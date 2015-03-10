@@ -2,18 +2,20 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2015, PHP 5.6.8
 
-- OpenSSL
-  . Fixed bugs #68853, #65137 (Buffered crypto stream data breaks IO polling
-    in stream_select() contexts) (Chris Wright)
-  . Fixed bug #69197 (openssl_pkcs7_sign handles default value incorrectly)
-    (Daniel Lowrey)
-
 - Core:
+  . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
+    (Dmitry, Laruence)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
 
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
     flags are used). (Jeff Welch)
+
+- OpenSSL
+  . Fixed bugs #68853, #65137 (Buffered crypto stream data breaks IO polling
+    in stream_select() contexts) (Chris Wright)
+  . Fixed bug #69197 (openssl_pkcs7_sign handles default value incorrectly)
+    (Daniel Lowrey)
 
 19 Mar 2015, PHP 5.6.7
 
