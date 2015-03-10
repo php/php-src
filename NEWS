@@ -3,8 +3,10 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.24
 
 - Core:
+  . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
+    (Dmitry, Laruence)
   . Fixed bug #67626 (User exceptions not properly handled in streams). 
-   (Julian)
+    (Julian)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
 
 - Filter:
