@@ -395,7 +395,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 			zval *z;
 			zval rv, obj;
 
-			ZVAL_COPY(&obj, object);
+			ZVAL_OBJ(&obj, Z_OBJ_P(object));
+			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
@@ -412,7 +413,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
 				Z_OBJ_HT(obj)->write_property(&obj, property, z, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				zval_ptr_dtor(&obj);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
@@ -423,6 +423,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			}
+			OBJ_RELEASE(Z_OBJ(obj));
 		}
 	} while (0);
 
@@ -815,7 +816,8 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval *z, obj;
 				
-				ZVAL_COPY(&obj, object);
+				ZVAL_OBJ(&obj, Z_OBJ_P(object));
+				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
@@ -834,7 +836,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 					ZVAL_COPY(retval, z);
 				}
 				Z_OBJ_HT(obj)->write_property(&obj, property, z, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				zval_ptr_dtor(&obj);
+				OBJ_RELEASE(Z_OBJ(obj));
 				zval_ptr_dtor(z);
 			} else {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -906,7 +908,8 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				zval rv, obj;
 				zval *z;
 
-				ZVAL_COPY(&obj, object);
+				ZVAL_OBJ(&obj, Z_OBJ_P(object));
+				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
 				zval z_copy;
 
@@ -923,7 +926,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				incdec_op(&z_copy);
 				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				zval_ptr_dtor(&obj);
+				OBJ_RELEASE(Z_OBJ(obj));
 				zval_ptr_dtor(&z_copy);
 				zval_ptr_dtor(z);
 			} else {
