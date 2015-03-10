@@ -1995,7 +1995,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		zend_vm_stack_free_extra_args(execute_data);
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
-		if (UNEXPECTED((old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && old_execute_data->func->op_array.prototype) {
+		if (UNEXPECTED(old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
 		object = Z_OBJ(old_execute_data->This);
@@ -2051,7 +2051,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			zend_vm_stack_free_extra_args(execute_data);
 			EG(current_execute_data) = EX(prev_execute_data);
-			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
+			if (EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 			}
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
@@ -2699,12 +2699,12 @@ ZEND_VM_C_LABEL(try_function_name):
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
-		if (OP2_TYPE == IS_VAR && (fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			fbc->common.prototype = (zend_function*)Z_OBJ_P(free_op2);
-		} else if (OP2_TYPE == IS_CV) {
-			FREE_OP2();
+			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(fbc->common.prototype)++;
 		}
+		FREE_OP2();
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 		zval *obj;
@@ -2818,8 +2818,11 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
-			Z_ADDREF_P(function_name);
+			if (OP2_TYPE & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(function_name);
+			}
+			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(func->common.prototype)++;
 		}
 		called_scope = fcc.called_scope;
 		object = fcc.object;
@@ -4453,6 +4456,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 			FREE_OP1_VAR_PTR();
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);

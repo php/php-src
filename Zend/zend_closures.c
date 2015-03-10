@@ -484,7 +484,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure = (zend_closure *)Z_OBJ_P(res);
 
 	closure->func = *func;
-	closure->func.common.prototype = NULL;
+	closure->func.common.prototype = (zend_function*)closure;
 	closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
