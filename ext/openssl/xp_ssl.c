@@ -1601,7 +1601,6 @@ int php_openssl_setup_crypto(php_stream *stream,
 				sslsock->ctx = NULL;
 				return FAILURE;
 			}
-
 			if (sslsock->is_client) {
 				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
 			} else {
@@ -2359,6 +2358,58 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 	php_stream_xport_param *xparam = (php_stream_xport_param *)ptrparam;
 
 	switch (option) {
+		case PHP_STREAM_OPTION_META_DATA_API:
+			if (sslsock->ssl_active) {
+				zval tmp;
+				char *proto_str;
+				const SSL_CIPHER *cipher;
+
+				array_init(&tmp);
+
+				switch (SSL_version(sslsock->ssl_handle)) {
+#ifdef HAVE_TLS12
+					case TLS1_2_VERSION: proto_str = "TLSv1.2"; break;
+#endif
+#ifdef HAVE_TLS11
+					case TLS1_1_VERSION: proto_str = "TLSv1.1"; break;
+#endif
+					case TLS1_VERSION: proto_str = "TLSv1"; break;
+#ifdef HAVE_SSL3
+					case SSL3_VERSION: proto_str = "SSLv3"; break;
+#endif
+#ifdef HAVE_SSL2
+					case SSL2_VERSION: proto_str = "SSLv2"; break;
+#endif
+					default: proto_str = "UNKNOWN";
+				}
+
+				cipher = SSL_get_current_cipher(sslsock->ssl_handle);
+
+				add_assoc_string(&tmp, "protocol", proto_str);
+				add_assoc_string(&tmp, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
+				add_assoc_long(&tmp, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+				add_assoc_string(&tmp, "cipher_version", SSL_CIPHER_get_version(cipher));
+
+#ifdef HAVE_TLS_ALPN
+				{
+					const unsigned char *alpn_proto = NULL;
+					unsigned int alpn_proto_len = 0;
+
+					SSL_get0_alpn_selected(sslsock->ssl_handle, &alpn_proto, &alpn_proto_len);
+					if (alpn_proto) {
+						add_assoc_stringl(&tmp, "alpn_protocol", (char *)alpn_proto, alpn_proto_len);
+					}
+				}
+#endif
+				add_assoc_zval((zval *)ptrparam, "crypto", &tmp);
+			}
+
+			add_assoc_bool((zval *)ptrparam, "timed_out", sslsock->s.timeout_event);
+			add_assoc_bool((zval *)ptrparam, "blocked", sslsock->s.is_blocked);
+			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
+
+			return PHP_STREAM_OPTION_RETURN_OK;
+
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			{
 				struct timeval tv;
