@@ -1214,6 +1214,10 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 				}
 				zval_ptr_dtor(&call->object);
 			}
+			if (call->fbc->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				efree((char *) call->fbc->common.function_name);
+				efree(call->fbc);
+			}
 			call--;
 		} while (call >= EX(call_slots));
 		EX(call) = NULL;
