@@ -658,7 +658,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 			if (Z_TYPE_PP(name) != IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
-				convert_to_string(name);
+				convert_to_string(*name);
 			}
 			propers = Z_OBJPROP_P(struc);
 			if (zend_hash_find(propers, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {

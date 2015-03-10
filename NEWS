@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+  . Fixed bug #69210 (serialize function return corrupted data when sleep has
+    non-string values). (Juan Basso)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
     __call/... arg passing). (Nikita)
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
