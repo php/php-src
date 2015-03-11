@@ -451,8 +451,9 @@ det_charset:
 		int found = 0;
 
 		/* now walk the charset map and look for the codeset */
-		for (i = 0; charset_map[i].codeset; i++) {
-			if (len == strlen(charset_map[i].codeset) && strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
+		for (i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
+			if (len == charset_map[i].codeset_len &&
+			    zend_binary_strcasecmp(charset_hint, len, charset_map[i].codeset, len) == 0) {
 				charset = charset_map[i].charset;
 				found = 1;
 				break;

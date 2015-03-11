@@ -807,6 +807,17 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot call overloaded function for non-object");
+#if 0
+			//TODO: implement clean exit ???
+			zend_vm_stack_free_args(call);
+
+			zend_vm_stack_free_call_frame(call);
+
+			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+				zend_string_release(fbc->common.function_name);
+			}
+			efree(fbc);
+#endif
 			HANDLE_EXCEPTION();
 		}
 
@@ -1809,6 +1820,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 
 			HANDLE_EXCEPTION();
 		}
@@ -2196,6 +2208,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 
 			HANDLE_EXCEPTION();
 		}
@@ -2379,6 +2392,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 			zval_ptr_dtor_nogc(free_op2);
 			HANDLE_EXCEPTION();
 		}
