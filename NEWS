@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
     __call/... arg passing). (Nikita)
+  . Fixed bug #69221 (Segmentation fault when using a generator in combination
+    with an Iterator). (Nikita)
 
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
