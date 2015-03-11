@@ -396,7 +396,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		zend_vm_stack_free_extra_args(execute_data);
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
-		if (UNEXPECTED((old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && old_execute_data->func->op_array.prototype) {
+		if (UNEXPECTED(old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
 		object = Z_OBJ(old_execute_data->This);
@@ -452,7 +452,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			zend_vm_stack_free_extra_args(execute_data);
 			EG(current_execute_data) = EX(prev_execute_data);
-			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
+			if (EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 			}
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
@@ -1518,6 +1518,11 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 				}
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
+			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				zend_string_release(call->func->common.function_name);
+				efree(call->func);
+			}
+
 			EX(call) = call->prev_execute_data;
 			zend_vm_stack_free_call_frame(call);
 			call = EX(call);
@@ -1787,7 +1792,7 @@ static int ZEND_FASTCALL  ZEND_INIT_DYNAMIC_CALL_SPEC_CONST_HANDLER(ZEND_OPCODE_
 	zend_function *fbc;
 	zval *function_name, *func;
 	zend_string *lcname;
-	zend_free_op free_op2;
+
 	zend_class_entry *called_scope;
 	zend_object *object;
 
@@ -1819,12 +1824,12 @@ try_function_name:
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
-		if (IS_CONST == IS_VAR && (fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			fbc->common.prototype = (zend_function*)Z_OBJ_P(free_op2);
-		} else if (IS_CONST == IS_CV) {
-
+			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(fbc->common.prototype)++;
 		}
+
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 		zval *obj;
@@ -2174,7 +2179,7 @@ static int ZEND_FASTCALL  ZEND_INIT_DYNAMIC_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HAN
 	zend_function *fbc;
 	zval *function_name, *func;
 	zend_string *lcname;
-	zend_free_op free_op2;
+
 	zend_class_entry *called_scope;
 	zend_object *object;
 
@@ -2206,12 +2211,12 @@ try_function_name:
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
-		if (IS_CV == IS_VAR && (fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			fbc->common.prototype = (zend_function*)Z_OBJ_P(free_op2);
-		} else if (IS_CV == IS_CV) {
-
+			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(fbc->common.prototype)++;
 		}
+
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 		zval *obj;
@@ -2390,12 +2395,12 @@ try_function_name:
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
-		if ((IS_TMP_VAR|IS_VAR) == IS_VAR && (fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			fbc->common.prototype = (zend_function*)Z_OBJ_P(free_op2);
-		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
-			zval_ptr_dtor_nogc(free_op2);
+			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(fbc->common.prototype)++;
 		}
+		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
 			zend_hash_num_elements(Z_ARRVAL_P(function_name)) == 2) {
 		zval *obj;
@@ -4680,8 +4685,11 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
-			Z_ADDREF_P(function_name);
+			if (IS_CONST & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(function_name);
+			}
+			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(func->common.prototype)++;
 		}
 		called_scope = fcc.called_scope;
 		object = fcc.object;
@@ -4846,6 +4854,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -6541,6 +6550,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -7670,8 +7680,11 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
-			Z_ADDREF_P(function_name);
+			if (IS_CV & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(function_name);
+			}
+			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(func->common.prototype)++;
 		}
 		called_scope = fcc.called_scope;
 		object = fcc.object;
@@ -7786,6 +7799,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -8857,8 +8871,11 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPC
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			func->common.prototype = (zend_function*)Z_OBJ_P(function_name);
-			Z_ADDREF_P(function_name);
+			if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) {
+				ZVAL_DEREF(function_name);
+			}
+			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT(func->common.prototype)++;
 		}
 		called_scope = fcc.called_scope;
 		object = fcc.object;
@@ -8924,6 +8941,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER(ZEND_
 		if (IS_CONST == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -10133,6 +10151,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -10792,6 +10811,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -11269,6 +11289,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -11717,6 +11738,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER(ZEND_OP
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -13829,11 +13851,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -14580,6 +14602,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -16074,6 +16097,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -16924,11 +16948,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -17637,6 +17661,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -18574,11 +18599,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMPVAR(incdec
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -19194,6 +19219,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER(ZEND_OP
 		if (IS_VAR == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -20058,11 +20084,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -22330,11 +22356,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -23753,11 +23779,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMPVAR(inc
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -26899,11 +26925,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -27828,6 +27854,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -30199,6 +30226,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -31467,11 +31495,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -32249,6 +32277,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);
@@ -33616,11 +33645,11 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMPVAR(incdec_
 			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 				zval rv, obj;
 				zval *z;
+				zval z_copy;
 
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				zval z_copy;
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv;
@@ -34309,6 +34338,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER(ZEND_OPC
 		if (IS_CV == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
 
+			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
 		ZVAL_MAKE_REF(expr_ptr);

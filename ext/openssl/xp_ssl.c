@@ -845,16 +845,26 @@ static int enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 	zval *val = NULL;
 	char *cafile = NULL;
 	char *capath = NULL;
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	GET_VER_OPT_STRING("cafile", cafile);
 	GET_VER_OPT_STRING("capath", capath);
 
-	if (!cafile) {
+	if (cafile == NULL) {
 		cafile = zend_ini_string("openssl.cafile", sizeof("openssl.cafile")-1, 0);
 		cafile = strlen(cafile) ? cafile : NULL;
+	} else if (!sslsock->is_client) {
+		/* Servers need to load and assign CA names from the cafile */
+		STACK_OF(X509_NAME) *cert_names = SSL_load_client_CA_file(cafile);
+		if (cert_names != NULL) {
+			SSL_CTX_set_client_CA_list(ctx, cert_names);
+		} else {
+			php_error(E_WARNING, "SSL: failed loading CA names from cafile");
+			return FAILURE;
+		}
 	}
 
-	if (!capath) {
+	if (capath == NULL) {
 		capath = zend_ini_string("openssl.capath", sizeof("openssl.capath")-1, 0);
 		capath = strlen(capath) ? capath : NULL;
 	}
@@ -870,9 +880,6 @@ static int enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 		SSL_CTX_set_cert_verify_callback(ctx, win_cert_verify_callback, (void *)stream);
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 #else
-		php_openssl_netstream_data_t *sslsock;
-		sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-
 		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
 			php_error_docref(NULL, E_WARNING,
 				"Unable to set default verify locations and no CA settings specified");
