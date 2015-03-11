@@ -1809,6 +1809,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 
 			HANDLE_EXCEPTION();
 		}
@@ -2196,6 +2197,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 
 			HANDLE_EXCEPTION();
 		}
@@ -2379,6 +2381,7 @@ try_function_name:
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 			zval_ptr_dtor_nogc(free_op2);
 			HANDLE_EXCEPTION();
 		}
