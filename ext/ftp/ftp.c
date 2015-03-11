@@ -65,7 +65,7 @@
 #include <sys/select.h>
 #endif
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 #include <openssl/ssl.h>
 #endif
 
@@ -182,7 +182,7 @@ ftp_close(ftpbuf_t *ftp)
 			php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (ftp->ssl_active) {
 			SSL_shutdown(ftp->ssl_handle);
 			SSL_free(ftp->ssl_handle);
@@ -245,15 +245,15 @@ ftp_quit(ftpbuf_t *ftp)
 int
 ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX	*ctx = NULL;
-	zend_long ssl_ctx_options = SSL_OP_ALL;
+	long ssl_ctx_options = SSL_OP_ALL;
 #endif
 	if (ftp == NULL) {
 		return 0;
 	}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	if (ftp->use_ssl && !ftp->ssl_active) {
 		if (!ftp_putcmd(ftp, "AUTH", "TLS")) {
 			return 0;
@@ -1243,7 +1243,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 			return -1;
 		}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 			sent = SSL_write(ftp->ssl_handle, buf, size);
 		} else if (ftp->use_ssl && ftp->fd != s && ftp->use_ssl_for_data && ftp->data->ssl_active) {
@@ -1251,7 +1251,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		} else {
 #endif
 			sent = send(s, buf, size, 0);
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		}
 #endif
 		if (sent == -1) {
@@ -1283,7 +1283,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		return -1;
 	}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 		nr_bytes = SSL_read(ftp->ssl_handle, buf, len);
 	} else if (ftp->use_ssl && ftp->fd != s && ftp->use_ssl_for_data && ftp->data->ssl_active) {
@@ -1291,7 +1291,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	} else {
 #endif
 		nr_bytes = recv(s, buf, len, 0);
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	}
 #endif
 	return (nr_bytes);
@@ -1490,7 +1490,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	php_sockaddr_storage addr;
 	socklen_t			size;
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
 	zend_long ssl_ctx_options = SSL_OP_ALL;
 #endif
@@ -1509,7 +1509,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	}
 
 data_accepted:
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 
 	/* now enable ssl if we need to */
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
@@ -1559,14 +1559,14 @@ data_accepted:
 databuf_t*
 data_close(ftpbuf_t *ftp, databuf_t *data)
 {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	SSL_CTX		*ctx;
 #endif
 	if (data == NULL) {
 		return NULL;
 	}
 	if (data->listener != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
 
 			ctx = SSL_get_SSL_CTX(data->ssl_handle);
@@ -1580,7 +1580,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 		closesocket(data->listener);
 	}
 	if (data->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 		if (data->ssl_active) {
 			ctx = SSL_get_SSL_CTX(data->ssl_handle);
 			SSL_CTX_free(ctx);

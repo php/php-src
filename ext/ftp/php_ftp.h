@@ -35,7 +35,7 @@ PHP_MINIT_FUNCTION(ftp);
 PHP_MINFO_FUNCTION(ftp);
 
 PHP_FUNCTION(ftp_connect);
-#ifdef HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 PHP_FUNCTION(ftp_ssl_connect);
 #endif
 PHP_FUNCTION(ftp_login);

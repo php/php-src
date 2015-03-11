@@ -29,7 +29,7 @@
 #include <novsock2.h>
 #endif
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 # include <openssl/ssl.h>
 #endif
 
@@ -51,7 +51,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, port)
@@ -243,7 +243,7 @@ ZEND_END_ARG_INFO()
 
 const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			arginfo_ftp_connect)
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
 #endif
 	PHP_FE(ftp_login,			arginfo_ftp_login)
@@ -281,8 +281,22 @@ const zend_function_entry php_ftp_functions[] = {
 	PHP_FE_END
 };
 
+#ifdef HAVE_FTP_SSL
+/* {{{ ftp_deps */
+static const zend_module_dep ftp_deps[] = {
+	ZEND_MOD_REQUIRED("openssl")
+	{NULL, NULL, NULL}
+};/*}}}*/
+#endif
+
 zend_module_entry php_ftp_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+#ifdef HAVE_FTP_SSL
+	ftp_deps,
+#else
+	NULL,
+#endif
 	"ftp",
 	php_ftp_functions,
 	PHP_MINIT(ftp),
@@ -290,7 +304,7 @@ zend_module_entry php_ftp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ftp),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -325,6 +339,11 @@ PHP_MINFO_FUNCTION(ftp)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "FTP support", "enabled");
+#ifdef HAVE_FTP_SSL
+	php_info_print_table_row(2, "FTPS support", "enabled");
+#else
+	php_info_print_table_row(2, "FTPS support", "disabled");
+#endif
 	php_info_print_table_end();
 }
 
@@ -363,7 +382,7 @@ PHP_FUNCTION(ftp_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 	/* disable ssl */
 	ftp->use_ssl = 0;
 #endif
@@ -372,7 +391,7 @@ PHP_FUNCTION(ftp_connect)
 }
 /* }}} */
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_FTP_SSL
 /* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout]])
    Opens a FTP-SSL stream */
 PHP_FUNCTION(ftp_ssl_connect)
