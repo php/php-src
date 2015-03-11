@@ -256,7 +256,7 @@ string(2) "1 "
 (8): A non well formed numeric value encountered
 ----
 string(2) "1d"
-(1): Argument 1 passed to int_func() must be of the type integer, string given, called in /home/dmitry/php/php-fe/Zend/tests/scalar_type_hints_001.php on line 38 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
 ----
 string(37) "1111111111111111111111111111111111111"
 (1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
@@ -305,13 +305,13 @@ string(2) "1 "
 (8): A non well formed numeric value encountered
 ----
 string(2) "1d"
-(1): Argument 1 passed to float_func() must be of the type float, string given, called in /home/dmitry/php/php-fe/Zend/tests/scalar_type_hints_001.php on line 59 and defined
+(1): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line %d and defined
 ----
 string(37) "1111111111111111111111111111111111111"
 float(1.1111111111111E+36)
 ----
 string(7) "1E+3600"
-float(INF)
+(1): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line %d and defined
 ----
 string(3) "1.0"
 float(1)

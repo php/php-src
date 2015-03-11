@@ -2661,11 +2661,10 @@ ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *l
 /* }}} */
 
 ZEND_API zend_uchar is_numeric_str_function_safe(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-//	int oflow_info;
 	zend_uchar ret = is_numeric_string_ex(str->val, str->len, lval, dval, -2, NULL);
-//	if (oflow_info != 0) {
-//		ret = 0;
-//	}
+	if (ret == IS_DOUBLE && (zend_isnan(*dval) || zend_isinf(*dval))) {
+		ret = 0;
+	}
 	return ret;
 }
 /* }}} */
