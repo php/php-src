@@ -2683,6 +2683,7 @@ ZEND_VM_C_LABEL(try_function_name):
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+			zend_string_release(lcname);
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
