@@ -1546,6 +1546,9 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring)
 /* {{{ PHP_MINIT_FUNCTION(mbstring) */
 PHP_MINIT_FUNCTION(mbstring)
 {
+#if defined(COMPILE_DL_MBSTRING) && defined(ZTS)
+ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	__mbfl_allocators = &_php_mb_allocators;
 
 	REGISTER_INI_ENTRIES();
