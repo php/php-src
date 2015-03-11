@@ -819,6 +819,11 @@ PHP_METHOD(Phar, webPhar)
 							code = Z_LVAL_P(val);
 						} else {
 							zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+							if (free_pathinfo) {
+								efree(path_info);
+							}
+							efree(pt);
+							efree(entry);
 #ifdef PHP_WIN32
 							efree(fname);
 #endif
@@ -831,6 +836,11 @@ PHP_METHOD(Phar, webPhar)
 						break;
 					default:
 						zend_throw_exception_ex(phar_ce_PharException, 0, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+						if (free_pathinfo) {
+							efree(path_info);
+						}
+						efree(pt);
+						efree(entry);
 #ifdef PHP_WIN32
 						efree(fname);
 #endif
