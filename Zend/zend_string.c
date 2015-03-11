@@ -111,18 +111,14 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 			uint32_t *h = (uint32_t *) perealloc_recoverable(CG(interned_strings).arHash, (CG(interned_strings).nTableSize << 1) * sizeof(uint32_t), 1);
 
 			if (d && h) {
-				HANDLE_BLOCK_INTERRUPTIONS();
 				CG(interned_strings).arData = d;
 				CG(interned_strings).arHash = h;
 				CG(interned_strings).nTableSize = (CG(interned_strings).nTableSize << 1);
 				CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 				zend_hash_rehash(&CG(interned_strings));
-				HANDLE_UNBLOCK_INTERRUPTIONS();
 			}
 		}
 	}
-
-	HANDLE_BLOCK_INTERRUPTIONS();
 
 	idx = CG(interned_strings).nNumUsed++;
 	CG(interned_strings).nNumOfElements++;
@@ -134,8 +130,6 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	nIndex = h & CG(interned_strings).nTableMask;
 	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
 	CG(interned_strings).arHash[nIndex] = idx;
-
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return str;
 #else

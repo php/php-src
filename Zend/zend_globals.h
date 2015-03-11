@@ -179,6 +179,9 @@ struct _zend_executor_globals {
 
 	zend_long precision;
 
+	zend_bool vm_interrupt;
+	zend_bool timed_out;
+
 	int ticks_count;
 
 	HashTable *in_autoload;

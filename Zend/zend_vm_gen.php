@@ -979,9 +979,14 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define ZEND_VM_RETURN()           return -1\n");
 							out($f,"#define ZEND_VM_ENTER()            return  1\n");
 							out($f,"#define ZEND_VM_LEAVE()            return  2\n");
-							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
-							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
-");
+							if (ZEND_VM_SPEC) {
+								out($f,"#define ZEND_VM_INTERRUPT()        return  zend_interrupt_helper_SPEC(execute_data)\n");
+							} else {
+								out($f,"#define ZEND_VM_INTERRUPT()        return  zend_interrupt_helper(execute_data)\n");
+							}
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data\n");
+							out($f,"\n");
 							break;
 						case ZEND_VM_KIND_SWITCH:
 							out($f,"\n");
@@ -1005,9 +1010,14 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
-							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
-							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
-");
+							if (ZEND_VM_SPEC) {
+								out($f,"#define ZEND_VM_INTERRUPT() goto zend_interrupt_helper_SPEC\n");
+							} else {
+								out($f,"#define ZEND_VM_INTERRUPT() goto zend_interrupt_helper\n");
+							}
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n");
+							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data\n");
+							out($f,"\n");
 							break;
 						case ZEND_VM_KIND_GOTO:
 							out($f,"\n");
@@ -1037,9 +1047,14 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
-							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
-							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
-");
+							if (ZEND_VM_SPEC) {
+								out($f,"#define ZEND_VM_INTERRUPT() goto zend_interrupt_helper_SPEC\n");
+							} else {
+								out($f,"#define ZEND_VM_INTERRUPT() goto zend_interrupt_helper\n");
+							}
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n");
+							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data\n");
+							out($f,"\n");
 							break;
 					}
 					break;
@@ -1478,9 +1493,10 @@ function gen_vm($def, $skel) {
 		out($f,"#define ZEND_VM_RETURN()     return -1\n");
 		out($f,"#define ZEND_VM_ENTER()      return  1\n");
 		out($f,"#define ZEND_VM_LEAVE()      return  2\n");
-		out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
-		out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
-\n");
+		out($f,"#define ZEND_VM_INTERRUPT()  return  zend_interrupt_helper(execute_data)\n");
+		out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+		out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data\n");
+		out($f,"\n");
 	}
 	foreach ($export as $dsk) {
 		list($kind, $func, $name) = $dsk;

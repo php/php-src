@@ -329,9 +329,10 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 #define ZEND_VM_RETURN()           return -1
 #define ZEND_VM_ENTER()            return  1
 #define ZEND_VM_LEAVE()            return  2
+#define ZEND_VM_INTERRUPT()        return  zend_interrupt_helper_SPEC(execute_data)
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
+
 
 ZEND_API void execute_ex(zend_execute_data *execute_data)
 {
@@ -343,12 +344,6 @@ ZEND_API void execute_ex(zend_execute_data *execute_data)
 
 	while (1) {
     	int ret;
-#ifdef ZEND_WIN32
-		if (EG(timed_out)) {
-			zend_timeout(0);
-		}
-#endif
-
 		if (UNEXPECTED((ret = OPLINE->handler(execute_data)) != 0)) {
 			if (EXPECTED(ret > 0)) {
 				execute_data = EG(current_execute_data);
@@ -379,6 +374,21 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value);
 	zend_execute_ex(execute_data);
+}
+
+static int ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	// TODO: use atomic instruction ???
+	if (EG(vm_interrupt)) {
+		EG(vm_interrupt) = 0;
+		if (EG(timed_out)) {
+			if (zend_on_timeout) {
+				zend_on_timeout(EG(timeout_seconds));
+			}
+			zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+		}
+	}
+	ZEND_VM_CONTINUE();
 }
 
 static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
@@ -2581,7 +2591,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	val = EX_CONSTANT(opline->op1);
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		if (IS_CONST == IS_CV) {
@@ -2620,7 +2630,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		if (IS_CONST == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -2682,7 +2692,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
@@ -2728,7 +2738,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		if (IS_CONST == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -24793,7 +24803,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	val = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		if (IS_CV == IS_CV) {
@@ -24832,7 +24842,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (IS_CV == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -24894,7 +24904,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
@@ -24940,7 +24950,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		if (IS_CV == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -34830,7 +34840,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	val = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -34869,7 +34879,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -34931,7 +34941,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
@@ -34977,7 +34987,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
