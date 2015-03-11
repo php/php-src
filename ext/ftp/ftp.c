@@ -298,6 +298,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 
 		SSL_set_fd(ftp->ssl_handle, ftp->fd);
 
+		/* TODO check SSL_get_error() and poll on failure */
 		if (SSL_connect(ftp->ssl_handle) <= 0) {
 			php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
 			SSL_shutdown(ftp->ssl_handle);
