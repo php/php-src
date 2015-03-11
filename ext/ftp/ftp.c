@@ -248,6 +248,8 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 #ifdef HAVE_FTP_SSL
 	SSL_CTX	*ctx = NULL;
 	long ssl_ctx_options = SSL_OP_ALL;
+	int err, res;
+	zend_bool retry;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -298,13 +300,42 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 
 		SSL_set_fd(ftp->ssl_handle, ftp->fd);
 
-		/* TODO check SSL_get_error() and poll on failure */
-		if (SSL_connect(ftp->ssl_handle) <= 0) {
-			php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
-			SSL_shutdown(ftp->ssl_handle);
-			SSL_free(ftp->ssl_handle);
-			return 0;
-		}
+		do {
+			res = SSL_connect(ftp->ssl_handle);
+			err = SSL_get_error(ftp->ssl_handle, res);
+
+			/* TODO check if handling other error codes would make sense */
+			switch (err) {
+				case SSL_ERROR_NONE:
+					retry = 0;
+					break;
+
+				case SSL_ERROR_WANT_READ:
+				case SSL_ERROR_WANT_WRITE: {
+						php_pollfd p;
+						int i;
+
+						p.fd = ftp->fd;
+						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
+						p.revents = 0;
+
+						i = php_poll2(&p, 1, 300);
+
+						if (i > 0) {
+							retry = 1;
+						} else {
+							retry = 0;
+						}
+					}
+					break;
+
+				default:
+					php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
+					SSL_shutdown(ftp->ssl_handle);
+					SSL_free(ftp->ssl_handle);
+					return 0;
+			}
+		} while (retry);
 
 		ftp->ssl_active = 1;
 
