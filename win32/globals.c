@@ -34,6 +34,8 @@ void php_win32_core_globals_ctor(void *vg)
 	memset(wg, 0, sizeof(*wg));
 
 	wg->mail_socket = INVALID_SOCKET;
+
+	wg->log_source = INVALID_HANDLE_VALUE;
 }
 
 void php_win32_core_globals_dtor(void *vg)
