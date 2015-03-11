@@ -281,22 +281,10 @@ const zend_function_entry php_ftp_functions[] = {
 	PHP_FE_END
 };
 
-#ifdef HAVE_FTP_SSL
-/* {{{ ftp_deps */
-static const zend_module_dep ftp_deps[] = {
-	ZEND_MOD_REQUIRED("openssl")
-	{NULL, NULL, NULL}
-};/*}}}*/
-#endif
-
 zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
-#ifdef HAVE_FTP_SSL
-	ftp_deps,
-#else
 	NULL,
-#endif
 	"ftp",
 	php_ftp_functions,
 	PHP_MINIT(ftp),
@@ -321,6 +309,15 @@ static void ftp_destructor_ftpbuf(zend_resource *rsrc)
 
 PHP_MINIT_FUNCTION(ftp)
 {
+#ifdef HAVE_FTP_SSL
+	SSL_library_init();
+	OpenSSL_add_all_ciphers();
+	OpenSSL_add_all_digests();
+	OpenSSL_add_all_algorithms();
+
+	SSL_load_error_strings();
+#endif
+
 	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, le_ftpbuf_name, module_number);
 	REGISTER_LONG_CONSTANT("FTP_ASCII",  FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_TEXT",   FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
