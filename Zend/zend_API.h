@@ -1209,7 +1209,7 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 				}
 			}
 #else
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
+		if (UNEXPECTED((type = is_numeric_str_function_safe(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 #endif
 			if (EXPECTED(type != 0)) {
 				if (UNEXPECTED(zend_isnan(d))) {
@@ -1318,7 +1318,7 @@ static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *
 				}
 			}
 #else
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
+		if (UNEXPECTED((type = is_numeric_str_function_safe(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
 #endif
 			if (EXPECTED(type != 0)) {
 				*dest = (double)(l);

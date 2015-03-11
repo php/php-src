@@ -145,6 +145,7 @@ static zend_always_inline zend_uchar is_numeric_string(const char *str, size_t l
 }
 
 ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
+ZEND_API zend_uchar is_numeric_str_function_safe(const zend_string *str, zend_long *lval, double *dval);
 
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *end)

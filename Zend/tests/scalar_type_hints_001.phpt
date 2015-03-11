@@ -104,6 +104,12 @@ check_bool(0.2);
 check_bool("");
 check_bool("0");
 check_bool("1");
+check_bool(" 0");
+check_bool("0 ");
+check_bool("0d");
+check_bool(" 1");
+check_bool("1 ");
+check_bool("1d");
 
 echo "== int ==\n";
 check_int(null);
@@ -119,6 +125,7 @@ check_int("0");
 check_int("1");
 check_int(" 1");
 check_int("1 ");
+check_int("1d");
 check_int("1111111111111111111111111111111111111");
 check_int("1.0");
 check_int("1.1");
@@ -136,7 +143,9 @@ check_float("0");
 check_float("1");
 check_float(" 1");
 check_float("1 ");
+check_float("1d");
 check_float("1111111111111111111111111111111111111");
+check_float("1E+3600");
 check_float("1.0");
 check_float("1.1");
 
@@ -188,6 +197,24 @@ bool(false)
 string(1) "1"
 bool(true)
 ----
+string(2) " 0"
+bool(true)
+----
+string(2) "0 "
+bool(true)
+----
+string(2) "0d"
+bool(true)
+----
+string(2) " 1"
+bool(true)
+----
+string(2) "1 "
+bool(true)
+----
+string(2) "1d"
+bool(true)
+----
 == int ==
 NULL
 (1): Argument 1 passed to int_func() must be of the type integer, null given, called in %s on line %d and defined
@@ -227,6 +254,9 @@ int(1)
 ----
 string(2) "1 "
 (8): A non well formed numeric value encountered
+----
+string(2) "1d"
+(1): Argument 1 passed to int_func() must be of the type integer, string given, called in /home/dmitry/php/php-fe/Zend/tests/scalar_type_hints_001.php on line 38 and defined
 ----
 string(37) "1111111111111111111111111111111111111"
 (1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
@@ -274,8 +304,14 @@ float(1)
 string(2) "1 "
 (8): A non well formed numeric value encountered
 ----
+string(2) "1d"
+(1): Argument 1 passed to float_func() must be of the type float, string given, called in /home/dmitry/php/php-fe/Zend/tests/scalar_type_hints_001.php on line 59 and defined
+----
 string(37) "1111111111111111111111111111111111111"
 float(1.1111111111111E+36)
+----
+string(7) "1E+3600"
+float(INF)
 ----
 string(3) "1.0"
 float(1)
