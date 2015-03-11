@@ -3241,6 +3241,14 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot call overloaded function for non-object");
+			zend_vm_stack_free_args(call);
+
+			zend_vm_stack_free_call_frame(call);
+
+			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+				zend_string_release(fbc->common.function_name);
+			}
+			efree(fbc);
 			HANDLE_EXCEPTION();
 		}
 
