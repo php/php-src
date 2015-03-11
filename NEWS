@@ -18,6 +18,8 @@
     in stream_select() contexts) (Chris Wright)
   . Fixed bug #69197 (openssl_pkcs7_sign handles default value incorrectly)
     (Daniel Lowrey)
+  . Fixed bug #69215 (Crypto servers should send client CA list)
+    (Daniel Lowrey)
 
 19 Mar 2015, PHP 5.6.7
 
