@@ -58,6 +58,7 @@ void php_win32_core_globals_dtor(void *vg)
 
 	if (INVALID_SOCKET != wg->mail_socket) {
 		closesocket(wg->mail_socket);
+		wg->mail_socket = INVALID_SOCKET;
 	}
 }
 
