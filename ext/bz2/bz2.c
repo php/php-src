@@ -379,7 +379,7 @@ static PHP_FUNCTION(bzread)
 	data->len = php_stream_read(stream, data->val, data->len);
 	data->val[data->len] = '\0';
 
-	RETURN_STR(data);
+	RETURN_NEW_STR(data);
 }
 /* }}} */
 
@@ -545,7 +545,7 @@ static PHP_FUNCTION(bzcompress)
 		   so we erealloc() the buffer to the proper size */
 		dest->len = dest_len;
 		dest->val[dest->len] = '\0';
-		RETURN_STR(dest);
+		RETURN_NEW_STR(dest);
 	}
 }
 /* }}} */

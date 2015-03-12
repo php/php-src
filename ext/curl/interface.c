@@ -2862,7 +2862,7 @@ PHP_FUNCTION(curl_exec)
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.s) {
 		smart_str_0(&ch->handlers->write->buf);
-		RETURN_STR(zend_string_copy(ch->handlers->write->buf.s));
+		RETURN_STR_COPY(ch->handlers->write->buf.s);
 	}
 
 	/* flush the file handle, so any remaining data is synched to disk */
@@ -3009,7 +3009,7 @@ PHP_FUNCTION(curl_getinfo)
 		switch (option) {
 			case CURLINFO_HEADER_OUT:
 				if (ch->header.str) {
-					RETURN_STR(zend_string_copy(ch->header.str));
+					RETURN_STR_COPY(ch->header.str);
 				} else {
 					RETURN_FALSE;
 				}

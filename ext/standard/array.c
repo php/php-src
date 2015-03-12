@@ -1272,7 +1272,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 					RETURN_TRUE;
 				} else {
 					if (str_idx) {
-						RETVAL_STR(zend_string_copy(str_idx));
+						RETVAL_STR_COPY(str_idx);
 					} else {
 						RETVAL_LONG(num_idx);
 					}
@@ -1289,7 +1289,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -1304,7 +1304,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -1319,7 +1319,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -4597,7 +4597,7 @@ PHP_FUNCTION(array_rand)
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (string_key) {
-					RETURN_STR(zend_string_copy(string_key));
+					RETURN_STR_COPY(string_key);
 				} else {
 					RETURN_LONG(num_key);
 				}

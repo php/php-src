@@ -1247,7 +1247,7 @@ again:
 	smart_str_0(&implstr);
 
 	if (implstr.s) {
-		RETURN_STR(implstr.s);
+		RETURN_NEW_STR(implstr.s);
 	} else {
 		smart_str_free(&implstr);
 		RETURN_EMPTY_STRING();
@@ -2442,12 +2442,12 @@ PHP_FUNCTION(substr_replace)
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
 			php_error_docref(NULL, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
-			RETURN_STR(zend_string_copy(Z_STR_P(str)));
+			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
 				php_error_docref(NULL, E_WARNING, "'from' and 'len' should have the same number of elements");
-				RETURN_STR(zend_string_copy(Z_STR_P(str)));
+				RETURN_STR_COPY(Z_STR_P(str));
 			}
 		}
 	}
@@ -2516,7 +2516,7 @@ PHP_FUNCTION(substr_replace)
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
-			RETURN_STR(zend_string_copy(Z_STR_P(str)));
+			RETURN_STR_COPY(Z_STR_P(str));
 		}
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
@@ -3143,10 +3143,10 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
 		smart_str_0(&result);
-		RETVAL_STR(result.s);
+		RETVAL_NEW_STR(result.s);
 	} else {
 		smart_str_free(&result);
-		RETVAL_STR(zend_string_copy(input));
+		RETVAL_STR_COPY(input);
 	}
 
 	if (pats == &str_hash) {
@@ -3492,7 +3492,7 @@ PHP_FUNCTION(strtr)
 		HashTable *pats = HASH_OF(from);
 
 		if (zend_hash_num_elements(pats) < 1) {
-			RETURN_STR(zend_string_copy(str));
+			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
 			zend_string *str_key, *replace;
@@ -3507,7 +3507,7 @@ PHP_FUNCTION(strtr)
 				}		
 				replace = zval_get_string(entry);
 				if (str_key->len < 1) {
-					RETVAL_STR(zend_string_copy(str));
+					RETVAL_STR_COPY(str);
 				} else if (str_key->len == 1) {
 					RETVAL_STR(php_char_to_str_ex(str,
 								str_key->val[0],
@@ -4585,7 +4585,7 @@ PHP_FUNCTION(setlocale)
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
 						zend_string_release(loc);
-						RETURN_STR(zend_string_copy(BG(locale_string)));
+						RETURN_STR_COPY(BG(locale_string));
 					}
 				} else if (len == loc->len && !memcmp(loc->val, retval, len)) {
 					RETURN_STR(loc);

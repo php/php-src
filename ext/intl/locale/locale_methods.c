@@ -898,7 +898,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 }
 /* }}} */
 
-#define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_STR((str)->s)
+#define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_NEW_STR((str)->s)
 /* {{{ proto static string Locale::composeLocale($array)
 * Creates a locale by combining the parts of locale-ID passed
 * }}} */

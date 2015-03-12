@@ -1149,7 +1149,7 @@ ZEND_FUNCTION(gmp_export)
 		mpz_export(out_string->val, NULL, order, size, endian, 0, gmpnumber);
 		out_string->val[out_len] = '\0';
 
-		RETURN_STR(out_string);
+		RETURN_NEW_STR(out_string);
 	}
 
 	FREE_GMP_TEMP(temp_a);

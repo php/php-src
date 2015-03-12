@@ -1780,7 +1780,7 @@ static PHP_FUNCTION(preg_quote)
 
 	/* Reallocate string and return it */
 	out_str = zend_string_realloc(out_str, q - out_str->val, 0);
-	RETURN_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 

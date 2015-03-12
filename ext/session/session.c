@@ -1472,7 +1472,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		smart_str_0(&var);
 		if (sid) {
 			zend_string_release(Z_STR_P(sid));
-			ZVAL_STR(sid, var.s);
+			ZVAL_NEW_STR(sid, var.s);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
 			smart_str_free(&var);
@@ -1988,9 +1988,9 @@ static PHP_FUNCTION(session_id)
 		 * see: ext/session/tests/session_id_error3.phpt */
 		int len = strlen(PS(id)->val);
 		if (UNEXPECTED(len != PS(id)->len)) {
-			RETVAL_STR(zend_string_init(PS(id)->val, len, 0));
+			RETVAL_NEW_STR(zend_string_init(PS(id)->val, len, 0));
 		} else {
-			RETVAL_STR(zend_string_copy(PS(id)));
+			RETVAL_STR_COPY(PS(id));
 		}
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -2085,7 +2085,7 @@ static PHP_FUNCTION(session_create_id)
 		RETURN_FALSE;
 	}
 	smart_str_0(&id);
-	RETVAL_STR(id.s);
+	RETVAL_NEW_STR(id.s);
 	smart_str_free(&id);
 }
 /* }}} */

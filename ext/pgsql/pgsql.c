@@ -72,7 +72,7 @@
 		smart_str s = {0}; \
 		smart_str_append_unsigned(&s, oid); \
 		smart_str_0(&s); \
-		RETURN_STR(s.s); \
+		RETURN_NEW_STR(s.s); \
 	} \
 	RETURN_LONG((zend_long)oid); \
 } while(0)
@@ -2431,7 +2431,7 @@ PHP_FUNCTION(pg_field_table)
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
-			RETURN_STR(oidstr.s);
+			RETURN_NEW_STR(oidstr.s);
 		} else
 #endif
 			RETURN_LONG((zend_long)oid);
@@ -2536,7 +2536,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
 				smart_str_0(&s);
-				RETURN_STR(s.s);
+				RETURN_NEW_STR(s.s);
 			} else
 #endif
 			{
@@ -3515,7 +3515,7 @@ PHP_FUNCTION(pg_lo_read)
 
 	buf->len = nbytes;
 	buf->val[buf->len] = '\0';
-	RETURN_STR(buf);
+	RETURN_NEW_STR(buf);
 }
 /* }}} */
 
@@ -4363,7 +4363,7 @@ PHP_FUNCTION(pg_escape_string)
 	}
 
 	to = zend_string_realloc(to, to->len, 0);
-	RETURN_STR(to);
+	RETURN_NEW_STR(to);
 }
 /* }}} */
 

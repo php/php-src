@@ -803,7 +803,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
 		convert_to_string_ex(value);
-		RETURN_STR(zend_string_copy(Z_STR_P(value)));
+		RETURN_STR_COPY(Z_STR_P(value));
 	} else {
 		RETURN_FALSE;
 	}

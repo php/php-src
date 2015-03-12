@@ -1093,7 +1093,7 @@ PHP_FUNCTION(wddx_serialize_value)
 	php_wddx_packet_end(packet);
 	smart_str_0(packet);
 
-	RETVAL_STR(zend_string_copy(packet->s));
+	RETVAL_STR_COPY(packet->s);
 	php_wddx_destructor(packet);
 }
 /* }}} */
@@ -1132,7 +1132,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	php_wddx_packet_end(packet);
 	smart_str_0(packet);
 
-	RETVAL_STR(zend_string_copy(packet->s));
+	RETVAL_STR_COPY(packet->s);
 	php_wddx_destructor(packet);
 }
 /* }}} */
@@ -1201,7 +1201,7 @@ PHP_FUNCTION(wddx_packet_end)
 	php_wddx_packet_end(packet);
 	smart_str_0(packet);
 
-	RETVAL_STR(zend_string_copy(packet->s));
+	RETVAL_STR_COPY(packet->s);
 
 	zend_list_close(Z_RES_P(packet_id));
 }

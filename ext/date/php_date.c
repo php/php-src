@@ -1681,7 +1681,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 
 	if (real_len && real_len != buf_len) {
 		buf = zend_string_realloc(buf, real_len, 0);
-		RETURN_STR(buf);
+		RETURN_NEW_STR(buf);
 	}
 	zend_string_free(buf);
 	RETURN_FALSE;
@@ -3742,7 +3742,7 @@ PHP_FUNCTION(timezone_name_get)
 				abs(utc_offset / 60),
 				abs((utc_offset % 60)));
 
-			RETURN_STR(tmpstr);
+			RETURN_NEW_STR(tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
@@ -4681,7 +4681,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
 			retstr = strpprintf(0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-			RETURN_STR(retstr);
+			RETURN_NEW_STR(retstr);
 			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);

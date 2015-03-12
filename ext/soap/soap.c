@@ -3017,7 +3017,7 @@ PHP_METHOD(SoapClient, __getLastRequest)
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_request", sizeof("__last_request")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(tmp)));
+		RETURN_STR_COPY(Z_STR_P(tmp));
 	}
 	RETURN_NULL();
 }
@@ -3036,7 +3036,7 @@ PHP_METHOD(SoapClient, __getLastResponse)
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_response", sizeof("__last_response")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(tmp)));
+		RETURN_STR_COPY(Z_STR_P(tmp));
 	}
 	RETURN_NULL();
 }
@@ -3055,7 +3055,7 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_request_headers", sizeof("__last_request_headers")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(tmp)));
+		RETURN_STR_COPY(Z_STR_P(tmp));
 	}
 	RETURN_NULL();
 }
@@ -3074,7 +3074,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()), "__last_response_headers", sizeof("__last_response_headers")-1)) != NULL &&
 	    Z_TYPE_P(tmp) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(tmp)));
+		RETURN_STR_COPY(Z_STR_P(tmp));
 	}
 	RETURN_NULL();
 }
@@ -3230,7 +3230,7 @@ PHP_METHOD(SoapClient, __setLocation)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
-		RETVAL_STR(zend_string_copy(Z_STR_P(tmp)));
+		RETVAL_STR_COPY(Z_STR_P(tmp));
 	} else {
 		RETVAL_NULL();
 	}

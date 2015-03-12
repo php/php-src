@@ -356,7 +356,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	p->key->h = str->h;
 	p->key->len = str->len;
 	memcpy(p->key->val, str->val, str->len);
-	ZVAL_STR(&p->val, p->key);
+	ZVAL_INTERNED_STR(&p->val, p->key);
 	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
 	ZCSG(interned_strings).arHash[nIndex] = idx;
 	zend_string_release(str);

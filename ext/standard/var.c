@@ -584,7 +584,7 @@ PHP_FUNCTION(var_export)
 	smart_str_0 (&buf);
 
 	if (return_output) {
-		RETURN_STR(buf.s);
+		RETURN_NEW_STR(buf.s);
 	} else {
 		PHPWRITE(buf.s->val, buf.s->len);
 		smart_str_free(&buf);
@@ -983,7 +983,7 @@ PHP_FUNCTION(serialize)
 	}
 
 	if (buf.s) {
-		RETURN_STR(buf.s);
+		RETURN_NEW_STR(buf.s);
 	} else {
 		RETURN_NULL();
 	}

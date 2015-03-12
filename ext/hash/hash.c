@@ -167,14 +167,14 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (raw_output) {
 		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
 		hex_digest->val[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -293,14 +293,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (raw_output) {
 		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
 		hex_digest->val[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -542,14 +542,14 @@ PHP_FUNCTION(hash_final)
 	zend_list_close(Z_RES_P(zhash));
 
 	if (raw_output) {
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, digest_len);
 		hex_digest->val[2 * digest_len] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -727,7 +727,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	returnval->val[length] = 0;
 	efree(result);
-	RETURN_STR(returnval);
+	RETURN_NEW_STR(returnval);
 }
 /* }}} */
 

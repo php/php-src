@@ -1755,7 +1755,7 @@ SPL_METHOD(Array, serialize)
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.s) {
-		RETURN_STR(buf.s);
+		RETURN_NEW_STR(buf.s);
 	}
 
 	RETURN_NULL();

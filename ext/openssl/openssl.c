@@ -4008,7 +4008,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)out_buffer->val) == 1) {
 		out_buffer->val[key_length] = 0;
-		RETURN_STR(out_buffer);
+		RETURN_NEW_STR(out_buffer);
 	} else {
 		zend_string_release(out_buffer);
 		RETURN_FALSE;
