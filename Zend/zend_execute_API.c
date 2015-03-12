@@ -159,6 +159,8 @@ void init_executor(void) /* {{{ */
 
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 
+	EG(vm_interrupt) = 0;
+	EG(timed_out) = 0;
 	EG(ticks_count) = 0;
 
 	ZVAL_UNDEF(&EG(user_error_handler));
@@ -172,9 +174,6 @@ void init_executor(void) /* {{{ */
 	zend_objects_store_init(&EG(objects_store), 1024);
 
 	EG(full_tables_cleanup) = 0;
-#ifdef ZEND_WIN32
-	EG(timed_out) = 0;
-#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -1160,21 +1159,8 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 
 ZEND_API void zend_timeout(int dummy) /* {{{ */
 {
-
-	if (zend_on_timeout) {
-#ifdef ZEND_SIGNALS
-		/*
-		   We got here because we got a timeout signal, so we are in a signal handler
-		   at this point. However, we want to be able to timeout any user-supplied
-		   shutdown functions, so pretend we are not in a signal handler while we are
-		   calling these
-		*/
-		SIGG(running) = 0;
-#endif
-		zend_on_timeout(EG(timeout_seconds));
-	}
-
-	zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	EG(timed_out) = 1;
+	EG(vm_interrupt) = 1;
 }
 /* }}} */
 
@@ -1189,8 +1175,9 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 		return;
 	}
 
-	php_timed_out = (zend_bool *)arg;
-	*php_timed_out = 1;
+	php_timed_out = (zend_interrupt *)arg;
+	php_timed_out[1] = 1;
+	php_timed_out[0] = 1;
 }
 #endif
 
@@ -1223,7 +1210,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 	}
 
 	/* XXX passing NULL means the default timer queue provided by the system is used */
-	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(timed_out), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
+	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(vm_interrupt), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		EG(timed_out) = 0;
 		tq_timer = NULL;
 		zend_error(E_ERROR, "Could not queue new timer");

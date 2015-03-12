@@ -2035,13 +2035,25 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 }
 /* }}} */
 
+#define ZEND_VM_CHECK_INTERRUPT() do { \
+		if (UNEXPECTED(EG(vm_interrupt))) { \
+			ZEND_VM_INTERRUPT(); \
+		} \
+	} while (0)
+
 #define ZEND_VM_NEXT_OPCODE() \
 	CHECK_SYMBOL_TABLES() \
 	ZEND_VM_INC_OPCODE(); \
 	ZEND_VM_CONTINUE()
 
+#define ZEND_VM_NEXT_OPCODE_EX(new_op) \
+	CHECK_SYMBOL_TABLES() \
+	OPLINE = new_op; \
+	ZEND_VM_CONTINUE()
+
 #define ZEND_VM_SET_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \
+	ZEND_VM_CHECK_INTERRUPT(); \
 	OPLINE = new_op
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
@@ -2050,6 +2062,7 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 #define ZEND_VM_JMP(new_op) \
 	if (EXPECTED(!EG(exception))) { \
 		ZEND_VM_SET_OPCODE(new_op); \
+		ZEND_VM_CHECK_INTERRUPT(); \
 	} else { \
 		LOAD_OPLINE(); \
 	} \

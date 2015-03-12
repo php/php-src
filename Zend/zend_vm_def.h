@@ -25,6 +25,21 @@
  * php zend_vm_gen.php
  */
 
+ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
+{
+	// TODO: use atomic instruction ???
+	if (EG(vm_interrupt)) {
+		EG(vm_interrupt) = 0;
+		if (EG(timed_out)) {
+			if (zend_on_timeout) {
+				zend_on_timeout(EG(timeout_seconds));
+			}
+			zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+		}
+	}
+	ZEND_VM_CONTINUE();
+}
+
 ZEND_VM_HANDLER(1, ZEND_ADD, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
@@ -2094,7 +2109,7 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, ANY)
 	val = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		if (OP1_TYPE == IS_CV) {
@@ -2133,7 +2148,7 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, ANY)
 		if (OP1_TYPE == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -2195,7 +2210,7 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, ANY)
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
@@ -2241,7 +2256,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, ANY)
 		if (OP1_TYPE == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_NEXT_OPCODE_EX(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}

@@ -178,10 +178,8 @@ static void zend_hash_packed_grow(HashTable *ht)
 	if (ht->nTableSize >= HT_MAX_SIZE) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
 	}
-	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->nTableSize += ht->nTableSize;
 	zend_hash_realloc(ht, ht->nTableSize * sizeof(Bucket));
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 ZEND_API void zend_hash_real_init(HashTable *ht, zend_bool packed)
@@ -195,24 +193,20 @@ ZEND_API void zend_hash_real_init(HashTable *ht, zend_bool packed)
 ZEND_API void zend_hash_packed_to_hash(HashTable *ht)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
-	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags &= ~HASH_FLAG_PACKED;
 	ht->nTableMask = ht->nTableSize - 1;
 	zend_hash_realloc(ht, ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
 	ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
 	zend_hash_rehash(ht);
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 ZEND_API void zend_hash_to_packed(HashTable *ht)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
-	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags |= HASH_FLAG_PACKED;
 	ht->nTableMask = 0;
 	zend_hash_realloc(ht, ht->nTableSize * sizeof(Bucket));
 	ht->arHash = (uint32_t*)&uninitialized_bucket;
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 ZEND_API void _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
@@ -236,21 +230,17 @@ ZEND_API void zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed)
 		if (packed) {
 			ZEND_ASSERT(ht->u.flags & HASH_FLAG_PACKED);
 			if (nSize > ht->nTableSize) {
-				HANDLE_BLOCK_INTERRUPTIONS();
 				ht->nTableSize = zend_hash_check_size(nSize);
 				zend_hash_realloc(ht, ht->nTableSize * sizeof(Bucket));
-				HANDLE_UNBLOCK_INTERRUPTIONS();
 			}
 		} else {
 			ZEND_ASSERT(!(ht->u.flags & HASH_FLAG_PACKED));
 			if (nSize > ht->nTableSize) {
-				HANDLE_BLOCK_INTERRUPTIONS();
 				ht->nTableSize = zend_hash_check_size(nSize);
 				zend_hash_realloc(ht, ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
 				ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
 				ht->nTableMask = ht->nTableSize - 1;
 				zend_hash_rehash(ht);
-				HANDLE_UNBLOCK_INTERRUPTIONS();
 			}
 		}
 	}
@@ -492,12 +482,10 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
 				data = Z_INDIRECT_P(data);
 			}
-			HANDLE_BLOCK_INTERRUPTIONS();
 			if (ht->pDestructor) {
 				ht->pDestructor(data);
 			}
 			ZVAL_COPY_VALUE(data, pData);
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			return data;
 		}
 	}
@@ -505,7 +493,6 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
 add_to_hash:
-	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	if (ht->nInternalPointer == INVALID_IDX) {
@@ -520,7 +507,6 @@ add_to_hash:
 	nIndex = h & ht->nTableMask;
 	Z_NEXT(p->val) = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return &p->val;
 }
@@ -662,7 +648,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		}
 
 add_to_packed:
-		HANDLE_BLOCK_INTERRUPTIONS();
 		/* incremental initialization of empty Buckets */
 		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) == (HASH_ADD_NEW|HASH_ADD_NEXT)) {
 			ht->nNumUsed = h + 1;
@@ -688,8 +673,6 @@ add_to_packed:
 		p->key = NULL;
 		ZVAL_COPY_VALUE(&p->val, pData);
 
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-
 		return &p->val;
 
 convert_to_hash:
@@ -701,12 +684,10 @@ convert_to_hash:
 				return NULL;
 			}
 			ZEND_ASSERT(&p->val != pData);
-			HANDLE_BLOCK_INTERRUPTIONS();
 			if (ht->pDestructor) {
 				ht->pDestructor(&p->val);
 			}
 			ZVAL_COPY_VALUE(&p->val, pData);
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
 				ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 			}
@@ -717,7 +698,6 @@ convert_to_hash:
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
 add_to_hash:
-	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	if (ht->nInternalPointer == INVALID_IDX) {
@@ -734,7 +714,6 @@ add_to_hash:
 	ZVAL_COPY_VALUE(&p->val, pData);
 	Z_NEXT(p->val) = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return &p->val;
 }
@@ -776,17 +755,13 @@ static void zend_hash_do_resize(HashTable *ht)
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	if (ht->nNumUsed > ht->nNumOfElements) {
-		HANDLE_BLOCK_INTERRUPTIONS();
 		zend_hash_rehash(ht);
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else if (ht->nTableSize < HT_MAX_SIZE) {	/* Let's double the table size */
-		HANDLE_BLOCK_INTERRUPTIONS();
 		ht->nTableSize += ht->nTableSize;
 		zend_hash_realloc(ht, ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
 		ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
 		ht->nTableMask = ht->nTableSize - 1;
 		zend_hash_rehash(ht);
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket) + sizeof(uint32_t), sizeof(Bucket));
 	}
@@ -850,7 +825,6 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 
 static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx, Bucket *p, Bucket *prev)
 {
-	HANDLE_BLOCK_INTERRUPTIONS();
 	if (!(ht->u.flags & HASH_FLAG_PACKED)) {
 		if (prev) {
 			Z_NEXT(prev->val) = Z_NEXT(p->val);
@@ -892,7 +866,6 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 	} else {
 		ZVAL_UNDEF(&p->val);
 	}
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bucket *p)
@@ -2002,7 +1975,6 @@ ZEND_API int zend_hash_sort_ex(HashTable *ht, sort_func_t sort, compare_func_t c
 			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
 				((ht->u.flags & HASH_FLAG_PACKED) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->nNumUsed = i;
 	ht->nInternalPointer = 0;
 
@@ -2032,8 +2004,6 @@ ZEND_API int zend_hash_sort_ex(HashTable *ht, sort_func_t sort, compare_func_t c
 			zend_hash_rehash(ht);
 		}
 	}
-
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return SUCCESS;
 }

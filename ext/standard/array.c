@@ -1933,7 +1933,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 	}
-	HANDLE_BLOCK_INTERRUPTIONS();
 	hash->nNumUsed = n_elems;
 	hash->nInternalPointer = 0;
 
@@ -1949,7 +1948,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	if (!(hash->u.flags & HASH_FLAG_PACKED)) {
 		zend_hash_to_packed(hash);
 	}
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 /* }}} */
 
@@ -4520,7 +4518,6 @@ PHP_FUNCTION(array_multisort)
 	zend_qsort(indirect, array_size, sizeof(Bucket *), php_multisort_compare, (swap_func_t)array_bucket_p_sawp);
 
 	/* Restructure the arrays based on sorted indirect - this is mostly taken from zend_hash_sort() function. */
-	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < num_arrays; i++) {
 		int repack;
 
@@ -4542,7 +4539,6 @@ PHP_FUNCTION(array_multisort)
 			zend_hash_to_packed(hash);
 		}
 	}
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	/* Clean up. */
 	for (i = 0; i < array_size; i++) {
