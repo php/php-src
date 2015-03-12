@@ -78,7 +78,7 @@ file_fmttime(uint64_t v, int flags, char *buf)
 {
 	char *pp;
 	time_t t = (time_t)v;
-	struct tm *tm;
+	struct tm *tm = NULL;
 
 	if (flags & FILE_T_WINDOWS) {
 		struct timeval ts;
