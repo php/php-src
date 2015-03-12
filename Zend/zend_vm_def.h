@@ -353,11 +353,14 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data1;
-	zval *object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
-	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -2805,13 +2808,15 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	zval *function_name;
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
 
+	SAVE_OPLINE();
+	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -2929,8 +2934,6 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	LOAD_OPLINE();
-
 	call->called_scope = EX(called_scope);
 	Z_OBJ(call->This) = Z_OBJ(EX(This));
 
@@ -2977,8 +2980,6 @@ ZEND_VM_HANDLER(130, ZEND_DO_UCALL, ANY, ANY)
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	LOAD_OPLINE();
-
 	EG(scope) = NULL;
 	ret = NULL;
 	call->symbol_table = NULL;
@@ -3003,8 +3004,6 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
-
-	LOAD_OPLINE();
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = NULL;
@@ -3562,6 +3561,7 @@ ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, ANY)
 	zval *varptr, *arg;
 	zend_free_op free_op1;
 
+	SAVE_OPLINE();
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -3660,6 +3660,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR_EX, VAR|CV, ANY)
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
 	}
+	SAVE_OPLINE();
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -3682,6 +3683,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	int arg_num;
 	SAVE_OPLINE();
 
+	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
@@ -3846,6 +3848,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 	zval *args;
 	SAVE_OPLINE();
 
+	SAVE_OPLINE();
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(args) != IS_ARRAY)) {
@@ -3969,6 +3972,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 	zval *arg, *param, tmp;
 	zend_free_op free_op1;
 
+	SAVE_OPLINE();
 	arg = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
@@ -5289,7 +5293,6 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 	zval *array;
 	zval *value;
 	HashTable *fe_ht;
@@ -5449,7 +5452,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 	zval *array;
 	zval *value;
 	HashTable *fe_ht;
@@ -6485,7 +6487,7 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 	int ret;
 
 	SAVE_OPLINE();
-	ret = zend_user_opcode_handlers[opline->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL);
+	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
 	LOAD_OPLINE();
 
 	switch (ret) {
@@ -6590,6 +6592,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		FREE_UNFETCHED_OP2();
@@ -6728,6 +6731,7 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 
 	/* check for delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
+		SAVE_OPLINE();
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;
@@ -6990,4 +6994,3 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 	}
 }
 
-ZEND_VM_EXPORT_HANDLER(zend_do_fcall, ZEND_DO_FCALL)

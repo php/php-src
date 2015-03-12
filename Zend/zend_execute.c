@@ -411,9 +411,10 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, const 
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
 			return EX_CONSTANT(node);
-		} else {
-			ZEND_ASSERT(op_type == IS_CV);
+		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv(execute_data, node.var, type);
+		} else {
+			return NULL;
 		}
 	}
 }
@@ -431,9 +432,10 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
 			return EX_CONSTANT(node);
-		} else {
-			ZEND_ASSERT(op_type == IS_CV);
+		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv_deref(execute_data, node.var, type);
+		} else {
+			return NULL;
 		}
 	}
 }
@@ -1687,8 +1689,6 @@ static int zend_check_symbol(zval *pz)
 #else
 #define CHECK_SYMBOL_TABLES()
 #endif
-
-ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value)
 {

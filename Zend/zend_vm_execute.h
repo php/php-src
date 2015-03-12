@@ -306,8 +306,14 @@ static zend_uchar zend_user_opcodes[256] = {0,
 	241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
 };
 
-static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
+static const void **zend_opcode_handlers;
+static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
 
+
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
+
+typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
 #undef OPLINE
 #undef DCL_OPLINE
@@ -329,9 +335,8 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 #define ZEND_VM_RETURN()           return -1
 #define ZEND_VM_ENTER()            return  1
 #define ZEND_VM_LEAVE()            return  2
-#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#define ZEND_VM_DISPATCH(opcode, opline) return ((opcode_handler_t)zend_vm_get_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
 
 ZEND_API void execute_ex(zend_execute_data *execute_data)
 {
@@ -349,7 +354,7 @@ ZEND_API void execute_ex(zend_execute_data *execute_data)
 		}
 #endif
 
-		if (UNEXPECTED((ret = OPLINE->handler(execute_data)) != 0)) {
+		if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(execute_data)) != 0)) {
 			if (EXPECTED(ret > 0)) {
 				execute_data = EG(current_execute_data);
 			} else {
@@ -495,8 +500,6 @@ static int ZEND_FASTCALL  ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	LOAD_OPLINE();
-
 	call->called_scope = EX(called_scope);
 	Z_OBJ(call->This) = Z_OBJ(EX(This));
 
@@ -543,8 +546,6 @@ static int ZEND_FASTCALL  ZEND_DO_UCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	LOAD_OPLINE();
-
 	EG(scope) = NULL;
 	ret = NULL;
 	call->symbol_table = NULL;
@@ -569,8 +570,6 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
-
-	LOAD_OPLINE();
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = NULL;
@@ -885,6 +884,7 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	int arg_num;
 	SAVE_OPLINE();
 
+	SAVE_OPLINE();
 	args = get_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, BP_VAR_R);
 	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
@@ -1049,6 +1049,7 @@ static int ZEND_FASTCALL  ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *args;
 	SAVE_OPLINE();
 
+	SAVE_OPLINE();
 	args = get_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(args) != IS_ARRAY)) {
@@ -1621,7 +1622,7 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	int ret;
 
 	SAVE_OPLINE();
-	ret = zend_user_opcode_handlers[opline->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL);
+	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
 	LOAD_OPLINE();
 
 	switch (ret) {
@@ -1651,6 +1652,7 @@ static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLE
 
 	/* check for delayed exception */
 	if (Z_OBJ_P(fast_call) != NULL) {
+		SAVE_OPLINE();
 		/* discard the previously thrown exception */
 		OBJ_RELEASE(Z_OBJ_P(fast_call));
 		Z_OBJ_P(fast_call) = NULL;
@@ -4685,13 +4687,15 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 {
 	USE_OPLINE
 
-	zval *function_name = EX_CONSTANT(opline->op2);
+	zval *function_name;
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
 
+	SAVE_OPLINE();
+	function_name = EX_CONSTANT(opline->op2);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -4769,7 +4773,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(EX_CONSTANT(opline->op2)), '\\', Z_STRLEN_P(EX_CONSTANT(opline->op2)));
 				if (!actual) {
-					ZVAL_STR(EX_VAR(opline->result.var), zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2))));
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(EX_CONSTANT(opline->op2)));
 				} else {
 					actual++;
 					ZVAL_STRINGL(EX_VAR(opline->result.var),
@@ -5350,6 +5354,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -5533,6 +5538,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -6051,6 +6057,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -6878,6 +6885,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -7678,13 +7686,15 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_
 {
 	USE_OPLINE
 
-	zval *function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	zval *function_name;
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
 
+	SAVE_OPLINE();
+	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -8083,6 +8093,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -8869,13 +8880,15 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPC
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	zval *function_name;
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
 
+	SAVE_OPLINE();
+	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -10279,6 +10292,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -10447,6 +10461,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -10615,6 +10630,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -10937,6 +10953,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -11415,6 +11432,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -12161,6 +12179,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *varptr, *arg;
 	zend_free_op free_op1;
 
+	SAVE_OPLINE();
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -12259,6 +12278,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		return ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
+	SAVE_OPLINE();
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -12279,6 +12299,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	zval *arg, *param, tmp;
 	zend_free_op free_op1;
 
+	SAVE_OPLINE();
 	arg = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
@@ -12796,7 +12817,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-
 	zval *array;
 	zval *value;
 	HashTable *fe_ht;
@@ -12956,7 +12976,6 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-
 	zval *array;
 	zval *value;
 	HashTable *fe_ht;
@@ -13310,11 +13329,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op_data1;
-	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	zval *property = EX_CONSTANT(opline->op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
+	property = EX_CONSTANT(opline->op2);
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -14513,7 +14535,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(EX_CONSTANT(opline->op2)), '\\', Z_STRLEN_P(EX_CONSTANT(opline->op2)));
 				if (!actual) {
-					ZVAL_STR(EX_VAR(opline->result.var), zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2))));
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(EX_CONSTANT(opline->op2)));
 				} else {
 					actual++;
 					ZVAL_STRINGL(EX_VAR(opline->result.var),
@@ -14856,6 +14878,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -15062,6 +15085,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -15328,6 +15352,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -16239,6 +16264,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -16405,11 +16431,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op_data1;
-	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
+	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -17913,6 +17942,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -18053,11 +18083,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data1;
-	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
+	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -19579,11 +19612,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval *object = _get_obj_zval_ptr_unused(execute_data);
-	zval *property = EX_CONSTANT(opline->op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_obj_zval_ptr_unused(execute_data);
+	property = EX_CONSTANT(opline->op2);
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -20557,7 +20593,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(EX_CONSTANT(opline->op2)), '\\', Z_STRLEN_P(EX_CONSTANT(opline->op2)));
 				if (!actual) {
-					ZVAL_STR(EX_VAR(opline->result.var), zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2))));
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(EX_CONSTANT(opline->op2)));
 				} else {
 					actual++;
 					ZVAL_STRINGL(EX_VAR(opline->result.var),
@@ -20965,6 +21001,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -21102,6 +21139,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -21239,6 +21277,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -21715,6 +21754,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -21849,11 +21889,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval *object = _get_obj_zval_ptr_unused(execute_data);
-	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_obj_zval_ptr_unused(execute_data);
+	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -23136,6 +23179,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -23270,11 +23314,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data1;
-	zval *object = _get_obj_zval_ptr_unused(execute_data);
-	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_obj_zval_ptr_unused(execute_data);
+	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -25096,6 +25143,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	zval *varptr, *arg;
 
 
+	SAVE_OPLINE();
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -25193,6 +25241,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		return ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
+	SAVE_OPLINE();
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
@@ -25213,6 +25262,7 @@ static int ZEND_FASTCALL  ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *arg, *param, tmp;
 
 
+	SAVE_OPLINE();
 	arg = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
@@ -26380,11 +26430,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-	zval *property = EX_CONSTANT(opline->op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	property = EX_CONSTANT(opline->op2);
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -28480,6 +28533,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -28756,6 +28810,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -29413,6 +29468,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -30523,6 +30579,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -30948,11 +31005,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 {
 	USE_OPLINE
 	zend_free_op free_op_data1;
-	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -32681,6 +32741,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
 
+	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 
@@ -33095,11 +33156,14 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data1;
-	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
-	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	zval *object;
+	zval *property;
 	zval *value;
 	zval *zptr;
 
+	SAVE_OPLINE();
+	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -38408,7 +38472,7 @@ static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 void zend_init_opcodes_handlers(void)
 {
-  static const opcode_handler_t labels[] = {
+  static const void *labels[] = {
   	ZEND_NOP_SPEC_HANDLER,
   	ZEND_NOP_SPEC_HANDLER,
   	ZEND_NOP_SPEC_HANDLER,
@@ -42686,9 +42750,9 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SPACESHIP_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER
   };
-  zend_opcode_handlers = (opcode_handler_t*)labels;
+  zend_opcode_handlers = labels;
 }
-static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
+static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
 {
 		static const int zend_vm_decode[] = {
 			_UNUSED_CODE, /* 0              */
@@ -42715,10 +42779,5 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 ZEND_API void zend_vm_set_opcode_handler(zend_op* op)
 {
 	op->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);
-}
-
-ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS)
-{
-	return ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
