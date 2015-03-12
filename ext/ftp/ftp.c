@@ -1262,8 +1262,11 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
-
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+			if (n == 0) {
+				_set_errno(ETIMEDOUT);
+			}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 			if (n == 0) {
 				errno = ETIMEDOUT;
 			}
@@ -1303,7 +1306,11 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1335,7 +1342,11 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1355,7 +1366,11 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, POLLOUT, 1000);
 	if (n < 1) {
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
@@ -1376,7 +1391,11 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
+#ifdef PHP_WIN32
+		if (n == 0) {
+			_set_errno(ETIMEDOUT);
+		}
+#elif !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
 			errno = ETIMEDOUT;
 		}
