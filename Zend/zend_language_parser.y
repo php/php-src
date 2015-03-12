@@ -49,12 +49,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYFREE free
 #endif
 
-#define REWIND { \
-	zend_stack_push(&LANG_SCNG(state_stack), (void *) &LANG_SCNG(yy_state)); \
-	LANG_SCNG(yy_state) = yycST_LOOKING_FOR_SEMI_RESERVED_NAME; \
-	LANG_SCNG(yy_cursor) = (unsigned char*)LANG_SCNG(yy_text); \
-	LANG_SCNG(yy_leng)   = 0; }
-
 %}
 
 %pure_parser
@@ -245,7 +239,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr class_name class_name_reference simple_variable internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <ast> variable_class_name dereferencable_scalar class_name_scalar constant dereferencable
+%type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
@@ -283,7 +277,8 @@ SEMI_RESERVED:
 
 identifier:
 		T_STRING { $$ = $1; }
-	| 	/* if */ SEMI_RESERVED { REWIND } /* and rematch as */ T_STRING { $$ = $3; }
+	| 	SEMI_RESERVED
+			{ zval zv; ZVAL_STRINGL(&zv, (char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng)); $$ = zend_ast_create_zval(&zv); }
 ;
 
 top_statement_list:
@@ -1036,7 +1031,6 @@ scalar:
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }
-	|	class_name_scalar	{ $$ = $1; }
 	|	constant			{ $$ = $1; }
 ;
 
@@ -1238,11 +1232,6 @@ isset_variables:
 
 isset_variable:
 		expr { $$ = zend_ast_create(ZEND_AST_ISSET, $1); }
-;
-
-class_name_scalar:
-	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS
-		{ $$ = zend_ast_create(ZEND_AST_RESOLVE_CLASS_NAME, $1); }
 ;
 
 %%

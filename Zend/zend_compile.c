@@ -1261,6 +1261,10 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 	zval *c;
 
+	if(zend_string_equals_literal_ci(name, "class")) {
+		zend_str_tolower(name->val, name->len);
+	}
+
 	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_ci(class_name, CG(active_class_entry)->name)))) {
 		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
