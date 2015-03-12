@@ -321,11 +321,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 
 						i = php_poll2(&p, 1, 300);
 
-						if (i > 0) {
-							retry = 1;
-						} else {
-							retry = 0;
-						}
+						retry = i > 0;
 					}
 					break;
 
