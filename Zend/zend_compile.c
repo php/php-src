@@ -3053,6 +3053,10 @@ zend_class_entry* zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 	    name = 
 	        zend_name_anon_class((zend_ast*)name TSRMLS_CC);
+
+	    /* do not support serial classes */
+	    ce->serialize = zend_class_serialize_deny;
+	    ce->unserialize = zend_class_unserialize_deny;
 	}
 	
 	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
