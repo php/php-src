@@ -87,6 +87,8 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	long              flags;
 	zend_function    *fptr_get_hash;
 	HashTable        *debug_info;
+	zval            **gcdata;
+	long              gcdata_num;
 } spl_SplObjectStorage; /* }}} */
 
 /* {{{ storage is an assoc aray of [zend_object_value]=>[zval *obj, zval *inf] */
@@ -106,6 +108,10 @@ void spl_SplOjectStorage_free_storage(void *object TSRMLS_DC) /* {{{ */
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
+	}
+
+	if (intern->gcdata != NULL) {
+		efree(intern->gcdata);
 	}
 
 	efree(object);
@@ -325,7 +331,6 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	*is_temp = 0;
 
 	props = Z_OBJPROP_P(obj);
-	zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
 
 	if (intern->debug_info == NULL) {
 		ALLOC_HASHTABLE(intern->debug_info);
@@ -361,46 +366,30 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 }
 /* }}} */
 
-/* overriden for garbage collection
- * This is very hacky */
+/* overriden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
+	long i = 0;
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_SplObjectStorageElement *element;
-	HashTable *props;
 	HashPosition pos;
-	zval *gcdata_arr = NULL,
-		 **gcdata_arr_pp;
 
-	props = std_object_handlers.get_properties(obj TSRMLS_CC);
-	
-	*table = NULL;
-	*n = 0;
-
-	/* clean \x00gcdata, as it may be out of date */
-	if (zend_hash_find(props, "\x00gcdata", sizeof("\x00gcdata"), (void**) &gcdata_arr_pp) == SUCCESS) {
-		gcdata_arr = *gcdata_arr_pp;
-		zend_hash_clean(Z_ARRVAL_P(gcdata_arr));
-	}
-
-	if (gcdata_arr == NULL) {
-		MAKE_STD_ZVAL(gcdata_arr);
-		array_init(gcdata_arr);
-		/* don't decrease refcount of members when destroying */
-		Z_ARRVAL_P(gcdata_arr)->pDestructor = NULL;
-
-		/* name starts with \x00 to make tampering in user-land more difficult */
-		zend_hash_add(props, "\x00gcdata", sizeof("\x00gcdata"), &gcdata_arr, sizeof(gcdata_arr), NULL);
+	if (intern->storage.nNumOfElements > intern->gcdata_num) {
+		intern->gcdata_num = intern->storage.nNumOfElements * 2;
+		intern->gcdata = (zval**)erealloc(intern->gcdata, sizeof(zval*) * intern->gcdata_num);
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 	while (zend_hash_get_current_data_ex(&intern->storage, (void **)&element, &pos) == SUCCESS) {
-		add_next_index_zval(gcdata_arr, element->obj);
-		add_next_index_zval(gcdata_arr, element->inf);
+		intern->gcdata[i++] = element->obj;
+		intern->gcdata[i++] = element->inf;
 		zend_hash_move_forward_ex(&intern->storage, &pos);
 	}
 
-	return props;
+	*table = intern->gcdata;
+	*n = i;
+
+	return std_object_handlers.get_properties(obj TSRMLS_CC);
 }
 /* }}} */
 
@@ -799,7 +788,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	INIT_PZVAL(&members);
 	Z_ARRVAL(members) = zend_std_get_properties(getThis() TSRMLS_CC);
 	Z_TYPE(members) = IS_ARRAY;
-	zend_hash_del(Z_ARRVAL(members), "\x00gcdata", sizeof("\x00gcdata"));
+
 	pmembers = &members;
 	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
 
