@@ -1468,6 +1468,34 @@ function gen_vm($def, $skel) {
 	out($f, "\top->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);\n");
 	out($f, "}\n\n");
 
+	// Generate zend_vm_call_opcode_handler() function
+	if (ZEND_VM_KIND == ZEND_VM_KIND_CALL) {
+		out($f, "ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
+		out($f, "{\n");
+		out($f, "\tint ret;\n");
+		out($f, "#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+		out($f, "\tconst zend_op *orig_opline = opline;\n");
+		out($f, "#endif\n");
+		out($f, "#ifdef ZEND_VM_FP_GLOBAL_REG\n");
+		out($f, "\tzend_execute_data *orig_execute_data = execute_data;\n");
+		out($f, "\texecute_data = ex;\n");
+		out($f, "#else\n");
+		out($f, "\tzend_execute_data *execute_data = ex;\n");
+		out($f, "#endif\n");
+		out($f, "\n");
+		out($f, "\tLOAD_OPLINE();\n");
+		out($f, "\tret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+		out($f, "\tSAVE_OPLINE();\n");
+		out($f, "#ifdef ZEND_VM_FP_GLOBAL_REG\n");
+		out($f, "\texecute_data = orig_execute_data;\n");
+		out($f, "#endif\n");
+		out($f, "#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+		out($f, "\topline = orig_opline;\n");
+		out($f, "#endif\n");
+		out($f, "\treturn ret;\n");
+		out($f, "}\n\n");
+	}
+
 	// Export handlers and helpers
 	if (count($export) > 0 &&
 	    ZEND_VM_KIND != ZEND_VM_KIND_CALL) {

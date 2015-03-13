@@ -42835,3 +42835,28 @@ ZEND_API void zend_vm_set_opcode_handler(zend_op* op)
 	op->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);
 }
 
+ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)
+{
+	int ret;
+#ifdef ZEND_VM_IP_GLOBAL_REG
+	const zend_op *orig_opline = opline;
+#endif
+#ifdef ZEND_VM_FP_GLOBAL_REG
+	zend_execute_data *orig_execute_data = execute_data;
+	execute_data = ex;
+#else
+	zend_execute_data *execute_data = ex;
+#endif
+
+	LOAD_OPLINE();
+	ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	SAVE_OPLINE();
+#ifdef ZEND_VM_FP_GLOBAL_REG
+	execute_data = orig_execute_data;
+#endif
+#ifdef ZEND_VM_IP_GLOBAL_REG
+	opline = orig_opline;
+#endif
+	return ret;
+}
+

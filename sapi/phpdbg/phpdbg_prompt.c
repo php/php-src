@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_exceptions.h"
+#include "zend_vm.h"
 #include "phpdbg.h"
 
 #include "phpdbg_help.h"
@@ -1460,7 +1461,7 @@ next:
 		    execute_data->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
-		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data);
+		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		
 		zend_execute_ex = phpdbg_execute_ex;
 
 		if (PHPDBG_G(vmret) != 0) {
