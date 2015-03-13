@@ -86,6 +86,8 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	long              flags;
 	zend_function    *fptr_get_hash;
 	HashTable        *debug_info;
+	zval            **gcdata;
+	long              gcdata_len;
 } spl_SplObjectStorage; /* }}} */
 
 /* {{{ storage is an assoc aray of [zend_object_value]=>[zval *obj, zval *inf] */
@@ -105,6 +107,10 @@ void spl_SplOjectStorage_free_storage(void *object TSRMLS_DC) /* {{{ */
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
+	}
+
+	if (intern->gcdata_len > 0) {
+		efree(intern->gcdata);
 	}
 
 	efree(object);
@@ -263,6 +269,9 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
+	intern->gcdata = NULL;
+	intern->gcdata_len = 0;
+
 	zend_hash_init(&intern->storage, 0, NULL, (void (*)(void *))spl_object_storage_dtor, 0);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_SplOjectStorage_free_storage, NULL TSRMLS_CC);
@@ -324,7 +333,6 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	*is_temp = 0;
 
 	props = Z_OBJPROP_P(obj);
-	zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
 
 	if (intern->debug_info == NULL) {
 		ALLOC_HASHTABLE(intern->debug_info);
@@ -360,46 +368,35 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 }
 /* }}} */
 
-/* overriden for garbage collection
- * This is very hacky */
+/* overriden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_SplObjectStorageElement *element;
-	HashTable *props;
 	HashPosition pos;
-	zval *gcdata_arr = NULL,
-		 **gcdata_arr_pp;
+	long i = 0;
+	long requiredLength = intern->storage.nNumOfElements * 2;
 
-	props = std_object_handlers.get_properties(obj TSRMLS_CC);
-	
-	*table = NULL;
-	*n = 0;
+	if (requiredLength > intern->gcdata_len) {
+		if (intern->gcdata_len > 0) {
+			efree(intern->gcdata);
+		}
 
-	/* clean \x00gcdata, as it may be out of date */
-	if (zend_hash_find(props, "\x00gcdata", sizeof("\x00gcdata"), (void**) &gcdata_arr_pp) == SUCCESS) {
-		gcdata_arr = *gcdata_arr_pp;
-		zend_hash_clean(Z_ARRVAL_P(gcdata_arr));
-	}
-
-	if (gcdata_arr == NULL) {
-		MAKE_STD_ZVAL(gcdata_arr);
-		array_init(gcdata_arr);
-		/* don't decrease refcount of members when destroying */
-		Z_ARRVAL_P(gcdata_arr)->pDestructor = NULL;
-
-		/* name starts with \x00 to make tampering in user-land more difficult */
-		zend_hash_add(props, "\x00gcdata", sizeof("\x00gcdata"), &gcdata_arr, sizeof(gcdata_arr), NULL);
+		intern->gcdata = (zval**)erealloc(intern->gcdata, sizeof(zval*) * requiredLength);
+		intern->gcdata_len = requiredLength;
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 	while (zend_hash_get_current_data_ex(&intern->storage, (void **)&element, &pos) == SUCCESS) {
-		add_next_index_zval(gcdata_arr, element->obj);
-		add_next_index_zval(gcdata_arr, element->inf);
+		intern->gcdata[i++] = element->obj;
+		intern->gcdata[i++] = element->inf;
 		zend_hash_move_forward_ex(&intern->storage, &pos);
 	}
 
-	return props;
+	*table = intern->gcdata;
+	*n = intern->gcdata_len;
+
+	return std_object_handlers.get_properties(obj TSRMLS_CC);
 }
 /* }}} */
 
@@ -782,7 +779,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	INIT_PZVAL(&members);
 	Z_ARRVAL(members) = zend_std_get_properties(getThis() TSRMLS_CC);
 	Z_TYPE(members) = IS_ARRAY;
-	zend_hash_del(Z_ARRVAL(members), "\x00gcdata", sizeof("\x00gcdata"));
+
 	pmembers = &members;
 	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
 
