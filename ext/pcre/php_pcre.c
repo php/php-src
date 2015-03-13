@@ -1353,36 +1353,15 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 
 /* {{{ preg_replace_impl
  */
-static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_replace, int is_filter)
+static void preg_replace_impl(zval *return_value, int argc, zval *regex, zval *replace, zval *subject, zend_long limit, zval *zcount, int is_callable_replace, int is_filter)
 {
-	zval		    *regex,
-				    *replace,
-				    *subject,
-				    *subject_entry,
-				    *zcount = NULL;
+	zval			*subject_entry;
 	int				 limit_val = -1;
-	zend_long		 limit = -1;
 	zend_string		*result;
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_string		*callback_name;
 	int				 replace_count=0, old_replace_count;
-
-#ifndef FAST_ZPP
-	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
-		return;
-	}
-#else
-	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_ZVAL(regex)
-		Z_PARAM_ZVAL(replace)
-		Z_PARAM_ZVAL(subject)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
-	ZEND_PARSE_PARAMETERS_END();
-#endif
 
 	if (!is_callable_replace && Z_TYPE_P(replace) == IS_ARRAY && Z_TYPE_P(regex) != IS_ARRAY) {
 		php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
@@ -1403,7 +1382,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		zend_string_release(callback_name);
 	}
 
-	if (ZEND_NUM_ARGS() > 3) {
+	if (argc > 3) {
 		limit_val = (int)limit;
 	}
 
@@ -1433,7 +1412,8 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else {	/* if subject is not an array */
+	} else {	
+		/* if subject is not an array */
 		old_replace_count = replace_count;
 		if ((result = php_replace_in_subject(regex, replace, subject, limit_val, is_callable_replace, &replace_count)) != NULL) {
 			if (!is_filter || replace_count > old_replace_count) {
@@ -1443,11 +1423,10 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 			}
 		}
 	}
-	if (ZEND_NUM_ARGS() > 4) {
+	if (argc > 4) {
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
-
 }
 /* }}} */
 
@@ -1455,7 +1434,26 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
    Perform Perl-style regular expression replacement. */
 static PHP_FUNCTION(preg_replace)
 {
-	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
+	zval *regex, *replace, *subject, *zcount = NULL;
+	zend_long limit = -1;
+
+#ifndef FAST_ZPP
+	/* Get function parameters and do error-checking. */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ZVAL(regex)
+		Z_PARAM_ZVAL(replace)
+		Z_PARAM_ZVAL(subject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	preg_replace_impl(return_value, ZEND_NUM_ARGS(), regex, replace, subject, limit, zcount, 0, 0);
 }
 /* }}} */
 
@@ -1463,7 +1461,84 @@ static PHP_FUNCTION(preg_replace)
    Perform Perl-style regular expression replacement using replacement callback. */
 static PHP_FUNCTION(preg_replace_callback)
 {
-	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
+	zval *regex, *replace, *subject, *zcount = NULL;
+	zend_long limit = -1;
+
+#ifndef FAST_ZPP
+	/* Get function parameters and do error-checking. */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+		return;
+	}    
+#else
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ZVAL(regex)
+		Z_PARAM_ZVAL(replace)
+		Z_PARAM_ZVAL(subject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	preg_replace_impl(return_value, ZEND_NUM_ARGS(), regex, replace, subject, limit, zcount, 1, 0);
+}
+/* }}} */
+
+/* {{{ proto mixed preg_replace_callback_array(array pattern, mixed subject [, int limit [, int &count]])
+   Perform Perl-style regular expression replacement using replacement callback. */
+static PHP_FUNCTION(preg_replace_callback_array)
+{
+	zval regex, tmp_ret, *replace, *subject, *pattern, *zcount = NULL;
+	zend_long limit = -1;
+	zend_ulong num_idx, count = 0;
+	zend_string *str_idx;
+	int argc;
+
+#ifndef FAST_ZPP
+	/* Get function parameters and do error-checking. */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "az|lz/", &pattern, &subject, &limit, &zcount) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_ARRAY(pattern)
+		Z_PARAM_ZVAL(subject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+	argc = ZEND_NUM_ARGS();
+	
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(pattern), num_idx, str_idx, replace) {
+		if (str_idx) {
+			ZVAL_STR_COPY(&regex, str_idx);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
+			zval_dtor(return_value);
+			ZVAL_COPY(return_value, subject);
+			break;
+		}		
+
+		if (Z_ISNULL_P(return_value)) {
+			preg_replace_impl(&tmp_ret, argc + 1, &regex, replace, subject, limit, zcount, 1, 0);
+		} else {
+			preg_replace_impl(&tmp_ret, argc + 1, &regex, replace, return_value, limit, zcount, 1, 0);
+			zval_ptr_dtor(return_value);
+		}
+
+		if (zcount && Z_TYPE_P(zcount) == IS_LONG) {
+			count += Z_LVAL_P(zcount);
+		}
+
+		ZVAL_COPY_VALUE(return_value, &tmp_ret);
+		zval_ptr_dtor(&regex);
+	} ZEND_HASH_FOREACH_END();
+
+	if (zcount && Z_TYPE_P(zcount) == IS_LONG) {
+		zval_dtor(zcount);
+		ZVAL_LONG(zcount, count);
+	}
 }
 /* }}} */
 
@@ -1471,7 +1546,26 @@ static PHP_FUNCTION(preg_replace_callback)
    Perform Perl-style regular expression replacement and only return matches. */
 static PHP_FUNCTION(preg_filter)
 {
-	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
+	zval *regex, *replace, *subject, *zcount = NULL;
+	zend_long limit = -1;
+
+#ifndef FAST_ZPP
+	/* Get function parameters and do error-checking. */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|lz/", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+		return;
+	}    
+#else
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ZVAL(regex)
+		Z_PARAM_ZVAL(replace)
+		Z_PARAM_ZVAL(subject)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	preg_replace_impl(return_value, ZEND_NUM_ARGS(), regex, replace, subject, limit, zcount, 0, 1);
 }
 /* }}} */
 
@@ -1780,7 +1874,7 @@ static PHP_FUNCTION(preg_quote)
 
 	/* Reallocate string and return it */
 	out_str = zend_string_realloc(out_str, q - out_str->val, 0);
-	RETURN_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -1953,6 +2047,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
     ZEND_ARG_INFO(1, count)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback_array, 0, 0, 2)
+    ZEND_ARG_INFO(0, pattern)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(0, limit)
+    ZEND_ARG_INFO(1, count)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
@@ -1980,6 +2081,7 @@ static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match_all,			arginfo_preg_match_all)
 	PHP_FE(preg_replace,			arginfo_preg_replace)
 	PHP_FE(preg_replace_callback,	arginfo_preg_replace_callback)
+	PHP_FE(preg_replace_callback_array,	arginfo_preg_replace_callback_array)
 	PHP_FE(preg_filter,				arginfo_preg_replace)
 	PHP_FE(preg_split,				arginfo_preg_split)
 	PHP_FE(preg_quote,				arginfo_preg_quote)
