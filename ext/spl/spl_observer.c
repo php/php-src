@@ -376,7 +376,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n) /* 
 	*table = intern->gcdata;
 	*n = i;
 
-	return std_object_handlers.get_properties(obj TSRMLS_CC);
+	return std_object_handlers.get_properties(obj);
 }
 /* }}} */
 
