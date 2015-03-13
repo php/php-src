@@ -87,7 +87,7 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	zend_function    *fptr_get_hash;
 	HashTable        *debug_info;
 	zval            **gcdata;
-	long              gcdata_len;
+	long              gcdata_num;
 } spl_SplObjectStorage; /* }}} */
 
 /* {{{ storage is an assoc aray of [zend_object_value]=>[zval *obj, zval *inf] */
@@ -269,9 +269,6 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
-	intern->gcdata = NULL;
-	intern->gcdata_len = 0;
-
 	zend_hash_init(&intern->storage, 0, NULL, (void (*)(void *))spl_object_storage_dtor, 0);
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) spl_SplOjectStorage_free_storage, NULL TSRMLS_CC);
@@ -371,15 +368,14 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 /* overriden for garbage collection */
 static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
+	long i = 0;
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_SplObjectStorageElement *element;
 	HashPosition pos;
-	long i = 0;
-	long requiredLength = intern->storage.nNumOfElements * 2;
 
-	if (requiredLength > intern->gcdata_len) {
-		intern->gcdata = (zval**)erealloc(intern->gcdata, sizeof(zval*) * requiredLength);
-		intern->gcdata_len = requiredLength;
+	if (intern->storage.nNumOfElements > intern->gcdata_num) {
+		intern->gcdata_num = intern->storage.nNumOfElements * 2;
+		intern->gcdata = (zval**)erealloc(intern->gcdata, sizeof(zval*) * intern->gcdata_num);
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);

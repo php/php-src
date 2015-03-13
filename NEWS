@@ -21,6 +21,10 @@ PHP                                                                        NEWS
    . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
 
+- SPL:
+   . Fixed #69227 (Use after free in zval_scan caused by
+     spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
+
 19 Mar 2015, PHP 5.5.23
 
 - Core:
