@@ -4,11 +4,11 @@ testing anonymous inheritance
 <?php
 class Outer {
     protected $data;
-    
+
     public function __construct($data) {
         $this->data = $data;
     }
-    
+
     public function getArrayAccess() {
         /* create a proxy object implementing array access */
         return new class($this->data) extends Outer implements ArrayAccess {
@@ -26,6 +26,5 @@ $outer = new Outer(array(
 
 /* not null because inheritance */
 var_dump($outer->getArrayAccess()[0]);
-?>
---EXPECTF--	
+--EXPECTF--
 int(%d)

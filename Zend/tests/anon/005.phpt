@@ -4,7 +4,7 @@ testing reusing anons that implement an interface
 <?php
 class Outer {
     protected $data;
- 
+
     public function __construct(&$data) {
         /* array access will be implemented by the time we get to here */
         $this->data = &$data;
@@ -25,13 +25,12 @@ class Outer {
 $data = array(
     rand(1, 100),
     rand(2, 200)
-); 
+);
 
 $outer = new Outer($data);
 $proxy = $outer->getArrayAccess();
 
 /* null because no inheritance, so no access to protected member */
 var_dump(@$outer->getArrayAccess()[0]);
-?>
---EXPECT--	
+--EXPECT--
 NULL
