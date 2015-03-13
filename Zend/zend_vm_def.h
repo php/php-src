@@ -5383,7 +5383,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
 				p = fe_ht->arData + pos;
@@ -5497,7 +5497,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 		while (1) {
 			pos++;
 			if (pos >= fe_ht->nNumUsed) {
-				pos = INVALID_IDX;
+				pos = HT_INVALID_IDX;
 				break;
 			}
 			p = fe_ht->arData + pos;
@@ -5561,7 +5561,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
 				p = fe_ht->arData + pos;

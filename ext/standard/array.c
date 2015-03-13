@@ -2103,7 +2103,6 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 	in_hash->nNumOfElements    = out_hash.nNumOfElements;
 	in_hash->nNextFreeElement  = out_hash.nNextFreeElement;
 	in_hash->arData            = out_hash.arData;
-	in_hash->arHash            = out_hash.arHash;
 	in_hash->pDestructor       = out_hash.pDestructor;
 
 	zend_hash_internal_pointer_reset(in_hash);
@@ -2383,7 +2382,6 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->nNumOfElements    = new_hash.nNumOfElements;
 	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
-	Z_ARRVAL_P(stack)->arHash            = new_hash.arHash;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
 	
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));

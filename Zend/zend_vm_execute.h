@@ -12961,7 +12961,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
 				p = fe_ht->arData + pos;
@@ -13075,7 +13075,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 		while (1) {
 			pos++;
 			if (pos >= fe_ht->nNumUsed) {
-				pos = INVALID_IDX;
+				pos = HT_INVALID_IDX;
 				break;
 			}
 			p = fe_ht->arData + pos;
@@ -13139,7 +13139,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
 				p = fe_ht->arData + pos;

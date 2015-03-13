@@ -34,8 +34,6 @@
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
 
-#define INVALID_IDX ((uint32_t) -1)
-
 #define HASH_FLAG_PERSISTENT       (1<<0)
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
@@ -820,9 +818,9 @@ static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key
 	ZVAL_COPY_VALUE(&p->val, zv);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h & ht->nTableMask;
-	Z_NEXT(p->val) = ht->arHash[nIndex];
-	ht->arHash[nIndex] = idx;
+	nIndex = p->h | ht->nTableMask;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
 }
@@ -836,9 +834,9 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	ZVAL_PTR(&p->val, ptr);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h & ht->nTableMask;
-	Z_NEXT(p->val) = ht->arHash[nIndex];
-	ht->arHash[nIndex] = idx;
+	nIndex = p->h | ht->nTableMask;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
 }
@@ -852,9 +850,9 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	ZVAL_INDIRECT(&p->val, ptr);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h & ht->nTableMask;
-	Z_NEXT(p->val) = ht->arHash[nIndex];
-	ht->arHash[nIndex] = idx;
+	nIndex = p->h | ht->nTableMask;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
 }
