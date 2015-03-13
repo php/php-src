@@ -109,7 +109,7 @@ void spl_SplOjectStorage_free_storage(void *object TSRMLS_DC) /* {{{ */
 		efree(intern->debug_info);
 	}
 
-	if (intern->gcdata_len > 0) {
+	if (intern->gcdata != NULL) {
 		efree(intern->gcdata);
 	}
 
@@ -378,10 +378,6 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSR
 	long requiredLength = intern->storage.nNumOfElements * 2;
 
 	if (requiredLength > intern->gcdata_len) {
-		if (intern->gcdata_len > 0) {
-			efree(intern->gcdata);
-		}
-
 		intern->gcdata = (zval**)erealloc(intern->gcdata, sizeof(zval*) * requiredLength);
 		intern->gcdata_len = requiredLength;
 	}
@@ -394,7 +390,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSR
 	}
 
 	*table = intern->gcdata;
-	*n = intern->gcdata_len;
+	*n = i;
 
 	return std_object_handlers.get_properties(obj TSRMLS_CC);
 }
