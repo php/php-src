@@ -1,6 +1,6 @@
 {%DEFINES%}
 
-ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data)
+ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 {
 	DCL_OPLINE
 

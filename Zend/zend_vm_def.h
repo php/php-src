@@ -2018,10 +2018,10 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			const zend_op *opline = EX(opline);
+			const zend_op *old_opline = EX(opline);
 			zend_throw_exception_internal(NULL);
-			if (RETURN_VALUE_USED(opline)) {
-				zval_ptr_dtor(EX_VAR(opline->result.var));
+			if (RETURN_VALUE_USED(old_opline)) {
+				zval_ptr_dtor(EX_VAR(old_opline->result.var));
 			}
 			HANDLE_EXCEPTION_LEAVE();
 		}
