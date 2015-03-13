@@ -23,6 +23,10 @@
   . Fixed bug #69215 (Crypto servers should send client CA list)
     (Daniel Lowrey)
 
+- SPL:
+   . Fixed #69227 (Use after free in zval_scan caused by
+     spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
+
 19 Mar 2015, PHP 5.6.7
 
 - Core:
