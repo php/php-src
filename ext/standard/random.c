@@ -24,11 +24,23 @@
 #include <math.h>
 
 #include "php.h"
+#include "php_random.h"
 
 #if PHP_WIN32
 # include "win32/winutil.h"
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(random);
+
+/* {{{ */
+PHP_MINIT_FUNCTION(random)
+{
+	RANDOM_G(fd) = -1;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
 static int php_random_bytes(void *bytes, size_t size)
 {
 #if PHP_WIN32
@@ -41,18 +53,23 @@ static int php_random_bytes(void *bytes, size_t size)
 #if HAVE_DECL_ARC4RANDOM_BUF
 	arc4random_buf(bytes, size);
 #else
-	int    fd = -1;
+	int    fd = RANDOM_G(fd);
 	size_t read_bytes = 0;
+
+	if (fd < 0) {
 #if HAVE_DEV_ARANDOM
-	fd = open("/dev/arandom", O_RDONLY);
+		fd = open("/dev/arandom", O_RDONLY);
 #else
 #if HAVE_DEV_URANDOM
-	fd = open("/dev/urandom", O_RDONLY);
+		fd = open("/dev/urandom", O_RDONLY);
 #endif // URANDOM
 #endif // ARANDOM
-	if (fd < 0) {
-		php_error_docref(NULL, E_WARNING, "Cannot open source device");
-		return FAILURE;
+		if (fd < 0) {
+			php_error_docref(NULL, E_WARNING, "Cannot open source device");
+			return FAILURE;
+		}
+
+		RANDOM_G(fd) = fd;
 	}
 
 	size_t n = 0;
@@ -64,7 +81,6 @@ static int php_random_bytes(void *bytes, size_t size)
 		read_bytes += n;
 	}
 
-	close(fd);
 	if (read_bytes < size) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
@@ -74,6 +90,7 @@ static int php_random_bytes(void *bytes, size_t size)
 
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto string random_bytes(int length)
 Return an arbitrary length of pseudo-random bytes as binary string */
@@ -143,7 +160,7 @@ PHP_FUNCTION(random_int)
 	umax++;
 
 	// Powers of two are not biased
-	if (umax & ~umax != umax) {
+	if ((umax & ~umax) != umax) {
 		// Ceiling under which ZEND_LONG_MAX % max == 0
 		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 	

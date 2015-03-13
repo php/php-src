@@ -23,6 +23,19 @@
 
 PHP_FUNCTION(random_bytes);
 PHP_FUNCTION(random_int);
+
+PHP_MINIT_FUNCTION(lcg);
+
+ZEND_BEGIN_MODULE_GLOBALS(random)
+	int fd;
+ZEND_END_MODULE_GLOBALS(random)
+
+#ifdef ZTS
+# define RANDOM_G(v) TSRMG(random_globals_id, zend_random_globals *, v);
+#else
+# define RANDOM_G(v) random_globals.v
+#endif
+
 #endif
 
 /*

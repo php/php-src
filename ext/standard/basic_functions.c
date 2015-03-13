@@ -3659,6 +3659,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
+	BASIC_MINIT_SUBMODULE(random)
+
 	return SUCCESS;
 }
 /* }}} */
