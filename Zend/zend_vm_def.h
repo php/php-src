@@ -6869,7 +6869,7 @@ ZEND_VM_C_LABEL(check_indirect):
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
+ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, CONST|UNUSED)
 {
 	USE_OPLINE
 	zval *value;
@@ -6877,6 +6877,12 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP2_TYPE == IS_CONST && zend_check_namespaced_special_function_call(execute_data, value, EX_CONSTANT(opline->op2), OP1_TYPE)) {
+		CHECK_EXCEPTION();
+		ZEND_VM_DISPATCH_TO_ANY_HANDLER(ZEND_DO_FCALL);
+	}
+
 ZEND_VM_C_LABEL(try_strlen):
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
@@ -6913,14 +6919,24 @@ ZEND_VM_C_LABEL(strlen_error):
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, CONST|UNUSED)
 {
 	USE_OPLINE
 	zval *value;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP2_TYPE == IS_CONST && zend_check_namespaced_special_function_call(execute_data, value, EX_CONSTANT(opline->op2), OP1_TYPE)) {
+		CHECK_EXCEPTION();
+		ZEND_VM_DISPATCH_TO_ANY_HANDLER(ZEND_DO_FCALL);
+	}
+
+	if (OP1_TYPE & (IS_CV|IS_VAR)) {
+		ZVAL_DEREF(value);
+	}
+
 	switch (opline->extended_value) {
 		case IS_NULL:
 		case IS_LONG:
@@ -6960,7 +6976,7 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
+ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, CONST|UNUSED)
 {
 	USE_OPLINE
 	zend_constant *c;
@@ -6968,11 +6984,18 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
 	SAVE_OPLINE();
 	if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-	} else if ((c = zend_quick_get_constant(EX_CONSTANT(opline->op1), 0)) == NULL) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	} else {
-		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), c);
-		ZVAL_TRUE(EX_VAR(opline->result.var));
+		if (OP2_TYPE == IS_CONST && zend_check_namespaced_special_function_call(execute_data, EX_CONSTANT(opline->op1), EX_CONSTANT(opline->op2), IS_CONST)) {
+			CHECK_EXCEPTION();
+			ZEND_VM_DISPATCH_TO_ANY_HANDLER(ZEND_DO_FCALL);
+		}
+
+		if ((c = zend_quick_get_constant(EX_CONSTANT(opline->op1), 0)) == NULL) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		} else {
+			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), c);
+			ZVAL_TRUE(EX_VAR(opline->result.var));
+		}
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

@@ -1656,6 +1656,75 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 	return jmp_to;
 }
 
+static inline void zend_do_namespaced_special_function_call(zend_execute_data *execute_data, zend_function *fbc, zval *value, zend_uchar op_type) {
+	zend_bool has_arg = value && !Z_ISUNDEF_P(value);
+
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, has_arg, NULL, NULL, EX(call));
+
+	if (has_arg) {
+		zval *arg = ZEND_CALL_VAR(EX(call), EX(opline)->result.var);
+		if (op_type & (IS_CV|IS_VAR)) {
+			if (ARG_MAY_BE_SENT_BY_REF(fbc, 1)) {
+				zend_bool is_indirect = op_type == IS_VAR && Z_TYPE_P(value) == IS_INDIRECT;
+				zend_bool do_free = op_type == IS_VAR && !is_indirect && (!Z_REFCOUNTED_P(value) || Z_REFCOUNT_P(value) == 1);
+				if (is_indirect) {
+					value = Z_INDIRECT_P(value);
+				}
+				if (UNEXPECTED(value == &EG(error_zval))) {
+					ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
+				} else if (Z_ISREF_P(value)) {
+					Z_ADDREF_P(value);
+					ZVAL_COPY_VALUE(arg, value);
+				} else {
+					ZVAL_NEW_REF(arg, value);
+					if (op_type != IS_VAR || is_indirect) {
+						Z_ADDREF_P(arg);
+						ZVAL_REF(value, Z_REF_P(arg));
+					}
+				}
+				if (do_free) {
+					zval_ptr_dtor_nogc(value);
+				}
+			} else if (Z_ISREF_P(value)) {
+				ZVAL_COPY(arg, Z_REFVAL_P(value));
+			} else {
+				ZVAL_COPY_VALUE(arg, value);
+				if (op_type == IS_CV && Z_OPT_REFCOUNTED_P(arg)) {
+					Z_ADDREF_P(arg);
+				}
+			}
+		} else if (ARG_MUST_BE_SENT_BY_REF(fbc, 1)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot pass parameter 1 by reference");
+		} else {
+			ZVAL_COPY_VALUE(arg, value);
+			if (op_type == IS_CONST && UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+				zval_copy_ctor_func(arg);
+			}
+		}
+	}
+}
+
+static zend_always_inline zend_bool zend_check_namespaced_special_function_call(zend_execute_data *execute_data, zval *value, const zval *constant, zend_uchar op_type) {
+	zval *func;
+	zend_function *fbc;
+	switch ((size_t) (fbc = CACHED_PTR(Z_CACHE_SLOT_P(constant)))) {
+		case 1:
+			return 0;
+		case 0:
+			func = zend_hash_find(EG(function_table), Z_STR_P(constant));
+			if (func == NULL) {
+				CACHED_PTR(Z_CACHE_SLOT_P(constant)) = (void *) 0x1;
+				return 0;
+			} else {
+				CACHED_PTR(Z_CACHE_SLOT_P(constant)) = fbc = Z_FUNC_P(func);
+			}
+		default:
+			zend_do_namespaced_special_function_call(execute_data, fbc, value, op_type);
+			return 1;
+	}
+}
+
+
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
