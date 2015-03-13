@@ -631,9 +631,8 @@ const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);
 #endif
 
-
-typedef int ZEND_FASTCALL (*unary_op_type)(zval *, zval *);
-typedef int ZEND_FASTCALL (*binary_op_type)(zval *, zval *, zval *);
+typedef int (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
+typedef int (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
 
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
