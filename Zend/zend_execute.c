@@ -49,7 +49,7 @@
 #define _UNUSED_CODE 3
 #define _CV_CODE     4
 
-typedef int (*incdec_t)(zval *);
+typedef int ZEND_FASTCALL (*incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, ex, should_free, type) _get_zval_ptr(op_type, node, ex, should_free, type)
 #define get_zval_ptr_deref(op_type, node, ex, should_free, type) _get_zval_ptr_deref(op_type, node, ex, should_free, type)
@@ -1054,7 +1054,7 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 	}
 }
 
-static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2))
+static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, binary_op_type binary_op)
 {
 	zval *z;
 	zval rv, res;

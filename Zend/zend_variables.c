@@ -27,7 +27,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
-ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -84,7 +84,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 	}
 }
 
-ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -223,7 +223,7 @@ ZEND_API void zval_add_ref_unref(zval *p)
 	}
 }
 
-ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
 		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
@@ -255,12 +255,6 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 
 
 #if ZEND_DEBUG
-ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
-{
-	zval_copy_ctor(zvalue);
-}
-
-
 ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 {
 	zval_internal_dtor(zvalue);

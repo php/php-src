@@ -44,31 +44,31 @@
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
 BEGIN_EXTERN_C()
-ZEND_API int add_function(zval *result, zval *op1, zval *op2);
-ZEND_API int sub_function(zval *result, zval *op1, zval *op2);
-ZEND_API int mul_function(zval *result, zval *op1, zval *op2);
-ZEND_API int pow_function(zval *result, zval *op1, zval *op2);
-ZEND_API int div_function(zval *result, zval *op1, zval *op2);
-ZEND_API int mod_function(zval *result, zval *op1, zval *op2);
-ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2);
-ZEND_API int boolean_not_function(zval *result, zval *op1);
-ZEND_API int bitwise_not_function(zval *result, zval *op1);
-ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2);
-ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2);
-ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2);
-ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2);
-ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2);
-ZEND_API int concat_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL boolean_not_function(zval *result, zval *op1);
+ZEND_API int ZEND_FASTCALL bitwise_not_function(zval *result, zval *op1);
+ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2);
-ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2);
-ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2);
-ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2);
-ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2);
-ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_not_identical_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only);
-ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce);
+ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only);
+ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce);
 
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
@@ -85,10 +85,10 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
  * could not be represented as such due to overflow. It writes 1 to oflow_info
  * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
  */
-ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
+ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
 
-ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
-ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
+ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
+ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
 
 #if SIZEOF_ZEND_LONG == 4
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
@@ -107,7 +107,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
     }
 }
 #else
-ZEND_API zend_long zend_dval_to_lval_slow(double d);
+ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
@@ -136,7 +136,7 @@ static zend_always_inline zend_uchar is_numeric_string(const char *str, size_t l
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
+ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
 
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *end)
@@ -232,26 +232,26 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, char 
 	}
 }
 
-ZEND_API int increment_function(zval *op1);
-ZEND_API int decrement_function(zval *op2);
+ZEND_API int ZEND_FASTCALL increment_function(zval *op1);
+ZEND_API int ZEND_FASTCALL decrement_function(zval *op2);
 
-ZEND_API void convert_scalar_to_number(zval *op);
-ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
-ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
-ZEND_API void convert_to_long(zval *op);
-ZEND_API void convert_to_double(zval *op);
-ZEND_API void convert_to_long_base(zval *op, int base);
-ZEND_API void convert_to_null(zval *op);
-ZEND_API void convert_to_boolean(zval *op);
-ZEND_API void convert_to_array(zval *op);
-ZEND_API void convert_to_object(zval *op);
+ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op);
+ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL convert_to_long(zval *op);
+ZEND_API void ZEND_FASTCALL convert_to_double(zval *op);
+ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base);
+ZEND_API void ZEND_FASTCALL convert_to_null(zval *op);
+ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
+ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
+ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API zend_long _zval_get_long_func(zval *op);
-ZEND_API double _zval_get_double_func(zval *op);
-ZEND_API zend_string *_zval_get_string_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL _zval_get_long_func(zval *op);
+ZEND_API double       ZEND_FASTCALL _zval_get_double_func(zval *op);
+ZEND_API zend_string* ZEND_FASTCALL _zval_get_string_func(zval *op);
 
 static zend_always_inline zend_long _zval_get_long(zval *op) {
 	return Z_TYPE_P(op) == IS_LONG ? Z_LVAL_P(op) : _zval_get_long_func(op);
@@ -267,14 +267,14 @@ static zend_always_inline zend_string *_zval_get_string(zval *op) {
 #define zval_get_double(op) _zval_get_double((op))
 #define zval_get_string(op) _zval_get_string((op))
 
-ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
-ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);
+ZEND_API int ZEND_FASTCALL add_char_to_string(zval *result, const zval *op1, const zval *op2);
+ZEND_API int ZEND_FASTCALL add_string_to_string(zval *result, const zval *op1, const zval *op2);
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
 
-ZEND_API int zend_is_true(zval *op);
-ZEND_API int zend_object_is_true(zval *op);
+ZEND_API int ZEND_FASTCALL zend_is_true(zval *op);
+ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op);
 
 #define zval_is_true(op) \
 	zend_is_true(op)
@@ -336,31 +336,31 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2);
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2);
 #endif
 
-ZEND_API void zend_str_tolower(char *str, size_t length);
-ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, size_t length);
-ZEND_API char *zend_str_tolower_dup(const char *source, size_t length);
-ZEND_API zend_string *zend_string_tolower(zend_string *str);
+ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup(const char *source, size_t length);
+ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str);
 
-ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
-ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
-ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
-ZEND_API int zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
-ZEND_API int zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
-ZEND_API int zend_binary_strncasecmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
-ZEND_API int zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
-ZEND_API int zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
+ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(zval *s1, zval *s2);
+ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int ZEND_FASTCALL zend_binary_zval_strcasecmp(zval *s1, zval *s2);
+ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int ZEND_FASTCALL zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int ZEND_FASTCALL zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
+ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
+ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
+ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
-ZEND_API zend_long zendi_smart_strcmp(zval *s1, zval *s2);
-ZEND_API int zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
-ZEND_API int zend_compare_arrays(zval *a1, zval *a2);
-ZEND_API int zend_compare_objects(zval *o1, zval *o2);
+ZEND_API zend_long ZEND_FASTCALL zendi_smart_strcmp(zval *s1, zval *s2);
+ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
+ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
+ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-ZEND_API int zend_atoi(const char *str, int str_len);
-ZEND_API zend_long zend_atol(const char *str, int str_len);
+ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, int str_len);
+ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len);
 
-ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 
 #define convert_to_ex_master(pzv, lower_type, upper_type)	\
 	if (Z_TYPE_P(pzv)!=upper_type) {					\
@@ -1164,7 +1164,7 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 	}
 }
 
-ZEND_API zend_string *zend_long_to_str(zend_long num);
+ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
 
 END_EXTERN_C()
 

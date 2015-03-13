@@ -987,7 +987,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					ZEND_OP1_TYPE(opline)==IS_CONST &&
 					ZEND_OP2_TYPE(opline)==IS_CONST) {
 			/* evaluate constant expressions */
-			int (*binary_op)(zval *result, zval *op1, zval *op2) = get_binary_op(opline->opcode);
+			binary_op_type binary_op = get_binary_op(opline->opcode);
 			zval result;
 			int er;
 

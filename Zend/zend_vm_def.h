@@ -349,7 +349,7 @@ ZEND_VM_HANDLER(13, ZEND_BOOL_NOT, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int (*binary_op)(zval *result, zval *op1, zval *op2))
+ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, binary_op_type binary_op)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data1;
@@ -439,7 +439,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV, int (*binary_op)(zval *result, zval *op1, zval *op2))
+ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV, binary_op_type binary_op)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data1;
@@ -509,7 +509,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, int (*binary_op)(zval *result, zval *op1, zval *op2))
+ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_op_type binary_op)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
