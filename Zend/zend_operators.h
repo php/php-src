@@ -121,6 +121,14 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 #endif
 /* }}} */
 
+static zend_always_inline zend_bool zend_dval_is_integer(double d)
+{
+	double fractpart, intpart;
+
+	fractpart = modf(d, &intpart);
+	return (zend_bool)(fractpart == (double)0.0);
+}
+
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
@@ -137,6 +145,7 @@ static zend_always_inline zend_uchar is_numeric_string(const char *str, size_t l
 }
 
 ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
+ZEND_API zend_uchar is_numeric_str_function_safe(const zend_string *str, zend_long *lval, double *dval);
 
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *end)

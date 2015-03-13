@@ -2656,7 +2656,16 @@ ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 /* }}} */
 
 ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-    return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
+	return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
+}
+/* }}} */
+
+ZEND_API zend_uchar is_numeric_str_function_safe(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
+	zend_uchar ret = is_numeric_string_ex(str->val, str->len, lval, dval, -2, NULL);
+	if (ret == IS_DOUBLE && (zend_isnan(*dval) || zend_isinf(*dval))) {
+		ret = 0;
+	}
+	return ret;
 }
 /* }}} */
 
@@ -2740,10 +2749,17 @@ process_double:
 	}
 
 	if (ptr != str + length) {
-		if (!allow_errors) {
+		if (allow_errors == -2) {
+			while (*ptr == ' ' || *ptr == '\t' || *ptr == '\n' || *ptr == '\r' || *ptr == '\v' || *ptr == '\f') {
+				ptr++;
+			}
+			if (ptr != str + length) {
+				return 0;
+			}
+		} else if (!allow_errors) {
 			return 0;
 		}
-		if (allow_errors == -1) {
+		if (allow_errors < 0) {
 			zend_error(E_NOTICE, "A non well formed numeric value encountered");
 		}
 	}

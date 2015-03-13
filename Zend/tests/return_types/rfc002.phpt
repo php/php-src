@@ -8,6 +8,7 @@ function answer(): int {
 }
 
 answer();
-
---EXPECTF--
-Fatal error: Return value of answer() must be an instance of int, integer returned in %s on line %d
+?>
+DONE
+--EXPECT--
+DONE
