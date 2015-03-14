@@ -217,7 +217,7 @@ typedef struct {
 	zend_object zo;
 } reflection_object;
 
-static inline reflection_object *reflection_object_from_obj(zend_object *obj) /* {{{ */ {
+static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
 	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
 }
 
@@ -235,6 +235,7 @@ static zval *_default_load_entry(zval *object, char *name, size_t name_len) /* {
 	}
 	return value;
 }
+/* }}} */
 
 static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value) /* {{{ */
 {
