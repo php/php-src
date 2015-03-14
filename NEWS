@@ -14,6 +14,8 @@
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
     flags are used). (Jeff Welch)
+  . Fixed bug #69203 (FILTER_FLAG_STRIP_HIGH doesn't strip ASCII 127). (Jeff
+    Welch)
 
 - OpenSSL
   . Fixed bugs #68853, #65137 (Buffered crypto stream data breaks IO polling
