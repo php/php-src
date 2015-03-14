@@ -84,7 +84,7 @@ abstract class CLICommand
 			}
 		}
 
-		call_user_func(array($this, $this->cmds[$command]['run']), $this->args);
+		call_user_func(array($this, $this->cmds[$command]['run']));
 	}
 
 	static function notice ($msg)
@@ -188,7 +188,7 @@ abstract class CLICommand
 		return $f;
 	}
 
-	static function cli_arg_typ_file($arg)
+	static function cli_arg_typ_file($arg, $cfg=null, $key=null)
 	{
 		$f = new SplFileInfo($arg);
 		$f = $f->getRealPath();
