@@ -123,7 +123,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
-		if ((str[i] > 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
+		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
 		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
 		} else {
