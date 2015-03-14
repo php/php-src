@@ -363,7 +363,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n) /* 
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(obj);
 	spl_SplObjectStorageElement *element;
 
-	if (intern->storage.nNumOfElements > intern->gcdata_num) {
+	if (intern->storage.nNumOfElements * 2 > intern->gcdata_num) {
 		intern->gcdata_num = intern->storage.nNumOfElements * 2;
 		intern->gcdata = (zval*)erealloc(intern->gcdata, sizeof(zval) * intern->gcdata_num);
 	}
