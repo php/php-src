@@ -2340,7 +2340,7 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 /* }}} */
 
 #ifdef ZEND_USE_TOLOWER_L
-ZEND_API void ZEND_FASTCALL zend_update_current_locale(void) /* {{{ */
+ZEND_API void zend_update_current_locale(void) /* {{{ */
 {
 	current_locale = _get_current_locale();
 }
