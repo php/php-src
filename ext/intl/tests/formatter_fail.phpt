@@ -12,16 +12,23 @@ function err($fmt) {
 }
 
 function crt($t, $l, $s) {
-	switch(true) {
-		case $t == "O":
-			return new NumberFormatter($l, $s);
-			break;
-		case $t == "C":
-			return NumberFormatter::create($l, $s);
-			break;
-		case $t == "P":
-			return numfmt_create($l, $s);
-			break;
+	try {
+		$fmt = null;
+		switch(true) {
+			case $t == "O":
+				$fmt = new NumberFormatter($l, $s);
+				break;
+			case $t == "C":
+				$fmt = NumberFormatter::create($l, $s);
+				break;
+			case $t == "P":
+				$fmt = numfmt_create($l, $s);
+				break;
+		}
+		err($fmt); 
+	}
+	catch(IntlException $ie) {
+		echo "IE: ".$ie->getMessage().PHP_EOL;
 	}
 }
 
@@ -33,8 +40,13 @@ $args = array(
 	array("en_US", NumberFormatter::PATTERN_RULEBASED),
 );
 
-$fmt = new NumberFormatter();
-err($fmt); 
+try {
+	$fmt = new NumberFormatter();
+}
+catch(IntlException $ie) {
+	echo $ie->getMessage().PHP_EOL;
+}
+
 $fmt = numfmt_create();
 err($fmt); 
 $fmt = NumberFormatter::create();
@@ -42,11 +54,8 @@ err($fmt);
 
 foreach($args as $arg) {
 	$fmt = crt("O", $arg[0], $arg[1]);
-	err($fmt);
 	$fmt = crt("C", $arg[0], $arg[1]);
-	err($fmt);
 	$fmt = crt("P", $arg[0], $arg[1]);
-	err($fmt);
 }
 
 ?>
@@ -70,10 +79,10 @@ Warning: NumberFormatter::create() expects parameter 1 to be string, array given
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects parameter 1 to be string, array given in %s on line %d
-'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+IE: numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR
+IE: numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR
+IE: numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR
+IE: numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR
+IE: numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR
+IE: numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR
+IE: numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR

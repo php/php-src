@@ -26,7 +26,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char* locale;
 	char*       pattern;
@@ -42,8 +42,8 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 );
+		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"msgfmt_create: unable to parse input parameters", 0, is_constructor );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -54,7 +54,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
-		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to UTF-16");
+		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to UTF-16", is_constructor);
 	} else {
 		spattern_len = 0;
 		spattern = NULL;
@@ -66,7 +66,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
-		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
+		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format", is_constructor);
 	}
 #endif
 
@@ -84,7 +84,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		efree(spattern);
 	}
 
-	INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: message formatter creation failed");
+	INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: message formatter creation failed", is_constructor);
 }
 /* }}} */
 
@@ -96,7 +96,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 PHP_FUNCTION( msgfmt_create )
 {
 	object_init_ex( return_value, MessageFormatter_ce_ptr );
-	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -111,7 +111,7 @@ PHP_METHOD( MessageFormatter, __construct )
 	zval orig_this = *getThis();
 
 	return_value = getThis();
-	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this));

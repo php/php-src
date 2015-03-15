@@ -87,10 +87,10 @@ zend_object *MessageFormatter_object_clone(zval *object)
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			intl_errors_set(INTL_DATA_ERROR_P(mfo), INTL_DATA_ERROR_CODE(mfo),
 					"Failed to clone MessageFormatter object", 0);
-			zend_throw_exception_ex(NULL, 0, "Failed to clone MessageFormatter object");
+			zend_throw_exception_ex(IntlException_ce_ptr, 0, "Failed to clone MessageFormatter object");
 		}
 	} else {
-		zend_throw_exception_ex(NULL, 0, "Cannot clone unconstructed MessageFormatter");
+		zend_throw_exception_ex(IntlException_ce_ptr, 0, "Cannot clone unconstructed MessageFormatter");
 	}
 	return new_obj;
 }

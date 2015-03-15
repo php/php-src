@@ -29,7 +29,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
-static zend_class_entry *IntlException_ce_ptr;
+zend_class_entry *IntlException_ce_ptr;
 
 /* {{{ intl_error* intl_g_error_get()
  * Return global error structure.
@@ -103,14 +103,25 @@ void intl_error_reset( intl_error* err )
  */
 void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
 {
+    intl_error_set_custom_msg_ex( err, msg, copyMsg, 0 );
+}
+/* }}} */
+
+
+/* {{{ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
+ * Set last error message to msg copying it if needed.
+ */
+void intl_error_set_custom_msg_ex( intl_error* err, char* msg, int copyMsg, int forceException )
+{
 	if( !msg )
 		return;
 
 	if( !err ) {
-		if( INTL_G( error_level ) )
-			php_error_docref( NULL, INTL_G( error_level ), "%s", msg );
-		if( INTL_G( use_exceptions ) )
+		if ( forceException || INTL_G( use_exceptions ) ) {
 			zend_throw_exception_ex( IntlException_ce_ptr, 0, "%s", msg );
+		} else if( INTL_G( error_level ) ) {
+			php_error_docref( NULL, INTL_G( error_level ), "%s", msg );
+		}
 	}
 	if( !err && !( err = intl_g_error_get(  ) ) )
 		return;
@@ -182,18 +193,38 @@ UErrorCode intl_error_get_code( intl_error* err )
  */
 void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
 {
-	intl_error_set_code( err, code );
-	intl_error_set_custom_msg( err, msg, copyMsg );
+	intl_error_set_ex( err, code, msg, copyMsg, 0 );
 }
 /* }}} */
+
+
+/* {{{ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
+ * Set error code and message.
+ */
+void intl_error_set_ex( intl_error* err, UErrorCode code, char* msg, int copyMsg, int forceException )
+{
+	intl_error_set_code( err, code );
+	intl_error_set_custom_msg_ex( err, msg, copyMsg, forceException );
+}
+/* }}} */
+
 
 /* {{{ void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
  * Set error code and message.
  */
 void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
 {
+	intl_errors_set_ex( err, code, msg, copyMsg, 0 );
+}
+/* }}} */
+
+/* {{{ void intl_errors_set_ex( intl_error* err, UErrorCode code, char* msg, int copyMsg )
+ * Set error code and message.
+ */
+void intl_errors_set_ex( intl_error* err, UErrorCode code, char* msg, int copyMsg, int forceException )
+{
 	intl_errors_set_code( err, code );
-	intl_errors_set_custom_msg( err, msg, copyMsg );
+	intl_errors_set_custom_msg_ex( err, msg, copyMsg, forceException );
 }
 /* }}} */
 
@@ -212,12 +243,22 @@ void intl_errors_reset( intl_error* err )
  */
 void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
 {
-	if(err) {
-		intl_error_set_custom_msg( err, msg, copyMsg );
-	}
-	intl_error_set_custom_msg( NULL, msg, copyMsg );
+	intl_errors_set_custom_msg_ex( err, msg, copyMsg, 0 );
 }
 /* }}} */
+
+
+/* {{{ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
+ */
+void intl_errors_set_custom_msg_ex( intl_error* err, char* msg, int copyMsg, int forceException )
+{
+	if(err) {
+		intl_error_set_custom_msg_ex( err, msg, copyMsg, forceException );
+	}
+	intl_error_set_custom_msg_ex( NULL, msg, copyMsg, forceException );
+}
+/* }}} */
+
 
 /* {{{ intl_errors_set_code( intl_error* err, UErrorCode err_code )
  */
