@@ -2233,7 +2233,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		if (!OP2_FREE) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			FREE_OP2_VAR_PTR();
 			HANDLE_EXCEPTION();
@@ -2936,7 +2936,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -3087,7 +3087,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_STRICT,
+					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						fbc->common.scope->name->val, fbc->common.function_name->val);
 				} else {
@@ -3170,7 +3170,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 		} else if (func->common.scope &&
 		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT,
+				zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
 			} else {
@@ -3998,7 +3998,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
 			!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error(E_STRICT, "Only variables should be passed by reference");
+			zend_error(E_NOTICE, "Only variables should be passed by reference");
 		}
 	}
 

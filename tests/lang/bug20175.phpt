@@ -146,7 +146,7 @@ foo:1
 bar_static()
 bar_global()
 
-Strict Standards: Only variables should be assigned by reference in %sbug20175.php on line 47
+Notice: Only variables should be assigned by reference in %sbug20175.php on line 47
 bar:1
 bar_static()
 bar:1

@@ -27,17 +27,17 @@ call_user_func(array('foo', 'test'));
 object(foo)#%d (0) {
 }
 
-Strict Standards: Non-static method foo::test() should not be called statically in %s on line %d
+Deprecated: Non-static method foo::test() should not be called statically in %s on line %d
 
-Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
+Deprecated: Non-static method bar::show() should not be called statically in %s on line %d
 object(foo)#%d (0) {
 }
 object(foo)#%d (0) {
 }
 
-Strict Standards: %son-static method foo::test() should not be called statically in %s on line %d
+Deprecated: %son-static method foo::test() should not be called statically in %s on line %d
 
-Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
+Deprecated: Non-static method bar::show() should not be called statically in %s on line %d
 object(foo)#%d (0) {
 }
 

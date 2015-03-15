@@ -565,12 +565,10 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		if (UNEXPECTED(!zend_do_perform_implementation_check(child, child->common.prototype))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, zend_get_function_declaration(child->common.prototype)->val);
 		}
-	} else if (EG(error_reporting) & E_STRICT || Z_TYPE(EG(user_error_handler)) != IS_UNDEF) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
-		if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
-			zend_string *method_prototype = zend_get_function_declaration(parent);
-			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, method_prototype->val);
-			zend_string_free(method_prototype);
-		}
+	} else if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
+		zend_string *method_prototype = zend_get_function_declaration(parent);
+		zend_error(E_WARNING, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, method_prototype->val);
+		zend_string_free(method_prototype);
 	}
 }
 /* }}} */
@@ -1494,16 +1492,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 								property_info->ce->name->val,
 								prop_name->val,
 								ce->name->val);
-					} else {
-						zend_error(E_STRICT,
-							   "%s and %s define the same property ($%s) in the composition of %s. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed",
-								find_first_definition(ce, i, prop_name, coliding_prop->ce)->name->val,
-								property_info->ce->name->val,
-								prop_name->val,
-								ce->name->val);
-						zend_string_release(prop_name);
-						continue;
 					}
+
+					zend_string_release(prop_name);
+					continue;
 				}
 			}
 

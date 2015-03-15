@@ -10,11 +10,11 @@ set_error_handler(function($_, $msg, $file) {
 
 /* This is just a particular example of a non-fatal compile-time error
  * If this breaks in future, just find another example and use it instead */
-eval('abstract class foo { abstract static function bar(); }');
+eval('class A { function test() { } } class B extends A { function test($a) { } }');
 
 ?>
 --EXPECTF--
-string(%d) "Static function foo::bar() should not be abstract"
+string(60) "Declaration of B::test() should be compatible with A::test()"
 string(%d) "%s(%d) : eval()'d code"
 
 Notice: Undefined variable: undefined in %s on line %d
