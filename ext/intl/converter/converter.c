@@ -22,6 +22,7 @@
 #include <unicode/ustring.h>
 
 #include "../intl_error.h"
+#include "../intl_common.h"
 
 typedef struct _php_converter_object {
 	UConverter *src, *dest;
@@ -556,11 +557,17 @@ static PHP_METHOD(UConverter, __construct) {
 	size_t src_len = sizeof("utf-8") - 1;
 	char *dest = src;
 	size_t dest_len = src_len;
+	zend_error_handling zeh;
+	int rv;
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!",
-	                          &dest, &dest_len, &src, &src_len) == FAILURE) {
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &zeh TSRMLS_CC);
+    rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!",
+			&dest, &dest_len, &src, &src_len);
+    zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (rv == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::__construct(): bad arguments", 0);
 		return;
