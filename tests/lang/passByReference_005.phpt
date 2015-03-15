@@ -179,17 +179,17 @@ string(12) "Ref2 changed"
 
  ---- Pass by ref / pass by val: static method calls ----
 
-Strict Standards: Non-static method C::v() should not be called statically in %s on line 95
+Deprecated: Non-static method C::v() should not be called statically in %s on line 95
 
 Notice: Undefined variable: u1 in %s on line 95
 
-Strict Standards: Non-static method C::r() should not be called statically in %s on line 96
+Deprecated: Non-static method C::r() should not be called statically in %s on line 96
 
 Notice: Undefined variable: u1 in %s on line 97
 NULL
 string(11) "Ref changed"
 
-Strict Standards: Non-static method C::vv() should not be called statically in %s on line 100
+Deprecated: Non-static method C::vv() should not be called statically in %s on line 100
 
 Notice: Undefined variable: u1 in %s on line 100
 
@@ -201,7 +201,7 @@ Notice: Undefined variable: u2 in %s on line 101
 NULL
 NULL
 
-Strict Standards: Non-static method C::vr() should not be called statically in %s on line 104
+Deprecated: Non-static method C::vr() should not be called statically in %s on line 104
 
 Notice: Undefined variable: u1 in %s on line 104
 
@@ -209,7 +209,7 @@ Notice: Undefined variable: u1 in %s on line 105
 NULL
 string(11) "Ref changed"
 
-Strict Standards: Non-static method C::rv() should not be called statically in %s on line 108
+Deprecated: Non-static method C::rv() should not be called statically in %s on line 108
 
 Notice: Undefined variable: u2 in %s on line 108
 
@@ -217,7 +217,7 @@ Notice: Undefined variable: u2 in %s on line 109
 string(11) "Ref changed"
 NULL
 
-Strict Standards: Non-static method C::rr() should not be called statically in %s on line 112
+Deprecated: Non-static method C::rr() should not be called statically in %s on line 112
 string(12) "Ref1 changed"
 string(12) "Ref2 changed"
 

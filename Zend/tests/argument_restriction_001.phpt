@@ -13,4 +13,4 @@ class Sub extends Base {
 }
 ?>
 --EXPECTF--
-Strict Standards: Declaration of Sub::test() should be compatible with & Base::test($foo, array $bar, $option = NULL, $extra = 'llllllllll...') in %sargument_restriction_001.php on line %d 
+Warning: Declaration of Sub::test() should be compatible with & Base::test($foo, array $bar, $option = NULL, $extra = 'llllllllll...') in %sargument_restriction_001.php on line %d 

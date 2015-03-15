@@ -17,5 +17,5 @@ class B extends A
 ===DONE===
 --EXPECTF--
 
-Strict Standards: Declaration of B::f() should be compatible with A::f() in %sinheritance_004.php on line %d
+Warning: Declaration of B::f() should be compatible with A::f() in %sinheritance_004.php on line %d
 ===DONE===

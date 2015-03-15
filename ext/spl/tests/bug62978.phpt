@@ -44,7 +44,7 @@ Notice: Undefined index: epic_magic in %sbug62978.php on line %d
 NULL
 bool(false)
 
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
 
 Notice: Undefined offset: %d in %sbug62978.php on line %d
 NULL

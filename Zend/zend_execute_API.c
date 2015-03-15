@@ -752,7 +752,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			if (error[0] >= 'a' && error[0] <= 'z') {
 				error[0] += ('A' - 'a');
 			}
-			zend_error(E_STRICT, "%s", error);
+			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
 		}
 		zend_string_release(callable_name);

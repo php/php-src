@@ -1956,7 +1956,7 @@ try_function_name:
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_STRICT,
+					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						fbc->common.scope->name->val, fbc->common.function_name->val);
 				} else {
@@ -2344,7 +2344,7 @@ try_function_name:
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_STRICT,
+					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						fbc->common.scope->name->val, fbc->common.function_name->val);
 				} else {
@@ -2529,7 +2529,7 @@ try_function_name:
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_STRICT,
+					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						fbc->common.scope->name->val, fbc->common.function_name->val);
 				} else {
@@ -5056,7 +5056,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -5123,7 +5123,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 		} else if (func->common.scope &&
 		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT,
+				zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
 			} else {
@@ -6958,7 +6958,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -8440,7 +8440,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -8507,7 +8507,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 		} else if (func->common.scope &&
 		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT,
+				zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
 			} else {
@@ -9989,7 +9989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -10056,7 +10056,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 		} else if (func->common.scope &&
 		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT,
+				zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
 			} else {
@@ -13589,7 +13589,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDL
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
 			!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error(E_STRICT, "Only variables should be passed by reference");
+			zend_error(E_NOTICE, "Only variables should be passed by reference");
 		}
 	}
 
@@ -15854,7 +15854,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -16669,7 +16669,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 		if (!(free_op2 != NULL)) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (free_op2) {zval_ptr_dtor_nogc(free_op2);};
 			HANDLE_EXCEPTION();
@@ -17429,7 +17429,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -18908,7 +18908,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 		if (!0) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();
@@ -19046,7 +19046,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -20605,7 +20605,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
+					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically%s",
 					fbc->common.scope->name->val, fbc->common.function_name->val,
 					object ? ", assuming $this from incompatible context" : "");
@@ -26591,7 +26591,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLE
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
 			!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-			zend_error(E_STRICT, "Only variables should be passed by reference");
+			zend_error(E_NOTICE, "Only variables should be passed by reference");
 		}
 	}
 
@@ -30957,7 +30957,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 		if (!(free_op2 != NULL)) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (free_op2) {zval_ptr_dtor_nogc(free_op2);};
 			HANDLE_EXCEPTION();
@@ -34239,7 +34239,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 		if (!0) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
 			HANDLE_EXCEPTION();

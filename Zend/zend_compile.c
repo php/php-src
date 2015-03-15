@@ -4323,9 +4323,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 				"%s::%s() must be omitted", ce->name->val, name->val);
 		}
 		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
-	} else if (is_static && (op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
-		zend_error(E_STRICT, "Static function %s::%s() should not be abstract",
-			ce->name->val, name->val);
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {

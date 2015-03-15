@@ -99,13 +99,13 @@ var_dump(call_user_func($f, 'you'));
 
 ?>
 --EXPECTF--
-Strict Standards: Non-static method Hello::world() should not be called statically in %s on line %d
+Deprecated: Non-static method Hello::world() should not be called statically in %s on line %d
 Hello, you
 
 Notice: Undefined variable: this in %s on line %d
 NULL
 
-Strict Standards: %son-static method Hello::world() should not be called statically in %s on line %d
+Deprecated: %son-static method Hello::world() should not be called statically in %s on line %d
 Hello, you
 
 Notice: Undefined variable: this in %s on line %d

@@ -323,7 +323,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 					|| UNEXPECTED((flags & ZEND_ACC_PRIVATE))) {
 					if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
 						if (!silent) {
-							zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
+							zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 						}
 						return ZEND_DYNAMIC_PROPERTY_OFFSET;
 					}
@@ -401,7 +401,7 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 					|| UNEXPECTED((flags & ZEND_ACC_PRIVATE))) {
 					if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0)) {
 						if (!silent) {
-							zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
+							zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 						}
 					}
 					goto exit;

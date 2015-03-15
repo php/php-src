@@ -24,5 +24,5 @@ var_dump(prev(f()));
 --EXPECTF--
 -- Passing an indirect temporary variable --
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
+Notice: Only variables should be passed by reference in %s on line %d
 int(1)
