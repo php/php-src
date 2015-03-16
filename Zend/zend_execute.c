@@ -1727,6 +1727,17 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 }
 /* }}} */
 
+#ifdef ZEND_WIN32
+# define ZEND_VM_INTERRUPT_CHECK() do { \
+		if (EG(timed_out)) { \
+			zend_timeout(0); \
+		} \
+	} while (0)
+#else
+# define ZEND_VM_INTERRUPT_CHECK() do { \
+	} while (0)
+#endif
+
 /*
  * Stack Frame Layout (the whole stack frame is allocated at once)
  * ==================
@@ -1816,6 +1827,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
+	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
@@ -1842,6 +1854,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
+	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
@@ -1923,6 +1936,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
+	ZEND_VM_INTERRUPT_CHECK();
 }
 /* }}} */
 
@@ -2050,9 +2064,14 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 	ZEND_VM_INC_OPCODE(); \
 	ZEND_VM_CONTINUE()
 
-#define ZEND_VM_SET_OPCODE(new_op) \
+#define ZEND_VM_SET_NEXT_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \
 	OPLINE = new_op
+
+#define ZEND_VM_SET_OPCODE(new_op) \
+	CHECK_SYMBOL_TABLES() \
+	OPLINE = new_op; \
+	ZEND_VM_INTERRUPT_CHECK()
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))

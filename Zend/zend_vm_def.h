@@ -2097,7 +2097,7 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, ANY)
 	val = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		if (OP1_TYPE == IS_CV) {
@@ -2136,7 +2136,7 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, ANY)
 		if (OP1_TYPE == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_SET_NEXT_OPCODE(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -2198,7 +2198,7 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, ANY)
 
 	if (Z_TYPE_P(val) == IS_TRUE) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
-		ZEND_VM_SET_OPCODE(opline + 1);
+		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
 		ZEND_VM_CONTINUE();
 	} else if (EXPECTED(Z_TYPE_P(val) <= IS_TRUE)) {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
@@ -2244,7 +2244,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, ANY)
 		if (OP1_TYPE == IS_CV) {
 			ZEND_VM_NEXT_OPCODE();
 		} else {
-			ZEND_VM_SET_OPCODE(opline + 1);
+			ZEND_VM_SET_NEXT_OPCODE(opline + 1);
 			ZEND_VM_CONTINUE();
 		}
 	}
@@ -2967,6 +2967,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 		HANDLE_EXCEPTION();
 	}
 
+	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3094,6 +3095,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 		}
 		HANDLE_EXCEPTION();
 	}
+	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3295,6 +3297,7 @@ ZEND_VM_C_LABEL(fcall_end):
 		HANDLE_EXCEPTION();
 	}
 
+	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -4807,6 +4810,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 	} else if (RETURN_VALUE_USED(opline)) {
 		ZVAL_BOOL(EX_VAR(opline->result.var), failure_retval);
 	}
+	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -6274,6 +6278,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	int in_finally = 0;
 
+	ZEND_VM_INTERRUPT_CHECK();
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
