@@ -21,6 +21,13 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#define ZEND_VM_SPEC		1
+#define ZEND_VM_LINES		0
+#define ZEND_VM_KIND_CALL	1
+#define ZEND_VM_KIND_SWITCH	2
+#define ZEND_VM_KIND_GOTO	3
+#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+
 BEGIN_EXTERN_C()
 
 ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);

@@ -54,6 +54,12 @@ define("ZEND_VM_KIND_CALL",   1);
 define("ZEND_VM_KIND_SWITCH", 2);
 define("ZEND_VM_KIND_GOTO",   3);
 
+$vm_kind_name = array(
+	ZEND_VM_KIND_CALL => "ZEND_VM_KIND_CALL",
+	ZEND_VM_KIND_SWITCH => "ZEND_VM_KIND_SWITCH",
+	ZEND_VM_KIND_GOTO => "ZEND_VM_KIND_GOTO",
+);
+
 $op_types = array(
 	"ANY",
 	"CONST",
@@ -1351,8 +1357,14 @@ function gen_vm($def, $skel) {
 
 	// Insert header
 	out($f, $GLOBALS['header_text']);
-
 	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
+	fputs($f, "#define ZEND_VM_SPEC\t\t" . ZEND_VM_SPEC . "\n");
+	fputs($f, "#define ZEND_VM_LINES\t\t" . ZEND_VM_LINES . "\n");
+	fputs($f, "#define ZEND_VM_KIND_CALL\t" . ZEND_VM_KIND_CALL . "\n");
+	fputs($f, "#define ZEND_VM_KIND_SWITCH\t" . ZEND_VM_KIND_SWITCH . "\n");
+	fputs($f, "#define ZEND_VM_KIND_GOTO\t" . ZEND_VM_KIND_GOTO . "\n");
+	fputs($f, "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_KIND] . "\n");
+	fputs($f, "\n");
 	fputs($f, "BEGIN_EXTERN_C()\n\n");
 	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n\n");
 	fputs($f, "END_EXTERN_C()\n\n");
