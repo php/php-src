@@ -3,13 +3,15 @@ Timeout within shutdown function
 --FILE--
 <?php
 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+
 $t = 3;
 set_time_limit($t);
 
 function f()
 {
 	echo "call";
-	sleep(4);
+	busy_sleep(4);
 }
 
 register_shutdown_function("f");

@@ -3,12 +3,14 @@ Timeout within function trowing exteption before timeout reached
 --FILE--
 <?php
 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+
 $t = 3;
 set_time_limit($t);
 
 function f($t) { 
 	echo "call";
-	sleep($t-1);
+	busy_sleep($t-1);
 	throw new Exception("exception before timeout");
 }
 

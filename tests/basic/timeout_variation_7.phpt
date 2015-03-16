@@ -3,12 +3,14 @@ Timeout within for loop
 --FILE--
 <?php
 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+
 $t = 3;
 set_time_limit($t);
 
 for($i = 0; $i < 42; $i++) { 
 	echo 1; 
-	sleep(1);
+	busy_sleep(1);
 }
 
 ?>

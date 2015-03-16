@@ -3,12 +3,13 @@ Timeout within while loop
 --FILE--
 <?php
 
-$t = 3;
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+
 set_time_limit($t);
 
 while(1) { 
 	echo 1; 
-	sleep(1);
+	busy_sleep(1);
 }
 
 ?>

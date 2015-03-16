@@ -3,12 +3,14 @@ Timeout within eval
 --FILE--
 <?php
 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+
 $t = 3;
 set_time_limit($t);
 
 function hello ($t) { 
 	echo "call", PHP_EOL; 
-	sleep($t*2);
+	busy_sleep($t*2);
 }
 
 eval('hello($t);');
