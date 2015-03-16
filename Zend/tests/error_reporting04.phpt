@@ -5,7 +5,7 @@ testing @ and error_reporting - 4
 
 error_reporting(E_ALL);
 
-function foo() {
+function foo($arg) {
 	echo $undef;
 	error_reporting(E_ALL|E_STRICT);
 }

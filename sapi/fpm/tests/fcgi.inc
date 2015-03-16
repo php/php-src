@@ -467,7 +467,7 @@ class Client
 
         $paramsRequest = '';
         foreach ($params as $key => $value) {
-            $paramsRequest .= $this->buildNvpair($key, $value, $id);
+            $paramsRequest .= $this->buildNvpair($key, $value);
         }
         if ($paramsRequest) {
             $request .= $this->buildPacket(self::PARAMS, $paramsRequest, $id);

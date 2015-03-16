@@ -16,7 +16,7 @@ $foo = function() {
 };
 
 var_dump(call_user_func(array($foo, '__invoke'))->__invoke());
-var_dump(call_user_func(function() use (&$foo) { return $foo; }, '__invoke'));
+var_dump(call_user_func(function() use (&$foo) { return $foo; }));
 
 ?>
 --EXPECTF--

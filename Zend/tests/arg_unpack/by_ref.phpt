@@ -21,7 +21,7 @@ $array1 = [1, 2]; $array2 = [3, 4];
 test1(...$array1, ...$array2);
 var_dump($array1, $array2);
 
-function test2($val1, &$ref1, $val2, &$ref2) {
+function test2($val1, &$ref1, $val2, &$ref2, ...$arg) {
     $ref1++;
     $ref2++;
 }

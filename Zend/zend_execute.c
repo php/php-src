@@ -759,6 +759,26 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
+static void zend_verify_exceeding_arg(zend_execute_data *execute_data, uint32_t arg_num, uint32_t expect_arg_num)
+{
+    /* if function is not variadic AND the implementation is not sensible to variable-length argument lists... */
+	if (EXPECTED(!(EX(func)->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_VARIADIC|ZEND_ACC_DYNAMIC_ARGCOUNT)))) {
+		const char *parameter_s = expect_arg_num == 1 ? "parameter" : "parameters";
+		const char *expects = expect_arg_num > 0 ? "expects at most " : "expects ";
+		const char *class_name = EX(func)->common.scope ? EX(func)->common.scope->name->val : "";
+		const char *space = EX(func)->common.scope ? "::" : "";
+		const char *func_name = EX(func)->common.function_name ? EX(func)->common.function_name->val : "main";
+
+		if (execute_data && execute_data->func && ZEND_USER_CODE(execute_data->func->common.type)) {
+			zend_error(
+				E_WARNING, "%s%s%s() %s%u %s, %u given, defined in %s on line %u and called",
+				class_name, space, func_name, expects, expect_arg_num, parameter_s, arg_num, execute_data->func->op_array.filename->val, execute_data->func->op_array.line_start);
+		} else {
+			zend_error(E_WARNING, "%s%s%s() %s%u %s, %u given", class_name, space, func_name, expects, expect_arg_num, parameter_s, arg_num);
+		}
+	}
+}
+
 ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = zf->common.function_name->val;
@@ -1778,6 +1798,8 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
 			EX(opline) += first_extra_arg;
 		}
+
+		zend_verify_exceeding_arg(execute_data, num_args, first_extra_arg);
 
 		/* move extra args into separate array after all CV and TMP vars */
 		end = EX_VAR_NUM(first_extra_arg - 1);

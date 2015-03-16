@@ -13,17 +13,17 @@ class foo
 		$cl = &$this->list;
 	}
 
-	function &method1() {
+	function &method1($foo) {
 		print __CLASS__."::".__FUNCTION__."\n";
 		return @$this->foo;
 	}
 
-	function &method2() {
+	function &method2($foo) {
 		print __CLASS__."::".__FUNCTION__."\n";
 		return $this->foo;
 	}
 
-	function method3() {
+	function method3($foo) {
 		print __CLASS__."::".__FUNCTION__."\n";
 		return @$this->foo;
 	}

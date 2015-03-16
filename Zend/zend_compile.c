@@ -2674,14 +2674,34 @@ zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* {{
 }
 /* }}} */
 
+void zend_check_dynamic_argcount(zend_string *name) /* {{{ */
+{
+	if(zend_string_equals_literal(name, "func_get_args")
+		|| zend_string_equals_literal(name, "func_get_arg")) {
+		CG(active_op_array)->fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
+	}
+}
+/* }}} */
+
 void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
 	SET_UNUSED(opline->op1);
 	opline->op2_type = IS_CONST;
-	opline->op2.constant = zend_add_ns_func_name_literal(
-		CG(active_op_array), Z_STR(name_node->u.constant));
+	
+	zend_string *full_qualified_name = Z_STR(name_node->u.constant);
+	const char *unqualified_name;
+	size_t unqualified_name_len;
+	zend_string *zval_unqualified_name;
+
+	if(zend_get_unqualified_name(full_qualified_name, &unqualified_name, &unqualified_name_len)) {
+		zval_unqualified_name = zend_string_init(unqualified_name, unqualified_name_len, 0);
+		zend_check_dynamic_argcount(zval_unqualified_name);
+		zend_string_release(zval_unqualified_name);
+	}
+	
+	opline->op2.constant = zend_add_ns_func_name_literal(CG(active_op_array), full_qualified_name);
 	zend_alloc_cache_slot(opline->op2.constant);
 
 	zend_compile_call_common(result, args_ast, NULL);
@@ -3011,6 +3031,8 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		zend_op *opline;
 
 		lcname = zend_string_tolower(Z_STR_P(name));
+
+		zend_check_dynamic_argcount(lcname);
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 		if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&

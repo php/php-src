@@ -27,7 +27,7 @@ function c($i,$j)
 a();
 b("blah");
 a();
-b("blah","blah");
+b("blah");
 c(7,14);
 
 a();

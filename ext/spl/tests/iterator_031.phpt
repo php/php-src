@@ -65,7 +65,7 @@ $ap->parent__construct();
 
 try
 {
-	$ap->parent__construct($it);
+	$ap->parent__construct();
 }
 catch(BadMethodCallException $e)
 {

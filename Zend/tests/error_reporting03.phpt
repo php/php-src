@@ -9,7 +9,7 @@ function foo($arg) {
 	echo @$nonex_foo;
 }
 
-function bar() {
+function bar($arg) {
 	echo @$nonex_bar;
 	throw new Exception("test");
 }
