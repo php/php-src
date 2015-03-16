@@ -82,9 +82,9 @@ try {
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.2.tar');
 ?>
 --EXPECT--
 =================== new PharData() ==================

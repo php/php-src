@@ -14,7 +14,6 @@ is_link();
 var_dump(is_file(__FILE__));
 
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 copy(dirname(__FILE__) . '/tar/files/links.tar', $fname2);
 $a = new PharData($fname2);
 $b = $a->convertToExecutable(Phar::TAR, Phar::NONE);
@@ -33,7 +32,7 @@ $b->addEmptyDir('foo/bar/blah');
 $b->setStub('<?php
 include "phar://" . __FILE__ . "/foo/stat.php";
 __HALT_COMPILER();');
-include $fname3;
+include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 ?>
 ===DONE===
 --CLEAN--
