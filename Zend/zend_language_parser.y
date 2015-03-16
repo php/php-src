@@ -299,17 +299,14 @@ top_statement:
 		'{' top_statement_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, NULL, $4); }
 	|	T_USE mixed_group_use_declaration ';'		{ $$ = $2; }
-	|	T_USE T_FUNCTION group_use_declaration ';'	{ $$ = $3; $$->attr = T_FUNCTION; }
-	|	T_USE T_CONST group_use_declaration ';'		{ $$ = $3; $$->attr = T_CONST; }
+	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = T_CLASS; }
-	|	T_USE T_FUNCTION use_declarations ';'		{ $$ = $3; $$->attr = T_FUNCTION; }
-	|	T_USE T_CONST use_declarations ';'			{ $$ = $3; $$->attr = T_CONST; }
+	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
 	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
 use_type:
-		/* empty */		{ $$ = T_CLASS; }
-	| 	T_FUNCTION 		{ $$ = T_FUNCTION; }
+	 	T_FUNCTION 		{ $$ = T_FUNCTION; }
 	| 	T_CONST 		{ $$ = T_CONST; }
 ;
 
@@ -331,7 +328,8 @@ inline_use_declarations:
 ;
 
 inline_use_declaration:
-	use_type use_declaration { $$ = $2; $$->attr = $1; }
+		use_declaration { $$ = $1; $$->attr = T_CLASS; }
+	|	use_type use_declaration { $$ = $2; $$->attr = $1; }
 ;
 
 use_declarations:
