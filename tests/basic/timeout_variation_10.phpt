@@ -1,5 +1,9 @@
 --TEST--
 Timeout within shutdown function, variation
+--SKIPIF--
+<?php 
+	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 
@@ -11,7 +15,7 @@ set_time_limit($t);
 function f()
 {
 	echo "call";
-	busy_sleep(4);
+	busy_wait(4);
 }
 
 register_shutdown_function("f");

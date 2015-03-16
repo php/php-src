@@ -1,5 +1,9 @@
 --TEST--
 Timeout within call_user_func
+--SKIPIF--
+<?php 
+	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 
@@ -10,7 +14,7 @@ set_time_limit($t);
 
 function hello ($t) { 
 	echo "call", PHP_EOL; 
-	busy_sleep($t*2);
+	busy_wait($t*2);
 }
 
 call_user_func('hello', $t);

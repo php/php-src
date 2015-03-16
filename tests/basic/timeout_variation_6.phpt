@@ -1,5 +1,9 @@
 --TEST--
 Timeout within function trowing exteption before timeout reached
+--SKIPIF--
+<?php 
+	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 
@@ -10,7 +14,7 @@ set_time_limit($t);
 
 function f($t) { 
 	echo "call";
-	busy_sleep($t-1);
+	busy_wait($t-1);
 	throw new Exception("exception before timeout");
 }
 
