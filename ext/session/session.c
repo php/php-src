@@ -126,9 +126,11 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 	}
 	if (PS(id)) {
 		zend_string_release(PS(id));
+		PS(id) = NULL;
 	}
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
+		PS(session_vars) = NULL;
 	}
 }
 /* }}} */
