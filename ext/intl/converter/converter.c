@@ -563,9 +563,9 @@ static PHP_METHOD(UConverter, __construct) {
 	intl_error_reset(NULL);
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &zeh TSRMLS_CC);
-    rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!",
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!",
 			&dest, &dest_len, &src, &src_len);
-    zend_restore_error_handling(&zeh TSRMLS_CC);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
 
 	if (rv == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,

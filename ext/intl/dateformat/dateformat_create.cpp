@@ -79,8 +79,8 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
-		// This is __construct being called on an instance - it is not
-		// a constructor.
+		/* This is __construct being called on an instance - it is not
+		a constructor. */
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
 				"datefmt_create: cannot call constructor twice", 0);
 		return;

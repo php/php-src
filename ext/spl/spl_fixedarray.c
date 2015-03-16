@@ -564,11 +564,11 @@ SPL_METHOD(SplFixedArray, __construct)
 	int rv;
 	zend_error_handling zeh;
 
-//	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &zeh TSRMLS_CC);
-//	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &size);
-//	zend_restore_error_handling(&zeh TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &size);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &size) == FAILURE) {
+	if (rv == FAILURE) {
 		return;
 	}
 
