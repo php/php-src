@@ -42,6 +42,10 @@
 #include "phpdbg_wait.h"
 #include "phpdbg_eol.h"
 
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL
+#error "phpdbg can only be built with CALL zend vm kind"
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 extern int phpdbg_startup_run;
 
