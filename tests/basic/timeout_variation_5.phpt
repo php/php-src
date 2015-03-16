@@ -9,7 +9,6 @@ Timeout within function containing exteption
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
-$t = 3;
 set_time_limit($t);
 
 function f($t) { 

@@ -9,7 +9,6 @@ Timeout within array_walk
 
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
-$t = 3;
 set_time_limit($t);
 
 function cb(&$i, $k, $p)

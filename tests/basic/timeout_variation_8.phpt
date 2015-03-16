@@ -7,7 +7,6 @@ Timeout within foreach loop
 --FILE--
 <?php
 
-$t = 3;
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
