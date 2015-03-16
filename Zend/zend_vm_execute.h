@@ -3820,7 +3820,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(
 			if (Z_TYPE_P(value) == opline->extended_value) {
 				zend_class_entry *ce = Z_OBJCE_P(value);
 				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
-						&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						&& !memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1)) {
 					ZVAL_FALSE(EX_VAR(opline->result.var));
 				} else {
 					ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -9976,7 +9976,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZE
 			if (Z_TYPE_P(value) == opline->extended_value) {
 				zend_class_entry *ce = Z_OBJCE_P(value);
 				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
-						&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						&& !memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1)) {
 					ZVAL_FALSE(EX_VAR(opline->result.var));
 				} else {
 					ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -13324,7 +13324,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZE
 			if (Z_TYPE_P(value) == opline->extended_value) {
 				zend_class_entry *ce = Z_OBJCE_P(value);
 				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
-						&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						&& !memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1)) {
 					ZVAL_FALSE(EX_VAR(opline->result.var));
 				} else {
 					ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -26165,7 +26165,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEN
 			if (Z_TYPE_P(value) == opline->extended_value) {
 				zend_class_entry *ce = Z_OBJCE_P(value);
 				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
-						&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+						&& !memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1)) {
 					ZVAL_FALSE(EX_VAR(opline->result.var));
 				} else {
 					ZVAL_TRUE(EX_VAR(opline->result.var));
