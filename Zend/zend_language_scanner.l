@@ -55,6 +55,7 @@
 #define YYCURSOR  SCNG(yy_cursor)
 #define YYLIMIT   SCNG(yy_limit)
 #define YYMARKER  SCNG(yy_marker)
+#define YYCTXMARKER SCNG(yy_marker)
 
 #define YYGETCONDITION()  SCNG(yy_state)
 #define YYSETCONDITION(s) SCNG(yy_state) = s
@@ -1077,6 +1078,14 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 
 int lex_scan(zval *zendlval)
 {
+
+static int       in_class = 0;
+static zend_bool in_const_list = 0;
+static zend_bool in_use_list = 0;
+static zend_bool in_trait_conflict = 0;
+
+ZEND_ASSERT(in_class >= 0);
+
 restart:
 	SCNG(yy_text) = YYCURSOR;
 
@@ -1089,6 +1098,7 @@ HNUM	"0x"[0-9a-fA-F]+
 BNUM	"0b"[01]+
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
+OPTIONAL_WHITESPACE [ \n\r\t]*
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
@@ -1096,6 +1106,108 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
+
+<ST_IN_SCRIPTING,
+ ST_LOOKING_FOR_SR_NAME,
+ ST_LOOKING_FOR_VISIBILITY,
+ ST_LOOKING_FOR_TRAIT_METHOD_NAME>{WHITESPACE}+ {
+	HANDLE_NEWLINES(yytext, yyleng);
+	return T_WHITESPACE;
+}
+
+<ST_IN_SCRIPTING,
+ ST_LOOKING_FOR_SR_NAME,
+ ST_LOOKING_FOR_VISIBILITY,
+ ST_LOOKING_FOR_TRAIT_METHOD_NAME>"#"|"//" {
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '\r':
+				if (*YYCURSOR == '\n') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			case '\n':
+				CG(zend_lineno)++;
+				break;
+			case '?':
+				if (*YYCURSOR == '>') {
+					YYCURSOR--;
+					break;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+
+		break;
+	}
+
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	return T_COMMENT;
+}
+
+<ST_IN_SCRIPTING,
+ ST_LOOKING_FOR_SR_NAME,
+ ST_LOOKING_FOR_VISIBILITY,
+ ST_LOOKING_FOR_TRAIT_METHOD_NAME>"/*"|"/**"{WHITESPACE} {
+	int doc_com;
+
+	if (yyleng > 2) {
+		doc_com = 1;
+		RESET_DOC_COMMENT();
+	} else {
+		doc_com = 0;
+	}
+
+	while (YYCURSOR < YYLIMIT) {
+		if (*YYCURSOR++ == '*' && *YYCURSOR == '/') {
+			break;
+		}
+	}
+
+	if (YYCURSOR < YYLIMIT) {
+		YYCURSOR++;
+	} else {
+		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+	}
+
+	yyleng = YYCURSOR - SCNG(yy_text);
+	HANDLE_NEWLINES(yytext, yyleng);
+
+	if (doc_com) {
+		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
+		return T_DOC_COMMENT;
+	}
+
+	return T_COMMENT;
+}
+
+<ST_LOOKING_FOR_SR_NAME>"->" {
+	return T_OBJECT_OPERATOR;
+}
+
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_SR_NAME,ST_LOOKING_FOR_TRAIT_METHOD_NAME>"namespace"/{OPTIONAL_WHITESPACE}"\\" {
+	return T_NAMESPACE;
+}
+
+<ST_LOOKING_FOR_TRAIT_METHOD_NAME>{LABEL}/{OPTIONAL_WHITESPACE}("\\"|"::") {
+	yyless(0);
+	yy_pop_state();
+	goto restart;
+}
+
+<ST_LOOKING_FOR_SR_NAME,ST_LOOKING_FOR_TRAIT_METHOD_NAME>{LABEL} {
+	yy_pop_state();
+	zend_copy_value(zendlval, yytext, yyleng);
+	return T_STRING;
+}
+
+<ST_LOOKING_FOR_SR_NAME,ST_LOOKING_FOR_TRAIT_METHOD_NAME>{ANY_CHAR} {
+	yyless(0);
+	yy_pop_state();
+	goto restart;
+}
 
 <ST_IN_SCRIPTING>"exit" {
 	return T_EXIT;
@@ -1106,10 +1218,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"function" {
+	if(in_class) {
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_FUNCTION;
 }
 
 <ST_IN_SCRIPTING>"const" {
+	in_const_list = 1;
+	if(in_class) {
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_CONST;
 }
 
@@ -1194,6 +1313,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"as" {
+	if(in_trait_conflict) {
+		yy_push_state(ST_LOOKING_FOR_VISIBILITY);
+	}
 	return T_AS;
 }
 
@@ -1234,14 +1356,17 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"class" {
+	in_class++;
 	return T_CLASS;
 }
 
 <ST_IN_SCRIPTING>"interface" {
+	in_class++;
 	return T_INTERFACE;
 }
 
 <ST_IN_SCRIPTING>"trait" {
+	in_class++;
 	return T_TRAIT;
 }
 
@@ -1253,38 +1378,31 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_IMPLEMENTS;
 }
 
+<ST_IN_SCRIPTING>"->"/{OPTIONAL_WHITESPACE}[{[] {
+	return T_OBJECT_OPERATOR;
+}
+
 <ST_IN_SCRIPTING>"->" {
-	yy_push_state(ST_LOOKING_FOR_PROPERTY);
+	yy_push_state(ST_LOOKING_FOR_SR_NAME);
 	return T_OBJECT_OPERATOR;
-}
-
-<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	HANDLE_NEWLINES(yytext, yyleng);
-	return T_WHITESPACE;
-}
-
-<ST_LOOKING_FOR_PROPERTY>"->" {
-	return T_OBJECT_OPERATOR;
-}
-
-<ST_LOOKING_FOR_PROPERTY>{LABEL} {
-	yy_pop_state();
-	zend_copy_value(zendlval, yytext, yyleng);
-	return T_STRING;
-}
-
-<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
-	yyless(0);
-	yy_pop_state();
-	goto restart;
-}
-
-<ST_IN_SCRIPTING>"::" {
-	return T_PAAMAYIM_NEKUDOTAYIM;
 }
 
 <ST_IN_SCRIPTING>"\\" {
 	return T_NS_SEPARATOR;
+}
+
+<ST_IN_SCRIPTING>"::"/{OPTIONAL_WHITESPACE}("class"|[{[]) {
+	return T_PAAMAYIM_NEKUDOTAYIM;
+}
+
+<ST_IN_SCRIPTING>"::"/{OPTIONAL_WHITESPACE}("$"|{LABEL}){OPTIONAL_WHITESPACE}"("? {
+	yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	return T_PAAMAYIM_NEKUDOTAYIM;
+}
+
+<ST_IN_SCRIPTING>"::"/{ANY_CHAR} {
+	yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	return T_PAAMAYIM_NEKUDOTAYIM;
 }
 
 <ST_IN_SCRIPTING>"..." {
@@ -1360,11 +1478,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"use" {
+	in_use_list = 1;
 	return T_USE;
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
-        return T_INSTEADOF;
+    return T_INSTEADOF;
 }
 
 <ST_IN_SCRIPTING>"global" {
@@ -1383,28 +1502,58 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_HALT_COMPILER;
 }
 
-<ST_IN_SCRIPTING>"static" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"static" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_STATIC;
 }
 
-<ST_IN_SCRIPTING>"abstract" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"abstract" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_ABSTRACT;
 }
 
-<ST_IN_SCRIPTING>"final" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"final" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_FINAL;
 }
 
-<ST_IN_SCRIPTING>"private" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"private" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_PRIVATE;
 }
 
-<ST_IN_SCRIPTING>"protected" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"protected" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_PROTECTED;
 }
 
-<ST_IN_SCRIPTING>"public" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_VISIBILITY>"public" {
+	if(in_trait_conflict) {
+		yy_pop_state();
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
 	return T_PUBLIC;
+}
+
+<ST_LOOKING_FOR_VISIBILITY>{LABEL} {
+	yy_pop_state();
+	zend_copy_value(zendlval, yytext, yyleng);
+	return T_STRING;
 }
 
 <ST_IN_SCRIPTING>"unset" {
@@ -1543,6 +1692,35 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_SR;
 }
 
+<ST_IN_SCRIPTING>","/{OPTIONAL_WHITESPACE}{LABEL}{OPTIONAL_WHITESPACE}"=" {
+	if((in_class && in_const_list)) {
+		yy_push_state(ST_LOOKING_FOR_SR_NAME);
+	}
+	return ',';
+}
+
+<ST_IN_SCRIPTING>";" {
+	if(in_const_list) {
+		in_const_list = 0;
+	}
+	if(in_use_list) {
+		if(!in_class || (in_class && !in_trait_conflict)) {
+			in_use_list = 0;
+		}
+		if(in_trait_conflict) {
+			yy_push_state(ST_LOOKING_FOR_TRAIT_METHOD_NAME);
+		}
+	}
+	return ';';
+}
+
+<ST_IN_SCRIPTING>"(" {
+	if(in_use_list) {
+		in_use_list = 0;
+	}
+	return '(';
+}
+
 <ST_IN_SCRIPTING>{TOKENS} {
 	return yytext[0];
 }
@@ -1550,17 +1728,36 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING);
+	if(in_class) {
+		if(in_use_list) {
+			in_trait_conflict = 1;
+			yy_push_state(ST_LOOKING_FOR_TRAIT_METHOD_NAME);
+		}
+		in_class++;
+	}
 	return '{';
 }
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
+	if(in_class) {
+		in_class++;
+	}
 	yy_push_state(ST_LOOKING_FOR_VARNAME);
 	return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
 
 <ST_IN_SCRIPTING>"}" {
+	if(in_class) {
+		if(--in_class == 1) {
+			in_class = 0;
+		}
+		if(in_use_list) {
+			in_use_list = 0;
+			in_trait_conflict = 0;
+		}
+	}
 	RESET_DOC_COMMENT();
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state();
@@ -1816,7 +2013,7 @@ inline_char_handler:
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
 	yyless(yyleng - 3);
-	yy_push_state(ST_LOOKING_FOR_PROPERTY);
+	yy_push_state(ST_LOOKING_FOR_SR_NAME);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	return T_VARIABLE;
 }
@@ -1856,69 +2053,6 @@ inline_char_handler:
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
 	return T_STRING;
-}
-
-
-<ST_IN_SCRIPTING>"#"|"//" {
-	while (YYCURSOR < YYLIMIT) {
-		switch (*YYCURSOR++) {
-			case '\r':
-				if (*YYCURSOR == '\n') {
-					YYCURSOR++;
-				}
-				/* fall through */
-			case '\n':
-				CG(zend_lineno)++;
-				break;
-			case '?':
-				if (*YYCURSOR == '>') {
-					YYCURSOR--;
-					break;
-				}
-				/* fall through */
-			default:
-				continue;
-		}
-
-		break;
-	}
-
-	yyleng = YYCURSOR - SCNG(yy_text);
-
-	return T_COMMENT;
-}
-
-<ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
-	int doc_com;
-
-	if (yyleng > 2) {
-		doc_com = 1;
-		RESET_DOC_COMMENT();
-	} else {
-		doc_com = 0;
-	}
-
-	while (YYCURSOR < YYLIMIT) {
-		if (*YYCURSOR++ == '*' && *YYCURSOR == '/') {
-			break;
-		}
-	}
-
-	if (YYCURSOR < YYLIMIT) {
-		YYCURSOR++;
-	} else {
-		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
-	}
-
-	yyleng = YYCURSOR - SCNG(yy_text);
-	HANDLE_NEWLINES(yytext, yyleng);
-
-	if (doc_com) {
-		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		return T_DOC_COMMENT;
-	}
-
-	return T_COMMENT;
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
@@ -2107,6 +2241,9 @@ inline_char_handler:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
+	if(in_class) {
+		in_class++;
+	}
 	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);

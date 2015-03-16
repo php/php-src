@@ -1484,6 +1484,35 @@ uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_check_reserved_method_name(zend_string *name) /* {{{ */
+{
+	if (zend_string_equals_literal_ci(name, "static")) {
+		return ZEND_RESERVED_STATIC;
+	} else if (zend_string_equals_literal_ci(name, "public")) {
+		return ZEND_RESERVED_PUBLIC;
+	} else if (zend_string_equals_literal_ci(name, "private")) {
+		return ZEND_RESERVED_PRIVATE;
+	} else if (zend_string_equals_literal_ci(name, "protected")) {
+		return ZEND_RESERVED_PROTECTED;
+	} else if (zend_string_equals_literal_ci(name, "abstract")) {
+		return ZEND_RESERVED_ABSTRACT;
+	} else if (zend_string_equals_literal_ci(name, "final")) {
+		return ZEND_RESERVED_FINAL;
+	} else {
+		return ZEND_NOT_RESERVED;
+	}
+}
+/* }}} */
+
+uint32_t zend_check_reserved_class_const_name(zend_string *name) /* {{{ */
+{
+	if(zend_string_equals_literal_ci(name, "class")) {
+		return ZEND_RESERVED_CLASS;
+	}
+	return zend_check_reserved_method_name(name);
+}
+/* }}} */
+
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var) /* {{{ */
 {
 	return op_array->vars[EX_VAR_TO_NUM(var)];
@@ -4421,6 +4450,12 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	if (is_method) {
 		zend_bool has_body = stmt_ast != NULL;
+
+		if(ZEND_NOT_RESERVED != zend_check_reserved_method_name(decl->name)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use '%s' as class method name as it is reserved", decl->name->val);
+		}
+
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl);
@@ -4543,6 +4578,16 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_const_expr_to_zval(&value_zv, value_ast);
 
 		name = zend_new_interned_string_safe(name);
+
+		uint32_t is_reserved = zend_check_reserved_class_const_name(name);
+		if(ZEND_RESERVED_CLASS == is_reserved) {
+			zend_error_noreturn( E_COMPILE_ERROR,
+				"Cannot redefine class constant %s::%s as it is reserved", ce->name->val, name->val);
+		} else if(ZEND_NOT_RESERVED != is_reserved) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use '%s' as class constant name as it is reserved", name->val);
+		}
+
 		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
 				ce->name->val, name->val);
