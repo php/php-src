@@ -1791,12 +1791,14 @@ try_function_name:
 		zend_string_release(lcname);
 
 		fbc = Z_FUNC_P(func);
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		called_scope = NULL;
 		object = NULL;
 	} else if (IS_CONST != IS_CONST &&
 	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
@@ -2161,12 +2163,14 @@ try_function_name:
 		zend_string_release(lcname);
 
 		fbc = Z_FUNC_P(func);
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		called_scope = NULL;
 		object = NULL;
 	} else if (IS_CV != IS_CONST &&
 	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
@@ -2330,12 +2334,14 @@ try_function_name:
 		zval_ptr_dtor_nogc(free_op2);
 
 		fbc = Z_FUNC_P(func);
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		called_scope = NULL;
 		object = NULL;
 	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
 	    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure) &&
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 		if (object) {
 			GC_REFCOUNT(object)++;
 		}
@@ -4504,6 +4510,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			}
 		}
 		if (IS_CONST != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -6299,6 +6306,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 			}
 		}
 		if (IS_UNUSED != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -7409,6 +7417,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 			}
 		}
 		if (IS_CV != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -8563,6 +8572,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER
 			}
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 			zval_ptr_dtor_nogc(free_op2);
 		}
 	} else {
@@ -13990,6 +14000,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			}
 		}
 		if (IS_CONST != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -15496,6 +15507,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 			}
 		}
 		if (IS_UNUSED != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -16982,6 +16994,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 			}
 		}
 		if (IS_CV != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 
 		}
 	} else {
@@ -18449,6 +18462,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER(Z
 			}
 		}
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 			zval_ptr_dtor_nogc(free_op2);
 		}
 	} else {
@@ -19771,7 +19785,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -19783,6 +19796,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CONST != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -21984,7 +22001,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -21996,6 +22012,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CV != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -23381,7 +23401,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -23393,6 +23412,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -26906,7 +26929,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -26918,6 +26940,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CONST != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -31195,7 +31221,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -31207,6 +31232,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CV != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -33198,7 +33227,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCO
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -33210,6 +33238,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCO
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -34874,7 +34906,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_O
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -34886,6 +34917,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_O
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CONST != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -36492,7 +36527,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCO
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -36504,6 +36538,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCO
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if (IS_CV != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
@@ -37155,7 +37193,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
 			zend_error_noreturn(E_ERROR, "Object does not support method calls");
 		}
-
 		/* First, locate the function. */
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
@@ -37167,6 +37204,10 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_
 		    EXPECTED(obj == orig_obj)) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
 		}
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		fbc->common.fn_flags |= ZEND_ACC_DYNAMIC_ARGCOUNT;
 	}
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
