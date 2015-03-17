@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #67626 (User exceptions not properly handled in streams). 
     (Julian)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
+  . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
+    configuration options). (Anatol Belski)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
     __call/... arg passing). (Nikita)
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
@@ -26,6 +29,10 @@ PHP                                                                        NEWS
 - Mbstring:
    . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
+
+- SOAP:
+  . Fixed bug #69085 (SoapClient's __call() type confusion through
+    unserialize()). (Dmitry)
 
 - SPL:
    . Fixed #69227 (Use after free in zval_scan caused by
