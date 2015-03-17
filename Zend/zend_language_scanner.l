@@ -560,15 +560,7 @@ END_EXTERN_C()
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_lex_state original_lex_state;
-	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
-	zend_op_array *original_active_op_array = CG(active_op_array);
-	int compiler_result;
-	zend_bool compilation_successful=0;
-	zval retval_zv;
-	zend_bool original_in_compilation = CG(in_compilation);
-
-	ZVAL_LONG(&retval_zv, 1);
-
+	zend_op_array *op_array = NULL;
 	zend_save_lexical_state(&original_lex_state);
 
 	if (open_file_for_scanning(file_handle)==FAILURE) {
@@ -578,37 +570,37 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		} else {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
-		compilation_successful=0;
 	} else {
-		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+		zend_bool original_in_compilation = CG(in_compilation);
 		CG(in_compilation) = 1;
-		CG(active_op_array) = op_array;
-		zend_stack_push(&CG(context_stack), (void *) &CG(context));
-		zend_init_compiler_context();
+
+		CG(ast) = NULL;
 		CG(ast_arena) = zend_arena_create(1024 * 32);
-		compiler_result = zendparse();
-		if (compiler_result != 0) { /* parser error */
-			zend_bailout();
+		if (!zendparse()) {
+			zval retval_zv;
+			zend_op_array *original_active_op_array = CG(active_op_array);
+			op_array = emalloc(sizeof(zend_op_array));
+			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+			CG(active_op_array) = op_array;
+			ZVAL_LONG(&retval_zv, 1);
+
+			zend_stack_push(&CG(context_stack), (void *) &CG(context));
+			zend_init_compiler_context();
+			if (zend_ast_process) {
+				zend_ast_process(CG(ast));
+			}
+			zend_compile_top_stmt(CG(ast));
+			zend_do_end_compilation();
+			zend_emit_final_return(&retval_zv);
+			pass_two(op_array);
+			zend_release_labels(0);
+
+			CG(active_op_array) = original_active_op_array;
 		}
-		if (zend_ast_process) {
-			zend_ast_process(CG(ast));
-		}
-		zend_compile_top_stmt(CG(ast));
+
 		zend_ast_destroy(CG(ast));
 		zend_arena_destroy(CG(ast_arena));
-		zend_do_end_compilation();
-		zend_emit_final_return(&retval_zv);
 		CG(in_compilation) = original_in_compilation;
-		compilation_successful=1;
-	}
-
-	CG(active_op_array) = original_active_op_array;
-	if (compilation_successful) {
-		pass_two(op_array);
-		zend_release_labels(0);
-	} else {
-		efree_size(op_array, sizeof(zend_op_array));
-		op_array = NULL;
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
