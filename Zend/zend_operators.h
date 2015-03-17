@@ -435,238 +435,235 @@ ZEND_API void zend_update_current_locale(void);
 #define ZVAL_OFFSETOF_TYPE	\
 	(offsetof(zval, u1.type_info) - offsetof(zval, value))
 
-static zend_always_inline int fast_increment_function(zval *op1)
+static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 #if defined(__GNUC__) && defined(__i386__)
-		__asm__(
-			"incl (%0)\n\t"
-			"jno  0f\n\t"
-			"movl $0x0, (%0)\n\t"
-			"movl $0x41e00000, 0x4(%0)\n\t"
-			"movl %1, %c2(%0)\n"
-			"0:"
-			:
-			: "r"(&op1->value),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "cc");
+	__asm__(
+		"incl (%0)\n\t"
+		"jno  0f\n\t"
+		"movl $0x0, (%0)\n\t"
+		"movl $0x41e00000, 0x4(%0)\n\t"
+		"movl %1, %c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
-		__asm__(
-			"incq (%0)\n\t"
-			"jno  0f\n\t"
-			"movl $0x0, (%0)\n\t"
-			"movl $0x43e00000, 0x4(%0)\n\t"
-			"movl %1, %c2(%0)\n"
-			"0:"
-			:
-			: "r"(&op1->value),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "cc");
+	__asm__(
+		"incq (%0)\n\t"
+		"jno  0f\n\t"
+		"movl $0x0, (%0)\n\t"
+		"movl $0x43e00000, 0x4(%0)\n\t"
+		"movl %1, %c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "cc");
 #elif defined(__GNUC__) && defined(__powerpc64__)
-                __asm__(
-                        "ld 14, 0(%0)\n\t"
-                        "li 15, 1\n\t"
-                        "li 16, 0\n\t"
-                        "mtxer 16\n\t"
-                        "addo. 14, 14, 15\n\t"
-                        "std 14, 0(%0)\n\t"
-                        "bns+  0f\n\t"
-                        "xor 14, 14, 14\n\t"
-                        "lis 15, 0x43e00000@h\n\t"
-                        "ori 15, 15, 0x43e00000@l\n\t"
+	 __asm__(
+		"ld 14, 0(%0)\n\t"
+		"li 15, 1\n\t"
+		"li 16, 0\n\t"
+		"mtxer 16\n\t"
+		"addo. 14, 14, 15\n\t"
+		"std 14, 0(%0)\n\t"
+		"bns+  0f\n\t"
+		"xor 14, 14, 14\n\t"
+		"lis 15, 0x43e00000@h\n\t"
+		"ori 15, 15, 0x43e00000@l\n\t"
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-                        "stw 14, 0(%0)\n\t"
-                        "stw 15, 0x4(%0)\n\t"
+		"stw 14, 0(%0)\n\t"
+		"stw 15, 0x4(%0)\n\t"
 #else
-                        "stw 14, 0x4(%0)\n\t"
-                        "stw 15, 0(%0)\n\t"
+		"stw 14, 0x4(%0)\n\t"
+		"stw 15, 0(%0)\n\t"
 #endif
-                        "li 14, %1\n\t"
-                        "stw 14, %c2(%0)\n"
-                        "0:"
-                        :
-                        : "r"(&op1->value),
-                          "n"(IS_DOUBLE),
-                          "n"(ZVAL_OFFSETOF_TYPE)
-                        : "r14", "r15", "r16", "cc");
+		"li 14, %1\n\t"
+		"stw 14, %c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "r14", "r15", "r16", "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
-		} else {
-			Z_LVAL_P(op1)++;
-		}
-#endif
-		return SUCCESS;
+	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1)++;
 	}
-	return increment_function(op1);
+#endif
 }
 
-static zend_always_inline int fast_decrement_function(zval *op1)
+static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 #if defined(__GNUC__) && defined(__i386__)
-		__asm__(
-			"decl (%0)\n\t"
-			"jno  0f\n\t"
-			"movl $0x00200000, (%0)\n\t"
-			"movl $0xc1e00000, 0x4(%0)\n\t"
-			"movl %1,%c2(%0)\n"
-			"0:"
-			:
-			: "r"(&op1->value),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "cc");
+	__asm__(
+		"decl (%0)\n\t"
+		"jno  0f\n\t"
+		"movl $0x00200000, (%0)\n\t"
+		"movl $0xc1e00000, 0x4(%0)\n\t"
+		"movl %1,%c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
-		__asm__(
-			"decq (%0)\n\t"
-			"jno  0f\n\t"
-			"movl $0x00000000, (%0)\n\t"
-			"movl $0xc3e00000, 0x4(%0)\n\t"
-			"movl %1,%c2(%0)\n"
-			"0:"
-			:
-			: "r"(&op1->value),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "cc");
+	__asm__(
+		"decq (%0)\n\t"
+		"jno  0f\n\t"
+		"movl $0x00000000, (%0)\n\t"
+		"movl $0xc3e00000, 0x4(%0)\n\t"
+		"movl %1,%c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "cc");
 #elif defined(__GNUC__) && defined(__powerpc64__)
-                __asm__(
-                        "ld 14, 0(%0)\n\t"
-                        "li 15, 1\n\t"
-                        "li 16, 0\n\t"
-                        "mtxer 16\n\t"
-                        "subo. 14, 14, 15\n\t"
-                        "std 14, 0(%0)\n\t"
-                        "bns+  0f\n\t"
-                        "xor 14, 14, 14\n\t"
-                        "lis 15, 0xc3e00000@h\n\t"
-                        "ori 15, 15, 0xc3e00000@l\n\t"
+	__asm__(
+		"ld 14, 0(%0)\n\t"
+		"li 15, 1\n\t"
+		"li 16, 0\n\t"
+		"mtxer 16\n\t"
+		"subo. 14, 14, 15\n\t"
+		"std 14, 0(%0)\n\t"
+		"bns+  0f\n\t"
+		"xor 14, 14, 14\n\t"
+		"lis 15, 0xc3e00000@h\n\t"
+		"ori 15, 15, 0xc3e00000@l\n\t"
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-                        "stw 14, 0(%0)\n\t"
-                        "stw 15, 0x4(%0)\n\t"
+		"stw 14, 0(%0)\n\t"
+		"stw 15, 0x4(%0)\n\t"
 #else
-                        "stw 14, 0x4(%0)\n\t"
-                        "stw 15, 0(%0)\n\t"
+		"stw 14, 0x4(%0)\n\t"
+		"stw 15, 0(%0)\n\t"
 #endif
-                        "li 14, %1\n\t"
-                        "stw 14, %c2(%0)\n"
-                        "0:"
-                        :
-                        : "r"(&op1->value),
-                          "n"(IS_DOUBLE),
-                          "n"(ZVAL_OFFSETOF_TYPE)
-                        : "r14", "r15", "r16", "cc");
+		"li 14, %1\n\t"
+		"stw 14, %c2(%0)\n"
+		"0:"
+		:
+		: "r"(&op1->value),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "r14", "r15", "r16", "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
-			/* switch to double */
-			ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
-		} else {
-			Z_LVAL_P(op1)--;
-		}
-#endif
-		return SUCCESS;
+	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1)--;
 	}
-	return decrement_function(op1);
+#endif
+}
+
+static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
+{
+#if defined(__GNUC__) && defined(__i386__)
+	__asm__(
+		"movl	(%1), %%eax\n\t"
+		"addl   (%2), %%eax\n\t"
+		"jo     0f\n\t"
+		"movl   %%eax, (%0)\n\t"
+		"movl   %3, %c5(%0)\n\t"
+		"jmp    1f\n"
+		"0:\n\t"
+		"fildl	(%1)\n\t"
+		"fildl	(%2)\n\t"
+		"faddp	%%st, %%st(1)\n\t"
+		"movl   %4, %c5(%0)\n\t"
+		"fstpl	(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "eax","cc");
+#elif defined(__GNUC__) && defined(__x86_64__)
+	__asm__(
+		"movq	(%1), %%rax\n\t"
+		"addq   (%2), %%rax\n\t"
+		"jo     0f\n\t"
+		"movq   %%rax, (%0)\n\t"
+		"movl   %3, %c5(%0)\n\t"
+		"jmp    1f\n"
+		"0:\n\t"
+		"fildq	(%1)\n\t"
+		"fildq	(%2)\n\t"
+		"faddp	%%st, %%st(1)\n\t"
+		"movl   %4, %c5(%0)\n\t"
+		"fstpl	(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "rax","cc");
+#elif defined(__GNUC__) && defined(__powerpc64__)
+	__asm__(
+		"ld 14, 0(%1)\n\t"
+		"ld 15, 0(%2)\n\t"
+		"li 16, 0 \n\t"
+		"mtxer 16\n\t"
+		"addo. 14, 14, 15\n\t"
+		"bso- 0f\n\t"
+		"std 14, 0(%0)\n\t"
+		"li 14, %3\n\t"
+		"stw 14, %c5(%0)\n\t"
+		"b 1f\n"
+		"0:\n\t"
+		"lfd 0, 0(%1)\n\t"
+		"lfd 1, 0(%2)\n\t"
+		"fcfid 0, 0\n\t"
+		"fcfid 1, 1\n\t"
+		"fadd 0, 0, 1\n\t"
+		"li 14, %4\n\t"
+		"stw 14, %c5(%0)\n\t"
+		"stfd 0, 0(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "r14","r15","r16","fr0","fr1","cc");
+#else
+	/*
+	 * 'result' may alias with op1 or op2, so we need to
+	 * ensure that 'result' is not updated until after we
+	 * have read the values of op1 and op2.
+	 */
+
+	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
+	}
+#endif
 }
 
 static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *op2)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-#if defined(__GNUC__) && defined(__i386__)
-		__asm__(
-			"movl	(%1), %%eax\n\t"
-			"addl   (%2), %%eax\n\t"
-			"jo     0f\n\t"
-			"movl   %%eax, (%0)\n\t"
-			"movl   %3, %c5(%0)\n\t"
-			"jmp    1f\n"
-			"0:\n\t"
-			"fildl	(%1)\n\t"
-			"fildl	(%2)\n\t"
-			"faddp	%%st, %%st(1)\n\t"
-			"movl   %4, %c5(%0)\n\t"
-			"fstpl	(%0)\n"
-			"1:"
-			:
-			: "r"(&result->value),
-			  "r"(&op1->value),
-			  "r"(&op2->value),
-			  "n"(IS_LONG),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "eax","cc");
-#elif defined(__GNUC__) && defined(__x86_64__)
-		__asm__(
-			"movq	(%1), %%rax\n\t"
-			"addq   (%2), %%rax\n\t"
-			"jo     0f\n\t"
-			"movq   %%rax, (%0)\n\t"
-			"movl   %3, %c5(%0)\n\t"
-			"jmp    1f\n"
-			"0:\n\t"
-			"fildq	(%1)\n\t"
-			"fildq	(%2)\n\t"
-			"faddp	%%st, %%st(1)\n\t"
-			"movl   %4, %c5(%0)\n\t"
-			"fstpl	(%0)\n"
-			"1:"
-			:
-			: "r"(&result->value),
-			  "r"(&op1->value),
-			  "r"(&op2->value),
-			  "n"(IS_LONG),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "rax","cc");
-#elif defined(__GNUC__) && defined(__powerpc64__)
-                __asm__(
-                        "ld 14, 0(%1)\n\t"
-                        "ld 15, 0(%2)\n\t"
-                        "li 16, 0 \n\t"
-                        "mtxer 16\n\t"
-                        "addo. 14, 14, 15\n\t"
-                        "bso- 0f\n\t"
-                        "std 14, 0(%0)\n\t"
-                        "li 14, %3\n\t"
-                        "stw 14, %c5(%0)\n\t"
-                        "b 1f\n"
-                        "0:\n\t"
-                        "lfd 0, 0(%1)\n\t"
-                        "lfd 1, 0(%2)\n\t"
-                        "fcfid 0, 0\n\t"
-                        "fcfid 1, 1\n\t"
-                        "fadd 0, 0, 1\n\t"
-                        "li 14, %4\n\t"
-                        "stw 14, %c5(%0)\n\t"
-                        "stfd 0, 0(%0)\n"
-                        "1:"
-                        :
-                        : "r"(&result->value),
-                          "r"(&op1->value),
-                          "r"(&op2->value),
-                          "n"(IS_LONG),
-                          "n"(IS_DOUBLE),
-                          "n"(ZVAL_OFFSETOF_TYPE)
-                        : "r14","r15","r16","fr0","fr1","cc");
-#else
-			/*
-			 * 'result' may alias with op1 or op2, so we need to
-			 * ensure that 'result' is not updated until after we
-			 * have read the values of op1 and op2.
-			 */
-
-			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
-			} else {
-				ZVAL_LONG(result, Z_LVAL_P(op1) + Z_LVAL_P(op2));
-			}
-#endif
+			fast_long_add_function(result, op1, op2);
 			return SUCCESS;
 		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
@@ -684,142 +681,100 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 	return add_function(result, op1, op2);
 }
 
-static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *op2)
+static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 #if defined(__GNUC__) && defined(__i386__)
-		__asm__(
-			"movl	(%1), %%eax\n\t"
-			"subl   (%2), %%eax\n\t"
-			"jo     0f\n\t"
-			"movl   %%eax, (%0)\n\t"
-			"movl   %3, %c5(%0)\n\t"
-			"jmp    1f\n"
-			"0:\n\t"
-			"fildl	(%2)\n\t"
-			"fildl	(%1)\n\t"
+	__asm__(
+		"movl	(%1), %%eax\n\t"
+		"subl   (%2), %%eax\n\t"
+		"jo     0f\n\t"
+		"movl   %%eax, (%0)\n\t"
+		"movl   %3, %c5(%0)\n\t"
+		"jmp    1f\n"
+		"0:\n\t"
+		"fildl	(%2)\n\t"
+		"fildl	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
-			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
+		"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
 #else
-			"fsubp	%%st, %%st(1)\n\t"
+		"fsubp	%%st, %%st(1)\n\t"
 #endif
-			"movl   %4, %c5(%0)\n\t"
-			"fstpl	(%0)\n"
-			"1:"
-			:
-			: "r"(&result->value),
-			  "r"(&op1->value),
-			  "r"(&op2->value),
-			  "n"(IS_LONG),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "eax","cc");
+		"movl   %4, %c5(%0)\n\t"
+		"fstpl	(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "eax","cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
-		__asm__(
-			"movq	(%1), %%rax\n\t"
-			"subq   (%2), %%rax\n\t"
-			"jo     0f\n\t"
-			"movq   %%rax, (%0)\n\t"
-			"movl   %3, %c5(%0)\n\t"
-			"jmp    1f\n"
-			"0:\n\t"
-			"fildq	(%2)\n\t"
-			"fildq	(%1)\n\t"
+	__asm__(
+		"movq	(%1), %%rax\n\t"
+		"subq   (%2), %%rax\n\t"
+		"jo     0f\n\t"
+		"movq   %%rax, (%0)\n\t"
+		"movl   %3, %c5(%0)\n\t"
+		"jmp    1f\n"
+		"0:\n\t"
+		"fildq	(%2)\n\t"
+		"fildq	(%1)\n\t"
 #if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
-			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
+		"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
 #else
-			"fsubp	%%st, %%st(1)\n\t"
+		"fsubp	%%st, %%st(1)\n\t"
 #endif
-			"movl   %4, %c5(%0)\n\t"
-			"fstpl	(%0)\n"
-			"1:"
-			:
-			: "r"(&result->value),
-			  "r"(&op1->value),
-			  "r"(&op2->value),
-			  "n"(IS_LONG),
-			  "n"(IS_DOUBLE),
-			  "n"(ZVAL_OFFSETOF_TYPE)
-			: "rax","cc");
+		"movl   %4, %c5(%0)\n\t"
+		"fstpl	(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "rax","cc");
 #elif defined(__GNUC__) && defined(__powerpc64__)
-                __asm__(
-                        "ld 14, 0(%1)\n\t"
-                        "ld 15, 0(%2)\n\t"
-                        "li 16, 0\n\t"
-                        "mtxer 16\n\t"
-                        "subo. 14, 14, 15\n\t"
-                        "bso- 0f\n\t"
-                        "std 14, 0(%0)\n\t"
-                        "li 14, %3\n\t"
-                        "stw 14, %c5(%0)\n\t"
-                        "b 1f\n"
-                        "0:\n\t"
-                        "lfd 0, 0(%1)\n\t"
-                        "lfd 1, 0(%2)\n\t"
-                        "fcfid 0, 0\n\t"
-                        "fcfid 1, 1\n\t"
-                        "fsub 0, 0, 1\n\t"
-                        "li 14, %4\n\t"
-                        "stw 14, %c5(%0)\n\t"
-                        "stfd 0, 0(%0)\n"
-                        "1:"
-                        :
-                        : "r"(&result->value),
-                          "r"(&op1->value),
-                          "r"(&op2->value),
-                          "n"(IS_LONG),
-                          "n"(IS_DOUBLE),
-                          "n"(ZVAL_OFFSETOF_TYPE)
-                        : "r14","r15","r16","fr0","fr1","cc");
+	__asm__(
+		"ld 14, 0(%1)\n\t"
+		"ld 15, 0(%2)\n\t"
+		"li 16, 0\n\t"
+		"mtxer 16\n\t"
+		"subo. 14, 14, 15\n\t"
+		"bso- 0f\n\t"
+		"std 14, 0(%0)\n\t"
+		"li 14, %3\n\t"
+		"stw 14, %c5(%0)\n\t"
+		"b 1f\n"
+		"0:\n\t"
+		"lfd 0, 0(%1)\n\t"
+		"lfd 1, 0(%2)\n\t"
+		"fcfid 0, 0\n\t"
+		"fcfid 1, 1\n\t"
+		"fsub 0, 0, 1\n\t"
+		"li 14, %4\n\t"
+		"stw 14, %c5(%0)\n\t"
+		"stfd 0, 0(%0)\n"
+		"1:"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(IS_DOUBLE),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "r14","r15","r16","fr0","fr1","cc");
 #else
-			ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
+	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
-			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
-				ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
-			}
+	if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
+		&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	}
 #endif
-			return SUCCESS;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
-			return SUCCESS;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
-			return SUCCESS;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
-			return SUCCESS;
-		}
-	}
-	return sub_function(result, op1, op2);
-}
-
-static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			zend_long overflow;
-
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			return SUCCESS;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
-			return SUCCESS;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
-			return SUCCESS;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
-			return SUCCESS;
-		}
-	}
-	return mul_function(result, op1, op2);
 }
 
 static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *op2)
@@ -871,26 +826,6 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 	}
 #endif
 	return div_function(result, op1, op2);
-}
-
-static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
-				return FAILURE;
-			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
-				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
-				ZVAL_LONG(result, 0);
-				return SUCCESS;
-			}
-			ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
-			return SUCCESS;
-		}
-	}
-	return mod_function(result, op1, op2);
 }
 
 static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
@@ -955,134 +890,6 @@ static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
 	}
 	compare_function(&result, op1, op2);
 	return Z_LVAL(result) == 0;
-}
-
-static zend_always_inline void fast_equal_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_LVAL_P(op1) == Z_LVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			if (Z_STR_P(op1) == Z_STR_P(op2)) {
-				ZVAL_TRUE(result);
-				return;
-			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-					ZVAL_FALSE(result);
-					return;
-				} else {
-					ZVAL_BOOL(result, memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					return;
-				}
-			} else {
-				ZVAL_BOOL(result, zendi_smart_strcmp(op1, op2) == 0);
-				return;
-			}
-		}
-	}
-	compare_function(result, op1, op2);
-	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
-}
-
-static zend_always_inline void fast_not_equal_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_LVAL_P(op1) != Z_LVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			if (Z_STR_P(op1) == Z_STR_P(op2)) {
-				ZVAL_FALSE(result);
-				return;
-			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-					ZVAL_TRUE(result);
-					return;
-				} else {
-					ZVAL_BOOL(result, memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					return;
-				}
-			} else {
-				ZVAL_BOOL(result, zendi_smart_strcmp(op1, op2) != 0);
-				return;
-			}
-		}
-	}
-	compare_function(result, op1, op2);
-	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
-}
-
-static zend_always_inline void fast_is_smaller_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_LVAL_P(op1) < Z_LVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) < Z_DVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
-			return;
-		}
-	}
-	compare_function(result, op1, op2);
-	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
-}
-
-static zend_always_inline void fast_is_smaller_or_equal_function(zval *result, zval *op1, zval *op2)
-{
-	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_LVAL_P(op1) <= Z_LVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
-			return;
-		}
-	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
-		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) <= Z_DVAL_P(op2));
-			return;
-		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			ZVAL_BOOL(result, Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
-			return;
-		}
-	}
-	compare_function(result, op1, op2);
-	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 }
 
 static zend_always_inline void fast_is_identical_function(zval *result, zval *op1, zval *op2)

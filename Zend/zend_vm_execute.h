@@ -3865,11 +3865,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CONST_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -3880,11 +3909,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CONST_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -3895,11 +3953,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CONST_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -3925,11 +4015,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -4016,12 +4131,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CONST_HAND
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 
 	CHECK_EXCEPTION();
@@ -4032,12 +4199,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 
 	CHECK_EXCEPTION();
@@ -4048,12 +4267,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CONST_HA
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 
 	CHECK_EXCEPTION();
@@ -4064,12 +4309,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 
 	CHECK_EXCEPTION();
@@ -4800,12 +5071,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CONST_HANDLER(
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 EX_CONSTANT(opline->op1),
-		 EX_CONSTANT(opline->op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -7073,11 +7392,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CONST_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -7088,11 +7436,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CONST_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -7103,11 +7480,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CONST_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -7133,11 +7542,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -7224,12 +7658,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CV_HANDLER
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 
 	CHECK_EXCEPTION();
@@ -7240,12 +7726,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CV_HAN
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 
 	CHECK_EXCEPTION();
@@ -7256,12 +7794,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CV_HANDL
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 
 	CHECK_EXCEPTION();
@@ -7272,12 +7836,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 
 	CHECK_EXCEPTION();
@@ -7850,12 +8440,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 EX_CONSTANT(opline->op1),
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -8296,11 +8934,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CONST_TMPVAR_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8311,11 +8978,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CONST_TMPVAR_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8326,11 +9022,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CONST_TMPVAR_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8356,11 +9084,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_TMPVAR_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8416,12 +9169,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_TMPVAR_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8432,12 +9237,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_TMPVAR
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8448,12 +9305,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVAR_H
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8464,12 +9347,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -8994,13 +9903,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_TMPVAR_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 EX_CONSTANT(opline->op1),
-		 _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
-
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -11934,17 +12890,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_HANDLER(ZEND_
 	zend_free_op free_op1;
 	zval *var_ptr;
 
-	SAVE_OPLINE();
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 		HANDLE_EXCEPTION();
 	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -11955,10 +12911,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_HANDLER(ZEND_
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
@@ -11979,17 +12938,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_HANDLER(ZEND_
 	zend_free_op free_op1;
 	zval *var_ptr;
 
-	SAVE_OPLINE();
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 		HANDLE_EXCEPTION();
 	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -12000,10 +12959,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_HANDLER(ZEND_
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
@@ -12024,10 +12986,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 	zend_free_op free_op1;
 	zval *var_ptr;
 
-	SAVE_OPLINE();
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 		HANDLE_EXCEPTION();
@@ -12035,16 +12997,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		fast_long_increment_function(var_ptr);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 	zval_opt_copy_ctor(var_ptr);
@@ -12062,10 +13027,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND
 	zend_free_op free_op1;
 	zval *var_ptr;
 
-	SAVE_OPLINE();
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 		HANDLE_EXCEPTION();
@@ -12073,16 +13038,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		fast_long_decrement_function(var_ptr);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 	zval_opt_copy_ctor(var_ptr);
@@ -24699,17 +25667,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_O
 
 	zval *var_ptr;
 
-	SAVE_OPLINE();
-	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 
 		HANDLE_EXCEPTION();
 	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+		fast_long_increment_function(var_ptr);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -24720,10 +25688,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_O
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
@@ -24743,17 +25714,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_O
 
 	zval *var_ptr;
 
-	SAVE_OPLINE();
-	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 
 		HANDLE_EXCEPTION();
 	}
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+		fast_long_decrement_function(var_ptr);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -24764,10 +25735,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_O
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
@@ -24787,10 +25761,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 
 	zval *var_ptr;
 
-	SAVE_OPLINE();
-	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 
 		HANDLE_EXCEPTION();
@@ -24798,16 +25772,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		fast_long_increment_function(var_ptr);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 	zval_opt_copy_ctor(var_ptr);
@@ -24824,10 +25801,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_
 
 	zval *var_ptr;
 
-	SAVE_OPLINE();
-	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var);
+	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(execute_data, opline->op1.var);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
+		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 
 		HANDLE_EXCEPTION();
@@ -24835,16 +25812,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_
 
 	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		fast_long_decrement_function(var_ptr);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
 	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
-		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
 
+	SAVE_OPLINE();
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
+	}
 	ZVAL_DEREF(var_ptr);
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 	zval_opt_copy_ctor(var_ptr);
@@ -26193,11 +27173,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -26208,11 +27217,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CV_CONST_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -26223,11 +27261,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CV_CONST_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -26253,11 +27323,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CONST_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -26344,12 +27439,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 
 	CHECK_EXCEPTION();
@@ -26360,12 +27507,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HAN
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 
 	CHECK_EXCEPTION();
@@ -26376,12 +27575,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CONST_HANDL
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 
 	CHECK_EXCEPTION();
@@ -26392,12 +27617,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CO
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 
 	CHECK_EXCEPTION();
@@ -27943,12 +29194,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		 EX_CONSTANT(opline->op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -30768,11 +32067,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CV_CV_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -30783,11 +32111,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CV_CV_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -30798,11 +32155,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CV_CV_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -30828,11 +32217,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CV_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	CHECK_EXCEPTION();
@@ -30919,12 +32333,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZE
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 
 	CHECK_EXCEPTION();
@@ -30935,12 +32401,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLE
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 
 	CHECK_EXCEPTION();
@@ -30951,12 +32469,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CV_HANDLER(
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 
 	CHECK_EXCEPTION();
@@ -30967,12 +32511,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CV
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 
 	CHECK_EXCEPTION();
@@ -32371,12 +33941,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CV_HANDLER(ZEND_O
 {
 	USE_OPLINE
 
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -32950,11 +34568,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_CV_TMPVAR_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -32965,11 +34612,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_CV_TMPVAR_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -32980,11 +34656,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_CV_TMPVAR_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -33010,11 +34718,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_TMPVAR_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -33070,12 +34803,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -33086,12 +34871,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -33102,12 +34939,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_TMPVAR_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -33118,12 +34981,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_TM
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -34435,13 +36324,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_TMPVAR_HANDLER(ZE
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_cv_undef(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		 _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
-
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -35437,11 +37373,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_TMPVAR_CONST_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35452,11 +37417,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_TMPVAR_CONST_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35467,11 +37461,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_TMPVAR_CONST_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35497,11 +37523,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CONST_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35557,12 +37608,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35573,12 +37676,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35589,12 +37744,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CONST_H
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -35605,12 +37786,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -36095,12 +38302,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CONST_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		 EX_CONSTANT(opline->op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -37249,11 +39504,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_TMPVAR_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37264,11 +39548,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_TMPVAR_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37279,11 +39592,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_TMPVAR_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37309,11 +39654,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37369,12 +39739,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CV_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37385,12 +39807,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CV_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+					zval_ptr_dtor_nogc(free_op1);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+				zval_ptr_dtor_nogc(free_op1);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37401,12 +39875,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CV_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37417,12 +39917,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -37697,12 +40223,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CV_HANDLER(ZE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_undef(execute_data, opline->op2.var);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		 _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -37883,11 +40457,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_TMPVAR_TMPVAR_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_add_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_add_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	add_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -37898,11 +40501,40 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SUB_SPEC_TMPVAR_TMPVAR_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			fast_long_sub_function(result, op1, op2);
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_sub_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	sub_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -37913,11 +40545,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MUL_SPEC_TMPVAR_TMPVAR_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			zend_long overflow;
+
+			result = EX_VAR(opline->result.var);
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mul_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mul_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -37943,11 +40607,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_TMPVAR_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			result = EX_VAR(opline->result.var);
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				// TODO: change into exception ???
+				SAVE_OPLINE();
+				zend_error(E_WARNING, "Division by zero");
+				ZVAL_FALSE(result);
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
+				ZVAL_LONG(result, 0);
+			} else {
+				ZVAL_LONG(result, Z_LVAL_P(op1) % Z_LVAL_P(op2));
+			}
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_mod_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	mod_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -38003,12 +40692,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op1);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op1);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -38019,12 +40760,64 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op1);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_TRUE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op1);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
+					zval_ptr_dtor_nogc(free_op1);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) != 0);
+				zval_ptr_dtor_nogc(free_op1);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_not_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -38035,12 +40828,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_TMPVAR_
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) < Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -38051,12 +40870,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) <= Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_is_smaller_or_equal_function(result,
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -38333,13 +41178,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_TMPVAR_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2, *result;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), (double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			ZEND_VM_NEXT_OPCODE();
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZVAL_BOOL(EX_VAR(opline->result.var), memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
+					zval_ptr_dtor_nogc(free_op2);
+					ZEND_VM_NEXT_OPCODE();
+				}
+			} else {
+				ZVAL_BOOL(EX_VAR(opline->result.var), zendi_smart_strcmp(op1, op2) == 0);
+				zval_ptr_dtor_nogc(free_op2);
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	}
 
 	SAVE_OPLINE();
-	fast_equal_function(result,
-		 _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		 _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
-
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+	}
+	result = EX_VAR(opline->result.var);
+	compare_function(result, op1, op2);
+	ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

@@ -2162,13 +2162,7 @@ ZEND_API int ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
 try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == ZEND_LONG_MAX) {
-				/* switch to double */
-				double d = (double)Z_LVAL_P(op1);
-				ZVAL_DOUBLE(op1, d+1);
-			} else {
-			Z_LVAL_P(op1)++;
-			}
+			fast_long_increment_function(op1);
 			break;
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) + 1;
@@ -2211,7 +2205,7 @@ try_again:
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
-				fast_increment_function(val);
+				increment_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
@@ -2243,12 +2237,7 @@ ZEND_API int ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
 try_again:
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == ZEND_LONG_MIN) {
-				double d = (double)Z_LVAL_P(op1);
-				ZVAL_DOUBLE(op1, d-1);
-			} else {
-			Z_LVAL_P(op1)--;
-			}
+			fast_long_decrement_function(op1);
 			break;
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
@@ -2284,7 +2273,7 @@ try_again:
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
-				fast_decrement_function(val);
+				decrement_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {

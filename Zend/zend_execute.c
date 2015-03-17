@@ -53,6 +53,7 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, ex, should_free, type) _get_zval_ptr(op_type, node, ex, should_free, type)
 #define get_zval_ptr_deref(op_type, node, ex, should_free, type) _get_zval_ptr_deref(op_type, node, ex, should_free, type)
+#define get_zval_ptr_undef(op_type, node, ex, should_free, type) _get_zval_ptr_undef(op_type, node, ex, should_free, type)
 #define get_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
 #define get_zval_ptr_ptr_undef(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
 #define get_obj_zval_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr(op_type, node, ex, should_free, type)
@@ -283,6 +284,11 @@ static zend_always_inline zval *_get_zval_ptr_cv(const zend_execute_data *execut
 	return ret;
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_undef(const zend_execute_data *execute_data, uint32_t var)
+{
+	return EX_VAR(var);
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_deref(const zend_execute_data *execute_data, uint32_t var, int type)
 {
 	zval *ret = EX_VAR(var);
@@ -387,6 +393,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_W(const zend_execu
 	return EX_VAR(var);
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_RW(const zend_execute_data *execute_data, uint32_t var)
+{
+	return EX_VAR(var);
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execute_data *execute_data, uint32_t var)
 {
 	zval *ret = EX_VAR(var);
@@ -434,6 +445,27 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 			return EX_CONSTANT(node);
 		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv_deref(execute_data, node.var, type);
+		} else {
+			return NULL;
+		}
+	}
+}
+
+static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
+{
+	if (op_type & (IS_TMP_VAR|IS_VAR)) {
+		if (op_type == IS_TMP_VAR) {
+			return _get_zval_ptr_tmp(node.var, execute_data, should_free);
+		} else {
+			ZEND_ASSERT(op_type == IS_VAR);
+			return _get_zval_ptr_var(node.var, execute_data, should_free);
+		}
+	} else {
+		*should_free = NULL;
+		if (op_type == IS_CONST) {
+			return EX_CONSTANT(node);
+		} else if (op_type == IS_CV) {
+			return _get_zval_ptr_cv_undef(execute_data, node.var);
 		} else {
 			return NULL;
 		}
@@ -2092,6 +2124,11 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 #else
 # define ZEND_VM_GUARD(name)
 #endif
+
+#define GET_OP1_UNDEF_CV(ptr, type) \
+	_get_zval_cv_lookup_ ## type(ptr, opline->op1.var, execute_data)
+#define GET_OP2_UNDEF_CV(ptr, type) \
+	_get_zval_cv_lookup_ ## type(ptr, opline->op2.var, execute_data)
 
 #include "zend_vm_execute.h"
 
