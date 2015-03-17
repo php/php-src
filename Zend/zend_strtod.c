@@ -216,7 +216,6 @@
 #define ULong uint32_t
 #endif
 
-
 #ifdef USE_LOCALE
 #include "locale.h"
 #endif
@@ -344,7 +343,7 @@ extern int strtod_diglim;
  * An alternative that might be better on some machines is
  * #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
  */
-#if defined(IEEE_8087) + defined(VAX)
+#if defined(IEEE_8087) + defined(VAX) + defined(__arm__)
 #define Storeinc(a,b,c) (((unsigned short *)a)[1] = (unsigned short)b, \
 ((unsigned short *)a)[0] = (unsigned short)c, a++)
 #else
@@ -4540,7 +4539,6 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 
 static void destroy_freelist(void)
 {
-#if 0
 	int i;
 	Bigint *tmp;
 
@@ -4554,7 +4552,6 @@ static void destroy_freelist(void)
 		freelist[i] = NULL;
 	}
 	FREE_DTOA_LOCK(0) 
-#endif
 }
 
 #ifdef __cplusplus

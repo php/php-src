@@ -1,3 +1,9 @@
+
+/* TODO check to undef this option, this might
+	make more perf. destroy_freelist() 
+	should be adapted then. */
+#define Omit_Private_Memory 1
+
 #if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
 #elif defined(HAVE_STDINT_H)
@@ -25,9 +31,9 @@ typedef unsigned long int uint32_t;
 #endif
 
 #ifdef WORDS_BIGENDIAN
-#define IEEE_BIG_ENDIAN
+#define IEEE_BIG_ENDIAN 1
 #else
-#define IEEE_LITTLE_ENDIAN
+#define IEEE_LITTLE_ENDIAN 1
 #endif
 
 #ifdef IEEE_LITTLE_ENDIAN
@@ -66,7 +72,6 @@ typedef unsigned long int uint32_t;
 #if defined(_MSC_VER)
 #define int32_t __int32
 #define uint32_t unsigned __int32
-#define IEEE_LITTLE_ENDIAN
 #endif
 
 #ifdef ZTS
@@ -88,4 +93,5 @@ typedef unsigned long int uint32_t;
 	
 
 #endif
+
 
