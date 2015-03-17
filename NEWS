@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.39
 
+- Core:
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+
 19 Feb 2015 PHP 5.4.38
 
 - Core:
