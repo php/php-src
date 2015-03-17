@@ -209,11 +209,15 @@ struct _zend_array {
 	((Bucket*)((char*)(data) + (idx)))
 # define HT_IDX_TO_HASH(idx) \
 	((idx) * sizeof(Bucket))
+# define HT_HASH_TO_IDX(idx) \
+	((idx) / sizeof(Bucket))
 #elif SIZEOF_SIZE_T == 8
 # define HT_MAX_SIZE 0x80000000
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((data) + (idx))
 # define HT_IDX_TO_HASH(idx) \
+	(idx)
+# define HT_HASH_TO_IDX(idx) \
 	(idx)
 #else
 # error "Unknown SIZEOF_SIZE_T"

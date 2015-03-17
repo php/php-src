@@ -807,6 +807,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
 		if (ht->u.flags & HASH_FLAG_INITIALIZED) {
+			ht->nNumUsed = 0;
 			HT_HASH_RESET(ht);
 		}
 		return SUCCESS;
@@ -864,15 +865,16 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 			HT_HASH(ht, p->h | ht->nTableMask) = Z_NEXT(p->val);
 		}
 	}
-	if (ht->nNumUsed - 1 == idx) {
+	if (HT_IDX_TO_HASH(ht->nNumUsed - 1) == idx) {
 		do {
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF));
 	}
 	ht->nNumOfElements--;
-	if (ht->nInternalPointer == idx || UNEXPECTED(ht->u.v.nIteratorsCount)) {
-		uint32_t new_idx = idx;
+	if (HT_IDX_TO_HASH(ht->nInternalPointer) == idx || UNEXPECTED(ht->u.v.nIteratorsCount)) {
+		uint32_t new_idx;
 
+		new_idx = idx = HT_HASH_TO_IDX(idx);
 		while (1) {
 			new_idx++;
 			if (new_idx >= ht->nNumUsed) {
@@ -1083,7 +1085,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h)
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
-				_zend_hash_del_el_ex(ht, h, p, NULL);
+				_zend_hash_del_el_ex(ht, HT_IDX_TO_HASH(h), p, NULL);
 				return SUCCESS;
 			}
 		}
