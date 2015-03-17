@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #67626 (User exceptions not properly handled in streams). 
     (Julian)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
+  . Fixed bug #68976 (Use After Free Vulnerability in unserialize()). (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
