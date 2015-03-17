@@ -1,4 +1,18 @@
 
+#ifdef ZTS
+#include <TSRM.h>
+#endif
+
+#include <stddef.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <math.h>
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
 /* TODO check to undef this option, this might
 	make more perf. destroy_freelist() 
 	should be adapted then. */
@@ -36,14 +50,6 @@ typedef unsigned long int uint32_t;
 #define IEEE_LITTLE_ENDIAN 1
 #endif
 
-#ifdef IEEE_LITTLE_ENDIAN
-#define IEEE_8087 1
-#endif
-
-#ifdef IEEE_BIG_ENDIAN
-#define IEEE_MC68k 1
-#endif
-
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
 #  undef WORDS_BIGENDIAN
@@ -67,6 +73,14 @@ typedef unsigned long int uint32_t;
 #ifdef __vax__
 #define VAX
 #undef IEEE_LITTLE_ENDIAN
+#endif
+
+#ifdef IEEE_LITTLE_ENDIAN
+#define IEEE_8087 1
+#endif
+
+#ifdef IEEE_BIG_ENDIAN
+#define IEEE_MC68k 1
 #endif
 
 #if defined(_MSC_VER)

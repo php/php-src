@@ -11,7 +11,7 @@
  * documentation for such software.
  *
  * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
- * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR AT&T MAKES ANY
+ * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR LUCENT MAKES ANY
  * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
  * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
  *
@@ -29,7 +29,7 @@
  * appropriate depends on the compiler; for this to work, it may be
  * necessary to #include "float.h" or another system-dependent header
  * file.
-   */
+ */
 
 /* strtod for IEEE-, VAX-, and IBM-arithmetic machines.
  * (Note that IEEE arithmetic is disabled by gcc's -ffast-math flag.)
@@ -63,9 +63,9 @@
  */
 
 /*
- * #define IEEE_LITTLE_ENDIAN for IEEE-arithmetic machines where the least
+ * #define IEEE_8087 for IEEE-arithmetic machines where the least
  *	significant byte has the lowest address.
- * #define IEEE_BIG_ENDIAN for IEEE-arithmetic machines where the most
+ * #define IEEE_MC68k for IEEE-arithmetic machines where the most
  *	significant byte has the lowest address.
  * #define Long int on machines with 32-bit ints and 64-bit longs.
  * #define IBM for IBM mainframe-style floating-point arithmetic.
@@ -186,28 +186,9 @@
  *	used for input more than STRTOD_DIGLIM digits long (default 40).
  */
 
-/* $Id$ */
-
 #include <zend_operators.h>
 #include <zend_strtod.h>
 #include "zend_strtod_int.h"
-
-#ifdef ZTS
-#include <TSRM.h>
-#endif
-
-#include <stddef.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <math.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#include "stdlib.h"
-#include "string.h"
 
 #ifndef Long
 #define Long int32_t
@@ -215,6 +196,15 @@
 #ifndef ULong
 #define ULong uint32_t
 #endif
+
+#ifdef DEBUG
+static void Bug(const char *message) {
+	fprintf(stderr, "%s\n", message);
+}
+#endif
+
+#include "stdlib.h"
+#include "string.h"
 
 #ifdef USE_LOCALE
 #include "locale.h"
@@ -553,22 +543,14 @@ Bigint {
 
  typedef struct Bigint Bigint;
 
-static Bigint *freelist[Kmax+1];
+ static Bigint *freelist[Kmax+1];
 
 static void destroy_freelist(void);
 
 #ifdef ZTS
-
 static MUTEX_T dtoa_mutex;
 static MUTEX_T pow5mult_mutex;
-
 #endif /* ZTS */
-
-#ifdef DEBUG
-static void Bug(const char *message) {
-	fprintf(stderr, "%s\n", message);
-}
-#endif
 
 ZEND_API int zend_startup_strtod(void) /* {{{ */
 {
@@ -1125,7 +1107,6 @@ cmp
 	return 0;
 	}
 
-
  static Bigint *
 diff
 #ifdef KR_headers
@@ -1410,14 +1391,14 @@ d2b
 				x[2] = z >> k & 0xffff;
 				x[3] = z >> k+16;
 				i = 3;
-			}
+				}
 		else {
 			x[0] = y & 0xffff;
 			x[1] = y >> 16;
 			x[2] = z & 0xffff;
 			x[3] = z >> 16;
 			i = 3;
-		}
+			}
 		}
 	else {
 #ifdef DEBUG
@@ -3682,7 +3663,7 @@ zend_freedtoa(char *s)
 	if (s == dtoa_result)
 		dtoa_result = 0;
 #endif
-}
+	}
 
 /* dtoa for IEEE arithmetic (dmg): convert double to ASCII string.
  *
