@@ -54,6 +54,8 @@
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
   . Added error_clear_last() function. (Reeze Xia)
+  . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
+    (Anatol)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
