@@ -1,3 +1,23 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Anatol Belski <ab@php.net>                                  |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef ZEND_STRTOD_INT_H
+#define ZEND_STRTOD_INT_H
 
 #ifdef ZTS
 #include <TSRM.h>
@@ -84,8 +104,12 @@ typedef unsigned long int uint32_t;
 #endif
 
 #if defined(_MSC_VER)
+#ifndef int32_t
 #define int32_t __int32
+#endif
+#ifndef uint32_t
 #define uint32_t unsigned __int32
+#endif
 #endif
 
 #ifdef ZTS
@@ -108,4 +132,5 @@ typedef unsigned long int uint32_t;
 
 #endif
 
+#endif /* ZEND_STRTOD_INT_H */
 
