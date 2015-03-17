@@ -2049,7 +2049,7 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 }
 /* }}} */
 
-#if HAVE_GCC_GLOBAL_REGS
+#ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
 #  define ZEND_VM_IP_GLOBAL_REG "%edi"
