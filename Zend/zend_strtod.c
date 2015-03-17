@@ -3792,7 +3792,7 @@ zend_dtoa
 
 #ifndef MULTIPLE_THREADS
 	if (dtoa_result) {
-		freedtoa(dtoa_result);
+		zend_freedtoa(dtoa_result);
 		dtoa_result = 0;
 		}
 #endif
