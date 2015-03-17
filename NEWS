@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
     (Dmitry, Laruence)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
+  . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
+    configuration options). (Anatol Belski)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
     __call/... arg passing). (Nikita)
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
@@ -28,6 +31,10 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
   . Fixed bug #69215 (Crypto servers should send client CA list)
     (Daniel Lowrey)
+
+- SOAP:
+  . Fixed bug #69085 (SoapClient's __call() type confusion through
+    unserialize()). (Dmitry)
 
 - SPL:
    . Fixed #69227 (Use after free in zval_scan caused by
