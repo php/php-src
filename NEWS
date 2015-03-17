@@ -4,6 +4,12 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+  . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
+    configuration options). (Anatol Belski)
+
+- SOAP:
+  . Fixed bug #69085 (SoapClient's __call() type confusion through
+    unserialize()). (Dmitry)
 
 19 Feb 2015 PHP 5.4.38
 
