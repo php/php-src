@@ -607,9 +607,6 @@ Balloc
 	unsigned int len;
 #endif
 
-	if (k > Kmax) {
-		zend_error(E_ERROR, "Balloc() allocation exceeds list boundary");
-	}
 	ACQUIRE_DTOA_LOCK(0);
 	/* The k > Kmax case does not need ACQUIRE_DTOA_LOCK(0), */
 	/* but this case seems very unlikely. */
