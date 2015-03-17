@@ -444,6 +444,10 @@ int phpdbg_compile(void) /* {{{ */
 	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS) {
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
 		zend_destroy_file_handle(&fh);
+		if (EG(exception)) {
+			zend_exception_error(EG(exception), E_ERROR);
+			zend_bailout();
+		}
 
 		phpdbg_notice("compile", "context=\"%s\"", "Successful compilation of %s", PHPDBG_G(exec));
 
