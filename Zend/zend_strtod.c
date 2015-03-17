@@ -619,6 +619,10 @@ Balloc
 		x = 1 << k;
 #ifdef Omit_Private_Memory
 		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(ULong));
+		if (!rv) {
+			FREE_DTOA_LOCK(0);
+			zend_error(E_ERROR, "Balloc() failed to allocate memory");
+		}
 #else
 		len = (sizeof(Bigint) + (x-1)*sizeof(ULong) + sizeof(double) - 1)
 			/sizeof(double);
@@ -628,6 +632,10 @@ Balloc
 			}
 		else
 			rv = (Bigint*)MALLOC(len*sizeof(double));
+			if (!rv) {
+				FREE_DTOA_LOCK(0);
+				zend_error(E_ERROR, "Balloc() failed to allocate memory");
+			}
 #endif
 		rv->k = k;
 		rv->maxwds = x;
@@ -2553,7 +2561,7 @@ zend_strtod
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, e, e1;
 	int esign, i, j, k, nd, nd0, nf, nz, nz0, nz1, sign;
 	CONST char *s, *s0, *s1;
-	double aadj, aadj1;
+	volatile double aadj, aadj1;
 	Long L;
 	U aadj2, adj, rv, rv0;
 	ULong y, z;
@@ -3756,9 +3764,9 @@ zend_dtoa
 		to hold the suppressed trailing zeros.
 	*/
 
-	int bbits, b2, b5, be, dig, i, ieps, ilim, ilim0, ilim1,
+	int bbits, b2, b5, be, dig, i, ieps, ilim = 0, ilim0, ilim1,
 		j, j1, k, k0, k_check, leftright, m2, m5, s2, s5,
-		spec_case, try_quick;
+		spec_case = 0, try_quick;
 	Long L;
 #ifndef Sudden_Underflow
 	int denorm;
