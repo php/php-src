@@ -10,10 +10,9 @@ $errnames = [
     E_WARNING => 'E_WARNING',
     E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
 ];
-$errored = true;
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames, &$errored) {
+
+set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
     echo "$errnames[$errno]: $errmsg on line $line\n";
-    $errored = true;
     return true;
 });
 
@@ -52,91 +51,131 @@ foreach ($functions as $type => $function) {
     echo PHP_EOL, "Testing '$type' typehint:", PHP_EOL;
     foreach ($values as $value) {
         $errored = false;
-        echo "*** Trying ", type($value), " value", PHP_EOL;
-        $result = $function($value);
-        if (!$errored) {
-            var_dump($result);
+        echo PHP_EOL . "*** Trying ", type($value), " value", PHP_EOL;
+        try {
+        	var_dump($function($value));
+        } catch (TypeException $e) {
+        	echo "*** Caught " . $e->getMessage() . PHP_EOL;
         }
     }
 }
+echo PHP_EOL . "Done";
+?>
 --EXPECTF--
-
 Testing 'int' typehint:
+
 *** Trying integer value
 int(1)
+
 *** Trying float value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d and defined in %s on line %d
+
 *** Trying string value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d and defined in %s on line %d
+
 *** Trying true value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying false value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying null value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d and defined in %s on line %d
+
 *** Trying array value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line %d and defined in %s on line %d
+
 *** Trying object value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d and defined in %s on line %d
+
 *** Trying resource value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line 53 and defined on line 18
+*** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d and defined in %s on line %d
 
 Testing 'float' typehint:
+
 *** Trying integer value
 float(1)
+
 *** Trying float value
 float(1)
+
 *** Trying string value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d and defined in %s on line %d
+
 *** Trying true value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying false value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying null value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d and defined in %s on line %d
+
 *** Trying array value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line %d and defined in %s on line %d
+
 *** Trying object value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d and defined in %s on line %d
+
 *** Trying resource value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, resource given, called in %s on line 53 and defined on line 19
+*** Caught Argument 1 passed to {closure}() must be of the type float, resource given, called in %s on line %d and defined in %s on line %d
 
 Testing 'string' typehint:
+
 *** Trying integer value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d and defined in %s on line %d
+
 *** Trying float value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d and defined in %s on line %d
+
 *** Trying string value
 string(1) "1"
+
 *** Trying true value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying false value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d and defined in %s on line %d
+
 *** Trying null value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d and defined in %s on line %d
+
 *** Trying array value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line %d and defined in %s on line %d
+
 *** Trying object value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d and defined in %s on line %d
+
 *** Trying resource value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, resource given, called in %s on line 53 and defined on line 20
+*** Caught Argument 1 passed to {closure}() must be of the type string, resource given, called in %s on line %d and defined in %s on line %d
 
 Testing 'bool' typehint:
+
 *** Trying integer value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d and defined in %s on line %d
+
 *** Trying float value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d and defined in %s on line %d
+
 *** Trying string value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d and defined in %s on line %d
+
 *** Trying true value
 bool(true)
+
 *** Trying false value
 bool(false)
+
 *** Trying null value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d and defined in %s on line %d
+
 *** Trying array value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line %d and defined in %s on line %d
+
 *** Trying object value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d and defined in %s on line %d
+
 *** Trying resource value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line 53 and defined on line 21
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line %d and defined in %s on line %d
+
+Done

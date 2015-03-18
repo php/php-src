@@ -26,25 +26,22 @@ $functions = [
 
 foreach ($functions as $type => $function) {
     echo "Testing $type:", PHP_EOL;
-    var_dump($function());
+    try {
+    	var_dump($function());
+    } catch (TypeException $e) {
+    	echo "*** Caught " . $e->getMessage() . PHP_EOL;
+    }
 }
+echo PHP_EOL . "Done";
 --EXPECTF--
 Testing int:
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type integer, none given, called in %s on line %d and defined on line %d
-E_NOTICE: Undefined variable: i on line %d
-NULL
+*** Caught Argument 1 passed to {closure}() must be of the type integer, none given, called in %s on line %d and defined in %s on line %d
 Testing float:
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, none given, called in %s on line %d and defined on line %d
-E_NOTICE: Undefined variable: f on line %d
-NULL
+*** Caught Argument 1 passed to {closure}() must be of the type float, none given, called in %s on line %d and defined in %s on line %d
 Testing string:
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type string, none given, called in %s on line %d and defined on line %d
-E_NOTICE: Undefined variable: s on line %d
-NULL
+*** Caught Argument 1 passed to {closure}() must be of the type string, none given, called in %s on line %d and defined in %s on line %d
 Testing bool:
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type boolean, none given, called in %s on line %d and defined on line %d
-E_NOTICE: Undefined variable: b on line %d
-NULL
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, none given, called in %s on line %d and defined in %s on line %d
 Testing int nullable:
 NULL
 Testing float nullable:
@@ -53,3 +50,5 @@ Testing string nullable:
 NULL
 Testing bool nullable:
 NULL
+
+Done

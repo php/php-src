@@ -50,11 +50,17 @@ foreach ($functions as $type => $function) {
     foreach ($values as $value) {
         echo "*** Trying ";
         var_dump($value);
-        var_dump($function($value));
+        try {
+        	var_dump($function($value));
+        } catch (TypeException $e) {
+        	echo "*** Caught " . $e->getMessage() . PHP_EOL;
+        }
     }
 }
---EXPECTF--
 
+echo PHP_EOL . "Done";
+?>
+--EXPECTF--
 Testing 'int' typehint:
 *** Trying int(1)
 int(1)
@@ -68,41 +74,30 @@ int(1)
 E_NOTICE: A non well formed numeric value encountered on line %d
 int(1)
 *** Trying string(1) "a"
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, string returned on line %d
-string(1) "a"
+*** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
 *** Trying string(0) ""
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, string returned on line %d
-string(0) ""
-*** Trying int(%d)
-int(%d)
+*** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
+*** Trying int(9223372036854775807)
+int(9223372036854775807)
 *** Trying float(NAN)
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, float returned on line %d
-float(NAN)
+*** Caught Return value of {closure}() must be of the type integer, float returned in %s on line %d
 *** Trying bool(true)
 int(1)
 *** Trying bool(false)
 int(0)
 *** Trying NULL
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, null returned on line %d
-NULL
+*** Caught Return value of {closure}() must be of the type integer, null returned in %s on line %d
 *** Trying array(0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, array returned on line %d
-array(0) {
+*** Caught Return value of {closure}() must be of the type integer, array returned in %s on line %d
+*** Trying object(stdClass)#6 (0) {
 }
-*** Trying object(stdClass)#%s (0) {
+*** Caught Return value of {closure}() must be of the type integer, object returned in %s on line %d
+*** Trying object(Stringable)#7 (0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, object returned on line %d
-object(stdClass)#%s (0) {
-}
-*** Trying object(Stringable)#%s (0) {
-}
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, object returned on line %d
-object(Stringable)#%s (0) {
-}
-*** Trying resource(%d) of type (stream)
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type integer, resource returned on line %d
-resource(%d) of type (stream)
+*** Caught Return value of {closure}() must be of the type integer, object returned in %s on line %d
+*** Trying resource(5) of type (stream)
+*** Caught Return value of {closure}() must be of the type integer, resource returned in %s on line %d
 
 Testing 'float' typehint:
 *** Trying int(1)
@@ -117,13 +112,11 @@ float(1.5)
 E_NOTICE: A non well formed numeric value encountered on line %d
 float(1)
 *** Trying string(1) "a"
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, string returned on line %d
-string(1) "a"
+*** Caught Return value of {closure}() must be of the type float, string returned in %s on line %d
 *** Trying string(0) ""
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, string returned on line %d
-string(0) ""
-*** Trying int(%d)
-float(%s)
+*** Caught Return value of {closure}() must be of the type float, string returned in %s on line %d
+*** Trying int(9223372036854775807)
+float(9.2233720368548E+18)
 *** Trying float(NAN)
 float(NAN)
 *** Trying bool(true)
@@ -131,26 +124,18 @@ float(1)
 *** Trying bool(false)
 float(0)
 *** Trying NULL
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, null returned on line %d
-NULL
+*** Caught Return value of {closure}() must be of the type float, null returned in %s on line %d
 *** Trying array(0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, array returned on line %d
-array(0) {
+*** Caught Return value of {closure}() must be of the type float, array returned in %s on line %d
+*** Trying object(stdClass)#6 (0) {
 }
-*** Trying object(stdClass)#%s (0) {
+*** Caught Return value of {closure}() must be of the type float, object returned in %s on line %d
+*** Trying object(Stringable)#7 (0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, object returned on line %d
-object(stdClass)#%s (0) {
-}
-*** Trying object(Stringable)#%s (0) {
-}
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, object returned on line %d
-object(Stringable)#%s (0) {
-}
-*** Trying resource(%d) of type (stream)
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type float, resource returned on line %d
-resource(%d) of type (stream)
+*** Caught Return value of {closure}() must be of the type float, object returned in %s on line %d
+*** Trying resource(5) of type (stream)
+*** Caught Return value of {closure}() must be of the type float, resource returned in %s on line %d
 
 Testing 'string' typehint:
 *** Trying int(1)
@@ -167,8 +152,8 @@ string(2) "1a"
 string(1) "a"
 *** Trying string(0) ""
 string(0) ""
-*** Trying int(%d)
-string(%d) "%d"
+*** Trying int(9223372036854775807)
+string(19) "9223372036854775807"
 *** Trying float(NAN)
 string(3) "NAN"
 *** Trying bool(true)
@@ -176,24 +161,18 @@ string(1) "1"
 *** Trying bool(false)
 string(0) ""
 *** Trying NULL
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type string, null returned on line %d
-NULL
+*** Caught Return value of {closure}() must be of the type string, null returned in %s on line %d
 *** Trying array(0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type string, array returned on line %d
-array(0) {
+*** Caught Return value of {closure}() must be of the type string, array returned in %s on line %d
+*** Trying object(stdClass)#6 (0) {
 }
-*** Trying object(stdClass)#%s (0) {
-}
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type string, object returned on line %d
-object(stdClass)#%s (0) {
-}
-*** Trying object(Stringable)#%s (0) {
+*** Caught Return value of {closure}() must be of the type string, object returned in %s on line %d
+*** Trying object(Stringable)#7 (0) {
 }
 string(6) "foobar"
-*** Trying resource(%d) of type (stream)
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type string, resource returned on line %d
-resource(%d) of type (stream)
+*** Trying resource(5) of type (stream)
+*** Caught Return value of {closure}() must be of the type string, resource returned in %s on line %d
 
 Testing 'bool' typehint:
 *** Trying int(1)
@@ -210,7 +189,7 @@ bool(true)
 bool(true)
 *** Trying string(0) ""
 bool(false)
-*** Trying int(%d)
+*** Trying int(9223372036854775807)
 bool(true)
 *** Trying float(NAN)
 bool(true)
@@ -219,23 +198,17 @@ bool(true)
 *** Trying bool(false)
 bool(false)
 *** Trying NULL
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type boolean, null returned on line %d
-NULL
+*** Caught Return value of {closure}() must be of the type boolean, null returned in %s on line %d
 *** Trying array(0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type boolean, array returned on line %d
-array(0) {
+*** Caught Return value of {closure}() must be of the type boolean, array returned in %s on line %d
+*** Trying object(stdClass)#6 (0) {
 }
-*** Trying object(stdClass)#%s (0) {
+*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Trying object(Stringable)#7 (0) {
 }
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type boolean, object returned on line %d
-object(stdClass)#%s (0) {
-}
-*** Trying object(Stringable)#%s (0) {
-}
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type boolean, object returned on line %d
-object(Stringable)#%s (0) {
-}
-*** Trying resource(%d) of type (stream)
-E_RECOVERABLE_ERROR: Return value of {closure}() must be of the type boolean, resource returned on line %d
-resource(%d) of type (stream)
+*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Trying resource(5) of type (stream)
+*** Caught Return value of {closure}() must be of the type boolean, resource returned in %s on line %d
+
+Done

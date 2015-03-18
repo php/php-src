@@ -867,8 +867,9 @@ ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need
 		fclass = "";
 	}
 
-	zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
-		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
+	zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned in %s on line %d",
+		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind,
+		zf->op_array.filename->val, EG(current_execute_data)->opline->lineno);
 }
 
 #if ZEND_DEBUG
