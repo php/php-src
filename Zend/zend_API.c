@@ -157,6 +157,7 @@ ZEND_API void zend_wrong_param_count(void) /* {{{ */
 		zend_wrong_param_count_ex(0);
 	}
 }
+/* }}} */
 
 ZEND_API void zend_wrong_param_count_ex(zend_bool strict) /* {{{ */
 {
