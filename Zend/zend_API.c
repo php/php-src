@@ -149,7 +149,16 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array) /
 }
 /* }}} */
 
-ZEND_API void _zend_wrong_param_count(zend_bool strict) /* {{{ */
+ZEND_API void zend_wrong_param_count(void) /* {{{ */
+{
+	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+		zend_wrong_param_count_ex(1);
+	} else {
+		zend_wrong_param_count_ex(0);
+	}
+}
+
+ZEND_API void zend_wrong_param_count_ex(zend_bool strict) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);

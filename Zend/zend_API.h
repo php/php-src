@@ -296,7 +296,8 @@ ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zen
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
 
-ZEND_API void _zend_wrong_param_count(zend_bool strict);
+ZEND_API void zend_wrong_param_count(void);
+ZEND_API void zend_wrong_param_count_ex(zend_bool strict);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
 #define IS_CALLABLE_CHECK_NO_ACCESS   (1<<1)
@@ -354,15 +355,12 @@ ZEND_API char *zend_get_type_by_const(int type);
 #define getThis()							(Z_OBJ(EX(This)) ? &EX(This) : NULL)
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
-#define WRONG_PARAM_COUNT					_ZEND_WRONG_PARAM_COUNT((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0)
-#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	_ZEND_WRONG_PARAM_COUNT_WITH_RETVAL((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0, ret)
+#define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
+#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL()
 #define ARG_COUNT(dummy)					EX_NUM_ARGS()
 #define ZEND_NUM_ARGS()						EX_NUM_ARGS()
-/* These are prefixed with underscores for a reason: don't use them directly
- * Use WRONG_PARAM_COUNT;
- */
-#define _ZEND_WRONG_PARAM_COUNT(strict)						{ _zend_wrong_param_count(strict); return; }
-#define _ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(strict, ret)		{ _zend_wrong_param_count(strict); return ret; }
+#define ZEND_WRONG_PARAM_COUNT()				{ zend_wrong_param_count(); return; }
+#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
