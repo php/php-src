@@ -220,9 +220,17 @@ PHP_FUNCTION(krsort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	php_set_compare_func(sort_type);
 
@@ -925,12 +933,12 @@ PHP_FUNCTION(current)
 	zval *entry;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H/", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H", &array) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
@@ -953,12 +961,12 @@ PHP_FUNCTION(key)
 	HashTable *array;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H/", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H", &array) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_HT(array)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
@@ -1264,7 +1272,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 					RETURN_TRUE;
 				} else {
 					if (str_idx) {
-						RETVAL_STR(zend_string_copy(str_idx));
+						RETVAL_STR_COPY(str_idx);
 					} else {
 						RETVAL_LONG(num_idx);
 					}
@@ -1281,7 +1289,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -1296,7 +1304,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -1311,7 +1319,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 						RETURN_TRUE;
 					} else {
 						if (str_idx) {
-							RETVAL_STR(zend_string_copy(str_idx));
+							RETVAL_STR_COPY(str_idx);
 						} else {
 							RETVAL_LONG(num_idx);
 						}
@@ -2095,7 +2103,6 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 	in_hash->nNumOfElements    = out_hash.nNumOfElements;
 	in_hash->nNextFreeElement  = out_hash.nNextFreeElement;
 	in_hash->arData            = out_hash.arData;
-	in_hash->arHash            = out_hash.arHash;
 	in_hash->pDestructor       = out_hash.pDestructor;
 
 	zend_hash_internal_pointer_reset(in_hash);
@@ -2375,7 +2382,6 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->nNumOfElements    = new_hash.nNumOfElements;
 	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
-	Z_ARRVAL_P(stack)->arHash            = new_hash.arHash;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
 	
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
@@ -4589,7 +4595,7 @@ PHP_FUNCTION(array_rand)
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (string_key) {
-					RETURN_STR(zend_string_copy(string_key));
+					RETURN_STR_COPY(string_key);
 				} else {
 					RETURN_LONG(num_key);
 				}

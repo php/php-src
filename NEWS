@@ -24,7 +24,8 @@
     non-object"`. (Timm)
   . Added options parameter for unserialize allowing to specify acceptable
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
-  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly
+    triggered). (Julien)
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
@@ -36,27 +37,42 @@
   . Added ?? operator. (Andrea)
   . Added <=> operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
-  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
-  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
-  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
+  . Fixed oversight where define() did not support arrays yet const syntax did.
+    (Andrea, Dmitry)
+  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint
+    and conversion error messages. (Andrea)
+  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output
+    buffering handler). (Kalle)
   . Removed scoped calls of non-static methods from an incompatible $this
     context. (Nikita)
   . Removed support for #-style comments in ini files. (Nikita)
   . Removed support for assigning the result of new by reference. (Nikita)
-  . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
+  . Invalid octal literals in source code now produce compile errors, fixes
+    PHPSadness #31. (Andrea)
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Added error_clear_last() function. (Reeze Xia)
+  . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
+    (Anatol)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
+  . Removed support for unsafe file uploads. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
   . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
-
+  . Removed date.timezone warning
+    (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
+  . Added "v" DateTime format modifier to get the 3-digit version of fraction 
+    of seconds. (Mariano Iglesias)
+  . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
+    RFC3339 Extended format which includes fraction of seconds (Mariano 
+    Iglesias)
+	
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
@@ -74,7 +90,7 @@
   . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
 
 - FPM:
-  . Fixed bug #68945 (Unknown admin values segfault pools) (Laruence)
+  . Fixed bug #68945 (Unknown admin values segfault pools). (Laruence)
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
@@ -89,6 +105,8 @@
 
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
+  . Removed mcrypt_generic_end() alias. (Nikita)
+  . Removed mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb(), mcrypt_ofb(). (Nikita)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
@@ -97,12 +115,15 @@
     + Opcache). (Laruence)
 
 - OpenSSL:
-  . Fixed bug #61285, #68329, #68046, #41631: encrypted streams don't observe
-    socket timeouts (Brad Broerman)
+  . Added "alpn_protocols" SSL context option allowing encrypted client/server
+    streams to negotiate alternative protocols using the ALPN TLS extension when
+    built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
+    accessible through stream_get_meta_data() output.
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
+  . Added wifcontinued and wcontinued. (xilon-jul)
 
 - PCRE:
   . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
@@ -120,11 +141,10 @@
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
-  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
+  . Fixed bug #68941 (mod_files.sh is a bash-script). (bugzilla at ii.nl, Yasuo)
 
 - SOAP:
-  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
-    (Laruence)
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes). (Laruence)
 
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
@@ -156,5 +176,6 @@
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+  . Removed xsl.security_prefs ini option. (Nikita)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -99,7 +99,7 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 		break;
 
 		case ADDR_PARAM:
-			asprintf(pointer, "%#llx", param->addr);
+			asprintf(pointer, ZEND_ULONG_FMT, param->addr);
 		break;
 
 		case NUMERIC_PARAM:
@@ -329,7 +329,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			break;
 
 			case ADDR_PARAM:
-				fprintf(stderr, "%s ADDR_PARAM(%llu)\n", msg, param->addr);
+				fprintf(stderr, "%s ADDR_PARAM(" ZEND_ULONG_FMT ")\n", msg, param->addr);
 			break;
 
 			case NUMERIC_FILE_PARAM:

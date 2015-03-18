@@ -102,4 +102,6 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Catchable fatal error: Argument 1 passed to VariableStream::__construct() must be of the type array, none given in %s on line %d
+Warning: fopen(var://myvar): failed to open stream: "VariableStream::stream_open" call failed in %sbug38450_3.php on line %d
+
+Fatal error: Argument 1 passed to VariableStream::__construct() must be of the type array, none given in %s on line %d

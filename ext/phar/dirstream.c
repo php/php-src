@@ -300,7 +300,7 @@ PHAR_ADD_ENTRY:
 /**
  * Open a directory handle within a phar archive
  */
-php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
 	php_stream *ret;

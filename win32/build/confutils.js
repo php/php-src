@@ -105,6 +105,7 @@ var PHP_RELEASE_VERSION = 0;
 var PHP_EXTRA_VERSION = "";
 var PHP_VERSION_STRING = "5.0.0";
 
+/* Get version numbers and DEFINE as a string */
 function get_version_numbers()
 {
 	var cin = file_get_contents("configure.in");
@@ -906,7 +907,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (typeof(p) == "string") {
 		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
 	} else if (p == false) {
-		/* not found in the defaults or the explicit paths,
+		/* Not found in the defaults or the explicit paths,
 		 * so check the general extra includes; if we find
 		 * it here, no need to add another /I for it as we
 		 * already have it covered, unless we are adding
@@ -935,7 +936,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
-/* emits rule to generate version info for a SAPI
+/* Emits rule to generate version info for a SAPI
  * or extension.  Returns the name of the .res file
  * that will be generated */
 function generate_version_info_resource(makefiletarget, basename, creditspath, sapi)
@@ -1036,7 +1037,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 
 /* Check if PGO is enabled for given module. To disable PGO for a particular module,
 define a global variable by the following name scheme before SAPI() or EXTENSION() call
-	var PHP_MYMODULE_PGO = false; */
+var PHP_MYMODULE_PGO = false; */
 function is_pgo_desired(mod)
 {
 	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
@@ -1576,7 +1577,7 @@ function output_as_table(header, ar_out)
 	for (j=0; j < l; j++) {
 		var tmax, tmin;
 
-		/*Figure out the max length per column */
+		/* Figure out the max length per column */
 		tmin = 0;
 		tmax = 0;
 		for (k = 0; k < ar_out.length; k++) {
@@ -1934,6 +1935,7 @@ function generate_config_h()
 	outfile.Close();
 }
 
+/* Generate phpize */
 function generate_phpize()
 {
 	STDOUT.WriteLine("Generating phpize");
@@ -1984,6 +1986,7 @@ function generate_phpize()
 	CJ.Close();
 }
 
+/* Generate the Makefile */
 function generate_makefile()
 {
 	STDOUT.WriteLine("Generating Makefile");
@@ -2033,6 +2036,7 @@ function generate_makefile()
 			var lib = "php_" + extensions_enabled[i][0] + ".lib";
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
 		}
 	} else {
@@ -2266,6 +2270,7 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
+/* Install Headers */
 function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
@@ -2318,7 +2323,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 	}
 }
 
-// for snapshot builders, this option will attempt to enable everything
+// For snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
 // by running "nmake snap"
 PHP_SNAPSHOT_BUILD = "no";
@@ -2330,7 +2335,6 @@ if (!MODE_PHPIZE) {
 	// compiler processes.
 	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
-
 
 function toolset_option_handle()
 {
@@ -2442,7 +2446,7 @@ function toolset_setup_project_tools()
 		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
 	}
 }
-
+/* Get compiler if the toolset is supported */
 function toolset_get_compiler()
 {
 	if (VS_TOOLSET) {
@@ -2456,6 +2460,7 @@ function toolset_get_compiler()
 	ERROR("Unsupported toolset");
 }
 
+/* Get compiler version if the toolset is supported */
 function toolset_get_compiler_version()
 {
 	var version;
@@ -2491,6 +2496,7 @@ function toolset_get_compiler_version()
 	ERROR("Failed to parse compiler version or unsupported toolset");
 }
 
+/* Get compiler name if the toolset is supported */
 function toolset_get_compiler_name()
 {
 	var version;
@@ -2817,4 +2823,3 @@ function trim(s)
 {
 	return s.replace(/^\s+/, "").replace(/\s+$/, "");
 }
-

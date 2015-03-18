@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_exceptions.h"
+#include "zend_vm.h"
 #include "phpdbg.h"
 
 #include "phpdbg_help.h"
@@ -40,6 +41,10 @@
 #include "phpdbg_parser.h"
 #include "phpdbg_wait.h"
 #include "phpdbg_eol.h"
+
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL
+#error "phpdbg can only be built with CALL zend vm kind"
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 extern int phpdbg_startup_run;
@@ -439,6 +444,10 @@ int phpdbg_compile(void) /* {{{ */
 	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS) {
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
 		zend_destroy_file_handle(&fh);
+		if (EG(exception)) {
+			zend_exception_error(EG(exception), E_ERROR);
+			zend_bailout();
+		}
 
 		phpdbg_notice("compile", "context=\"%s\"", "Successful compilation of %s", PHPDBG_G(exec));
 
@@ -1454,10 +1463,13 @@ next:
 		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		/* stupid hack to make zend_do_fcall_common_helper return ZEND_VM_ENTER() instead of recursively calling zend_execute() and eventually segfaulting */
-		if (execute_data->opline->opcode == ZEND_DO_FCALL && execute_data->func->type == ZEND_USER_FUNCTION) {
+		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
+		     execute_data->opline->opcode == ZEND_DO_UCALL ||
+		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
+		    execute_data->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
-		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data);
+		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		
 		zend_execute_ex = phpdbg_execute_ex;
 
 		if (PHPDBG_G(vmret) != 0) {

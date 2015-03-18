@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -235,7 +235,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake = {{0}};
 	zend_op_array *ret;
-	char *filename = (char *)(file->opened_path ? file->opened_path : file->filename);
+	char *filename = (char *)(file->opened_path ? file->opened_path->val : file->filename);
 	uint line;
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];

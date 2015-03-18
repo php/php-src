@@ -38,4 +38,4 @@ bool(false)
 Warning: intlcal_set(): intlcal_set: invalid field in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_set() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_set() must be an instance of IntlCalendar, integer given in %s on line %d

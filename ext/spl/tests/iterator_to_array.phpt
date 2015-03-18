@@ -22,4 +22,4 @@ Warning: iterator_to_array() expects at least 1 parameter, 0 given in %s
 
 Warning: iterator_to_array() expects at most 2 parameters, 3 given in %s
 
-Catchable fatal error: Argument 1 passed to iterator_to_array() must implement interface Traversable, %unicode_string_optional% given %s
+Fatal error: Argument 1 passed to iterator_to_array() must implement interface Traversable, %unicode_string_optional% given %s

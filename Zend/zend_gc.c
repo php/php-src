@@ -137,7 +137,7 @@ ZEND_API void gc_init(void)
 	}
 }
 
-ZEND_API void gc_possible_root(zend_refcounted *ref)
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
 	if (UNEXPECTED(GC_TYPE(ref) == IS_NULL) || UNEXPECTED(CG(unclean_shutdown))) {
 		return;
@@ -189,7 +189,7 @@ ZEND_API void gc_possible_root(zend_refcounted *ref)
 	}
 }
 
-ZEND_API void gc_remove_from_buffer(zend_refcounted *ref)
+ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
 

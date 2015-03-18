@@ -41,4 +41,4 @@ Warning: intlcal_get_weekend_transition() expects exactly 2 parameters, 1 given 
 Warning: intlcal_get_weekend_transition(): intlcal_get_weekend_transition: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_weekend_transition() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_weekend_transition() must be an instance of IntlCalendar, integer given in %s on line %d

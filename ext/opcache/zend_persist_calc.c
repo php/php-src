@@ -57,11 +57,8 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
-	} else {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(uint32_t) * ht->nTableSize);
-	}
+
+	ADD_SIZE(HT_USED_SIZE(ht));
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
@@ -247,18 +244,35 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 static void zend_persist_op_array_calc(zval *zv)
 {
-	ADD_ARENA_SIZE(sizeof(zend_op_array));
-	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	zend_op_array *op_array = Z_PTR_P(zv);
+
+	if (op_array->type == ZEND_USER_FUNCTION/* &&
+	    (!op_array->refcount || *(op_array->refcount) > 1)*/) {
+		zend_op_array *old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+		if (old_op_array) {
+			Z_PTR_P(zv) = old_op_array;
+		} else {
+			ADD_ARENA_SIZE(sizeof(zend_op_array));
+			zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+			zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+		}
+	} else {
+		ADD_ARENA_SIZE(sizeof(zend_op_array));
+		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	}
 }
 
 static void zend_persist_property_info_calc(zval *zv)
 {
 	zend_property_info *prop = Z_PTR_P(zv);
 
-	ADD_ARENA_SIZE(sizeof(zend_property_info));
-	ADD_INTERNED_STRING(prop->name, 0);
-	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
-		ADD_STRING(prop->doc_comment);
+	if (!zend_shared_alloc_get_xlat_entry(prop)) {
+		zend_shared_alloc_register_xlat_entry(prop, prop);
+		ADD_ARENA_SIZE(sizeof(zend_property_info));
+		ADD_INTERNED_STRING(prop->name, 0);
+		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
+			ADD_STRING(prop->doc_comment);
+		}
 	}
 }
 
@@ -358,7 +372,9 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
-	ADD_DUP_SIZE(key, key_length + 1);
+	if (key) {
+		ADD_DUP_SIZE(key, key_length + 1);
+	}
 	ADD_STRING(new_persistent_script->full_path);
 
 #ifdef __SSE2__

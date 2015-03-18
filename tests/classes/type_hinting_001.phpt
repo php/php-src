@@ -35,4 +35,4 @@ $a->b($b);
 ?>
 --EXPECTF--
 
-Catchable fatal error: Argument 1 passed to FooBar::a() must implement interface Foo, instance of Blort given, called in %s on line 27 and defined in %s on line 12
+Fatal error: Argument 1 passed to FooBar::a() must implement interface Foo, instance of Blort given, called in %s on line 27 and defined in %s on line 12

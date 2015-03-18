@@ -277,7 +277,10 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
-	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
+	(*thread_resources_ptr)->storage = NULL;
+	if (id_count > 0) {
+		(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
+	}
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;

@@ -1,6 +1,6 @@
 {%DEFINES%}
 
-ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data)
+ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 {
 	DCL_OPLINE
 
@@ -12,12 +12,6 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data)
 
 	while (1) {
     {%ZEND_VM_CONTINUE_LABEL%}
-#ifdef ZEND_WIN32
-		if (EG(timed_out)) {
-			zend_timeout(0);
-		}
-#endif
-
 		{%ZEND_VM_DISPATCH%} {
 			{%INTERNAL_EXECUTOR%}
 		}

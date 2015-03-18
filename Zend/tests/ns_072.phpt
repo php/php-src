@@ -30,4 +30,4 @@ object(foo\test)#%d (0) {
 }
 NULL
 
-Catchable fatal error: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo, instance of stdClass given, called in %s on line %d and defined in %s on line %d
+Fatal error: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo, instance of stdClass given, called in %s on line %d and defined in %s on line %d

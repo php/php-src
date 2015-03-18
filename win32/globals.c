@@ -32,6 +32,10 @@ void php_win32_core_globals_ctor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
+
+	wg->mail_socket = INVALID_SOCKET;
+
+	wg->log_source = INVALID_HANDLE_VALUE;
 }
 
 void php_win32_core_globals_dtor(void *vg)
@@ -50,6 +54,11 @@ void php_win32_core_globals_dtor(void *vg)
 		zend_hash_destroy(wg->registry_directories);
 		free(wg->registry_directories);
 		wg->registry_directories = NULL;
+	}
+
+	if (INVALID_SOCKET != wg->mail_socket) {
+		closesocket(wg->mail_socket);
+		wg->mail_socket = INVALID_SOCKET;
 	}
 }
 

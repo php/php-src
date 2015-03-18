@@ -900,14 +900,14 @@ ZEND_FUNCTION(get_class)
 
 	if (!obj) {
 		if (EG(scope)) {
-			RETURN_STR(zend_string_copy(EG(scope)->name));
+			RETURN_STR_COPY(EG(scope)->name);
 		} else {
 			zend_error(E_WARNING, "get_class() called without object from outside a class");
 			RETURN_FALSE;
 		}
 	}
 
-	RETURN_STR(zend_string_copy(Z_OBJCE_P(obj)->name));
+	RETURN_STR_COPY(Z_OBJCE_P(obj)->name);
 }
 /* }}} */
 
@@ -920,7 +920,7 @@ ZEND_FUNCTION(get_called_class)
 	}
 
 	if (EX(called_scope)) {
-		RETURN_STR(zend_string_copy(EX(called_scope)->name));
+		RETURN_STR_COPY(EX(called_scope)->name);
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}
@@ -942,7 +942,7 @@ ZEND_FUNCTION(get_parent_class)
 	if (!ZEND_NUM_ARGS()) {
 		ce = EG(scope);
 		if (ce && ce->parent) {
-			RETURN_STR(zend_string_copy(ce->parent->name));
+			RETURN_STR_COPY(ce->parent->name);
 		} else {
 			RETURN_FALSE;
 		}
@@ -955,7 +955,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (ce && ce->parent) {
-		RETURN_STR(zend_string_copy(ce->parent->name));
+		RETURN_STR_COPY(ce->parent->name);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1950,7 +1950,7 @@ ZEND_FUNCTION(create_function)
 		do {
 			function_name->len = snprintf(function_name->val + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
 		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
-		RETURN_STR(function_name);
+		RETURN_NEW_STR(function_name);
 	} else {
 		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
 		RETURN_FALSE;
@@ -2258,6 +2258,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 		    skip->prev_execute_data->func &&
 		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
 		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}
@@ -2453,6 +2456,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		    skip->prev_execute_data->func &&
 		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
 		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}

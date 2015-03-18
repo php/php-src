@@ -359,11 +359,7 @@ PHP_FUNCTION(flock)
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-#ifdef PHP_WIN32
-		if (operation && errno == ERROR_INVALID_BLOCK && wouldblock) {
-#else
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
-#endif
 			ZVAL_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;
@@ -806,7 +802,7 @@ PHP_FUNCTION(tempnam)
 {
 	char *dir, *prefix;
 	size_t dir_len, prefix_len;
-	char *opened_path;
+	zend_string *opened_path;
 	int fd;
 	zend_string *p;
 
@@ -827,9 +823,7 @@ PHP_FUNCTION(tempnam)
 
 	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1)) >= 0) {
 		close(fd);
-		// TODO: avoid reallocation ???
-		RETVAL_STRING(opened_path);
-		efree(opened_path);
+		RETVAL_STR(opened_path);
 	}
 	zend_string_release(p);
 }

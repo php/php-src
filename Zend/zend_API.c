@@ -153,8 +153,9 @@ ZEND_API void _zend_wrong_param_count(zend_bool strict) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
+	zend_error(error_type, "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
 }
 /* }}} */
 
@@ -238,8 +239,9 @@ ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, in
 {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+	zend_error(error_type, "%s%s%s() expects %s %d parameter%s, %d given",
 		class_name, \
 		class_name[0] ? "::" : "", \
 		active_function->common.function_name->val,
@@ -258,8 +260,9 @@ ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected
 		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
 		NULL
 	};
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
 }
 /* }}} */
@@ -268,8 +271,9 @@ ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg, zen
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
 }
 /* }}} */
@@ -288,6 +292,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error) /* {
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null, zend_bool strict) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
@@ -300,7 +305,7 @@ ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, in
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
 
-			zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+			zend_error(error_type, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
 				class_name, space, get_active_function_name(), num,
 				ce_base->name->val, Z_STRVAL_P(arg));
 			*pce = NULL;
@@ -311,7 +316,7 @@ ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, in
 		const char *space;
 		const char *class_name = get_active_class_name(&space);
 
-		zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+		zend_error(error_type, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
 			class_name, space, get_active_function_name(), num,
 			Z_STRVAL_P(arg));
 		return 0;
@@ -540,7 +545,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					break;
 				} else {
 					if (is_callable_error) {
-						*severity = strict ? E_RECOVERABLE_ERROR : E_WARNING;
+						*severity = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 						zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
 						efree(is_callable_error);
 						return "";
@@ -575,7 +580,8 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 {
 	const char *expected_type = NULL;
 	char *error = NULL;
-	int severity = strict ? E_RECOVERABLE_ERROR : E_WARNING;
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
+	int severity;
 
 	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity, strict);
 	if (expected_type) {
@@ -584,11 +590,11 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 			const char *class_name = get_active_class_name(&space);
 
 			if (error) {
-				zend_error(severity, "%s%s%s() expects parameter %d %s",
+				zend_error(error_type, "%s%s%s() expects parameter %d %s",
 						class_name, space, get_active_function_name(), arg_num, error);
 				efree(error);
 			} else {
-				zend_error(severity, "%s%s%s() expects parameter %d to be %s, %s given",
+				zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
 						class_name, space, get_active_function_name(), arg_num, expected_type,
 						zend_zval_type_name(arg));
 			}
@@ -630,6 +636,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	zend_bool have_varargs = 0;
 	zval **varargs = NULL;
 	int *n_varargs = NULL;
+	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -662,7 +669,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 					if (!quiet) {
 						zend_function *active_function = EG(current_execute_data)->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-						zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
+						
+						zend_error(error_type, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
 								class_name[0] ? "::" : "",
 								active_function->common.function_name->val);
@@ -682,7 +690,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				if (!quiet) {
 					zend_function *active_function = EG(current_execute_data)->func;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-					zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
+					zend_error(error_type, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
 							class_name[0] ? "::" : "",
 							active_function->common.function_name->val);
@@ -705,7 +713,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		if (!quiet) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-			zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+			zend_error(error_type, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
 					active_function->common.function_name->val,
@@ -720,7 +728,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
-		zend_error(strict ? E_RECOVERABLE_ERROR : E_WARNING, "%s(): could not obtain parameters for parsing",
+		zend_error(error_type, "%s(): could not obtain parameters for parsing",
 			get_active_function_name());
 		return FAILURE;
 	}
@@ -774,7 +782,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	if (0 == (type_spec)[0] && 0 != __num_args && !(flags & ZEND_PARSE_PARAMS_QUIET)) { \
 		const char *__space; \
 		const char * __class_name = get_active_class_name(&__space); \
-		zend_error((flags & ZEND_PARSE_PARAMS_STRICT) ? E_RECOVERABLE_ERROR : E_WARNING, "%s%s%s() expects exactly 0 parameters, %d given", \
+		zend_error((flags & ZEND_PARSE_PARAMS_STRICT) ? (E_EXCEPTION | E_ERROR) : E_WARNING, "%s%s%s() expects exactly 0 parameters, %d given", \
 			__class_name, __space, \
 			get_active_function_name(), __num_args); \
 		return FAILURE; \
@@ -1934,9 +1942,9 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		!memcmp(lcname, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)
 	) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ce->name->val, ZEND_CALLSTATIC_FUNC_NAME);
+			zend_error(error_type, "Method %s::__callStatic() must take exactly 2 arguments", ce->name->val);
 		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ce->name->val, ZEND_CALLSTATIC_FUNC_NAME);
+			zend_error(error_type, "Method %s::__callStatic() cannot take arguments by reference", ce->name->val);
 		}
  	} else if (name_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
  		!memcmp(lcname, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0
@@ -2027,8 +2035,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (info->type_hint) {
 				if (info->class_name) {
 					ZEND_ASSERT(info->type_hint == IS_OBJECT);
-					if (!strcasecmp(info->class_name, "self") && !scope) {
-						zend_error(E_CORE_ERROR, "Cannot declare a return type of self outside of a class scope");
+					if (!scope && (!strcasecmp(info->class_name, "self") || !strcasecmp(info->class_name, "parent"))) {
+						zend_error(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
 					}
 				}
 
@@ -3040,6 +3048,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 		return 0;
 	}
 
+again:
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 			if (object) {
@@ -3183,7 +3192,6 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 				}
 			}
 			return 0;
-
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
@@ -3196,8 +3204,14 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 				}
 				return 1;
 			}
-			/* break missing intentionally */
-
+			if (callable_name) {
+				*callable_name = zval_get_string(callable);
+			}
+			if (error) zend_spprintf(error, 0, "no array or string given");
+			return 0;
+		case IS_REFERENCE:
+			callable = Z_REFVAL_P(callable);
+			goto again;
 		default:
 			if (callable_name) {
 				*callable_name = zval_get_string(callable);

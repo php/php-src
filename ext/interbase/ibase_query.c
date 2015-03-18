@@ -292,8 +292,8 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 					 * were mentioned erroneously.
 					 */
 				default:
-					_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'"
-						TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
+					_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'",
+						ar_desc->array_desc_dtype, var->relname, var->sqlname);
 					efree(ar);
 					return FAILURE;
 			} /* switch array_desc_type */
@@ -511,8 +511,8 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 						convert_to_string(val);
 
 						if (!sscanf(Z_STRVAL_P(val), "%Lf", &l)) {
-							_php_ibase_module_error("Cannot convert '%s' to long double"
-								TSRMLS_CC, Z_STRVAL_P(val));
+							_php_ibase_module_error("Cannot convert '%s' to long double",
+								 Z_STRVAL_P(val));
 							return FAILURE;
 						}
 
@@ -558,8 +558,8 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 #else
 					convert_to_string(val);
 					if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "d", &l)) {
-						_php_ibase_module_error("Cannot convert '%s' to long integer"
-							TSRMLS_CC, Z_STRVAL_P(val));
+						_php_ibase_module_error("Cannot convert '%s' to long integer",
+							 Z_STRVAL_P(val));
 						return FAILURE;
 					} else {
 						*(ISC_INT64 *) buf = l;
@@ -776,8 +776,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
 
 					if (FAILURE == _php_ibase_bind_array(b_var, array_data, ar->ar_size,
 							ar, 0)) {
-						_php_ibase_module_error("Parameter %d: failed to bind array argument"
-							TSRMLS_CC,i+1);
+						_php_ibase_module_error("Parameter %d: failed to bind array argument", i+1);
 						efree(array_data);
 						rv = FAILURE;
 						continue;
@@ -1100,8 +1099,8 @@ PHP_FUNCTION(ibase_query)
 			}
 
 			/* the statement is 'CREATE DATABASE ...' if the link argument is IBASE_CREATE */
-			if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS()
-					TSRMLS_CC, "ls", &l, &query, &query_len) && l == PHP_IBASE_CREATE) {
+			if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
+					 "ls", &l, &query, &query_len) && l == PHP_IBASE_CREATE) {
 				isc_db_handle db = NULL;
 				isc_tr_handle trans = NULL;
 

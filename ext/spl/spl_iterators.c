@@ -931,6 +931,11 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 {
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
 
+	if (object->iterators) {
+		efree(object->iterators);
+		object->iterators = NULL;
+	}
+
 	zend_object_std_dtor(&object->std);
 	smart_str_free(&object->prefix[0]);
 	smart_str_free(&object->prefix[1]);
@@ -1051,7 +1056,7 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	smart_str_appendl(&str, object->prefix[5].s->val, object->prefix[5].s->len);
 	smart_str_0(&str);
 
-	RETURN_STR(str.s);
+	RETURN_NEW_STR(str.s);
 }
 
 static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *object, zval *return_value)
@@ -2123,7 +2128,7 @@ SPL_METHOD(RegexIterator, getRegex)
 		return;
 	}
 
-	RETURN_STR(zend_string_copy(intern->u.regex.regex));
+	RETURN_STR_COPY(intern->u.regex.regex);
 } /* }}} */
 
 /* {{{ proto bool RegexIterator::getMode()
@@ -2807,7 +2812,7 @@ SPL_METHOD(CachingIterator, __toString)
 		return;
 	}
 	if (Z_TYPE(intern->u.caching.zstr) == IS_STRING) {
-		RETURN_STR(zend_string_copy(Z_STR_P(&intern->u.caching.zstr)));
+		RETURN_STR_COPY(Z_STR_P(&intern->u.caching.zstr));
 	} else {
 		RETURN_NULL();
 	}

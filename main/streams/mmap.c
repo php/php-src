@@ -22,7 +22,7 @@
 #include "php.h"
 #include "php_streams_int.h"
 
-PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t length, php_stream_mmap_operation_t mode, size_t *mapped_len)
+PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t length, php_stream_mmap_access_t mode, size_t *mapped_len)
 {
 	php_stream_mmap_range range;
 

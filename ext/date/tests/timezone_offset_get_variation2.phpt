@@ -107,7 +107,11 @@ $object = new DateTimezone("Europe/London");
 
 foreach($inputs as $variation =>$datetime) {
     echo "\n-- $variation --\n";
-   	var_dump( timezone_offset_get($object, $datetime) );
+    try {
+		var_dump( timezone_offset_get($object, $datetime) );
+	} catch (EngineException $ex) {
+		echo $ex->getMessage()."\n";
+	}
 };
 
 // closing the resource
@@ -120,113 +124,85 @@ fclose( $file_handle );
 
 -- int 0 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
-bool(false)
 
 -- int 1 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
-bool(false)
 
 -- int 12345 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
-bool(false)
 
 -- int -12345 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
-bool(false)
 
 -- float 10.5 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
-bool(false)
 
 -- float -10.5 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
-bool(false)
 
 -- float .5 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
-bool(false)
 
 -- empty array --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, array given
-bool(false)
 
 -- int indexed array --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, array given
-bool(false)
 
 -- associative array --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, array given
-bool(false)
 
 -- nested arrays --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, array given
-bool(false)
 
 -- uppercase NULL --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
-bool(false)
 
 -- lowercase null --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
-bool(false)
 
 -- lowercase true --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
-bool(false)
 
 -- lowercase false --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
-bool(false)
 
 -- uppercase TRUE --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
-bool(false)
 
 -- uppercase FALSE --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
-bool(false)
 
 -- empty string DQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- empty string SQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- string DQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- string SQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- mixed case string --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- heredoc --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given
-bool(false)
 
 -- instance of classWithToString --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, instance of classWithToString given
-bool(false)
 
 -- instance of classWithoutToString --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, instance of classWithoutToString given
-bool(false)
 
 -- undefined var --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
-bool(false)
 
 -- unset var --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
-bool(false)
 
 -- resource --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, resource given
-bool(false)
 ===DONE===

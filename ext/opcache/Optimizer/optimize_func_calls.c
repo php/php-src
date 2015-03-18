@@ -66,6 +66,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				/* break missing intentionally */
 			case ZEND_NEW:
+			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_FCALL:
@@ -74,6 +75,9 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				call++;
 				break;
 			case ZEND_DO_FCALL:
+			case ZEND_DO_ICALL:
+			case ZEND_DO_UCALL:
+			case ZEND_DO_FCALL_BY_NAME:
 				call--;
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
@@ -84,6 +88,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						Z_CACHE_SLOT(op_array->literals[fcall->op2.constant + 1]) = Z_CACHE_SLOT(op_array->literals[fcall->op2.constant]);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
 						fcall->op2.constant = fcall->op2.constant + 1;
+						opline->opcode = zend_get_call_op(ZEND_INIT_FCALL, call_stack[call].func);
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
@@ -91,6 +96,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
 						fcall->op2.constant = fcall->op2.constant + 1;
+						opline->opcode = zend_get_call_op(ZEND_INIT_FCALL, call_stack[call].func);
 					} else {
 						ZEND_ASSERT(0);
 					}
@@ -103,10 +109,10 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (call_stack[call - 1].func) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
-						opline->extended_value = 0;
+						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
 						opline->opcode -= 9;
 					} else {
-						opline->extended_value = 0;
+						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
 						opline->opcode -= 12;
 					}
 				}

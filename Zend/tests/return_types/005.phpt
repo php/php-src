@@ -15,4 +15,4 @@ $qux = new qux();
 $qux->foo();
 
 --EXPECTF--
-Catchable fatal error: Return value of qux::foo() must be an instance of foo, instance of qux returned in %s on line %d
+Fatal error: Return value of qux::foo() must be an instance of foo, instance of qux returned in %s on line %d

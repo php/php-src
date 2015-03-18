@@ -30,4 +30,4 @@ Warning: IntlTimeZone::getOffset() expects exactly 4 parameters, 5 given in %s o
 Warning: IntlTimeZone::getOffset(): intltz_get_offset: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intltz_get_offset() must be an instance of IntlTimeZone, null given in %s on line %d
+Fatal error: Argument 1 passed to intltz_get_offset() must be an instance of IntlTimeZone, null given in %s on line %d

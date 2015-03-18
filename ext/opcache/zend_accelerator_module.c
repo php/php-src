@@ -278,28 +278,22 @@ ZEND_INI_BEGIN()
 #endif
 ZEND_INI_END()
 
-static int filename_is_in_cache(char *filename, int filename_len)
+static int filename_is_in_cache(zend_string *filename)
 {
 	char *key;
 	int key_length;
-	zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
-	zend_persistent_script *persistent_script;
 
-	handle.filename = filename;
-	handle.type = ZEND_HANDLE_FILENAME;
+	key = accel_make_persistent_key(filename->val, filename->len, &key_length);
+	if (key != NULL) {
+		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
+		if (persistent_script && !persistent_script->corrupted) {
+			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 
-	if (IS_ABSOLUTE_PATH(filename, filename_len)) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len);
-		if (persistent_script) {
-			return !persistent_script->corrupted &&
-				validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
+			handle.filename = filename->val;
+			handle.type = ZEND_HANDLE_FILENAME;
+
+			return validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 		}
-	}
-
-	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length)) != NULL) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
-		return persistent_script && !persistent_script->corrupted &&
-			validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 	}
 
 	return 0;
@@ -315,7 +309,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	    Z_STRLEN(zfilename) == 0) {
 		return 0;
 	}
-	return filename_is_in_cache(Z_STRVAL(zfilename), Z_STRLEN(zfilename));
+	return filename_is_in_cache(Z_STR(zfilename));
 }
 
 static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
@@ -734,8 +728,7 @@ static ZEND_FUNCTION(opcache_compile_file)
    Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
 static ZEND_FUNCTION(opcache_is_script_cached)
 {
-	char *script_name;
-	size_t script_name_len;
+	zend_string *script_name;
 
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
@@ -745,9 +738,9 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(filename_is_in_cache(script_name, script_name_len));
+	RETURN_BOOL(filename_is_in_cache(script_name));
 }

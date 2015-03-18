@@ -36,7 +36,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 #include "zend_smart_str.h"
-#include "ext/ereg/php_regex.h"
+#include "ext/pcre/php_pcre.h"
 #ifdef PHP_WIN32
 # include "win32/time.h"
 #endif
@@ -72,7 +72,7 @@
 		smart_str s = {0}; \
 		smart_str_append_unsigned(&s, oid); \
 		smart_str_0(&s); \
-		RETURN_STR(s.s); \
+		RETURN_NEW_STR(s.s); \
 	} \
 	RETURN_LONG((zend_long)oid); \
 } while(0)
@@ -2431,7 +2431,7 @@ PHP_FUNCTION(pg_field_table)
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
-			RETURN_STR(oidstr.s);
+			RETURN_NEW_STR(oidstr.s);
 		} else
 #endif
 			RETURN_LONG((zend_long)oid);
@@ -2536,7 +2536,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
 				smart_str_0(&s);
-				RETURN_STR(s.s);
+				RETURN_NEW_STR(s.s);
 			} else
 #endif
 			{
@@ -3515,7 +3515,7 @@ PHP_FUNCTION(pg_lo_read)
 
 	buf->len = nbytes;
 	buf->val[buf->len] = '\0';
-	RETURN_STR(buf);
+	RETURN_NEW_STR(buf);
 }
 /* }}} */
 
@@ -4363,7 +4363,7 @@ PHP_FUNCTION(pg_escape_string)
 	}
 
 	to = zend_string_realloc(to, to->len, 0);
-	RETURN_STR(to);
+	RETURN_NEW_STR(to);
 }
 /* }}} */
 
@@ -5717,10 +5717,10 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase)
 {
-	regex_t re;
-	regmatch_t *subs;
-	int regopt = REG_EXTENDED;
-	int regerr, ret = SUCCESS;
+	pcre *re;
+	const char *err_msg;
+	int err_offset;
+	int options = PCRE_NO_AUTO_CAPTURE, res;
 	size_t i;
 
 	/* Check invalid chars for POSIX regex */
@@ -5733,28 +5733,24 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if (icase) {
-		regopt |= REG_ICASE;
+		options |= PCRE_CASELESS;
 	}
 
-	regerr = regcomp(&re, regex, regopt);
-	if (regerr) {
+	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex");
-		regfree(&re);
 		return FAILURE;
 	}
-	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t), re.re_nsub+1);
 
-	regerr = regexec(&re, str, re.re_nsub+1, subs, 0);
-	if (regerr == REG_NOMATCH) {
-		ret = FAILURE;
-	}
-	else if (regerr) {
+	res = pcre_exec(re, NULL, str, str_len, 0, 0, NULL, 0);
+	pcre_free(re);
+
+	if (res == PCRE_ERROR_NOMATCH) {
+		return FAILURE;
+	} else if (res) {
 		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
-		ret = FAILURE;
+		return FAILURE;
 	}
-	regfree(&re);
-	efree(subs);
-	return ret;
+	return SUCCESS;
 }
 
 /* }}} */

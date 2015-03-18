@@ -1055,7 +1055,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 
 	if (pce->preg_options & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
+		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
 		return NULL;
 	}
 	if (!is_callable_replace) {
@@ -1221,7 +1221,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				new_len = result_len + subject_len - start_offset;
 				if (new_len > alloc_len) {
 					alloc_len = new_len; /* now we know exactly how long it is */
-					result = zend_string_realloc(result, alloc_len, 0);
+					if (NULL != result) {
+						result = zend_string_realloc(result, alloc_len, 0);
+					} else {
+						result = zend_string_alloc(alloc_len, 0);
+					}
 				}
 				/* stick that last bit of string on our output */
 				memcpy(&result->val[result_len], piece, subject_len - start_offset);
@@ -1776,7 +1780,7 @@ static PHP_FUNCTION(preg_quote)
 
 	/* Reallocate string and return it */
 	out_str = zend_string_realloc(out_str, q - out_str->val, 0);
-	RETURN_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 

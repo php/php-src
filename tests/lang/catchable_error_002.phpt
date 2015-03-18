@@ -17,21 +17,13 @@ Catchable fatal error [2]
 
 	set_error_handler('error');
 
-	blah (new StdClass);
+	try {
+		blah (new StdClass);
+	} catch (engineException $ex) {
+	    echo $ex->getMessage(), "\n";
+	}
 	echo "ALIVE!\n";
 ?>
 --EXPECTF--
-array(5) {
-  [0]=>
-  int(4096)
-  [1]=>
-  string(%d) "Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line %d and defined"
-  [2]=>
-  string(%d) "%scatchable_error_002.php"
-  [3]=>
-  int(5)
-  [4]=>
-  array(0) {
-  }
-}
+Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line 18 and defined
 ALIVE!

@@ -200,38 +200,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
-	ZEND_ARG_INFO(0, cipher)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, iv)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
-	ZEND_ARG_INFO(0, cipher)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, iv)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
-	ZEND_ARG_INFO(0, cipher)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, iv)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
-	ZEND_ARG_INFO(0, cipher)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, iv)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 1)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, source)
@@ -239,10 +207,6 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry mcrypt_functions[] = { /* {{{ */
-	PHP_DEP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
-	PHP_DEP_FE(mcrypt_cbc, 				arginfo_mcrypt_cbc)
-	PHP_DEP_FE(mcrypt_cfb, 				arginfo_mcrypt_cfb)
-	PHP_DEP_FE(mcrypt_ofb, 				arginfo_mcrypt_ofb)
 	PHP_FE(mcrypt_get_key_size, 	arginfo_mcrypt_get_key_size)
 	PHP_FE(mcrypt_get_block_size, 	arginfo_mcrypt_get_block_size)
 	PHP_FE(mcrypt_get_cipher_name, 	arginfo_mcrypt_get_cipher_name)
@@ -258,7 +222,6 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 	PHP_FE(mcrypt_generic_init, 	arginfo_mcrypt_generic_init)
 	PHP_FE(mcrypt_generic, 			arginfo_mcrypt_generic)
 	PHP_FE(mdecrypt_generic, 		arginfo_mdecrypt_generic)
-	PHP_DEP_FALIAS(mcrypt_generic_end, mcrypt_generic_deinit, arginfo_mcrypt_generic_deinit)
 	PHP_FE(mcrypt_generic_deinit, 	arginfo_mcrypt_generic_deinit)
 
 	PHP_FE(mcrypt_enc_self_test, 	arginfo_mcrypt_enc_self_test)
@@ -1340,70 +1303,6 @@ PHP_FUNCTION(mcrypt_decrypt)
 	}
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_DECRYPT, return_value);
-}
-/* }}} */
-
-/* {{{ proto string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
-   ECB crypt/decrypt data using key key with cipher cipher starting with iv */
-PHP_FUNCTION(mcrypt_ecb)
-{
-	zval *mode;
-	char *cipher, *key, *data, *iv = NULL;
-	size_t cipher_len, key_len, data_len, iv_len = 0;
-
-	MCRYPT_GET_CRYPT_ARGS
-
-	convert_to_long_ex(mode);
-
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_LVAL_P(mode), return_value);
-}
-/* }}} */
-
-/* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode, string iv)
-   CBC crypt/decrypt data using key key with cipher cipher starting with iv */
-PHP_FUNCTION(mcrypt_cbc)
-{
-	zval *mode;
-	char *cipher, *key, *data, *iv = NULL;
-	size_t cipher_len, key_len, data_len, iv_len = 0;
-
-	MCRYPT_GET_CRYPT_ARGS
-
-	convert_to_long_ex(mode);
-
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_LVAL_P(mode), return_value);
-}
-/* }}} */
-
-/* {{{ proto string mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
-   CFB crypt/decrypt data using key key with cipher cipher starting with iv */
-PHP_FUNCTION(mcrypt_cfb)
-{
-	zval *mode;
-	char *cipher, *key, *data, *iv = NULL;
-	size_t cipher_len, key_len, data_len, iv_len = 0;
-
-	MCRYPT_GET_CRYPT_ARGS
-
-	convert_to_long_ex(mode);
-
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_LVAL_P(mode), return_value);
-}
-/* }}} */
-
-/* {{{ proto string mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
-   OFB crypt/decrypt data using key key with cipher cipher starting with iv */
-PHP_FUNCTION(mcrypt_ofb)
-{
-	zval *mode;
-	char *cipher, *key, *data, *iv = NULL;
-	size_t cipher_len, key_len, data_len, iv_len = 0;
-
-	MCRYPT_GET_CRYPT_ARGS
-
-	convert_to_long_ex(mode);
-
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_P(mode), return_value);
 }
 /* }}} */
 

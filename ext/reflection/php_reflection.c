@@ -217,7 +217,7 @@ typedef struct {
 	zend_object zo;
 } reflection_object;
 
-static inline reflection_object *reflection_object_from_obj(zend_object *obj) /* {{{ */ {
+static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
 	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
 }
 
@@ -235,6 +235,7 @@ static zval *_default_load_entry(zval *object, char *name, size_t name_len) /* {
 	}
 	return value;
 }
+/* }}} */
 
 static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value) /* {{{ */
 {
@@ -1208,7 +1209,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			ZVAL_STRING(&name, ((zend_internal_arg_info*)arg_info)->name);
 		} else {
-			ZVAL_STR(&name, zend_string_copy(arg_info->name));
+			ZVAL_STR_COPY(&name, arg_info->name);
 		}
 	} else {
 		ZVAL_NULL(&name);
@@ -1636,7 +1637,7 @@ ZEND_METHOD(reflection_function, __toString)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
 	_function_string(&str, fptr, intern->ce, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -1777,7 +1778,7 @@ ZEND_METHOD(reflection_function, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_STR(zend_string_copy(fptr->op_array.filename));
+		RETURN_STR_COPY(fptr->op_array.filename);
 	}
 	RETURN_FALSE;
 }
@@ -1831,7 +1832,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		RETURN_STR(zend_string_copy(fptr->op_array.doc_comment));
+		RETURN_STR_COPY(fptr->op_array.doc_comment);
 	}
 	RETURN_FALSE;
 }
@@ -2288,7 +2289,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			ZVAL_STRING(&name, ((zend_internal_arg_info*)arg_info)[position].name);
 		} else {
-			ZVAL_STR(&name, zend_string_copy(arg_info[position].name));
+			ZVAL_STR_COPY(&name, arg_info[position].name);
 		}
 	} else {
 		ZVAL_NULL(&name);
@@ -2324,7 +2325,7 @@ ZEND_METHOD(reflection_parameter, __toString)
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
 	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -2668,7 +2669,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 
 	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
 	if (precv && Z_TYPE_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)) == IS_CONSTANT) {
-		RETURN_STR(zend_string_copy(Z_STR_P(RT_CONSTANT(&param->fptr->op_array, precv->op2))));
+		RETURN_STR_COPY(Z_STR_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)));
 	}
 }
 /* }}} */
@@ -2805,7 +2806,7 @@ ZEND_METHOD(reflection_method, __toString)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
 	_function_string(&str, mptr, intern->ce, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -3530,7 +3531,7 @@ ZEND_METHOD(reflection_class, __toString)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
 	_class_string(&str, ce, &intern->obj, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -3587,7 +3588,7 @@ ZEND_METHOD(reflection_class, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_STR(zend_string_copy(ce->info.user.filename));
+		RETURN_STR_COPY(ce->info.user.filename);
 	}
 	RETURN_FALSE;
 }
@@ -3641,7 +3642,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		RETURN_STR(zend_string_copy(ce->info.user.doc_comment));
+		RETURN_STR_COPY(ce->info.user.doc_comment);
 	}
 	RETURN_FALSE;
 }
@@ -4883,7 +4884,7 @@ ZEND_METHOD(reflection_property, __toString)
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
 	_property_string(&str, &ref->prop, NULL, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -5134,7 +5135,7 @@ ZEND_METHOD(reflection_property, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop.doc_comment) {
-		RETURN_STR(zend_string_copy(ref->prop.doc_comment));
+		RETURN_STR_COPY(ref->prop.doc_comment);
 	}
 	RETURN_FALSE;
 }
@@ -5222,7 +5223,7 @@ ZEND_METHOD(reflection_extension, __toString)
 	GET_REFLECTION_OBJECT_PTR(module);
 	string_init(&str);
 	_extension_string(&str, module, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 
@@ -5588,7 +5589,7 @@ ZEND_METHOD(reflection_zend_extension, __toString)
 	GET_REFLECTION_OBJECT_PTR(extension);
 	string_init(&str);
 	_zend_extension_string(&str, extension, "");
-	RETURN_STR(str.buf);
+	RETURN_NEW_STR(str.buf);
 }
 /* }}} */
 

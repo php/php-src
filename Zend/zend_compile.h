@@ -129,16 +129,10 @@ void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
-
-typedef int (*user_opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
-typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
-
-extern ZEND_API opcode_handler_t *zend_opcode_handlers;
+typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
 struct _zend_op {
-	opcode_handler_t handler;
+	const void *handler;
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
@@ -352,7 +346,7 @@ struct _zend_op_array {
 	int last_literal;
 	zval *literals;
 
-	int  last_cache_slot;
+	int  cache_size;
 	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
@@ -465,6 +459,7 @@ struct _zend_execute_data {
 #define EX_CALL_INFO()			ZEND_CALL_INFO(execute_data)
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
+#define EX_USES_STRICT_TYPES()	((EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0)
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
@@ -638,9 +633,9 @@ const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);
 #endif
 
+typedef int (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
+typedef int (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
 
-typedef int (*unary_op_type)(zval *, zval *);
-typedef int (*binary_op_type)(zval *, zval *, zval *);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
@@ -719,6 +714,7 @@ ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
+ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {

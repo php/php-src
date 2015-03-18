@@ -235,7 +235,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 											const char *path,
 											const char *mode,
 											int options,
-											char **opened_path,
+											zend_string **opened_path,
 											php_stream_context *context STREAMS_DC)
 {
 	php_stream *retstream = NULL, *stream = NULL;
@@ -266,20 +266,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	bz_file = BZ2_bzopen(path_copy, mode);
 
 	if (opened_path && bz_file) {
-#ifdef VIRTUAL_DIR
-		*opened_path = path_copy;
-		path_copy = NULL;
-#else
-		*opened_path = estrdup(path_copy);
-#endif
+		*opened_path = zend_string_init(path_copy, strlen(path_copy), 0);
 	}
 
 #ifdef VIRTUAL_DIR
-	if (path_copy) {
-		efree(path_copy);
-	}
+	efree(path_copy);
 #endif
-	path_copy = NULL;
 
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
@@ -296,7 +288,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		 * failed.
 		 */
 		if (opened_path && !bz_file && mode[0] == 'w') {
-			VCWD_UNLINK(*opened_path);
+			VCWD_UNLINK((*opened_path)->val);
 		}
 	}
 
@@ -387,7 +379,7 @@ static PHP_FUNCTION(bzread)
 	data->len = php_stream_read(stream, data->val, data->len);
 	data->val[data->len] = '\0';
 
-	RETURN_STR(data);
+	RETURN_NEW_STR(data);
 }
 /* }}} */
 
@@ -553,7 +545,7 @@ static PHP_FUNCTION(bzcompress)
 		   so we erealloc() the buffer to the proper size */
 		dest->len = dest_len;
 		dest->val[dest->len] = '\0';
-		RETURN_STR(dest);
+		RETURN_NEW_STR(dest);
 	}
 }
 /* }}} */

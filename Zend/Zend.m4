@@ -153,14 +153,6 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_WITH(zend-vm,
-[  --with-zend-vm=TYPE     Set virtual machine dispatch method. Type is
-                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]],[
-  PHP_ZEND_VM=$withval
-],[
-  PHP_ZEND_VM=CALL
-])
-
 AC_ARG_ENABLE(maintainer-zts,
 [  --enable-maintainer-zts Enable thread safety - for code maintainers only!!],[
   ZEND_MAINTAINER_ZTS=$enableval
@@ -176,9 +168,6 @@ AC_ARG_ENABLE(inline-optimization,
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
-AC_MSG_CHECKING([virtual machine dispatch method])
-AC_MSG_RESULT($PHP_ZEND_VM)
-
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
 
@@ -187,19 +176,6 @@ AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
-
-case $PHP_ZEND_VM in
-  SWITCH)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
-    ;;
-  GOTO)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_GOTO,[virtual machine dispatch method])
-    ;;
-  *)
-    PHP_ZEND_VM=CALL
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_CALL,[virtual machine dispatch method])
-    ;;
-esac
 
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
@@ -433,3 +409,51 @@ else
     AC_MSG_RESULT(no) 
   fi 
 fi 
+
+AC_ARG_ENABLE(gcc-global-regs,
+[  --disable-gcc-global-regs 
+                          whether to enable GCC global register variables],[
+  ZEND_GCC_GLOBAL_REGS=$enableval
+],[
+  ZEND_GCC_GLOBAL_REGS=yes
+])
+AC_MSG_CHECKING(for global register variables support)
+if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
+  AC_TRY_COMPILE([
+  ],[
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
+# define ZEND_VM_FP_GLOBAL_REG "%esi"
+# define ZEND_VM_IP_GLOBAL_REG "%edi"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__x86_64__)
+# define ZEND_VM_FP_GLOBAL_REG "%r14"
+# define ZEND_VM_IP_GLOBAL_REG "%r15"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
+# define ZEND_VM_FP_GLOBAL_REG "r28"
+# define ZEND_VM_IP_GLOBAL_REG "r29"
+#else
+# error "global register variables are not supported"
+#endif
+typedef int (*opcode_handler_t)(void);
+register void *FP  __asm__(ZEND_VM_FP_GLOBAL_REG);
+register const opcode_handler_t *IP __asm__(ZEND_VM_IP_GLOBAL_REG);
+int emu(const opcode_handler_t *ip, void *fp) {
+	const opcode_handler_t *orig_ip = IP;
+	void *orig_fp = FP;
+	IP = ip;
+	FP = fp;
+	while ((*ip)());
+	FP = orig_fp;
+	IP = orig_ip;
+}
+  ], [
+    ZEND_GCC_GLOBAL_REGS=yes
+  ], [
+    ZEND_GCC_GLOBAL_REGS=no
+  ])
+fi
+if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
+  AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
+else
+  HAVE_GCC_GLOBAL_REGS=no
+fi
+AC_MSG_RESULT(ZEND_GCC_GLOBAL_REGS)

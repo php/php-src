@@ -2686,7 +2686,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		int   b;
 		FILE *tmp;
 		char  buf[4096];
-		char *path;
+		zend_string *path;
 
 		tmp = php_open_temporary_file(NULL, NULL, &path);
 		if (tmp == NULL) {
@@ -2745,8 +2745,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		fclose(tmp);
-		VCWD_UNLINK((const char *)path); /* make sure that the temporary file is removed */
-		efree(path);
+		VCWD_UNLINK((const char *)path->val); /* make sure that the temporary file is removed */
+		zend_string_release(path);
 	}
 	RETURN_TRUE;
 }

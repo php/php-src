@@ -51,7 +51,7 @@ OnigSyntaxType OnigSyntaxRuby = {
       ONIG_SYN_OP2_CCLASS_SET_OP | ONIG_SYN_OP2_ESC_CAPITAL_C_BAR_CONTROL |
       ONIG_SYN_OP2_ESC_CAPITAL_M_BAR_META | ONIG_SYN_OP2_ESC_V_VTAB |
       ONIG_SYN_OP2_ESC_H_XDIGIT )
-  , ( SYN_GNU_REGEX_BV |
+  , ( SYN_GNU_REGEX_BV | 
       ONIG_SYN_ALLOW_INTERVAL_LOW_ABBREV |
       ONIG_SYN_DIFFERENT_LEN_ALT_LOOK_BEHIND |
       ONIG_SYN_CAPTURE_ONLY_NAMED_GROUP |
@@ -2845,7 +2845,7 @@ find_str_position(OnigCodePoint s[], int n, UChar* from, UChar* to,
   OnigCodePoint x;
   UChar *q;
   UChar *p = from;
-
+  
   while (p < to) {
     x = ONIGENC_MBC_TO_CODE(enc, p, to);
     q = p + enclen(enc, p);
@@ -3406,7 +3406,7 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
         goto skip_backref;
       }
 
-      if (IS_SYNTAX_OP(syn, ONIG_SYN_OP_DECIMAL_BACKREF) &&
+      if (IS_SYNTAX_OP(syn, ONIG_SYN_OP_DECIMAL_BACKREF) && 
 	  (num <= env->num_mem || num <= 9)) { /* This spec. from GNU regex */
 	if (IS_SYNTAX_BV(syn, ONIG_SYN_STRICT_CHECK_BACKREF)) {
 	  if (num > env->num_mem || IS_NULL(SCANENV_MEM_NODES(env)[num]))
@@ -4384,7 +4384,7 @@ parse_char_class(Node** np, OnigToken* tok, UChar** src, UChar* end,
 	  CC_ESC_WARN(env, (UChar* )"-");
 	  goto range_end_val;
 	}
-
+	
 	if (IS_SYNTAX_BV(env->syntax, ONIG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC)) {
 	  CC_ESC_WARN(env, (UChar* )"-");
 	  goto sb_char;   /* [0-9-a] is allowed as [0-9\-a] */
@@ -5067,7 +5067,7 @@ parse_exp(Node** np, OnigToken* tok, int term,
       r = parse_subexp(&target, tok, term, src, end, env);
       env->option = prev;
       if (r < 0) return r;
-      NENCLOSE(*np)->target = target;
+      NENCLOSE(*np)->target = target;	
       return tok->type;
     }
     break;
@@ -5235,7 +5235,7 @@ parse_exp(Node** np, OnigToken* tok, int term,
 	    xmemcpy(new_key, &key, sizeof(type_cclass_key));
             onig_st_add_direct(OnigTypeCClassTable, (st_data_t )new_key,
                                (st_data_t )*np);
-
+            
             THREAD_ATOMIC_END;
           }
           else {

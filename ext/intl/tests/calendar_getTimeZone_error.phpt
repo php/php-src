@@ -29,4 +29,4 @@ Warning: intlcal_get_time_zone() expects exactly 1 parameter, 2 given in %s on l
 Warning: intlcal_get_time_zone(): intlcal_get_time_zone: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_time_zone() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_time_zone() must be an instance of IntlCalendar, integer given in %s on line %d

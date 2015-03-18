@@ -173,26 +173,83 @@ struct _zend_array {
 		} v;
 		uint32_t flags;
 	} u;
-	uint32_t          nTableSize;
 	uint32_t          nTableMask;
+	Bucket           *arData;
 	uint32_t          nNumUsed;
 	uint32_t          nNumOfElements;
+	uint32_t          nTableSize;
 	uint32_t          nInternalPointer;
 	zend_long         nNextFreeElement;
-	Bucket           *arData;
-	uint32_t         *arHash;
 	dtor_func_t       pDestructor;
 };
 
+/*
+ * HashTable Data Layout
+ * =====================
+ *
+ *                 +=============================+
+ *                 | HT_HASH(ht, ht->nTableMask) |
+ *                 | ...                         |
+ *                 | HT_HASH(ht, -1)             |
+ *                 +-----------------------------+
+ * ht->arData ---> | Bucket[0]                   |
+ *                 | ...                         |
+ *                 | Bucket[ht->nTableSize-1]    |
+ *                 +=============================+
+ */
+
+#define HT_INVALID_IDX ((uint32_t) -1)
+
+#define HT_MIN_MASK ((uint32_t) -2)
 #define HT_MIN_SIZE 8
 
 #if SIZEOF_SIZE_T == 4
 # define HT_MAX_SIZE 0x04000000 /* small enough to avoid overflow checks */
+# define HT_HASH_TO_BUCKET_EX(data, idx) \
+	((Bucket*)((char*)(data) + (idx)))
+# define HT_IDX_TO_HASH(idx) \
+	((idx) * sizeof(Bucket))
+# define HT_HASH_TO_IDX(idx) \
+	((idx) / sizeof(Bucket))
 #elif SIZEOF_SIZE_T == 8
 # define HT_MAX_SIZE 0x80000000
+# define HT_HASH_TO_BUCKET_EX(data, idx) \
+	((data) + (idx))
+# define HT_IDX_TO_HASH(idx) \
+	(idx)
+# define HT_HASH_TO_IDX(idx) \
+	(idx)
 #else
 # error "Unknown SIZEOF_SIZE_T"
 #endif
+
+#define HT_HASH_EX(data, idx) \
+	((uint32_t*)(data))[(int)(idx)]
+#define HT_HASH(ht, idx) \
+	HT_HASH_EX((ht)->arData, idx)
+
+#define HT_HASH_SIZE(ht) \
+	((-(int)(ht)->nTableMask) * sizeof(uint32_t))
+#define HT_DATA_SIZE(ht) \
+	((ht)->nTableSize * sizeof(Bucket))
+#define HT_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + HT_DATA_SIZE(ht))
+#define HT_USED_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + ((ht)->nNumUsed * sizeof(Bucket)))
+#define HT_HASH_RESET(ht) \
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht))
+#define HT_HASH_RESET_PACKED(ht) do { \
+		HT_HASH(ht, -2) = HT_INVALID_IDX; \
+		HT_HASH(ht, -1) = HT_INVALID_IDX; \
+	} while (0)
+#define HT_HASH_TO_BUCKET(ht, idx) \
+	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
+
+#define HT_SET_DATA_ADDR(ht, ptr) do { \
+		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE(ht)); \
+	} while (0)
+#define HT_GET_DATA_ADDR(ht) \
+	((char*)((ht)->arData) - HT_HASH_SIZE(ht))
 
 typedef uint32_t HashPosition;
 
@@ -337,6 +394,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_CONSTANT_UNQUALIFIED		0x010
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
+#define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
 #define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
 
 /* zval.u2.var_flags */

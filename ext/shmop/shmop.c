@@ -256,7 +256,7 @@ PHP_FUNCTION(shmop_read)
 
 	return_string = zend_string_init(startaddr, bytes, 0);
 
-	RETURN_STR(return_string);
+	RETURN_NEW_STR(return_string);
 }
 /* }}} */
 

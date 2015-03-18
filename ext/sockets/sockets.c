@@ -1181,7 +1181,7 @@ PHP_FUNCTION(socket_read)
 	tmpbuf->len = retval;
 	tmpbuf->val[tmpbuf->len] = '\0' ;
 
-	RETURN_STR(tmpbuf);
+	RETURN_NEW_STR(tmpbuf);
 }
 /* }}} */
 

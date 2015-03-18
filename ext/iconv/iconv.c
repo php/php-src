@@ -2080,7 +2080,7 @@ PHP_FUNCTION(iconv_substr)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && str->val[0] != '\0' && retval.s != NULL) {
-		RETURN_STR(retval.s);
+		RETURN_NEW_STR(retval.s);
 	}
 	smart_str_free(&retval);
 	RETURN_FALSE;

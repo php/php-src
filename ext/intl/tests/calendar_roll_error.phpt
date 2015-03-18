@@ -34,4 +34,4 @@ bool(false)
 Warning: intlcal_roll(): intlcal_set: too many arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_roll() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_roll() must be an instance of IntlCalendar, integer given in %s on line %d

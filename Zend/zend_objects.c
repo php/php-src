@@ -55,7 +55,6 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (object->properties) {
 		zend_array_destroy(object->properties);
-		FREE_HASHTABLE(object->properties);
 	}
 	count = object->ce->default_properties_count;
 	for (i = 0; i < count; i++) {

@@ -100,6 +100,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
+				case ZEND_ASSERT_CHECK:
 					ZEND_OP2(opline).opline_num -= shiftlist[ZEND_OP2(opline).opline_num];
 					break;
 				case ZEND_JMPZNZ:

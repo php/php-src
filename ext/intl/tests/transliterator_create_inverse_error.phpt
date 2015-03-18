@@ -18,4 +18,4 @@ Warning: Transliterator::createInverse() expects exactly 0 parameters, 1 given i
 
 Warning: Transliterator::createInverse(): transliterator_create_inverse: bad arguments in %s on line %d
 
-Catchable fatal error: Argument 1 passed to transliterator_create_inverse() must be an instance of Transliterator, string given in %s on line %d
+Fatal error: Argument 1 passed to transliterator_create_inverse() must be an instance of Transliterator, string given in %s on line %d

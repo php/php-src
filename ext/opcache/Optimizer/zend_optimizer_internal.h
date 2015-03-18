@@ -40,7 +40,7 @@
 	memset(&(opline)->op1, 0, sizeof((opline)->op1)); \
 	memset(&(opline)->op2, 0, sizeof((opline)->op2)); \
 	(opline)->result_type = (opline)->op1_type = (opline)->op2_type=IS_UNUSED; \
-	(opline)->handler = zend_opcode_handlers[ZEND_NOP]; \
+	zend_vm_set_opcode_handler(opline); \
 } while (0);
 #define RESULT_USED(op)	    (((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
 #define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)

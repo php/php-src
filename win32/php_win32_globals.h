@@ -23,6 +23,8 @@
 
 /* misc globals for thread-safety under win32 */
 
+#include "win32/sendmail.h"
+
 typedef struct _php_win32_core_globals php_win32_core_globals;
 
 #ifdef ZTS
@@ -41,6 +43,11 @@ struct _php_win32_core_globals {
 	HKEY       registry_key;
 	HANDLE     registry_event;
 	HashTable *registry_directories;
+
+	char   mail_buffer[MAIL_BUFFER_SIZE];
+	SOCKET mail_socket;
+	char   mail_host[HOST_NAME_LEN];
+	char   mail_local_host[HOST_NAME_LEN];
 };
 
 void php_win32_core_globals_ctor(void *vg);

@@ -200,10 +200,8 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 ZEND_TSRMLS_CACHE_EXTERN();
 #   endif
 #	define PHAR_G(v) ZEND_TSRMG(phar_globals_id, zend_phar_globals *, v)
-#	define PHAR_GLOBALS ((zend_phar_globals *) (*((void ***) ZEND_TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phar_globals_id)])
 #else
 #	define PHAR_G(v) (phar_globals.v)
-#	define PHAR_GLOBALS (&phar_globals)
 #endif
 
 #ifndef php_uint16
@@ -351,7 +349,7 @@ static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
 	if (!entry->is_persistent) {
 		return entry->phar->fp;
 	}
-	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].fp;
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].fp;
 }
 
 static inline php_stream *phar_get_entrypufp(phar_entry_info *entry)
@@ -359,7 +357,7 @@ static inline php_stream *phar_get_entrypufp(phar_entry_info *entry)
 	if (!entry->is_persistent) {
 		return entry->phar->ufp;
 	}
-	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].ufp;
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].ufp;
 }
 
 static inline void phar_set_entrypfp(phar_entry_info *entry, php_stream *fp)
@@ -369,7 +367,7 @@ static inline void phar_set_entrypfp(phar_entry_info *entry, php_stream *fp)
 		return;
 	}
 
-	PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].fp = fp;
+	PHAR_G(cached_fp)[entry->phar->phar_pos].fp = fp;
 }
 
 static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp)
@@ -379,7 +377,7 @@ static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp)
 		return;
 	}
 
-	PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].ufp = fp;
+	PHAR_G(cached_fp)[entry->phar->phar_pos].ufp = fp;
 }
 
 static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
@@ -387,7 +385,7 @@ static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
 	if (!phar->is_persistent) {
 		return phar->fp;
 	}
-	return PHAR_GLOBALS->cached_fp[phar->phar_pos].fp;
+	return PHAR_G(cached_fp)[phar->phar_pos].fp;
 }
 
 static inline php_stream *phar_get_pharufp(phar_archive_data *phar)
@@ -395,7 +393,7 @@ static inline php_stream *phar_get_pharufp(phar_archive_data *phar)
 	if (!phar->is_persistent) {
 		return phar->ufp;
 	}
-	return PHAR_GLOBALS->cached_fp[phar->phar_pos].ufp;
+	return PHAR_G(cached_fp)[phar->phar_pos].ufp;
 }
 
 static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
@@ -405,7 +403,7 @@ static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 		return;
 	}
 
-	PHAR_GLOBALS->cached_fp[phar->phar_pos].fp = fp;
+	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
 }
 
 static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp)
@@ -415,7 +413,7 @@ static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp)
 		return;
 	}
 
-	PHAR_GLOBALS->cached_fp[phar->phar_pos].ufp = fp;
+	PHAR_G(cached_fp)[phar->phar_pos].ufp = fp;
 }
 
 static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zend_off_t offset)
@@ -427,7 +425,7 @@ static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type ty
 		entry->offset = offset;
 		return;
 	}
-	data = &(PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos]);
+	data = &(PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos]);
 	data->fp_type = type;
 	data->offset = offset;
 }
@@ -437,7 +435,7 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 	if (!entry->is_persistent) {
 		return entry->fp_type;
 	}
-	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
 }
 
 static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
@@ -445,12 +443,12 @@ static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
 	if (!entry->is_persistent) {
 		return entry->offset;
 	}
-	if (PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
-		if (!PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
-			PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
+	if (PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
+		if (!PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
+			PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
 		}
 	}
-	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
 }
 
 #define PHAR_MIME_PHP '\0'
@@ -495,7 +493,7 @@ union _phar_entry_object {
 #endif
 
 #ifndef PHAR_MAIN
-extern char *(*phar_save_resolve_path)(const char *filename, int filename_len);
+extern zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
 #endif
 
 BEGIN_EXTERN_C()
@@ -562,7 +560,7 @@ char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len);
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len);
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len);
-char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
+zend_string *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len);

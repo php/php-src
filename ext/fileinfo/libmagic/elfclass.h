@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Christos Zoulas 2008.
  * All Rights Reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -11,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *
+ *  
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,39 +32,51 @@
 	swap = (u.c[sizeof(int32_t) - 1] + 1) != elfhdr.e_ident[EI_DATA];
 
 	type = elf_getu16(swap, elfhdr.e_type);
+	notecount = ms->elf_notes_max;
 	switch (type) {
 #ifdef ELFCORE
 	case ET_CORE:
+		phnum = elf_getu16(swap, elfhdr.e_phnum);
+		if (phnum > ms->elf_phnum_max)
+			return toomany(ms, "program headers", phnum);
 		flags |= FLAGS_IS_CORE;
 		if (dophn_core(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff),
-		    elf_getu16(swap, elfhdr.e_phnum),
+		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff), phnum,
 		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
-		    fsize, &flags) == -1)
+		    fsize, &flags, &notecount) == -1)
 			return -1;
 		break;
 #endif
 	case ET_EXEC:
 	case ET_DYN:
+		phnum = elf_getu16(swap, elfhdr.e_phnum);
+		if (phnum > ms->elf_phnum_max)
+			return toomany(ms, "program", phnum);
+		shnum = elf_getu16(swap, elfhdr.e_shnum);
+		if (shnum > ms->elf_shnum_max)
+			return toomany(ms, "section", shnum);
 		if (dophn_exec(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff),
-		    elf_getu16(swap, elfhdr.e_phnum),
+		    (zend_off_t)elf_getu(swap, elfhdr.e_phoff), phnum,
 		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
-		    fsize, &flags, elf_getu16(swap, elfhdr.e_shnum))
-		    == -1)
+		    fsize, shnum, &flags, &notecount) == -1)
 			return -1;
 		/*FALLTHROUGH*/
 	case ET_REL:
+		shnum = elf_getu16(swap, elfhdr.e_shnum);
+		if (shnum > ms->elf_shnum_max)
+			return toomany(ms, "section headers", shnum);
 		if (doshn(ms, clazz, swap, fd,
-		    (zend_off_t)elf_getu(swap, elfhdr.e_shoff),
-		    elf_getu16(swap, elfhdr.e_shnum),
+		    (zend_off_t)elf_getu(swap, elfhdr.e_shoff), shnum,
 		    (size_t)elf_getu16(swap, elfhdr.e_shentsize),
-		    fsize, &flags, elf_getu16(swap, elfhdr.e_machine),
-		    (int)elf_getu16(swap, elfhdr.e_shstrndx)) == -1)
+		    fsize, elf_getu16(swap, elfhdr.e_machine),
+		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
+		    &flags, &notecount) == -1)
 			return -1;
 		break;
 
 	default:
 		break;
 	}
+	if (notecount == 0)
+		return toomany(ms, "notes", ms->elf_notes_max);
 	return 1;

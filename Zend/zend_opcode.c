@@ -91,7 +91,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->literals = NULL;
 
 	op_array->run_time_cache = NULL;
-	op_array->last_cache_slot = 0;
+	op_array->cache_size = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -221,9 +221,14 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
+				size_t j = 0;
+				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
+				while (cur_precedence->exclude_from_classes[j].class_name) {
+					zend_string_release(cur_precedence->exclude_from_classes[j].class_name);
+					j++;
+				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
 			}
-
 			efree(ce->trait_precedences[i]);
 			i++;
 		}
@@ -233,6 +238,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 ZEND_API void destroy_zend_class(zval *zv)
 {
+	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (--ce->refcount > 0) {
@@ -260,6 +266,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+					zend_string_release(prop_info->name);
+					if (prop_info->doc_comment) {
+						zend_string_release(prop_info->doc_comment);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
@@ -322,7 +336,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
 	    if (--GC_REFCOUNT(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
-			FREE_HASHTABLE(op_array->static_variables);
 		}
 	}
 
@@ -774,6 +787,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_RW:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
@@ -784,11 +798,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-					if (opline->op1_type != IS_CONST || Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) != IS_NULL) {
-						CG(zend_lineno) = opline->lineno;
-						zend_error_noreturn(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
-					}
-
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;

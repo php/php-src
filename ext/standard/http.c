@@ -256,7 +256,7 @@ PHP_FUNCTION(http_build_query)
 
 	smart_str_0(&formstr);
 
-	RETURN_STR(formstr.s);
+	RETURN_NEW_STR(formstr.s);
 }
 /* }}} */
 

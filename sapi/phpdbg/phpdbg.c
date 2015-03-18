@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -983,7 +983,14 @@ void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
 
 void phpdbg_free_wrapper(void *p) /* {{{ */
 {
-	zend_mm_free(phpdbg_mm_get_heap(), p);
+	zend_mm_heap *heap = phpdbg_mm_get_heap();
+	if (UNEXPECTED(heap == p)) {
+		/* TODO: heap maybe allocated by mmap(zend_mm_init) or malloc(USE_ZEND_ALLOC=0) 
+		 * let's prevent it from segfault for now
+		 */
+	} else {
+		zend_mm_free(heap, p);
+	}
 } /* }}} */
 
 void *phpdbg_realloc_wrapper(void *ptr, size_t size) /* {{{ */

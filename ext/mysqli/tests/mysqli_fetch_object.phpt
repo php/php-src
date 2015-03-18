@@ -101,8 +101,8 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (false !== ($obj = @mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
 			printf("[011] Should have failed\n");
-	} catch (Exception $e) {
-		printf("%s\n", $e->getMessage());
+	} catch (EngineException $e) {
+		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
 	mysqli_free_result($res);
@@ -150,7 +150,6 @@ NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
-[E_RECOVERABLE_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
-Parameter ctor_params must be an array
+[E_ERROR] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

@@ -37,4 +37,4 @@ ok
 ok
 ok
 
-Catchable fatal error: Argument 1 passed to foo\test5() must be an instance of bar, instance of foo\bar given, called in %sbug42802.php on line %d and defined in %sbug42802.php on line %d
+Fatal error: Argument 1 passed to foo\test5() must be an instance of bar, instance of foo\bar given, called in %sbug42802.php on line %d and defined in %sbug42802.php on line %d

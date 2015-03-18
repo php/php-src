@@ -32,10 +32,26 @@ echo "error: $errno, $errstr\n";
 }
 set_error_handler('eh');
 
-var_dump(intlcal_get_least_maximum(1, 1));
-var_dump(intlcal_get_maximum(1, 1));
-var_dump(intlcal_get_greatest_minimum(1, -1));
-var_dump(intlcal_get_minimum(1, -1));
+try {
+	var_dump(intlcal_get_least_maximum(1, 1));
+} catch (EngineException $ex) {
+	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+}
+try {
+	var_dump(intlcal_get_maximum(1, 1));
+} catch (EngineException $ex) {
+	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+}
+try {
+	var_dump(intlcal_get_greatest_minimum(1, -1));
+} catch (EngineException $ex) {
+	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+}
+try {
+	var_dump(intlcal_get_minimum(1, -1));
+} catch (EngineException $ex) {
+	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+}
 
 --EXPECTF--
 
@@ -82,19 +98,11 @@ bool(false)
 
 Warning: intlcal_get_minimum(): intlcal_get_minimum: invalid field in %s on line %d
 bool(false)
-error: 4096, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, integer given
-error: 2, intlcal_get_least_maximum() expects parameter 1 to be IntlCalendar, integer given
-error: 2, intlcal_get_least_maximum(): intlcal_get_least_maximum: bad arguments
-bool(false)
-error: 4096, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, integer given
-error: 2, intlcal_get_maximum() expects parameter 1 to be IntlCalendar, integer given
-error: 2, intlcal_get_maximum(): intlcal_get_maximum: bad arguments
-bool(false)
-error: 4096, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, integer given
-error: 2, intlcal_get_greatest_minimum() expects parameter 1 to be IntlCalendar, integer given
-error: 2, intlcal_get_greatest_minimum(): intlcal_get_greatest_minimum: bad arguments
-bool(false)
-error: 4096, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, integer given
-error: 2, intlcal_get_minimum() expects parameter 1 to be IntlCalendar, integer given
-error: 2, intlcal_get_minimum(): intlcal_get_minimum: bad arguments
-bool(false)
+error: 1, Argument 1 passed to intlcal_get_least_maximum() must be an instance of IntlCalendar, integer given
+
+error: 1, Argument 1 passed to intlcal_get_maximum() must be an instance of IntlCalendar, integer given
+
+error: 1, Argument 1 passed to intlcal_get_greatest_minimum() must be an instance of IntlCalendar, integer given
+
+error: 1, Argument 1 passed to intlcal_get_minimum() must be an instance of IntlCalendar, integer given
+

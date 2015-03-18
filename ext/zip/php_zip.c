@@ -1279,7 +1279,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 		if (n > 0) {
 			buffer->val[n] = '\0';
 			buffer->len = n;
-			RETURN_STR(buffer);
+			RETURN_NEW_STR(buffer);
 		} else {
 			zend_string_free(buffer);
 			RETURN_EMPTY_STRING()
@@ -2648,7 +2648,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	zip_fclose(zf);
 	buffer->val[n] = '\0';
 	buffer->len = n;
-	RETURN_STR(buffer);
+	RETURN_NEW_STR(buffer);
 }
 /* }}} */
 

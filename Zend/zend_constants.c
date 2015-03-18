@@ -231,36 +231,6 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 
 	if (!EG(current_execute_data)) {
 		return NULL;
-	} else if (name_len == sizeof("__CLASS__")-1 &&
-	          !memcmp(name, "__CLASS__", sizeof("__CLASS__")-1)) {
-
-		/* Returned constants may be cached, so they have to be stored */
-		if (EG(scope) && EG(scope)->name) {
-			size_t const_name_len;
-			zend_string *const_name;
-
-			const_name_len = sizeof("\0__CLASS__") + EG(scope)->name->len;
-			const_name = zend_string_alloc(const_name_len, 0);
-			memcpy(const_name->val, "\0__CLASS__", sizeof("\0__CLASS__")-1);
-			zend_str_tolower_copy(const_name->val + sizeof("\0__CLASS__")-1, EG(scope)->name->val, EG(scope)->name->len);
-			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = emalloc(sizeof(zend_constant));
-				memset(c, 0, sizeof(zend_constant));
-				ZVAL_STR_COPY(&c->value, EG(scope)->name);
-				zend_hash_add_ptr(EG(zend_constants), const_name, c);
-			}
-			zend_string_release(const_name);
-		} else {
-			zend_string *const_name = zend_string_init("\0__CLASS__", sizeof("\0__CLASS__")-1, 0);
-			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = emalloc(sizeof(zend_constant));
-				memset(c, 0, sizeof(zend_constant));
-				ZVAL_EMPTY_STRING(&c->value);
-				zend_hash_add_ptr(EG(zend_constants), const_name, c);
-			}
-			zend_string_release(const_name);
-		}
-		return c;
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
 		const char *cfilename;
@@ -465,12 +435,12 @@ zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags)
 					    (c->flags & CONST_CS) != 0) {
 
 						key--;
-						c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key));
+						c = NULL;
 					}
 				}
 			} else {
 				key--;
-				c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key));
+				c = NULL;
 			}
 		}
 	}

@@ -42,6 +42,10 @@
 
 /* OpenSSL includes */
 #include <openssl/evp.h>
+#include <openssl/bn.h>
+#include <openssl/rsa.h>
+#include <openssl/dsa.h>
+#include <openssl/dh.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/crypto.h>
@@ -1934,7 +1938,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	zval * zcert;
 	X509 * cert = NULL;
 	zend_resource *certresource = NULL;
-	int i;
+	int i, sig_nid;
 	zend_bool useshortnames = 1;
 	char * tmpstr;
 	zval subitem;
@@ -1981,11 +1985,11 @@ PHP_FUNCTION(openssl_x509_parse)
 	if (tmpstr) {
 		add_assoc_string(return_value, "alias", tmpstr);
 	}
-/*
-	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
-	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)));
-	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)));
-*/
+
+	sig_nid = OBJ_obj2nid((cert)->sig_alg->algorithm);
+	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid));
+	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid));
+	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
 	array_init(&subitem);
 
 	/* NOTE: the purposes are added as integer keys - the keys match up to the X509_PURPOSE_SSL_XXX defines
@@ -3350,22 +3354,46 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
 		switch(req->priv_key_type) {
 			case OPENSSL_KEYTYPE_RSA:
-				if (EVP_PKEY_assign_RSA(req->priv_key, RSA_generate_key(req->priv_key_bits, 0x10001, NULL, NULL))) {
-					return_val = req->priv_key;
+				{
+					RSA* rsaparam;
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+					/* OpenSSL 1.0.2 deprecates RSA_generate_key */
+					rsaparam = (RSA*)RSA_generate_key(req->priv_key_bits, RSA_F4, NULL, NULL);
+#else
+					{
+						BIGNUM *bne = (BIGNUM *)BN_new();
+						if (BN_set_word(bne, RSA_F4) != 1) {
+							BN_free(bne);
+							php_error_docref(NULL, E_WARNING, "failed setting exponent");
+							return NULL;
+						}
+						rsaparam = RSA_new();
+						RSA_generate_key_ex(rsaparam, req->priv_key_bits, bne, NULL);
+						BN_free(bne);
+					}
+#endif
+					if (rsaparam && EVP_PKEY_assign_RSA(req->priv_key, rsaparam)) {
+						return_val = req->priv_key;
+					}
 				}
 				break;
 #if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
 			case OPENSSL_KEYTYPE_DSA:
 				{
-					DSA *dsapar = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
-					if (dsapar) {
-						DSA_set_method(dsapar, DSA_get_default_method());
-						if (DSA_generate_key(dsapar)) {
-							if (EVP_PKEY_assign_DSA(req->priv_key, dsapar)) {
+					DSA *dsaparam = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+					dsaparam = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
+#else
+					DSA_generate_parameters_ex(dsaparam, req->priv_key_bits, NULL, 0, NULL, NULL, NULL);
+#endif
+					if (dsaparam) {
+						DSA_set_method(dsaparam, DSA_get_default_method());
+						if (DSA_generate_key(dsaparam)) {
+							if (EVP_PKEY_assign_DSA(req->priv_key, dsaparam)) {
 								return_val = req->priv_key;
 							}
 						} else {
-							DSA_free(dsapar);
+							DSA_free(dsaparam);
 						}
 					}
 				}
@@ -3374,17 +3402,21 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 #if !defined(NO_DH)
 			case OPENSSL_KEYTYPE_DH:
 				{
-					DH *dhpar = DH_generate_parameters(req->priv_key_bits, 2, NULL, NULL);
 					int codes = 0;
-
-					if (dhpar) {
-						DH_set_method(dhpar, DH_get_default_method());
-						if (DH_check(dhpar, &codes) && codes == 0 && DH_generate_key(dhpar)) {
-							if (EVP_PKEY_assign_DH(req->priv_key, dhpar)) {
+					DH *dhparam = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+					dhparam = DH_generate_parameters(req->priv_key_bits, 2, NULL, NULL);
+#else
+					DH_generate_parameters_ex(dhparam, req->priv_key_bits, 2, NULL);
+#endif
+					if (dhparam) {
+						DH_set_method(dhparam, DH_get_default_method());
+						if (DH_check(dhparam, &codes) && codes == 0 && DH_generate_key(dhparam)) {
+							if (EVP_PKEY_assign_DH(req->priv_key, dhparam)) {
 								return_val = req->priv_key;
 							}
 						} else {
-							DH_free(dhpar);
+							DH_free(dhparam);
 						}
 					}
 				}
@@ -3976,7 +4008,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)out_buffer->val) == 1) {
 		out_buffer->val[key_length] = 0;
-		RETURN_STR(out_buffer);
+		RETURN_NEW_STR(out_buffer);
 	} else {
 		zend_string_release(out_buffer);
 		RETURN_FALSE;
@@ -4249,7 +4281,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * extracertsfilename = NULL;
 	size_t extracertsfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppzza!|lp",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppzza!|lp!",
 				&infilename, &infilename_len, &outfilename, &outfilename_len,
 				&zcert, &zprivkey, &zheaders, &flags, &extracertsfilename,
 				&extracertsfilename_len) == FAILURE) {
