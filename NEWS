@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #69085 (SoapClient's __call() type confusion through
     unserialize()). (Dmitry)
 
+- ZIP:
+  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
+    boundary). (Stas)
+
 19 Feb 2015 PHP 5.4.38
 
 - Core:
