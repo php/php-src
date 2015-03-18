@@ -6976,8 +6976,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 
 
 		retval_ptr = EX_CONSTANT(opline->op1);
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -11922,8 +11930,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		zend_free_op free_op1;
 
 		retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -17267,9 +17283,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		zval *retval_ptr;
 		zend_free_op free_op1;
 
-		retval_ptr = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+		retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -22871,8 +22895,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 
 
 		retval_ptr = NULL;
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -31800,9 +31832,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		zval *retval_ptr;
 
 
-		retval_ptr = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+		retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();

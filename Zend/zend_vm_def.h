@@ -3606,9 +3606,17 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 		zval *retval_ptr;
 		zend_free_op free_op1;
 
-		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-		/* extended_value stores strictness flag */
-		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		
+		if (EXPECTED((opline->extended_value & ZEND_RETURN_TYPE_BYREF) == 0)) {
+			/* Does not return by reference */
+			SEPARATE_ZVAL(retval_ptr);
+		} else {
+			ZVAL_DEREF(retval_ptr);
+			SEPARATE_ZVAL_NOREF(retval_ptr);
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value & ZEND_RETURN_TYPE_STRICT);
 #endif
 	}
 	CHECK_EXCEPTION();

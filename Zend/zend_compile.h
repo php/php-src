@@ -425,6 +425,9 @@ struct _zend_execute_data {
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
 #define ZEND_CALL_STRICT_TYPEHINTS   (1 << 5)
 
+#define ZEND_RETURN_TYPE_STRICT	(1 << 0)
+#define ZEND_RETURN_TYPE_BYREF	(1 << 1)
+
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)
 

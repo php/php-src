@@ -1922,9 +1922,12 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
+	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
 	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
-		opline->extended_value = CG(declarables).strict_types;
+		opline->extended_value = (CG(declarables).strict_types ? ZEND_RETURN_TYPE_STRICT : 0)
+			 & (returns_reference ? ZEND_RETURN_TYPE_BYREF : 0);
 	}
 }
 /* }}} */
@@ -4224,19 +4227,17 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				type = zend_lookup_scalar_typehint_by_name(class_name);
 				if (type != 0) {
 					arg_info->type_hint = type;
-					goto done;
-				}
-				
-				if (zend_is_const_default_class_ref(type_ast)) {
-					class_name = zend_resolve_class_name_ast(type_ast);
 				} else {
-					zend_string_addref(class_name);
+				
+					if (zend_is_const_default_class_ref(type_ast)) {
+						class_name = zend_resolve_class_name_ast(type_ast);
+					} else {
+						zend_string_addref(class_name);
+					}
+
+					arg_info->type_hint = IS_OBJECT;
+					arg_info->class_name = class_name;
 				}
-
-				arg_info->type_hint = IS_OBJECT;
-				arg_info->class_name = class_name;
-
-done:
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
