@@ -840,15 +840,16 @@ ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const ch
 	zval **object;
 	zend_class_entry *ce;
 
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
-		flags |= ZEND_PARSE_PARAMS_STRICT;
-	}
-
 	/* Just checking this_ptr is not enough, because fcall_common_helper does not set
 	 * Z_OBJ(EG(This)) to NULL when calling an internal function with common.scope == NULL.
 	 * In that case EG(This) would still be the $this from the calling code and we'd take the
 	 * wrong branch here. */
 	zend_bool is_method = EG(current_execute_data)->func->common.scope != NULL;
+
+	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+		flags |= ZEND_PARSE_PARAMS_STRICT;
+	}
+
 	if (!is_method || !this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, flags);
 
