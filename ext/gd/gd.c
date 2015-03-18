@@ -3940,13 +3940,13 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 	if (mode == TTFTEXT_BBOX) {
 		if (argc < 4 || argc > ((extended) ? 5 : 4)) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		} else if (zend_parse_parameters(argc, "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
 		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		} else if (zend_parse_parameters(argc, "rddlllss|a", &IM, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
 			RETURN_FALSE;
 		}
@@ -4395,7 +4395,7 @@ PHP_FUNCTION(imagepsbbox)
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
 	if (argc != 3 && argc != 6) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Srl|lld", &str, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {

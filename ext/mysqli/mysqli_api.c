@@ -368,7 +368,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 	args = safe_emalloc(argc, sizeof(zval), 0);
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
 		rc = 1;
 	} else {
 		rc = mysqli_stmt_bind_param_do_bind(stmt, argc, num_vars, args, start, types);

@@ -1931,7 +1931,7 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 {
 	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
-		opline->extended_value = (CG(declarables).strict_types ? 1 : 0);
+		opline->extended_value = CG(declarables).strict_types;
 	}
 }
 /* }}} */
@@ -3402,7 +3402,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 	}
 
-    // Generator return types are handled separately
+	/* Generator return types are handled separately */
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_arg_info *arg_info = CG(active_op_array)->arg_info - 1;
 
