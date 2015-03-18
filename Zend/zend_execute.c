@@ -598,7 +598,7 @@ ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ch
 	}
 }
 
-ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
+ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname = zf->common.function_name->val;
@@ -621,16 +621,19 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 		}
 
 		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
+			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined in %s on line %d", 
+					arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, 
+					ptr->func->op_array.filename->val, ptr->opline->lineno,
+					zf->op_array.filename->val, EG(current_execute_data)->opline->lineno);
 		} else {
-			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
+			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
 		}
 
 		if (arg) {
 			ZVAL_COPY_VALUE(arg, &old_arg);
 		}
 	} else {
-		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
+		zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
 	}
 }
 
@@ -717,27 +720,27 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 		if (Z_TYPE_P(arg) == IS_OBJECT) {
 			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce);
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+				zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
 			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce);
-			zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
+			zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
 		}
 	} else if (cur_arg_info->type_hint) {
 		ZVAL_DEREF(arg);
 		if (cur_arg_info->type_hint == IS_ARRAY) {
 			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg);
 			}
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
 		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint, Z_TYPE_P(arg)))) {
 			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (!cur_arg_info->allow_null) {
 failure:
-					zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+					zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
 				}
 				return;
 			}
@@ -769,27 +772,27 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 		if (Z_TYPE_P(arg) == IS_OBJECT) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+				zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
-			zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
+			zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
 		}
 	} else if (cur_arg_info->type_hint) {
 		ZVAL_DEREF(arg);
 		if (cur_arg_info->type_hint == IS_ARRAY) {
 			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg);
 			}
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
-				zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
+				zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
 		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint,  Z_TYPE_P(arg)))) {
 			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (!cur_arg_info->allow_null) {
 failure:
-					zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+					zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
 				}
 				return;
 			}
@@ -818,15 +821,15 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 		char *class_name;
 
 		need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
-		zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, need_msg, class_name, "none", "", NULL);
+		zend_verify_arg_error(zf, arg_num, need_msg, class_name, "none", "", NULL);
 		return 0;
 	} else if (cur_arg_info->type_hint) {
 		if (cur_arg_info->type_hint == IS_ARRAY) {
-			zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type array", "", "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, "be of the type array", "", "none", "", NULL);
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-			zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be callable", "", "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "", NULL);
 		} else {
-			zend_verify_arg_error(E_EXCEPTION | E_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "", NULL);
+			zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "", NULL);
 		}
 		return 0;
 	}
@@ -850,7 +853,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
-ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
+ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = zf->common.function_name->val;
 	const char *fsep;
@@ -864,8 +867,7 @@ ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, 
 		fclass = "";
 	}
 
-	zend_error(error_type,
-		"Return value of %s%s%s() must %s%s, %s%s returned",
+	zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
@@ -882,30 +884,30 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret, zend_b
 		if (Z_TYPE_P(ret) == IS_OBJECT) {
 			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
 			if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
-				zend_verify_return_error(E_CORE_ERROR, zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
+				zend_verify_return_error(zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
 				return 0;
 			}
 		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
 			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
-			zend_verify_return_error(E_CORE_ERROR, zf, need_msg, class_name, zend_zval_type_name(ret), "");
+			zend_verify_return_error(zf, need_msg, class_name, zend_zval_type_name(ret), "");
 			return 0;
 		}
 	} else if (ret_info->type_hint) {
 		if (ret_info->type_hint == IS_ARRAY) {
 			if (Z_TYPE_P(ret) != IS_ARRAY && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-				zend_verify_return_error(E_CORE_ERROR, zf, "be of the type array", "", zend_zval_type_name(ret), "");
+				zend_verify_return_error(zf, "be of the type array", "", zend_zval_type_name(ret), "");
 				return 0;
 			}
 		} else if (ret_info->type_hint == IS_CALLABLE) {
 			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-				zend_verify_return_error(E_CORE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
+				zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
 				return 0;
 			}
 		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(ret)))) {
 			if (Z_TYPE_P(ret) == IS_NULL) {
 				if (!ret_info->allow_null) {
 failure:
-					zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
+					zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 				}
 				return 0;
 			}
@@ -930,26 +932,26 @@ static void zend_verify_return_type(zend_function *zf, zval *ret, zend_bool stri
 		if (Z_TYPE_P(ret) == IS_OBJECT) {
 			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
 			if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
-				zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
+				zend_verify_return_error(zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
 			}
 		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
 			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-			zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, need_msg, class_name, zend_zval_type_name(ret), "");
+			zend_verify_return_error(zf, need_msg, class_name, zend_zval_type_name(ret), "");
 		}
 	} else if (ret_info->type_hint) {
 		if (ret_info->type_hint == IS_ARRAY) {
 			if (Z_TYPE_P(ret) != IS_ARRAY && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-				zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be of the type array", "", zend_zval_type_name(ret), "");
+				zend_verify_return_error(zf, "be of the type array", "", zend_zval_type_name(ret), "");
 			}
 		} else if (ret_info->type_hint == IS_CALLABLE) {
 			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
-				zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
+				zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
 			}
 		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(ret)))) {
 			if (Z_TYPE_P(ret) == IS_NULL) {
 				if (!ret_info->allow_null) {
 failure:
-					zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
+					zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 				}
 				return;
 			}
@@ -970,15 +972,15 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 		char *class_name;
 
 		need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-		zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, need_msg, class_name, "none", "");
+		zend_verify_return_error(zf, need_msg, class_name, "none", "");
 		return 0;
 	} else if (ret_info->type_hint) {
 		if (ret_info->type_hint == IS_ARRAY) {
-			zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be of the type array", "", "none", "");
+			zend_verify_return_error(zf, "be of the type array", "", "none", "");
 		} else if (ret_info->type_hint == IS_CALLABLE) {
-			zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be callable", "", "none", "");
+			zend_verify_return_error(zf, "be callable", "", "none", "");
 		} else {
-			zend_verify_return_error(E_EXCEPTION | E_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "none", "");
+			zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "none", "");
 		}
 		return 0;
 	}

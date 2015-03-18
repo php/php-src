@@ -153,9 +153,8 @@ ZEND_API void _zend_wrong_param_count(zend_bool strict) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(error_type, "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
+	zend_internal_type_error(strict, "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name());
 }
 /* }}} */
 
@@ -239,9 +238,8 @@ ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, in
 {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(error_type, "%s%s%s() expects %s %d parameter%s, %d given",
+	zend_internal_type_error(strict, "%s%s%s() expects %s %d parameter%s, %d given",
 		class_name, \
 		class_name[0] ? "::" : "", \
 		active_function->common.function_name->val,
@@ -260,9 +258,8 @@ ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected
 		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
 		NULL
 	};
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
 }
 /* }}} */
@@ -271,9 +268,8 @@ ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg, zen
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
-	zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
+	zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
 }
 /* }}} */
@@ -292,7 +288,6 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error) /* {
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null, zend_bool strict) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
@@ -305,7 +300,7 @@ ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, in
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
 
-			zend_error(error_type, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
+			zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
 				class_name, space, get_active_function_name(), num,
 				ce_base->name->val, Z_STRVAL_P(arg));
 			*pce = NULL;
@@ -316,7 +311,7 @@ ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, in
 		const char *space;
 		const char *class_name = get_active_class_name(&space);
 
-		zend_error(error_type, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
+		zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be a valid class name, '%s' given",
 			class_name, space, get_active_function_name(), num,
 			Z_STRVAL_P(arg));
 		return 0;
@@ -580,7 +575,6 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 {
 	const char *expected_type = NULL;
 	char *error = NULL;
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 	int severity;
 
 	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity, strict);
@@ -590,11 +584,11 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 			const char *class_name = get_active_class_name(&space);
 
 			if (error) {
-				zend_error(error_type, "%s%s%s() expects parameter %d %s",
-						class_name, space, get_active_function_name(), arg_num, error);
+				zend_internal_type_error(strict, "%s%s%s() expects parameter %d %s",
+							class_name, space, get_active_function_name(), arg_num, error);
 				efree(error);
 			} else {
-				zend_error(error_type, "%s%s%s() expects parameter %d to be %s, %s given",
+				zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be %s, %s given",
 						class_name, space, get_active_function_name(), arg_num, expected_type,
 						zend_zval_type_name(arg));
 			}
@@ -636,7 +630,6 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	zend_bool have_varargs = 0;
 	zval **varargs = NULL;
 	int *n_varargs = NULL;
-	int error_type = strict ? (E_EXCEPTION | E_ERROR) : E_WARNING;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -670,7 +663,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 						zend_function *active_function = EG(current_execute_data)->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
 						
-						zend_error(error_type, "%s%s%s(): only one varargs specifier (* or +) is permitted",
+						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
 								class_name[0] ? "::" : "",
 								active_function->common.function_name->val);
@@ -690,7 +683,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				if (!quiet) {
 					zend_function *active_function = EG(current_execute_data)->func;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-					zend_error(error_type, "%s%s%s(): bad type specifier while parsing parameters",
+					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
 							class_name,
 							class_name[0] ? "::" : "",
 							active_function->common.function_name->val);
@@ -713,7 +706,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		if (!quiet) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-			zend_error(error_type, "%s%s%s() expects %s %d parameter%s, %d given",
+			zend_internal_type_error(strict, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
 					active_function->common.function_name->val,
@@ -728,7 +721,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
-		zend_error(error_type, "%s(): could not obtain parameters for parsing",
+		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
 			get_active_function_name());
 		return FAILURE;
 	}
@@ -782,7 +775,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	if (0 == (type_spec)[0] && 0 != __num_args && !(flags & ZEND_PARSE_PARAMS_QUIET)) { \
 		const char *__space; \
 		const char * __class_name = get_active_class_name(&__space); \
-		zend_error((flags & ZEND_PARSE_PARAMS_STRICT) ? (E_EXCEPTION | E_ERROR) : E_WARNING, "%s%s%s() expects exactly 0 parameters, %d given", \
+		zend_internal_type_error((flags & ZEND_PARSE_PARAMS_STRICT), "%s%s%s() expects exactly 0 parameters, %d given", \
 			__class_name, __space, \
 			get_active_function_name(), __num_args); \
 		return FAILURE; \
