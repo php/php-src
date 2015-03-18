@@ -909,7 +909,12 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		zend_error_helper(code, file->val, line, "%s", message->val);
+		if (ce_exception == type_exception_ce) {
+			zend_error_helper(code, file->val, line, "%s and defined", message->val);
+		} else {
+			zend_error_helper(code, file->val, line, "%s", message->val);
+		}
+
 		zend_string_release(file);
 		zend_string_release(message);
 		OBJ_RELEASE(ex);

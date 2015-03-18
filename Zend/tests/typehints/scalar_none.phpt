@@ -35,13 +35,13 @@ foreach ($functions as $type => $function) {
 echo PHP_EOL . "Done";
 --EXPECTF--
 Testing int:
-*** Caught Argument 1 passed to {closure}() must be of the type integer, none given, called in %s on line %d and defined in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type integer, none given, called in %s on line %d
 Testing float:
-*** Caught Argument 1 passed to {closure}() must be of the type float, none given, called in %s on line %d and defined in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type float, none given, called in %s on line %d
 Testing string:
-*** Caught Argument 1 passed to {closure}() must be of the type string, none given, called in %s on line %d and defined in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type string, none given, called in %s on line %d
 Testing bool:
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, none given, called in %s on line %d and defined in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, none given, called in %s on line %d
 Testing int nullable:
 NULL
 Testing float nullable:

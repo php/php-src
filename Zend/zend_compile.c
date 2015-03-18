@@ -129,13 +129,13 @@ static zend_bool zend_get_unqualified_name(const zend_string *name, const char *
 }
 /* }}} */
 
-struct _scalar_typehint_info {
+typedef struct _scalar_typehint_info {
 	const char* name;
 	const size_t name_len;
 	const zend_uchar type;
-};
+} scalar_typehint_info;
 
-static const struct _scalar_typehint_info scalar_typehints[] = {
+static const scalar_typehint_info scalar_typehints[] = {
 	{"int", sizeof("int") - 1, IS_LONG},
 	{"float", sizeof("float") - 1, IS_DOUBLE},
 	{"string", sizeof("string") - 1, IS_STRING},
@@ -143,19 +143,12 @@ static const struct _scalar_typehint_info scalar_typehints[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
-static zend_always_inline const struct _scalar_typehint_info* zend_find_scalar_typehint(const zend_string *const_name) /* {{{ */
+static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(const zend_string *const_name) /* {{{ */
 {
-	const struct _scalar_typehint_info *info = &scalar_typehints[0];
-	const char *uqname;
-	size_t uqname_len;
+	const scalar_typehint_info *info = &scalar_typehints[0];
 
-	if (!zend_get_unqualified_name(const_name, &uqname, &uqname_len)) {
-		uqname = const_name->val;
-		uqname_len = const_name->len;
-	}
-	
 	while (info->name) {
-		if (uqname_len == info->name_len && zend_binary_strcasecmp(uqname, uqname_len, info->name, info->name_len) == 0) {
+		if (const_name->len == info->name_len && zend_binary_strcasecmp(const_name->val, const_name->len, info->name, info->name_len) == 0) {
 			break;
 		}
 		info++;
@@ -171,7 +164,7 @@ static zend_always_inline const struct _scalar_typehint_info* zend_find_scalar_t
 
 ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{ */
 {	
-	const struct _scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
+	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
 	
 	if (info) {
 		zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a class name", info->name);
@@ -181,7 +174,7 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{
 
 static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const zend_string *const_name) /* {{{ */
 {	
-	const struct _scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
+	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
 	
 	if (info) {
 		return info->type;
