@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015 PHP 5.4.39
+?? ??? 2015 PHP 5.4.40
+
+19 Mar 2015 PHP 5.4.39
 
 - Core:
   . Fixed bug #68976 (Use After Free Vulnerability in unserialize()). (Stas)
