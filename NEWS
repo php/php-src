@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
 
+- Ereg:
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (Stas)
+
 - SOAP:
   . Fixed bug #69085 (SoapClient's __call() type confusion through
     unserialize()). (Dmitry)
