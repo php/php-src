@@ -179,7 +179,7 @@ const char *zend_vm_opcodes_map[171] = {
 	"ZEND_ADD_TRAIT",
 	"ZEND_BIND_TRAITS",
 	"ZEND_SEPARATE",
-	NULL,
+	"ZEND_FETCH_CLASS_NAME",
 	NULL,
 	"ZEND_DISCARD_EXCEPTION",
 	"ZEND_YIELD",

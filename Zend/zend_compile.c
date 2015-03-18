@@ -5975,6 +5975,22 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
+	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__")) {
+		zend_ast *last = CG(ast);
+
+		while (last->kind == ZEND_AST_STMT_LIST) {
+			zend_ast_list *list = zend_ast_get_list(last);
+			last = list->child[list->children-1];
+		}
+		if (last->kind == ZEND_AST_HALT_COMPILER) {
+			result->op_type = IS_CONST;
+			ZVAL_LONG(&result->u.constant,
+				Z_LVAL_P(zend_ast_get_zval(last->child[0])));
+			zend_string_release(resolved_name);
+			return;
+		}
+	}
+
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
 	opline->op2_type = IS_CONST;
 
@@ -6161,12 +6177,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 	            CG(active_class_entry) &&
 	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
-	{
-		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
-			zend_ast_create_zval_from_str(zend_string_init("__CLASS__", sizeof("__CLASS__") - 1, 0)));
-		zend_compile_const(result, const_ast);
-		zend_ast_destroy(const_ast);
-	}
+	zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
 }
 /* }}} */
 
@@ -6298,8 +6309,8 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 
 	{
 		zval const_zv;
-		ZVAL_STRING(&const_zv, "__CLASS__");
-		Z_TYPE_INFO(const_zv) = IS_CONSTANT_EX;
+		Z_STR(const_zv) = zend_string_init("__CLASS__", sizeof("__CLASS__")-1, 0);
+		Z_TYPE_INFO(const_zv) = IS_CONSTANT_EX | (IS_CONSTANT_CLASS << Z_CONST_FLAGS_SHIFT);
 
 		zend_ast_destroy(ast);
 		*ast_ptr = zend_ast_create_zval(&const_zv);

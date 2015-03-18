@@ -7363,3 +7363,14 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 	}
 }
 
+ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (EG(scope) && EG(scope)->name) {
+		ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->name);
+	} else {
+		ZVAL_EMPTY_STRING(EX_VAR(opline->result.var));
+	}
+	ZEND_VM_NEXT_OPCODE();
+}

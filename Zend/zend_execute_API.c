@@ -535,8 +535,17 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
-		const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p));
-		if (!const_value) {
+		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
+			ZEND_ASSERT(EG(current_execute_data));
+			if (inline_change) {
+				zend_string_release(Z_STR_P(p));
+			}
+			if (EG(scope) && EG(scope)->name) {
+				ZVAL_STR_COPY(p, EG(scope)->name);
+			} else {
+				ZVAL_EMPTY_STRING(p);
+			}
+		} else if ((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL) {
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
