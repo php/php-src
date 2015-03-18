@@ -110,7 +110,7 @@ _zip_cdir_new(zip_uint64_t nentry, struct zip_error *error)
 
     if (nentry == 0)
 	cd->entry = NULL;
-    else if ((cd->entry=(struct zip_entry *)malloc(sizeof(*(cd->entry))*(size_t)nentry)) == NULL) {
+    else if (nentry > ((size_t)-1)/sizeof(*(cd->entry)) || (cd->entry=(struct zip_entry *)malloc(sizeof(*(cd->entry))*(size_t)nentry)) == NULL) {
 	_zip_error_set(error, ZIP_ER_MEMORY, 0);
 	free(cd);
 	return NULL;
