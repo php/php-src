@@ -2088,6 +2088,9 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__x86_64__)
 #  define ZEND_VM_FP_GLOBAL_REG "%r14"
 #  define ZEND_VM_IP_GLOBAL_REG "%r15"
+# elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
+#  define ZEND_VM_FP_GLOBAL_REG "r28"
+#  define ZEND_VM_IP_GLOBAL_REG "r29"
 # endif
 #endif
 
