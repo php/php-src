@@ -42,6 +42,10 @@ PHP                                                                        NEWS
    . Fixed #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
+- ZIP:
+  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
+    boundary). (Stas)
+
 19 Mar 2015, PHP 5.5.23
 
 - Core:
