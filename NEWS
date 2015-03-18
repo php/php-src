@@ -21,9 +21,6 @@ PHP                                                                        NEWS
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
 
-- Ereg:
-  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (Stas)
-
 - Filter:
   . Fixed bug #69202 (FILTER_FLAG_STRIP_BACKTICK ignored unless other
     flags are used). (Jeff Welch)
@@ -34,17 +31,12 @@ PHP                                                                        NEWS
    . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
 
-- SOAP:
-  . Fixed bug #69085 (SoapClient's __call() type confusion through
-    unserialize()). (Dmitry)
+- OpenSSL:
+   . Fix bug #67403 (Add signatureType to openssl_x509_parse)
 
 - SPL:
    . Fixed #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
-
-- ZIP:
-  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
-    boundary). (Stas)
 
 19 Mar 2015, PHP 5.5.23
 
@@ -97,7 +89,6 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bugs #61285, #68329, #68046, #41631 (encrypted streams don't observe
     socket timeouts). (Brad Broerman)
-  . Fix bug #67403 (Add signatureType to openssl_x509_parse)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).
