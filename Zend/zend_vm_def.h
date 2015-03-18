@@ -3214,6 +3214,8 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -3261,6 +3263,8 @@ ZEND_VM_HANDLER(130, ZEND_DO_UCALL, ANY, ANY)
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -3285,6 +3289,8 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zval *ret;
+
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;

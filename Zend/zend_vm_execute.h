@@ -545,6 +545,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -592,6 +594,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_HANDLER(ZEND_OPC
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -616,6 +620,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zval *ret;
+
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;

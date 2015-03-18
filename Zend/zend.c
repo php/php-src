@@ -1284,7 +1284,7 @@ ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_get_type_exception(), message, 0);
+	zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
 	efree(message);
 	va_end(va);
 } /* }}} */

@@ -11,4 +11,4 @@ require 'weak_include_strict_2.inc';
 // calls within that file should stay strict, despite being included by weak file
 ?>
 --EXPECTF--
-Catchable fatal error: Argument 1 passed to takes_int() must be of the type integer, float given, called in %sweak_include_strict_2.inc on line 9 and defined in %sweak_include_strict_2.inc on line 5
+Fatal error: Argument 1 passed to takes_int() must be of the type integer, float given, called in %sweak_include_strict_2.inc on line 9 and defined in %sweak_include_strict_2.inc on line 5
