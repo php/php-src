@@ -87,35 +87,35 @@ array(7) refcount(2){
     [%u|b%"id"]=>
     long(1)
     [%u|b%"label"]=>
-    %unicode|string%(1) "a" refcount(1)
+    %unicode|string%(1) "a" refcount(%d)
   }
   [1]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
     long(2)
     [%u|b%"label"]=>
-    %unicode|string%(1) "b" refcount(1)
+    %unicode|string%(1) "b" refcount(%d)
   }
   [2]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
     long(1)
     [%u|b%"label"]=>
-    %unicode|string%(1) "a" refcount(1)
+    %unicode|string%(1) "a" refcount(%d)
   }
   [3]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
     long(2)
     [%u|b%"label"]=>
-    %unicode|string%(1) "b" refcount(1)
+    %unicode|string%(1) "b" refcount(%d)
   }
   [4]=>
   array(3) refcount(1){
     [%u|b%"id"]=>
     &long(3)
     [%u|b%"label"]=>
-    %unicode|string%(1) "a" refcount(1)
+    %unicode|string%(1) "a" refcount(%d)
     [%u|b%"id2"]=>
     &long(3)
   }
@@ -124,7 +124,7 @@ array(7) refcount(2){
     [%u|b%"id"]=>
     &long(4)
     [%u|b%"label"]=>
-    %unicode|string%(1) "b" refcount(1)
+    %unicode|string%(1) "b" refcount(%d)
     [%u|b%"id2"]=>
     &long(4)
   }
@@ -146,9 +146,9 @@ array(1) refcount(2){
   [0]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    %unicode|string%(1) "1" refcount(1)
+    %unicode|string%(1) "1" refcount(%d)
     [%u|b%"label"]=>
-    %unicode|string%(1) "a" refcount(1)
+    %unicode|string%(1) "a" refcount(%d)
   }
 }
 done!
