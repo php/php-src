@@ -20,7 +20,8 @@ PHP                                                                        NEWS
     builds). (Anatol)
 
 - Ereg:
-  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (Stas)
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (CVE-2015-2305)
+    (Stas)
 
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
