@@ -421,6 +421,11 @@ AC_MSG_CHECKING(for global register variables support)
 if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
   AC_TRY_COMPILE([
   ],[
+#if defined(__GNUC__)
+# define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
+#else
+# define ZEND_GCC_VERSION 0
+#endif
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 # define ZEND_VM_FP_GLOBAL_REG "%esi"
 # define ZEND_VM_IP_GLOBAL_REG "%edi"
