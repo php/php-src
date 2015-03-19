@@ -1600,7 +1600,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	size_t                  format_len;
 	zend_long                 timestamp = 0;
 	struct tm            ta;
-	int                  max_reallocs = 5;
 	size_t               buf_len = 256, real_len;
 	timelib_time        *ts;
 	timelib_tzinfo      *tzi;
@@ -1662,9 +1661,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	while ((real_len = strftime(buf->val, buf_len, format, &ta)) == buf_len || real_len == 0) {
 		buf_len *= 2;
 		buf = zend_string_realloc(buf, buf_len, 0);
-		if (!--max_reallocs) {
-			break;
-		}
 	}
 #if defined(PHP_WIN32) && _MSC_VER >= 1700
 	/* VS2012 strftime() returns number of characters, not bytes.
