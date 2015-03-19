@@ -3597,15 +3597,22 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 #if OP1_TYPE != IS_UNUSED
 		zval *retval_ptr;
 		zend_free_op free_op1;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
 		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		
-		if (EXPECTED((opline->extended_value & ZEND_RETURN_REF) == 0)) {
-			/* Does not return by reference */
-			SEPARATE_ZVAL(retval_ptr);
-		} else {
-			ZVAL_DEREF(retval_ptr);
-			SEPARATE_ZVAL_NOREF(retval_ptr);
+		if (UNEXPECTED(!ret_info->class_name 
+			&& ret_info->type_hint != IS_CALLABLE 
+			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
+			/* A cast or an error will happen, so separate the zval to prevent overwriting it */
+			
+			if (EXPECTED((opline->extended_value & ZEND_RETURN_REF) == 0)) {
+				/* Does not return by reference */
+				SEPARATE_ZVAL(retval_ptr);
+			} else {
+				ZVAL_DEREF(retval_ptr);
+				SEPARATE_ZVAL_NOREF(retval_ptr);
+			}
 		}
 
 		zend_verify_return_type(EX(func), retval_ptr, EX_USES_STRICT_TYPES());
