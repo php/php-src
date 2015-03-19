@@ -3815,7 +3815,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND
 try_strlen:
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-	} else {
+	} else if (EXPECTED(0 == EX_USES_STRICT_TYPES())) {
 		if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			goto try_strlen;
@@ -3842,6 +3842,8 @@ strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	} else {
+		zend_type_error("strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 	}
 
 	CHECK_EXCEPTION();
@@ -27300,7 +27302,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 try_strlen:
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-	} else {
+	} else if (EXPECTED(0 == EX_USES_STRICT_TYPES())) {
 		if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			goto try_strlen;
@@ -27327,6 +27329,8 @@ strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	} else {
+		zend_type_error("strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 	}
 
 	CHECK_EXCEPTION();
@@ -37559,7 +37563,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 try_strlen:
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-	} else {
+	} else if (EXPECTED(0 == EX_USES_STRICT_TYPES())) {
 		if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			goto try_strlen;
@@ -37586,6 +37590,8 @@ strlen_error:
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	} else {
+		zend_type_error("strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 	}
 	zval_ptr_dtor_nogc(free_op1);
 	CHECK_EXCEPTION();

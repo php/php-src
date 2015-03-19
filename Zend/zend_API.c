@@ -284,13 +284,18 @@ ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg, zen
 }
 /* }}} */
 
-ZEND_API void zend_wrong_callback_error(int severity, int num, char *error) /* {{{ */
+ZEND_API void zend_wrong_callback_error(int severity, int num, char *error, zend_bool strict) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
-		class_name, space, get_active_function_name(), num, error);
+	if (severity == E_WARNING) {
+		zend_internal_type_error(strict, "%s%s%s() expects parameter %d to be a valid callback, %s",
+			class_name, space, get_active_function_name(), num, error);
+	} else {
+		zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
+			class_name, space, get_active_function_name(), num, error);
+	}
 	efree(error);
 }
 /* }}} */

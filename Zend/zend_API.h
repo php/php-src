@@ -710,7 +710,7 @@ typedef enum _zend_expected_type {
 ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args, zend_bool strict);
 ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg, zend_bool strict);
 ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg, zend_bool strict);
-ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
+ZEND_API void zend_wrong_callback_error(int severity, int num, char *error, zend_bool strict);
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1
@@ -761,7 +761,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 		if (UNEXPECTED(error_code != ZPP_ERROR_OK)) { \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
 				if (error_code == ZPP_ERROR_WRONG_CALLBACK) { \
-					zend_wrong_callback_error(_strict ? E_RECOVERABLE_ERROR : E_WARNING, _i, _error); \
+					zend_wrong_callback_error(E_WARNING, _i, _error, _strict); \
 				} else if (error_code == ZPP_ERROR_WRONG_CLASS) { \
 					zend_wrong_paramer_class_error(_i, _error, _arg, _strict); \
 				} else if (error_code == ZPP_ERROR_WRONG_ARG) { \
@@ -863,7 +863,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 				break; \
 			} \
 		} else if (UNEXPECTED(_error != NULL)) { \
-			zend_wrong_callback_error(E_STRICT, _i, _error); \
+			zend_wrong_callback_error(E_STRICT, _i, _error, _strict); \
 		}
 
 #define Z_PARAM_FUNC(dest_fci, dest_fcc) \

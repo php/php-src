@@ -7269,7 +7269,7 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 ZEND_VM_C_LABEL(try_strlen):
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-	} else {
+	} else if (EXPECTED(0 == EX_USES_STRICT_TYPES())) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			ZEND_VM_C_GOTO(try_strlen);
@@ -7296,6 +7296,8 @@ ZEND_VM_C_LABEL(strlen_error):
 			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	} else {
+		zend_type_error("strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();
