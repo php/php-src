@@ -141,7 +141,7 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
-    (Antony)
+    (CVE-2014-9705) (Antony)
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
@@ -178,7 +178,8 @@ PHP                                                                        NEWS
     named pipes). (steffenb198 at aol dot com)
 
 - Phar:
-  . Fixed bug #68901 (use after free). (bugreports at internot dot info)
+  . Fixed bug #68901 (use after free). (CVE-2015-2301)
+    (bugreports at internot dot info)
 
 - Pgsql:
   . Fixed Bug #65199 (pg_copy_from() modifies input array variable) (Yasuo)
