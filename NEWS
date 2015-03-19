@@ -74,7 +74,7 @@ PHP                                                                        NEWS
     by libcurl. (Linus Unneback)
 
 - Ereg:
-  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (Stas)
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (CVE-2015-2305) (Stas)
 
 - FPM:
   . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
