@@ -32,10 +32,10 @@ PHP                                                                        NEWS
     (Masaki Kagaya)
 
 - OpenSSL:
-   . Fix bug #67403 (Add signatureType to openssl_x509_parse)
+   . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
 
 - SPL:
-   . Fixed #69227 (Use after free in zval_scan caused by
+   . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
 19 Mar 2015, PHP 5.5.23
@@ -110,7 +110,7 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
-    boundary) (CVE-2015-2331). (Stas)
+    boundary). (CVE-2015-2331) (Stas)
 
 19 Feb 2015, PHP 5.5.22
 
