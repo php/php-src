@@ -33,7 +33,7 @@
 #	include <stdint.h>
 #	include <stddef.h>
 #else
-#	include "win32/php_stdint.h"
+#	include "main/php_stdint.h"
 #endif
 #include "php.h"
 #include "php_globals.h"
