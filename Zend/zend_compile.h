@@ -252,6 +252,9 @@ typedef struct _zend_try_catch_element {
 /* Function has a return type hint (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
+/* op_array uses strict mode types */
+#define ZEND_ACC_STRICT_TYPES			0x80000000
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -423,10 +426,6 @@ struct _zend_execute_data {
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
-#define ZEND_CALL_STRICT_TYPEHINTS   (1 << 5)
-
-#define ZEND_RETURN_TYPE_STRICT	(1 << 0)
-#define ZEND_RETURN_TYPE_BYREF	(1 << 1)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)
@@ -462,7 +461,10 @@ struct _zend_execute_data {
 #define EX_CALL_INFO()			ZEND_CALL_INFO(execute_data)
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
-#define EX_USES_STRICT_TYPES()	((EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0)
+
+#define EX_USES_STRICT_TYPES()		_EX_USES_STRICT_TYPES(EG(current_execute_data))
+#define EX_PREV_USES_STRICT_TYPES()	_EX_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data)
+#define _EX_USES_STRICT_TYPES(ex_data)	((ex_data) && (ex_data)->func && ZEND_USER_CODE((ex_data)->func->type) && ((ex_data)->func->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) ? 1 : 0)
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)

@@ -151,7 +151,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array) /
 
 ZEND_API void zend_wrong_param_count(void) /* {{{ */
 {
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+	if (EX_PREV_USES_STRICT_TYPES()) {
 		zend_wrong_param_count_ex(1);
 	} else {
 		zend_wrong_param_count_ex(0);
@@ -802,7 +802,7 @@ ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_
 	va_list va;
 	int retval;
 
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+	if (EX_PREV_USES_STRICT_TYPES()) {
 		flags |= ZEND_PARSE_PARAMS_STRICT;
 	}
 
@@ -822,7 +822,7 @@ ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...) /* 
 	int retval;
 	int flags = 0;
 
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+	if (EX_PREV_USES_STRICT_TYPES()) {
 		flags |= ZEND_PARSE_PARAMS_STRICT;
 	}
 
@@ -851,7 +851,7 @@ ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const ch
 	 * wrong branch here. */
 	zend_bool is_method = EG(current_execute_data)->func->common.scope != NULL;
 
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+	if (EX_PREV_USES_STRICT_TYPES()) {
 		flags |= ZEND_PARSE_PARAMS_STRICT;
 	}
 
@@ -891,7 +891,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this
 	zval **object;
 	zend_class_entry *ce;
 
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) {
+	if (EX_PREV_USES_STRICT_TYPES()) {
 		flags |= ZEND_PARSE_PARAMS_STRICT;
 	}
 

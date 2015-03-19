@@ -188,7 +188,6 @@ static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const z
 static void init_compiler_declarables(void) /* {{{ */
 {
 	ZVAL_LONG(&CG(declarables).ticks, 0);
-	CG(declarables).strict_types = 0;
 }
 /* }}} */
 
@@ -1624,8 +1623,6 @@ void zend_do_end_compilation(void) /* {{{ */
 {
 	CG(has_bracketed_namespaces) = 0;
 	zend_end_namespace();
-	/* strict typehinting is per-file */
-	CG(declarables).strict_types = 0;
 }
 /* }}} */
 
@@ -1926,8 +1923,7 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 
 	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
-		opline->extended_value = (CG(declarables).strict_types ? ZEND_RETURN_TYPE_STRICT : 0)
-			 & (returns_reference ? ZEND_RETURN_TYPE_BYREF : 0);
+		opline->extended_value = (returns_reference ? ZEND_RETURN_REF : 0);
 	}
 }
 /* }}} */
@@ -2716,8 +2712,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
 	}
 
-	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0)
-		| (CG(declarables).strict_types ? ZEND_CALL_STRICT_TYPEHINTS : 0);
+	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
 	opline = zend_emit_op(result, zend_get_call_op(opline->opcode, fbc), NULL, NULL);
 	opline->op1.num = call_flags;
 
@@ -3405,7 +3400,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		/* for scalar, weak return types, the value may be casted
 		 * thus, for constants, we need to store them in a tmp var
 		 */
-		if (expr_node.op_type == IS_CONST && !CG(declarables).strict_types) {
+		if (expr_node.op_type == IS_CONST && !(CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)) {
 			znode expr_node_copy = expr_node;
 
 			zend_emit_op_tmp(&expr_node, ZEND_QM_ASSIGN, &expr_node_copy, NULL);
@@ -4050,7 +4045,10 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
 			}
 
-			CG(declarables).strict_types = Z_LVAL(value_zv);
+			if (Z_LVAL(value_zv) == 1) {
+				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
+			}
+			
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", name->val);
 		}
@@ -4525,6 +4523,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
+	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;
 	op_array->line_start = decl->start_lineno;
 	op_array->line_end = decl->end_lineno;
