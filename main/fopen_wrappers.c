@@ -586,7 +586,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 		const char *exec_fname = exec_filename->val;
 		size_t exec_fname_length = exec_filename->len;
 
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length > 0 &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
 			memcpy(trypath, exec_fname, exec_fname_length + 1);
@@ -664,7 +664,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 		const char *exec_fname = exec_filename->val;
 		size_t exec_fname_length = exec_filename->len;
 
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if ((exec_fname && exec_fname[0] == '[') || exec_fname_length <= 0) {
 			/* [no active file] or no path */
 			pathbuf = estrdup(path);
