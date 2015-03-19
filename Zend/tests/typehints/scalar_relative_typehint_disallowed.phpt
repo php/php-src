@@ -11,4 +11,4 @@ foo(10);
 
 ?>
 --EXPECTF--
-Fatal error: Argument 1 passed to foo() must be an instance of bar\int, integer given, called in %s on line %d and defined in %s on line %d
+Fatal error: "bar\int" cannot be used as a type declaration in %s on line %d

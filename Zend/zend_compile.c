@@ -146,9 +146,16 @@ static const scalar_typehint_info scalar_typehints[] = {
 static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(const zend_string *const_name) /* {{{ */
 {
 	const scalar_typehint_info *info = &scalar_typehints[0];
+	const char *uqname;
+	size_t uqname_len;
+
+	if (!zend_get_unqualified_name(const_name, &uqname, &uqname_len)) {
+		uqname = const_name->val;
+		uqname_len = const_name->len;
+	}
 
 	while (info->name) {
-		if (const_name->len == info->name_len && zend_binary_strcasecmp(const_name->val, const_name->len, info->name, info->name_len) == 0) {
+		if (uqname_len == info->name_len && zend_binary_strcasecmp(uqname, uqname_len, info->name, info->name_len) == 0) {
 			break;
 		}
 		info++;
@@ -177,6 +184,9 @@ static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const z
 	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
 	
 	if (info) {
+		if (const_name->len != info->name_len) {
+			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a type declaration", const_name->val);
+		}
 		return info->type;
 	} else {
 		return 0;
