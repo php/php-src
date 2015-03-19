@@ -272,7 +272,7 @@ static PHP_FUNCTION(phpdbg_exec)
 	}
 
 	{
-		struct stat sb;
+		zend_stat_t sb;
 		zend_bool result = 1;
 
 		if (VCWD_STAT(exec->val, &sb) != FAILURE) {
