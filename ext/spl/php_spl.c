@@ -552,7 +552,7 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			lc_name = zend_string_realloc(lc_name, lc_name->len + sizeof(uint32_t), 0);
+			lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
 			memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
 			lc_name->val[lc_name->len] = '\0';
 			ZVAL_OBJ(&alfi.obj, obj_ptr);
@@ -663,7 +663,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			if (success != SUCCESS && obj_ptr) {
-				lc_name = zend_string_realloc(lc_name, lc_name->len + sizeof(uint32_t), 0);
+				lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
 				memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
 				lc_name->val[lc_name->len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);

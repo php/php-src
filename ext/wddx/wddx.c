@@ -991,7 +991,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 					zval_ptr_dtor(&ent->data);
 					ZVAL_STRINGL(&ent->data, (char *)s, len);
 				} else {
-					Z_STR(ent->data) = zend_string_realloc(Z_STR(ent->data), Z_STRLEN(ent->data) + len, 0);
+					Z_STR(ent->data) = zend_string_extend(Z_STR(ent->data), Z_STRLEN(ent->data) + len, 0);
 					memcpy(Z_STRVAL(ent->data) + Z_STRLEN(ent->data) - len, (char *)s, len);
 					Z_STRVAL(ent->data)[Z_STRLEN(ent->data)] = '\0';
 				}

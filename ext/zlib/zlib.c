@@ -336,7 +336,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
-			out = zend_string_realloc(out, Z.total_out, 0);
+			out = zend_string_truncate(out, Z.total_out, 0);
 			out->val[out->len] = '\0';
 			return out;
 		} else {

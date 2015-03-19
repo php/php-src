@@ -1500,7 +1500,7 @@ zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) /* {{{ */
 	size_t left_len = left->len;
 	size_t len = left_len + right->len + 1; /* left\right */
 
-	result = zend_string_realloc(left, len, 0);
+	result = zend_string_extend(left, len, 0);
 	result->val[left_len] = '\\';
 	memcpy(&result->val[left_len + 1], right->val, right->len);
 	result->val[len] = '\0';
@@ -5225,7 +5225,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			zend_dirname(dirname->val, dirname->len);
 
 			if (strcmp(dirname->val, ".") == 0) {
-				dirname = zend_string_realloc(dirname, MAXPATHLEN, 0);
+				dirname = zend_string_extend(dirname, MAXPATHLEN, 0);
 #if HAVE_GETCWD
 				VCWD_GETCWD(dirname->val, MAXPATHLEN);
 #elif HAVE_GETWD

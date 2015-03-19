@@ -655,7 +655,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
-	Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
+	Z_STR_P(str) = zend_string_extend(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
 	Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	memset(Z_STRVAL_P(str) + old_len, 0, ZEND_MMAP_AHEAD + 1);
 

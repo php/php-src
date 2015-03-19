@@ -1477,7 +1477,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			result = zend_string_realloc(result, max_len + step, persistent);
+			result = zend_string_extend(result, max_len + step, persistent);
 			max_len += step;
 			ptr = result->val + len;
 		} else {
@@ -1485,7 +1485,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 	}
 	if (len) {
-		result = zend_string_realloc(result, len, persistent);
+		result = zend_string_truncate(result, len, persistent);
 		result->val[len] = '\0';
 	} else {
 		zend_string_free(result);

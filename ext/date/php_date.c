@@ -1661,7 +1661,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	buf = zend_string_alloc(buf_len, 0);
 	while ((real_len = strftime(buf->val, buf_len, format, &ta)) == buf_len || real_len == 0) {
 		buf_len *= 2;
-		buf = zend_string_realloc(buf, buf_len, 0);
+		buf = zend_string_extend(buf, buf_len, 0);
 		if (!--max_reallocs) {
 			break;
 		}
@@ -1680,7 +1680,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	if (real_len && real_len != buf_len) {
-		buf = zend_string_realloc(buf, real_len, 0);
+		buf = zend_string_truncate(buf, real_len, 0);
 		RETURN_NEW_STR(buf);
 	}
 	zend_string_free(buf);

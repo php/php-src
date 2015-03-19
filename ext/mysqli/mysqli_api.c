@@ -1988,7 +1988,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 
 	newstr = zend_string_alloc(2 * escapestr_len, 0);
 	newstr->len = mysql_real_escape_string(mysql->mysql, newstr->val, escapestr, escapestr_len);
-	newstr = zend_string_realloc(newstr, newstr->len, 0);
+	newstr = zend_string_truncate(newstr, newstr->len, 0);
 
 	RETURN_NEW_STR(newstr);
 }

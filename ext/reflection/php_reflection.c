@@ -140,7 +140,7 @@ static string *string_printf(string *str, const char *format, ...)
 		if (str->alloced < nlen) {
 			size_t old_len = str->buf->len;
 			str->alloced = nlen;
-			str->buf = zend_string_realloc(str->buf, str->alloced, 0);
+			str->buf = zend_string_extend(str->buf, str->alloced, 0);
 			str->buf->len = old_len;
 		}
 		memcpy(str->buf->val + str->buf->len, s_tmp, len + 1);
@@ -157,7 +157,7 @@ static string *string_write(string *str, char *buf, size_t len)
 	if (str->alloced < nlen) {
 		size_t old_len = str->buf->len;
 		str->alloced = nlen;
-		str->buf = zend_string_realloc(str->buf, str->alloced, 0);
+		str->buf = zend_string_extend(str->buf, str->alloced, 0);
 		str->buf->len = old_len;
 	}
 	memcpy(str->buf->val + str->buf->len, buf, len);

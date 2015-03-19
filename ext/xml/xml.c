@@ -604,7 +604,7 @@ PHPAPI zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Char *e
 		s++;
 	}
 	str->val[str->len] = '\0';
-	str = zend_string_realloc(str, str->len, 0);
+	str = zend_string_truncate(str, str->len, 0);
 	return str;
 }
 /* }}} */
@@ -644,7 +644,7 @@ PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 	}
 	str->val[str->len] = '\0';
 	if (str->len < len) {
-		str = zend_string_realloc(str, str->len, 0);
+		str = zend_string_truncate(str, str->len, 0);
 	}
 
 	return str;
@@ -892,7 +892,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					/* check if the current tag already has a value - if yes append to that! */
 					if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
 						int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-						Z_STR_P(myval) = zend_string_realloc(Z_STR_P(myval), newlen, 0);
+						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 								decoded_value->val, decoded_value->len + 1);
 						zend_string_release(decoded_value);
@@ -909,7 +909,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
 									int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-									Z_STR_P(myval) = zend_string_realloc(Z_STR_P(myval), newlen, 0);
+									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 											decoded_value->val, decoded_value->len + 1);
 									zend_string_release(decoded_value);

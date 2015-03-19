@@ -4362,7 +4362,7 @@ PHP_FUNCTION(pg_escape_string)
 		to->len = PQescapeString(to->val, from->val, from->len);
 	}
 
-	to = zend_string_realloc(to, to->len, 0);
+	to = zend_string_truncate(to, to->len, 0);
 	RETURN_NEW_STR(to);
 }
 /* }}} */
@@ -6048,7 +6048,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
-							str = zend_string_realloc(str, str->len, 0);
+							str = zend_string_truncate(str, str->len, 0);
 							ZVAL_NEW_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1);
 						}

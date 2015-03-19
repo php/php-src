@@ -1004,7 +1004,7 @@ PHP_FUNCTION(wordwrap)
 		for (current = 0; current < text->len; current++) {
 			if (chk <= 0) {
 				alloced += (size_t) (((text->len - current + 1)/linelength + 1) * breakchar_len) + 1;
-				newtext = zend_string_realloc(newtext, alloced, 0);
+				newtext = zend_string_extend(newtext, alloced, 0);
 				chk = (size_t) ((text->len - current)/linelength) + 1;
 			}
 			/* when we hit an existing break, copy to new buffer, and
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(wordwrap)
 
 		newtext->val[newtextlen] = '\0';
 		/* free unused memory */
-		newtext = zend_string_realloc(newtext, newtextlen, 0);
+		newtext = zend_string_truncate(newtext, newtextlen, 0);
 
 		RETURN_NEW_STR(newtext);
 	}
@@ -2738,7 +2738,7 @@ PHP_FUNCTION(quotemeta)
 
 	*q = '\0';
 
-	RETURN_NEW_STR(zend_string_realloc(str, q - str->val, 0));
+	RETURN_NEW_STR(zend_string_truncate(str, q - str->val, 0));
 }
 /* }}} */
 
@@ -3441,7 +3441,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, 
 			}
 
 			*e = '\0';
-			new_str = zend_string_realloc(new_str, e - s, 0);
+			new_str = zend_string_truncate(new_str, e - s, 0);
 			return new_str;
 		}
 	} else if (needle_len > length || memcmp(haystack, needle, length)) {
@@ -3878,7 +3878,7 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 	*target = 0;
 	newlen = target - new_str->val;
 	if (newlen < str->len * 4) {
-		new_str = zend_string_realloc(new_str, newlen, 0);
+		new_str = zend_string_truncate(new_str, newlen, 0);
 	}
 	if (should_free) {
 		zend_string_release(str);
@@ -3954,7 +3954,7 @@ do_escape:
 	}
 
 	if (new_str->len - (target - new_str->val) > 16) {
-		new_str = zend_string_realloc(new_str, target - new_str->val, 0);
+		new_str = zend_string_truncate(new_str, target - new_str->val, 0);
 	} else {
 		new_str->len = target - new_str->val;
 	}
@@ -5648,7 +5648,7 @@ PHP_FUNCTION(money_format)
 	str->len = (size_t)res_len;
 	str->val[str->len] = '\0';
 
-	RETURN_NEW_STR(zend_string_realloc(str, str->len, 0));
+	RETURN_NEW_STR(zend_string_truncate(str, str->len, 0));
 }
 /* }}} */
 #endif

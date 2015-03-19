@@ -524,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_realloc(start, to - (unsigned char*)start->val, 0);
+	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
 
 	return start;
 }
@@ -631,7 +631,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 		}
 	}
 	str->val[y] = '\0';
-	str = zend_string_realloc(str, y, 0);
+	str = zend_string_truncate(str, y, 0);
 
 	return str;
 }

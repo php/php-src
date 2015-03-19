@@ -1158,7 +1158,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
 					alloc_len = alloc_len + 2 * new_len;
-					result = zend_string_realloc(result, alloc_len, 0);
+					result = zend_string_extend(result, alloc_len, 0);
 				}
 			}
 			/* copy the part of the string before the match */
@@ -1779,7 +1779,7 @@ static PHP_FUNCTION(preg_quote)
 	*q = '\0';
 
 	/* Reallocate string and return it */
-	out_str = zend_string_realloc(out_str, q - out_str->val, 0);
+	out_str = zend_string_truncate(out_str, q - out_str->val, 0);
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */

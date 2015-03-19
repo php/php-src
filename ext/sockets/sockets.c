@@ -1177,7 +1177,7 @@ PHP_FUNCTION(socket_read)
 		RETURN_EMPTY_STRING();
 	}
 
-	tmpbuf = zend_string_realloc(tmpbuf, retval, 0);
+	tmpbuf = zend_string_truncate(tmpbuf, retval, 0);
 	tmpbuf->len = retval;
 	tmpbuf->val[tmpbuf->len] = '\0' ;
 

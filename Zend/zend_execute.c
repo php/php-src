@@ -1136,7 +1136,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	old_str = Z_STR_P(str);
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		zend_long old_len = Z_STRLEN_P(str);
-		Z_STR_P(str) = zend_string_realloc(Z_STR_P(str), offset + 1, 0);
+		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
