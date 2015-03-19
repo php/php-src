@@ -47,7 +47,7 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
-    boundary). (Stas)
+    boundary). (CVE-2015-2331) (Stas)
 
 19 Mar 2015, PHP 5.6.7
 
