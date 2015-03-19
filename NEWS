@@ -222,7 +222,7 @@ PHP                                                                        NEWS
     (Joshua Rogers, Anatol Belski)
   . Removed readelf.c and related code from libmagic sources
     (Remi, Anatol)
-  . Fixed bug #68735 (fileinfo out-of-bounds memory access).
+  . Fixed bug #68735 (fileinfo out-of-bounds memory access). (CVE-2014-9652)
     (Anatol)
 
 - FPM:
