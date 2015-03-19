@@ -9,6 +9,7 @@ const STRING_VAL = "this is a test";
 const INT_ADD_VAL = 10 + 15;
 const FLOAT_ADD_VAL = 10.5 + 0.2;
 const STRING_ADD_VAL = "this" . " is a test";
+const NULL_VAL = null;
 
 function int_val(int $a = INT_VAL): int {
 	return $a;
@@ -34,6 +35,10 @@ function string_add_val(string $a = STRING_ADD_VAL): string {
 	return $a;
 }
 
+function int_val_default_null(int $a = NULL_VAL) {
+	return $a;
+}
+
 echo "Testing int val" . PHP_EOL;
 var_dump(int_val());
 
@@ -52,6 +57,12 @@ var_dump(float_add_val());
 echo "Testing string add val" . PHP_EOL;
 var_dump(string_add_val());
 
+echo "Testing int with default null constant" . PHP_EOL;
+var_dump(int_val_default_null());
+
+echo "Testing int with null null constant" . PHP_EOL;
+var_dump(int_val_default_null(null));
+
 ?>
 --EXPECTF--
 Testing int val
@@ -66,3 +77,7 @@ Testing float add val
 float(10.7)
 Testing string add val
 string(14) "this is a test"
+Testing int with default null constant
+NULL
+Testing int with null null constant
+NULL
