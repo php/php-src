@@ -42,7 +42,7 @@ PHP                                                                        NEWS
     unserialize()). (Dmitry)
 
 - SPL:
-   . Fixed #69227 (Use after free in zval_scan caused by
+   . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
 - ZIP:
