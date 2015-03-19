@@ -1474,7 +1474,7 @@ not_relative_path:
 		const char *exec_fname = exec_filename->val;
 		size_t exec_fname_length = exec_filename->len;
 
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length<=0) {
 			/* no path */
 			pathbuf = estrdup(path);
