@@ -811,7 +811,7 @@ static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key
 	ZVAL_COPY_VALUE(&p->val, zv);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h | ht->nTableMask;
+	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
@@ -827,7 +827,7 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	ZVAL_PTR(&p->val, ptr);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h | ht->nTableMask;
+	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
@@ -843,7 +843,7 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	ZVAL_INDIRECT(&p->val, ptr);
 	p->key = zend_string_copy(key);
 	p->h = zend_string_hash_val(key);
-	nIndex = p->h | ht->nTableMask;
+	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
