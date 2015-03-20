@@ -21,7 +21,7 @@ $TS \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
 --enable-intl \
---without-pear \
+--with-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \
