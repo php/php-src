@@ -3133,7 +3133,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 			}
 		}
 	} else {
-		zend_error(E_WARNING, "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
+		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
 		efree(error);
 		func = (zend_function*)&zend_pass_function;
 		called_scope = NULL;
@@ -3232,7 +3232,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 	ZEND_ASSERT(
 		!call->func ||
 		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES()));
 
 	EG(current_execute_data) = call->prev_execute_data;
 	zend_vm_stack_free_args(call);
@@ -3339,7 +3339,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < num_args; ++i) {
-				zend_verify_internal_arg_type(fbc, i + 1, p);
+				zend_verify_internal_arg_type(fbc, i + 1, p, EX_USES_STRICT_TYPES());
 				p++;
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -3360,7 +3360,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 		ZEND_ASSERT(
 			!call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES()));
 
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
@@ -3465,7 +3465,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < num_args; ++i) {
-				zend_verify_internal_arg_type(fbc, i + 1, p);
+				zend_verify_internal_arg_type(fbc, i + 1, p, EX_USES_STRICT_TYPES());
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					EG(current_execute_data) = call->prev_execute_data;
 					zend_vm_stack_free_args(call);
@@ -3497,7 +3497,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		ZEND_ASSERT(
 			!call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var), EX_USES_STRICT_TYPES()));
 
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
@@ -3593,11 +3593,30 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
 	} else {
+/* prevents "undefined variable opline" errors */
+#if OP1_TYPE != IS_UNUSED
 		zval *retval_ptr;
 		zend_free_op free_op1;
+		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-		zend_verify_return_type(EX(func), retval_ptr);
+		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		
+		if (UNEXPECTED(!ret_info->class_name 
+			&& ret_info->type_hint != IS_CALLABLE 
+			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
+			/* A cast or an error will happen, so separate the zval to prevent overwriting it */
+			
+			if (EXPECTED((opline->extended_value & ZEND_RETURN_REF) == 0)) {
+				/* Does not return by reference */
+				SEPARATE_ZVAL(retval_ptr);
+			} else {
+				ZVAL_DEREF(retval_ptr);
+				SEPARATE_ZVAL_NOREF(retval_ptr);
+			}
+		}
+
+		zend_verify_return_type(EX(func), retval_ptr, EX_USES_STRICT_TYPES());
+#endif
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -4169,7 +4188,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 				ZEND_VM_C_GOTO(send_array);
 			}
 		}
-		zend_error(E_WARNING, "call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
+		zend_internal_type_error(EX_USES_STRICT_TYPES(), "call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
 		if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
 		}
@@ -4368,7 +4387,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
-		zend_verify_arg_type(EX(func), arg_num, param, NULL);
+		zend_verify_arg_type(EX(func), arg_num, param, NULL, EX_PREV_USES_STRICT_TYPES());
 		CHECK_EXCEPTION();
 	}
 
@@ -4396,7 +4415,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	}
 
 	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-		zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2));
+		zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2), EX_PREV_USES_STRICT_TYPES());
 	}
 
 	CHECK_EXCEPTION();
@@ -4422,8 +4441,8 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(params)) {
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-				do {
-					zend_verify_arg_type(EX(func), arg_num, param, NULL);
+				do {			
+					zend_verify_arg_type(EX(func), arg_num, param, NULL, EX_USES_STRICT_TYPES());
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
 					param++;
@@ -7249,7 +7268,7 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 ZEND_VM_C_LABEL(try_strlen):
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-	} else {
+	} else if (EXPECTED(!EX_USES_STRICT_TYPES())) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			ZEND_VM_C_GOTO(try_strlen);
@@ -7273,9 +7292,11 @@ ZEND_VM_C_LABEL(try_strlen):
 			zval_dtor(&tmp);
 		} else {
 ZEND_VM_C_LABEL(strlen_error):
-			zend_error(E_WARNING, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			zend_internal_type_error(0, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+	} else {
+		zend_internal_type_error(1, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();

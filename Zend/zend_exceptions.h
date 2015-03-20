@@ -39,6 +39,7 @@ ZEND_API zend_class_entry *zend_exception_get_default(void);
 ZEND_API zend_class_entry *zend_get_error_exception(void);
 ZEND_API zend_class_entry *zend_get_engine_exception(void);
 ZEND_API zend_class_entry *zend_get_parse_exception(void);
+ZEND_API zend_class_entry *zend_get_type_exception(void);
 ZEND_API void zend_register_default_classes(void);
 
 /* exception_ce   NULL or zend_exception_get_default() or a derived class
