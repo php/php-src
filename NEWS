@@ -2,16 +2,22 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.40
 
+- SOAP:
+  . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
+    with SoapFault). (Dmitry)
+
 19 Mar 2015 PHP 5.4.39
 
 - Core:
-  . Fixed bug #68976 (Use After Free Vulnerability in unserialize()). (Stas)
+  . Fixed bug #68976 (Use After Free Vulnerability in unserialize())
+    (CVE-2015-0231). (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
 
 - Ereg:
-  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (Stas)
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c) (CVE-2015-2305).
+    (Stas)
 
 - SOAP:
   . Fixed bug #69085 (SoapClient's __call() type confusion through
@@ -19,7 +25,7 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
-    boundary). (Stas)
+    boundary) (CVE-2015-2331). (Stas)
 
 19 Feb 2015 PHP 5.4.38
 
