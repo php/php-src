@@ -50,9 +50,9 @@ foreach ($functions as $type => $function) {
         echo PHP_EOL . "*** Trying ";
         var_dump($value);
         try {
-        	var_dump($function($value));
+            var_dump($function($value));
         } catch (\TypeException $e) {
-        	echo "*** Caught " . $e->getMessage() . PHP_EOL;
+            echo "*** Caught " . $e->getMessage() . PHP_EOL;
         }
     }
 }

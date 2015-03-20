@@ -621,8 +621,8 @@ ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, c
 		}
 
 		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d", 
-					arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, 
+			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d",
+					arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind,
 					ptr->func->op_array.filename->val, ptr->opline->lineno);
 		} else {
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);

@@ -3600,12 +3600,12 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
 		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		
-		if (UNEXPECTED(!ret_info->class_name 
-			&& ret_info->type_hint != IS_CALLABLE 
+
+		if (UNEXPECTED(!ret_info->class_name
+			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
 			/* A cast or an error will happen, so separate the zval to prevent overwriting it */
-			
+
 			if (EXPECTED((opline->extended_value & ZEND_RETURN_REF) == 0)) {
 				/* Does not return by reference */
 				SEPARATE_ZVAL(retval_ptr);
@@ -4441,7 +4441,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(params)) {
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-				do {			
+				do {
 					zend_verify_arg_type(EX(func), arg_num, param, NULL, EX_USES_STRICT_TYPES());
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
@@ -7395,3 +7395,4 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
+

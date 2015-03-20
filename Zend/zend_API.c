@@ -677,7 +677,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 					if (!quiet) {
 						zend_function *active_function = EG(current_execute_data)->func;
 						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-						
+
 						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
 								class_name,
 								class_name[0] ? "::" : "",

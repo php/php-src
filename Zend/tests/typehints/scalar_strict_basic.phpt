@@ -53,9 +53,9 @@ foreach ($functions as $type => $function) {
         $errored = false;
         echo PHP_EOL . "*** Trying ", type($value), " value", PHP_EOL;
         try {
-        	var_dump($function($value));
+            var_dump($function($value));
         } catch (TypeException $e) {
-        	echo "*** Caught " . $e->getMessage() . PHP_EOL;
+            echo "*** Caught " . $e->getMessage() . PHP_EOL;
         }
     }
 }

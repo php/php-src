@@ -170,9 +170,9 @@ static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(
 /* }}} */
 
 ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{ */
-{	
+{
 	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
-	
+
 	if (info) {
 		zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a class name", info->name);
 	}
@@ -180,9 +180,9 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{
 /* }}} */
 
 static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const zend_string *const_name) /* {{{ */
-{	
+{
 	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
-	
+
 	if (info) {
 		if (const_name->len != info->name_len) {
 			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a type declaration", const_name->val);
@@ -4031,7 +4031,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
-			
+
 			if (FAILURE == zend_declare_is_first_statement(ast)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
@@ -4046,7 +4046,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 
 			if (ast->child[1] != NULL) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must not "
-					"use block mode");   
+					"use block mode");
 			}
 
 			zend_const_expr_to_zval(&value_zv, value_ast);
@@ -4058,7 +4058,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
-			
+
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", name->val);
 		}
@@ -4236,7 +4236,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				if (type != 0) {
 					arg_info->type_hint = type;
 				} else {
-				
+
 					if (zend_is_const_default_class_ref(type_ast)) {
 						class_name = zend_resolve_class_name_ast(type_ast);
 					} else {
