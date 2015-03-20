@@ -1,7 +1,7 @@
 --TEST--
 Return scalar type hint basics
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 64bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --FILE--
 <?php
 
