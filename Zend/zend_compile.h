@@ -462,9 +462,19 @@ struct _zend_execute_data {
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
-#define EX_USES_STRICT_TYPES()		_EX_USES_STRICT_TYPES(EG(current_execute_data))
-#define EX_PREV_USES_STRICT_TYPES()	_EX_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data)
-#define _EX_USES_STRICT_TYPES(ex_data)	((ex_data) && (ex_data)->func && ZEND_USER_CODE((ex_data)->func->type) && ((ex_data)->func->op_array.fn_flags & ZEND_ACC_STRICT_TYPES) ? 1 : 0)
+#define ZEND_CALL_USES_STRICT_TYPES(call) \
+	(((call)->func->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0)
+
+#define EX_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(execute_data)
+
+#define ZEND_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data)->prev_execute_data && \
+	 EG(current_execute_data)->prev_execute_data->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_RET_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)

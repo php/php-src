@@ -720,7 +720,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error, zend
 #define ZPP_ERROR_WRONG_COUNT    5
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
-		zend_bool _strict = EX_PREV_USES_STRICT_TYPES(); \
+		zend_bool _strict = ZEND_ARG_USES_STRICT_TYPES(); \
 		const int _flags = (flags) | (_strict ? ZEND_PARSE_PARAMS_STRICT : 0); \
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
