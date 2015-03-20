@@ -7281,28 +7281,16 @@ ZEND_VM_C_LABEL(try_strlen):
 		strict = EX_USES_STRICT_TYPES();
 		do {
 			if (EXPECTED(!strict)) {
-				if (Z_TYPE_P(value) < IS_TRUE) {
-					ZVAL_LONG(EX_VAR(opline->result.var), 0);
-					break;
-				} else if (Z_TYPE_P(value) == IS_TRUE) {
-					ZVAL_LONG(EX_VAR(opline->result.var), 1);
-					break;
-				} else if (Z_TYPE_P(value) <= IS_DOUBLE) {
-					zend_string *str = zval_get_string(value);
-					ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-					zend_string_release(str);
-					break;
-				} else if (Z_TYPE_P(value) == IS_OBJECT) {
-					zend_string *str;
-					zval tmp;
+				zend_string *str;
+				zval tmp;
 
-					ZVAL_COPY(&tmp, value);
-					if (parse_arg_object_to_str(&tmp, &str, IS_STRING) == SUCCESS) {
-						ZVAL_LONG(EX_VAR(opline->result.var), str->len);
-						zval_dtor(&tmp);
-						break;
-					}
+				ZVAL_COPY(&tmp, value);
+				if (zend_parse_arg_str_weak(&tmp, &str)) {
+					ZVAL_LONG(EX_VAR(opline->result.var), str->len);
+					zval_ptr_dtor(&tmp);
+					break;
 				}
+				zval_ptr_dtor(&tmp);
 			}
 			zend_internal_type_error(strict, "strlen() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
 			ZVAL_NULL(EX_VAR(opline->result.var));

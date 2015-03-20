@@ -653,13 +653,11 @@ static int is_null_constant(zval *default_value)
 
 static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
 {
-	zend_bool strict = 0;
-
 	switch (type_hint) {
 		case _IS_BOOL: {
 			zend_bool dest;
 
-			if (!zend_parse_arg_bool(arg, &dest, NULL, 0, strict)) {
+			if (!zend_parse_arg_bool_weak(arg, &dest)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -669,7 +667,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 		case IS_LONG: {
 			zend_long dest;
 
-			if (!zend_parse_arg_long(arg, &dest, NULL, 0, 0, strict)) {
+			if (!zend_parse_arg_long_weak(arg, &dest)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -679,7 +677,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 		case IS_DOUBLE: {
 			double dest;
 
-			if (!zend_parse_arg_double(arg, &dest, NULL, 0, strict)) {
+			if (!zend_parse_arg_double_weak(arg, &dest)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -690,7 +688,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 			zend_string *dest;
 
 			/* on success "arg" is converted to IS_STRING */
-			if (!zend_parse_arg_str(arg, &dest, 0, strict)) {
+			if (!zend_parse_arg_str_weak(arg, &dest)) {
 				return 0;
 			}
 			return 1;
@@ -703,7 +701,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
 {
 	if (UNEXPECTED(strict)) {
-		/* SSTH Exception: IS_LONG ma be accepted as IS_DOUBLE (converted) */
+		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 		if (type_hint != IS_DOUBLE || Z_TYPE_P(arg) != IS_LONG) {
 			return 0;
 		}
