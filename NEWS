@@ -56,6 +56,7 @@
   . Added error_clear_last() function. (Reeze Xia)
   . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
     (Anatol)
+  . Implemented the RFC `Scalar Type Decalarations v0.5` (Anthony) 
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
