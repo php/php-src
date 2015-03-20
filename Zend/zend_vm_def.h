@@ -3589,12 +3589,13 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 #if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED)
 	USE_OPLINE
 #endif
+
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
 	} else {
 /* prevents "undefined variable opline" errors */
-#if OP1_TYPE != IS_UNUSED
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED)
 		zval *retval_ptr;
 		zend_free_op free_op1;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -3606,7 +3607,7 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
 			/* A cast or an error will happen, so separate the zval to prevent overwriting it */
 
-			if (EXPECTED((opline->extended_value & ZEND_RETURN_REF) == 0)) {
+			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
 				SEPARATE_ZVAL(retval_ptr);
 			} else {
@@ -3614,8 +3615,10 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-
 		zend_verify_return_type(EX(func), retval_ptr);
+		if (OP1_TYPE == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+		}
 #endif
 	}
 	CHECK_EXCEPTION();
