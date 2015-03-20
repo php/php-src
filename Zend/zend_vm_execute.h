@@ -6970,6 +6970,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 
 		retval_ptr = EX_CONSTANT(opline->op1);
 
+		if (IS_CONST == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -6984,9 +6989,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (IS_CONST == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -11934,6 +11936,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 
 		retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -11948,9 +11955,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (IS_TMP_VAR == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -17298,6 +17302,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 
 		retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
+		if (IS_VAR == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -17312,9 +17321,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (IS_VAR == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -22919,6 +22925,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 
 		retval_ptr = NULL;
 
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -22933,9 +22944,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (IS_UNUSED == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -31864,6 +31872,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 
 		retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 
+		if (IS_CV == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -31878,9 +31891,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (IS_CV == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();

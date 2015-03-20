@@ -3602,6 +3602,11 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 
 		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+		if (OP1_TYPE == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+			retval_ptr = EX_VAR(opline->result.var);
+		}
+
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
 			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
@@ -3616,9 +3621,6 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
-		if (OP1_TYPE == IS_CONST) {
-			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-		}
 #endif
 	}
 	CHECK_EXCEPTION();
