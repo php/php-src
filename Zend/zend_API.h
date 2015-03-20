@@ -1060,18 +1060,17 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 	if (check_null) {
 		*is_null = 0;
 	}
-
-	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_TRUE && Z_TYPE_P(arg) != IS_FALSE && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
-		return 0;
-	}
-
 	if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		if (check_null) {
 			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+		} else if (strict && Z_TYPE_P(arg) == IS_NULL) {
+			return 0;
 		}
 		*dest = 0;
+	} else if (UNEXPECTED(strict)) {
+		return 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
 		*dest = zend_is_true(arg);
 	} else {
@@ -1085,13 +1084,13 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 	if (check_null) {
 		*is_null = 0;
 	}
-
-	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_LONG && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
-		return 0;
-	}
-
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = Z_LVAL_P(arg);
+	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*is_null = 1;
+		*dest = 0;
+	} else if (UNEXPECTED(strict)) {
+		return 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
 			return 0;
@@ -1128,9 +1127,6 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
-		if (check_null) {
-			*is_null = (Z_TYPE_P(arg) == IS_NULL);
-		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
@@ -1145,15 +1141,16 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 	if (check_null) {
 		*is_null = 0;
 	}
-
-	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_DOUBLE && Z_TYPE_P(arg) != IS_LONG && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
-		return 0;
-	}
-
 	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		*dest = Z_DVAL_P(arg);
+	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*is_null = 0;
+		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		/* SSTH Exception: IS_LONG ma be accepted instead as IS_DOUBLE */
 		*dest = (double)Z_LVAL_P(arg);
+	} else if (UNEXPECTED(strict)) {
+		return 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		zend_long l;
 		int type;
@@ -1166,9 +1163,6 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
-		if (check_null) {
-			*is_null = (Z_TYPE_P(arg) == IS_NULL);
-		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1.0;
@@ -1180,23 +1174,19 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 
 static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, int check_null, zend_bool strict)
 {
-	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_STRING && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
-		return 0;
-	}
-
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest = Z_STR_P(arg);
+	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*dest = NULL;
+	} else if (UNEXPECTED(strict)) {
+		return 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
-		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-			*dest = NULL;
-		} else {
-			if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
-				Z_DELREF_P(arg);
-				zval_copy_ctor_func(arg);
-			}
-			convert_to_string(arg);
-			*dest = Z_STR_P(arg);
+		if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
+			Z_DELREF_P(arg);
+			zval_copy_ctor_func(arg);
 		}
+		convert_to_string(arg);
+		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) != IS_OBJECT) ||
 	           UNEXPECTED(parse_arg_object_to_str(arg, dest, IS_STRING) != SUCCESS)) {
 		return 0;
