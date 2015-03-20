@@ -2576,17 +2576,21 @@ ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP|UNUSED, CONST)
 	USE_OPLINE
 	zval *str = EX_VAR(opline->result.var);
 
-	SAVE_OPLINE();
-
 	if (OP1_TYPE == IS_UNUSED) {
-		/* Initialize for erealloc in add_char_to_string */
-		ZVAL_EMPTY_STRING(str);
+		ZVAL_NEW_STR(str, zend_string_alloc(opline->extended_value, 0));
+		Z_STRVAL_P(str)[0] = (char)Z_LVAL_P(EX_CONSTANT(opline->op2));
+		Z_STRVAL_P(str)[1] = '\0';
+		Z_STRLEN_P(str) = 1;
+	} else {
+		size_t len = Z_STRLEN_P(str);
+
+		Z_STRVAL_P(str)[len] = (char)Z_LVAL_P(EX_CONSTANT(opline->op2));
+		len++;
+		Z_STRVAL_P(str)[len] = '\0';
+		Z_STRLEN_P(str) = len;
 	}
 
-	add_char_to_string(str, str, EX_CONSTANT(opline->op2));
-
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
+	/* FREE_OP1 is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -2595,17 +2599,16 @@ ZEND_VM_HANDLER(55, ZEND_ADD_STRING, TMP|UNUSED, CONST)
 	USE_OPLINE
 	zval *str = EX_VAR(opline->result.var);
 
-	SAVE_OPLINE();
-
 	if (OP1_TYPE == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+		ZVAL_NEW_STR(str, zend_string_alloc(opline->extended_value, 0));
+		Z_STRLEN_P(str) = 0;
 	}
 
-	add_string_to_string(str, str, EX_CONSTANT(opline->op2));
+	memcpy(Z_STRVAL_P(str) + Z_STRLEN_P(str),
+			Z_STRVAL_P(EX_CONSTANT(opline->op2)), Z_STRLEN_P(EX_CONSTANT(opline->op2)) + 1);
+	Z_STRLEN_P(str) += Z_STRLEN_P(EX_CONSTANT(opline->op2));
 
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
+	/* FREE_OP1 is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -2621,11 +2624,6 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMPVAR|CV)
 	SAVE_OPLINE();
 	var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
-	}
-
 	if (Z_TYPE_P(var) != IS_STRING) {
 		use_copy = zend_make_printable_zval(var, &var_copy);
 
@@ -2633,19 +2631,33 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMPVAR|CV)
 			var = &var_copy;
 		}
 	}
-	add_string_to_string(str, str, var);
+
+	if (OP1_TYPE == IS_UNUSED) {
+		if (opline->extended_value == 0) {
+			ZVAL_STR_COPY(str, Z_STR_P(var));
+		} else {
+			ZVAL_NEW_STR(str, zend_string_alloc(Z_STRLEN_P(var) + opline->extended_value, 0));
+			Z_STRLEN_P(str) = Z_STRLEN_P(var);
+			memcpy(Z_STRVAL_P(str), Z_STRVAL_P(var), Z_STRLEN_P(var) + 1);
+		}
+	} else {
+		size_t orig_len = Z_STRLEN_P(str);
+
+		if (orig_len == 0 && opline->extended_value == 0) {
+			ZVAL_STR_COPY(str, Z_STR_P(var));
+		} else {
+			ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), orig_len + Z_STRLEN_P(var) + opline->extended_value, 0));
+			Z_STRLEN_P(str) = orig_len + Z_STRLEN_P(var);
+			memcpy(Z_STRVAL_P(str) + orig_len, Z_STRVAL_P(var), Z_STRLEN_P(var) + 1);
+		}
+	}
 
 	if (use_copy) {
 		zend_string_release(Z_STR_P(var));
 	}
-	/* original comment, possibly problematic:
-	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
-	 * (Zeev):  I don't think it's problematic, we only use variables
-	 * which aren't affected by FREE_OP(Ts, )'s anyway, unless they're
-	 * string offsets or overloaded objects
-	 */
-	FREE_OP2();
 
+	/* FREE_OP1 is missing intentionally here - we're always working on the same temporary variable */
+	FREE_OP2();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }

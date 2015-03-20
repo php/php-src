@@ -111,6 +111,42 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 	return i;
 }
 
+static void zend_optimizer_backpatch_append_strings(zend_op_array *op_array,
+                                                    zend_op       *opline,
+                                                    uint32_t       var_num,
+                                                    size_t         chars_at_right)
+{
+	do {
+		if (opline->opcode == ZEND_ADD_CHAR &&
+		    opline->result.var == var_num) {
+			chars_at_right += 1;
+			ZEND_ASSERT(chars_at_right < 0xffffffff);
+			opline->extended_value = chars_at_right;
+			if (opline->op1_type == IS_UNUSED) {
+				break;
+			}
+		} else if (opline->opcode == ZEND_ADD_STRING &&
+		           opline->result.var == var_num) {
+			chars_at_right += Z_STRLEN_P(&ZEND_OP2_LITERAL(opline));
+			ZEND_ASSERT(chars_at_right < 0xffffffff);
+			opline->extended_value = chars_at_right;
+			if (opline->op1_type == IS_UNUSED) {
+				break;
+			}
+		} else if (opline->opcode == ZEND_ADD_VAR &&
+		           opline->result.var == var_num) {
+			opline->extended_value = chars_at_right;
+			/* preallocate space for charaacters till the end of the string
+			 * not to the next VAR. This leads to less reallocations.
+			 */
+			/*chars_at_right = 0;*/
+			if (opline->op1_type == IS_UNUSED) {
+				break;
+			}
+		}
+	} while (opline-- != op_array->opcodes);
+}
+
 void zend_optimizer_update_op1_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zval          *val)
@@ -160,7 +196,6 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		return;
 	} else if (opline->opcode == ZEND_ADD_VAR) {
 		convert_to_string(val);
-		opline->opcode = ZEND_ADD_STRING;
 	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 	if (Z_TYPE_P(val) == IS_STRING) {
@@ -272,6 +307,10 @@ check_numeric:
 						op_array->literals[opline->op2.constant] = *val;
 		        	}
 				}
+				break;
+			case ZEND_ADD_VAR:
+				opline->opcode = ZEND_ADD_STRING;
+				zend_optimizer_backpatch_append_strings(op_array, opline, opline->result.var, opline->extended_value);
 				break;
 			default:
 				break;

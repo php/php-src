@@ -2891,8 +2891,6 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 }
 /* }}} */
 
-
-
 static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
@@ -5068,7 +5066,6 @@ void zend_compile_group_use(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-
 void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -6117,6 +6114,7 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
+	zend_op *opline = NULL;
 
 	ZEND_ASSERT(list->children > 0);
 
@@ -6126,7 +6124,6 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		znode elem_node;
-		zend_op *opline;
 
 		zend_compile_expr(&elem_node, elem_ast);
 
@@ -6162,6 +6159,42 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		}
 		SET_NODE(opline->op2, &elem_node);
 		SET_NODE(opline->result, result);
+	}
+
+	/* set extended_value of each ADD_... opcode to be the lenght of expected trailer constant parts */
+	if (opline) {
+		uint32_t var_num = opline->result.var;
+		size_t chars_at_right = 0;
+
+		do {
+			if (opline->opcode == ZEND_ADD_CHAR &&
+			    opline->result.var == var_num) {
+				chars_at_right += 1;
+				ZEND_ASSERT(chars_at_right < 0xffffffff);
+				opline->extended_value = chars_at_right;
+				if (opline->op1_type == IS_UNUSED) {
+					break;
+				}
+			} else if (opline->opcode == ZEND_ADD_STRING &&
+			           opline->result.var == var_num) {
+				chars_at_right += Z_STRLEN_P(CT_CONSTANT(opline->op2));
+				ZEND_ASSERT(chars_at_right < 0xffffffff);
+				opline->extended_value = chars_at_right;
+				if (opline->op1_type == IS_UNUSED) {
+					break;
+				}
+			} else if (opline->opcode == ZEND_ADD_VAR &&
+			           opline->result.var == var_num) {
+				opline->extended_value = chars_at_right;
+				/* preallocate space for charaacters till the end of the string
+				 * not to the next VAR. This leads to less reallocations.
+				 */
+				/* chars_at_right = 0; */
+				if (opline->op1_type == IS_UNUSED) {
+					break;
+				}
+			}
+		} while (opline-- != CG(active_op_array)->opcodes);
 	}
 }
 /* }}} */
