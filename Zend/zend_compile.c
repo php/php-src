@@ -6112,89 +6112,131 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 {
-	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
+	uint32_t first_op_num;
+	znode elem_node;
 	zend_op *opline = NULL;
+	zend_ast_list *list = zend_ast_get_list(ast);
 
 	ZEND_ASSERT(list->children > 0);
 
 	result->op_type = IS_TMP_VAR;
 	result->u.op.var = get_temporary_variable(CG(active_op_array));
 
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *elem_ast = list->child[i];
-		znode elem_node;
+	/* 4 is choosen by benchmarks */
+	if (list->children < 4) {
+		for (i = 0; i < list->children; ++i) {
+			zend_ast *elem_ast = list->child[i];
 
-		zend_compile_expr(&elem_node, elem_ast);
+			zend_compile_expr(&elem_node, elem_ast);
 
-		if (elem_ast->kind == ZEND_AST_ZVAL) {
-			zval *zv = &elem_node.u.constant;
-			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+			if (elem_ast->kind == ZEND_AST_ZVAL) {
+				zval *zv = &elem_node.u.constant;
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 
-			if (Z_STRLEN_P(zv) > 1) {
-				opline = get_next_op(CG(active_op_array));
-				opline->opcode = ZEND_ADD_STRING;
-			} else if (Z_STRLEN_P(zv) == 1) {
-				char ch = *Z_STRVAL_P(zv);
-				zend_string_release(Z_STR_P(zv));
-				ZVAL_LONG(zv, ch);
+				if (Z_STRLEN_P(zv) > 1) {
+					opline = get_next_op(CG(active_op_array));
+					opline->opcode = ZEND_ADD_STRING;
+				} else if (Z_STRLEN_P(zv) == 1) {
+					char ch = *Z_STRVAL_P(zv);
+					zend_string_release(Z_STR_P(zv));
+					ZVAL_LONG(zv, ch);
 
-				opline = get_next_op(CG(active_op_array));
-				opline->opcode = ZEND_ADD_CHAR;
+					opline = get_next_op(CG(active_op_array));
+					opline->opcode = ZEND_ADD_CHAR;
+				} else {
+					/* String can be empty after a variable at the end of a heredoc */
+					zend_string_release(Z_STR_P(zv));
+					continue;
+				}
 			} else {
-				/* String can be empty after a variable at the end of a heredoc */
-				zend_string_release(Z_STR_P(zv));
-				continue;
+				opline = get_next_op(CG(active_op_array));
+				opline->opcode = ZEND_ADD_VAR;
+				ZEND_ASSERT(elem_node.op_type != IS_CONST);
 			}
-		} else {
-			opline = get_next_op(CG(active_op_array));
-			opline->opcode = ZEND_ADD_VAR;
-			ZEND_ASSERT(elem_node.op_type != IS_CONST);
+
+			if (i == 0) {
+				first_op_num = opline - CG(active_op_array)->opcodes;
+				SET_UNUSED(opline->op1);
+			} else {
+				SET_NODE(opline->op1, result);
+			}
+			SET_NODE(opline->op2, &elem_node);
+			SET_NODE(opline->result, result);
 		}
 
-		if (i == 0) {
+		/* set extended_value of each ADD_... opcode to be the lenght of expected trailer constant parts */
+		if (opline) {
+			uint32_t var_num = opline->result.var;
+			size_t chars_at_right = 0;
+			zend_op *end = CG(active_op_array)->opcodes + first_op_num;
+
+			do {
+				if (opline->opcode == ZEND_ADD_CHAR &&
+						opline->result.var == var_num) {
+					chars_at_right += 1;
+					ZEND_ASSERT(chars_at_right < 0xffffffff);
+					opline->extended_value = chars_at_right;
+					if (opline->op1_type == IS_UNUSED) {
+						break;
+					}
+				} else if (opline->opcode == ZEND_ADD_STRING &&
+						opline->result.var == var_num) {
+					chars_at_right += Z_STRLEN_P(CT_CONSTANT(opline->op2));
+					ZEND_ASSERT(chars_at_right < 0xffffffff);
+					opline->extended_value = chars_at_right;
+					if (opline->op1_type == IS_UNUSED) {
+						break;
+					}
+				} else if (opline->opcode == ZEND_ADD_VAR &&
+						opline->result.var == var_num) {
+					opline->extended_value = chars_at_right;
+					/* preallocate space for charaacters till the end of the string
+					 * not to the next VAR. This leads to less reallocations.
+					 */
+					/* chars_at_right = 0; */
+					if (opline->op1_type == IS_UNUSED) {
+						break;
+					}
+				}
+			} while (opline-- != end);
+		}
+	} else {
+		uint32_t rope_len;
+		for (i = 0, rope_len = 0; i < list->children; ++i) {
+			zend_ast *elem_ast = list->child[i];
+
+			zend_compile_expr(&elem_node, elem_ast);
+
+			if (elem_ast->kind == ZEND_AST_ZVAL) {
+				zval *zv = &elem_node.u.constant;
+				ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+
+				if (Z_STRLEN_P(zv)) {
+					opline = get_next_op(CG(active_op_array));
+					opline->opcode = ZEND_ROPE_ADD_STRING;
+				} else {
+					zend_string_release(Z_STR_P(zv));
+					continue;
+				}
+			} else {
+				opline = get_next_op(CG(active_op_array));
+				opline->opcode = ZEND_ROPE_ADD_VAR;
+			}
+
+			if (i == 0) {
+				first_op_num = opline - CG(active_op_array)->opcodes;
+				opline->opcode = ZEND_ROPE_INIT;
+			}
 			SET_UNUSED(opline->op1);
-		} else {
-			SET_NODE(opline->op1, result);
+			SET_NODE(opline->op2, &elem_node);
+			SET_NODE(opline->result, result);
+			opline->extended_value = rope_len++;
 		}
-		SET_NODE(opline->op2, &elem_node);
-		SET_NODE(opline->result, result);
-	}
 
-	/* set extended_value of each ADD_... opcode to be the lenght of expected trailer constant parts */
-	if (opline) {
-		uint32_t var_num = opline->result.var;
-		size_t chars_at_right = 0;
-
-		do {
-			if (opline->opcode == ZEND_ADD_CHAR &&
-			    opline->result.var == var_num) {
-				chars_at_right += 1;
-				ZEND_ASSERT(chars_at_right < 0xffffffff);
-				opline->extended_value = chars_at_right;
-				if (opline->op1_type == IS_UNUSED) {
-					break;
-				}
-			} else if (opline->opcode == ZEND_ADD_STRING &&
-			           opline->result.var == var_num) {
-				chars_at_right += Z_STRLEN_P(CT_CONSTANT(opline->op2));
-				ZEND_ASSERT(chars_at_right < 0xffffffff);
-				opline->extended_value = chars_at_right;
-				if (opline->op1_type == IS_UNUSED) {
-					break;
-				}
-			} else if (opline->opcode == ZEND_ADD_VAR &&
-			           opline->result.var == var_num) {
-				opline->extended_value = chars_at_right;
-				/* preallocate space for charaacters till the end of the string
-				 * not to the next VAR. This leads to less reallocations.
-				 */
-				/* chars_at_right = 0; */
-				if (opline->op1_type == IS_UNUSED) {
-					break;
-				}
-			}
-		} while (opline-- != CG(active_op_array)->opcodes);
+		ZEND_ASSERT(opline && rope_len > 1);
+		opline->opcode = ZEND_ROPE_END;
+		(CG(active_op_array)->opcodes + first_op_num)->extended_value = rope_len - 1;
 	}
 }
 /* }}} */

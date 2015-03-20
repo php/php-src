@@ -1790,6 +1790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_HANDLER(
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2161,6 +2162,86 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_INTERFACE_SPEC_CONST_HANDL
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)emalloc(sizeof(zend_string *) * opline->extended_value);
+
+	if (IS_CONST == IS_CONST) {
+		rope[0] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+	} else {
+
+		zval *var = EX_CONSTANT(opline->op2);
+		zend_string *str;
+		SAVE_OPLINE();
+
+		str = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_string_release(str);
+			efree(rope);
+
+			HANDLE_EXCEPTION();
+		}
+		rope[0] = str;
+
+	}
+
+	ZVAL_PTR(EX_VAR(opline->result.var), rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	uint32_t i;
+	char *target;
+	size_t target_len;
+	zend_string *last;
+	zval *ret = EX_VAR(opline->result.var);
+	zend_string **rope = (zend_string **)Z_PTR_P(ret);
+
+	for (i = 0, target_len = 0; i < opline->extended_value; ++i) {
+		target_len += rope[i]->len;
+	}
+
+	if (IS_CONST == IS_CONST) {
+		last = Z_STR_P(EX_CONSTANT(opline->op2));
+	} else {
+
+		zval *var = EX_CONSTANT(opline->op2);
+		SAVE_OPLINE();
+
+		last = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			uint32_t i = opline->extended_value;
+			while (i--) {
+				zend_string_release(rope[i]);
+			}
+			zend_string_release(last);
+			efree(rope);
+
+			HANDLE_EXCEPTION();
+		}
+
+	}
+
+	target_len += last->len;
+	ZVAL_NEW_STR(ret, zend_string_alloc(target_len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i < opline->extended_value; ++i) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	memcpy(target, last->val, last->len);
+	zend_string_release(last);
+	*(target + last->len) = '\0';
+
+	efree(rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2387,6 +2468,86 @@ try_function_name:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)emalloc(sizeof(zend_string *) * opline->extended_value);
+
+	if (IS_CV == IS_CONST) {
+		rope[0] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+	} else {
+
+		zval *var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		zend_string *str;
+		SAVE_OPLINE();
+
+		str = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_string_release(str);
+			efree(rope);
+
+			HANDLE_EXCEPTION();
+		}
+		rope[0] = str;
+
+	}
+
+	ZVAL_PTR(EX_VAR(opline->result.var), rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	uint32_t i;
+	char *target;
+	size_t target_len;
+	zend_string *last;
+	zval *ret = EX_VAR(opline->result.var);
+	zend_string **rope = (zend_string **)Z_PTR_P(ret);
+
+	for (i = 0, target_len = 0; i < opline->extended_value; ++i) {
+		target_len += rope[i]->len;
+	}
+
+	if (IS_CV == IS_CONST) {
+		last = Z_STR_P(EX_CONSTANT(opline->op2));
+	} else {
+
+		zval *var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		SAVE_OPLINE();
+
+		last = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			uint32_t i = opline->extended_value;
+			while (i--) {
+				zend_string_release(rope[i]);
+			}
+			zend_string_release(last);
+			efree(rope);
+
+			HANDLE_EXCEPTION();
+		}
+
+	}
+
+	target_len += last->len;
+	ZVAL_NEW_STR(ret, zend_string_alloc(target_len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i < opline->extended_value; ++i) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	memcpy(target, last->val, last->len);
+	zend_string_release(last);
+	*(target + last->len) = '\0';
+
+	efree(rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2572,6 +2733,86 @@ try_function_name:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)emalloc(sizeof(zend_string *) * opline->extended_value);
+
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		rope[0] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+	} else {
+		zend_free_op free_op2;
+		zval *var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		zend_string *str;
+		SAVE_OPLINE();
+
+		str = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_string_release(str);
+			efree(rope);
+			zval_ptr_dtor_nogc(free_op2);
+			HANDLE_EXCEPTION();
+		}
+		rope[0] = str;
+		zval_ptr_dtor_nogc(free_op2);
+	}
+
+	ZVAL_PTR(EX_VAR(opline->result.var), rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	uint32_t i;
+	char *target;
+	size_t target_len;
+	zend_string *last;
+	zval *ret = EX_VAR(opline->result.var);
+	zend_string **rope = (zend_string **)Z_PTR_P(ret);
+
+	for (i = 0, target_len = 0; i < opline->extended_value; ++i) {
+		target_len += rope[i]->len;
+	}
+
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		last = Z_STR_P(EX_CONSTANT(opline->op2));
+	} else {
+		zend_free_op free_op2;
+		zval *var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		SAVE_OPLINE();
+
+		last = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			uint32_t i = opline->extended_value;
+			while (i--) {
+				zend_string_release(rope[i]);
+			}
+			zend_string_release(last);
+			efree(rope);
+			zval_ptr_dtor_nogc(free_op2);
+			HANDLE_EXCEPTION();
+		}
+		zval_ptr_dtor_nogc(free_op2);
+	}
+
+	target_len += last->len;
+	ZVAL_NEW_STR(ret, zend_string_alloc(target_len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i < opline->extended_value; ++i) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	memcpy(target, last->val, last->len);
+	zend_string_release(last);
+	*(target + last->len) = '\0';
+
+	efree(rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BW_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22297,6 +22538,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 	ZEND_VM_RETURN();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_STRING_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)Z_PTR_P(EX_VAR(opline->result.var));
+
+	rope[opline->extended_value] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -24485,6 +24736,30 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 	ZEND_VM_RETURN();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_string **rope = (zend_string **)Z_PTR_P(EX_VAR(opline->result.var));
+	zval *var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	SAVE_OPLINE();
+
+	rope[opline->extended_value] = zval_get_string(var);
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		uint32_t i = opline->extended_value;
+		while (i--) {
+			zend_string_release(rope[i]);
+		}
+		efree(rope);
+
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(binary_op_type binary_op ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
@@ -25788,6 +26063,30 @@ isset_no_object:
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 
 	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zend_string **rope = (zend_string **)Z_PTR_P(EX_VAR(opline->result.var));
+	zval *var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	SAVE_OPLINE();
+
+	rope[opline->extended_value] = zval_get_string(var);
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		uint32_t i = opline->extended_value;
+		while (i--) {
+			zend_string_release(rope[i]);
+		}
+		efree(rope);
+		zval_ptr_dtor_nogc(free_op2);
+		HANDLE_EXCEPTION();
+	}
+	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -45895,6 +46194,106 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SPACESHIP_SPEC_CV_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_SPACESHIP_SPEC_CV_CV_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CV_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CV_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CV_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CV_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_ADD_STRING_SPEC_UNUSED_CONST_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER,
+  	ZEND_ROPE_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_ADD_VAR_SPEC_UNUSED_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CV_HANDLER,
+  	ZEND_ROPE_END_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CV_HANDLER,
+  	ZEND_ROPE_END_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CV_HANDLER,
+  	ZEND_ROPE_END_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CV_HANDLER,
+  	ZEND_ROPE_END_SPEC_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = labels;

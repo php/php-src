@@ -7386,3 +7386,118 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
+
+ZEND_VM_HANDLER(171, ZEND_ROPE_INIT, ANY, CONST|CV|TMPVAR)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)emalloc(sizeof(zend_string *) * opline->extended_value);
+
+	if (OP2_TYPE == IS_CONST) {
+		rope[0] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+	} else {
+		zend_free_op free_op2;
+		zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zend_string *str;
+		SAVE_OPLINE();
+
+		str = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_string_release(str);
+			efree(rope);
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
+		rope[0] = str;
+		FREE_OP2();
+	}
+
+	ZVAL_PTR(EX_VAR(opline->result.var), rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(172, ZEND_ROPE_ADD_STRING, UNUSED, CONST)
+{
+	USE_OPLINE
+	zend_string **rope = (zend_string **)Z_PTR_P(EX_VAR(opline->result.var));
+
+	rope[opline->extended_value] = zend_string_copy(Z_STR_P(EX_CONSTANT(opline->op2)));
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(173, ZEND_ROPE_ADD_VAR, UNUSED, TMPVAR|CV)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zend_string **rope = (zend_string **)Z_PTR_P(EX_VAR(opline->result.var));
+	zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
+	SAVE_OPLINE();
+
+	rope[opline->extended_value] = zval_get_string(var);
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		uint32_t i = opline->extended_value;
+		while (i--) {
+			zend_string_release(rope[i]);
+		}
+		efree(rope);
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(174, ZEND_ROPE_END, ANY, CONST|TMPVAR|CV)
+{
+	USE_OPLINE
+	uint32_t i;
+	char *target;
+	size_t target_len;
+	zend_string *last;
+	zval *ret = EX_VAR(opline->result.var);
+	zend_string **rope = (zend_string **)Z_PTR_P(ret);
+
+	for (i = 0, target_len = 0; i < opline->extended_value; ++i) {
+		target_len += rope[i]->len;
+	}
+
+	if (OP2_TYPE == IS_CONST) {
+		last = Z_STR_P(EX_CONSTANT(opline->op2));
+	} else {
+		zend_free_op free_op2;
+		zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		SAVE_OPLINE();
+
+		last = zval_get_string(var);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			uint32_t i = opline->extended_value;
+			while (i--) {
+				zend_string_release(rope[i]);
+			}
+			zend_string_release(last);
+			efree(rope);
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
+		FREE_OP2();
+	}
+
+	target_len += last->len;
+	ZVAL_NEW_STR(ret, zend_string_alloc(target_len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i < opline->extended_value; ++i) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	memcpy(target, last->val, last->len);
+	zend_string_release(last);
+	*(target + last->len) = '\0';
+
+	efree(rope);
+
+	ZEND_VM_NEXT_OPCODE();
+}
