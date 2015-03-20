@@ -158,6 +158,9 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 		op_array->cache_size += sizeof(void*);
 		return;
+	} else if (opline->opcode == ZEND_ADD_VAR) {
+		convert_to_string(val);
+		opline->opcode = ZEND_ADD_STRING;
 	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 	if (Z_TYPE_P(val) == IS_STRING) {
@@ -306,6 +309,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_SEND_VAR_NO_REF:
 					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
+							zval_dtor(val);
 							return 0;
 						}
 						opline->extended_value = 0;
@@ -374,6 +378,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 			ZEND_OP2(opline).var == var) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN_REF:
+					zval_dtor(val);
 					return 0;
 				default:
 					break;

@@ -940,11 +940,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 
 			VAR_UNSET(opline->op1);
-			if (ZEND_OP1_TYPE(src) == IS_UNUSED) {
-				/* 5.3 may use IS_UNUSED as first argument to ZEND_ADD_... */
+			if (opline->opcode != ZEND_CONCAT) {
 				opline->opcode = ZEND_ADD_STRING;
-			} else {
-				opline->opcode = ZEND_CONCAT;
 			}
 			COPY_NODE(opline->op1, src->op1);
 			old_len = Z_STRLEN(ZEND_OP2_LITERAL(src));
@@ -1039,45 +1036,47 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_UNSET(opline->op1);
 			COPY_NODE(opline->op1, src->op1);
 			MAKE_NOP(src);
-		} else if ((opline->opcode == ZEND_ADD_STRING ||
-				   	opline->opcode == ZEND_ADD_CHAR ||
-				   	opline->opcode == ZEND_ADD_VAR ||
-				   	opline->opcode == ZEND_CONCAT) &&
-				  	ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-				  	VAR_SOURCE(opline->op1) &&
-				  	VAR_SOURCE(opline->op1)->opcode == ZEND_CONCAT &&
-				  	ZEND_OP2_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
-				  	Z_TYPE(ZEND_OP2_LITERAL(VAR_SOURCE(opline->op1))) == IS_STRING &&
-				  	Z_STRLEN(ZEND_OP2_LITERAL(VAR_SOURCE(opline->op1))) == 0) {
-			/* convert T = CONCAT(X,''), T = ADD_STRING(T, Y) to T = CONCAT(X,Y) */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, src->op1);
-			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-				ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1);
+		} else if (opline->opcode == ZEND_CONCAT) {
+			if ((ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
+				VAR_SOURCE(opline->op1) &&
+				VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
+				VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {
+				/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
+				zend_op *src = VAR_SOURCE(opline->op1);
+				VAR_UNSET(opline->op1);
+				COPY_NODE(opline->op1, src->op1);
+				MAKE_NOP(src);
 			}
-			opline->opcode = ZEND_CONCAT;
-			literal_dtor(&ZEND_OP2_LITERAL(src)); /* will take care of empty_string too */
-			MAKE_NOP(src);
-		} else if ((opline->opcode == ZEND_ADD_STRING ||
-					opline->opcode == ZEND_ADD_CHAR ||
-					opline->opcode == ZEND_ADD_VAR ||
-					opline->opcode == ZEND_CONCAT) &&
-					(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
-					VAR_SOURCE(opline->op1) &&
-					VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
-					VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {
-			/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, src->op1);
-			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-				ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1);
+			if ((ZEND_OP2_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
+				VAR_SOURCE(opline->op2) &&
+				VAR_SOURCE(opline->op2)->opcode == ZEND_CAST &&
+				VAR_SOURCE(opline->op2)->extended_value == IS_STRING) {
+				/* convert T1 = CAST(STRING, X), T2 = CONCAT(Y, T1) to T2 = CONCAT(Y,X) */
+				zend_op *src = VAR_SOURCE(opline->op2);
+				VAR_UNSET(opline->op2);
+				COPY_NODE(opline->op2, src->op1);
+				MAKE_NOP(src);
 			}
-			opline->opcode = ZEND_CONCAT;
-			MAKE_NOP(src);
+			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    Z_STRLEN(ZEND_OP1_LITERAL(opline)) == 0) {
+				/* convert CONCAT('', X) => CAST(STRING, X) */
+				literal_dtor(&ZEND_OP1_LITERAL(opline));
+				opline->opcode = ZEND_CAST;
+				opline->extended_value = IS_STRING;
+				COPY_NODE(opline->op1, opline->op2);
+				opline->op2_type = IS_UNUSED;
+				opline->op2.var = 0;
+			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
+			           Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
+			           Z_STRLEN(ZEND_OP2_LITERAL(opline)) == 0) {
+				/* convert CONCAT(X, '') => CAST(STRING, X) */
+				literal_dtor(&ZEND_OP2_LITERAL(opline));
+				opline->opcode = ZEND_CAST;
+				opline->extended_value = IS_STRING;
+				opline->op2_type = IS_UNUSED;
+				opline->op2.var = 0;
+			}
 		} else if (opline->opcode == ZEND_QM_ASSIGN &&
 					ZEND_OP1_TYPE(opline) == ZEND_RESULT_TYPE(opline) &&
 					ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {
