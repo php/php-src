@@ -1,7 +1,7 @@
 --TEST--
 Return scalar type hint basics
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 64bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 
@@ -79,8 +79,8 @@ int(1)
 *** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
 *** Trying string(0) ""
 *** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
-*** Trying int(2147483647)
-int(2147483647)
+*** Trying int(9223372036854775807)
+int(9223372036854775807)
 *** Trying float(NAN)
 *** Caught Return value of {closure}() must be of the type integer, float returned in %s on line %d
 *** Trying bool(true)
@@ -117,8 +117,8 @@ float(1)
 *** Caught Return value of {closure}() must be of the type float, string returned in %s on line %d
 *** Trying string(0) ""
 *** Caught Return value of {closure}() must be of the type float, string returned in %s on line %d
-*** Trying int(2147483647)
-float(2147483647)
+*** Trying int(9223372036854775807)
+float(9.2233720368548E+18)
 *** Trying float(NAN)
 float(NAN)
 *** Trying bool(true)
@@ -154,8 +154,8 @@ string(2) "1a"
 string(1) "a"
 *** Trying string(0) ""
 string(0) ""
-*** Trying int(2147483647)
-string(10) "2147483647"
+*** Trying int(9223372036854775807)
+string(19) "9223372036854775807"
 *** Trying float(NAN)
 string(3) "NAN"
 *** Trying bool(true)
@@ -191,7 +191,7 @@ bool(true)
 bool(true)
 *** Trying string(0) ""
 bool(false)
-*** Trying int(2147483647)
+*** Trying int(9223372036854775807)
 bool(true)
 *** Trying float(NAN)
 bool(true)

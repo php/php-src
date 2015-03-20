@@ -1,7 +1,7 @@
 --TEST--
 Scalar type hint strict mode
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 64bit platform only"); ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 declare(strict_types=1);
@@ -87,8 +87,8 @@ int(1)
 *** Trying string(0) ""
 *** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
 
-*** Trying int(2147483647)
-int(2147483647)
+*** Trying int(9223372036854775807)
+int(9223372036854775807)
 
 *** Trying float(NAN)
 *** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
@@ -140,8 +140,8 @@ float(1.5)
 *** Trying string(0) ""
 *** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
 
-*** Trying int(2147483647)
-float(2147483647)
+*** Trying int(9223372036854775807)
+float(9.2233720368548E+18)
 
 *** Trying float(NAN)
 float(NAN)
@@ -193,7 +193,7 @@ string(1) "a"
 *** Trying string(0) ""
 string(0) ""
 
-*** Trying int(2147483647)
+*** Trying int(9223372036854775807)
 *** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
 
 *** Trying float(NAN)
@@ -246,7 +246,7 @@ Testing 'bool' typehint:
 *** Trying string(0) ""
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
 
-*** Trying int(2147483647)
+*** Trying int(9223372036854775807)
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d
 
 *** Trying float(NAN)
