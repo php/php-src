@@ -199,5 +199,9 @@ END_EXTERN_C()
 #define ZEND_BIND_GLOBAL                     168
 #define ZEND_COALESCE                        169
 #define ZEND_SPACESHIP                       170
+#define ZEND_ROPE_INIT                       171
+#define ZEND_ROPE_ADD_STRING                 172
+#define ZEND_ROPE_ADD_VAR                    173
+#define ZEND_ROPE_END                        174
 
 #endif
