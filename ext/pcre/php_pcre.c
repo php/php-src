@@ -91,7 +91,7 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
-	pefree(pce->re, 1);
+	pcre_free(pce->re);
 	if (pce->extra) {
 		pcre_free_study(pce->extra);
 	}
