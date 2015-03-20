@@ -6,7 +6,6 @@ PHP                                                                        NEWS
   . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
     (Dmitry, Laruence)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
-  . Fixed bug #68976 (Use After Free Vulnerability in unserialize()). (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
@@ -18,10 +17,6 @@ PHP                                                                        NEWS
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
-
-- Ereg:
-  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (CVE-2015-2305)
-    (Stas)
 
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
@@ -45,10 +40,6 @@ PHP                                                                        NEWS
    . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
-- ZIP:
-  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
-    boundary). (CVE-2015-2331) (Stas)
-
 19 Mar 2015, PHP 5.6.7
 
 - Core:
@@ -65,6 +56,8 @@ PHP                                                                        NEWS
   . Fixed bug #68166 (Exception with invalid character causes segv). (Rasmus)
   . Fixed bug #69141 (Missing arguments in reflection info for some builtin
     functions). (kostyantyn dot lysyy at oracle dot com)
+  . Fixed bug #68976 (Use After Free Vulnerability in unserialize()).
+    (CVE-2015-0231) (Stas)
 
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
@@ -77,6 +70,10 @@ PHP                                                                        NEWS
     Win32). (Grant Pannell)
   . Add CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5_HOSTNAME constants if supported
     by libcurl. (Linus Unneback)
+
+- Ereg:
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c). (CVE-2015-2305)
+    (Stas)
 
 - FPM:
   . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
@@ -120,6 +117,10 @@ PHP                                                                        NEWS
     SplObjectStorage). (Laruence)
   . Fixed bug #68557 (RecursiveDirectoryIterator::seek(0) broken after 
     calling getChildren()). (Julien)
+
+- ZIP:
+  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
+    boundary). (CVE-2015-2331) (Stas)
 
 19 Feb 2015, PHP 5.6.6
 
