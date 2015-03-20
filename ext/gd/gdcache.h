@@ -41,6 +41,7 @@
 /*********************************************************/
 
 #if (!defined(_OSD_POSIX) && !defined(__FreeBSD__)) && HAVE_MALLOC_H
+#elif !defined(__OpenBSD__)
 #include <malloc.h>
 #else
 #include <stdlib.h> /* BS2000/OSD defines malloc() & friends in stdlib.h */
