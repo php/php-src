@@ -703,12 +703,12 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
 {
 	if (UNEXPECTED(strict)) {
-		/* SSTH Exception: IS_LONG ma be accepted instead as IS_DOUBLE */
+		/* SSTH Exception: IS_LONG ma be accepted as IS_DOUBLE (converted) */
 		if (type_hint != IS_DOUBLE || Z_TYPE_P(arg) != IS_LONG) {
 			return 0;
 		}
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-		/* FIXME: Is this exception on purpose ??? */
+		/* NULL may be accepted only by nullable hints (this is already checked) */
 		return 0;
 	}
 	return zend_verify_weak_scalar_type_hint(type_hint, arg);
