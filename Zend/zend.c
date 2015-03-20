@@ -1277,6 +1277,35 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 # endif
 #endif
 
+ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
+	efree(message);
+	va_end(va);
+} /* }}} */
+
+ZEND_API void zend_internal_type_error(zend_bool strict, const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	if (strict) {
+		zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
+	} else {
+		zend_error(E_WARNING, message);
+	}
+	efree(message);
+
+	va_end(va);
+} /* }}} */
+
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG

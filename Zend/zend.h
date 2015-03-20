@@ -285,6 +285,8 @@ extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API void zend_type_error(const char *format, ...);
+ZEND_API void zend_internal_type_error(zend_bool strict, const char *format, ...);
 
 void zenderror(const char *error);
 

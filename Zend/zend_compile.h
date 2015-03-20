@@ -252,6 +252,9 @@ typedef struct _zend_try_catch_element {
 /* Function has a return type hint (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
+/* op_array uses strict mode types */
+#define ZEND_ACC_STRICT_TYPES			0x80000000
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -458,6 +461,20 @@ struct _zend_execute_data {
 #define EX_CALL_INFO()			ZEND_CALL_INFO(execute_data)
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
+
+#define ZEND_CALL_USES_STRICT_TYPES(call) \
+	(((call)->func->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0)
+
+#define EX_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(execute_data)
+
+#define ZEND_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data)->prev_execute_data && \
+	 EG(current_execute_data)->prev_execute_data->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_RET_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
@@ -731,6 +748,8 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
+
+ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* BEGIN: OPCODES */
 

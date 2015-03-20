@@ -35,6 +35,7 @@ static zend_class_entry *default_exception_ce;
 static zend_class_entry *error_exception_ce;
 static zend_class_entry *engine_exception_ce;
 static zend_class_entry *parse_exception_ce;
+static zend_class_entry *type_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
@@ -778,6 +779,10 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ParseException", NULL);
 	parse_exception_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
 	parse_exception_ce->create_object = zend_default_exception_new;
+
+	INIT_CLASS_ENTRY(ce, "TypeException", NULL);
+	type_exception_ce = zend_register_internal_class_ex(&ce, engine_exception_ce);
+	type_exception_ce->create_object = zend_default_exception_new;
 }
 /* }}} */
 
@@ -808,6 +813,12 @@ ZEND_API zend_class_entry *zend_get_engine_exception(void) /* {{{ */
 ZEND_API zend_class_entry *zend_get_parse_exception(void) /* {{{ */
 {
 	return parse_exception_ce;
+}
+/* }}} */
+
+ZEND_API zend_class_entry *zend_get_type_exception(void) /* {{{ */
+{
+	return type_exception_ce;
 }
 /* }}} */
 
@@ -892,13 +903,18 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	EG(exception) = NULL;
-	if (ce_exception == parse_exception_ce || ce_exception == engine_exception_ce) {
+	if (ce_exception == parse_exception_ce || ce_exception == engine_exception_ce || ce_exception == type_exception_ce) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		zend_error_helper(code, file->val, line, "%s", message->val);
+		if (ce_exception == type_exception_ce && strstr(message->val, ", called in ")) {
+			zend_error_helper(code, file->val, line, "%s and defined", message->val);
+		} else {
+			zend_error_helper(code, file->val, line, "%s", message->val);
+		}
+
 		zend_string_release(file);
 		zend_string_release(message);
 		OBJ_RELEASE(ex);
