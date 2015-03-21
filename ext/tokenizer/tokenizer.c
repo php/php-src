@@ -97,6 +97,137 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
+/* This function will be soon generated based on zend_language_parser.y
+ */
+static zend_bool t_is_semi_reserved(int token_type)
+{
+	switch(token_type) {
+	/* [[[ semi-reserved */
+		case T_INCLUDE:
+		case T_INCLUDE_ONCE:
+		case T_EVAL:
+		case T_REQUIRE:
+		case T_REQUIRE_ONCE:
+		case T_LOGICAL_OR:
+		case T_LOGICAL_XOR:
+		case T_LOGICAL_AND:
+		case T_INSTANCEOF:
+		case T_NEW:
+		case T_CLONE:
+		case T_EXIT:
+		case T_IF:
+		case T_ELSEIF:
+		case T_ELSE:
+		case T_ENDIF:
+		case T_ECHO:
+		case T_DO:
+		case T_WHILE:
+		case T_ENDWHILE:
+		case T_FOR:
+		case T_ENDFOR:
+		case T_FOREACH:
+		case T_ENDFOREACH:
+		case T_DECLARE:
+		case T_ENDDECLARE:
+		case T_AS:
+		case T_TRY:
+		case T_CATCH:
+		case T_FINALLY:
+		case T_THROW:
+		case T_USE:
+		case T_INSTEADOF:
+		case T_GLOBAL:
+		case T_VAR:
+		case T_UNSET:
+		case T_ISSET:
+		case T_EMPTY:
+		case T_CONTINUE:
+		case T_GOTO:
+		case T_FUNCTION:
+		case T_CONST:
+		case T_RETURN:
+		case T_PRINT:
+		case T_YIELD:
+		case T_LIST:
+		case T_SWITCH:
+		case T_ENDSWITCH:
+		case T_CASE:
+		case T_DEFAULT:
+		case T_BREAK:
+		case T_ARRAY:
+		case T_CALLABLE:
+		case T_EXTENDS:
+		case T_IMPLEMENTS:
+		case T_NAMESPACE:
+		case T_CLASS:
+		case T_TRAIT:
+		case T_INTERFACE:
+	/* ]]] */
+		return 1;
+	}
+	return 0;
+}
+
+static int t_get_type(zval *tokens, int index)
+{
+	int type;
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(tokens), index);
+
+	if(Z_TYPE_P(token) == IS_ARRAY) {
+		type = zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
+	} else if(Z_TYPE_P(token) == IS_STRING) {
+		zend_string *tmp = zval_get_string(token);
+		type = (char)(* tmp->val);
+		zend_string_release(tmp);
+	}
+
+	return type;
+}
+
+static int t_look(zend_bool ahead, zval *tokens, int index, int attempts)
+{
+	int token_type,
+		length = zend_hash_num_elements(Z_ARRVAL_P(tokens));
+
+	while(attempts && (index < length)) {
+		(ahead) ? ++index : --index;
+		switch (token_type = t_get_type(tokens, index)) {
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
+				break;
+			case T_STRING:
+				return index;
+			default:
+				if(t_is_semi_reserved(token_type)) return index;
+				else attempts--;
+		}
+	}
+
+	return 0;
+}
+
+static zend_always_inline void t_stringify(zval *tokens, int index)
+{
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(tokens), index);
+
+	if(Z_TYPE_P(token) == IS_ARRAY)
+		ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token), 0), T_STRING);
+}
+
+static zend_always_inline void t_stringify_next(zval *tokens, int index, int attempts)
+{
+	if((index = t_look(1, tokens, index, attempts))) t_stringify(tokens, index);
+}
+
+static zend_always_inline void t_stringify_previous(zval *tokens, int index, int attempts)
+{
+	if((index = t_look(0, tokens, index, attempts))) t_stringify(tokens, index);
+}
+
+static void t_parse(zval *tokens)
+{
+	/* TODO */
+}
+
 static void tokenize(zval *return_value)
 {
 	zval token;
@@ -195,6 +326,8 @@ PHP_FUNCTION(token_get_all)
 
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&source_zval);
+
+	t_parse(return_value);
 }
 /* }}} */
 
