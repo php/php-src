@@ -389,6 +389,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
 "  **-x**                          Enable xml output (instead of normal text output)" CR
+"  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
@@ -637,8 +638,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"frame",
 "The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
-"If specified then the current scope is set to the corresponding frame listed in a **back** trace. " "This can be used to allowing access to the variables in a higher stack frame than that currently "
-"being executed." CR CR
+"If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+"This can be used to allowing access to the variables in a higher stack frame than that currently being executed." CR CR
 
 "**Examples**" CR CR
 "    $P frame 2" CR
@@ -651,6 +652,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"info",
 "**info** commands provide quick access to various types of information about the PHP environment" CR
+"By default general information about environment and PHP build is shown." CR
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
@@ -738,7 +740,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"print",
-"By default, print will show information about the current execution context." CR
+"By default, print will show the opcodes of the current execution context." CR
 "Other printing commands give access to instruction information." CR
 "Specific printers loaded are show below:" CR CR
 
@@ -749,6 +751,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **method**  **m**      print out the instructions in the specified method" CR
 "  **func**    **f**      print out the instructions in the specified function" CR
 "  **stack**   **s**      print out the instructions in the current stack" CR CR
+
+"In case passed argument does not match a specific printing command, it will treat it as function or method name and print its opcodes" CR CR
 
 "**Examples**" CR CR
 "    $P print class \\\\my\\\\class" CR
