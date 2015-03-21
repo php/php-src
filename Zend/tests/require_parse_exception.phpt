@@ -5,12 +5,11 @@ allow_url_include=1
 --FILE--
 <?php
 
-
 function test_parse_error($code) {
     try {
         require 'data://text/plain;base64,' . base64_encode($code);
     } catch (ParseException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e->getMessage(), " on line ", $e->getLine(), "\n";
     }
 }
 
@@ -33,8 +32,19 @@ empty
 EOC
 );
 
+test_parse_error('<?php
+var_dump(078);');
+
+test_parse_error('<?php
+var_dump("\u{xyz}");');
+test_parse_error('<?php
+var_dump("\u{ffffff}");');
+
 ?>
 --EXPECT--
-syntax error, unexpected end of file
-syntax error, unexpected end of file
-syntax error, unexpected end of file, expecting '('
+syntax error, unexpected end of file on line 2
+syntax error, unexpected end of file on line 3
+syntax error, unexpected end of file, expecting '(' on line 2
+Invalid numeric literal on line 2
+Invalid UTF-8 codepoint escape sequence on line 2
+Invalid UTF-8 codepoint escape sequence: Codepoint too large on line 2
