@@ -1518,14 +1518,15 @@ static PHP_FUNCTION(preg_replace_callback_array)
 			ZVAL_STR_COPY(&regex, str_idx);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}		
 
 		if (!zend_is_callable(replace, 0, &callback_name)) {
 			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", callback_name->val);
 			zend_string_release(callback_name);
-			zval_dtor(return_value);
+			zval_ptr_dtor(&regex);
+			zval_ptr_dtor(return_value);
 			ZVAL_COPY(return_value, subject);
 			return;
 		}
@@ -1547,7 +1548,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		ZVAL_COPY_VALUE(return_value, &zv);
 
 		if (UNEXPECTED(EG(exception))) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			RETURN_NULL();	
 		}
 	} ZEND_HASH_FOREACH_END();
