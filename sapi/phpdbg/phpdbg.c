@@ -761,6 +761,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'a', 1, "address-or-any"},
 #endif
 	{'x', 0, "xml output"},
+	{'h', 0, "help"},
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -1201,6 +1202,18 @@ phpdbg_main:
 			case 'x':
 				flags |= PHPDBG_WRITE_XML;
 			break;
+
+
+			case 'h': {
+				sapi_startup(phpdbg);
+				phpdbg->startup(phpdbg);
+				PHPDBG_G(flags) = 0;
+				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
+				phpdbg_do_help(NULL);
+				sapi_deactivate();
+				sapi_shutdown();
+				return 0;
+			} break;
 
 			case 'V': {
 				sapi_startup(phpdbg);
