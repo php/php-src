@@ -757,7 +757,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 		if (UNEXPECTED(error_code != ZPP_ERROR_OK)) { \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
 				if (error_code == ZPP_ERROR_WRONG_CALLBACK) { \
-					zend_wrong_callback_error(E_WARNING, _i, _error); \
+					zend_wrong_callback_error(E_ERROR | E_EXCEPTION, _i, _error); \
 				} else if (error_code == ZPP_ERROR_WRONG_CLASS) { \
 					zend_wrong_paramer_class_error(_i, _error, _arg); \
 				} else if (error_code == ZPP_ERROR_WRONG_ARG) { \
