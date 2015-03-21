@@ -1275,8 +1275,8 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 				*replace_value,
 				 empty_replace;
 	zend_string *result;
-	zend_string	*subject_str = zval_get_string(subject);
 	uint32_t replace_idx;
+	zend_string	*subject_str = zval_get_string(subject);
 
 	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 	ZVAL_EMPTY_STRING(&empty_replace);
@@ -1512,6 +1512,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 	
+	ZVAL_UNDEF(&zv);
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(pattern), num_idx, str_idx, replace) {
 		if (str_idx) {
 			ZVAL_STR_COPY(&regex, str_idx);
@@ -1537,8 +1538,18 @@ static PHP_FUNCTION(preg_replace_callback_array)
 			zval_ptr_dtor(return_value);
 		}
 
-		ZVAL_COPY_VALUE(return_value, &zv);
 		zval_ptr_dtor(&regex);
+
+		if (Z_ISUNDEF(zv)) {
+			RETURN_NULL();	
+		}
+
+		ZVAL_COPY_VALUE(return_value, &zv);
+
+		if (UNEXPECTED(EG(exception))) {
+			zval_dtor(return_value);
+			RETURN_NULL();	
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	if (zcount) {

@@ -4,12 +4,19 @@ preg_replace_callback_array() basic functions
 <?php
 
 function f() {
-	throw new Exception();
+	throw new Exception('f');
+}
+
+function a() {
+	return __FUNCTION__;
 }
 
 try {
-var_dump(preg_replace_callback_array(array('/\w/' => 'f'), 'z'));
-} catch(Exception $e) {}
+	var_dump($c = preg_replace_callback_array(array('/\w*/' => 'f', '/\w/' => 'a'), 'z'));
+} catch(Exception $e) {
+	var_dump($e->getMessage());
+}
+var_dump($c);
 
 function g($x) {
 	return "'$x[0]'";
@@ -22,6 +29,10 @@ var_dump(preg_replace_callback_array(array('~\A.~' => 'g'), array(array('xyz')))
 var_dump(preg_replace_callback_array(array('~\A.~' => create_function('$m', 'return strtolower($m[0]);')), 'ABC'));
 ?>
 --EXPECTF--
+string(1) "f"
+
+Notice: Undefined variable: c in %spreg_replace_callback_array.php on line %d
+NULL
 array(3) {
   [0]=>
   string(12) "'a' 'b3' bcd"
