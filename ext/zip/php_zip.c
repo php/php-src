@@ -956,7 +956,6 @@ static HashTable *php_zip_get_properties(zval *object)/* {{{ */
 	HashTable *props;
 	zip_prop_handler *hnd;
 	zend_string *key;
-	zend_ulong num_key;
 
 	obj = Z_ZIP_P(object);
 	props = zend_std_get_properties(object);
@@ -965,7 +964,7 @@ static HashTable *php_zip_get_properties(zval *object)/* {{{ */
 		return NULL;
 	}
 
-	ZEND_HASH_FOREACH_KEY_PTR(obj->prop_handler, num_key, key, hnd) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(obj->prop_handler, key, hnd) {
 		zval *ret, val;
 		ret = php_zip_property_reader(obj, hnd, &val);
 		if (ret == NULL) {
@@ -1627,7 +1626,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 	if (remove_path && remove_path_len > 1) {
 		size_t real_len = strlen(remove_path);
-		if (real_len > 1 && remove_path[real_len - 1] == '/' || remove_path[real_len - 1] == '\\') {
+		if ((real_len > 1) && ((remove_path[real_len - 1] == '/') || (remove_path[real_len - 1] == '\\'))) {
 			remove_path[real_len - 1] = '\0';
 		}
 	}
