@@ -97,7 +97,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
         Parameter #4 [ <optional> &$count ]
       }
     }
-    Function [ <internal:pcre> preg_replace_callback_array ] {
+    Function [ <internal:pcre> function preg_replace_callback_array ] {
 
       - Parameters [4] {
         Parameter #0 [ <required> $pattern ]
