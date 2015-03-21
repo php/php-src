@@ -1203,14 +1203,12 @@ static int strToMatch(const char* str ,char *retstr)
 	char* 	anchor 	= NULL;
 	const char* 	anchor1 = NULL;
 	int 	result 	= 0;
-	int 	len 	= 0;
 
     if( (!str) || str[0] == '\0'){
         return result;
     } else {
 	anchor = retstr;
 	anchor1 = str;
-        len = strlen(str);
         while( (*str)!='\0' ){
 		if( *str == '-' ){
 			*retstr =  '_';
