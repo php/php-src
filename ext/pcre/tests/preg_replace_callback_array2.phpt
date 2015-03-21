@@ -1,5 +1,5 @@
 --TEST--
-preg_replace_callback_array() 2
+preg_replace_callback_array() errors
 --FILE--
 <?php
 
@@ -12,7 +12,12 @@ var_dump(preg_replace_callback_array(1,2,3,$a));
 $a = "";
 var_dump(preg_replace_callback_array(array("" => ""),"","",$a));
 $a = array();
-var_dump(preg_replace_callback($a,$a,$a,$a));
+$b = "";
+var_dump(preg_replace_callback($a, $a, $a, $a, $b));
+var_dump($b);
+$b = "";
+var_dump(preg_replace_callback_array(array("xx" => "s"), $a, -1, $b));
+var_dump($b);
 
 echo "Done\n";
 ?>
@@ -37,4 +42,10 @@ NULL
 
 Warning: preg_replace_callback() expects parameter 4 to be integer, array given in %s on line %d
 NULL
+string(0) ""
+
+Warning: preg_replace_callback_array(): 's' is not a valid callback in %s on line %d
+array(0) {
+}
+string(0) ""
 Done

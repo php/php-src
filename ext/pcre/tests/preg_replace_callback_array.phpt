@@ -1,5 +1,5 @@
 --TEST--
-preg_replace_callback_array()
+preg_replace_callback_array() basic functions
 --FILE--
 <?php
 
