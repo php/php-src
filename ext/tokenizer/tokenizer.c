@@ -148,8 +148,8 @@ static void tokenize(zval *return_value)
 		// after T_HALT_COMPILER collect the next three non-dropped tokens
 		if (need_tokens != -1) {
 			if (token_type != T_WHITESPACE && token_type != T_OPEN_TAG
-			    && token_type != T_COMMENT && token_type != T_DOC_COMMENT
-			    && --need_tokens == 0
+				&& token_type != T_COMMENT && token_type != T_DOC_COMMENT
+				&& --need_tokens == 0
 			) {
 				// fetch the rest into a T_INLINE_HTML
 				if (zendcursor != zendlimit) {
