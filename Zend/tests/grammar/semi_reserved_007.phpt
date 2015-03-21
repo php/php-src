@@ -1,5 +1,5 @@
 --TEST--
-Test self::self, self::parent, parent::self semi reserved constants access
+Edge case: self::self, self::parent, parent::self semi reserved constants access
 --FILE--
 <?php
 

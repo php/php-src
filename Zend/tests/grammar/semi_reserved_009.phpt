@@ -1,5 +1,5 @@
 --TEST--
-insteadof insteadof <>, as as <>
+Edge case: T_STRING<as> as T_STRING<?>
 --FILE--
 <?php
 
