@@ -711,7 +711,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				if (zend_fcall_info_init(arg, 0, fci, fcc, NULL, &is_callable_error) == SUCCESS) {
 					if (is_callable_error) {
 						*severity = E_STRICT;
-						zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
+						zend_wrong_callback_error(E_STRICT, arg_num, is_callable_error);
 						efree(is_callable_error);
 						*spec = spec_walk;
 						return "";
@@ -720,7 +720,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				} else {
 					if (is_callable_error) {
 						*severity = E_EXCEPTION | E_ERROR;
-						zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
+						zend_wrong_callback_error(E_EXCEPTION | E_ERROR, arg_num, is_callable_error);
 						efree(is_callable_error);
 						return "";
 					} else {
@@ -754,7 +754,7 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 {
 	const char *expected_type = NULL;
 	char *error = NULL;
-	int severity;
+	int severity = 0;
 
 	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error, &severity);
 	if (expected_type) {
