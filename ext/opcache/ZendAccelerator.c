@@ -267,10 +267,10 @@ static void accel_interned_strings_save_state(void)
 }
 #endif
 
+#ifndef ZTS
 static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
-#ifndef ZTS
 	zend_ulong h;
 	uint nIndex;
 	uint idx;
@@ -296,10 +296,10 @@ static zend_string *accel_find_interned_string(zend_string *str)
 		}
 		idx = Z_NEXT(p->val);
 	}
-#endif
 
 	return NULL;
 }
+#endif
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
