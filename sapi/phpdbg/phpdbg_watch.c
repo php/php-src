@@ -23,6 +23,7 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_prompt.h"
 #ifndef _WIN32
 # include <unistd.h>
 # include <sys/mman.h>
@@ -31,9 +32,9 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 const phpdbg_command_t phpdbg_watch_commands[] = {
-	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     NULL, "s", 0),
-	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    NULL, "s", 0),
-	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, NULL, "s", 0),
+	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     &phpdbg_prompt_commands[24], "s", 0),
+	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    &phpdbg_prompt_commands[24], "s", 0),
+	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, &phpdbg_prompt_commands[24], "s", 0),
 	PHPDBG_END_COMMAND
 };
 

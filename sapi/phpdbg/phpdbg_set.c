@@ -28,7 +28,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #define PHPDBG_SET_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[18], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[17], flags)
 
 const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s", 0),

@@ -35,7 +35,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[13], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[12], flags)
 
 const phpdbg_command_t phpdbg_list_commands[] = {
 	PHPDBG_LIST_COMMAND_D(lines,     "lists the specified lines",    'l', list_lines,  NULL, "l", PHPDBG_ASYNC_SAFE),
