@@ -3,48 +3,47 @@ preg_replace_callback_array() basic functions
 --FILE--
 <?php
 
-function f() {
-	throw new Exception('f');
+class Rep {
+	public function __invoke() {
+		return "d";
+	}
 }
 
-function a() {
-	return __FUNCTION__;
+class Foo {
+	public static function rep($rep) {
+		return "ok";
+	}
 }
 
-try {
-	var_dump($c = preg_replace_callback_array(array('/\w*/' => 'f', '/\w/' => 'a'), 'z'));
-} catch(Exception $e) {
-	var_dump($e->getMessage());
-}
-var_dump($c);
-
-function g($x) {
-	return "'$x[0]'";
+function b() {
+	return "b";
 }
 
-var_dump(preg_replace_callback_array(array('@\b\w{1,2}\b@' => 'g'), array('a b3 bcd', 'v' => 'aksfjk', 12 => 'aa bb')));
+var_dump(preg_replace_callback_array(
+	array(
+		"/a/" => 'b',
+		"/b/" => function () { return "c"; },
+		"/c/" => new Rep,
+		'/d/' => array("Foo", "rep")), 'a'));
 
-var_dump(preg_replace_callback_array(array('~\A.~' => 'g'), array(array('xyz'))));
+var_dump(preg_replace_callback_array(
+	array(
+		"/a/" => 'b',
+		"/c/" => new Rep,
+		"/b/" => function () { return "ok"; },
+		'/d/' => array("Foo", "rep")), 'a'));
 
-var_dump(preg_replace_callback_array(array('~\A.~' => create_function('$m', 'return strtolower($m[0]);')), 'ABC'));
+var_dump(preg_replace_callback_array(
+	array(
+		'/d/' => array("Foo", "rep"),
+		"/c/" => new Rep,
+		"/a/" => 'b',
+		"/b/" => create_function('$a', 'return "ok";')), 'a', -1, $count));
+
+var_dump($count);
 ?>
 --EXPECTF--
-string(1) "f"
-
-Notice: Undefined variable: c in %spreg_replace_callback_array.php on line %d
-NULL
-array(3) {
-  [0]=>
-  string(12) "'a' 'b3' bcd"
-  ["v"]=>
-  string(6) "aksfjk"
-  [12]=>
-  string(9) "'aa' 'bb'"
-}
-
-Notice: Array to string conversion in %spreg_replace_callback_array.php on line %d
-array(1) {
-  [0]=>
-  string(7) "'A'rray"
-}
-string(3) "aBC"
+string(2) "ok"
+string(2) "ok"
+string(2) "ok"
+int(2)
