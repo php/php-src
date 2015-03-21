@@ -502,7 +502,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 				parent = Z_ARRVAL_P(zv);
 			} else {
-				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) i, input);
+				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) (input[i] == '>' ? i - 1 : i), input);
 				return FAILURE;
 			}
 			index_len = 0;

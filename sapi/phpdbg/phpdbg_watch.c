@@ -143,7 +143,7 @@ static void phpdbg_add_watch_collision(phpdbg_watchpoint_t *watch) {
 		phpdbg_activate_watchpoint(&cur->watch);
 	}
 
-	zend_hash_str_add_ptr(&cur->watches, watch->parent->str, watch->parent->str_len, watch->parent);
+	zend_hash_add_ptr(&cur->watches, watch->parent->str, watch->parent);
 }
 
 static void phpdbg_remove_watch_collision(zend_refcounted *ref) {
@@ -155,7 +155,7 @@ static void phpdbg_remove_watch_collision(zend_refcounted *ref) {
 			phpdbg_delete_watchpoints_recursive(watch);
 		}
 
-		zend_hash_str_del(&cur->watches, watch->str, watch->str_len);
+		zend_hash_del(&cur->watches, watch->str);
 
 		if (!--cur->num) {
 			phpdbg_deactivate_watchpoint(&cur->watch);
@@ -168,11 +168,25 @@ static void phpdbg_remove_watch_collision(zend_refcounted *ref) {
 	}
 }
 
+static void phpdbg_create_reference_watch(phpdbg_watchpoint_t *watch) {
+	phpdbg_watchpoint_t *ref = emalloc(sizeof(phpdbg_watchpoint_t));
+	watch->reference = ref;
+	ref->flags = watch->flags;
+	ref->str = watch->str;
+	++GC_REFCOUNT(ref->str);
+	ref->parent = watch;
+	ref->parent_container = NULL;
+	phpdbg_create_zval_watchpoint(Z_REFVAL_P(watch->addr.zv), ref);
+
+	phpdbg_store_watchpoint(ref);
+	phpdbg_activate_watchpoint(ref);
+}
+
 static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch) {
 	watch->flags |= PHPDBG_WATCH_SIMPLE;
 
 	phpdbg_store_watchpoint(watch);
-	zend_hash_str_add_ptr(&PHPDBG_G(watchpoints), watch->str, watch->str_len, watch);
+	zend_hash_add_ptr(&PHPDBG_G(watchpoints), watch->str, watch);
 
 	if (watch->parent && watch->parent->type == WATCH_ON_ZVAL && Z_REFCOUNTED_P(watch->parent->addr.zv)) {
 		phpdbg_add_watch_collision(phpdbg_create_refcounted_watchpoint(watch, Z_COUNTED_P(watch->parent->addr.zv)));
@@ -185,15 +199,7 @@ static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch) {
 		}
 
 		if (Z_ISREF_P(watch->addr.zv)) {
-			phpdbg_watchpoint_t *ref = emalloc(sizeof(phpdbg_watchpoint_t));
-			ref->flags = watch->flags;
-			ref->str = watch->str;
-			ref->str_len = watch->str_len;
-			ref->parent = watch;
-			ref->parent_container = NULL;
-			phpdbg_create_zval_watchpoint(Z_REFVAL_P(watch->addr.zv), ref);
-
-			phpdbg_create_watchpoint(ref);
+			phpdbg_create_reference_watch(watch);
 		}
 	}
 
@@ -229,6 +235,7 @@ static int phpdbg_create_array_watchpoint(phpdbg_watchpoint_t *zv_watch) {
 }
 
 static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch) {
+	size_t str_len;
 	HashTable *ht;
 	zval *zvp = watch->addr.zv;
 
@@ -246,26 +253,30 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch) {
 	}
 
 	{
-		HashPosition position;
 		zval *zv;
-		zval key;
+		zend_string *key;
+		zend_long h;
 
-		ZEND_HASH_FOREACH_VAL(ht, zv) {
+		ZEND_HASH_FOREACH_KEY_VAL(ht, h, key, zv) {
+			char *str = NULL;
 			phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
 
 			new_watch->flags = PHPDBG_WATCH_RECURSIVE;
 			new_watch->parent = watch;
 			new_watch->parent_container = ht;
 
-			zend_hash_get_current_key_zval_ex(ht, &key, &position);
-			if (Z_TYPE(key) == IS_STRING) {
-				new_watch->name_in_parent = estrndup(Z_STRVAL(key), Z_STRLEN(key));
-				new_watch->name_in_parent_len = Z_STRLEN(key);
+			if (key) {
+				new_watch->name_in_parent = key;
+				++GC_REFCOUNT(key);
 			} else {
-				new_watch->name_in_parent_len = spprintf(&new_watch->name_in_parent, 0, "%lld", Z_LVAL(key));
+				str_len = spprintf(&str, 0, "%lld", h);
+				new_watch->name_in_parent = zend_string_init(str, str_len, 0);
+				efree(str);
 			}
 
-			new_watch->str_len = spprintf(&new_watch->str, 0, "%.*s%s%s%s", (int) watch->str_len, watch->str, Z_TYPE_P(zvp) == IS_ARRAY ? "[" : "->", phpdbg_get_property_key(new_watch->name_in_parent), Z_TYPE_P(zvp) == IS_ARRAY ? "]" : "");
+			str_len = spprintf(&str, 0, "%.*s%s%s%s", (int) watch->str->len, watch->str->val, Z_TYPE_P(zvp) == IS_ARRAY ? "[" : "->", phpdbg_get_property_key(new_watch->name_in_parent->val), Z_TYPE_P(zvp) == IS_ARRAY ? "]" : "");
+			new_watch->str = zend_string_init(str, str_len, 0);
+			efree(str);
 
 			while (Z_TYPE_P(zv) == IS_INDIRECT) {
 				zv = Z_INDIRECT_P(zv);
@@ -277,15 +288,17 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch) {
 	}
 
 	{
+		char *str = NULL;
 		phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
 
+		new_watch->flags = PHPDBG_WATCH_RECURSIVE;
 		new_watch->parent = watch;
 		new_watch->parent_container = watch->parent_container;
-		new_watch->name_in_parent = estrndup(watch->name_in_parent, watch->name_in_parent_len);
-		new_watch->name_in_parent_len = watch->name_in_parent_len;
-		new_watch->str = NULL;
-		new_watch->str_len = spprintf(&new_watch->str, 0, "%.*s[]", (int) watch->str_len, watch->str);
-		new_watch->flags = PHPDBG_WATCH_RECURSIVE;
+		new_watch->name_in_parent = watch->name_in_parent;
+		++GC_REFCOUNT(new_watch->name_in_parent);
+		str_len = spprintf(&str, 0, "%.*s[]", (int) watch->str->len, watch->str->val);
+		new_watch->str = zend_string_init(str, str_len, 0);
+		efree(str);
 
 		if (Z_TYPE_P(zvp) == IS_ARRAY) {
 			new_watch->flags |= PHPDBG_WATCH_ARRAY;
@@ -318,26 +331,28 @@ static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch, zend_b
 		phpdbg_delete_zval_watchpoints_recursive(watch);
 	}
 
-	return zend_hash_str_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+	return zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 }
 
 static void phpdbg_delete_ht_watchpoints_recursive(phpdbg_watchpoint_t *watch) {
 	zend_string *strkey;
 	zend_long numkey;
 	char *str;
-	int str_len;
+	size_t str_len;
 	phpdbg_watchpoint_t *watchpoint;
 
 	ZEND_HASH_FOREACH_KEY(watch->addr.ht, numkey, strkey) {
 		if (strkey) {
-			str_len = asprintf(&str, "%.*s%s%s%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(strkey->val), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
+			str_len = spprintf(&str, 0, "%.*s%s%s%s", (int) watch->str->len, watch->str->val, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(strkey->val), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		} else {
-			str_len = asprintf(&str, "%.*s%s" ZEND_LONG_FMT "%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
+			str_len = spprintf(&str, 0, "%.*s%s" ZEND_LONG_FMT "%s", (int) watch->str->len, watch->str->val, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		}
 
 		if ((watchpoint = zend_hash_str_find_ptr(&PHPDBG_G(watchpoints), str, str_len))) {
 			phpdbg_delete_watchpoint_recursive(watchpoint, 1);
 		}
+
+		efree(str);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -369,33 +384,32 @@ static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch) {
 	if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
 		ret = phpdbg_delete_watchpoint_recursive(watch, 1);
 	} else {
-		ret = zend_hash_str_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+		ret = zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 	}
 
-	efree(tmp_watch->str);
-	efree(tmp_watch->name_in_parent);
+	zend_string_release(tmp_watch->str);
+	zend_string_release(tmp_watch->name_in_parent);
 	efree(tmp_watch);
 
 	return ret;
 }
 
-static int phpdbg_watchpoint_parse_wrapper(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv, int (*callback)(phpdbg_watchpoint_t *)) {
+static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key, size_t keylen, HashTable *parent, zval *zv, int (*callback)(phpdbg_watchpoint_t *)) {
 	int ret;
-	phpdbg_watchpoint_t *watch = emalloc(sizeof(phpdbg_watchpoint_t));
+	phpdbg_watchpoint_t *watch = ecalloc(1, sizeof(phpdbg_watchpoint_t));
 	watch->flags = 0;
-	watch->str = name;
-	watch->str_len = len;
-	watch->name_in_parent = keyname;
-	watch->name_in_parent_len = keylen;
+	watch->str = zend_string_init(name, namelen, 0);
+	watch->name_in_parent = zend_string_init(key, keylen, 0);
 	watch->parent_container = parent;
 	phpdbg_create_zval_watchpoint(zv, watch);
 
 	ret = callback(watch);
 
+	efree(name);
+	efree(key);
+
 	if (ret != SUCCESS) {
 		efree(watch);
-		efree(name);
-		efree(keyname);
 	}
 
 	return ret;
@@ -477,17 +491,21 @@ void phpdbg_watch_HashTable_dtor(zval *zv) {
 
 	zval_ptr_dtor_wrapper(zv);
 
+	while (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
+
 	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) zv))) {
 		phpdbg_watchpoint_t *watch = result->ptr;
 
 		PHPDBG_G(watchpoint_hit) = 1;
 
-		phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s was removed, removing watchpoint%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_RECURSIVE) ? " recursively" : "");
+		phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s was removed, removing watchpoint%s", (int) watch->str->len, watch->str->val, (watch->flags & PHPDBG_WATCH_RECURSIVE) ? " recursively" : "");
 
 		if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
 			phpdbg_delete_watchpoint_recursive(watch, 0);
 		} else {
-			zend_hash_str_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+			zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 		}
 	}
 }
@@ -558,8 +576,8 @@ static void phpdbg_watch_dtor(zval *pDest) {
 	phpdbg_deactivate_watchpoint(watch);
 	phpdbg_remove_watchpoint(watch);
 
-	efree(watch->str);
-	efree(watch->name_in_parent);
+	zend_string_release(watch->str);
+	zend_string_release(watch->name_in_parent);
 }
 
 static void phpdbg_watch_mem_dtor(void *llist_data) {
@@ -570,7 +588,7 @@ static void phpdbg_watch_mem_dtor(void *llist_data) {
 		mprotect(dump->page, dump->size, PROT_READ);
 	}
 
-	free(*(void **) llist_data);
+	free(dump);
 }
 
 void phpdbg_setup_watchpoints(void) {
@@ -610,9 +628,9 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 			continue;
 		}
 
-		/* Test if the zval was separated and if necessary move the watchpoint */
+		/* Test if the zval was separated or replaced and if necessary move the watchpoint */
 		if ((watch->type == WATCH_ON_HASHTABLE || watch->type == WATCH_ON_ZVAL) && watch->parent_container) {
-			if ((curTest = zend_hash_str_find(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len))) {
+			if ((curTest = zend_symtable_find(watch->parent_container, watch->name_in_parent))) {
 				while (Z_TYPE_P((zval *) curTest) == IS_INDIRECT) {
 					curTest = Z_INDIRECT_P((zval *) curTest);
 				}
@@ -664,13 +682,13 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 			if (do_break) {
 				PHPDBG_G(watchpoint_hit) = 1;
 
-				phpdbg_notice("watchhit", "variable=\"%s\"", "Breaking on watchpoint %.*s", (int) watch->str_len, watch->str);
+				phpdbg_notice("watchhit", "variable=\"%s\"", "Breaking on watchpoint %.*s", (int) watch->str->len, watch->str->val);
 				phpdbg_xml("<watchdata %r>");
 			}
 
 			switch (watch->type) {
 				case WATCH_ON_ZVAL: {
-					int show_value = memcmp(oldPtr, watch->addr.zv, sizeof(zval) - sizeof(uint32_t) /* no metadata info */);
+					int show_value = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* no metadata info */);
 
 					if (removed || show_value) {
 						if (removed && (Z_TYPE_P((zval *) oldPtr) == IS_ARRAY || Z_TYPE_P((zval *) oldPtr) == IS_OBJECT)) {
@@ -686,8 +704,8 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 
 					/* check if zval was removed */
 					if (removed) {
-						phpdbg_notice("watchdelete", "variable=\"%.*s\"", "Watchpoint %.*s was unset, removing watchpoint", (int) watch->str_len, watch->str);
-						zend_hash_str_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+						phpdbg_notice("watchdelete", "variable=\"%.*s\"", "Watchpoint %.*s was unset, removing watchpoint", (int) watch->str->len, watch->str->val);
+						zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 
 						reenable = 0;
 
@@ -698,15 +716,15 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 					}
 
 					if (show_value) {
-						phpdbg_out("New value: ");
-						phpdbg_xml("<watchvalue %r type=\"new\">");
+						phpdbg_out("New value%s: ", Z_ISREF_P(watch->addr.zv) ? " (reference)" : "");
+						phpdbg_xml("<watchvalue %r%s type=\"new\">", Z_ISREF_P(watch->addr.zv) ? " reference=\"reference\"" : "");
 						zend_print_flat_zval_r(watch->addr.zv);
 						phpdbg_xml("</watchvalue>");
 						phpdbg_out("\n");
 					}
 
 					/* add new watchpoints if necessary */
-					if (Z_PTR_P(watch->addr.zv) != Z_PTR_P((zval *) oldPtr)) {
+					if (Z_PTR_P(watch->addr.zv) != Z_PTR_P((zval *) oldPtr) || Z_TYPE_P(watch->addr.zv) != Z_TYPE_P((zval *) oldPtr)) {
 						if (Z_REFCOUNTED_P((zval *) oldPtr)) {
 							phpdbg_remove_watch_collision(Z_COUNTED_P((zval *) oldPtr));
 						}
@@ -716,6 +734,8 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 							}
 							if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
 								phpdbg_create_recursive_watchpoint(watch);
+							} else if (Z_ISREF_P(watch->addr.zv)) {
+								phpdbg_create_reference_watch(watch);
 							}
 						}
 					}
@@ -725,8 +745,8 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 				case WATCH_ON_HASHTABLE:
 #if 0 && ZEND_DEBUG
 					if (watch->addr.arr->ht->inconsistent) {
-						phpdbg_notice("watchdelete", "variable=\"%.*s\"", "Watchpoint %.*s was unset, removing watchpoint", (int) watch->str_len, watch->str);
-						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+						phpdbg_notice("watchdelete", "variable=\"%.*s\"", "Watchpoint %.*s was unset, removing watchpoint", (int) watch->str->len, watch->str->val);
+						zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 
 						reenable = 0;
 
@@ -801,7 +821,7 @@ void phpdbg_list_watchpoints(void) {
 	phpdbg_xml("<watchlist %r>");
 
 	ZEND_HASH_FOREACH_PTR(&PHPDBG_G(watchpoints), watch) {
-		phpdbg_writeln("watchvariable", "variable=\"%.*s\" on=\"%s\" type=\"%s\"", "%.*s (%s, %s)", (int) watch->str_len, watch->str, watch->type == WATCH_ON_HASHTABLE ? "array" : watch->type == WATCH_ON_REFCOUNTED ? "refcount" : "variable", watch->flags == PHPDBG_WATCH_RECURSIVE ? "recursive" : "simple");
+		phpdbg_writeln("watchvariable", "variable=\"%.*s\" on=\"%s\" type=\"%s\"", "%.*s (%s, %s)", (int) watch->str->len, watch->str->val, watch->type == WATCH_ON_HASHTABLE ? "array" : watch->type == WATCH_ON_REFCOUNTED ? "refcount" : "variable", watch->flags == PHPDBG_WATCH_RECURSIVE ? "recursive" : "simple");
 	} ZEND_HASH_FOREACH_END();
 
 	phpdbg_xml("</watchlist>");
@@ -819,7 +839,9 @@ void phpdbg_watch_efree(void *ptr) {
 			if (watch->type == WATCH_ON_ZVAL) {
 				phpdbg_remove_watch_collision(Z_COUNTED_P(watch->addr.zv));
 			}
-			zend_hash_str_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+			if (watch->parent == NULL || watch->parent->reference != watch) {
+				zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
+			}
 		}
 	}
 
