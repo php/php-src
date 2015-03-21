@@ -485,10 +485,13 @@ Other
 - GMP
   . Added gmp_random_seed().
 
+- PCRE:
+  . Added preg_replace_callback_array function
+    (RFC: https://wiki.php.net/rfc/preg_replace_callback_array)
+
 - Standard
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
-
 
 ========================================
 7. New Classes and Interfaces
