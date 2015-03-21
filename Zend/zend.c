@@ -842,6 +842,11 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* this should be compatible with the standard zenderror */
 void zenderror(const char *error) /* {{{ */
 {
+	if (EG(exception)) {
+		/* An exception was thrown in the lexer, don't throw another in the parser. */
+		return;
+	}
+
 	zend_throw_exception(zend_get_parse_exception(), error, E_PARSE);
 }
 /* }}} */

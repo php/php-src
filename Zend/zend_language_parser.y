@@ -226,6 +226,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_POW             "** (T_POW)"
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
 
+/* Token used to force a parse error from the lexer */
+%token T_ERROR
+
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement
 %type <ast> interface_declaration_statement interface_extends_list
@@ -1227,7 +1230,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		return yystrlen(yystr);
 	}
 	{
-			if (CG(parse_error) == 0) {
+		if (CG(parse_error) == 0) {
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;

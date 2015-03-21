@@ -123,6 +123,8 @@ static void tokenize(zval *return_value)
 			case T_DOC_COMMENT:
 				destroy = 0;
 				break;
+			case T_ERROR:
+				return;
 		}
 
 		if (token_type >= 256) {

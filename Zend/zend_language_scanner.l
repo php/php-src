@@ -865,7 +865,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
 
-static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
+static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
 {
 	register char *s, *t;
 	char *end;
@@ -986,7 +986,10 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						}
 
 						if (!valid) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence");
+							zend_throw_exception(zend_get_parse_exception(),
+								"Invalid UTF-8 codepoint escape sequence", E_PARSE);
+							zval_ptr_dtor(zendlval);
+							return FAILURE;
 						}
 
 						errno = 0;
@@ -994,7 +997,10 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 
 						/* per RFC 3629, UTF-8 can only represent 21 bits */
 						if (codepoint > 0x10FFFF || errno) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence: Codepoint too large");
+							zend_throw_exception(zend_get_parse_exception(),
+								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", E_PARSE);
+							zval_ptr_dtor(zendlval);
+							return FAILURE;
 						}
 
 						/* based on https://en.wikipedia.org/wiki/UTF-8#Sample_code */
@@ -1064,6 +1070,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 		ZVAL_STRINGL(zendlval, (char *) str, sz);
 		efree(str);
 	}
+	return SUCCESS;
 }
 
 
@@ -1614,9 +1621,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		 * Because the lexing itself doesn't do that for us
 		 */
 		if (end != yytext + yyleng) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+			zend_throw_exception(zend_get_parse_exception(), "Invalid numeric literal", E_PARSE);
+			return T_ERROR;
 		}
-		ZEND_ASSERT(!errno);
 	} else {
 		errno = 0;
 		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
@@ -1630,17 +1637,20 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			}
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+				zend_throw_exception(zend_get_parse_exception(),
+					"Invalid numeric literal", E_PARSE);
+				return T_ERROR;
 			}
 			ZEND_ASSERT(!errno);
 			return T_DNUMBER;
 		}
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+			zend_throw_exception(zend_get_parse_exception(), "Invalid numeric literal", E_PARSE);
+			return T_ERROR;
 		}
-		ZEND_ASSERT(!errno);
 	}
+	ZEND_ASSERT(!errno);
 	return T_LNUMBER;
 }
 
@@ -1995,7 +2005,9 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
+				if (zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == FAILURE) {
+					return T_ERROR;
+				}
 				return T_CONSTANT_ENCAPSED_STRING;
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
@@ -2162,7 +2174,9 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
+	if (zend_scan_escape_string(zendlval, yytext, yyleng, '"') == FAILURE) {
+		return T_ERROR;
+	}
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -2204,7 +2218,9 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
+	if (zend_scan_escape_string(zendlval, yytext, yyleng, '`') == FAILURE) {
+		return T_ERROR;
+	}
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -2278,7 +2294,9 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
+	if (zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == FAILURE) {
+		return T_ERROR;
+	}
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
