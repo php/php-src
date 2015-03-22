@@ -860,18 +860,23 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 
 	collation->fci.fci.params = zargs;
 
-	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
+	if (!EG(exception)) {
+		//Exception occurred on previous callback. Don't attempt to call function
+		if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
+		}
 	}
 
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
 	efree(zargs);
 
-	//retval ought to contain a ZVAL_LONG by now
-	// (the result of a comparison, i.e. most likely -1, 0, or 1)
-	//I suppose we could accept any scalar return type, though.
-	if (Z_TYPE(retval) != IS_LONG){
+	if (EG(exception)) {
+		ret = 0;
+	} else if (Z_TYPE(retval) != IS_LONG){
+		//retval ought to contain a ZVAL_LONG by now
+		// (the result of a comparison, i.e. most likely -1, 0, or 1)
+		//I suppose we could accept any scalar return type, though.
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback (invalid return type).  Collation behaviour is undefined.");
 	}else{
 		ret = Z_LVAL(retval);
