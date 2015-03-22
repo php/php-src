@@ -189,8 +189,7 @@ static int t_look(zend_bool ahead, zval *tokens, int index, int attempts)
 	int token_type,
 		length = zend_hash_num_elements(Z_ARRVAL_P(tokens));
 
-	while(attempts && (index < length)) {
-		(ahead) ? ++index : --index;
+	while(attempts && ((ahead ? ++index : --index) < length)) {
 		switch (token_type = t_get_type(tokens, index)) {
 			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
 				break;
@@ -202,7 +201,7 @@ static int t_look(zend_bool ahead, zval *tokens, int index, int attempts)
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 static zend_always_inline void t_stringify(zval *tokens, int index)
@@ -215,12 +214,12 @@ static zend_always_inline void t_stringify(zval *tokens, int index)
 
 static zend_always_inline void t_stringify_next(zval *tokens, int index, int attempts)
 {
-	if((index = t_look(1, tokens, index, attempts))) t_stringify(tokens, index);
+	if(-1 != (index = t_look(1, tokens, index, attempts))) t_stringify(tokens, index);
 }
 
 static zend_always_inline void t_stringify_previous(zval *tokens, int index, int attempts)
 {
-	if((index = t_look(0, tokens, index, attempts))) t_stringify(tokens, index);
+	if(-1 != (index = t_look(0, tokens, index, attempts))) t_stringify(tokens, index);
 }
 
 static void t_parse(zval *tokens)
