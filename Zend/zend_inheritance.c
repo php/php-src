@@ -328,11 +328,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		}
 	}
 
-	/* check return type compataibility */
-	if ((proto->common.fn_flags | fe->common.fn_flags) & ZEND_ACC_HAS_RETURN_TYPE) {
-		if ((proto->common.fn_flags ^ fe->common.fn_flags) & ZEND_ACC_HAS_RETURN_TYPE) {
+	/* Check return type compatibility, but only if the prototype already specifies
+	 * a return type. Adding a new return type is always valid. */
+	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		/* Removing a return type is not valid. */
+		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			return 0;
 		}
+
 		if (!zend_do_perform_type_hint_check(fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1)) {
 			return 0;
 		}
