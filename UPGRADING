@@ -408,6 +408,7 @@ None
 - cURL:
   - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
   - Added CURL_WRAPPERS_ENABLED to reflect --with-curlwrappers.
+  - Added CURL_HTTP_VERSION_2_0 and CURL_VERSION_HTTP2 in 5.5.24+.
 
 - GD
   - Added constants for imageflip:
