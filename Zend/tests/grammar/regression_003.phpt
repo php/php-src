@@ -9,4 +9,4 @@ class Obj
 }
 
 --EXPECTF--
-Fatal error: Cannot redefine class constant Obj::CLASS in %s on line 5
+Parse error: syntax error, unexpected 'CLASS' (T_CLASS) in %s on line 5

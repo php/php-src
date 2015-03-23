@@ -159,7 +159,6 @@ static zend_bool t_is_semi_reserved(int token_type)
 		case T_EXTENDS:
 		case T_IMPLEMENTS:
 		case T_NAMESPACE:
-		case T_CLASS:
 		case T_TRAIT:
 		case T_INTERFACE:
 	/* ]]] */

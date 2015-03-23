@@ -6323,7 +6323,6 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *const_ast = ast->child[1];
-	zend_ast *resolve_class_name_ast;
 	zend_string *class_name;
 	zend_string *const_name = zend_ast_get_str(const_ast);
 	zval result;
@@ -6337,19 +6336,15 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	class_name = zend_ast_get_str(class_ast);
 	fetch_type = zend_get_class_fetch_type(class_name);
 
-	if((ZEND_FETCH_CLASS_DEFAULT != fetch_type)) {
-		zend_string_addref(class_name);
-		if(zend_string_equals_literal_ci(const_name, "class")) {
-			resolve_class_name_ast = zend_ast_create(ZEND_AST_RESOLVE_CLASS_NAME, class_ast);
-			zend_compile_const_expr(&resolve_class_name_ast);
-			return;
-		}
-		if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"\"static::\" is not allowed in compile-time constants");
-		}
-	} else {
+	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"\"static::\" is not allowed in compile-time constants");
+	}
+
+	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
 		class_name = zend_resolve_class_name_ast(class_ast);
+	} else {
+		zend_string_addref(class_name);
 	}
 
 	Z_STR(result) = zend_concat3(
