@@ -25,7 +25,7 @@ string(44) "Exception: Extension unknown does not exist
 "
 string(37) "Exception: Extension  does not exist
 "
-string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
+string(%d) "Extension [ <persistent> extension #%d pcre version %d.%d.%d%a ] {
 
   - INI {
     Entry [ pcre.backtrack_limit <ALL> ]
