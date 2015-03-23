@@ -209,6 +209,11 @@ PHP 7.0 INTERNALS UPGRADE NOTES
        and library manager. This solves the issues with the long command lines
        which can exceed the OS limit.
 
+     - with clang toolset, an option --with-uncritical-warn-choke is available,
+       which suppresses the most frequent false positive warnings
+
+     - the --with-mp option will by default utilize all the available cores. It's
+       enabled by default and can be disabled with the special "disable" keyword.
 
 ========================
 3. Module changes
