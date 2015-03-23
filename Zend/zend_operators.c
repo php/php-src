@@ -781,7 +781,7 @@ try_again:
 			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
 		}
 		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Array to string conversion");
 			return zend_string_init("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
 			zval tmp;
