@@ -139,7 +139,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 
 	object_properties = Z_OBJPROP_P(object);
 
-	if ((val = zend_hash_str_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) != NULL) {
+	if ((val = zend_hash_str_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) != NULL && Z_TYPE_P(val) == IS_STRING) {
 		return zend_string_copy(Z_STR_P(val));
 	}
 
