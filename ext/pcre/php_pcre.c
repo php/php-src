@@ -2127,7 +2127,7 @@ zend_module_entry pcre_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pcre),
-	NO_VERSION_YET,
+	PHP_PCRE_VERSION,
 	PHP_MODULE_GLOBALS(pcre),
 	PHP_GINIT(pcre),
 	PHP_GSHUTDOWN(pcre),

@@ -193,7 +193,7 @@ zend_module_entry pcntl_module_entry = {
 	PHP_RINIT(pcntl),
 	PHP_RSHUTDOWN(pcntl),
 	PHP_MINFO(pcntl),
-	NO_VERSION_YET,
+	PHP_PCNTL_VERSION,
 	PHP_MODULE_GLOBALS(pcntl),
 	PHP_GINIT(pcntl),
 	NULL,

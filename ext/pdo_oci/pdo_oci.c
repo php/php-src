@@ -46,12 +46,8 @@ static const zend_module_dep pdo_oci_deps[] = {
 #endif
 
 zend_module_entry pdo_oci_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"PDO_OCI",
 	pdo_oci_functions,
 	PHP_MINIT(pdo_oci),
@@ -59,7 +55,7 @@ zend_module_entry pdo_oci_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_oci),
-	"1.0.1",
+	PHP_PDO_OCI_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

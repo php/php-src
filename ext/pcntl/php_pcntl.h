@@ -26,6 +26,9 @@
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
 
+#include "php_version.h"
+#define PHP_PCNTL_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(pcntl);
 PHP_MSHUTDOWN_FUNCTION(pcntl);
 PHP_RINIT_FUNCTION(pcntl);

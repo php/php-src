@@ -256,7 +256,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	NULL,
 #endif
 	PHP_MINFO(pdo_mysql),
-	"1.0.2",
+	PHP_PDO_MYSQL_VERSION,
 	PHP_MODULE_GLOBALS(pdo_mysql),
 	PHP_GINIT(pdo_mysql),
 	NULL,

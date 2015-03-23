@@ -47,12 +47,8 @@ static const zend_module_dep pdo_odbc_deps[] = {
 
 /* {{{ pdo_odbc_module_entry */
 zend_module_entry pdo_odbc_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_odbc_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"PDO_ODBC",
 	pdo_odbc_functions,
 	PHP_MINIT(pdo_odbc),
@@ -60,7 +56,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_odbc),
-	"1.0.1",
+	PHP_PDO_ODBC_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -26,6 +26,9 @@
 #include <sql.h>
 #include <sqlext.h>
 
+#include "php_version.h"
+#define PHP_BIRDSTEP_VERSION PHP_VERSION
+
 typedef struct VConn {
 	HDBC    hdbc;
 	zend_long    index;

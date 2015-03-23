@@ -148,7 +148,7 @@ zend_module_entry birdstep_module_entry = {
 	PHP_RINIT(birdstep),
 	NULL,
 	PHP_MINFO(birdstep),
-	NO_VERSION_YET,
+	PHP_BIRDSTEP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

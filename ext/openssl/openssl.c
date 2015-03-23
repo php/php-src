@@ -525,7 +525,7 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(openssl),
-	NO_VERSION_YET,
+	PHP_OPENSSL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
