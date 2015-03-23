@@ -18,6 +18,10 @@ if (PHP_DOM == "yes") {
 
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
+		} else {
+			if (!CHECK_LIB("libxml2.lib", "dom")) {
+				WARNING("dom support can't be enabled, libxml is not found")
+			}
 		}
 		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h");
 	} else {
