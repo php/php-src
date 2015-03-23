@@ -3046,6 +3046,6 @@ AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
     AC_MSG_RESULT([no])
   ])
 
-  AC_DEFINE([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
 
 ])
