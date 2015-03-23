@@ -185,6 +185,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_create_from_immutable, 0, 0, 1)
+	ZEND_ARG_INFO(0, DateTimeImmutable)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
@@ -468,6 +472,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime,			createFromImmutable,	arginfo_date_method_create_from_immutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
@@ -2781,7 +2786,7 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	php_date_obj *new_obj = NULL;
 	php_date_obj *old_obj = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O!", &datetime_object, date_ce_date) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &datetime_object, date_ce_date) == FAILURE) {
 		return;
 	}
 
@@ -2908,6 +2913,34 @@ PHP_METHOD(DateTime, __wakeup)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht TSRMLS_CC)) {
 		php_error(E_ERROR, "Invalid serialization data for DateTime object");
+	}
+}
+/* }}} */
+
+/* {{{ proto DateTime::createFromImmutable(DateTimeImmutable object)
+   Creates new DateTime object from an existing DateTimeImmutable object.
+*/
+PHP_METHOD(DateTime, createFromImmutable)
+{
+	zval *datetimeimmutable_object = NULL;
+	php_date_obj *new_obj = NULL;
+	php_date_obj *old_obj = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &datetimeimmutable_object, date_ce_immutable) == FAILURE) {
+		return;
+	}
+
+	php_date_instantiate(date_ce_date, return_value TSRMLS_CC);
+	old_obj = (php_date_obj *) zend_object_store_get_object(datetimeimmutable_object TSRMLS_CC);
+	new_obj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+
+	new_obj->time = timelib_time_ctor();
+	*new_obj->time = *old_obj->time;
+	if (old_obj->time->tz_abbr) {
+		new_obj->time->tz_abbr = strdup(old_obj->time->tz_abbr);
+	}
+	if (old_obj->time->tz_info) {
+		new_obj->time->tz_info = old_obj->time->tz_info;
 	}
 }
 /* }}} */
