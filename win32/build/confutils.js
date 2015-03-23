@@ -437,7 +437,7 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 't1lib', 'pgi', 'pgo'
+		 't1lib', 'pgi', 'pgo', 'all-shared'
 		);
 	var force;
 
@@ -1259,7 +1259,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	var ldflags;
 
 	if (shared == null) {
-		eval("shared = PHP_" + EXT + "_SHARED;");
+		if (force_all_shared()) {
+			shared = true;
+		} else { 
+			eval("shared = PHP_" + EXT + "_SHARED;");
+		}
 	} else {
 		eval("PHP_" + EXT + "_SHARED = shared;");
 	}
@@ -2823,3 +2827,9 @@ function trim(s)
 {
 	return s.replace(/^\s+/, "").replace(/\s+$/, "");
 }
+
+function force_all_shared()
+{
+	return !!PHP_ALL_SHARED && "yes" == PHP_ALL_SHARED;
+}
+
