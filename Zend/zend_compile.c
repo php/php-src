@@ -6251,7 +6251,7 @@ static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_n
 }
 /* }}} */
 
-static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
+static void zend_compile_concat_list(znode *result, zend_ast *ast) /* {{{ */
 {
 	uint32_t i, j;
 	uint32_t rope_init_lineno = -1;
@@ -6378,7 +6378,7 @@ zend_bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 	return kind == ZEND_AST_ZVAL || kind == ZEND_AST_BINARY_OP
 		|| kind == ZEND_AST_GREATER || kind == ZEND_AST_GREATER_EQUAL
 		|| kind == ZEND_AST_AND || kind == ZEND_AST_OR
-		|| kind == ZEND_AST_UNARY_OP
+		|| kind == ZEND_AST_UNARY_OP || kind == ZEND_AST_CONCAT_LIST
 		|| kind == ZEND_AST_UNARY_PLUS || kind == ZEND_AST_UNARY_MINUS
 		|| kind == ZEND_AST_CONDITIONAL || kind == ZEND_AST_DIM
 		|| kind == ZEND_AST_ARRAY || kind == ZEND_AST_ARRAY_ELEM
@@ -6805,8 +6805,8 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_RESOLVE_CLASS_NAME:
 			zend_compile_resolve_class_name(result, ast);
 			return;
-		case ZEND_AST_ENCAPS_LIST:
-			zend_compile_encaps_list(result, ast);
+		case ZEND_AST_CONCAT_LIST:
+			zend_compile_concat_list(result, ast);
 			return;
 		case ZEND_AST_MAGIC_CONST:
 			zend_compile_magic_const(result, ast);

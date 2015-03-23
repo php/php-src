@@ -44,7 +44,7 @@ enum _zend_ast_kind {
 	ZEND_AST_ARG_LIST = 1 << ZEND_AST_IS_LIST_SHIFT,
 	ZEND_AST_LIST,
 	ZEND_AST_ARRAY,
-	ZEND_AST_ENCAPS_LIST,
+	ZEND_AST_CONCAT_LIST,
 	ZEND_AST_EXPR_LIST,
 	ZEND_AST_STMT_LIST,
 	ZEND_AST_IF,
@@ -267,5 +267,9 @@ static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, z
 static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
 }
-
+static zend_always_inline zend_ast *zend_ast_create_concat_list(uint32_t opcode, zend_ast *op0) {
+	zend_ast *ast = zend_ast_create_list(1, ZEND_AST_CONCAT_LIST, op0);
+	ast->attr = opcode;
+	return ast;
+}
 #endif
