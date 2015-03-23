@@ -575,6 +575,9 @@ PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 dnl Check stdint types (must be after header check)
 PHP_CHECK_STDINT_TYPES
 
+dnl Check __builtin_expect
+PHP_CHECK_BUILTIN_EXPECT
+
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
