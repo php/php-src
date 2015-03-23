@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
     with SoapFault). (Dmitry)
 
+- Postgres:
+  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
+
 19 Mar 2015 PHP 5.4.39
 
 - Core:
