@@ -20,6 +20,10 @@
 /* $Id$ */
 
 #if HAVE_EXIF
+
+#include "php_version.h"
+#define PHP_EXIF_VERSION "1.4 $Id: 8bdc0c8f27c2c9dd1f7551f1f9fe3ab57a06a4b1 $"
+
 extern zend_module_entry exif_module_entry;
 #define phpext_exif_ptr &exif_module_entry
 

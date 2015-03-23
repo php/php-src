@@ -244,7 +244,7 @@ zend_module_entry com_dotnet_module_entry = {
 	PHP_RINIT(com_dotnet),
 	PHP_RSHUTDOWN(com_dotnet),
 	PHP_MINFO(com_dotnet),
-	"0.1",
+	PHP_COM_DOTNET_VERSION,
 	PHP_MODULE_GLOBALS(com_dotnet),
 	PHP_GINIT(com_dotnet),
 	NULL,

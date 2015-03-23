@@ -667,7 +667,7 @@ zend_module_entry date_module_entry = {
 	PHP_RINIT(date),            /* request startup */
 	PHP_RSHUTDOWN(date),        /* request shutdown */
 	PHP_MINFO(date),            /* extension info */
-	PHP_VERSION,                /* extension version */
+	PHP_DATE_VERSION,                /* extension version */
 	PHP_MODULE_GLOBALS(date),   /* globals descriptor */
 	PHP_GINIT(date),            /* globals ctor */
 	NULL,                       /* globals dtor */

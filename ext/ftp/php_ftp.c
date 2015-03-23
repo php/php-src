@@ -292,7 +292,7 @@ zend_module_entry php_ftp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ftp),
-	NO_VERSION_YET,
+	PHP_FTP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

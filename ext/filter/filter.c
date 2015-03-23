@@ -137,9 +137,7 @@ static const zend_function_entry filter_functions[] = {
 /* {{{ filter_module_entry
  */
 zend_module_entry filter_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"filter",
 	filter_functions,
 	PHP_MINIT(filter),
@@ -147,7 +145,7 @@ zend_module_entry filter_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(filter),
 	PHP_MINFO(filter),
-	"0.11.0",
+	PHP_FILTER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

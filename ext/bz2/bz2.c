@@ -120,7 +120,7 @@ zend_module_entry bz2_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(bz2),
-	NO_VERSION_YET,
+	PHP_BZ2_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

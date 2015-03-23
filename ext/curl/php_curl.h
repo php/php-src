@@ -42,6 +42,9 @@
 # define PHP_CURL_API
 #endif
 
+#include "php_version.h"
+#define PHP_CURL_VERSION PHP_VERSION
+
 #include <curl/curl.h>
 #include <curl/multi.h>
 

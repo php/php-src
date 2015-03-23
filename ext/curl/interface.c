@@ -486,7 +486,7 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
-	NO_VERSION_YET,
+	PHP_CURL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -178,7 +178,7 @@ zend_module_entry dba_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(dba),
-	NO_VERSION_YET,
+	PHP_DBA_VERSION,
 	PHP_MODULE_GLOBALS(dba),
 	PHP_GINIT(dba),
 	NULL,

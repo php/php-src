@@ -24,6 +24,9 @@
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
 
+#include "php_version.h"
+#define PHP_DATE_VERSION PHP_VERSION
+
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
