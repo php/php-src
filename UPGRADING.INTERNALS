@@ -77,8 +77,8 @@ PHP 7.0 INTERNALS UPGRADE NOTES
        'u', 'x' or 'o'.
 
        The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
-       they can use the implemenations available on the system, not the PHP one. Fro snprintf the
-       the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
+       they can use the implemenations available on the system, not the PHP one. With snprintf the
+       macros ZEND_INT_FMT and ZEND_UINT_FMT should be used.
 
   h. HashTable API
 
@@ -106,6 +106,10 @@ PHP 7.0 INTERNALS UPGRADE NOTES
       -                                                   ZEND_ULONG_MAX    replaces ULONG_MAX where appropriate
       -                                                   SIZEOF_ZEND_LONG  reworked SIZEOF_ZEND_LONG representing the size of zend_long datatype
       -                                                   ZEND_SIZE_MAX     Max value of size_t
+      -                                                   Z_L               casts an integral constant to zend_long
+      -                                                   Z_U               casts an integral constant to zend_ulong
+
+      The macro ZEND_ENABLE_ZVAL_LONG64 reveals whether zval operates on 64 or 32 bit integer.
 
   k. The get_class_entry object handler is no longer available. Instead
      zend_object.ce is always used.
@@ -166,9 +170,16 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 
      Porting an extension or SAPI is usually as easy as removing all the TSRMLS_*
      ocurrences and integrating the macros mentioned above. However if tsrm_ls
-     is used explicitly, its usage can considered obsolete in most cases.
+     is used explicitly, its usage can be considered obsolete in most cases.
      Additionally, if an extension triggers its own threads, TSRMLS_CACHE shouldn't
      be passed to that threads directly.
+
+     When working with CTOR/DTOR for the extension globals, only the data passed
+     as parameters should be touched. For example, don't use code like
+     free(MYEXT_G(vars)); inside globals destructor, as it possibly can destroy
+     the data from a wrong thread. Instead use the pointer to the data delivered
+     into the destructor. So the previous example could look like
+     free(my_struct->vars); given the income was casted to (struct my_struct *).
 
   q. gc_collect_cycles() is now a function pointer, and can be replaced in the
      same manner as zend_execute_ex() if needed (for example, to include the
