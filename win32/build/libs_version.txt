@@ -8,9 +8,9 @@ libiconv-1.14
 libmcrypt-2.5.8
 libmpir-2.6.0
 libpng-1.5.18
-libpq-9.3.2
-libssh2-1.4.3
+libpq-9.4.1
+libssh2-1.5.0
 libtidy-20090406
 libxslt-1.1.27
-libxml-2.9.1
-openssl-1.0.1k
+libxml-2.9.2
+openssl-1.0.1m
