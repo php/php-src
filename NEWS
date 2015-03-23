@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
     with an Iterator). (Nikita)
 
+- Curl:
+  . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
+
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
