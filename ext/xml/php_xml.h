@@ -34,7 +34,6 @@ extern zend_module_entry xml_module_entry;
 
 #include "ext/xml/expat_compat.h"
 
-
 #ifdef XML_UNICODE
 #error "UTF-16 Unicode support not implemented!"
 #endif
@@ -133,9 +132,9 @@ PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(xml_parse_into_struct);
 
-PHPAPI char *_xml_zval_strdup(zval *);
-PHPAPI zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
-PHPAPI zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *);
+PHP_XML_API char *_xml_zval_strdup(zval *);
+PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
+PHP_XML_API zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *);
 
 #endif /* HAVE_LIBEXPAT */
 
