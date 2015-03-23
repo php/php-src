@@ -332,7 +332,7 @@ zend_module_entry xmlreader_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xmlreader),
-	"0.1", /* Replace with version number for your extension */
+	PHP_XMLREADER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

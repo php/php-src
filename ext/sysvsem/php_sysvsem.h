@@ -26,6 +26,9 @@
 extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry
 
+#include "php_version.h"
+#define PHP_SYSVSEM_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(sysvsem);
 PHP_FUNCTION(sem_get);
 PHP_FUNCTION(sem_acquire);

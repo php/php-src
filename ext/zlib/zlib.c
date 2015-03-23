@@ -1037,7 +1037,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_RINIT(zlib),
 	PHP_RSHUTDOWN(zlib),
 	PHP_MINFO(zlib),
-	"2.0",
+	PHP_ZLIB_VERSION,
 	PHP_MODULE_GLOBALS(zlib),
 	PHP_GINIT(zlib),
 	NULL,

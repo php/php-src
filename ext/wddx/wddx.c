@@ -163,7 +163,7 @@ zend_module_entry wddx_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(wddx),
-    NO_VERSION_YET,
+    PHP_WDDX_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

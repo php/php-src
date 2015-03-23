@@ -24,6 +24,9 @@
 extern zend_module_entry tidy_module_entry;
 #define phpext_tidy_ptr &tidy_module_entry
 
+#include "php_version.h"
+#define PHP_TIDY_VERSION PHP_VERSION
+
 #define TIDY_METHOD_MAP(name, func_name, arg_types) \
 	ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
 #define TIDY_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)

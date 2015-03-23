@@ -762,7 +762,7 @@ zend_module_entry pgsql_module_entry = {
 	PHP_RINIT(pgsql),
 	PHP_RSHUTDOWN(pgsql),
 	PHP_MINFO(pgsql),
-	NO_VERSION_YET,
+	PHP_PGSQL_VERSION,
 	PHP_MODULE_GLOBALS(pgsql),
 	PHP_GINIT(pgsql),
 	NULL,

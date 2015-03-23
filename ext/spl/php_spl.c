@@ -956,7 +956,7 @@ zend_module_entry spl_module_entry = {
 	PHP_RINIT(spl),
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
-	"0.2",
+	PHP_SPL_VERSION,
 	PHP_MODULE_GLOBALS(spl),
 	PHP_GINIT(spl),
 	NULL,

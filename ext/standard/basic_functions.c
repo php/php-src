@@ -3372,7 +3372,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_RINIT(basic),			/* request startup */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
-	PHP_VERSION,				/* extension version */
+	PHP_STANDARD_VERSION,		/* extension version */
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

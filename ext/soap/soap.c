@@ -460,7 +460,7 @@ zend_module_entry soap_module_entry = {
   NULL,
   PHP_MINFO(soap),
 #ifdef STANDARD_MODULE_HEADER
-  NO_VERSION_YET,
+  PHP_SOAP_VERSION,
 #endif
   STANDARD_MODULE_PROPERTIES,
 };

@@ -96,7 +96,7 @@ zend_module_entry recode_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(recode),
-	NO_VERSION_YET,
+	PHP_RECODE_VERSION,
 	PHP_MODULE_GLOBALS(recode),
 	PHP_GINIT(recode),
 	NULL,

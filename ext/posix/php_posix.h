@@ -34,6 +34,9 @@
 extern zend_module_entry posix_module_entry;
 #define posix_module_ptr &posix_module_entry
 
+#include "php_version.h"
+#define PHP_POSIX_VERSION PHP_VERSION
+
 /* POSIX.1, 3.3 */
 PHP_FUNCTION(posix_kill);
 

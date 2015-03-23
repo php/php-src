@@ -360,7 +360,7 @@ zend_module_entry sockets_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(sockets),
 	PHP_MINFO(sockets),
-	NO_VERSION_YET,
+	PHP_SOCKETS_VERSION,
 	PHP_MODULE_GLOBALS(sockets),
 	PHP_GINIT(sockets),
 	NULL,

@@ -664,7 +664,7 @@ zend_module_entry xmlwriter_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xmlwriter),
-	"0.1",
+	PHP_XMLWRITER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

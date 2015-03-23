@@ -2524,7 +2524,7 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(simplexml),
-	"0.1",
+	PHP_SIMPLEXML_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

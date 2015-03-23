@@ -265,7 +265,7 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request startup function */
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
-    NO_VERSION_YET,
+    PHP_XML_VERSION,
     PHP_MODULE_GLOBALS(xml), /* globals descriptor */
     PHP_GINIT(xml),          /* globals ctor */
     NULL,                    /* globals dtor */

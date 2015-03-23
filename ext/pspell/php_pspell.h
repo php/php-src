@@ -23,6 +23,10 @@
 #if HAVE_PSPELL
 extern zend_module_entry pspell_module_entry;
 #define pspell_module_ptr &pspell_module_entry
+
+#include "php_version.h"
+#define PHP_PSPELL_VERSION PHP_VERSION
+
 #else
 #define pspell_module_ptr NULL
 #endif

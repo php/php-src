@@ -26,6 +26,9 @@
 extern zend_module_entry sysvmsg_module_entry;
 #define phpext_sysvmsg_ptr &sysvmsg_module_entry
 
+#include "php_version.h"
+#define PHP_SYSVMSG_VERSION PHP_VERSION
+
 #ifndef __USE_GNU
 /* we want to use mtype instead of __mtype */
 #define __USE_GNU

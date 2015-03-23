@@ -29,6 +29,9 @@
 
 #define PHP_SESSION_API 20150121
 
+#include "php_version.h"
+#define PHP_SESSION_VERSION PHP_VERSION
+
 /* save handler macros */
 #define PS_NUM_APIS      9
 #define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name

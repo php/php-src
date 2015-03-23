@@ -102,7 +102,7 @@ zend_module_entry shmop_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(shmop),
-	NO_VERSION_YET,
+	PHP_SHMOP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

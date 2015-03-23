@@ -160,7 +160,7 @@ zend_module_entry readline_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(readline),
 	PHP_MINFO(readline),
-	PHP_VERSION,
+	PHP_READLINE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

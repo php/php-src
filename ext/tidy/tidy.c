@@ -38,8 +38,6 @@
 #define TIDY_CALL
 #endif
 
-#define PHP_TIDY_MODULE_VERSION	"2.0"
-
 /* {{{ ext/tidy macros
 */
 #define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
@@ -458,7 +456,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_RINIT(tidy),
 	NULL,
 	PHP_MINFO(tidy),
-	PHP_TIDY_MODULE_VERSION,
+	PHP_TIDY_VERSION,
 	PHP_MODULE_GLOBALS(tidy),
 	NULL,
 	NULL,
@@ -1077,7 +1075,7 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Tidy support", "enabled");
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_MODULE_VERSION " ($Id$)");
+	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

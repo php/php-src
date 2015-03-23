@@ -47,12 +47,8 @@ static const zend_module_dep xsl_deps[] = {
 /* {{{ xsl_module_entry
  */
 zend_module_entry xsl_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050617
 	STANDARD_MODULE_HEADER_EX, NULL,
 	xsl_deps,
-#elif ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
-#endif
 	"xsl",
 	xsl_functions,
 	PHP_MINIT(xsl),
@@ -60,9 +56,7 @@ zend_module_entry xsl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xsl),
-#if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
-#endif
+	PHP_XSL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

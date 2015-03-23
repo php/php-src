@@ -6233,7 +6233,7 @@ zend_module_entry reflection_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(reflection),
-	"$Id$",
+	PHP_REFLECTION_VERSION,
 	STANDARD_MODULE_PROPERTIES
 }; /* }}} */
 

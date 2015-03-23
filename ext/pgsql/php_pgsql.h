@@ -29,6 +29,9 @@
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
+#include "php_version.h"
+#define PHP_PGSQL_VERSION PHP_VERSION
+
 #ifdef PHP_PGSQL_PRIVATE
 #undef SOCKET_SIZE_TYPE
 #include <libpq-fe.h>

@@ -61,9 +61,7 @@ const zend_function_entry tokenizer_functions[] = {
 /* {{{ tokenizer_module_entry
  */
 zend_module_entry tokenizer_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"tokenizer",
 	tokenizer_functions,
 	PHP_MINIT(tokenizer),
@@ -71,9 +69,7 @@ zend_module_entry tokenizer_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(tokenizer),
-#if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
-#endif
+	PHP_TOKENIZER_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

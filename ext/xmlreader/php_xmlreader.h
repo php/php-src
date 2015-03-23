@@ -24,6 +24,9 @@
 extern zend_module_entry xmlreader_module_entry;
 #define phpext_xmlreader_ptr &xmlreader_module_entry
 
+#include "php_version.h"
+#define PHP_XMLREADER_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

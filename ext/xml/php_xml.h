@@ -26,6 +26,10 @@
 #ifdef HAVE_XML
 extern zend_module_entry xml_module_entry;
 #define xml_module_ptr &xml_module_entry
+
+#include "php_version.h"
+#define PHP_XML_VERSION PHP_VERSION
+
 #else
 #define xml_module_ptr NULL
 #endif

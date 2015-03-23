@@ -3015,7 +3015,7 @@ zend_module_entry session_module_entry = {
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
-	NO_VERSION_YET,
+	PHP_SESSION_VERSION,
 	PHP_MODULE_GLOBALS(ps),
 	PHP_GINIT(ps),
 	NULL,

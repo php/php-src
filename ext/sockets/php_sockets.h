@@ -35,6 +35,8 @@
 # include "windows_common.h"
 #endif
 
+#define PHP_SOCKETS_VERSION PHP_VERSION
+
 extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
 
