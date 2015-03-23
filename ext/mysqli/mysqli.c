@@ -1008,12 +1008,8 @@ static const  zend_module_dep mysqli_deps[] = {
 /* {{{ mysqli_module_entry
  */
 zend_module_entry mysqli_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	mysqli_deps,
-#elif ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
-#endif
 	"mysqli",
 	mysqli_functions,
 	PHP_MINIT(mysqli),
@@ -1021,7 +1017,7 @@ zend_module_entry mysqli_module_entry = {
 	PHP_RINIT(mysqli),
 	PHP_RSHUTDOWN(mysqli),
 	PHP_MINFO(mysqli),
-	"0.1", /* Replace with version number for your extension */
+	PHP_MYSQLI_VERSION,
 	PHP_MODULE_GLOBALS(mysqli),
 	PHP_GINIT(mysqli),
 	NULL,

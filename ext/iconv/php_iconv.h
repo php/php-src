@@ -34,6 +34,9 @@
 # define PHP_ICONV_API
 #endif
 
+#include "php_version.h"
+#define PHP_ICONV_VERSION PHP_VERSION
+
 #ifdef PHP_ATOM_INC
 #include "ext/iconv/php_have_iconv.h"
 #include "ext/iconv/php_have_libiconv.h"

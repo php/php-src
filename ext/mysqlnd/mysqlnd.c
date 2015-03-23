@@ -2053,7 +2053,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 /* {{{ mysqlnd_get_client_info */
 PHPAPI const char * mysqlnd_get_client_info()
 {
-	return MYSQLND_VERSION;
+	return PHP_MYSQLND_VERSION;
 }
 /* }}} */
 

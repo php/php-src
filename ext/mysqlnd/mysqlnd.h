@@ -22,7 +22,7 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.11-dev - 20120503 - $Id$"
+#define PHP_MYSQLND_VERSION "mysqlnd 5.0.11-dev - 20120503 - $Id$"
 #define MYSQLND_VERSION_ID 50011
 
 #define MYSQLND_PLUGIN_API_VERSION 2

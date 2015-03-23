@@ -26,6 +26,9 @@
 extern zend_module_entry gmp_module_entry;
 #define phpext_gmp_ptr &gmp_module_entry
 
+#include "php_version.h"
+#define PHP_GMP_VERSION PHP_VERSION
+
 ZEND_MODULE_STARTUP_D(gmp);
 ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);

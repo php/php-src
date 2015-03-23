@@ -24,6 +24,9 @@
 extern zend_module_entry ibase_module_entry;
 #define phpext_interbase_ptr &ibase_module_entry
 
+#include "php_version.h"
+#define PHP_INTERBASE_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(ibase);
 PHP_RINIT_FUNCTION(ibase);
 PHP_MSHUTDOWN_FUNCTION(ibase);

@@ -261,7 +261,7 @@ zend_module_entry mcrypt_module_entry = {
 	PHP_MINIT(mcrypt), PHP_MSHUTDOWN(mcrypt),
 	NULL, NULL,
 	PHP_MINFO(mcrypt),
-	NO_VERSION_YET,
+	PHP_MCRYPT_VERSION,
 	PHP_MODULE_GLOBALS(mcrypt),
 	NULL,
 	NULL,

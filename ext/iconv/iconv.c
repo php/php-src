@@ -154,7 +154,7 @@ zend_module_entry iconv_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(miconv),
-	NO_VERSION_YET,
+	PHP_ICONV_VERSION,
 	PHP_MODULE_GLOBALS(iconv),
 	PHP_GINIT(iconv),
 	NULL,

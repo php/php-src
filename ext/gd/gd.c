@@ -1056,7 +1056,7 @@ zend_module_entry gd_module_entry = {
 	NULL,
 #endif
 	PHP_MINFO(gd),
-	NO_VERSION_YET,
+	PHP_GD_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 

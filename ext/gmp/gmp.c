@@ -204,7 +204,7 @@ zend_module_entry gmp_module_entry = {
 	NULL,
 	ZEND_MODULE_DEACTIVATE_N(gmp),
 	ZEND_MODULE_INFO_N(gmp),
-	NO_VERSION_YET,
+	PHP_GMP_VERSION,
 	ZEND_MODULE_GLOBALS(gmp),
 	ZEND_GINIT(gmp),
 	NULL,

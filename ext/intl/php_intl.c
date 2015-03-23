@@ -874,9 +874,7 @@ static PHP_GINIT_FUNCTION(intl);
 
 /* {{{ intl_module_entry */
 zend_module_entry intl_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"intl",
 	intl_functions,
 	PHP_MINIT( intl ),

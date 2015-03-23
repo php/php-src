@@ -572,7 +572,7 @@ zend_module_entry mbstring_module_entry = {
 	PHP_RINIT(mbstring),
 	PHP_RSHUTDOWN(mbstring),
 	PHP_MINFO(mbstring),
-	NO_VERSION_YET,
+	PHP_MBSTRING_VERSION,
 	PHP_MODULE_GLOBALS(mbstring),
 	PHP_GINIT(mbstring),
 	PHP_GSHUTDOWN(mbstring),

@@ -814,7 +814,7 @@ zend_module_entry mhash_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(mhash),
-	NO_VERSION_YET,
+	PHP_MHASH_VERSION,
 	STANDARD_MODULE_PROPERTIES,
 };
 
@@ -1271,9 +1271,7 @@ const zend_function_entry hash_functions[] = {
 /* {{{ hash_module_entry
  */
 zend_module_entry hash_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	PHP_HASH_EXTNAME,
 	hash_functions,
 	PHP_MINIT(hash),
@@ -1281,9 +1279,7 @@ zend_module_entry hash_module_entry = {
 	NULL, /* RINIT */
 	NULL, /* RSHUTDOWN */
 	PHP_MINFO(hash),
-#if ZEND_MODULE_API_NO >= 20010901
-	PHP_HASH_EXTVER, /* Replace with version number for your extension */
-#endif
+	PHP_HASH_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

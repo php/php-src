@@ -3289,7 +3289,7 @@ zend_module_entry ldap_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(ldap),
-	NO_VERSION_YET,
+	PHP_LDAP_VERSION,
 	PHP_MODULE_GLOBALS(ldap),
 	PHP_GINIT(ldap),
 	NULL,
