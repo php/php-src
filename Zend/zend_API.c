@@ -249,6 +249,20 @@ ZEND_API void zend_wrong_paramers_count_error(int num_args, int min_num_args, in
 }
 /* }}} */
 
+ZEND_API void zend_deprecated_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space);
+	static const char * const expected_error[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+		NULL
+	};
+
+	zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+}
+/* }}} */
+
 ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	const char *space;
@@ -284,7 +298,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error) /* {
 }
 /* }}} */
 
-ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null) /* {{{ */
+ZEND_API int zend_parse_arg_class(zval *arg, int _i, zend_expected_type _expected_type, zend_class_entry **pce, int num, int check_null) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
 
@@ -520,7 +534,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				zend_fcall_info *fci = va_arg(*va, zend_fcall_info *);
 				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
-				char *is_callable_error = NULL;
+				char *is_callable_error = NULL;zend_wrong_callback_error
+				
 
 				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 					fci->size = 0;
