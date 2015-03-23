@@ -1261,6 +1261,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	if (shared == null) {
 		if (force_all_shared()) {
 			shared = true;
+			eval("PHP_" + EXT + "_SHARED = true;");
 		} else { 
 			eval("shared = PHP_" + EXT + "_SHARED;");
 		}
