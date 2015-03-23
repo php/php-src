@@ -169,6 +169,7 @@
     (Nikita)
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
     (Daniel Lowrey)
+  . Added preg_replace_callback_array function. (Wei Dai)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).
