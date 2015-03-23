@@ -252,7 +252,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 #ifdef VIRTUAL_DIR
 	virtual_filepath_ex(path, &path_copy, NULL);
 #else
-	path_copy = path;
+	path_copy = (char *)path;
 #endif
 
 	if (php_check_open_basedir(path_copy)) {
