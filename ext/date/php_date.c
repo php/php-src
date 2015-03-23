@@ -2926,7 +2926,7 @@ PHP_METHOD(DateTime, createFromImmutable)
 	php_date_obj *new_obj = NULL;
 	php_date_obj *old_obj = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &datetimeimmutable_object, date_ce_immutable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &datetimeimmutable_object, date_ce_immutable) == FAILURE) {
 		return;
 	}
 
