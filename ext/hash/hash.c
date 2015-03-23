@@ -98,7 +98,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t alg
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
-	int algo_len = strlen(algo);
+	size_t algo_len = strlen(algo);
 	char *lower = zend_str_tolower_dup(algo, algo_len);
 	zend_hash_str_add_ptr(&php_hash_hashtable, lower, algo_len, (void *) ops);
 	efree(lower);
@@ -151,7 +151,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		size_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);

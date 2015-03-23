@@ -36,7 +36,7 @@
 #define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
-typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
 

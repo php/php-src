@@ -29,6 +29,7 @@
 #include "php_xmlreader.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
+#include "ext/dom/dom_ce.h"
 #endif
 #include <libxml/xmlreader.h>
 #include <libxml/uri.h>
