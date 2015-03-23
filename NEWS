@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - OpenSSL:
    . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
 
+- Postgres:
+  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
+
 - SPL:
    . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
