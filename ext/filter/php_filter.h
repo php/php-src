@@ -38,8 +38,7 @@ extern zend_module_entry filter_module_entry;
 #include "TSRM.h"
 #endif
 
-#include "php_version.h"
-#define PHP_FILTER_VERSION "0.11.0"
+#define PHP_FILTER_VERSION PHP_VERSION
 
 PHP_MINIT_FUNCTION(filter);
 PHP_MSHUTDOWN_FUNCTION(filter);
