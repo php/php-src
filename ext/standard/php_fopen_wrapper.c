@@ -82,7 +82,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 
 	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
-		int read_bytes = sapi_read_post_block(buf, count);
+		size_t read_bytes = sapi_read_post_block(buf, count);
 
 		if (read_bytes > 0) {
 			php_stream_seek(input->body, 0, SEEK_END);

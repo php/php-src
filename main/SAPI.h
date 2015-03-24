@@ -192,7 +192,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
-SAPI_API int sapi_read_post_block(char *buffer, size_t buflen);
+SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
