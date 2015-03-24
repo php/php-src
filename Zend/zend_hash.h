@@ -456,7 +456,12 @@ static zend_always_inline void *zend_hash_add_ptr(HashTable *ht, zend_string *ke
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add(ht, key, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_add_new_ptr(HashTable *ht, zend_string *key, void *pData)
@@ -465,7 +470,12 @@ static zend_always_inline void *zend_hash_add_new_ptr(HashTable *ht, zend_string
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add_new(ht, key, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char *str, size_t len, void *pData)
@@ -474,7 +484,12 @@ static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char 
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add(ht, str, len, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const char *str, size_t len, void *pData)
@@ -483,7 +498,12 @@ static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const c
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add_new(ht, str, len, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string *key, void *pData)
@@ -492,7 +512,12 @@ static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string 
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_update(ht, key, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_str_update_ptr(HashTable *ht, const char *str, size_t len, void *pData)
@@ -501,7 +526,12 @@ static zend_always_inline void *zend_hash_str_update_ptr(HashTable *ht, const ch
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_update(ht, str, len, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_add_mem(HashTable *ht, zend_string *key, void *pData, size_t size)
@@ -554,7 +584,12 @@ static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_u
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_index_update(ht, h, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
@@ -576,7 +611,12 @@ static zend_always_inline void *zend_hash_next_index_insert_ptr(HashTable *ht, v
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_next_index_insert(ht, &tmp);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_index_update_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
@@ -606,7 +646,12 @@ static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_str
 	zval *zv;
 
 	zv = zend_hash_find(ht, key);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
@@ -614,7 +659,12 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 	zval *zv;
 
 	zv = zend_hash_str_find(ht, str, len);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
@@ -622,7 +672,12 @@ static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, ze
 	zval *zv;
 
 	zv = zend_hash_index_find(ht, h);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, size_t len)
@@ -641,7 +696,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	zval *zv;
 
 	zv = zend_hash_get_current_data_ex(ht, pos);
-	return zv ? Z_PTR_P(zv) : NULL;
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
 }
 
 #define zend_hash_get_current_data_ptr(ht) \
