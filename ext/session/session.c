@@ -767,7 +767,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
-	int tmp;
+	zend_long tmp;
 	tmp = zend_atoi(new_value->val, new_value->len);
 	if(tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
@@ -1004,7 +1004,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	const char *endptr = val + vallen;
 	zval current;
 	int has_value;
-	int namelen;
+	ptrdiff_t namelen;
 	zend_string *name;
 	php_unserialize_data_t var_hash;
 
@@ -1988,7 +1988,7 @@ static PHP_FUNCTION(session_id)
 	if (PS(id)) {
 		/* keep compatibility for "\0" characters ???
 		 * see: ext/session/tests/session_id_error3.phpt */
-		int len = strlen(PS(id)->val);
+		size_t len = strlen(PS(id)->val);
 		if (UNEXPECTED(len != PS(id)->len)) {
 			RETVAL_NEW_STR(zend_string_init(PS(id)->val, len, 0));
 		} else {
@@ -2197,7 +2197,7 @@ static PHP_FUNCTION(session_start)
 	zval *value;
 	zend_ulong num_idx;
 	zend_string *str_idx;
-	int read_and_close = 0;
+	zend_long read_and_close = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
 		RETURN_FALSE;

@@ -595,7 +595,7 @@ static void sapi_update_response_code(int ncode)
  * since zend_llist_del_element only remove one matched item once,
  * we should remove them by ourself
  */
-static void sapi_remove_header(zend_llist *l, char *name, uint len) {
+static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;
 	zend_llist_element *next;
 	zend_llist_element *current=l->head;
@@ -623,7 +623,7 @@ static void sapi_remove_header(zend_llist *l, char *name, uint len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -666,7 +666,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	char *header_line;
-	uint header_line_len;
+	size_t header_line_len;
 	int http_response_code;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
