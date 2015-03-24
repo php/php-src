@@ -861,6 +861,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_SR:
 		case ZEND_ASSIGN_SR:
 			return (binary_op_type) shift_right_function;
+		case ZEND_FAST_CONCAT:
 		case ZEND_CONCAT:
 		case ZEND_ASSIGN_CONCAT:
 			return (binary_op_type) concat_function;

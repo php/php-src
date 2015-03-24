@@ -141,6 +141,10 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 					break;
 			}
 		} else {
+			if (opline->opcode == ZEND_CONCAT ||
+			    opline->opcode == ZEND_FAST_CONCAT) {
+				convert_to_string(val);
+			}
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 		}
 	}
@@ -158,9 +162,12 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 		op_array->cache_size += sizeof(void*);
 		return;
-	} else if (opline->opcode == ZEND_ADD_VAR) {
+	} else if (opline->opcode == ZEND_ROPE_INIT ||
+			opline->opcode == ZEND_ROPE_ADD ||
+			opline->opcode == ZEND_ROPE_END ||
+			opline->opcode == ZEND_CONCAT ||
+			opline->opcode == ZEND_FAST_CONCAT) {
 		convert_to_string(val);
-		opline->opcode = ZEND_ADD_STRING;
 	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 	if (Z_TYPE_P(val) == IS_STRING) {

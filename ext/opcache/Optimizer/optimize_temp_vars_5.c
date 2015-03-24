@@ -79,12 +79,36 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 
 			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
-			if (!valid_T[currT]) {
-				GET_AVAILABLE_T();
-				map_T[currT] = i;
+			if (opline->opcode == ZEND_ROPE_END) {
+				int num = (((opline->extended_value + 1) * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+				int var;
+
+				var = max;
+				while (var >= 0 && !taken_T[var]) {
+					var--;
+				}
+				max = MAX(max, var + num);
+				var = var + 1;
+				map_T[currT] = var;
 				valid_T[currT] = 1;
+				taken_T[var] = 1;
+				ZEND_OP1(opline).var = NUM_VAR(var + offset);
+				while (num > 1) {
+					num--;
+					map_T[currT + num] = var + num;
+					taken_T[var + num] = 1;
+				}
+			} else if (opline->opcode == ZEND_ROPE_ADD) {
+				ZEND_ASSERT(valid_T[currT]);
+				ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
+			} else {
+				if (!valid_T[currT]) {
+					GET_AVAILABLE_T();
+					map_T[currT] = i;
+					valid_T[currT] = 1;
+				}
+				ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
 			}
-			ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
 		/* Skip OP_DATA */
@@ -130,7 +154,21 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 
 		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
 			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
-			if (valid_T[currT]) {
+			if (opline->opcode == ZEND_ROPE_INIT) {
+				ZEND_ASSERT(valid_T[currT]);
+				ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
+				if (start_of_T[currT] == opline) {
+					uint32_t num = ((opline->extended_value * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+					taken_T[map_T[currT]] = 0;
+					while (num > 1) {
+						num--;
+						taken_T[map_T[currT]+num] = 0;
+					}
+				}
+			} else if (opline->opcode == ZEND_ROPE_ADD) {
+				ZEND_ASSERT(valid_T[currT]);
+				ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
+			} else if (valid_T[currT]) {
 				if (start_of_T[currT] == opline) {
 					taken_T[map_T[currT]] = 0;
 				}

@@ -223,6 +223,19 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		}
+		case ZEND_AST_CONCAT_LIST:
+		{
+			uint32_t i;
+			zend_ast_list *list = zend_ast_get_list(ast);
+
+			ZVAL_EMPTY_STRING(result);
+			for (i = 0; i < list->children; ++i) {
+				zend_ast_evaluate(&op1, list->child[i], scope);
+				concat_function(result, result, &op1);
+				zval_dtor(&op1);
+			}
+			break;
+		}
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
 		{
@@ -650,18 +663,27 @@ static void zend_ast_export_list(smart_str *str, zend_ast_list *list, int separa
 	}
 }
 
-static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_list *list, int indent)
+static void zend_ast_export_concat_list(smart_str *str, char quote, zend_ast_list *list, int indent)
 {
 	uint32_t i = 0;
 	zend_ast *ast;
 
+	if (list->attr != ZEND_CONCAT) {
+		smart_str_appendc(str, quote);
+	}
 	while (i < list->children) {
 		ast = list->child[i];
 		if (ast->kind == ZEND_AST_ZVAL) {
 			zval *zv = zend_ast_get_zval(ast);
 
 			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+			if (list->attr == ZEND_CONCAT) {
+				smart_str_appendc(str, '\'');
+			}
 			zend_ast_export_qstr(str, quote, Z_STR_P(zv));
+			if (list->attr == ZEND_CONCAT) {
+				smart_str_appendc(str, '\'');
+			}
 		} else if (ast->kind == ZEND_AST_VAR &&
 		           ast->child[0]->kind == ZEND_AST_ZVAL &&
 		           (i + 1 == list->children ||
@@ -671,11 +693,21 @@ static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_lis
 		                    zend_ast_get_zval(list->child[i + 1]))))) {
 			zend_ast_export_ex(str, ast, 0, indent);
 		} else {
-			smart_str_appendc(str, '{');
+			if (list->attr != ZEND_CONCAT) {
+				smart_str_appendc(str, '{');
+			}
 			zend_ast_export_ex(str, ast, 0, indent);
-			smart_str_appendc(str, '}');
+			if (list->attr != ZEND_CONCAT) {
+				smart_str_appendc(str, '}');
+			}
 		}
-		i++;
+		if (++i < list->children && list->attr == ZEND_CONCAT) {
+			smart_str_appends(str, " . ");
+		}
+	}
+
+	if (list->attr != ZEND_CONCAT) {
+		smart_str_appendc(str, quote);
 	}
 }
 
@@ -1000,10 +1032,8 @@ simple_list:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);
 			smart_str_appendc(str, ']');
 			break;
-		case ZEND_AST_ENCAPS_LIST:
-			smart_str_appendc(str, '"');
-			zend_ast_export_encaps_list(str, '"', (zend_ast_list*)ast, indent);
-			smart_str_appendc(str, '"');
+		case ZEND_AST_CONCAT_LIST:
+			zend_ast_export_concat_list(str, '"', (zend_ast_list*)ast, indent);
 			break;
 		case ZEND_AST_STMT_LIST:
 		case ZEND_AST_TRAIT_ADAPTATIONS:
@@ -1107,13 +1137,13 @@ simple_list:
 		case ZEND_AST_SILENCE:
 			PREFIX_OP("@", 240, 241);
 		case ZEND_AST_SHELL_EXEC:
-			smart_str_appendc(str, '`');
-			if (ast->child[0]->kind == ZEND_AST_ENCAPS_LIST) {
-				zend_ast_export_encaps_list(str, '`', (zend_ast_list*)ast->child[0], indent);
+			if (ast->child[0]->kind == ZEND_AST_CONCAT_LIST) {
+				zend_ast_export_concat_list(str, '`', (zend_ast_list*)ast->child[0], indent);
 			} else {
+				smart_str_appendc(str, '`');
 				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				smart_str_appendc(str, '`');
 			}
-			smart_str_appendc(str, '`');
 			break;
 		case ZEND_AST_CLONE:
 			PREFIX_OP("clone ", 270, 271);
@@ -1239,7 +1269,6 @@ simple_list:
 				case ZEND_MOD:                 BINARY_OP(" % ",   210, 210, 211);
 				case ZEND_SL:                  BINARY_OP(" << ",  190, 190, 191);
 				case ZEND_SR:                  BINARY_OP(" >> ",  190, 190, 191);
-				case ZEND_CONCAT:              BINARY_OP(" . ",   200, 200, 201);
 				case ZEND_BW_OR:               BINARY_OP(" | ",   140, 140, 141);
 				case ZEND_BW_AND:              BINARY_OP(" & ",   160, 160, 161);
 				case ZEND_BW_XOR:              BINARY_OP(" ^ ",   150, 150, 151);
