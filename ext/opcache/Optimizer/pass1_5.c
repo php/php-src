@@ -55,6 +55,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_SL:
 		case ZEND_SR:
 		case ZEND_CONCAT:
+		case ZEND_FAST_CONCAT:
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
@@ -160,6 +161,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
+#if 0
 		case ZEND_ADD_STRING:
 		case ZEND_ADD_CHAR:
 			{
@@ -230,6 +232,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 			}
 			break;
+#endif
 
 		case ZEND_FETCH_CONSTANT:
 			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&

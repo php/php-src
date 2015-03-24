@@ -85,9 +85,10 @@ END_EXTERN_C()
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
-#define ZEND_ADD_CHAR                         54
-#define ZEND_ADD_STRING                       55
-#define ZEND_ADD_VAR                          56
+#define ZEND_FAST_CONCAT                      53
+#define ZEND_ROPE_INIT                        54
+#define ZEND_ROPE_ADD                         55
+#define ZEND_ROPE_END                         56
 #define ZEND_BEGIN_SILENCE                    57
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
