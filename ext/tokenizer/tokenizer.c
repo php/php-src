@@ -223,7 +223,93 @@ static zend_always_inline void t_stringify_previous(zval *tokens, int index, int
 
 static void t_parse(zval *tokens)
 {
-	/* TODO */
+	int index = -1,
+		in_class = 0,
+		in_trait_use = 0,
+		in_const_list = 0,
+		length = zend_hash_num_elements(Z_ARRVAL_P(tokens)),
+		token_type;
+
+	while(++index < length) {
+		switch (token_type = t_get_type(tokens, index)) {
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING:
+				continue;
+			case T_CLASS: case T_TRAIT: case T_INTERFACE:
+				in_class++;
+				continue;
+			case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
+				t_stringify_next(tokens, index, 1);
+				continue;
+		}
+
+		if(in_class) {
+			switch (token_type) {
+				case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
+					in_class++;
+					break;
+				case '{':
+					in_class++;
+					if(in_trait_use) while(in_trait_use && (++index < length)) { /* use ... { ... } */
+						switch (token_type = t_get_type(tokens, index)) {
+							case T_PAAMAYIM_NEKUDOTAYIM:
+								t_stringify_next(tokens, index, 1);
+								break;
+							case T_AS:
+								if(-1 == t_look(0, tokens, index, 1)) { /* T_STRING<as> T_AS ...; */
+									t_stringify(tokens, index);
+								} else { /* T_STRING<?> T_AS visibility? T_STRING<?>; */
+									t_stringify_previous(tokens, index, 1);
+									t_stringify_next(tokens, index, 2);
+								}
+								break;
+							case '}':
+								in_trait_use = 0;
+								index--;
+								break;
+						}
+					}
+					break;
+				case '}':
+					if(1 == --in_class) in_class--;
+					break;
+				case T_FUNCTION:
+					t_stringify_next(tokens, index, 1);
+					break;
+				case T_USE:
+					in_trait_use++;
+					break;
+				case T_CONST:
+					in_const_list++;
+					while(in_const_list && (++index < length)) { /* const ...; */
+						switch (token_type = t_get_type(tokens, index)) {
+							case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
+								if(1 < in_const_list) t_stringify_next(tokens, index, 1);
+								break;
+							case '(': case '[': case '{': case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
+								in_const_list++;
+								break;
+							case ')': case ']': case '}':
+								in_const_list--;
+								break;
+							case '=':
+								if(1 == in_const_list) t_stringify_previous(tokens, index, 1);
+								break;
+							case ';':
+								if(1 == in_const_list) in_const_list--;
+								break;
+						}
+					}
+					break;
+				case '(':
+					if(in_trait_use) in_trait_use = 0;
+					break;
+				case ';':
+					if(in_trait_use) in_trait_use = 0;
+					if(in_const_list) in_const_list = 0;
+					break;
+			}
+		}
+	}
 }
 
 static void tokenize(zval *return_value)
