@@ -267,8 +267,6 @@ static zend_always_inline zend_string *_zval_get_string(zval *op) {
 #define zval_get_double(op) _zval_get_double((op))
 #define zval_get_string(op) _zval_get_string((op))
 
-ZEND_API int ZEND_FASTCALL add_char_to_string(zval *result, const zval *op1, const zval *op2);
-ZEND_API int ZEND_FASTCALL add_string_to_string(zval *result, const zval *op1, const zval *op2);
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 

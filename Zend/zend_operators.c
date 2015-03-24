@@ -1497,33 +1497,6 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-/* must support result==op1 */
-ZEND_API int ZEND_FASTCALL add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
-{
-	size_t length = Z_STRLEN_P(op1) + 1;
-	zend_string *buf = zend_string_extend(Z_STR_P(op1), length, 0);
-
-	buf->val[length - 1] = (char) Z_LVAL_P(op2);
-	buf->val[length] = 0;
-	ZVAL_NEW_STR(result, buf);
-	return SUCCESS;
-}
-/* }}} */
-
-/* must support result==op1 */
-ZEND_API int ZEND_FASTCALL add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
-{
-	size_t op1_len = Z_STRLEN_P(op1);
-	size_t length = op1_len + Z_STRLEN_P(op2);
-	zend_string *buf = zend_string_extend(Z_STR_P(op1), length, 0);
-
-	memcpy(buf->val + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-	buf->val[length] = 0;
-	ZVAL_NEW_STR(result, buf);
-	return SUCCESS;
-}
-/* }}} */
-
 ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy, op2_copy;
