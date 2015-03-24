@@ -3595,8 +3595,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		} else {
-//???			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
-//???			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
 			Z_VAR_FLAGS_P(EX_VAR(opline->result.var)) = 0;
 		}
 	}
@@ -5209,7 +5207,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 			return_value = EX_VAR(opline->result.var);
 		}
 
-		new_op_array->scope = EG(scope); /* ??? */
+		new_op_array->scope = EG(scope);
 
 		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE,
 			(zend_function*)new_op_array, 0, EX(called_scope), Z_OBJ(EX(This)), NULL);
@@ -5393,9 +5391,6 @@ ZEND_VM_C_LABEL(num_index_dim):
 		if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
 		} else {
-//???		if (OP2_TYPE == IS_CONST) {
-//???			zval_copy_ctor(offset);
-//???		}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 		}
 	} else if (OP1_TYPE != IS_UNUSED && Z_ISREF_P(container)) {
