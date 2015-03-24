@@ -97,6 +97,16 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
+typedef struct {
+	zval *tokens;
+	int	index,
+		length,
+		current,
+		in_class,
+		in_trait_use,
+		in_const_list;
+} t_stream;
+
 /* This function will be soon generated based on zend_language_parser.y
  */
 static zend_bool t_is_semi_reserved(int token_type)
@@ -167,149 +177,163 @@ static zend_bool t_is_semi_reserved(int token_type)
 	return 0;
 }
 
-static int t_get_type(zval *tokens, int index)
+static zend_always_inline t_stream *t_init(zval *tokens)
 {
-	int type;
-	zval *token = zend_hash_index_find(Z_ARRVAL_P(tokens), index);
-
-	if (Z_TYPE_P(token) == IS_ARRAY) {
-		type = zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
-	} else if (Z_TYPE_P(token) == IS_STRING) {
-		type = Z_STRVAL_P(token)[0];
-	} else {
-		ZEND_ASSERT(0);
-	}
-
-	return type;
+	t_stream *ts = (t_stream *)malloc (sizeof (t_stream));
+	ts->index = ts->current = -1;
+	ts->in_class = ts->in_trait_use = ts->in_const_list = 0;
+	ts->tokens = tokens;
+	ts->length = zend_hash_num_elements(Z_ARRVAL_P(tokens));
+	return ts;
 }
 
-static int t_look(zend_bool ahead, zval *tokens, int index, int attempts)
+static int t_get_type(t_stream *ts, int index)
 {
-	int token_type,
-		length = zend_hash_num_elements(Z_ARRVAL_P(tokens));
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
+	switch (Z_TYPE_P(token)) {
+		case IS_ARRAY:
+			return zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
+		case IS_STRING:
+			return Z_STRVAL_P(token)[0];
+		default:
+			ZEND_ASSERT(0);
+	}
+}
 
-	while (attempts && ((ahead ? ++index : --index) < length)) {
-		switch (token_type = t_get_type(tokens, index)) {
+static zend_always_inline zend_bool t_next(t_stream *ts)
+{
+	return (++ts->index < ts->length) ? ts->current = t_get_type(ts, ts->index) : 0;
+}
+
+static zend_always_inline zend_bool t_previous(t_stream *ts)
+{
+	return (--ts->index >= 0) ? ts->current = t_get_type(ts, ts->index) : 0;
+}
+
+static int t_look(t_stream *ts, zend_bool ahead, int delta)
+{
+	int	t_type,
+		index = ts->index;
+
+	while (delta && ((ahead ? ++index : --index) < ts->length)) {
+		switch (t_type = t_get_type(ts, index)) {
 			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
 				break;
 			case T_STRING:
 				return index;
 			default:
-				if (t_is_semi_reserved(token_type)) return index;
-				else attempts--;
+				if (t_is_semi_reserved(t_type)) return index;
+				else delta--;
 		}
 	}
-
 	return -1;
 }
 
-static zend_always_inline void t_stringify(zval *tokens, int index)
+static zend_always_inline void t_stringify(t_stream *ts, int index)
 {
-	zval *token = zend_hash_index_find(Z_ARRVAL_P(tokens), index);
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
 
 	if (Z_TYPE_P(token) == IS_ARRAY)
 		ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token), 0), T_STRING);
 }
 
-static zend_always_inline void t_stringify_next(zval *tokens, int index, int attempts)
+#define t_stringify_current(ts) t_stringify(ts, ts->index)
+
+static zend_always_inline void t_stringify_next(t_stream *ts, int delta)
 {
-	if (-1 != (index = t_look(1, tokens, index, attempts))) t_stringify(tokens, index);
+	if (-1 != (delta = t_look(ts, 1, delta))) t_stringify(ts, delta);
 }
 
-static zend_always_inline void t_stringify_previous(zval *tokens, int index, int attempts)
+static zend_always_inline void t_stringify_previous(t_stream *ts, int delta)
 {
-	if (-1 != (index = t_look(0, tokens, index, attempts))) t_stringify(tokens, index);
+	if (-1 != (delta = t_look(ts, 0, delta))) t_stringify(ts, delta);
 }
 
 static void t_parse(zval *tokens)
 {
-	int index = -1,
-		in_class = 0,
-		in_trait_use = 0,
-		in_const_list = 0,
-		length = zend_hash_num_elements(Z_ARRVAL_P(tokens)),
-		token_type;
+	t_stream *ts = t_init(tokens);
 
-	while (++index < length) {
-		switch (token_type = t_get_type(tokens, index)) {
+	while (t_next(ts)) {
+		switch (ts->current) {
 			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING:
 				continue;
 			case T_CLASS: case T_TRAIT: case T_INTERFACE:
-				in_class++;
+				ts->in_class++;
 				continue;
 			case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
-				t_stringify_next(tokens, index, 1);
+				t_stringify_next(ts, 1);
 				continue;
 		}
 
-		if (in_class) {
-			switch (token_type) {
+		if (ts->in_class) {
+			switch (ts->current) {
 				case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
-					in_class++;
+					ts->in_class++;
 					break;
 				case '{':
-					in_class++;
-					if (in_trait_use) while (in_trait_use && (++index < length)) { /* use ... { ... } */
-						switch (token_type = t_get_type(tokens, index)) {
-							case T_PAAMAYIM_NEKUDOTAYIM:
-								t_stringify_next(tokens, index, 1);
+					ts->in_class++;
+					if (ts->in_trait_use) while (ts->in_trait_use && t_next(ts)) {
+						switch (ts->current) { /* use ... { ... } */
+							case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
+								t_stringify_next(ts, 1);
 								break;
 							case T_AS:
-								if (-1 == t_look(0, tokens, index, 1)) { /* T_STRING<as> T_AS ...; */
-									t_stringify(tokens, index);
+								if (-1 == t_look(ts, 0, 1)) { /* T_STRING<as> T_AS ...; */
+									t_stringify_current(ts);
 								} else { /* T_STRING<?> T_AS visibility? T_STRING<?>; */
-									t_stringify_previous(tokens, index, 1);
-									t_stringify_next(tokens, index, 2);
+									t_stringify_previous(ts, 1);
+									t_stringify_next(ts, 2);
 								}
 								break;
 							case '}':
-								in_trait_use = 0;
-								index--;
+								ts->in_trait_use = 0;
+								t_previous(ts);
 								break;
 						}
 					}
 					break;
 				case '}':
-					if (1 == --in_class) in_class--;
+					if (1 == --ts->in_class) ts->in_class--;
 					break;
 				case T_FUNCTION:
-					t_stringify_next(tokens, index, 1);
+					if(2 == ts->in_class) t_stringify_next(ts, 1);
 					break;
 				case T_USE:
-					in_trait_use++;
+					ts->in_trait_use++;
 					break;
 				case T_CONST:
-					in_const_list++;
-					while (in_const_list && (++index < length)) { /* const ...; */
-						switch (token_type = t_get_type(tokens, index)) {
+					ts->in_const_list++;
+					while (ts->in_const_list && t_next(ts)) { /* const ...; */
+						switch (ts->current) {
 							case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
-								if (1 < in_const_list) t_stringify_next(tokens, index, 1);
+								t_stringify_next(ts, 1);
 								break;
-							case '(': case '[': case '{': case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
-								in_const_list++;
+							case '(': case '[':
+								ts->in_const_list++;
 								break;
-							case ')': case ']': case '}':
-								in_const_list--;
+							case ')': case ']':
+								ts->in_const_list--;
 								break;
 							case '=':
-								if (1 == in_const_list) t_stringify_previous(tokens, index, 1);
+								if (1 == ts->in_const_list) t_stringify_previous(ts, 1);
 								break;
 							case ';':
-								if (1 == in_const_list) in_const_list--;
+								if (1 == ts->in_const_list) ts->in_const_list--;
 								break;
 						}
 					}
 					break;
 				case '(':
-					if (in_trait_use) in_trait_use = 0;
+					if (ts->in_trait_use) ts->in_trait_use = 0;
 					break;
 				case ';':
-					if (in_trait_use) in_trait_use = 0;
-					if (in_const_list) in_const_list = 0;
+					if (ts->in_trait_use) ts->in_trait_use = 0;
+					if (ts->in_const_list) ts->in_const_list = 0;
 					break;
 			}
 		}
 	}
+	free(ts);
 }
 
 static void tokenize(zval *return_value)
@@ -381,6 +405,8 @@ static void tokenize(zval *return_value)
 		}
 
 		token_line = CG(zend_lineno);
+
+		t_parse(return_value);
 	}
 }
 
@@ -410,8 +436,6 @@ PHP_FUNCTION(token_get_all)
 
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&source_zval);
-
-	t_parse(return_value);
 }
 /* }}} */
 
