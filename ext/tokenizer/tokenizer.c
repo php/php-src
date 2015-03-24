@@ -175,9 +175,9 @@ static int t_get_type(zval *tokens, int index)
 	if(Z_TYPE_P(token) == IS_ARRAY) {
 		type = zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
 	} else if(Z_TYPE_P(token) == IS_STRING) {
-		zend_string *tmp = zval_get_string(token);
-		type = (char)(* tmp->val);
-		zend_string_release(tmp);
+		type = Z_STRVAL_P(token)[0];
+	} else {
+		ZEND_ASSERT(0);
 	}
 
 	return type;
