@@ -468,8 +468,13 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 {
 	spl_filesystem_object *intern;
 	zend_bool use_include_path = 0;
-	zval *arg1, *arg2;
+	zval *arg1, *arg2, *arg3, *arg4;
 	zend_error_handling error_handling;
+
+	char    *open_mode = NULL;
+	int     open_mode_len = 0;
+	zval    *zcontext = NULL;
+	zval    **construct_params[4];
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
@@ -514,43 +519,52 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 
 		return_value->value.obj = spl_filesystem_object_new_ex(ce, &intern TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_OBJECT;
-	
+
 		spl_filesystem_object_get_file_name(source TSRMLS_CC);
 
-		if (ce->constructor->common.scope != spl_ce_SplFileObject) {
-			MAKE_STD_ZVAL(arg1);
-			MAKE_STD_ZVAL(arg2);
-			ZVAL_STRINGL(arg1, source->file_name, source->file_name_len, 1);
+		if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr!", 
+				&open_mode, &open_mode_len,
+				&use_include_path, &zcontext) == FAILURE) {
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
+			intern->u.file.open_mode = NULL;
+			intern->file_name = NULL;
+			zval_dtor(return_value);
+			Z_TYPE_P(return_value) = IS_NULL;
+			return NULL;
+		}
+
+		MAKE_STD_ZVAL(arg1);
+		ZVAL_STRINGL(arg1, source->file_name, source->file_name_len, 1);
+		MAKE_STD_ZVAL(arg2);
+		if (open_mode != NULL) {
+			ZVAL_STRINGL(arg2, open_mode, open_mode_len, 1);
+		}
+		else {
 			ZVAL_STRINGL(arg2, "r", 1, 1);
-			zend_call_method_with_2_params(&return_value, ce, &ce->constructor, "__construct", NULL, arg1, arg2);
-			zval_ptr_dtor(&arg1);
-			zval_ptr_dtor(&arg2);
-		} else {
-			intern->file_name = source->file_name;
-			intern->file_name_len = source->file_name_len;
-			intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
-			intern->_path = estrndup(intern->_path, intern->_path_len);
-		
-			intern->u.file.open_mode = "r";
-			intern->u.file.open_mode_len = 1;
-		
-			if (ht && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sbr", 
-					&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
-					&use_include_path, &intern->u.file.zcontext) == FAILURE) {
-				zend_restore_error_handling(&error_handling TSRMLS_CC);
-				intern->u.file.open_mode = NULL;
-				intern->file_name = NULL;
-				zval_dtor(return_value);
-				Z_TYPE_P(return_value) = IS_NULL;
-				return NULL;
-			}
-		
-			if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == FAILURE) {
-				zend_restore_error_handling(&error_handling TSRMLS_CC);
-				zval_dtor(return_value);
-				Z_TYPE_P(return_value) = IS_NULL;
-				return NULL;
-			}
+		}
+
+		MAKE_STD_ZVAL(arg3);
+		ZVAL_BOOL(arg3, use_include_path);
+
+		if (zcontext != NULL) {
+			arg4 = zcontext;
+		}
+		else {
+			MAKE_STD_ZVAL(arg4);
+			ZVAL_NULL(arg4);
+		}
+
+		construct_params[0] = &arg1;
+		construct_params[1] = &arg2;
+		construct_params[2] = &arg3;
+		construct_params[3] = &arg4;
+
+		zend_call_method_with_params(&return_value, ce, &ce->constructor, "__construct", NULL, 4, construct_params);
+		zval_ptr_dtor(&arg1);
+		zval_ptr_dtor(&arg2);
+		zval_ptr_dtor(&arg3);
+		if (zcontext != NULL) {
+			zval_ptr_dtor(&arg4);
 		}
 		break;
 	case SPL_FS_DIR:	

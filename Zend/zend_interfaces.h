@@ -49,6 +49,9 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2 TSRMLS_CC)
 
+#define zend_call_method_with_params(obj, obj_ce, fn_proxy, function_name, retval, num_params, params) \
+	zend_call_method_params(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, num_params, params TSRMLS_CC)
+
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key TSRMLS_DC);
