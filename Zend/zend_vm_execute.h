@@ -560,10 +560,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 
 	fbc->internal_function.handler(call, ret);
 
+#if ZEND_DEBUG
 	ZEND_ASSERT(
 		!call->func ||
 		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 		zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
 
 	EG(current_execute_data) = call->prev_execute_data;
 	zend_vm_stack_free_args(call);
@@ -688,10 +690,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 
 		fbc->internal_function.handler(call, ret);
 
+#if ZEND_DEBUG
 		ZEND_ASSERT(
 			!call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
 
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
@@ -825,10 +829,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 			zend_execute_internal(call, ret);
 		}
 
+#if ZEND_DEBUG
 		ZEND_ASSERT(
 			!call->func ||
 			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
 
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
