@@ -6970,15 +6970,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CONST != IS_UNUSED)
-		zval *retval_ptr;
+		zval *retval_ref, *retval_ptr;
 
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = EX_CONSTANT(opline->op1);
+		retval_ref = retval_ptr = EX_CONSTANT(opline->op1);
 
 		if (IS_CONST == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-			retval_ptr = EX_VAR(opline->result.var);
+			retval_ref = retval_ptr = EX_VAR(opline->result.var);
+		} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
+			ZVAL_DEREF(retval_ptr);
 		}
 
 		if (UNEXPECTED(!ret_info->class_name
@@ -6988,9 +6990,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 
 			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
-				SEPARATE_ZVAL(retval_ptr);
+				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
+					ZVAL_UNREF(retval_ref);
+				} else {
+					SEPARATE_ZVAL(retval_ref);
+				}
+				retval_ptr = retval_ref;
 			} else {
-				ZVAL_DEREF(retval_ptr);
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
@@ -11936,15 +11942,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_TMP_VAR != IS_UNUSED)
-		zval *retval_ptr;
+		zval *retval_ref, *retval_ptr;
 		zend_free_op free_op1;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+		retval_ref = retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 
 		if (IS_TMP_VAR == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-			retval_ptr = EX_VAR(opline->result.var);
+			retval_ref = retval_ptr = EX_VAR(opline->result.var);
+		} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
+			ZVAL_DEREF(retval_ptr);
 		}
 
 		if (UNEXPECTED(!ret_info->class_name
@@ -11954,9 +11962,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 
 			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
-				SEPARATE_ZVAL(retval_ptr);
+				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
+					ZVAL_UNREF(retval_ref);
+				} else {
+					SEPARATE_ZVAL(retval_ref);
+				}
+				retval_ptr = retval_ref;
 			} else {
-				ZVAL_DEREF(retval_ptr);
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
@@ -17302,15 +17314,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_VAR != IS_UNUSED)
-		zval *retval_ptr;
+		zval *retval_ref, *retval_ptr;
 		zend_free_op free_op1;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+		retval_ref = retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
 		if (IS_VAR == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-			retval_ptr = EX_VAR(opline->result.var);
+			retval_ref = retval_ptr = EX_VAR(opline->result.var);
+		} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
+			ZVAL_DEREF(retval_ptr);
 		}
 
 		if (UNEXPECTED(!ret_info->class_name
@@ -17320,9 +17334,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 
 			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
-				SEPARATE_ZVAL(retval_ptr);
+				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
+					ZVAL_UNREF(retval_ref);
+				} else {
+					SEPARATE_ZVAL(retval_ref);
+				}
+				retval_ptr = retval_ref;
 			} else {
-				ZVAL_DEREF(retval_ptr);
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
@@ -22925,15 +22943,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_UNUSED != IS_UNUSED)
-		zval *retval_ptr;
+		zval *retval_ref, *retval_ptr;
 
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = NULL;
+		retval_ref = retval_ptr = NULL;
 
 		if (IS_UNUSED == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-			retval_ptr = EX_VAR(opline->result.var);
+			retval_ref = retval_ptr = EX_VAR(opline->result.var);
+		} else if (IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV) {
+			ZVAL_DEREF(retval_ptr);
 		}
 
 		if (UNEXPECTED(!ret_info->class_name
@@ -22943,9 +22963,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 
 			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
-				SEPARATE_ZVAL(retval_ptr);
+				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
+					ZVAL_UNREF(retval_ref);
+				} else {
+					SEPARATE_ZVAL(retval_ref);
+				}
+				retval_ptr = retval_ref;
 			} else {
-				ZVAL_DEREF(retval_ptr);
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
@@ -31872,15 +31896,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CV != IS_UNUSED)
-		zval *retval_ptr;
+		zval *retval_ref, *retval_ptr;
 
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
 
-		retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+		retval_ref = retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 
 		if (IS_CV == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
-			retval_ptr = EX_VAR(opline->result.var);
+			retval_ref = retval_ptr = EX_VAR(opline->result.var);
+		} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
+			ZVAL_DEREF(retval_ptr);
 		}
 
 		if (UNEXPECTED(!ret_info->class_name
@@ -31890,9 +31916,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 
 			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
 				/* Does not return by reference */
-				SEPARATE_ZVAL(retval_ptr);
+				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
+					ZVAL_UNREF(retval_ref);
+				} else {
+					SEPARATE_ZVAL(retval_ref);
+				}
+				retval_ptr = retval_ref;
 			} else {
-				ZVAL_DEREF(retval_ptr);
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
