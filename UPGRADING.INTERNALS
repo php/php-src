@@ -107,7 +107,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
       -                                                   SIZEOF_ZEND_LONG  reworked SIZEOF_ZEND_LONG representing the size of zend_long datatype
       -                                                   ZEND_SIZE_MAX     Max value of size_t
       -                                                   Z_L               casts an integral constant to zend_long
-      -                                                   Z_U               casts an integral constant to zend_ulong
+      -                                                   Z_UL              casts an integral constant to zend_ulong
 
       The macro ZEND_ENABLE_ZVAL_LONG64 reveals whether zval operates on 64 or 32 bit integer.
 
