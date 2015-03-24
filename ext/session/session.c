@@ -767,8 +767,8 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
-	zend_long tmp;
-	tmp = zend_atoi(new_value->val, new_value->len);
+	int tmp;
+	tmp = zend_atoi(new_value->val, (int)new_value->len);
 	if(tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
 		return FAILURE;
