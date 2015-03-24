@@ -111,7 +111,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	size_t key_len;
 	const char *p;
 	int i;
-	int n;
+	size_t n;
 
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
@@ -222,7 +222,7 @@ static void ps_files_open(ps_files *data, const char *key)
 
 static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
-	zend_long n;
+	zend_long n = 0;
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
@@ -233,7 +233,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	}
 
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (val->len < (int)data->st_size) {
+	if (val->len < data->st_size) {
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
@@ -241,7 +241,24 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	n = pwrite(data->fd, val->val, val->len, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
+#ifdef PHP_WIN32
+	{
+		unsigned int to_write = val->len > UINT_MAX ? UINT_MAX : (unsigned int)val->len;
+		char *buf = val->val;
+		int wrote;
+
+		do {
+			wrote = _write(data->fd, buf, to_write);
+
+			n += wrote;
+			buf = wrote > -1 ? buf + wrote : 0;
+			to_write = wrote > -1 ? (val->len - n > UINT_MAX ? UINT_MAX : (unsigned int)(val->len - n)): 0;
+
+		} while(wrote > 0);
+	}
+#else
 	n = write(data->fd, val->val, val->len);
+#endif
 #endif
 
 	if (n != val->len) {
@@ -256,7 +273,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	return SUCCESS;
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
+static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
@@ -443,7 +460,7 @@ PS_CLOSE_FUNC(files)
  */
 PS_READ_FUNC(files)
 {
-	zend_long n;
+	zend_long n = 0;
 	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
@@ -469,10 +486,28 @@ PS_READ_FUNC(files)
 	n = pread(data->fd, (*val)->val, (*val)->len, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
+#ifdef PHP_WIN32
+	{
+		unsigned int to_read = (*val)->len > UINT_MAX ? UINT_MAX : (unsigned int)(*val)->len;
+		char *buf = (*val)->val;
+		int read_in;
+
+		do {
+			read_in = _read(data->fd, buf, to_read);
+
+			n += read_in;
+			buf = read_in > -1 ? buf + read_in : 0;
+			to_read = read_in > -1 ? ((*val)->len - n > UINT_MAX ? UINT_MAX : (unsigned int)((*val)->len - n)): 0;
+
+		} while(read_in > 0);
+
+	}
+#else
 	n = read(data->fd, (*val)->val, (*val)->len);
 #endif
+#endif
 
-	if (n != sbuf.st_size) {
+	if (n != (zend_long)sbuf.st_size) {
 		if (n == -1) {
 			php_error_docref(NULL, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
 		} else {
