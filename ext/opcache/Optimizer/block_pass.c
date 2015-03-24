@@ -1026,39 +1026,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			COPY_NODE(opline->op1, src->op1);
 			MAKE_NOP(src);
 		} else if (opline->opcode == ZEND_CONCAT || opline->opcode == ZEND_FAST_CONCAT) {
-#if 0
-if (opline->opcode == ZEND_CONCAT) {
-fprintf(stderr, "CONCAT ");
-} else {
-fprintf(stderr, "FAST_CONCAT ");
-}
-if (opline->op1_type == IS_CONST) {
-fprintf(stderr, "CONST");
-} else if (opline->op1_type == IS_TMP_VAR) {
-fprintf(stderr, "TMP");
-if (VAR_SOURCE(opline->op1)) {
-fprintf(stderr, "(%s)", zend_get_opcode_name(VAR_SOURCE(opline->op1)->opcode));
-}
-} else if (opline->op1_type == IS_VAR) {
-fprintf(stderr, "VAR");
-} else if (opline->op1_type == IS_CV) {
-fprintf(stderr, "CV");
-}
-fprintf(stderr, ", ");
-if (opline->op2_type == IS_CONST) {
-fprintf(stderr, "CONST");
-} else if (opline->op2_type == IS_TMP_VAR) {
-fprintf(stderr, "TMP");
-if (VAR_SOURCE(opline->op2)) {
-fprintf(stderr, "(%s)", zend_get_opcode_name(VAR_SOURCE(opline->op2)->opcode));
-}
-} else if (opline->op2_type == IS_VAR) {
-fprintf(stderr, "VAR");
-} else if (opline->op2_type == IS_CV) {
-fprintf(stderr, "CV");
-}
-fprintf(stderr, "\n");
-#endif
 			if ((ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 				VAR_SOURCE(opline->op1) &&
 				VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
