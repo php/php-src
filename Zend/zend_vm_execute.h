@@ -4924,6 +4924,42 @@ try_fetch_list:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if (IS_CONST == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CONST == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8272,6 +8308,42 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	}
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	if (IS_CONST == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CV == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -9785,6 +9857,42 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	}
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (IS_CONST == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
+	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -11250,41 +11358,62 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 	}
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_CHAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *str = EX_VAR(opline->result.var);
 
-	SAVE_OPLINE();
+	zend_string **rope;
+	zval *var;
 
-	if (IS_TMP_VAR == IS_UNUSED) {
-		/* Initialize for erealloc in add_char_to_string */
-		ZVAL_EMPTY_STRING(str);
+	/* op1 and result are the same */
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if (IS_CONST == IS_CONST) {
+		var = EX_CONSTANT(opline->op2);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = EX_CONSTANT(opline->op2);
+		rope[opline->extended_value] = zval_get_string(var);
+
+		CHECK_EXCEPTION();
 	}
-
-	add_char_to_string(str, str, EX_CONSTANT(opline->op2));
-
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_STRING_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *str = EX_VAR(opline->result.var);
 
-	SAVE_OPLINE();
+	zend_string **rope;
+	zval *var, *ret;
+	uint32_t i;
+	size_t len = 0;
+	char *target;
 
-	if (IS_TMP_VAR == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if (IS_CONST == IS_CONST) {
+		var = EX_CONSTANT(opline->op2);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = EX_CONSTANT(opline->op2);
+		rope[opline->extended_value] = zval_get_string(var);
+
+		CHECK_EXCEPTION();
 	}
+	for (i = 0; i <= opline->extended_value; i++) {
+		len += rope[i]->len;
+	}
+	ret = EX_VAR(opline->result.var);
+	ZVAL_STR(ret, zend_string_alloc(len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i <= opline->extended_value; i++) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	*target = '\0';
 
-	add_string_to_string(str, str, EX_CONSTANT(opline->op2));
-
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -12418,43 +12547,62 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 	}
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval *str = EX_VAR(opline->result.var);
+	zend_string **rope;
 	zval *var;
-	zval var_copy;
-	int use_copy = 0;
 
-	SAVE_OPLINE();
-	var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	/* op1 and result are the same */
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if (IS_CV == IS_CONST) {
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[opline->extended_value] = zval_get_string(var);
 
-	if (IS_TMP_VAR == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+		CHECK_EXCEPTION();
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
 
-	if (Z_TYPE_P(var) != IS_STRING) {
-		use_copy = zend_make_printable_zval(var, &var_copy);
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
 
-		if (use_copy) {
-			var = &var_copy;
-		}
+	zend_string **rope;
+	zval *var, *ret;
+	uint32_t i;
+	size_t len = 0;
+	char *target;
+
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if (IS_CV == IS_CONST) {
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[opline->extended_value] = zval_get_string(var);
+
+		CHECK_EXCEPTION();
 	}
-	add_string_to_string(str, str, var);
-
-	if (use_copy) {
-		zend_string_release(Z_STR_P(var));
+	for (i = 0; i <= opline->extended_value; i++) {
+		len += rope[i]->len;
 	}
-	/* original comment, possibly problematic:
-	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
-	 * (Zeev):  I don't think it's problematic, we only use variables
-	 * which aren't affected by FREE_OP(Ts, )'s anyway, unless they're
-	 * string offsets or overloaded objects
-	 */
+	ret = EX_VAR(opline->result.var);
+	ZVAL_STR(ret, zend_string_alloc(len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i <= opline->extended_value; i++) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	*target = '\0';
 
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -12867,44 +13015,62 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 	}
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_VAR_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_ADD_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *str = EX_VAR(opline->result.var);
+	zend_string **rope;
 	zval *var;
-	zval var_copy;
-	int use_copy = 0;
 
-	SAVE_OPLINE();
-	var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
-	if (IS_TMP_VAR == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+	/* op1 and result are the same */
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[opline->extended_value] = zval_get_string(var);
+		zval_ptr_dtor_nogc(free_op2);
+		CHECK_EXCEPTION();
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
 
-	if (Z_TYPE_P(var) != IS_STRING) {
-		use_copy = zend_make_printable_zval(var, &var_copy);
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zend_string **rope;
+	zval *var, *ret;
+	uint32_t i;
+	size_t len = 0;
+	char *target;
 
-		if (use_copy) {
-			var = &var_copy;
-		}
+	rope = (zend_string**)EX_VAR(opline->op1.var);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[opline->extended_value] = zval_get_string(var);
+		zval_ptr_dtor_nogc(free_op2);
+		CHECK_EXCEPTION();
 	}
-	add_string_to_string(str, str, var);
-
-	if (use_copy) {
-		zend_string_release(Z_STR_P(var));
+	for (i = 0; i <= opline->extended_value; i++) {
+		len += rope[i]->len;
 	}
-	/* original comment, possibly problematic:
-	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
-	 * (Zeev):  I don't think it's problematic, we only use variables
-	 * which aren't affected by FREE_OP(Ts, )'s anyway, unless they're
-	 * string offsets or overloaded objects
-	 */
-	zval_ptr_dtor_nogc(free_op2);
+	ret = EX_VAR(opline->result.var);
+	ZVAL_STR(ret, zend_string_alloc(len, 0));
+	target = Z_STRVAL_P(ret);
+	for (i = 0; i <= opline->extended_value; i++) {
+		memcpy(target, rope[i]->val, rope[i]->len);
+		target += rope[i]->len;
+		zend_string_release(rope[i]);
+	}
+	*target = '\0';
 
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -21682,41 +21848,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_CHAR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *str = EX_VAR(opline->result.var);
 
-	SAVE_OPLINE();
+	zend_string **rope;
+	zval *var;
 
-	if (IS_UNUSED == IS_UNUSED) {
-		/* Initialize for erealloc in add_char_to_string */
-		ZVAL_EMPTY_STRING(str);
+	/* Compiler allocates the necessary number of zval slots to keep the rope */
+	rope = (zend_string**)EX_VAR(opline->result.var);
+	if (IS_CONST == IS_CONST) {
+		var = EX_CONSTANT(opline->op2);
+		rope[0] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = EX_CONSTANT(opline->op2);
+		rope[0] = zval_get_string(var);
+
+		CHECK_EXCEPTION();
 	}
-
-	add_char_to_string(str, str, EX_CONSTANT(opline->op2));
-
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_STRING_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *str = EX_VAR(opline->result.var);
-
-	SAVE_OPLINE();
-
-	if (IS_UNUSED == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
-	}
-
-	add_string_to_string(str, str, EX_CONSTANT(opline->op2));
-
-	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
-	/*CHECK_EXCEPTION();*/
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -23989,43 +24139,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval *str = EX_VAR(opline->result.var);
+	zend_string **rope;
 	zval *var;
-	zval var_copy;
-	int use_copy = 0;
 
-	SAVE_OPLINE();
-	var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	/* Compiler allocates the necessary number of zval slots to keep the rope */
+	rope = (zend_string**)EX_VAR(opline->result.var);
+	if (IS_CV == IS_CONST) {
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[0] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+		rope[0] = zval_get_string(var);
 
-	if (IS_UNUSED == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+		CHECK_EXCEPTION();
 	}
-
-	if (Z_TYPE_P(var) != IS_STRING) {
-		use_copy = zend_make_printable_zval(var, &var_copy);
-
-		if (use_copy) {
-			var = &var_copy;
-		}
-	}
-	add_string_to_string(str, str, var);
-
-	if (use_copy) {
-		zend_string_release(Z_STR_P(var));
-	}
-	/* original comment, possibly problematic:
-	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
-	 * (Zeev):  I don't think it's problematic, we only use variables
-	 * which aren't affected by FREE_OP(Ts, )'s anyway, unless they're
-	 * string offsets or overloaded objects
-	 */
-
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -25419,44 +25551,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *str = EX_VAR(opline->result.var);
+	zend_string **rope;
 	zval *var;
-	zval var_copy;
-	int use_copy = 0;
 
-	SAVE_OPLINE();
-	var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-
-	if (IS_UNUSED == IS_UNUSED) {
-		/* Initialize for erealloc in add_string_to_string */
-		ZVAL_EMPTY_STRING(str);
+	/* Compiler allocates the necessary number of zval slots to keep the rope */
+	rope = (zend_string**)EX_VAR(opline->result.var);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[0] = zend_string_copy(Z_STR_P(var));
+	} else {
+		SAVE_OPLINE();
+		var = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		rope[0] = zval_get_string(var);
+		zval_ptr_dtor_nogc(free_op2);
+		CHECK_EXCEPTION();
 	}
-
-	if (Z_TYPE_P(var) != IS_STRING) {
-		use_copy = zend_make_printable_zval(var, &var_copy);
-
-		if (use_copy) {
-			var = &var_copy;
-		}
-	}
-	add_string_to_string(str, str, var);
-
-	if (use_copy) {
-		zend_string_release(Z_STR_P(var));
-	}
-	/* original comment, possibly problematic:
-	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
-	 * (Zeev):  I don't think it's problematic, we only use variables
-	 * which aren't affected by FREE_OP(Ts, )'s anyway, unless they're
-	 * string offsets or overloaded objects
-	 */
-	zval_ptr_dtor_nogc(free_op2);
-
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -29370,6 +29483,42 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(Z
 	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
+	if (IS_CV == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CONST == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -34152,6 +34301,42 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	if (IS_CV == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CV == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -36534,6 +36719,42 @@ assign_dim_clean:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if (IS_CV == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+
+	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -38509,6 +38730,42 @@ try_fetch_list:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CONST == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CONST != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+	zval_ptr_dtor_nogc(free_op1);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -40430,6 +40687,42 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if (IS_CV == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if (IS_CV != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+	zval_ptr_dtor_nogc(free_op1);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -41380,6 +41673,42 @@ fetch_obj_is_no_object:
 
 	zval_ptr_dtor_nogc(free_op2);
 	zval_ptr_dtor_nogc(free_op1);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+	zend_string *op1_str, *op2_str, *str;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op1_str = Z_STR_P(op1);
+	} else {
+		op1_str = zval_get_string(op1);
+	}
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		op2_str = Z_STR_P(op2);
+	} else {
+		op2_str = zval_get_string(op2);
+	}
+	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+	memcpy(str->val, op1_str->val, op1_str->len);
+	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op1_str);
+	}
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+		zend_string_release(op2_str);
+	}
+	zval_ptr_dtor_nogc(free_op1);
+	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -43049,15 +43378,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_BOOL_SPEC_CV_HANDLER,
   	ZEND_BOOL_SPEC_CV_HANDLER,
   	ZEND_BOOL_SPEC_CV_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CONST_CONST_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CONST_CV_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CV_CONST_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -43073,23 +43418,29 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_UNUSED_CONST_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_UNUSED_TMPVAR_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_UNUSED_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_INIT_SPEC_UNUSED_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_ADD_CHAR_SPEC_TMP_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_ADD_SPEC_TMP_CONST_HANDLER,
+  	ZEND_ROPE_ADD_SPEC_TMP_TMPVAR_HANDLER,
+  	ZEND_ROPE_ADD_SPEC_TMP_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_ADD_SPEC_TMP_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_ADD_CHAR_SPEC_UNUSED_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -43104,46 +43455,24 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_ADD_STRING_SPEC_TMP_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMP_CONST_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
+  	ZEND_ROPE_END_SPEC_TMP_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_ADD_STRING_SPEC_UNUSED_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_ADD_VAR_SPEC_TMP_TMPVAR_HANDLER,
-  	ZEND_ADD_VAR_SPEC_TMP_TMPVAR_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER,
-  	ZEND_ADD_VAR_SPEC_UNUSED_TMPVAR_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

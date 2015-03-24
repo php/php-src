@@ -6231,55 +6231,129 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
+static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
+	zend_op *opline = get_next_op(CG(active_op_array));
+
+	if (num == 0) {
+		result->op_type = IS_TMP_VAR;
+		result->u.op.var = -1;
+		opline->opcode = ZEND_ROPE_INIT;
+		SET_UNUSED(opline->op1);
+	} else {
+		opline->opcode = ZEND_ROPE_ADD;
+		SET_NODE(opline->op1, result);
+	}
+	SET_NODE(opline->op2, elem_node);
+	SET_NODE(opline->result, result);
+	opline->extended_value = num;
+	return opline;
+}
+/* }}} */
+
+static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
+{
+	uint32_t i, j;
+	uint32_t rope_init_lineno = -1;
+	zend_op *opline = NULL, *init_opline;
+	znode elem_node, last_const_node;
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
 
 	ZEND_ASSERT(list->children > 0);
 
-	result->op_type = IS_TMP_VAR;
-	result->u.op.var = get_temporary_variable(CG(active_op_array));
+	j = 0;
+	last_const_node.op_type = IS_UNUSED;
+	for (i = 0; i < list->children; i++) {
+		zend_compile_expr(&elem_node, list->child[i]);
 
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *elem_ast = list->child[i];
-		znode elem_node;
-		zend_op *opline;
+		if (elem_node.op_type == IS_CONST) {
+			convert_to_string(&elem_node.u.constant);
 
-		zend_compile_expr(&elem_node, elem_ast);
-
-		if (elem_ast->kind == ZEND_AST_ZVAL) {
-			zval *zv = &elem_node.u.constant;
-			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-
-			if (Z_STRLEN_P(zv) > 1) {
-				opline = get_next_op(CG(active_op_array));
-				opline->opcode = ZEND_ADD_STRING;
-			} else if (Z_STRLEN_P(zv) == 1) {
-				char ch = *Z_STRVAL_P(zv);
-				zend_string_release(Z_STR_P(zv));
-				ZVAL_LONG(zv, ch);
-
-				opline = get_next_op(CG(active_op_array));
-				opline->opcode = ZEND_ADD_CHAR;
+			if (Z_STRLEN(elem_node.u.constant) == 0) {
+				zval_ptr_dtor(&elem_node.u.constant);
+			} else if (last_const_node.op_type == IS_CONST) {
+				concat_function(&last_const_node.u.constant, &last_const_node.u.constant, &elem_node.u.constant);
+				zval_ptr_dtor(&elem_node.u.constant);
 			} else {
-				/* String can be empty after a variable at the end of a heredoc */
-				zend_string_release(Z_STR_P(zv));
-				continue;
+				last_const_node.op_type = IS_CONST;
+				ZVAL_COPY_VALUE(&last_const_node.u.constant, &elem_node.u.constant);
 			}
+			continue;
 		} else {
-			opline = get_next_op(CG(active_op_array));
-			opline->opcode = ZEND_ADD_VAR;
-			ZEND_ASSERT(elem_node.op_type != IS_CONST);
+			if (j == 0) {
+				rope_init_lineno = get_next_op_number(CG(active_op_array));
+			}
+			if (last_const_node.op_type == IS_CONST) {
+				zend_compile_rope_add(result, j++, &last_const_node);
+				last_const_node.op_type = IS_UNUSED;
+			}
+			opline = zend_compile_rope_add(result, j++, &elem_node);
 		}
+	}
 
-		if (i == 0) {
-			SET_UNUSED(opline->op1);
+	if (j == 0) {
+		result->op_type = IS_CONST;
+		if (last_const_node.op_type == IS_CONST) {
+			ZVAL_COPY_VALUE(&result->u.constant, &last_const_node.u.constant);
 		} else {
-			SET_NODE(opline->op1, result);
+			ZVAL_EMPTY_STRING(&result->u.constant);
+			/* empty string */
 		}
-		SET_NODE(opline->op2, &elem_node);
-		SET_NODE(opline->result, result);
+		return;
+	} else if (last_const_node.op_type == IS_CONST) {
+		opline = zend_compile_rope_add(result, j++, &last_const_node);
+	}
+	init_opline = CG(active_op_array)->opcodes + rope_init_lineno;
+	if (j == 1) {
+		if (opline->op2_type == IS_CONST) {
+			GET_NODE(result, opline->op2);
+			MAKE_NOP(opline);
+		} else {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_STRING;
+			opline->op1_type = opline->op2_type;
+			opline->op1 = opline->op2;
+			opline->result_type = IS_TMP_VAR;
+			opline->result.var = get_temporary_variable(CG(active_op_array));
+			SET_UNUSED(opline->op2);
+			GET_NODE(result, opline->result);
+		}
+	} else if (j == 2) {
+		opline->opcode = ZEND_FAST_CONCAT;
+		opline->extended_value = 0;
+		opline->op1_type = init_opline->op2_type;
+		opline->op1 = init_opline->op2;
+		opline->result_type = IS_TMP_VAR;
+		opline->result.var = get_temporary_variable(CG(active_op_array));
+		MAKE_NOP(init_opline);
+		GET_NODE(result, opline->result);
+	} else {
+		uint32_t var;
+
+		init_opline->extended_value = j;
+		opline->opcode = ZEND_ROPE_END;
+		opline->result.var = get_temporary_variable(CG(active_op_array));
+		var = opline->op1.var = get_temporary_variable(CG(active_op_array));
+		GET_NODE(result, opline->result);
+
+		/* Allocates the necessary number of zval slots to keep the rope */
+		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+		while (i > 1) {
+			get_temporary_variable(CG(active_op_array));
+			i--;			
+		}
+		/* Update all the previous opcodes to use the same variable */
+		while (opline != init_opline) {
+			opline--;
+			if (opline->opcode == ZEND_ROPE_ADD &&
+			    opline->result.var == -1) {
+				opline->op1.var = var;
+				opline->result.var = var;
+			} else if (opline->opcode == ZEND_ROPE_INIT &&
+			           opline->result.var == -1) {
+				opline->result.var = var;
+			}
+		}
 	}
 }
 /* }}} */
