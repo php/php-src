@@ -1039,17 +1039,23 @@ SPL_METHOD(SplHeap, rewind)
 SPL_METHOD(SplHeap, current)
 {
 	spl_heap_object *intern  = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zval            *element = (zval *)intern->heap->elements[0];
-	
+	zval            *element;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (!intern->heap->count || !element) {
+	if (!intern->heap->count) {
 		RETURN_NULL();
-	} else {
-		RETURN_ZVAL(element, 1, 0);
 	}
+
+	element = (zval *)intern->heap->elements[0];
+
+	if (!element) {
+		RETURN_NULL();
+	}
+
+	RETURN_ZVAL(element, 1, 0);
 }
 /* }}} */
 
