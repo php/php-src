@@ -324,7 +324,14 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	return hash;
+	/* Hash value can't be zero, so we always set the high bit */
+#if SIZEOF_ZEND_LONG == 8
+	return hash | Z_UL(0x8000000000000000);
+#elif SIZEOF_ZEND_LONG == 4
+	return hash | Z_UL(0x80000000);
+#else
+# error "Unknown SIZEOF_ZEND_LONG"
+#endif
 }
 
 static zend_always_inline void zend_interned_empty_string_init(zend_string **s)
