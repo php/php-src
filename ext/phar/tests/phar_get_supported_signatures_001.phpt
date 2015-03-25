@@ -17,10 +17,14 @@ var_dump(Phar::getSupportedSignatures());
 ===DONE===
 ?>
 --EXPECT--
-array(2) {
+array(4) {
   [0]=>
   string(3) "MD5"
   [1]=>
   string(5) "SHA-1"
+  [2]=>
+  string(7) "SHA-256"
+  [3]=>
+  string(7) "SHA-512"
 }
 ===DONE===
