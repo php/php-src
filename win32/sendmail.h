@@ -5,7 +5,7 @@
 #endif
 
 #define HOST_NAME_LEN	256
-#define MAX_APPNAME_LENGHT 100
+#define MAX_APPNAME_LENGTH 100
 #define MAIL_BUFFER_SIZE		(1024*4)	/* 4k buffer */
 /* Return values */
 #define MIN_ERROR_INDEX					0 /* Always 0 like SUCCESS */

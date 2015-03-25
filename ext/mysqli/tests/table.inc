@@ -12,6 +12,11 @@ if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
 	exit(1);
 }
 
+if (!mysqli_query($link, 'SET SESSION sql_mode=\'\'')) {
+	printf("Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	exit(1);
+}
+
 if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=' . $engine)) {
 	printf("Failed to create test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	exit(1);

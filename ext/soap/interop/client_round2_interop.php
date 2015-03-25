@@ -373,7 +373,7 @@ class Interop_Client
                 }
                 $soap =& $endpoint_info['client'];
 
-                # XXX how do we determine a failure on retreiving/parsing wsdl?
+                # XXX how do we determine a failure on retrieving/parsing wsdl?
                 if ($soap->wsdl->fault) {
                     $fault = $soap->wsdl->fault;
                     $soap_test->setResult(0,'WSDL',

@@ -24,6 +24,7 @@
 #include "php.h"
 
 #include <stddef.h>
+#include <errno.h>
 
 #ifdef PHP_WIN32
 # include "win32/inet.h"
@@ -243,7 +244,12 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #else
 	if (!inet_aton(host, &in)) {
 		/* XXX NOT THREAD SAFE (is safe under win32) */
-		host_info = gethostbyname(host);
+		if(strlen(host) > MAXFQDNLEN) {
+			host_info = NULL;
+			errno = E2BIG;
+		} else {
+			host_info = gethostbyname(host);
+		}
 		if (host_info == NULL) {
 			if (error_string) {
 				spprintf(error_string, 0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
@@ -989,6 +995,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		buf = estrdup(errstr);
 	} else {
 		strncpy(buf, errstr, bufsize);
+		buf[bufsize?(bufsize-1):0] = 0;
 	}
 	return buf;
 #else
@@ -1013,6 +1020,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		buf = estrdup(sysbuf);
 	} else {
 		strncpy(buf, sysbuf, bufsize);
+		buf[bufsize?(bufsize-1):0] = 0;
 	}
 
 	if (free_it) {

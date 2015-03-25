@@ -18,8 +18,10 @@ $tests =array(
 	array('$2x$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e', "\xff\xff\xa3"),
 	array('$2y$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e', "\xff\xff\xa3"),
 	array('$2a$05$/OK.fbVrR/bpIqNJ5ianF.nqd1wy.pTMdcvrRWxyiGL2eMz.2a85.', "\xff\xff\xa3"),
+	array('$2b$05$/OK.fbVrR/bpIqNJ5ianF.CE5elHaaO4EbggVDjb8P19RukzXSM3e', "\xff\xff\xa3"),
 	array('$2y$05$/OK.fbVrR/bpIqNJ5ianF.Sa7shbm4.OzKpvFnX1pQLmQW96oUlCq', "\xa3"),
 	array('$2a$05$/OK.fbVrR/bpIqNJ5ianF.Sa7shbm4.OzKpvFnX1pQLmQW96oUlCq', "\xa3"),
+	array('$2b$05$/OK.fbVrR/bpIqNJ5ianF.Sa7shbm4.OzKpvFnX1pQLmQW96oUlCq', "\xa3"),
 	array('$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi', "1\xa3345"),
 	array('$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi', "\xff\xa3345"),
 	array('$2x$05$/OK.fbVrR/bpIqNJ5ianF.o./n25XVfn6oAPaUvHe.Csk4zRfsYPi', "\xff\xa334\xff\xff\xff\xa3345"),
@@ -36,14 +38,35 @@ $tests =array(
 	array('$2a$05$/OK.fbVrR/bpIqNJ5ianF.R9xrDjiycxMbQE2bp.vgqlYpW5wx2yy', "\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55\xaa\x55"),
 	array('$2a$05$/OK.fbVrR/bpIqNJ5ianF.9tQZzcJfm3uj2NvJ/n5xkhpqLrMpWCe', "\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff\x55\xaa\xff"),
 	array('$2a$05$CCCCCCCCCCCCCCCCCCCCC.7uG0VCzI2bS7j6ymqJi9CdcdxiRTWNy', ''),
-
 );
+
+$tests2 = array(
+	array('$2a$03$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('$2a$32$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('$2c$05$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('$2z$05$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('$2`$05$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('$2{$05$CCCCCCCCCCCCCCCCCCCCC.', '*0'),
+	array('*0', '*1'),
+);
+
 $i=0;
 foreach($tests as $test) {
-  if(crypt($test[1], $test[0]) == $test[0]) {
+  $result = crypt($test[1], $test[0]);
+  if($result === $test[0]) {
     echo "$i. OK\n";
   } else {
-    echo "$i. Not OK: $test[0] ".crypt($test[1], $test[0])."\n";
+    echo "$i. Not OK: $test[0] $result\n";
+  }
+  $i++;
+}
+
+foreach($tests2 as $test) {
+  $result = crypt('', $test[0]);
+  if($result === $test[1]) {
+    echo "$i. OK\n";
+  } else {
+    echo "$i. Not OK: $test[0] $result\n";
   }
   $i++;
 }
@@ -76,3 +99,12 @@ foreach($tests as $test) {
 23. OK
 24. OK
 25. OK
+26. OK
+27. OK
+28. OK
+29. OK
+30. OK
+31. OK
+32. OK
+33. OK
+34. OK

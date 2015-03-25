@@ -518,7 +518,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 						conn->current_result = NULL;
 					} else {
 						stmt->result = NULL;
-						memset(stmt, 0, sizeof(MYSQLND_STMT));
+						memset(stmt, 0, sizeof(*stmt));
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {
@@ -1182,7 +1182,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		  No need to FREE_ALLOCA as we can reuse the
 		  'lengths' and 'fields' arrays. For lengths its absolutely safe.
 		  'fields' is reused because the ownership of the strings has been
-		  transfered above. 
+		  transferred above.
 		*/
 	}
 	/* Overflow ? */

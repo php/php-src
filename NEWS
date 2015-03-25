@@ -1,9 +1,183 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.4.32
+?? ??? 2015 PHP 5.4.40
+
+- SOAP:
+  . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
+    with SoapFault). (Dmitry)
+
+- Postgres:
+  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
+
+19 Mar 2015 PHP 5.4.39
+
+- Core:
+  . Fixed bug #68976 (Use After Free Vulnerability in unserialize())
+    (CVE-2015-0231). (Stas)
+  . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
+    configuration options). (Anatol Belski)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+
+- Ereg:
+  . Fixed bug #69248 (heap overflow vulnerability in regcomp.c) (CVE-2015-2305).
+    (Stas)
+
+- SOAP:
+  . Fixed bug #69085 (SoapClient's __call() type confusion through
+    unserialize()). (Dmitry)
+
+- ZIP:
+  . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
+    boundary) (CVE-2015-2331). (Stas)
+
+19 Feb 2015 PHP 5.4.38
+
+- Core:
+  . Removed support for multi-line headers, as the are deprecated by RFC 7230.
+    (Stas)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
+    buffer overflow). (Stas)
+  . Fixed bug #67827 (broken detection of system crypt sha256/sha512 support).
+    (ncopa at alpinelinux dot org)  
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (CVE-2015-0273) (Stas)
+  
+- Enchant: 
+  . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
+
+- SOAP:
+  . Fixed bug #67427 (SoapServer cannot handle large messages)
+    (brandt at docoloc dot de)
+
+22 Jan 2015 PHP 5.4.37
+- Core:
+  . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
+    (CVE-2015-0231) (Stefan Esser)
+
+- CGI:
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
+    (Stas)
+
+- EXIF:
+  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232) 
+    (Stas)
+
+- Fileinfo:
+  . Removed readelf.c and related code from libmagic sources
+    (Remi, Anatol)
+  . Fixed bug #68735 (fileinfo out-of-bounds memory access).
+    (Anatol)
+
+- OpenSSL:
+  . Fixed bug #55618 (use case-insensitive cert name matching).
+    (Daniel Lowrey)
+
+18 Dec 2014 PHP 5.4.36
+
+- Core:
+  . Upgraded crypt_blowfish to version 1.3. (Leigh)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
+  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
+    (CVE-2014-8142) (Stefan Esser)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+13 Nov 2014 PHP 5.4.35
+
+- Core:
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
+
+- Fileinfo:
+  . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
+    (CVE-2014-3710) (Remi)
+
+- GMP:
+ . Fixed bug #63595 (GMP memory management conflicts with other libraries
+   using GMP). (Remi)
+
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+
+16 Oct 2014, PHP 5.4.34
+
+- Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
+- Core:
+  . Fixed bug #67985 (Incorrect last used array index copied to new array after
+    unset). (Tjerk)
+  . Fixed bug #68044 (Integer overflow in unserialize() (32-bits only)). 
+    (CVE-2014-3669) (Stas)
+
+- cURL:
+  . Fixed bug #68089 (NULL byte injection - cURL lib). (Stas)
+
+- EXIF:
+  . Fixed bug #68113 (Heap corruption in exif_thumbnail()). (CVE-2014-3670)
+    (Stas)
+
+- OpenSSL:
+  . Reverted fixes for bug #41631, due to regressions. (Stas) 
+
+- XMLRPC:
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function). 
+    (CVE-2014-3668) (Stas)
+
+18 Sep 2014, PHP 5.4.33
+
+- Core:
+  . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
+  . Fixed bug #65463 (SIGSEGV during zend_shutdown()). (Keyur Govande)
+  . Fixed bug #66036 (Crash on SIGTERM in apache process). (Keyur Govande)
+
+- OpenSSL:
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
+    (Daniel Lowrey)
+
+- Date:
+  . Fixed bug #66091 (memory leaks in DateTime constructor). (Tjerk)
+
+- FPM:
+  . Fixed #67606 (FPM with mod_fastcgi/apache2.4 is broken). (David Zuelke)
+
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
+
+- Wddx:
+  . Fixed bug #67873 (Segfaults in php_wddx_serialize_var). (Anatol, Remi)
+
+- Zlib:
+  . Fixed bug #67724 (chained zlib filters silently fail with large amounts of 
+    data). (Mike)
+  . Fixed bug #67865 (internal corruption phar error). (Mike)
+
+21 Aug 2014, PHP 5.4.32
 
 - COM:
-  . Fixed missing type checks in com_event_sink (Yussuf Khalil, Stas).
+  . Fixed missing type checks in com_event_sink. (Yussuf Khalil, Stas)
+  . Fixed bug #41577 (DOTNET is successful once per server run).
+    (Aidas Kasparas)
+
+- Fileinfo:
+  . Fixed bug #67705 (extensive backtracking in rule regular expression).
+    (CVE-2014-3538) (Remi)
+  . Fixed bug #67716 (Segfault in cdf.c). (CVE-2014-3587) (Remi)
+
+- GD:
+  . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
+    (CVE-2014-2497). (Remi)
+  . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
+    (CVE-2014-5120) (Ryan Mauger)
+
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6 (George Wang)
+
+- Network:
+  . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
 
 - Milter:
   . Fixed bug #67715 (php-milter does not build and crashes randomly). (Mike)
@@ -18,11 +192,11 @@ PHP                                                                        NEWS
     with control-c). (Dmitry Saprykin, Johannes)
 
 - Sessions:
-  . Fixed missing type checks in php_session_create_id (Yussuf Khalil, Stas).
+  . Fixed missing type checks in php_session_create_id. (Yussuf Khalil, Stas).
 
 - SPL:
   . Fixed bug #67539 (ArrayIterator use-after-free due to object change during
-    sorting). (research at insighti dot org, Laruence)
+    sorting). (CVE-2014-4698) (research at insighti dot org, Laruence)
   . Fixed bug #67538 (SPL Iterators use-after-free). (CVE-2014-4670) (Laruence)
 
 - Core:
@@ -31,6 +205,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #60616 (odbc_fetch_into returns junk data at end of multi-byte
     char fields). (Keyur)
+
+- MySQLi:
+  . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
 24 Jul 2014, PHP 5.4.31
 

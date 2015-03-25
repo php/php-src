@@ -4556,14 +4556,14 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			return FAILURE;
 		}
 
-		match = strcmp(cnmatch, buf) == 0;
+		match = strcasecmp(cnmatch, buf) == 0;
 		if (!match && strlen(buf) > 3 && buf[0] == '*' && buf[1] == '.') {
 			/* Try wildcard */
 
 			if (strchr(buf+2, '.')) {
 				char *tmp = strstr(cnmatch, buf+1);
 
-				match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
+				match = tmp && strcasecmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
 			}
 		}
 

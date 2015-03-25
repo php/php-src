@@ -260,7 +260,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		goto out;
 	}
 
-	num = n; /* make sure to process initilized vars only */
+	num = n; /* make sure to process initialized vars only */
 	
 	/* initialize converter */
 	if (info->num_from_encodings <= 0) {

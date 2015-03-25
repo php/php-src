@@ -198,7 +198,8 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	IUnknown *unk = NULL;
 
 	php_com_initialize(TSRMLS_C);
-	if (COMG(dotnet_runtime_stuff) == NULL) {
+	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
+	if (stuff == NULL) {
 		hr = dotnet_init(&where TSRMLS_CC);
 		if (FAILED(hr)) {
 			char buf[1024];
@@ -210,9 +211,35 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			ZVAL_NULL(object);
 			return;
 		}
-	}
+		stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
 
-	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
+	} else if (stuff->dotnet_domain == NULL) {
+		where = "ICorRuntimeHost_GetDefaultDomain";
+		hr = ICorRuntimeHost_GetDefaultDomain(stuff->dotnet_host, &unk);
+		if (FAILED(hr)) {
+			char buf[1024];
+			char *err = php_win32_error_to_msg(hr);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
+			if (err)
+				LocalFree(err);
+			php_com_throw_exception(hr, buf TSRMLS_CC);
+			ZVAL_NULL(object);
+			return;
+		}
+
+		where = "QI: System._AppDomain";
+		hr = IUnknown_QueryInterface(unk, &IID_mscorlib_System_AppDomain, (LPVOID*)&stuff->dotnet_domain);
+		if (FAILED(hr)) {
+			char buf[1024];
+			char *err = php_win32_error_to_msg(hr);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
+			if (err)
+				LocalFree(err);
+			php_com_throw_exception(hr, buf TSRMLS_CC);
+			ZVAL_NULL(object);
+			return;
+		}
+	}
 
 	obj = CDNO_FETCH(object);
 

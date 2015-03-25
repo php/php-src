@@ -1390,10 +1390,12 @@ char * LSAPI_GetHeader_r( LSAPI_Request * pReq, int headerIndex )
     off = pReq->m_pHeaderIndex->m_headerOff[ headerIndex ];
     if ( !off )
         return NULL;
-        if ( *(pReq->m_pHttpHeader + off + 
-                 pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) )
-                *( pReq->m_pHttpHeader + off + 
-                        pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) = 0;
+    if ( *(pReq->m_pHttpHeader + off 
+        + pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) )
+    {
+        *( pReq->m_pHttpHeader + off 
+            + pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) = 0;
+    }
     return pReq->m_pHttpHeader + off;
 }
 
@@ -1830,12 +1832,21 @@ ssize_t LSAPI_Write_Stderr_r( LSAPI_Request * pReq, const char * pBuf, size_t le
 static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
 {
     int i;
+    char * pValue;
     for( i = 0; i < H_TRANSFER_ENCODING; ++i )
     {
         if ( pReq->m_pHeaderIndex->m_headerOff[i] )
         {
             if ( strcmp( name, CGI_HEADERS[i] ) == 0 )
-                return pReq->m_pHttpHeader + pReq->m_pHeaderIndex->m_headerOff[i];
+            {
+                pValue = pReq->m_pHttpHeader 
+                         + pReq->m_pHeaderIndex->m_headerOff[i];
+                if ( *(pValue + pReq->m_pHeaderIndex->m_headerLen[i]) != '\0')
+                {
+                    *(pValue + pReq->m_pHeaderIndex->m_headerLen[i]) = '\0';
+                }
+                return pValue;
+            }
         }
     }
     if ( pReq->m_pHeader->m_cntUnknownHeaders > 0 )
@@ -1862,7 +1873,15 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
                 ++p; ++pKey;
             }
             if (( pKey == pKeyEnd )&& (!*p ))
-                return pReq->m_pHttpHeader + pCur->valueOff;
+            {
+                pValue = pReq->m_pHttpHeader + pCur->valueOff;
+                
+                if ( *(pValue + pCur->valueLen) != '\0')
+                {
+                    *(pValue + pCur->valueLen) = '\0';
+                }
+                return pValue;
+            }
             ++pCur;
         }
     }
@@ -1912,9 +1931,13 @@ int LSAPI_ForeachOrgHeader_r( LSAPI_Request * pReq,
     int ret;
     int count = 0;
     struct _headerInfo headers[512];
+
     if ( !pReq || !fn )
         return -1;
-    
+
+    if ( !pReq->m_pHeaderIndex )
+        return 0;
+
     for( i = 0; i < H_TRANSFER_ENCODING; ++i )
     {
         if ( pReq->m_pHeaderIndex->m_headerOff[i] )
@@ -3372,7 +3395,7 @@ void lsapi_MD5Final(unsigned char digest[16], struct lsapi_MD5Context *ctx)
     lsapi_MD5Transform(ctx->buf, (uint32 *) ctx->in);
     byteReverse((unsigned char *) ctx->buf, 4);
     memmove(digest, ctx->buf, 16);
-    memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
+    memset(ctx, 0, sizeof(*ctx));        /* In case it's sensitive */
 }
 
 /* The four core functions - F1 is optimized somewhat */

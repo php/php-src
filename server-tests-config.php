@@ -52,7 +52,7 @@ $conf = array(
 
 /* file extension of pages requested via http
    this allows for php to be configured to parse
-   extensions other than php, usefull for multiple
+   extensions other than php, useful for multiple
    configurations under a single webserver */
 'TEST_WEB_EXT'         =>    'php',
 
