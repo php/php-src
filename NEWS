@@ -280,7 +280,8 @@ PHP                                                                        NEWS
   . Fixed bug #68751 (listen.allowed_clients is broken). (Remi)
 
 - GD:
-  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
+  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (CVE-2014-9709)
+    (Jan Bee, Remi)
   . Fixed request #68656 (Report gd library version). (Remi)
 
 - mbstring:
