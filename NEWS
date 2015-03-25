@@ -43,11 +43,15 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
 
 - Postgres:
-  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
+  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Laruence)
 
 - SPL:
    . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
+
+- SOAP:
+   . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
+     (bisected, regression)). (Laruence)
 
 - SQLITE:
    . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
