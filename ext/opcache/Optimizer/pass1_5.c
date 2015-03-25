@@ -443,7 +443,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							func->type == ZEND_INTERNAL_FUNCTION &&
 							func->module->type == MODULE_PERSISTENT) {
 						zval t;
-						ZVAL_TRUE(&t);
+						if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("is_callable") - 1 ||
+								func->handler != ZEND_FN(display_disabled_function)) {
+							ZVAL_TRUE(&t);
+						} else {
+							ZVAL_FALSE(&t);
+						}
 						if (zend_optimizer_replace_by_const(op_array, opline + 1, IS_VAR, ZEND_RESULT(opline).var, &t)) {
 							literal_dtor(&ZEND_OP2_LITERAL(init_opline));
 							MAKE_NOP(init_opline);
