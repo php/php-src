@@ -161,6 +161,8 @@
     required_num_args). (Julien)
 
 - Standard:
+  . Fixed bug #69299 (Regression in array_filter's $flag argument in PHP 7).
+    (Laruence)
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
   . Fixed user session handlers (See rfc:session.user.return-value). (Sara)
   . Added intdiv() function. (Andrea)

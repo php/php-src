@@ -4744,6 +4744,7 @@ PHP_FUNCTION(array_filter)
 {
 	zval *array;
 	zval *operand;
+	zval *key;
 	zval args[2];
 	zval retval;
 	zend_bool have_callback = 0;
@@ -4766,7 +4767,13 @@ PHP_FUNCTION(array_filter)
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval = &retval;
-		fci.param_count = 1;
+		if (use_type == ARRAY_FILTER_USE_BOTH) {
+			fci.param_count = 2;
+			key = &args[1];
+		} else {
+			fci.param_count = 1;
+			key = &args[0];
+		}
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
@@ -4774,18 +4781,9 @@ PHP_FUNCTION(array_filter)
 			if (use_type) {
 				/* Set up the key */
 				if (!string_key) {
-					if (use_type == ARRAY_FILTER_USE_BOTH) {
-						fci.param_count = 2;
-						ZVAL_LONG(&args[1], num_key);
-					} else if (use_type == ARRAY_FILTER_USE_KEY) {
-						ZVAL_LONG(&args[0], num_key);
-					}
+					ZVAL_LONG(key, num_key);
 				} else {
-					if (use_type == ARRAY_FILTER_USE_BOTH) {
-						ZVAL_STR_COPY(&args[1], string_key);
-					} else if (use_type == ARRAY_FILTER_USE_KEY) {
-						ZVAL_STR_COPY(&args[0], string_key);
-					}
+					ZVAL_STR_COPY(key, string_key);
 				}
 			}
 			if (use_type != ARRAY_FILTER_USE_KEY) {
