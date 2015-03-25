@@ -1817,7 +1817,7 @@ void php_json_parser_object_init(php_json_parser *parser, zval *object)
 void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *zkey, zval *zvalue)
 {
 	char *key = Z_STRVAL_P(zkey);
-	int key_len = Z_STRLEN_P(zkey);
+	size_t key_len = Z_STRLEN_P(zkey);
 
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		add_assoc_zval_ex(object, key, key_len, zvalue);

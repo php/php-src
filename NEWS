@@ -58,6 +58,7 @@
     (Anatol)
   . Implemented the RFC `Scalar Type Decalarations v0.5`. (Anthony)
   . Implemented the RFC `Group Use Declarations`. (Marcio)
+  . Implemented the RFC `Continue Output Buffering`. (Mike)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)

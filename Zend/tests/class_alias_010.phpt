@@ -11,4 +11,4 @@ class b { }
 
 ?>
 --EXPECTF--
-Warning: Cannot redeclare class b in %s on line %d
+Warning: Cannot redeclare interface b in %s on line %d

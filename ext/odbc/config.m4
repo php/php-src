@@ -106,7 +106,7 @@ PHP_ARG_WITH(odbcver,,
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
-[  --with-adabas[=DIR]       Include Adabas D support [/usr/local]],no,no)
+[  --with-adabas[=DIR]       Include Adabas D support [/usr/local]])
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
@@ -135,7 +135,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(sapdb,,
-[  --with-sapdb[=DIR]        Include SAP DB support [/usr/local]],no,no)
+[  --with-sapdb[=DIR]        Include SAP DB support [/usr/local]])
 
   AC_MSG_CHECKING([for SAP DB support])
   if test "$PHP_SAPDB" != "no"; then
@@ -155,7 +155,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(solid,,
-[  --with-solid[=DIR]        Include Solid support [/usr/local/solid]],no,no)
+[  --with-solid[=DIR]        Include Solid support [/usr/local/solid]])
 
   AC_MSG_CHECKING(for Solid support)
   if test "$PHP_SOLID" != "no"; then
@@ -182,7 +182,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(ibm-db2,,
-[  --with-ibm-db2[=DIR]      Include IBM DB2 support [/home/db2inst1/sqllib]],no,no)
+[  --with-ibm-db2[=DIR]      Include IBM DB2 support [/home/db2inst1/sqllib]])
 
   AC_MSG_CHECKING(for IBM DB2 support)
   if test "$PHP_IBM_DB2" != "no"; then
@@ -221,7 +221,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(ODBCRouter,,
-[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support [/usr]],no,no)
+[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support [/usr]])
 
   AC_MSG_CHECKING(for ODBCRouter.com support)
   if test "$PHP_ODBCROUTER" != "no"; then
@@ -244,7 +244,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress,,
 [  --with-empress[=DIR]      Include Empress support [\$EMPRESSPATH]
-                          (Empress Version >= 8.60 required)],no,no)
+                          (Empress Version >= 8.60 required)])
 
   AC_MSG_CHECKING(for Empress support)
   if test "$PHP_EMPRESS" != "no"; then
@@ -270,7 +270,7 @@ if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress-bcs,,
 [  --with-empress-bcs[=DIR]
                           Include Empress Local Access support [\$EMPRESSPATH]
-                          (Empress Version >= 8.60 required)],no,no)
+                          (Empress Version >= 8.60 required)])
 
   AC_MSG_CHECKING(for Empress local access support)
   if test "$PHP_EMPRESS_BCS" != "no"; then
@@ -310,7 +310,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(birdstep,,
-[  --with-birdstep[=DIR]     Include Birdstep support [/usr/local/birdstep]],no,no)
+[  --with-birdstep[=DIR]     Include Birdstep support [/usr/local/birdstep]])
   
   AC_MSG_CHECKING(for Birdstep support)
   if test "$PHP_BIRDSTEP" != "no"; then
@@ -366,7 +366,7 @@ PHP_ARG_WITH(custom-odbc,,
                           running this configure script:
                             CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
                             LDFLAGS=-lunix
-                            CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"],no,no)
+                            CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])
 
   AC_MSG_CHECKING(for a custom ODBC support)
   if test "$PHP_CUSTOM_ODBC" != "no"; then
@@ -388,7 +388,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(iodbc,,
-[  --with-iodbc[=DIR]        Include iODBC support [/usr/local]],no,no)
+[  --with-iodbc[=DIR]        Include iODBC support [/usr/local]])
 
   AC_MSG_CHECKING(for iODBC support)
   if test "$PHP_IODBC" != "no"; then
@@ -426,7 +426,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(esoob,,
-[  --with-esoob[=DIR]        Include Easysoft OOB support [/usr/local/easysoft/oob/client]],no,no)
+[  --with-esoob[=DIR]        Include Easysoft OOB support [/usr/local/easysoft/oob/client]])
 
   AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
   if test "$PHP_ESOOB" != "no"; then
@@ -448,7 +448,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(unixODBC,,
-[  --with-unixODBC[=DIR]     Include unixODBC support [/usr/local]],no,no)
+[  --with-unixODBC[=DIR]     Include unixODBC support [/usr/local]])
 
   AC_MSG_CHECKING(for unixODBC support)
   if test "$PHP_UNIXODBC" != "no"; then
@@ -471,7 +471,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(dbmaker,,
-[  --with-dbmaker[=DIR]      Include DBMaker support],no,no)
+[  --with-dbmaker[=DIR]      Include DBMaker support])
 
   AC_MSG_CHECKING(for DBMaker support)
   if test "$PHP_DBMAKER" != "no"; then
@@ -550,7 +550,7 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
 
-  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, $ODBC_INCLUDE)
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, [$ODBC_INCLUDE -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 else
   AC_MSG_CHECKING([for any ODBC driver support])
   AC_MSG_RESULT(no)

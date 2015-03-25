@@ -564,4 +564,7 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object.
-  . Error messages for zend_parse_parameters, type hints and conversions now always say "integer" and "float" instead of "long" and "double".
+  . Error messages for zend_parse_parameters, type hints and conversions now
+    always say "integer" and "float" instead of "long" and "double".
+  . Output buffering now continues to work for an aborted connection if
+    ignore_user_abort is set to true.

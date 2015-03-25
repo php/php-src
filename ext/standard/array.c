@@ -1874,7 +1874,8 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	uint32_t idx, j, n_elems;
 	Bucket *p, temp;
 	HashTable *hash;
-	zend_long rnd_idx, n_left;
+	zend_long rnd_idx;
+	uint32_t n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 
@@ -1929,7 +1930,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 				temp = hash->arData[n_left];
 				hash->arData[n_left] = hash->arData[rnd_idx];
 				hash->arData[rnd_idx] = temp;
-				zend_hash_iterators_update(hash, rnd_idx, n_left);
+				zend_hash_iterators_update(hash, (uint32_t)rnd_idx, n_left);
 			}
 		}
 	}
