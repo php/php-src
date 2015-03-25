@@ -287,6 +287,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 	if (mail_log && *mail_log) {
 		char *msg;
+		char *tmp;
 		time_t curtime;
 		size_t len;
 		zend_string *date_str;
@@ -305,11 +306,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			php_mail_log_to_syslog(msg);
 		}
 		else {
-			len = spprintf(&msg, 0, "[%s] %s%s", date_str->val, msg, PHP_EOL);
-			php_mail_log_to_file(mail_log, msg, len);
+			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, msg, PHP_EOL);
+			php_mail_log_to_file(mail_log, tmp, len);
 		}
 
 		efree(msg);
+		efree(tmp);
 	}
 
 	if (PG(mail_x_header)) {
