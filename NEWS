@@ -39,7 +39,7 @@ PHP                                                                        NEWS
    . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
 
 - Postgres:
-  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Laruence)
+  . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
 
 - SPL:
    . Fixed bug #69227 (Use after free in zval_scan caused by
@@ -47,7 +47,7 @@ PHP                                                                        NEWS
 
 - SOAP:
    . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
-     (bisected, regression)). (Laruence)
+     (bisected, regression)). (thomas at shadowweb dot org, Laruence)
 
 - SQLITE:
    . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
