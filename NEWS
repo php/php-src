@@ -43,7 +43,7 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
 
 - Postgres:
-  . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Laruence)
+  . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
 
 - SPL:
    . Fixed bug #69227 (Use after free in zval_scan caused by
