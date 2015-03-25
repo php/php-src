@@ -287,7 +287,10 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
 #ifdef ZTS
-# define ODBCG(v) TSRMG(odbc_globals_id, zend_odbc_globals *, v)
+# define ODBCG(v) ZEND_TSRMG(odbc_globals_id, zend_odbc_globals *, v)
+# ifdef COMPILE_DL_ODBC
+ZEND_TSRMLS_CACHE_EXTERN();
+# endif
 #else
 # define ODBCG(v) (odbc_globals.v)
 extern ZEND_API zend_odbc_globals odbc_globals;

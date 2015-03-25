@@ -411,6 +411,9 @@ zend_module_entry odbc_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_ODBC
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
 ZEND_GET_MODULE(odbc)
 #endif
 
@@ -695,6 +698,9 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(odbc)
 {
+#if defined(COMPILE_DL_ODBC) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	odbc_globals->num_persistent = 0;
 }
 
