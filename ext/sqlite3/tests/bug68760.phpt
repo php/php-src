@@ -31,6 +31,6 @@ catch(\Exception $e) {
 ?>
 --EXPECTF--
 callback
-Warning: SQLite3::query(): An error occurred while invoking the compare callback in %a/bug68760.php on line %i
+Warning: SQLite3::query(): An error occurred while invoking the compare callback in %a%ebug68760.php on line %i
 Exception: oops
 
