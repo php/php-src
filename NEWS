@@ -52,6 +52,7 @@ PHP                                                                        NEWS
 - SQLITE:
    . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
      (Dan Ackroyd)
+   . Fixed bug #69287 (Upgrade bundled sqlite to 3.8.8.3). (Anatol)
 
 19 Mar 2015, PHP 5.5.23
 
