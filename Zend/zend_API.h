@@ -540,7 +540,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 
 ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data);
 
-ZEND_API char *zend_get_object_type(zend_class_entry *ce);
+ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
 
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
