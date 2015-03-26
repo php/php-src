@@ -1555,7 +1555,7 @@ ZEND_FUNCTION(class_alias)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
-	zend_long leakbytes=3;
+	zend_long leakbytes = 3;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
 		return;
@@ -1565,7 +1565,8 @@ ZEND_FUNCTION(leak)
 }
 /* }}} */
 
-/* {{{ proto leak_variable(mixed variable [, bool leak_data]) */
+/* {{{ proto void leak_variable(mixed variable [, bool leak_data])
+   Leak a variable that is a resource or an object */
 ZEND_FUNCTION(leak_variable)
 {
 	zval *zv;
@@ -1589,12 +1590,19 @@ ZEND_FUNCTION(leak_variable)
 
 
 #ifdef ZEND_TEST_EXCEPTIONS
+/* {{{ proto void crash(void)
+   Crash the script */
 ZEND_FUNCTION(crash)
 {
-	char *nowhere=NULL;
+	char *nowhere = NULL;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	memcpy(nowhere, "something", sizeof("something"));
 }
+/* }}} */
 #endif
 
 #endif /* ZEND_DEBUG */
