@@ -755,7 +755,7 @@ failure:
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(ce1->info.user.filename);
 	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot redeclare %s %s", zend_get_object_type(ce1), ce1->name->val);
+	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ce1->name->val);
 }
 
 #ifdef __SSE2__
