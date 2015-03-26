@@ -13,6 +13,13 @@ $tokens = token_get_all('<?php
             as as private as;
             try as private /** */ while;
         }
+
+        use A, B {
+            foo as as;
+            as as foo;
+            as as private bar;
+            foo as private bar;
+        }
     }
   }
 ');
@@ -75,6 +82,30 @@ L10: T_AS as
 L10: T_PRIVATE private
 L10: T_DOC_COMMENT /** */
 L10: T_STRING while
+;
+}
+L13: T_USE use
+L13: T_STRING A
+,
+L13: T_STRING B
+{
+L14: T_STRING foo
+L14: T_AS as
+L14: T_STRING as
+;
+L15: T_STRING as
+L15: T_AS as
+L15: T_STRING foo
+;
+L16: T_STRING as
+L16: T_AS as
+L16: T_PRIVATE private
+L16: T_STRING bar
+;
+L17: T_STRING foo
+L17: T_AS as
+L17: T_PRIVATE private
+L17: T_STRING bar
 ;
 }
 }

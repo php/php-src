@@ -195,9 +195,8 @@ static int t_get_type(t_stream *ts, int index)
 			return zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
 		case IS_STRING:
 			return Z_STRVAL_P(token)[0];
-		default:
-			ZEND_ASSERT(0);
 	}
+	ZEND_ASSERT(0);
 }
 
 static zend_always_inline zend_bool t_next(t_stream *ts)
@@ -255,7 +254,7 @@ static void t_parse(zval *tokens)
 
 	while (t_next(ts)) {
 		switch (ts->current) {
-			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING:
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING: case T_INLINE_HTML:
 				continue;
 			case T_CLASS: case T_TRAIT: case T_INTERFACE:
 				ts->in_class++;
@@ -278,9 +277,8 @@ static void t_parse(zval *tokens)
 								t_stringify_next(ts, 1);
 								break;
 							case T_AS:
-								if (-1 == t_look(ts, 0, 1)) { /* T_STRING<as> T_AS ...; */
-									t_stringify_current(ts);
-								} else { /* T_STRING<?> T_AS visibility? T_STRING<?>; */
+								/* T_STRING<?> T_AS visibility? T_STRING<?>; */
+								if (-1 != t_look(ts, 0, 1)) {
 									t_stringify_previous(ts, 1);
 									t_stringify_next(ts, 2);
 								}
@@ -328,7 +326,6 @@ static void t_parse(zval *tokens)
 					break;
 				case ';':
 					if (ts->in_trait_use) ts->in_trait_use = 0;
-					if (ts->in_const_list) ts->in_const_list = 0;
 					break;
 			}
 		}
