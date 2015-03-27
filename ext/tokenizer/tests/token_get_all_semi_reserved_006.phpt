@@ -1,5 +1,7 @@
 --TEST--
 Semi reserved words support: string interpolation
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 $tokens = token_get_all('<?php
