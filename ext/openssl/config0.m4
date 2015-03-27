@@ -21,6 +21,7 @@ if test "$PHP_OPENSSL" != "no"; then
 
   AC_CHECK_LIB(ssl, DSA_get_default_method, AC_DEFINE(HAVE_DSA_DEFAULT_METHOD, 1, [OpenSSL 0.9.7 or later]))
   AC_CHECK_LIB(crypto, X509_free, AC_DEFINE(HAVE_DSA_DEFAULT_METHOD, 1, [OpenSSL 0.9.7 or later]))
+  AC_CHECK_FUNCS([RAND_egd])
 
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD, 
   [
