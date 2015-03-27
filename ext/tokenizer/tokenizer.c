@@ -402,9 +402,9 @@ static void tokenize(zval *return_value)
 		}
 
 		token_line = CG(zend_lineno);
-
-		t_parse(return_value);
 	}
+
+	t_parse(return_value);
 }
 
 /* {{{ proto array token_get_all(string source)
