@@ -45,22 +45,23 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
   . Fixed bug #69215 (Crypto servers should send client CA list)
     (Daniel Lowrey)
+  . Add a check for RAND_egd to allow compiling against LibreSSL (Leigh)
 
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
 
 - SPL:
-   . Fixed bug #69227 (Use after free in zval_scan caused by
+  . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
 - SOAP:
-   . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
+  . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
      (bisected, regression)). (Laruence)
 
 - SQLITE:
-   . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
+  . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
      (Dan Ackroyd)
-   . Fixed bug #69287 (Upgrade bundled libsqlite to 3.8.8.3). (Anatol)
+  . Fixed bug #69287 (Upgrade bundled libsqlite to 3.8.8.3). (Anatol)
 
 19 Mar 2015, PHP 5.6.7
 
