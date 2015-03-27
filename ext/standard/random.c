@@ -30,13 +30,44 @@
 # include "win32/winutil.h"
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(random);
+#ifdef ZTS
+int random_globals_id;
+#else
+php_random_globals random_globals;
+#endif
+
+static void random_globals_ctor(php_random_globals *random_globals_p)
+{
+	random_globals_p->fd = -1;
+}
+
+static void random_globals_dtor(php_random_globals *random_globals_p)
+{
+	if (random_globals_p->fd > 0) {
+		close(random_globals_p->fd);
+		random_globals_p->fd = -1;
+	}
+}
 
 /* {{{ */
 PHP_MINIT_FUNCTION(random)
 {
-	RANDOM_G(fd) = -1;
+#ifdef ZTS
+	ts_allocate_id(&random_globals_id, sizeof(php_random_globals), (ts_allocate_ctor)random_globals_ctor, (ts_allocate_dtor)random_globals_dtor);
+#else
+	random_globals_ctor(&random_globals);
+#endif
+
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
+PHP_MSHUTDOWN_FUNCTION(random)
+{
+#ifndef ZTS
+	random_globals_dtor(&random_globals);
+#endif
 }
 /* }}} */
 
@@ -72,7 +103,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		RANDOM_G(fd) = fd;
 	}
 
-	size_t n = 0;
+	ssize_t n = 0;
 	while (read_bytes < size) {
 		n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n < 0) {
