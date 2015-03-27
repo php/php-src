@@ -464,7 +464,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			xmlNodeSetName(node, BAD_CAST(Z_STRVAL_PP(zname)));
 		}
 		if (zend_hash_find(ht, "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS &&
-		    Z_TYPE_PP(zname) == IS_STRING) {
+		    Z_TYPE_PP(znamens) == IS_STRING) {
 			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_PP(znamens));
 			xmlSetNs(node, nsp);
 		}
