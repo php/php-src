@@ -248,6 +248,12 @@ static zend_always_inline void t_stringify_previous(t_stream *ts, int delta)
 	if (-1 != (delta = t_look(ts, 0, delta))) t_stringify(ts, delta);
 }
 
+#define CASE_MEMBER_ACCESS do {								\
+	case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:	\
+		 t_stringify_next(ts, 1);							\
+		 break;												\
+} while (0);
+
 static void t_parse(zval *tokens)
 {
 	t_stream *ts = t_init(tokens);
@@ -259,9 +265,7 @@ static void t_parse(zval *tokens)
 			case T_CLASS: case T_TRAIT: case T_INTERFACE:
 				ts->in_class++;
 				continue;
-			case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
-				t_stringify_next(ts, 1);
-				continue;
+			CASE_MEMBER_ACCESS;
 		}
 
 		if (ts->in_class) {
@@ -273,11 +277,7 @@ static void t_parse(zval *tokens)
 					ts->in_class++;
 					if (ts->in_trait_use) while (ts->in_trait_use && t_next(ts)) {
 						switch (ts->current) { /* use ... { ... } */
-							case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
-								t_stringify_next(ts, 1);
-								break;
-							case T_AS:
-								/* T_STRING<?> T_AS visibility? T_STRING<?>; */
+							case T_AS: /* T_STRING<?> T_AS visibility? T_STRING<?>; */
 								if (-1 != t_look(ts, 0, 1)) {
 									t_stringify_previous(ts, 1);
 									t_stringify_next(ts, 2);
@@ -287,6 +287,7 @@ static void t_parse(zval *tokens)
 								ts->in_trait_use = 0;
 								t_previous(ts);
 								break;
+							CASE_MEMBER_ACCESS;
 						}
 					}
 					break;
@@ -303,9 +304,6 @@ static void t_parse(zval *tokens)
 					ts->in_const_list++;
 					while (ts->in_const_list && t_next(ts)) { /* const ...; */
 						switch (ts->current) {
-							case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:
-								t_stringify_next(ts, 1);
-								break;
 							case '(': case '[':
 								ts->in_const_list++;
 								break;
@@ -318,6 +316,7 @@ static void t_parse(zval *tokens)
 							case ';':
 								if (1 == ts->in_const_list) ts->in_const_list--;
 								break;
+							CASE_MEMBER_ACCESS;
 						}
 					}
 					break;
