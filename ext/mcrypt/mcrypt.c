@@ -415,7 +415,13 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ 
 	}
 }
 /* }}} */
-    
+
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND
+} iv_source;
+
 static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
@@ -472,6 +478,9 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 
 	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
 	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
+
+	MCG(fd[RANDOM]) = -1;
+	MCG(fd[URANDOM]) = -1;
 
 	return SUCCESS;
 }
@@ -535,12 +544,6 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
-
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND
-} iv_source;
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory)
    Opens the module of the algorithm and the mode to be used */
@@ -1403,24 +1406,27 @@ PHP_FUNCTION(mcrypt_create_iv)
 		}
 		n = size;
 #else
-		int    fd;
+		int    *fd = &MCG(fd[source]);
 		size_t read_bytes = 0;
 
-		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
-		if (fd < 0) {
-			efree(iv);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device");
-			RETURN_FALSE;
+		if (*fd < 0) {
+			*fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
+			if (*fd < 0) {
+				efree(iv);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device");
+				RETURN_FALSE;
+			}
 		}
+
 		while (read_bytes < size) {
-			n = read(fd, iv + read_bytes, size - read_bytes);
+			n = read(*fd, iv + read_bytes, size - read_bytes);
 			if (n < 0) {
 				break;
 			}
 			read_bytes += n;
 		}
 		n = read_bytes;
-		close(fd);
+
 		if (n < size) {
 			efree(iv);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");
