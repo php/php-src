@@ -1250,7 +1250,9 @@ PHP_MINIT_FUNCTION(openssl)
 	}
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
+#ifndef OPENSSL_NO_SSL3
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory);
+#endif
 #ifndef OPENSSL_NO_SSL2
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory);
 #endif
@@ -1299,7 +1301,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #ifndef OPENSSL_NO_SSL2
 	php_stream_xport_unregister("sslv2");
 #endif
+#ifndef OPENSSL_NO_SSL3
 	php_stream_xport_unregister("sslv3");
+#endif
 	php_stream_xport_unregister("tls");
 	php_stream_xport_unregister("tlsv1.0");
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
