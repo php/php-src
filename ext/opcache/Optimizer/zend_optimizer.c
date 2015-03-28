@@ -111,6 +111,13 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 	return i;
 }
 
+int zend_optimizer_is_disabled_func(const char *name, size_t len) {
+	zend_function *fbc = (zend_function *)zend_hash_str_find_ptr(EG(function_table), name, len);
+
+	return (fbc && fbc->type == ZEND_INTERNAL_FUNCTION &&
+			fbc->internal_function.handler == ZEND_FN(display_disabled_function));
+}
+
 void zend_optimizer_update_op1_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zval          *val)
