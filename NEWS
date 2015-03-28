@@ -42,6 +42,9 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
 
+- Session:
+  . Use /dev/arandom for session ids when the platform supports it. (Leigh)
+
 - SPL:
   . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
