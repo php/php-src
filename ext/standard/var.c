@@ -766,8 +766,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					php_var_serialize_string(buf, name->val, name->len);
 					php_var_serialize_intern(buf, nvalp, var_hash);
 				}
-				zend_string_release(name);
 			}
+			zend_string_release(name);
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, '}');
