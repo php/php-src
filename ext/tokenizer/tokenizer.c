@@ -320,8 +320,7 @@ static void t_parse(zval *tokens)
 						}
 					}
 					break;
-				case '(':
-				case ';':
+				case '(': case ';':
 					if (ts->in_trait_use) ts->in_trait_use = 0;
 					break;
 			}
