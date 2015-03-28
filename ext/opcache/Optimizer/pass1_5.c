@@ -431,10 +431,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			    Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING) {
 				if ((Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("function_exists")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"function_exists", sizeof("function_exists")-1)) ||
+						"function_exists", sizeof("function_exists")-1) &&
+					!zend_optimizer_is_disabled_func("function_exists", sizeof("function_exists") - 1)) ||
 					(Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("is_callable")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"is_callable", sizeof("is_callable")))) {
+						"is_callable", sizeof("is_callable")) &&
+					!zend_optimizer_is_disabled_func("is_callable", sizeof("is_callable") - 1))) {
 					zend_internal_function *func;
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));

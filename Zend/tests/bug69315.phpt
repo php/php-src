@@ -1,7 +1,7 @@
 --TEST--
 Bug #69315 (disable_functions behaviors inconsistently)
 --INI--
-disable_functions=strlen,defined,call_user_func,constant,is_callable,is_string
+disable_functions=strlen,defined,call_user_func,constant,is_string
 --FILE--
 <?php
 
