@@ -73,7 +73,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 #include "zend_exceptions.h"
 
 #include "php_getopt.h"

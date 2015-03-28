@@ -2343,7 +2343,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 }
 /* }}} */
 
-void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
+static void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
 {
 	if (ast->kind == ZEND_AST_CALL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use function return value in write context");
@@ -5648,6 +5648,8 @@ void zend_compile_post_incdec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *var_ast = ast->child[0];
 	ZEND_ASSERT(ast->kind == ZEND_AST_POST_INC || ast->kind == ZEND_AST_POST_DEC);
 
+	zend_ensure_writable_variable(var_ast);
+
 	if (var_ast->kind == ZEND_AST_PROP) {
 		zend_op *opline = zend_compile_prop_common(NULL, var_ast, BP_VAR_RW);
 		opline->opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_OBJ : ZEND_POST_DEC_OBJ;
@@ -5665,6 +5667,8 @@ void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
 	ZEND_ASSERT(ast->kind == ZEND_AST_PRE_INC || ast->kind == ZEND_AST_PRE_DEC);
+
+	zend_ensure_writable_variable(var_ast);
 
 	if (var_ast->kind == ZEND_AST_PROP) {
 		zend_op *opline = zend_compile_prop_common(result, var_ast, BP_VAR_RW);

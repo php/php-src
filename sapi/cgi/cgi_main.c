@@ -87,7 +87,6 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 
 #include "php_getopt.h"
 
@@ -127,7 +126,6 @@ static pid_t pgroup;
 
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
-#define PHP_MODE_INDENT		3
 #define PHP_MODE_LINT		4
 #define PHP_MODE_STRIP		5
 
@@ -2180,12 +2178,6 @@ consult the installation file that came with this distribution, or visit \n\
 							exit_status = 0;
 							goto out;
 
-#if 0 /* not yet operational, see also below ... */
-						case '': /* generate indented source mode*/
-							behavior=PHP_MODE_INDENT;
-							break;
-#endif
-
 						case 'q': /* do not generate HTTP headers */
 							no_headers = 1;
 							break;
@@ -2471,16 +2463,6 @@ consult the installation file that came with this distribution, or visit \n\
 						return SUCCESS;
 					}
 					break;
-#if 0
-				/* Zeev might want to do something with this one day */
-				case PHP_MODE_INDENT:
-					open_file_for_scanning(&file_handle);
-					zend_indent();
-					zend_file_handle_dtor(&file_handle);
-					php_output_teardown();
-					return SUCCESS;
-					break;
-#endif
 			}
 
 fastcgi_request_done:

@@ -80,7 +80,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 #include "zend_extensions.h"
 #include "zend_ini.h"
 #include "zend_dtrace.h"
@@ -2659,16 +2658,6 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 	return retval;
 }
 /* }}} */
-
-#ifdef PHP_WIN32
-/* {{{ dummy_indent
-   just so that this symbol gets exported... */
-PHPAPI void dummy_indent(void)
-{
-	zend_indent();
-}
-/* }}} */
-#endif
 
 /*
  * Local variables:
