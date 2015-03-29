@@ -155,10 +155,6 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
-// Newer versions have it
-if (VS_TOOLSET && VCVERS <= 1300) {
-	ADD_SOURCES("win32", "strtoi64.c");
-}
 if (VS_TOOLSET && VCVERS >= 1400 || !VS_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
