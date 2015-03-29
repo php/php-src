@@ -1671,7 +1671,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			break;
 		}
 	}
-#if defined(PHP_WIN32) && _MSC_VER >= 1700
+#ifdef PHP_WIN32
 	/* VS2012 strftime() returns number of characters, not bytes.
 		See VC++11 bug id 766205. */
 	if (real_len > 0) {
