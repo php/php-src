@@ -126,34 +126,6 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
-#ifdef PHP_WIN32
-#include "win32_internal_function_disabled.h"
-
-static int php_win32_disable_functions(void)
-{
-	int i;
-
-	if (EG(windows_version_info).dwMajorVersion < 5) {
-		for (i = 0; i < function_name_cnt_5; i++) {
-			if (zend_hash_str_del(CG(function_table), function_name_5[i], strlen(function_name_5[i]))==FAILURE) {
-				php_printf("Unable to disable function '%s'\n", function_name_5[i]);
-				return FAILURE;
-			}
-		}
-	}
-
-	if (EG(windows_version_info).dwMajorVersion < 6) {
-		for (i = 0; i < function_name_cnt_6; i++) {
-			if (zend_hash_str_del(CG(function_table), function_name_6[i], strlen(function_name_6[i]))==FAILURE) {
-				php_printf("Unable to disable function '%s'\n", function_name_6[i]);
-				return FAILURE;
-			}
-		}
-	}
-	return SUCCESS;
-}
-#endif
-
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 /* {{{ PHP_INI_MH
@@ -2253,15 +2225,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
-
-
-#ifdef PHP_WIN32
-	/* Disable incompatible functions for the running platform */
-	if (php_win32_disable_functions() == FAILURE) {
-		php_printf("Unable to disable unsupported functions\n");
-		return FAILURE;
-	}
-#endif
 
 	zend_post_startup();
 
