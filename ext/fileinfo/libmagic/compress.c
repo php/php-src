@@ -46,7 +46,12 @@ FILE_RCSID("@(#)$File: compress.c,v 1.77 2014/12/12 16:33:01 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+# ifndef HAVE_SIG_T
+typedef void (*sig_t)(int);
+# endif /* HAVE_SIG_T */
+#endif 
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -107,12 +112,16 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	size_t i, nsz;
 	int rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
+#ifdef HAVE_SIGNAL_H
 	sig_t osigpipe;
+#endif
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
 
+#ifdef HAVE_SIGNAL_H
 	osigpipe = signal(SIGPIPE, SIG_IGN);
+#endif
 	for (i = 0; i < ncompr; i++) {
 		if (nbytes < compr[i].maglen)
 			continue;
@@ -139,8 +148,9 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 		}
 	}
 error:
+#ifdef HAVE_SIGNAL_H
 	(void)signal(SIGPIPE, osigpipe);
-
+#endif
 	if (newbuf)
 		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
