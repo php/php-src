@@ -291,21 +291,14 @@ PHPAPI zend_string *php_info_html_esc(char *string)
 
 char* php_get_windows_name()
 {
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
 	PGNSI pGNSI;
 	PGPI pGPI;
-	BOOL bOsVersionInfoEx;
 	DWORD dwType;
 	char *major = NULL, *sub = NULL, *retval;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-	if (!(bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi))) {
-		return NULL;
-	}
 
 	pGNSI = (PGNSI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
 	if(NULL != pGNSI) {
