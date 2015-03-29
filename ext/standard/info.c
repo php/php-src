@@ -45,9 +45,6 @@ typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # include "winver.h"
 
-# if _MSC_VER < 1300
-#  define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
-# endif
 #endif
 
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
