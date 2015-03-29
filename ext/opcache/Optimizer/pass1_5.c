@@ -431,10 +431,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			    Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING) {
 				if ((Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("function_exists")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"function_exists", sizeof("function_exists")-1)) ||
+						"function_exists", sizeof("function_exists")-1) &&
+					!zend_optimizer_is_disabled_func("function_exists", sizeof("function_exists") - 1)) ||
 					(Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("is_callable")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"is_callable", sizeof("is_callable")))) {
+						"is_callable", sizeof("is_callable")) &&
+					!zend_optimizer_is_disabled_func("is_callable", sizeof("is_callable") - 1))) {
 					zend_internal_function *func;
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
@@ -462,7 +464,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_string_release(lc_name);
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"extension_loaded", sizeof("extension_loaded")-1)) {
+						"extension_loaded", sizeof("extension_loaded")-1) &&
+					!zend_optimizer_is_disabled_func("extension_loaded", sizeof("extension_loaded") - 1)) {
 					zval t;
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
@@ -494,7 +497,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("defined")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"defined", sizeof("defined")-1)) {
+						"defined", sizeof("defined")-1) &&
+					!zend_optimizer_is_disabled_func("defined", sizeof("defined") - 1)) {
 					zval t;
 
 					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &t, 0)) {
@@ -511,7 +515,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("constant")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"constant", sizeof("constant")-1)) {
+						"constant", sizeof("constant")-1) &&
+					!zend_optimizer_is_disabled_func("constant", sizeof("constant") - 1)) {
 					zval t;
 
 					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &t, 1)) {
@@ -526,7 +531,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
 					Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("strlen") - 1 &&
-					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), "strlen", sizeof("strlen") - 1)) {
+					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), "strlen", sizeof("strlen") - 1) &&
+					!zend_optimizer_is_disabled_func("strlen", sizeof("strlen") - 1)) {
 					zval t;
 
 					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)));
@@ -541,7 +547,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* dirname(IS_CONST/IS_STRING) -> IS_CONST/IS_STRING */
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("dirname")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
-						"dirname", sizeof("dirname")-1) &&
+						"dirname", sizeof("dirname") - 1) &&
+					!zend_optimizer_is_disabled_func("dirname", sizeof("dirname") - 1) &&
 					IS_ABSOLUTE_PATH(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
 					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
 					dirname->len = zend_dirname(dirname->val, dirname->len);

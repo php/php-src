@@ -132,7 +132,6 @@ void init_executor(void) /* {{{ */
 	zend_init_fpu();
 
 	ZVAL_NULL(&EG(uninitialized_zval));
-	/* trick to make uninitialized_zval never be modified, passed by ref, etc. */
 	ZVAL_NULL(&EG(error_zval));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG

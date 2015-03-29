@@ -690,32 +690,35 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 	if (count > 0) {
 		zend_string *key;
-		zval *d, *name;
+		zval *d, *val;
 		zval nval, *nvalp;
+		zend_string *name;
 		HashTable *propers, *ht;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
 
 		ht = HASH_OF(retval_ptr);
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, name) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (incomplete_class && strcmp(key->val, MAGIC_MEMBER) == 0) {
 				continue;
 			}
 
-			if (Z_TYPE_P(name) != IS_STRING) {
-				php_error_docref(NULL, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
-				convert_to_string(name);
+			if (Z_TYPE_P(val) != IS_STRING) {
+				php_error_docref(NULL, E_NOTICE,
+						"__sleep should return an array only containing the names of instance-variables to serialize.");
 			}
+			name = zval_get_string(val);
 			propers = Z_OBJPROP_P(struc);
-			if ((d = zend_hash_find(propers, Z_STR_P(name))) != NULL) {
+			if ((d = zend_hash_find(propers, name)) != NULL) {
 				if (Z_TYPE_P(d) == IS_INDIRECT) {
 					d = Z_INDIRECT_P(d);
 					if (Z_TYPE_P(d) == IS_UNDEF) {
+						zend_string_release(name);
 						continue;
 					}
 				}
-				php_var_serialize_string(buf, Z_STRVAL_P(name), Z_STRLEN_P(name));
+				php_var_serialize_string(buf, name->val, name->len);
 				php_var_serialize_intern(buf, d, var_hash);
 			} else {
 				zend_class_entry *ce = Z_OBJ_P(struc)->ce;
@@ -723,7 +726,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					zend_string *prot_name, *priv_name;
 
 					do {
-						priv_name = zend_mangle_property_name(ce->name->val, ce->name->len, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
+						priv_name = zend_mangle_property_name(
+								ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 						if ((d = zend_hash_find(propers, priv_name)) != NULL) {
 							if (Z_TYPE_P(d) == IS_INDIRECT) {
 								d = Z_INDIRECT_P(d);
@@ -737,7 +741,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							break;
 						}
 						zend_string_free(priv_name);
-						prot_name = zend_mangle_property_name("*", 1, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
+						prot_name = zend_mangle_property_name(
+								"*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 						if ((d = zend_hash_find(propers, prot_name)) != NULL) {
 							if (Z_TYPE_P(d) == IS_INDIRECT) {
 								d = Z_INDIRECT_P(d);
@@ -752,15 +757,17 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							break;
 						}
 						zend_string_free(prot_name);
-						php_var_serialize_string(buf, Z_STRVAL_P(name), Z_STRLEN_P(name));
+						php_var_serialize_string(buf, name->val, name->len);
 						php_var_serialize_intern(buf, nvalp, var_hash);
-						php_error_docref(NULL, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_P(name));
+						php_error_docref(NULL, E_NOTICE,
+								"\"%s\" returned as member variable from __sleep() but does not exist", name->val);
 					} while (0);
 				} else {
-					php_var_serialize_string(buf, Z_STRVAL_P(name), Z_STRLEN_P(name));
+					php_var_serialize_string(buf, name->val, name->len);
 					php_var_serialize_intern(buf, nvalp, var_hash);
 				}
 			}
+			zend_string_release(name);
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, '}');
