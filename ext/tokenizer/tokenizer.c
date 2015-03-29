@@ -187,6 +187,8 @@ static zend_always_inline t_stream *t_init(zval *tokens)
 	return ts;
 }
 
+static zend_always_inline void t_destroy(t_stream *ts) { free(ts); }
+
 static int t_get_type(t_stream *ts, int index)
 {
 	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
@@ -326,7 +328,7 @@ static void t_parse(zval *tokens)
 			}
 		}
 	}
-	free(ts);
+	t_destroy(ts);
 }
 
 static void tokenize(zval *return_value)
