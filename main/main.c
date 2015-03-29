@@ -1974,7 +1974,7 @@ static int php_register_extensions_bc(zend_module_entry *ptr, int count)
 }
 /* }}} */
 
-#if defined(PHP_WIN32) && _MSC_VER >= 1400
+#ifdef PHP_WIN32
 static _invalid_parameter_handler old_invalid_parameter_handler;
 
 void dummy_invalid_parameter_handler(
@@ -2023,7 +2023,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 #ifdef PHP_WIN32
 	php_os = "WINNT";
-#if _MSC_VER >= 1400
+
 	old_invalid_parameter_handler =
 		_set_invalid_parameter_handler(dummy_invalid_parameter_handler);
 	if (old_invalid_parameter_handler != NULL) {
@@ -2032,7 +2032,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* Disable the message box for assertions.*/
 	_CrtSetReportMode(_CRT_ASSERT, 0);
-#endif
 #else
 	php_os = PHP_OS;
 #endif
@@ -2412,7 +2411,7 @@ void php_module_shutdown(void)
 	ts_free_id(core_globals_id);
 #endif
 
-#if defined(PHP_WIN32) && defined(_MSC_VER) && (_MSC_VER >= 1400)
+#ifdef PHP_WIN32
 	if (old_invalid_parameter_handler == NULL) {
 		_set_invalid_parameter_handler(old_invalid_parameter_handler);
 	}
