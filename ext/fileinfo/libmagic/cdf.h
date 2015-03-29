@@ -57,13 +57,10 @@ typedef int32_t cdf_secid_t;
 #define CDF_SECID_SECTOR_ALLOCATION_TABLE		-3
 #define CDF_SECID_MASTER_SECTOR_ALLOCATION_TABLE	-4
 
+# define CDF_MAGIC	0xE11AB1A1E011CFD0LL
+
 typedef struct {
 	uint64_t	h_magic;
-#if defined(PHP_WIN32) && _MSC_VER <= 1500
-# define CDF_MAGIC	0xE11AB1A1E011CFD0i64
-#else
-# define CDF_MAGIC	0xE11AB1A1E011CFD0LL
-#endif
 	uint64_t	h_uuid[2];
 	uint16_t	h_revision;
 	uint16_t	h_version;
