@@ -416,10 +416,8 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 		convert_scalar_to_number(pzv);					\
 	}
 
-#if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)
-/* This is performance improvement of tolower() on Windows and VC2005
- * Gives 10-18% on bench.php
- */
+#if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
+/* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
 #define ZEND_USE_TOLOWER_L 1
 #endif
 
