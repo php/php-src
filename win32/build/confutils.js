@@ -2381,11 +2381,14 @@ function toolset_setup_compiler()
 		// 1400 is vs.net 2005
 		// 1500 is vs.net 2008
 		// 1600 is vs.net 2010
-		// Which version of the compiler do we have?
+		// 1700 is vs.net 2011
+		// 1800 is vs.net 2012
+		// 1900 is vs.net 2014
+		// Which version of the compiler do we have?12
 		VCVERS = COMPILER_NUMERIC_VERSION;
 
-		if (VCVERS < 1500) {
-			ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
+		if (VCVERS < 1700) {
+			ERROR("Unsupported MS C++ Compiler, VC11 (2011) minimum is required");
 		}
 
 		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
@@ -2446,8 +2449,8 @@ function toolset_setup_project_tools()
 	// avoid picking up midnight commander from cygwin
 	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
-	// Try locating manifest tool
-	if (VS_TOOLSET && VCVERS > 1200) {
+	// Try locating the manifest tool
+	if (VS_TOOLSET) {
 		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
 	}
 }
@@ -2591,7 +2594,7 @@ function toolset_setup_common_cflags()
 	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
 
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
-
+1
 	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3");
@@ -2599,30 +2602,18 @@ function toolset_setup_common_cflags()
 	if (VS_TOOLSET) {
 		ADD_FLAG("CFLAGS", " /FD ");
 
-		if (VCVERS < 1400) {
-			// Enable automatic precompiled headers
-			ADD_FLAG('CFLAGS', ' /YX ');
-
-			if (PHP_DEBUG == "yes") {
-				// Set some debug/release specific options
-				ADD_FLAG('CFLAGS', ' /GZ ');
-			}
+		// fun stuff: MS deprecated ANSI stdio and similar functions
+		// disable annoying warnings.  In addition, time_t defaults
+		// to 64-bit.  Ask for 32-bit.
+		if (X64) {
+			ADD_FLAG('CFLAGS', ' /wd4996 ');
+		} else {
+			ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
 		}
 
-		if (VCVERS >= 1400) {
-			// fun stuff: MS deprecated ANSI stdio and similar functions
-			// disable annoying warnings.  In addition, time_t defaults
-			// to 64-bit.  Ask for 32-bit.
-			if (X64) {
-				ADD_FLAG('CFLAGS', ' /wd4996 ');
-			} else {
-				ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
-			}
-
-			if (PHP_DEBUG == "yes") {
-				// Set some debug/release specific options
-				ADD_FLAG('CFLAGS', ' /RTC1 ');
-			}
+		if (PHP_DEBUG == "yes") {
+			// Set some debug/release specific options
+			ADD_FLAG('CFLAGS', ' /RTC1 ');
 		}
 
 	} else if (CLANG_TOOLSET) {
@@ -2646,16 +2637,7 @@ function toolset_setup_common_ldlags()
 	// PHP DLL link flags
 	DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
-	if (VS_TOOLSET) {
-		if (VCVERS >= 1700) {
-			DEFINE("LDFLAGS", "/nologo ");
-		} else {
-			DEFINE("LDFLAGS", "/nologo /version:" +
-					PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
-		}
-	} else {
-		DEFINE("LDFLAGS", "/nologo ");
-	}
+	DEFINE("LDFLAGS", "/nologo ");
 
 	// we want msvcrt in the PHP DLL
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
