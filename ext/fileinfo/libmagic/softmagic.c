@@ -1637,7 +1637,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		break;
 
 	case FILE_REGEX:
-		if (OFFSET_OOB(nbytes, offset, 0))
+		if (nbytes < offset)
 			return 0;
 		break;
 
@@ -1646,7 +1646,8 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			offset += CAST(uint32_t, o);
 		if (offset == 0)
 			return 0;
-		if (OFFSET_OOB(nbytes, offset, 0))
+
+		if (nbytes < offset)
 			return 0;
 
 		if ((pb = file_push_buffer(ms)) == NULL)
@@ -1677,7 +1678,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		return rv;
 
 	case FILE_USE:
-		if (OFFSET_OOB(nbytes, offset, 0))
+		if (nbytes < offset)
 			return 0;
 		rbuf = m->value.s;
 		if (*rbuf == '^') {
