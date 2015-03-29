@@ -29,6 +29,11 @@ if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
 }
 
+if (PHP_DEBUG == "yes") {
+	ADD_FLAG("CFLAGS"," /Wall ");
+	ADD_FLAG("LDFLAGS", " /verbose ");
+}
+
 ARG_ENABLE('pgi', 'Generate PGO instrumented binaries', 'no');
 ARG_WITH('pgo', 'Compile optimized binaries using training data from folder', 'no');
 if (PHP_PGI == "yes" || PHP_PGO != "no") {
