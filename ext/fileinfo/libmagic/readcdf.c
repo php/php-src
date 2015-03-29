@@ -86,11 +86,7 @@ static const struct cv {
 	const char *mime;
 } clsid2mime[] = {
 	{
-#ifdef PHP_WIN32
-		{ 0x00000000000c1084ui64, 0x46000000000000c0ui64 },
-#else
-		{ 0x00000000000c1084LLU, 0x46000000000000c0LLU },
-#endif
+		{ 0x00000000000c1084ULL, 0x46000000000000c0ULL  },
 		"x-msi",
 	},
 	{	{ 0,			 0			},
@@ -98,11 +94,7 @@ static const struct cv {
 	}
 }, clsid2desc[] = {
 	{
-#ifdef PHP_WIN32
-		{ 0x00000000000c1084ui64, 0x46000000000000c0ui64 },
-#else
-		{ 0x00000000000c1084LLU, 0x46000000000000c0LLU },
-#endif
+		{ 0x00000000000c1084ULL, 0x46000000000000c0ULL  },
 		"MSI Installer",
 	},
 	{	{ 0,			 0			},
@@ -219,8 +211,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                 case CDF_FILETIME:
                         tp = info[i].pi_tp;
                         if (tp != 0) {
-							char tbuf[64];
-							if (tp < 1000000000000000LL) {
+				char tbuf[64];
+                                if (tp < 1000000000000000LL) {
                                         cdf_print_elapsed_time(tbuf,
                                             sizeof(tbuf), tp);
                                         if (NOTMIME(ms) && file_printf(ms,
