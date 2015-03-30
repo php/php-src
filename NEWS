@@ -40,8 +40,10 @@ PHP                                                                        NEWS
   . Add a check for RAND_egd to allow compiling against LibreSSL (Leigh)
 
 - Phar:
-  . Fixed bug 64343 (PharData::extractTo fails for tarball created by BSD tar).
+  . Fixed bug #64343 (PharData::extractTo fails for tarball created by BSD tar).
     (Mike)
+  . Fixed bug #67761 (Phar::mapPhar fails for Phars inside a path containing 
+    ".tar"). (Mike)
 
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
