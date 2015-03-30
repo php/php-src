@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
   . Add a check for RAND_egd to allow compiling against LibreSSL (Leigh)
 
+- Phar:
+  . Fixed bug 64343 (PharData::extractTo fails for tarball created by BSD tar).
+    (Mike)
+
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference) (CVE-2015-1352). (Laruence)
 
