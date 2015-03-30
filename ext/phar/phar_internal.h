@@ -124,6 +124,8 @@
 #define TAR_SYMLINK '2'
 #define TAR_DIR     '5'
 #define TAR_NEW     '8'
+#define TAR_GLOBAL_HDR 'g'
+#define TAR_FILE_HDR   'x'
 
 #define PHAR_MUNG_PHP_SELF			(1<<0)
 #define PHAR_MUNG_REQUEST_URI		(1<<1)
