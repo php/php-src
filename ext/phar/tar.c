@@ -113,10 +113,7 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	memset(header->checksum, ' ', sizeof(header->checksum));
 	ret = (checksum == phar_tar_checksum(buf, 512));
 	memcpy(header->checksum, save, sizeof(header->checksum));
-	if (!ret && strstr(fname, ".tar")) {
-		/* probably a corrupted tar - so we will pretend it is one */
-		return 1;
-	}
+	
 	return ret;
 }
 /* }}} */
