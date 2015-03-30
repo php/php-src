@@ -719,7 +719,7 @@ PHP_FUNCTION(get_headers)
 	HashTable *hashT;
 	zend_long format = 0;
 	zval *zcontext = NULL;
-	php_stream_context *context = NULL;
+	php_stream_context *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
 		return;
