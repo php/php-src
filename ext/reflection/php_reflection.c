@@ -1612,7 +1612,7 @@ ZEND_METHOD(reflection_function, __construct)
 			}
 			efree(lcname);
 		} else {
-			//Exception has been thrown.
+			/* Exception has been thrown. */
 			return;
 		}
 	}

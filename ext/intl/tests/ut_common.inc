@@ -132,7 +132,15 @@ function ut_coll_set_default( $coll )
 
 function ut_nfmt_create( $locale, $style, $pattern = null )
 {
-    return $GLOBALS['oo-mode'] ? new NumberFormatter( $locale, $style, $pattern ) : numfmt_create( $locale, $style, $pattern );
+    if ($GLOBALS['oo-mode']) {
+        try {
+            return new NumberFormatter( $locale, $style, $pattern );
+        } catch (Exception $e) {
+            return NULL;
+        }
+    } else {
+        return numfmt_create( $locale, $style, $pattern );
+    }
 }
 function ut_nfmt_format( $fmt, $number, $type = null )
 {
@@ -392,7 +400,15 @@ function ut_datefmt_localtime( $fmt , $value , &$parse_pos=0 )
 
 function ut_resourcebundle_create( $locale, $bundle, $fallback=true )
 {
-    return $GLOBALS['oo-mode'] ? new ResourceBundle($locale, $bundle, $fallback): resourcebundle_create($locale, $bundle, $fallback);
+    if ($GLOBALS['oo-mode']) {
+        try {
+            return new ResourceBundle($locale, $bundle, $fallback);
+    } catch (Exception $e) {
+            return NULL;
+        }
+    } else {
+        return resourcebundle_create($locale, $bundle, $fallback);
+    }
 }
 function ut_resourcebundle_count($bundle )
 {

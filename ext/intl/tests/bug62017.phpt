@@ -11,14 +11,14 @@ var_dump(
 	datefmt_create('', IntlDateFormatter::NONE, IntlDateFormatter::NONE, "\xFF",
 		IntlDateFormatter::GREGORIAN, 'a'));
 try {
-	new IntlDateFormatter('', IntlDateFormatter::NONE, IntlDateFormatter::NONE, "Europe/Lisbon",
-		IntlDateFormatter::GREGORIAN, "\x80");
-}
-catch(IntlException $ie) {
-	echo $ie->getMessage().PHP_EOL;
+	var_dump(
+		new IntlDateFormatter('', IntlDateFormatter::NONE, IntlDateFormatter::NONE, "Europe/Lisbon",
+			IntlDateFormatter::GREGORIAN, "\x80"));
+} catch (IntlException $e) {
+	echo PHP_EOL."Exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . PHP_EOL;
 }
 --EXPECTF--
 Warning: datefmt_create(): datefmt_create: Time zone identifier given is not a valid UTF-8 string in %s on line %d
 NULL
-datefmt_create: error converting pattern to UTF-16
 
+Exception: IntlDateFormatter::__construct(): datefmt_create: error converting pattern to UTF-16 in %sbug62017.php on line %d

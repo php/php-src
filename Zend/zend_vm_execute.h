@@ -3100,9 +3100,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OP
 
 		if (EXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
-			EX(call)->return_value = EX_VAR(opline->result.var);
-		} else {
-			EX(call)->return_value = NULL;
 		}
 
 		CHECK_EXCEPTION();
@@ -5082,10 +5079,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
 
-	if (IS_CONST == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
-
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -6984,10 +6977,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
 
-	if (IS_UNUSED == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
-
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8465,10 +8454,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
-
-	if (IS_CV == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -10014,10 +9999,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -13795,9 +13776,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCO
 
 		if (EXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
-			EX(call)->return_value = EX_VAR(opline->result.var);
-		} else {
-			EX(call)->return_value = NULL;
 		}
 
 		CHECK_EXCEPTION();
@@ -15880,10 +15858,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
 
-	if (IS_CONST == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
-
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -17454,10 +17428,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
-
-	if (IS_UNUSED == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -19072,10 +19042,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
 
-	if (IS_CV == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
-
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -20630,10 +20596,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call));
-
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-		EX(call)->return_value = NULL;
-	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

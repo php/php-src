@@ -34,9 +34,10 @@ extern "C" {
 }
 
 #include "dateformat_helpers.h"
+#include "zend_exceptions.h"
 
 /* {{{ */
-static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 
@@ -64,8 +65,8 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
-		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
-				"unable to parse input parameters", 0, is_constructor);
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
+				"unable to parse input parameters", 0);
 		Z_OBJ_P(return_value) = NULL;
 		return;
     }
@@ -79,8 +80,6 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
-		/* This is __construct being called on an instance - it is not
-		a constructor. */
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
 				"datefmt_create: cannot call constructor twice", 0);
 		return;
@@ -112,8 +111,8 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 				pattern_str, pattern_str_len, &INTL_DATA_ERROR_CODE(dfo));
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			/* object construction -> only set global error */
-			intl_error_set_ex(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: "
-					"error converting pattern to UTF-16", 0, is_constructor);
+			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: "
+					"error converting pattern to UTF-16", 0);
 			goto error;
 		}
 	}
@@ -141,8 +140,8 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 			df->adoptTimeZone(timezone);
 		}
     } else {
-		intl_error_set_ex(NULL, INTL_DATA_ERROR_CODE(dfo),	"datefmt_create: date "
-				"formatter creation failed", 0, is_constructor);
+		intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),	"datefmt_create: date "
+				"formatter creation failed", 0);
 		goto error;
 	}
 
@@ -177,7 +176,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -189,16 +188,18 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
  */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = getThis();
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-
+	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */

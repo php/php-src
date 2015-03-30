@@ -25,6 +25,7 @@
 
 #include "php_intl.h"
 #include "intl_data.h"
+#include "intl_common.h"
 
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_iterator.h"
@@ -74,7 +75,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char *bundlename;
 	size_t		bundlename_len = 0;
@@ -90,8 +91,8 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_const
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
-		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_ctor: unable to parse input parameters", 0, is_constructor );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"resourcebundle_ctor: unable to parse input parameters", 0 );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -108,7 +109,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_const
 		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
 	}
 
-	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle", is_constructor);
+	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
 			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
@@ -119,7 +120,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_const
 				bundlename ? bundlename : "(default data)", locale,
 				ures_getLocaleByType(
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
-		intl_errors_set_custom_msg_ex(INTL_DATA_ERROR_P(rb), pbuf, 1, is_constructor);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1);
 		efree(pbuf);
 		Z_OBJ_P(return_value) = NULL;
 	}
@@ -139,15 +140,17 @@ ZEND_END_ARG_INFO()
  */
 PHP_METHOD( ResourceBundle, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-
+	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
@@ -157,7 +160,7 @@ proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}

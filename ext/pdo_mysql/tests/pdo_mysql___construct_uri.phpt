@@ -68,9 +68,6 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-Warning: PDO::__construct(%s
 [002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI
-
-Warning: PDO::__construct(%s
 [003] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, invalid data source URI
 done!

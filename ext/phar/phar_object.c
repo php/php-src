@@ -1149,7 +1149,7 @@ PHP_METHOD(Phar, __construct)
 		rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len);
 		zend_restore_error_handling(&zeh TSRMLS_CC);
 		if (rv == FAILURE) {
-			//Exception was thrown already
+			/* Exception was thrown already */
 			return;
 		}
 	}

@@ -25,7 +25,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern = NULL;
@@ -39,8 +39,8 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_create: unable to parse input parameters", 0, is_constructor );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"numfmt_create: unable to parse input parameters", 0 );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -52,7 +52,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
-		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16", is_constructor);
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16");
 	}
 
 	if(locale_len == 0) {
@@ -66,7 +66,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 		efree(spattern);
 	}
 
-	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed", is_constructor);
+	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
 }
 /* }}} */
 
@@ -78,7 +78,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -90,15 +90,17 @@ PHP_FUNCTION( numfmt_create )
  */
 PHP_METHOD( NumberFormatter, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

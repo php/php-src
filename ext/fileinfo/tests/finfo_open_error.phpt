@@ -46,6 +46,8 @@ resource(6) of type (file_info)
 Warning: finfo_open() expects parameter 1 to be integer, string given in %sfinfo_open_error.php on line 16
 bool(false)
 
-Warning: finfo::finfo() expects parameter 1 to be integer, string given in %sfinfo_open_error.php on line 18
-NULL
-===DONE===
+Fatal error: Uncaught exception 'Exception' with message 'finfo::finfo() expects parameter 1 to be integer, string given' in %sfinfo_open_error.php:18
+Stack trace:
+#0 %sfinfo_open_error.php(18): finfo->finfo('foobar')
+#1 {main}
+  thrown in %sfinfo_open_error.php on line 18

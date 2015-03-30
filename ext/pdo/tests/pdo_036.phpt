@@ -7,29 +7,22 @@ Testing PDORow and PDOStatement instances with Reflection
 
 $instance = new reflectionclass('pdostatement');
 $x = $instance->newInstance();
+var_dump($x);
 
-if ($x instanceof pdostatement) {
-    echo "Ok".PHP_EOL;
-}
-else {
-    echo "Failed to create instance of pdostatment";
-}
-
-try {
-    $instance = new reflectionclass('pdorow');
-    $x = $instance->newInstance();
-    echo "Failed to throw exception: ".var_export($x, true);
-}
-catch(PDOException $pe) {
-    if ($pe->getMessage() != "You may not create a PDORow manually") {
-        echo "PDOException has wrong message.";
-    }
-    else {
-        echo "Ok".PHP_EOL;
-    }
-}
+$instance = new reflectionclass('pdorow');
+$x = $instance->newInstance();
+var_dump($x);
 
 ?>
 --EXPECTF--
-Ok
-Ok
+object(PDOStatement)#%d (1) {
+  [%u|b%"queryString"]=>
+  NULL
+}
+
+Fatal error: Uncaught exception 'PDOException' with message 'You may not create a PDORow manually' in %spdo_036.php:8
+Stack trace:
+#0 [internal function]: PDORow->__construct()
+#1 %spdo_036.php(8): ReflectionClass->newInstance()
+#2 {main}
+  thrown in %spdo_036.php on line 8

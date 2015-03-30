@@ -25,7 +25,7 @@
 #include "intl_data.h"
 
 /* {{{ */
-static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
 	size_t           locale_len = 0;
@@ -38,8 +38,8 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
-		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_create: unable to parse input params", 0, is_constructor );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"collator_create: unable to parse input params", 0 );
 		zval_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -53,7 +53,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor
 
 	/* Open ICU collator. */
 	co->ucoll = ucol_open( locale, COLLATOR_ERROR_CODE_P( co ) );
-	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator", is_constructor);
+	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator");
 }
 /* }}} */
 
@@ -63,7 +63,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -72,15 +72,17 @@ PHP_FUNCTION( collator_create )
  */
 PHP_METHOD( Collator, __construct )
 {
-	zval orig_this = *getThis();
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-
+	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

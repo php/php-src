@@ -113,8 +113,7 @@ ZEND_END_ARG_INFO()
 	  RETURN_FALSE;	\
   }	\
 
-//The class is called PDORow in userland, it is called PDOStatement in the manual.
-static PHP_FUNCTION(dbstmt_constructor) /* {{{ */
+static PHP_FUNCTION(dbrow_constructor) /* {{{ */
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
 }
@@ -2641,8 +2640,7 @@ static union _zend_function *row_get_ctor(zend_object *object)
 	ctor.type = ZEND_INTERNAL_FUNCTION;
 	ctor.function_name = zend_string_init("__construct", sizeof("__construct") - 1, 0);
 	ctor.scope = pdo_row_ce;
-	//The class is called PDORow in userland, it is called PDOStatement in the manual.
-	ctor.handler = ZEND_FN(dbstmt_constructor);
+	ctor.handler = ZEND_FN(dbrow_constructor);
 	ctor.fn_flags = ZEND_ACC_PUBLIC;
 
 	return (union _zend_function*)&ctor;
