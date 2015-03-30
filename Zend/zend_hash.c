@@ -266,14 +266,13 @@ ZEND_API void ZEND_FASTCALL zend_hash_set_apply_protection(HashTable *ht, zend_b
 
 ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPosition pos)
 {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_count);
+	HashTableIterator *iter = EG(ht_iterators) + EG(ht_iterators_used);
 	uint32_t idx;
 
 	if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
 		ht->u.v.nIteratorsCount++;
 	}
-	while (iter != end) {
+	while (iter-- != EG(ht_iterators)) {
 		if (iter->ht == NULL) {
 			iter->ht = ht;
 			iter->pos = pos;
@@ -283,7 +282,6 @@ ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPositi
 			}
 			return idx;
 		}
-		iter++;
 	}
 	if (EG(ht_iterators) == EG(ht_iterators_slots)) {
 		EG(ht_iterators) = emalloc(sizeof(HashTableIterator) * (EG(ht_iterators_count) + 8));
@@ -342,15 +340,13 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTable *ht)
 {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	HashTableIterator *iter = EG(ht_iterators) + EG(ht_iterators_used);
 	uint32_t idx;
 
-	while (iter != end) {
+	while (iter-- != EG(ht_iterators)) {
 		if (iter->ht == ht) {
 			iter->ht = NULL;
 		}
-		iter++;
 	}
 
 	idx = EG(ht_iterators_used);
@@ -369,31 +365,27 @@ static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
 
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterators_lower_pos(HashTable *ht, HashPosition start)
 {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	HashTableIterator *iter = EG(ht_iterators) + EG(ht_iterators_used);
 	HashPosition res = HT_INVALID_IDX;
 
-	while (iter != end) {
+	while (iter-- != EG(ht_iterators)) {
 		if (iter->ht == ht) {
 			if (iter->pos >= start && iter->pos < res) {
 				res = iter->pos;
 			}
 		}
-		iter++;
 	}
 	return res;
 }
 
 ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosition from, HashPosition to)
 {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	HashTableIterator *iter = EG(ht_iterators) + EG(ht_iterators_used);
 
-	while (iter != end) {
+	while (iter-- != EG(ht_iterators)) {
 		if (iter->ht == ht && iter->pos == from) {
 			iter->pos = to;
 		}
-		iter++;
 	}
 }
 
