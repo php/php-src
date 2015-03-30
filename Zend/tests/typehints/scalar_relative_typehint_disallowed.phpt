@@ -11,4 +11,4 @@ foo(10);
 
 ?>
 --EXPECTF--
-Fatal error: "bar\int" cannot be used as a type declaration in %s on line %d
+Fatal error: "bar\int" cannot be used as a class name in %s on line %d
