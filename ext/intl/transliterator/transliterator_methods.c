@@ -169,7 +169,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		str_rules, str_rules_len, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* (I'm not a big fan of non-obvious flow control macros ).
 	 * This one checks the error value, destroys object and returns false */
-	INTL_CTOR_CHECK_STATUS( to, "String conversion of rules to UTF-16 failed" );
+	INTL_CTOR_CHECK_STATUS( to, "String conversion of rules to UTF-16 failed", 0 );
 
 	/* Open ICU Transliterator. */
 	utrans = utrans_openU( id, ( sizeof( id ) - 1 ) / ( sizeof( *id ) ), (UTransDirection ) direction,
@@ -197,7 +197,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
     }
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_from_rules: internal constructor call failed" );
+	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_from_rules: internal constructor call failed", 0 );
 }
 /* }}} */
 
@@ -228,10 +228,10 @@ PHP_FUNCTION( transliterator_create_inverse )
 
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_inverse: could not create "
-		"inverse ICU transliterator" );
+		"inverse ICU transliterator", 0 );
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_CTOR_CHECK_STATUS( to, "transliterator_create: internal constructor call failed" );
+	INTL_CTOR_CHECK_STATUS( to, "transliterator_create: internal constructor call failed", 0 );
 }
 /* }}} */
 

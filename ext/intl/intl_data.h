@@ -64,11 +64,11 @@ typedef struct _intl_data {
     }
 
 /* Check status, if error - destroy value and exit */
-#define INTL_CTOR_CHECK_STATUS(obj, msg)											\
+#define INTL_CTOR_CHECK_STATUS(obj, msg, forceException)							\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );	\
+        intl_errors_set_custom_msg_ex( INTL_DATA_ERROR_P((obj)), msg, 0, forceException );	\
 		/* yes, this is ugly, but it alreay is */									\
 		if (return_value != getThis()) {											\
 			zval_dtor(return_value);												\

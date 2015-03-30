@@ -50,7 +50,14 @@ function ut_main()
         $str_res .= "\nLocale is: $locale\n";
         foreach( $styles as $style => $pattern )
         {
-            $fmt = ut_nfmt_create( $locale, $style, $pattern );
+        	try {
+            	$fmt = ut_nfmt_create( $locale, $style, $pattern );
+            }
+            catch (IntlException $ie) {
+            	//$str_res .= "IE:".$ie->getMessage()."\n";
+            	$str_res .= "Bad formatter!\n";
+            	continue;
+            }
 
 			if(!$fmt) {
 				$str_res .= "Bad formatter!\n";

@@ -13,16 +13,24 @@ function err($fmt) {
 }
 
 function crt($t, $l, $s) {
-	switch(true) {
-		case $t == "O":
-			return new MessageFormatter($l, $s);
-			break;
-		case $t == "C":
-			return MessageFormatter::create($l, $s);
-			break;
-		case $t == "P":
-			return msgfmt_create($l, $s);
-			break;
+
+	try {
+		$fmt = null;
+		switch(true) {
+			case $t == "O":
+				$fmt = new MessageFormatter($l, $s);
+				break;
+			case $t == "C":
+				$fmt = MessageFormatter::create($l, $s);
+				break;
+			case $t == "P":
+				$fmt = msgfmt_create($l, $s);
+				break;
+		}
+		err($fmt);
+	}
+	catch (IntlException $ie) {
+		echo "IE: ".$ie->getMessage().PHP_EOL;
 	}
 }
 
@@ -35,32 +43,36 @@ $args = array(
 	array("en_US", "\xD0"),
 );
 
-$fmt = new MessageFormatter();
-err($fmt); 
+try {
+	$fmt = new MessageFormatter();
+}
+catch(IntlException $ie) {
+	echo "IE: ".$ie->getMessage().PHP_EOL;
+} 
 $fmt = msgfmt_create();
 err($fmt); 
 $fmt = MessageFormatter::create();
-err($fmt); 
-$fmt = new MessageFormatter('en');
-err($fmt); 
+err($fmt);
+try {
+	$fmt = new MessageFormatter('en');
+}
+catch(IntlException $ie) {
+	echo "IE: ".$ie->getMessage().PHP_EOL;
+}
 $fmt = msgfmt_create('en');
 err($fmt); 
 $fmt = MessageFormatter::create('en');
 err($fmt); 
 
 foreach($args as $arg) {
-	$fmt = crt("O", $arg[0], $arg[1]);
-	err($fmt);
-	$fmt = crt("C", $arg[0], $arg[1]);
-	err($fmt);
-	$fmt = crt("P", $arg[0], $arg[1]);
-	err($fmt);
+	crt("O", $arg[0], $arg[1]);
+	crt("C", $arg[0], $arg[1]);
+	crt("P", $arg[0], $arg[1]);
 }
 
 ?>
 --EXPECTF--
-Warning: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+IE: msgfmt_create: unable to parse input parameters
 
 Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
@@ -68,8 +80,7 @@ Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
 Warning: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+IE: msgfmt_create: unable to parse input parameters
 
 Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'

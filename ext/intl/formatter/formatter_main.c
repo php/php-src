@@ -25,7 +25,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char* locale;
 	char*       pattern = NULL;
@@ -39,8 +39,8 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_create: unable to parse input parameters", 0 );
+		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"numfmt_create: unable to parse input parameters", 0, is_constructor );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -52,7 +52,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
-		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16");
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16", is_constructor);
 	}
 
 	if(locale_len == 0) {
@@ -66,7 +66,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		efree(spattern);
 	}
 
-	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
+	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed", is_constructor);
 }
 /* }}} */
 
@@ -78,7 +78,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -93,7 +93,7 @@ PHP_METHOD( NumberFormatter, __construct )
 	zval orig_this = *getThis();
 
 	return_value = getThis();
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this));
