@@ -5,4 +5,4 @@ Scalar type hint names cannot be used as class, trait or interface names (2) - u
 
 use foobar as int;
 --EXPECTF--
-Fatal error: "int" cannot be used as a class name in %s on line %d
+Fatal error: Cannot use foobar as int because 'int' is a special class name in %s on line %d
