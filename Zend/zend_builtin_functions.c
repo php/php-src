@@ -1664,6 +1664,10 @@ ZEND_FUNCTION(set_error_handler)
    Returns the currently defined error handler, or null */
 ZEND_FUNCTION(get_error_handler)
 {
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 		RETVAL_ZVAL(&EG(user_error_handler), 1, 0);
 	}
@@ -1736,6 +1740,10 @@ ZEND_FUNCTION(set_exception_handler)
    Returns the currently defined exception handler, or null */
 ZEND_FUNCTION(get_exception_handler)
 {
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 		RETVAL_ZVAL(&EG(user_exception_handler), 1, 0);
 	}
