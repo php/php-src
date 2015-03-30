@@ -24,7 +24,7 @@ phpinfo(INFO_MODULES);
 ===DONE===
 --EXPECTF--
 %a
-<h2><a name="module_Phar">Phar</a></h2>
+<h2><a name="module_phar">Phar</a></h2>
 <table>
 <tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
 <tr><td class="e">Phar EXT version </td><td class="v">%s </td></tr>
