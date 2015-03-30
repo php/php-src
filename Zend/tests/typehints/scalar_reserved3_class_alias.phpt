@@ -6,4 +6,4 @@ Scalar type hint names cannot be used as class, trait or interface names (3) - c
 class foobar {}
 class_alias("foobar", "float");
 --EXPECTF--
-Fatal error: "float" cannot be used as a class name in %s on line %d
+Fatal error: Cannot use 'float' as class name as it is reserved in %s on line %d
