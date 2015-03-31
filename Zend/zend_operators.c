@@ -868,7 +868,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_ERROR, "Unsupported operand types");
+					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -921,7 +921,7 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_ERROR, "Unsupported operand types");
+					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -968,7 +968,7 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_ERROR, "Unsupported operand types");
+					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1056,7 +1056,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 					}
 					converted = 1;
 				} else {
-					zend_error(E_ERROR, "Unsupported operand types");
+					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 					return FAILURE;
 				}
 		}
@@ -1127,7 +1127,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_ERROR, "Unsupported operand types");
+					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1263,7 +1263,7 @@ try_again:
 		default:
 			ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BW_NOT);
 
-			zend_error(E_ERROR, "Unsupported operand types");
+			zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
 			return FAILURE;
 	}
 }
