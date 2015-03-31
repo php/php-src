@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? May 2015, PHP 5.6.9
 
-02 Apr 2015, PHP 5.6.8
+16 Apr 2015, PHP 5.6.8
 
 - Core:
   . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
