@@ -76,7 +76,7 @@ class foo
 	public $s2;
 	public $s3;
 
-	function foo() 
+	function __construct() 
 	{
 		global $sjis, $jis, $euc_jp;
 		
@@ -92,7 +92,7 @@ class bar
 	public $s2;
 	public $s3;
 
-	function bar() 
+	function __construct() 
 	{
 		global $sjis, $jis, $euc_jp;
 		
