@@ -296,6 +296,16 @@ static void do_adjust_special_early(timelib_time* time)
 				break;
 		}
 	}
+
+	switch (time->relative.first_last_day_of) {
+                case 1: /* first */
+                        time->d = 1;
+                        break;
+                case 2: /* last */
+                        time->d = 0;
+                        time->m++;
+                        break;
+	}
 	timelib_do_normalize(time);
 }
 
