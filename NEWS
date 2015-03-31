@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Date:
   . Export date_get_immutable_ce so that it can be used by extensions. (Derick
     Rethans)
+  . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
 
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
