@@ -2,8 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.25
 
+- cURL:
+  . Fixed bug #68739 (Missing break / control flow). (Laruence)
 
+- Ereg:
+  . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
 
+- OPCache:
+  . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
 
 ?? ??? 2015, PHP 5.5.24
 
