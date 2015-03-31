@@ -81,7 +81,7 @@ PHP                                                                        NEWS
   . Fixed bug #69141 (Missing arguments in reflection info for some builtin
     functions). (kostyantyn dot lysyy at oracle dot com)
   . Fixed bug #68976 (Use After Free Vulnerability in unserialize()).
-    (CVE-2015-0231) (Stas)
+    (CVE-2015-2787) (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
   . Fixed bug #69207 (move_uploaded_file allows nulls in path). (CVE-2015-2348)
