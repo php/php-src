@@ -220,7 +220,7 @@ require_once('skipifconnectfailure.inc');
 		private $id;
 		public $id_ref;
 		public function __construct() {
-			parent::construct();
+			parent::__construct();
 			$this->id_ref = &$this->id;
 		}
 	}

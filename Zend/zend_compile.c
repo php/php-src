@@ -4947,6 +4947,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	zend_compile_stmt(stmt_ast);
 
+	if (ce->num_traits == 0) {
+		/* For traits this check is delayed until after trait binding */
+		zend_check_deprecated_constructor(ce);
+	}
+
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
