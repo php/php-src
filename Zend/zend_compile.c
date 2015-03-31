@@ -129,6 +129,53 @@ static zend_bool zend_get_unqualified_name(const zend_string *name, const char *
 }
 /* }}} */
 
+struct reserved_class_name {
+	const char *name;
+	size_t len;
+};
+static const struct reserved_class_name reserved_class_names[] = {
+	{ZEND_STRL("bool")},
+	{ZEND_STRL("false")},
+	{ZEND_STRL("float")},
+	{ZEND_STRL("int")},
+	{ZEND_STRL("null")},
+	{ZEND_STRL("parent")},
+	{ZEND_STRL("self")},
+	{ZEND_STRL("static")},
+	{ZEND_STRL("string")},
+	{ZEND_STRL("true")},
+	{NULL, 0}
+};
+
+static zend_bool zend_is_reserved_class_name(const zend_string *name) /* {{{ */
+{
+	const struct reserved_class_name *reserved = reserved_class_names;
+
+	const char *uqname = name->val;
+	size_t uqname_len = name->len;
+	zend_get_unqualified_name(name, &uqname, &uqname_len);
+
+	for (; reserved->name; ++reserved) {
+		if (uqname_len == reserved->len
+			&& zend_binary_strcasecmp(uqname, uqname_len, reserved->name, reserved->len) == 0
+		) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+ZEND_API void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
+{
+	if (zend_is_reserved_class_name(name)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use '%s' as class name as it is reserved", name->val);
+	}
+}
+/* }}} */
+
 typedef struct _scalar_typehint_info {
 	const char* name;
 	const size_t name_len;
@@ -143,39 +190,19 @@ static const scalar_typehint_info scalar_typehints[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
-static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(const zend_string *const_name) /* {{{ */
+static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(const zend_string *name) /* {{{ */
 {
 	const scalar_typehint_info *info = &scalar_typehints[0];
-	const char *uqname;
-	size_t uqname_len;
 
-	if (!zend_get_unqualified_name(const_name, &uqname, &uqname_len)) {
-		uqname = const_name->val;
-		uqname_len = const_name->len;
-	}
-
-	while (info->name) {
-		if (uqname_len == info->name_len && zend_binary_strcasecmp(uqname, uqname_len, info->name, info->name_len) == 0) {
-			break;
+	for (; info->name; ++info) {
+		if (name->len == info->name_len
+			&& zend_binary_strcasecmp(name->val, name->len, info->name, info->name_len) == 0
+		) {
+			return info;
 		}
-		info++;
 	}
 
-	if (info->name) {
-		return info;
-	} else {
-		return NULL;
-	}
-}
-/* }}} */
-
-ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{ */
-{
-	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
-
-	if (info) {
-		zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a class name", info->name);
-	}
+	return NULL;
 }
 /* }}} */
 
@@ -184,9 +211,6 @@ static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const z
 	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
 
 	if (info) {
-		if (const_name->len != info->name_len) {
-			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a type declaration", const_name->val);
-		}
 		return info->type;
 	} else {
 		return 0;
@@ -4099,6 +4123,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 			} else {
 				if (zend_is_const_default_class_ref(return_type_ast)) {
 					class_name = zend_resolve_class_name_ast(return_type_ast);
+					zend_assert_valid_class_name(class_name);
 				} else {
 					zend_string_addref(class_name);
 					if (!is_method) {
@@ -4225,9 +4250,9 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				if (type != 0) {
 					arg_info->type_hint = type;
 				} else {
-
 					if (zend_is_const_default_class_ref(type_ast)) {
 						class_name = zend_resolve_class_name_ast(type_ast);
+						zend_assert_valid_class_name(class_name);
 					} else {
 						zend_string_addref(class_name);
 					}
@@ -4846,18 +4871,13 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved",
-			name->val);
-	}
+	zend_assert_valid_class_name(name);
 
 	lcname = zend_string_tolower(name);
 
 	if (CG(current_import)) {
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
 	}
-
-	zend_assert_valid_class_name(name);
 
 	if (CG(current_namespace)) {
 		name = zend_prefix_with_ns(name);
@@ -5094,19 +5114,13 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		if (type == T_CLASS) {
-			zend_assert_valid_class_name(new_name);
-		}
-
 		if (case_sensitive) {
 			lookup_name = zend_string_copy(new_name);
 		} else {
 			lookup_name = zend_string_tolower(new_name);
 		}
 
-		if (type == T_CLASS && (zend_string_equals_literal(lookup_name, "self")
-			|| zend_string_equals_literal(lookup_name, "parent"))
-		) {
+		if (type == T_CLASS && zend_is_reserved_class_name(new_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' "
 				"is a special class name", old_name->val, new_name->val, new_name->val);
 		}

@@ -5,4 +5,4 @@ Scalar type hint names cannot be used as class, trait or interface names (3) - u
 
 use foobar as float;
 --EXPECTF--
-Fatal error: "float" cannot be used as a class name in %s on line %d
+Fatal error: Cannot use foobar as float because 'float' is a special class name in %s on line %d
