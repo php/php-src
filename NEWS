@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.24
+02 Apr 2015, PHP 5.5.24RC1
 
 - Core:
   . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
@@ -17,12 +17,12 @@ PHP                                                                        NEWS
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
     with an Iterator). (Nikita)
 
+- Curl:
+  . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
+
 - Date:
   . Export date_get_immutable_ce so that it can be used by extensions. (Derick
     Rethans)
-
-- Curl:
-  . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
 
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
