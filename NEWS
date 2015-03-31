@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Date:
   . Export date_get_immutable_ce so that it can be used by extensions. (Derick
     Rethans)
+  . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
 
 - Curl:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
