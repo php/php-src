@@ -90,7 +90,8 @@ PHP                                                                        NEWS
     (CVE-2015-0231) (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
-  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (CVE-2015-2348)
+    (Stas)
 
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
