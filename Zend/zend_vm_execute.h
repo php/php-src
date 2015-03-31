@@ -4502,7 +4502,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -4527,13 +4529,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CONST == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -5556,7 +5564,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_C
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -5577,7 +5587,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_C
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -6187,7 +6199,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -6212,13 +6226,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CONST == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -6448,7 +6468,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_V
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -6469,7 +6491,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_V
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -6675,7 +6699,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -6700,13 +6726,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CONST == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -7283,7 +7315,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -7304,7 +7338,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -28735,7 +28771,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -28760,13 +28798,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CV == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -30026,7 +30070,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONS
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -30047,7 +30093,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONS
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -30760,7 +30808,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -30785,13 +30835,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CV == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -31117,7 +31173,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -31138,7 +31196,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -31676,7 +31736,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -31701,13 +31763,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+
+			HANDLE_EXCEPTION();
+		}
 		if (IS_CV == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -32301,7 +32369,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -32322,7 +32392,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -38428,7 +38500,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -38453,13 +38527,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(free_op1);
+			HANDLE_EXCEPTION();
+		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -39013,7 +39093,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -39034,7 +39116,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -39317,7 +39401,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -39342,13 +39428,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(free_op1);
+			HANDLE_EXCEPTION();
+		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -39579,7 +39671,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -39600,7 +39694,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -39712,7 +39808,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
@@ -39737,13 +39835,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
 				}
 
 				goto fetch_var_return;
 			}
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor_nogc(free_op1);
+			HANDLE_EXCEPTION();
+		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
 			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
 		}
@@ -39974,7 +40078,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
@@ -39995,7 +40101,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 
 					/* check if static properties were destoyed */
 					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+						zval_ptr_dtor_nogc(free_op1);
+						HANDLE_EXCEPTION();
 					}
 
 					goto is_var_return;
