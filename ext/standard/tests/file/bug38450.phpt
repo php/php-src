@@ -7,7 +7,7 @@ class VariableStream {
 	var $position;
 	var $varname;
 
-	function VariableStream($var) {
+	function __construct($var) {
 		var_dump("constructor!");
 	}
 
@@ -102,7 +102,7 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Missing argument 1 for VariableStream::VariableStream() in %s on line %d
+Warning: Missing argument 1 for VariableStream::__construct() in %s on line %d
 string(12) "constructor!"
 line1
 line2

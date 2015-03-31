@@ -13,10 +13,12 @@ set_error_handler(function($_, $msg, $file) {
     new B;
 });
 
-eval('class A { function a() {} function __construct() {} }');
+/* This is just a particular example of a non-fatal compile-time error
+ * If this breaks in future, just find another example and use it instead */
+eval('abstract class foo { abstract static function bar(); }');
 
 ?>
 --EXPECTF--
-string(50) "Redefining already defined constructor for class A"
+string(%d) "Static function foo::bar() should not be abstract"
 string(%d) "%s(%d) : eval()'d code"
 string(1) "B"
