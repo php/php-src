@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
     with an Iterator). (Nikita)
 
+- Date:
+  . Export date_get_immutable_ce so that it can be used by extensions. (Derick
+    Rethans)
+
 - Curl:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
 
