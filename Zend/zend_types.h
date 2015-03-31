@@ -224,12 +224,12 @@ struct _zend_array {
 #endif
 
 #define HT_HASH_EX(data, idx) \
-	((uint32_t*)(data))[(int)(idx)]
+	((uint32_t*)(data))[(int32_t)(idx)]
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arData, idx)
 
 #define HT_HASH_SIZE(ht) \
-	((-(int)(ht)->nTableMask) * sizeof(uint32_t))
+	((-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
 #define HT_DATA_SIZE(ht) \
 	((ht)->nTableSize * sizeof(Bucket))
 #define HT_SIZE(ht) \
