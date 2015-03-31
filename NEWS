@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.40
 
+- Ereg:
+  . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
+
 - GD:
   . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Remi)
 
