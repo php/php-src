@@ -10,7 +10,6 @@ PHP                                                                        NEWS
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
-  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
   . Fixed bug #69210 (serialize function return corrupted data when sleep has
     non-string values). (Juan Basso)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
@@ -89,6 +88,9 @@ PHP                                                                        NEWS
     functions). (kostyantyn dot lysyy at oracle dot com)
   . Fixed bug #68976 (Use After Free Vulnerability in unserialize()).
     (CVE-2015-0231) (Stas)
+  . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
+    configuration options). (Anatol Belski)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
 
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
