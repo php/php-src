@@ -10,7 +10,7 @@ error_reporting=2047
 class MyCloneable {
 	static $id = 0;
 
-	function MyCloneable() {
+	function __construct() {
 		$this->id = self::$id++;
 	}
 

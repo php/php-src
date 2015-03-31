@@ -23,6 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_smart_str.h"
+#include "zend_inheritance.h"
 
 static void ptr_dtor(zval *zv) /* {{{ */
 {
@@ -1596,9 +1597,35 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 	/* verify that all abstract methods from traits have been implemented */
 	zend_verify_abstract_class(ce);
 
+	/* Emit E_DEPRECATED for PHP 4 constructors */
+	zend_check_deprecated_constructor(ce);
+
 	/* now everything should be fine and an added ZEND_ACC_IMPLICIT_ABSTRACT_CLASS should be removed */
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+	}
+}
+/* }}} */
+
+
+static zend_bool zend_has_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
+{
+	const zend_string *constructor_name;
+	if (!ce->constructor) {
+		return 0;
+	}
+	constructor_name = ce->constructor->common.function_name;
+	return !zend_binary_strcasecmp(
+		ce->name->val, ce->name->len,
+		constructor_name->val, constructor_name->len
+	);
+}
+/* }}} */
+
+void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
+{
+	if (zend_has_deprecated_constructor(ce)) {
+		zend_error(E_DEPRECATED, "Methods with the same name as their class will not be constructors in a future version of PHP; %s has a deprecated constructor", ce->name->val);
 	}
 }
 /* }}} */
