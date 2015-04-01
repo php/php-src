@@ -1665,7 +1665,7 @@ PHPAPI int php_copy_file(const char *src, const char *dest)
  */
 PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg)
 {
-	return php_copy_file_ctx(src, dest, 0, NULL);
+	return php_copy_file_ctx(src, dest, src_flg, NULL);
 }
 /* }}} */
 
