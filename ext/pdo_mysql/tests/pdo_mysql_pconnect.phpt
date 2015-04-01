@@ -88,6 +88,8 @@ MySQLPDOTest::skip();
 		printf("[001] %s, [%s] %s [%s] %s\n",
 			$e->getMessage(),
 			(is_object($db1)) ? $db1->errorCode() : 'n/a',
+			(is_object($db1)) ? implode(' ', $db1->errorInfo()) : 'n/a');
+			(is_object($db2)) ? $db2->errorCode() : 'n/a',
 			(is_object($db2)) ? implode(' ', $db2->errorInfo()) : 'n/a');
 	}
 
