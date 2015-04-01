@@ -30,8 +30,12 @@ PHP_METHOD(Spoofchecker, __construct)
 {
 	int checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
+	zend_error_handling error_handling;
+
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 
 	if (zend_parse_parameters_none() == FAILURE) {
+		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
@@ -46,6 +50,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	*/
 	checks = uspoof_getChecks(co->uspoof, SPOOFCHECKER_ERROR_CODE_P(co));
 	uspoof_setChecks(co->uspoof, checks & ~USPOOF_SINGLE_SCRIPT, SPOOFCHECKER_ERROR_CODE_P(co));
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

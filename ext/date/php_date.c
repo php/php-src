@@ -2670,9 +2670,7 @@ PHP_METHOD(DateTime, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		if (!php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1)) {
-			ZEND_CTOR_MAKE_NULL();
-		}
+		php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
 	}
 	zend_restore_error_handling(&error_handling);
 }
@@ -3679,9 +3677,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &tz, &tz_len)) {
 		tzobj = Z_PHPTIMEZONE_P(getThis());
-		if (FAILURE == timezone_initialize(tzobj, tz)) {
-			ZEND_CTOR_MAKE_NULL();
-		}
+		timezone_initialize(tzobj, tz);
 	}
 	zend_restore_error_handling(&error_handling);
 }
@@ -4113,8 +4109,6 @@ PHP_METHOD(DateInterval, __construct)
 			diobj = Z_PHPINTERVAL_P(getThis());
 			diobj->diff = reltime;
 			diobj->initialized = 1;
-		} else {
-			ZEND_CTOR_MAKE_NULL();
 		}
 	}
 	zend_restore_error_handling(&error_handling);

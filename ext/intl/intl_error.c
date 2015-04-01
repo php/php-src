@@ -29,7 +29,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
-static zend_class_entry *IntlException_ce_ptr;
+zend_class_entry *IntlException_ce_ptr;
 
 /* {{{ intl_error* intl_g_error_get()
  * Return global error structure.

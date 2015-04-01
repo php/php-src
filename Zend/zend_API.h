@@ -538,8 +538,6 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);
 
-ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data);
-
 ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
 
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
@@ -650,10 +648,6 @@ END_EXTERN_C()
 		ZVAL_COPY(return_value, _z);  \
 	}                                 \
 } while (0)
-
-/* May be used in internal constructors to make them return NULL */
-#define ZEND_CTOR_MAKE_NULL() \
-	zend_ctor_make_null(execute_data)
 
 #define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 

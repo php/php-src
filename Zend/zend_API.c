@@ -4128,15 +4128,6 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 }
 /* }}} */
 
-ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
-{
-	if (EX(return_value)) {
-		Z_OBJ_P(EX(return_value)) = NULL;
-		ZVAL_NULL(EX(return_value));
-	}
-}
-/* }}} */
-
 ZEND_API const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
 {
 	if(ce->ce_flags & ZEND_ACC_TRAIT) {

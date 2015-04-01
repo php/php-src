@@ -25,11 +25,13 @@
 #include <unicode/gregocal.h>
 extern "C" {
 #include "../php_intl.h"
+#include "../intl_common.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
 #include <ext/date/php_date.h>
+#include "zend_exceptions.h"
 }
 
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
@@ -189,17 +191,18 @@ U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 {
-	zval	orig_this	= *getThis();
-	intl_error_reset(NULL);
+	zend_error_handling error_handling;
 
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
 	//changes this to IS_NULL (without first destroying) if there's an error
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		ZEND_CTOR_MAKE_NULL();
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
 	}
+	zend_restore_error_handling(&error_handling);
 }
 
 U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)

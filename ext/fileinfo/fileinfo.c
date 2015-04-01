@@ -282,15 +282,6 @@ PHP_MINFO_FUNCTION(fileinfo)
 }
 /* }}} */
 
-#define FILEINFO_DESTROY_OBJECT(object)									\
-	do {																\
-		if (object) {													\
-			zend_object_store_ctor_failed(Z_OBJ_P(object));	\
-			Z_OBJ_P(object) = NULL;										\
-			ZEND_CTOR_MAKE_NULL();										\
-		}																\
-	} while (0)
-
 /* {{{ proto resource finfo_open([int options [, string arg]])
    Create a new fileinfo resource. */
 PHP_FUNCTION(finfo_open)
@@ -301,9 +292,18 @@ PHP_FUNCTION(finfo_open)
 	php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
+	zend_error_handling zeh;
 
+	if (object) {
+		zend_replace_error_handling(EH_THROW, NULL, &zeh);
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
-		FILEINFO_DESTROY_OBJECT(object);
+		if (object) {
+			zend_restore_error_handling(&zeh);
+			if (!EG(exception)) {
+				zend_throw_exception(NULL, "Constructor failed", 0);
+			}
+		}
 		RETURN_FALSE;
 	}
 
@@ -322,11 +322,21 @@ PHP_FUNCTION(finfo_open)
 	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 
 		if (php_check_open_basedir(file)) {
-			FILEINFO_DESTROY_OBJECT(object);
+			if (object) {
+				zend_restore_error_handling(&zeh);
+				if (!EG(exception)) {
+					zend_throw_exception(NULL, "Constructor failed", 0);
+				}
+			}
 			RETURN_FALSE;
 		}
 		if (!expand_filepath_with_mode(file, resolved_path, NULL, 0, CWD_EXPAND)) {
-			FILEINFO_DESTROY_OBJECT(object);
+			if (object) {
+				zend_restore_error_handling(&zeh);
+				if (!EG(exception)) {
+					zend_throw_exception(NULL, "Constructor failed", 0);
+				}
+			}
 			RETURN_FALSE;
 		}
 		file = resolved_path;
@@ -340,7 +350,12 @@ PHP_FUNCTION(finfo_open)
 	if (finfo->magic == NULL) {
 		efree(finfo);
 		php_error_docref(NULL, E_WARNING, "Invalid mode '%pd'.", options);
-		FILEINFO_DESTROY_OBJECT(object);
+		if (object) {
+			zend_restore_error_handling(&zeh);
+			if (!EG(exception)) {
+				zend_throw_exception(NULL, "Constructor failed", 0);
+			}
+		}
 		RETURN_FALSE;
 	}
 
@@ -348,11 +363,17 @@ PHP_FUNCTION(finfo_open)
 		php_error_docref(NULL, E_WARNING, "Failed to load magic database at '%s'.", file);
 		magic_close(finfo->magic);
 		efree(finfo);
-		FILEINFO_DESTROY_OBJECT(object);
+		if (object) {
+			zend_restore_error_handling(&zeh);
+			if (!EG(exception)) {
+				zend_throw_exception(NULL, "Constructor failed", 0);
+			}
+		}
 		RETURN_FALSE;
 	}
 
 	if (object) {
+		zend_restore_error_handling(&zeh);
 		FILEINFO_REGISTER_OBJECT(object, finfo);
 	} else {
 		RETURN_RES(zend_register_resource(finfo, le_fileinfo));

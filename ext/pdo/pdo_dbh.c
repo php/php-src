@@ -208,10 +208,12 @@ static PHP_METHOD(PDO, dbh_constructor)
 	zval *options = NULL;
 	char alt_dsn[512];
 	int call_factory = 1;
+	zend_error_handling zeh;
 
+	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
-		ZEND_CTOR_MAKE_NULL();
+		zend_restore_error_handling(&zeh);
 		return;
 	}
 
@@ -224,8 +226,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
+			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 
@@ -233,8 +235,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 		colon = strchr(data_source, ':');
 
 		if (!colon) {
+			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -243,14 +245,14 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* the specified URI holds connection details */
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
+			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
+			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -260,8 +262,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 	if (!driver) {
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
+		zend_restore_error_handling(&zeh);
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -396,12 +398,16 @@ options:
 			} ZEND_HASH_FOREACH_END();
 		}
 
+		zend_restore_error_handling(&zeh);
 		return;
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
-	ZEND_CTOR_MAKE_NULL();
+	zend_restore_error_handling(&zeh);
+	if (!EG(exception)) {
+		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
+	}
 }
 /* }}} */
 
@@ -459,11 +465,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
-		if (zend_call_function(&fci, &fcc) == FAILURE) {
-			Z_OBJ_P(object) = NULL;
-			ZEND_CTOR_MAKE_NULL();
-			object = NULL; /* marks failure */
-		} else if (!Z_ISUNDEF(retval)) {
+		if (zend_call_function(&fci, &fcc) != FAILURE) {
 			zval_ptr_dtor(&retval);
 		}
 

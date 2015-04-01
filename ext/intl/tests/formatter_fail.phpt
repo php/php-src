@@ -11,10 +11,19 @@ function err($fmt) {
 	}
 }
 
+function print_exception($e) {
+	echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+}
+
 function crt($t, $l, $s) {
 	switch(true) {
 		case $t == "O":
-			return new NumberFormatter($l, $s);
+			try {
+				return new NumberFormatter($l, $s);
+			} catch (IntlException $e) {
+				print_exception($e);
+				return null;
+			}
 			break;
 		case $t == "C":
 			return NumberFormatter::create($l, $s);
@@ -33,7 +42,12 @@ $args = array(
 	array("en_US", NumberFormatter::PATTERN_RULEBASED),
 );
 
-$fmt = new NumberFormatter();
+try {
+	$fmt = new NumberFormatter();
+} catch (IntlException $e) {
+	print_exception($e);
+	$fmt = null;
+}
 err($fmt); 
 $fmt = numfmt_create();
 err($fmt); 
@@ -51,7 +65,7 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-Warning: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
+Exception: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
@@ -59,11 +73,13 @@ Warning: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
 
 Warning: NumberFormatter::create() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+
+Exception: Constructor failed in %sformatter_fail.php on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-Warning: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+Exception: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: NumberFormatter::create() expects parameter 1 to be string, array given in %s on line %d
@@ -71,9 +87,13 @@ Warning: NumberFormatter::create() expects parameter 1 to be string, array given
 
 Warning: numfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+
+Exception: Constructor failed in %sformatter_fail.php on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
+
+Exception: Constructor failed in %sformatter_fail.php on line %d
 'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
 'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
 'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'

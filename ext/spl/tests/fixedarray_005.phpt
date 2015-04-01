@@ -5,8 +5,14 @@ SPL: FixedArray: Trying to instantiate passing object to constructor parameter
 
 $b = new stdClass;
 
-$a = new SplFixedArray($b);
+try {
+	$a = new SplFixedArray($b);
+}
+catch(InvalidArgumentException $iae) {
+	echo "Ok - ".$iae->getMessage().PHP_EOL;
+}
+
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be integer, object given in %s on line %d
+Ok - SplFixedArray::__construct() expects parameter 1 to be integer, object given
