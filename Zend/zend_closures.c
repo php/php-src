@@ -269,7 +269,7 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		zend_execute_data *ex = EG(current_execute_data);
 		while (ex) {
 			if (ex->func == &closure->func) {
-				zend_error(E_ERROR, "Cannot destroy active lambda function");
+				zend_error_noreturn(E_ERROR, "Cannot destroy active lambda function");
 			}
 			ex = ex->prev_execute_data;
 		}

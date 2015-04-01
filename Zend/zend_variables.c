@@ -147,7 +147,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -178,7 +178,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);

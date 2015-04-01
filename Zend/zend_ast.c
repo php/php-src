@@ -203,7 +203,7 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
 			break;
 		default:
-			zend_error(E_ERROR, "Illegal offset type");
+			zend_error_noreturn(E_ERROR, "Illegal offset type");
 			break;
  	}
 }
@@ -338,7 +338,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		default:
-			zend_error(E_ERROR, "Unsupported constant expression");
+			zend_error_noreturn(E_ERROR, "Unsupported constant expression");
 	}
 }
 

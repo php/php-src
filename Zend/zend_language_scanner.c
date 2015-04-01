@@ -988,7 +988,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						}
 
 						if (!valid) {
-							zend_error(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence");
+							zend_error_noreturn(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence");
 						}
 
 						errno = 0;

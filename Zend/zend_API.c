@@ -1020,7 +1020,7 @@ ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const ch
 		*object = this_ptr;
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
-			zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+			zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
 				Z_OBJCE_P(this_ptr)->name->val, get_active_function_name(), ce->name->val, get_active_function_name());
 		}
 
@@ -1057,7 +1057,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
 			if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-				zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+				zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
 					ce->name->val, get_active_function_name(), Z_OBJCE_P(this_ptr)->name->val, get_active_function_name());
 			}
 			va_end(va);
@@ -1840,7 +1840,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 	if (module->module_startup_func) {
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {
-			zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
+			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);
 			EG(current_module) = NULL;
 			return FAILURE;
 		}
@@ -2189,7 +2189,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				if (info->class_name) {
 					ZEND_ASSERT(info->type_hint == IS_OBJECT);
 					if (!scope && (!strcasecmp(info->class_name, "self") || !strcasecmp(info->class_name, "parent"))) {
-						zend_error(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
+						zend_error_noreturn(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
 					}
 				}
 
@@ -2399,15 +2399,15 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 
 		if (ctor && ctor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ctor->common.fn_flags & ZEND_ACC_CTOR) {
-			zend_error(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", scope->name->val, ctor->common.function_name->val);
+			zend_error_noreturn(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", scope->name->val, ctor->common.function_name->val);
 		}
 
 		if (dtor && dtor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
-			zend_error(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", scope->name->val, dtor->common.function_name->val);
+			zend_error_noreturn(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", scope->name->val, dtor->common.function_name->val);
 		}
 
 		if (clone && clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
-			zend_error(E_CORE_ERROR, "%s::%s() cannot declare a return type", scope->name->val, clone->common.function_name->val);
+			zend_error_noreturn(E_CORE_ERROR, "%s::%s() cannot declare a return type", scope->name->val, clone->common.function_name->val);
 		}
 		efree((char*)lc_class_name);
 	}
@@ -3092,7 +3092,7 @@ get_function_via_handler:
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 					retval = 0;
 				} else {
-					zend_error(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
+					zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;
@@ -3636,7 +3636,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 			case IS_ARRAY:
 			case IS_OBJECT:
 			case IS_RESOURCE:
-				zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 				break;
 			default:
 				break;
@@ -3798,7 +3798,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, Z_OBJCE_P(object)->name->val);
+		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, Z_OBJCE_P(object)->name->val);
 	}
 	ZVAL_STRINGL(&property, name, name_length);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
@@ -3976,7 +3976,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", name, Z_OBJCE_P(object)->name->val);
+		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be read", name, Z_OBJCE_P(object)->name->val);
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);

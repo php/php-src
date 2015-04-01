@@ -600,7 +600,7 @@ Balloc
 		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(ULong));
 		if (!rv) {
 			FREE_DTOA_LOCK(0);
-			zend_error(E_ERROR, "Balloc() failed to allocate memory");
+			zend_error_noreturn(E_ERROR, "Balloc() failed to allocate memory");
 		}
 #else
 		len = (sizeof(Bigint) + (x-1)*sizeof(ULong) + sizeof(double) - 1)
@@ -613,7 +613,7 @@ Balloc
 			rv = (Bigint*)MALLOC(len*sizeof(double));
 			if (!rv) {
 				FREE_DTOA_LOCK(0);
-				zend_error(E_ERROR, "Balloc() failed to allocate memory");
+				zend_error_noreturn(E_ERROR, "Balloc() failed to allocate memory");
 			}
 #endif
 		rv->k = k;

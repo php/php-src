@@ -880,7 +880,7 @@ ZEND_API void zend_verify_internal_return_error(const zend_function *zf, const c
 		fclass = "";
 	}
 
-	zend_error(E_CORE_ERROR, "Return value of %s%s%s() must %s%s, %s%s returned",
+	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s, %s%s returned",
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 

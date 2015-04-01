@@ -303,7 +303,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 	}
 
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
-		zend_error(E_ERROR, "Cannot resume an already running generator");
+		zend_error_noreturn(E_ERROR, "Cannot resume an already running generator");
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */

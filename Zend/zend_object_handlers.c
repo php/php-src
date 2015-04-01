@@ -42,7 +42,7 @@
 #define Z_OBJ_PROTECT_RECURSION(zval_p) \
 	do { \
 		if (Z_OBJ_APPLY_COUNT_P(zval_p) >= 3) { \
-			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
+			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?"); \
 		} \
 		Z_OBJ_INC_APPLY_COUNT_P(zval_p); \
 	} while (0)
@@ -170,7 +170,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 		return ht;
 	}
 
-	zend_error(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
 
 	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }

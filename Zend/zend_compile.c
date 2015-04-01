@@ -4490,7 +4490,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
 		}
 	}
@@ -5229,7 +5229,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
 		) {
 			if (!zend_string_equals(import_name, name)) {
-				zend_error(E_COMPILE_ERROR, "Cannot declare const %s because "
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", name->val);
 			}
 		}
@@ -5499,7 +5499,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_hash_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), value);
 					break;
 				default:
-					zend_error(E_COMPILE_ERROR, "Illegal offset type");
+					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
 					break;
 			}
 		} else {

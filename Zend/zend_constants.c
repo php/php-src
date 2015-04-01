@@ -334,14 +334,14 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			if (scope) {
 				ce = scope;
 			} else {
-				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access self:: when no class scope is active");
 			}
 		} else if (class_name_len == sizeof("parent")-1 &&
 		           !memcmp(lcname, "parent", sizeof("parent")-1)) {
 			if (!scope) {
-				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access parent:: when no class scope is active");
 			} else if (!scope->parent) {
-				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+				zend_error_noreturn(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			} else {
 				ce = scope->parent;
 			}
@@ -350,7 +350,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			if (EG(current_execute_data) && EG(current_execute_data)->called_scope) {
 				ce = EG(current_execute_data)->called_scope;
 			} else {
-				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
 		} else {
 			ce = zend_fetch_class(class_name, flags);
@@ -360,7 +360,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
+					zend_error_noreturn(E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
 				}
 			} else if (Z_ISREF_P(ret_constant)) {
 				ret_constant = Z_REFVAL_P(ret_constant);

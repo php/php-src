@@ -527,7 +527,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
-		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+		zend_error_noreturn(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 
@@ -550,7 +550,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
 				size_t len;
 
-				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
 					zend_string *tmp = zend_string_init(colon + 1, len, 0);
@@ -584,9 +584,9 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (save->val[0] == '\\') {
-						zend_error(E_ERROR, "Undefined constant '%s'", save->val + 1);
+						zend_error_noreturn(E_ERROR, "Undefined constant '%s'", save->val + 1);
 					} else {
-						zend_error(E_ERROR, "Undefined constant '%s'", save->val);
+						zend_error_noreturn(E_ERROR, "Undefined constant '%s'", save->val);
 					}
 					if (inline_change) {
 						zend_string_release(save);
@@ -698,7 +698,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		case sizeof(zend_fcall_info):
 			break; /* nothing to do currently */
 		default:
-			zend_error(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
+			zend_error_noreturn(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
 			break;
 	}
 
@@ -1182,7 +1182,7 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
-	zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error_noreturn(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
 
@@ -1224,7 +1224,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
 			EG(timed_out) = 0;
 			tq_timer = NULL;
-			zend_error(E_ERROR, "Could not delete queued timer");
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
 			return;
 		}
 		tq_timer = NULL;
@@ -1234,7 +1234,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(timed_out), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		EG(timed_out) = 0;
 		tq_timer = NULL;
-		zend_error(E_ERROR, "Could not queue new timer");
+		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
 	EG(timed_out) = 0;
@@ -1283,7 +1283,7 @@ void zend_unset_timeout(void) /* {{{ */
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
 			EG(timed_out) = 0;
 			tq_timer = NULL;
-			zend_error(E_ERROR, "Could not delete queued timer");
+			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
 			return;
 		}
 		tq_timer = NULL;
@@ -1319,20 +1319,20 @@ check_fetch_type:
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
 			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access self:: when no class scope is active");
 			}
 			return EG(scope);
 		case ZEND_FETCH_CLASS_PARENT:
 			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access parent:: when no class scope is active");
 			}
 			if (!EG(scope)->parent) {
-				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+				zend_error_noreturn(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
 			if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
-				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
+				zend_error_noreturn(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
 			return EG(current_execute_data)->called_scope;
 		case ZEND_FETCH_CLASS_AUTO: {
@@ -1348,11 +1348,11 @@ check_fetch_type:
 		if (use_autoload) {
 			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
-					zend_error(E_ERROR, "Interface '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Interface '%s' not found", class_name->val);
 				} else if (fetch_type == ZEND_FETCH_CLASS_TRAIT) {
-                	zend_error(E_ERROR, "Trait '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Trait '%s' not found", class_name->val);
                 } else {
-					zend_error(E_ERROR, "Class '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", class_name->val);
 				}
 			}
 		}
@@ -1371,11 +1371,11 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *
 		if (use_autoload) {
 			if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
 				if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-					zend_error(E_ERROR, "Interface '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Interface '%s' not found", class_name->val);
 				} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-					zend_error(E_ERROR, "Trait '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Trait '%s' not found", class_name->val);
 				} else {
-					zend_error(E_ERROR, "Class '%s' not found", class_name->val);
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", class_name->val);
 				}
 			}
 		}
@@ -1432,7 +1432,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 		} ZEND_HASH_FOREACH_END();
 
 		if (ai.cnt) {
-			zend_error(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+			zend_error_noreturn(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
 				ce->name->val, ai.cnt,
 				ai.cnt > 1 ? "s" : "",
 				DISPLAY_ABSTRACT_FN(0),

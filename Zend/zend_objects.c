@@ -117,7 +117,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		old_exception = NULL;
 		if (EG(exception)) {
 			if (EG(exception) == object) {
-				zend_error(E_ERROR, "Attempt to destruct pending exception");
+				zend_error_noreturn(E_ERROR, "Attempt to destruct pending exception");
 			} else {
 				old_exception = EG(exception);
 				EG(exception) = NULL;
