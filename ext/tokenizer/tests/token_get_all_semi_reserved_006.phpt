@@ -6,7 +6,7 @@ Semi reserved words support: string interpolation
 <?php
 $tokens = token_get_all('<?php
   class SomeClass {
-    const STRING = "{$foo} ${bar}"; // invalid code but hould be tokenized right
+    const STRING = "{$foo} ${bar}"; // invalid code but should be tokenized right
     function function() {
         return "{$foo} ${bar}";
     }
@@ -44,7 +44,7 @@ L3: T_STRING_VARNAME bar
 }
 "
 ;
-L3: T_COMMENT // invalid code but hould be tokenized right
+L3: T_COMMENT // invalid code but should be tokenized right
 
 L4: T_FUNCTION function
 L4: T_STRING function
