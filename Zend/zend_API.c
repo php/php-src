@@ -3103,7 +3103,7 @@ get_function_via_handler:
 					verb = "should not";
 				} else {
 					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-					severity = E_ERROR;
+					severity = E_ERROR; //TODO: add E_EXCEPTION???
 					verb = "cannot";
 				}
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {

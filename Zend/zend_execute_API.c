@@ -592,15 +592,16 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 						zend_string_release(save);
 					}
 					save = NULL;
-				}
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
-				if (!inline_change) {
-					ZVAL_STRINGL(p, actual, actual_len);
 				} else {
-					Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
-						IS_STRING_EX : IS_INTERNED_STRING_EX;
-					if (save && save->val != actual) {
-						zend_string_release(save);
+					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
+					if (!inline_change) {
+						ZVAL_STRINGL(p, actual, actual_len);
+					} else {
+						Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
+							IS_STRING_EX : IS_INTERNED_STRING_EX;
+						if (save && save->val != actual) {
+							zend_string_release(save);
+						}
 					}
 				}
 			}
@@ -1313,27 +1314,31 @@ zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type) /* {
 	zend_class_entry *ce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 	int silent       = (fetch_type & ZEND_FETCH_CLASS_SILENT) != 0;
+	int error_type   = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
+						(E_EXCEPTION | E_ERROR) : E_ERROR;
 
 	fetch_type &= ZEND_FETCH_CLASS_MASK;
 
 check_fetch_type:
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (!EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Cannot access self:: when no class scope is active");
+			if (UNEXPECTED(!EG(scope))) {
+				zend_error(error_type, "Cannot access self:: when no class scope is active");
 			}
 			return EG(scope);
 		case ZEND_FETCH_CLASS_PARENT:
-			if (!EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Cannot access parent:: when no class scope is active");
+			if (UNEXPECTED(!EG(scope))) {
+				zend_error(error_type, "Cannot access parent:: when no class scope is active");
+				return NULL;
 			}
-			if (!EG(scope)->parent) {
-				zend_error_noreturn(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+			if (UNEXPECTED(!EG(scope)->parent)) {
+				zend_error(error_type, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
-			if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
-				zend_error_noreturn(E_ERROR, "Cannot access static:: when no class scope is active");
+			if (UNEXPECTED(!EG(current_execute_data)) || UNEXPECTED(!EG(current_execute_data)->called_scope)) {
+				zend_error(error_type, "Cannot access static:: when no class scope is active");
+				return NULL;
 			}
 			return EG(current_execute_data)->called_scope;
 		case ZEND_FETCH_CLASS_AUTO: {
@@ -1349,11 +1354,11 @@ check_fetch_type:
 		if (use_autoload) {
 			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
-					zend_error_noreturn(E_ERROR, "Interface '%s' not found", class_name->val);
+					zend_error(error_type, "Interface '%s' not found", class_name->val);
 				} else if (fetch_type == ZEND_FETCH_CLASS_TRAIT) {
-					zend_error_noreturn(E_ERROR, "Trait '%s' not found", class_name->val);
+					zend_error(error_type, "Trait '%s' not found", class_name->val);
                 } else {
-					zend_error_noreturn(E_ERROR, "Class '%s' not found", class_name->val);
+					zend_error(error_type, "Class '%s' not found", class_name->val);
 				}
 			}
 		}
@@ -1370,13 +1375,15 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *
 
 	if ((ce = zend_lookup_class_ex(class_name, key, use_autoload)) == NULL) {
 		if (use_autoload) {
+			int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
+								(E_EXCEPTION | E_ERROR) : E_ERROR;
 			if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
 				if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-					zend_error_noreturn(E_ERROR, "Interface '%s' not found", class_name->val);
+					zend_error(error_type, "Interface '%s' not found", class_name->val);
 				} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-					zend_error_noreturn(E_ERROR, "Trait '%s' not found", class_name->val);
+					zend_error(error_type, "Trait '%s' not found", class_name->val);
 				} else {
-					zend_error_noreturn(E_ERROR, "Class '%s' not found", class_name->val);
+					zend_error(error_type, "Class '%s' not found", class_name->val);
 				}
 			}
 		}
