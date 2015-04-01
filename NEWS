@@ -98,6 +98,10 @@
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
+- Intl:
+  . Removed deprecated aliases datefmt_set_timezone_id() and
+    IntlDateFormatter::setTimeZoneID(). (Nikita)
+
 - JSON
   . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
