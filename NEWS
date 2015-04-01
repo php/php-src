@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
 
 - OPCache:
+  . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
   . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
 
 ?? ??? 2015, PHP 5.5.24
