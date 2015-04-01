@@ -632,6 +632,12 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -719,6 +725,12 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		FREE_UNFETCHED_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -1053,6 +1065,11 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	retval = EX_VAR(opline->result.var);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
@@ -1151,6 +1168,11 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	retval = EX_VAR(opline->result.var);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
@@ -1774,6 +1796,11 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
@@ -1839,6 +1866,11 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
@@ -1867,6 +1899,11 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
@@ -1895,6 +1932,11 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
@@ -1963,6 +2005,11 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|CV, CONST|TMPV
 		property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
+		if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
 		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot use temporary expression in write context");
 			FREE_OP2();
@@ -1998,6 +2045,11 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
@@ -2061,6 +2113,11 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_OP2();
@@ -2781,6 +2838,12 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 	}
 
 	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 
 	if (OP1_TYPE != IS_UNUSED) {
 		ZVAL_DEREF(object);
@@ -4739,6 +4802,11 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	SAVE_OPLINE();
 	obj = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(obj) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		HANDLE_EXCEPTION();
+	}
+
 	do {
 		if (OP1_TYPE == IS_CONST ||
 		    (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
@@ -5343,6 +5411,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_UNFETCHED_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
@@ -5427,6 +5500,11 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_UNFETCHED_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
@@ -6186,6 +6264,11 @@ ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|T
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 ZEND_VM_C_LABEL(isset_dim_obj_again):
 	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(container);
@@ -6303,6 +6386,11 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);

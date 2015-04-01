@@ -502,24 +502,15 @@ static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, const zend_exe
 }
 
 static zend_always_inline zval *_get_obj_zval_ptr_unused(zend_execute_data *execute_data)
-{
-	if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
-		return &EX(This);
-	} else {
-		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		return NULL;
-	}
+{	
+	return &EX(This);
 }
 
 static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_execute_data *execute_data, zend_free_op *should_free, int type)
 {
 	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
-			*should_free = NULL;
-			return &EX(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
+		*should_free = NULL;
+		return &EX(This);
 	}
 	return get_zval_ptr(op_type, op, execute_data, should_free, type);
 }
@@ -527,12 +518,8 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_execute_dat
 static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execute_data *execute_data, zend_free_op *should_free, int type)
 {
 	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
-			*should_free = NULL;
-			return &EX(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
+		*should_free = NULL;
+		return &EX(This);
 	}
 	return get_zval_ptr_ptr(op_type, node, execute_data, should_free, type);
 }
