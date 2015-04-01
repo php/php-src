@@ -2076,7 +2076,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 	if (arg_num > EX_NUM_ARGS()) {
 		ZVAL_COPY_VALUE(param, EX_CONSTANT(opline->op2));
 		if (Z_OPT_CONSTANT_P(param)) {
-			zval_update_constant(param, 0);
+			if (UNEXPECTED(zval_update_constant_ex(param, 0, NULL) != SUCCESS)) {
+				ZVAL_UNDEF(param);
+				HANDLE_EXCEPTION();
+			}
 		} else {
 			/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
 			if (UNEXPECTED(Z_OPT_COPYABLE_P(param))) {
@@ -3079,17 +3082,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OP
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
-	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate interface %s", ce->name->val);
-		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate trait %s", ce->name->val);
-		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
-		}
+	if (UNEXPECTED(object_init_ex(&object_zval, ce) != SUCCESS)) {
 		HANDLE_EXCEPTION();
 	}
-	object_init_ex(&object_zval, ce);
 	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval));
 
 	if (constructor == NULL) {
@@ -4604,7 +4599,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -5325,7 +5323,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_CONST_CONS
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
-				zval_update_constant(value, 1);
+				zval_update_constant_ex(value, 1, NULL);
 				EG(scope) = EX(func)->op_array.scope;
 			}
 			if (IS_CONST == IS_CONST) {
@@ -5339,7 +5337,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_CONST_CONS
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
-			HANDLE_EXCEPTION();
 		}
 	}
 constant_fetch_end:
@@ -5830,7 +5827,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 
 	ZVAL_COPY_VALUE(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
-		zval_update_constant(&c.value, 0);
+		if (UNEXPECTED(zval_update_constant_ex(&c.value, 0, NULL) != SUCCESS)) {
+
+
+			HANDLE_EXCEPTION();
+		}
 	} else {
 		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
 		if (UNEXPECTED(Z_OPT_COPYABLE(c.value))) {
@@ -6322,7 +6323,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -6822,7 +6826,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -13901,17 +13908,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCO
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
-	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate interface %s", ce->name->val);
-		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate trait %s", ce->name->val);
-		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
-		}
+	if (UNEXPECTED(object_init_ex(&object_zval, ce) != SUCCESS)) {
 		HANDLE_EXCEPTION();
 	}
-	object_init_ex(&object_zval, ce);
 	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval));
 
 	if (constructor == NULL) {
@@ -16158,7 +16157,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
-				zval_update_constant(value, 1);
+				zval_update_constant_ex(value, 1, NULL);
 				EG(scope) = EX(func)->op_array.scope;
 			}
 			if (IS_VAR == IS_CONST) {
@@ -16172,7 +16171,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
-			HANDLE_EXCEPTION();
 		}
 	}
 constant_fetch_end:
@@ -22440,7 +22438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_UNUSED_CON
 			ZVAL_DEREF(value);
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
-				zval_update_constant(value, 1);
+				zval_update_constant_ex(value, 1, NULL);
 				EG(scope) = EX(func)->op_array.scope;
 			}
 			if (IS_UNUSED == IS_CONST) {
@@ -22454,7 +22452,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_UNUSED_CON
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
-			HANDLE_EXCEPTION();
 		}
 	}
 constant_fetch_end:
@@ -29456,7 +29453,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -31563,7 +31563,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -32497,7 +32500,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 
@@ -39458,7 +39464,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 			zval_ptr_dtor_nogc(free_op1);
@@ -40382,7 +40391,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 			zval_ptr_dtor_nogc(free_op1);
@@ -40789,7 +40801,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		}
 		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
 			if (Z_CONSTANT_P(retval)) {
-				zval_update_constant(retval, 1);
+				if (UNEXPECTED(zval_update_constant_ex(retval, 1, NULL) != SUCCESS)) {
+					zval_ptr_dtor_nogc(free_op1);
+					HANDLE_EXCEPTION();
+				}
 			}
 		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
 			zval_ptr_dtor_nogc(free_op1);

@@ -945,7 +945,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 					return 0;
 				}
 				if ((flags & PDO_FETCH_SERIALIZE) == 0) {
-					object_init_ex(return_value, ce);
+					if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
+						return 0;
+					}
 					if (!stmt->fetch.cls.fci.size) {
 						if (!do_fetch_class_prepare(stmt))
 						{

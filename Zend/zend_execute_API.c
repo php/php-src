@@ -520,6 +520,7 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 #define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
+#define RESET_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) &= ~IS_VISITED_CONSTANT
 
 ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_class_entry *scope) /* {{{ */
 {
@@ -527,7 +528,8 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
-		zend_error_noreturn(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+		zend_error(E_EXCEPTION | E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+		return FAILURE;
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 
@@ -544,22 +546,18 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			} else {
 				ZVAL_EMPTY_STRING(p);
 			}
-		} else if ((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL) {
+		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
 			char *actual = Z_STRVAL_P(p);
 
-			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+			if (UNEXPECTED(EG(exception))) {
+				RESET_CONSTANT_VISITED(p);
+				return FAILURE;
+			} else if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
 				size_t len;
 
-				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
-				if (inline_change) {
-					zend_string *tmp = zend_string_init(colon + 1, len, 0);
-					zend_string_release(Z_STR_P(p));
-					Z_STR_P(p) = tmp;
-				} else {
-					Z_STR_P(p) = zend_string_init(colon + 1, len, 0);
-				}
-				Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
+				zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+				RESET_CONSTANT_VISITED(p);
+				return FAILURE;
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
@@ -584,14 +582,15 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (save->val[0] == '\\') {
-						zend_error_noreturn(E_ERROR, "Undefined constant '%s'", save->val + 1);
+						zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", save->val + 1);
 					} else {
-						zend_error_noreturn(E_ERROR, "Undefined constant '%s'", save->val);
+						zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", save->val);
 					}
 					if (inline_change) {
 						zend_string_release(save);
 					}
-					save = NULL;
+					RESET_CONSTANT_VISITED(p);
+					return FAILURE;
 				} else {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 					if (!inline_change) {
@@ -611,7 +610,10 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			}
 			ZVAL_COPY_VALUE(p, const_value);
 			if (Z_OPT_CONSTANT_P(p)) {
-				zval_update_constant_ex(p, 1, NULL);
+				if (UNEXPECTED(zval_update_constant_ex(p, 1, NULL) != SUCCESS)) {
+					RESET_CONSTANT_VISITED(p);
+					return FAILURE;
+				}
 			}
 			zval_opt_copy_ctor(p);
 		}
@@ -619,29 +621,16 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
-		if (inline_change) {
-			SEPARATE_ZVAL_NOREF(p);
+
+		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
+			return FAILURE;
 		}
-		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope);
 		if (inline_change) {
-			zend_ast_destroy_and_free(Z_ASTVAL_P(p));
-			efree_size(Z_AST_P(p), sizeof(zend_ast_ref));
+			zval_ptr_dtor(p);
 		}
 		ZVAL_COPY_VALUE(p, &tmp);
 	}
-	return 0;
-}
-/* }}} */
-
-ZEND_API int zval_update_constant_inline_change(zval *pp, zend_class_entry *scope) /* {{{ */
-{
-	return zval_update_constant_ex(pp, 1, scope);
-}
-/* }}} */
-
-ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *scope) /* {{{ */
-{
-	return zval_update_constant_ex(pp, 0, scope);
+	return SUCCESS;
 }
 /* }}} */
 

@@ -629,7 +629,9 @@ static int is_null_constant(zval *default_value)
 		zval constant;
 
 		ZVAL_COPY_VALUE(&constant, default_value);
-		zval_update_constant(&constant, 0);
+		if (UNEXPECTED(zval_update_constant_ex(&constant, 0, NULL) != SUCCESS)) {
+			return 0;
+		}
 		if (Z_TYPE(constant) == IS_NULL) {
 			return 1;
 		}
@@ -1714,7 +1716,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, const zend_op_array *op_array, const zend_execute_data *execute_data)
 {
-	int original_nest_levels = nest_levels;
 	zend_brk_cont_element *jmp_to;
 
 	do {

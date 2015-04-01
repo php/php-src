@@ -772,7 +772,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	if (parent_ce->type != ce->type) {
 		/* User class extends internal class */
-		zend_update_class_constants(parent_ce );
+		zend_update_class_constants(parent_ce);
 		if (parent_ce->default_static_members_count) {
 			int i = ce->default_static_members_count + parent_ce->default_static_members_count;
 

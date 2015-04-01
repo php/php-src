@@ -375,7 +375,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		zend_string_release(class_name);
 		zend_string_free(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
-			zval_update_constant_ex(ret_constant, 1, ce);
+			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
+				return NULL;
+			}
 		}
 		return ret_constant;
 	}

@@ -424,7 +424,9 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 		}
 	}
 
-	object_init_ex(object, dbstmt_ce);
+	if (UNEXPECTED(object_init_ex(object, dbstmt_ce) != SUCCESS)) {
+		return NULL;
+	}
 	// ??? Z_SET_REFCOUNT_P(object, 1);
 	//Z_SET_ISREF_P(object);
 
@@ -538,9 +540,11 @@ static PHP_METHOD(PDO, prepare)
 	}
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, &ctor_args)) {
-		pdo_raise_impl_error(dbh, NULL, "HY000",
-			"failed to instantiate user-supplied statement class"
-			);
+		if (EXPECTED(!EG(exception))) {
+			pdo_raise_impl_error(dbh, NULL, "HY000",
+				"failed to instantiate user-supplied statement class"
+				);
+		}
 		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
 	}
@@ -1077,7 +1081,9 @@ static PHP_METHOD(PDO, query)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
-		pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class");
+		if (EXPECTED(!EG(exception))) {
+			pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class");
+		}
 		return;
 	}
 	stmt = Z_PDO_STMT_P(return_value);

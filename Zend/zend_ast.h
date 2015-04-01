@@ -203,7 +203,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
 ZEND_API zend_ast *zend_ast_list_add(zend_ast *list, zend_ast *op);
 
-ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
+ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);

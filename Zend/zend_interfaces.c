@@ -447,7 +447,9 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 {
 	zval zdata;
 
-	object_init_ex(object, ce);
+	if (UNEXPECTED(object_init_ex(object, ce) != SUCCESS)) {
+		return FAILURE;
+	}
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
 
