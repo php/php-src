@@ -266,13 +266,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
-		zend_execute_data *ex = EG(current_execute_data);
-		while (ex) {
-			if (ex->func == &closure->func) {
-				zend_error_noreturn(E_ERROR, "Cannot destroy active lambda function");
-			}
-			ex = ex->prev_execute_data;
-		}
 		destroy_op_array(&closure->func.op_array);
 	}
 
