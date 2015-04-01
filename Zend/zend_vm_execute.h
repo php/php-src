@@ -15705,14 +15705,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_CONST == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			dim = EX_CONSTANT(opline->op2);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				dim = EX_CONSTANT(opline->op2);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -17307,14 +17314,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_UNUSED == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			dim = NULL;
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				dim = NULL;
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -18824,14 +18838,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_CV == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -20473,14 +20494,21 @@ try_assign_dim_array:
 		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-			zval_ptr_dtor_nogc(free_op2);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				zval_ptr_dtor_nogc(free_op2);
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -29411,14 +29439,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_CONST == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 
-			dim = EX_CONSTANT(opline->op2);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				dim = EX_CONSTANT(opline->op2);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -32011,14 +32046,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_UNUSED == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 
-			dim = NULL;
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				dim = NULL;
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -34189,14 +34231,21 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if (IS_CV == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 
-			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
 
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:
@@ -36700,14 +36749,21 @@ try_assign_dim_array:
 		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			zend_long offset;
+			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 
-			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-			zval_ptr_dtor_nogc(free_op2);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-			FREE_OP(free_op_data1);
+				HANDLE_EXCEPTION();
+			} else {
+				zend_long offset;
+
+				dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+				zval_ptr_dtor_nogc(free_op2);
+				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+				FREE_OP(free_op_data1);
+			}
 		} else {
 			zval_ptr_dtor_nogc(object_ptr);
 assign_dim_convert_to_array:

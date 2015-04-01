@@ -1124,7 +1124,9 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 
 	/* Note:  property_name in this case is really the array index! */
 	if (!Z_OBJ_HT_P(object)->write_dimension) {
-		zend_error_noreturn(E_ERROR, "Cannot use object as array");
+		zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+		FREE_OP(free_value);
+		return;
 	}
 
 	/* separate our value if necessary */
@@ -1395,10 +1397,6 @@ static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
 {
 	zend_long offset;
 
-	if (dim == NULL) {
-		zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
-	}
-
 try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
@@ -1473,12 +1471,17 @@ convert_to_array:
 			goto fetch_from_array;
 		}
 
-		zend_check_string_offset(dim, type);
+		if (dim == NULL) {
+			zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+		} else {
+			zend_check_string_offset(dim, type);
+		}
 
 		ZVAL_INDIRECT(result, NULL); /* wrong string offset */
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_error_noreturn(E_ERROR, "Cannot use object as array");
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+			retval = &EG(error_zval);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
@@ -1610,7 +1613,8 @@ try_string_offset:
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_error_noreturn(E_ERROR, "Cannot use object as array");
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+			ZVAL_NULL(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
 
@@ -1704,7 +1708,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 					ZVAL_INDIRECT(result, ptr);
 				}
 			} else {
-				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
+				zend_error(E_EXCEPTION | E_ERROR, "Cannot access undefined property for object with overloaded property access");
+				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
 		} else {
 			ZVAL_INDIRECT(result, ptr);
