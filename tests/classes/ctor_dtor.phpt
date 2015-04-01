@@ -6,7 +6,7 @@ ZE2 The new constructor/destructor is called
 <?php
 
 class early {
-	function early() {
+	function __construct() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 	}
 	function __destruct() {
@@ -24,7 +24,7 @@ class late {
 }
 
 $t = new early();
-$t->early();
+$t->__construct();
 unset($t);
 $t = new late();
 //unset($t); delay to end of script
@@ -32,8 +32,8 @@ $t = new late();
 echo "Done\n";
 ?>
 --EXPECTF--
-early::early
-early::early
+early::__construct
+early::__construct
 early::__destruct
 late::__construct
 Done

@@ -1017,18 +1017,22 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_array *symbol_table;
 
 	if (type & E_EXCEPTION) {
-		char *message = NULL;
+		type &= ~E_EXCEPTION;
+		//TODO: we can't convert compile-time errors to exceptions yet???
+		if (EG(current_execute_data) && !CG(in_compilation)) {
+			char *message = NULL;
 
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-		va_start(args, format);
+			va_start(args, format);
 #endif
-		zend_vspprintf(&message, 0, format, args);
-		zend_throw_exception(zend_get_engine_exception(), message, type & ~E_EXCEPTION);
-		efree(message);
+			zend_vspprintf(&message, 0, format, args);
+			zend_throw_exception(zend_get_engine_exception(), message, type);
+			efree(message);
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-		va_end(args);
+			va_end(args);
 #endif
-		return;
+			return;
+		}
 	}
 
 	/* Report about uncaught exception in case of fatal errors */

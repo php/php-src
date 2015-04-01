@@ -3,7 +3,7 @@ Bug #30080 (Passing array or non array of objects)
 --FILE--
 <?php
 class foo { 	
-  function foo($arrayobj) { 
+  function __construct($arrayobj) { 
     var_dump($arrayobj);
   } 
 } 

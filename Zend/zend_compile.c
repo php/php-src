@@ -3171,7 +3171,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-zend_bool zend_is_constructor(zend_string *name) /* {{{ */
+static zend_bool zend_is_constructor(zend_string *name) /* {{{ */
 {
 	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
 }
@@ -4409,10 +4409,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 				ce->constructor = (zend_function *) op_array;
 			}
 		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-			if (CG(active_class_entry)->constructor) {
-				zend_error(E_STRICT, "Redefining already defined constructor for class %s",
-					ce->name->val);
-			}
 			ce->constructor = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 			ce->destructor = (zend_function *) op_array;
@@ -4950,6 +4946,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	zend_compile_stmt(stmt_ast);
+
+	if (ce->num_traits == 0) {
+		/* For traits this check is delayed until after trait binding */
+		zend_check_deprecated_constructor(ce);
+	}
 
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;

@@ -4,7 +4,7 @@ Bug #45312 (Segmentation fault on second request for array functions)
 <?php
 class cr {
     private $priv_member;
-    function cr($val) {
+    function __construct($val) {
         $this->priv_member = $val;
     }
     static function comp_func_cr($a, $b) {

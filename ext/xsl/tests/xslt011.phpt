@@ -6,7 +6,7 @@ Test 11: php:function Support
 <?php
 print "Test 11: php:function Support\n";
   Class foo {
-       function foo() {}
+       function __construct() {}
        function __toString() { return "not a DomNode object";}
   }
 

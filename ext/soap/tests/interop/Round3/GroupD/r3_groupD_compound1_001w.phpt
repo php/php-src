@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class Person {
-    function Person($a=NULL, $i=NULL, $n=NULL, $m=NULL) {
+    function __construct($a=NULL, $i=NULL, $n=NULL, $m=NULL) {
         $this->Age = $a;
         $this->ID = $i;
         $this->Name = $n;
