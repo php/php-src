@@ -281,7 +281,7 @@ PHP                                                                        NEWS
     interval). (Marc Bennewitz)
 
 - EXIF:
-  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232)
+  . Fixed bug #68799: Free called on uninitialized pointer. (CVE-2015-0232)
     (Stas)
 
 - Fileinfo:
