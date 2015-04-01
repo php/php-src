@@ -1182,7 +1182,11 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
-	zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error(E_ERROR, "Maximum %s time of %d second%s exceeded",
+	        EG(timeout_type) == ZEND_TIMEOUT_TYPE_INPUT ? "input" : "execution",
+	        EG(timeout_seconds),
+	        EG(timeout_seconds) == 1 ? "" : "s"
+        );
 }
 /* }}} */
 
@@ -1211,6 +1215,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 {
 
 	EG(timeout_seconds) = seconds;
+	EG(timeout_type) = ZEND_TIMEOUT_TYPE_DEFAULT;
 
 #ifdef ZEND_WIN32
 	if(!seconds) {
@@ -1273,6 +1278,13 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 	}
 #	endif /* HAVE_SETITIMER */
 #endif
+}
+/* }}} */
+
+void zend_set_input_timeout(long seconds) /* {{{ */
+{
+        zend_set_timeout(seconds, 1);
+        EG(timeout_type) = ZEND_TIMEOUT_TYPE_INPUT;
 }
 /* }}} */
 

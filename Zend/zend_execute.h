@@ -227,6 +227,7 @@ ZEND_API uint zend_get_executed_lineno(void);
 ZEND_API zend_bool zend_is_executing(void);
 
 ZEND_API void zend_set_timeout(zend_long seconds, int reset_signals);
+ZEND_API void zend_set_input_timeout(long seconds);
 ZEND_API void zend_unset_timeout(void);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type);

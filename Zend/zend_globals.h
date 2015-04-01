@@ -62,6 +62,9 @@ END_EXTERN_C()
 #define ZEND_EARLY_BINDING_DELAYED      1
 #define ZEND_EARLY_BINDING_DELAYED_ALL  2
 
+#define ZEND_TIMEOUT_TYPE_DEFAULT       1
+#define ZEND_TIMEOUT_TYPE_INPUT         2
+
 typedef struct _zend_declarables {
 	zval ticks;
 } zend_declarables;
@@ -208,6 +211,7 @@ struct _zend_executor_globals {
 
 	/* timeout support */
 	zend_long timeout_seconds;
+	unsigned char timeout_type;
 
 	int lambda_count;
 
