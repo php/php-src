@@ -3495,6 +3495,22 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		ZVAL_LONG(&depth_node.u.constant, 1);
 	}
 
+	if (CG(context).current_brk_cont == -1) {
+		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
+			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
+	} else {
+		int array_offset = CG(context).current_brk_cont;
+		zend_long nest_level = Z_LVAL(depth_node.u.constant);
+
+		do {
+			if (array_offset == -1) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+					ast->kind == ZEND_AST_BREAK ? "break" : "continue",
+					Z_LVAL(depth_node.u.constant), (Z_LVAL(depth_node.u.constant) == 1) ? "" : "s");
+			}
+			array_offset = CG(active_op_array)->brk_cont_array[array_offset].parent;
+		} while (--nest_level > 0);
+	}
 	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT,
 		NULL, &depth_node);
 	opline->op1.opline_num = CG(context).current_brk_cont;

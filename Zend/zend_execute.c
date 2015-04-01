@@ -1731,9 +1731,7 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 	zend_brk_cont_element *jmp_to;
 
 	do {
-		if (array_offset==-1) {
-			zend_error_noreturn(E_ERROR, "Cannot break/continue %d level%s", original_nest_levels, (original_nest_levels == 1) ? "" : "s");
-		}
+		ZEND_ASSERT(array_offset != -1);
 		jmp_to = &op_array->brk_cont_array[array_offset];
 		if (nest_levels>1) {
 			zend_op *brk_opline = &op_array->opcodes[jmp_to->brk];
