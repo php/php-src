@@ -23,9 +23,6 @@ PHP                                                                        NEWS
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
   . Fixed bug #68739 (Missing break / control flow). (Laruence)
 
-- Date:
-  . Added DateTime::createFromImmutable(). (Trevor Suarez)
-
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
