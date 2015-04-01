@@ -617,6 +617,9 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
     it depends alone on the openssl library. If it's presend at the compile time,
     ftp_ssl_connect() is enabled automatically.
 
+- odbc
+  . The odbc extension is always shipped shared
+
 ========================================
 13. Other Changes
 ========================================
