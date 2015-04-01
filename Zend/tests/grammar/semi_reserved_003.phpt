@@ -5,6 +5,7 @@ Test semi-reserved words as class properties
 
 class Obj
 {
+    var $empty = 'empty';
     var $callable = 'callable';
     var $class = 'class';
     var $trait = 'trait';
@@ -72,6 +73,7 @@ class Obj
 
 $obj = new Obj;
 
+echo $obj->empty, PHP_EOL;
 echo $obj->callable, PHP_EOL;
 echo $obj->class, PHP_EOL;
 echo $obj->trait, PHP_EOL;
@@ -140,6 +142,7 @@ echo "\nDone\n";
 
 ?>
 --EXPECTF--
+empty
 callable
 class
 trait

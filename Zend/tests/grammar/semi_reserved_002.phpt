@@ -5,6 +5,7 @@ Test semi-reserved words as static class methods
 
 class Obj
 {
+    static function empty(){ echo __METHOD__, PHP_EOL; }
     static function callable(){ echo __METHOD__, PHP_EOL; }
     static function trait(){ echo __METHOD__, PHP_EOL; }
     static function extends(){ echo __METHOD__, PHP_EOL; }
@@ -63,6 +64,7 @@ class Obj
     static function parent(){ echo __METHOD__, PHP_EOL; }
 }
 
+Obj::empty();
 Obj::callable();
 Obj::trait();
 Obj::extends();
@@ -123,6 +125,7 @@ Obj::parent();
 echo "\nDone\n";
 
 --EXPECTF--
+Obj::empty
 Obj::callable
 Obj::trait
 Obj::extends

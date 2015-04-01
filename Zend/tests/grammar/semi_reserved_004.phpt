@@ -5,6 +5,7 @@ Test semi-reserved words as static class properties
 
 class Obj
 {
+    static $empty = 'empty';
     static $callable = 'callable';
     static $class = 'class';
     static $trait = 'trait';
@@ -71,6 +72,7 @@ class Obj
     static $parent = 'parent';
 }
 
+echo Obj::$empty, PHP_EOL;
 echo Obj::$callable, PHP_EOL;
 echo Obj::$class, PHP_EOL;
 echo Obj::$trait, PHP_EOL;
@@ -139,6 +141,7 @@ echo Obj::$parent, PHP_EOL;
 echo "\nDone\n";
 
 --EXPECTF--
+empty
 callable
 class
 trait

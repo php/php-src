@@ -5,6 +5,7 @@ Test semi-reserved words as class constants
 
 class Obj
 {
+    const EMPTY = 'empty';
     const CALLABLE = 'callable';
     const TRAIT = 'trait';
     const EXTENDS = 'extends';
@@ -64,6 +65,7 @@ class Obj
     const PARENT = 'parent';
 }
 
+echo Obj::EMPTY, PHP_EOL;
 echo Obj::CALLABLE, PHP_EOL;
 echo Obj::TRAIT, PHP_EOL;
 echo Obj::EXTENDS, PHP_EOL;
@@ -125,6 +127,7 @@ echo Obj::PARENT, PHP_EOL;
 echo "\nDone\n";
 
 --EXPECTF--
+empty
 callable
 trait
 extends
