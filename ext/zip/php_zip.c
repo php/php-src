@@ -417,7 +417,7 @@ static int php_zip_parse_options(zval *options, long *remove_all_path,
 		ze_zip_object *obj = (ze_zip_object*) zend_object_store_get_object(object TSRMLS_CC); \
 		intern = obj->za; \
 		if (!intern) { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or unitialized Zip object"); \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or uninitialized Zip object"); \
 			RETURN_FALSE; \
 		} \
 	}
