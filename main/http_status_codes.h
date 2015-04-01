@@ -72,6 +72,7 @@ static http_response_status_code_pair http_status_map[] = {
 	{ 503, "Service Unavailable" },
 	{ 504, "Gateway Timeout" },
 	{ 505, "HTTP Version Not Supported" },
+	{ 506, "Variant Also Negotiates" },
 	{ 511, "Network Authentication Required" },
 	/* to allow search with while() loop */
 	{ 0, NULL }
