@@ -37,6 +37,7 @@
 #include "ext/standard/file.h" /* needed for context stuff */
 #include "php_fileinfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
+#include "Zend/zend_exceptions.h"
 
 #ifndef _S_IFDIR
 # define _S_IFDIR		S_IFDIR
