@@ -320,6 +320,32 @@ Relevant RFCs:
 * https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
 * https://wiki.php.net/rfc/unicode_escape
 
+Changes to error handling
+-------------------------
+
+* The new base class of the exception hierarchy is BaseException, from which
+  Exception extends. Typehints in exception handling code may need to be changed
+  to account for this.
+
+* Some fatal errors and recoverable fatal errors now throw an EngineException
+  instead. As EngineException extends BaseException but not Exception, these
+  exceptions will not caught by existing try/catch blocks.
+
+  For the recoverable fatal errors which have been converted into an exception,
+  it is no longer possible to silently ignore the error from an error handler.
+  In particular, it is no longer possible to ignore typehint failures.
+
+* Parser errors now generate a ParseException (extends BaseException). Error
+  handling for eval()s on potentially invalid code should be changed to catch
+  ParseException in addition to the previous return value / error_get_last()
+  based handling.
+
+* The error level of some E_STRICT notices has been changed.
+
+Relevant RFCs:
+* https://wiki.php.net/rfc/engine_exceptions_for_php7
+* https://wiki.php.net/rfc/reclassify_e_strict
+
 Other language changes
 ----------------------
 
@@ -459,6 +485,11 @@ Other
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- Core
+  . PHP 4 style constructors, where the constructor name is the same as the
+    class name, are now deprecated.
+  . Static calls to non-static methods are now deprecated.
 
 - OpenSSL
   . The "capture_session_meta" SSL context option is now deprecated. Meta
