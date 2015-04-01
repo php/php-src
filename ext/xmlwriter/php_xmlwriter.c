@@ -112,7 +112,7 @@ static void xmlwriter_free_resource_ptr(xmlwriter_object *intern)
 		ze_xmlwriter_object *obj = Z_XMLWRITER_P(object); \
 		intern = obj->xmlwriter_ptr; \
 		if (!intern) { \
-			php_error_docref(NULL, E_WARNING, "Invalid or unitialized XMLWriter object"); \
+			php_error_docref(NULL, E_WARNING, "Invalid or uninitialized XMLWriter object"); \
 			RETURN_FALSE; \
 		} \
 	}
