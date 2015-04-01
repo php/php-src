@@ -1130,17 +1130,26 @@ PHP_METHOD(Phar, __construct)
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
+	zend_error_handling zeh;
+	int rv;
 
 	phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
 	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data);
 
 	if (is_data) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
+		zend_replace_error_handling(EH_THROW, phar_ce_PharException, &zeh TSRMLS_CC);
+		rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format);
+		zend_restore_error_handling(&zeh TSRMLS_CC);
+		if (rv == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+		zend_replace_error_handling(EH_THROW, phar_ce_PharException, &zeh TSRMLS_CC);
+		rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len);
+		zend_restore_error_handling(&zeh TSRMLS_CC);
+		if (rv == FAILURE) {
+			//Exception was thrown already
 			return;
 		}
 	}
@@ -4350,8 +4359,14 @@ PHP_METHOD(PharFileInfo, __construct)
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;
 	zval *zobj = getThis(), arg1;
+	zend_error_handling zeh;
+	int rv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &fname, &fname_len) == FAILURE) {
+	zend_replace_error_handling(EH_THROW, phar_ce_PharException, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s", &fname, &fname_len);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (rv == FAILURE) {
 		return;
 	}
 

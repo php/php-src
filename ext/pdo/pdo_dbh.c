@@ -208,9 +208,15 @@ static PHP_METHOD(PDO, dbh_constructor)
 	zval *options = NULL;
 	char alt_dsn[512];
 	int call_factory = 1;
+	zend_error_handling zeh;
+	int rv;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!a!", &data_source, &data_source_len,
-				&username, &usernamelen, &password, &passwordlen, &options)) {
+	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!a!", &data_source, &data_source_len,
+					&username, &usernamelen, &password, &passwordlen, &options);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (FAILURE == rv) {
 		ZEND_CTOR_MAKE_NULL();
 		return;
 	}

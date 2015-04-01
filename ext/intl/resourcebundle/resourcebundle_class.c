@@ -74,7 +74,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char *bundlename;
 	size_t		bundlename_len = 0;
@@ -90,8 +90,8 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_ctor: unable to parse input parameters", 0 );
+		intl_error_set_ex( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"resourcebundle_ctor: unable to parse input parameters", 0, is_constructor );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -108,7 +108,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
 	}
 
-	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
+	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle", is_constructor);
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
 			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
@@ -119,7 +119,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 				bundlename ? bundlename : "(default data)", locale,
 				ures_getLocaleByType(
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1);
+		intl_errors_set_custom_msg_ex(INTL_DATA_ERROR_P(rb), pbuf, 1, is_constructor);
 		efree(pbuf);
 		Z_OBJ_P(return_value) = NULL;
 	}
@@ -142,7 +142,7 @@ PHP_METHOD( ResourceBundle, __construct )
 	zval orig_this = *getThis();
 
 	return_value = getThis();
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this));
@@ -157,7 +157,7 @@ proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}

@@ -41,4 +41,6 @@
 #define INTL_Z_STRVAL_P(str) (UChar*) Z_STRVAL_P(str)
 #define INTL_Z_STRLEN_P(str) UCHARS( Z_STRLEN_P(str) )
 
+extern zend_class_entry *IntlException_ce_ptr;
+
 #endif /* INTL_COMMON_H */

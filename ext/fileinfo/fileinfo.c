@@ -301,8 +301,18 @@ PHP_FUNCTION(finfo_open)
 	php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
+	zend_error_handling zeh;
+	int rv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
+	if (object) {
+		zend_replace_error_handling(EH_THROW, NULL, &zeh TSRMLS_CC);
+		rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len);
+		zend_restore_error_handling(&zeh TSRMLS_CC);
+	} else {
+		rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len);
+	}
+
+	if (rv == FAILURE) {
 		FILEINFO_DESTROY_OBJECT(object);
 		RETURN_FALSE;
 	}

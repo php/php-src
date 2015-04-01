@@ -36,9 +36,15 @@ function ut_main()
     foreach( $locales as $locale => $pattern )
     {
         $str_res .= "\nLocale is: $locale\n";
-        $fmt = ut_msgfmt_create( $locale, $pattern );
-		if(!$fmt) {
-			$str_res .= dump(intl_get_error_message())."\n";
+        try {
+			$fmt = ut_msgfmt_create( $locale, $pattern );
+			if(!$fmt) {
+				$str_res .= dump(intl_get_error_message())."\n";
+				continue;
+			}
+		}
+		catch (\IntlException $ie) {
+			$str_res .= "IE: ".$ie->getMessage().PHP_EOL;
 			continue;
 		}
         $str_res .= dump( ut_msgfmt_parse( $fmt, $results[$locale] ) ) . "\n";
@@ -103,7 +109,7 @@ array (
 )
 
 Locale is: root
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+IE: msgfmt_create: message formatter creation failed
 
 Locale is: fr
 array (

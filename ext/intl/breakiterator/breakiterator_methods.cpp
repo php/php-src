@@ -162,12 +162,12 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	ut = utext_openUTF8(ut, text->val, text->len, BREAKITER_ERROR_CODE_P(bio));
-	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error opening UText");
+	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error opening UText", 0);
 
 	bio->biter->setText(ut, BREAKITER_ERROR_CODE(bio));
 	utext_close(ut); /* ICU shallow clones the UText */
 	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error calling "
-		"BreakIterator::setText()");
+		"BreakIterator::setText()", 0);
 
 	/* When ICU clones the UText, it does not copy the buffer, so we have to
 	 * keep the string buffer around by holding a reference to its zval. This

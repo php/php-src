@@ -5,8 +5,22 @@ Trying instantiate a PDORow object manually
 --FILE--
 <?php
 
-new PDORow;
+try {
+    $instance = new PDORow;
+    echo "Failed to throw exception.".var_export($instance, true);
+}
+catch(PDOException $pe) {
+        if ($pe->getMessage() != "You may not create a PDORow manually") {
+            echo "PDOException has wrong message.";
+        }
+        else {
+            echo "Ok".PHP_EOL;
+        }
+}
+catch(\Exception $e) {
+    echo "Exception throw was not of type PDOException instead was ".get_class($e).PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Fatal error: PDORow::__construct(): You should not create a PDOStatement manually in %s on line %d
+Ok
