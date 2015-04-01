@@ -29,8 +29,8 @@
 PHP_METHOD(Spoofchecker, __construct)
 {
 	int checks;
-	SPOOFCHECKER_METHOD_INIT_VARS;
 	zend_error_handling error_handling;
+	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 
