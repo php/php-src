@@ -340,14 +340,40 @@ Changes to error handling
   ParseException in addition to the previous return value / error_get_last()
   based handling.
 
+* Constructors of internal classes will now always throw an exception on
+  failure. Previously some constructors returned NULL or an unusable object.
+
 * The error level of some E_STRICT notices has been changed.
 
 Relevant RFCs:
 * https://wiki.php.net/rfc/engine_exceptions_for_php7
+* https://wiki.php.net/rfc/internal_constructor_behaviour
 * https://wiki.php.net/rfc/reclassify_e_strict
 
 Other language changes
 ----------------------
+
+* Removed support for static calls to non-static calls form an incompatible
+  $this context. In this case $this will not be defined, but the call will be
+  allowed with a deprecation notice. An example:
+
+      class A {
+          public function test() { var_dump($this); }
+      }
+
+      // Note: Does NOT extend A
+      class B {
+          public function callNonStaticMethodOfA() { A::test(); }
+      }
+      
+      (new B)->callNonStaticMethodOfA();
+
+      // Deprecated: Non-static method A::test() should not be called statically
+      // Notice: Undefined variable $this
+      NULL
+
+  Note that this only applies to calls from an incompatible context. If class B
+  extended from A the call would be allowed without any notices.
 
 * The yield language construct no longer requires parentheses when used in an
   expression context. It is now a right-associative operator with precedence
