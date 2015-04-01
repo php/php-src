@@ -16,6 +16,6 @@ try {
 var_dump($x->p);
 ?>
 --EXPECTF--
-Exception: Cannot access private property C::$p in /home/dmitry/php/php-master/Zend/tests/exception_014.php on line 8
+Exception: Cannot access private property C::$p in %sexception_014.php on line %d
 
-Fatal error: Cannot access private property C::$p in /home/dmitry/php/php-master/Zend/tests/exception_014.php on line 13
+Fatal error: Cannot access private property C::$p in %sexception_014.php on line %d
