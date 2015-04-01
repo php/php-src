@@ -1355,7 +1355,7 @@ static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 	size_t i;
 	int ch;
 
-	if (!var_name || !var_name_len) {
+	if (!var_name_len) {
 		return 0;
 	}
 
@@ -1371,7 +1371,8 @@ static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 
 	/* And these as the rest: [a-zA-Z0-9_\x7f-\xff] */
 	if (var_name_len > 1) {
-		for (i = 1; i < var_name_len; i++) {
+		i = 1;
+		do {
 			ch = (int)((unsigned char *)var_name)[i];
 			if (var_name[i] != '_' &&
 				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&
@@ -1381,7 +1382,7 @@ static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 			) {
 				return 0;
 			}
-		}
+		} while (++i < var_name_len);
 	}
 	return 1;
 }
@@ -1530,7 +1531,7 @@ PHP_FUNCTION(extract)
 				break;
 		}
 
-		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+		if (Z_TYPE(final_name) == IS_STRING && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (extract_refs) {
 				zval *orig_var;
 
