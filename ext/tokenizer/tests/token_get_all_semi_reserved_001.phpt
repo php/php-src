@@ -11,6 +11,11 @@ $x->$continue;
 X::continue();
 $x->continue();
 X::class;
+
+class X {
+    const CONTINUE = 1;
+    public $x = self::CONTINUE + 1;
+}
 ');
 
 array_walk($tokens, function($tk) {
@@ -55,4 +60,22 @@ L7: T_STRING X
 L7: T_DOUBLE_COLON ::
 L7: T_CLASS class
 ;
+L9: T_CLASS class
+L9: T_STRING X
+{
+L10: T_CONST const
+L10: T_STRING CONTINUE
+=
+L10: T_LNUMBER 1
+;
+L11: T_PUBLIC public
+L11: T_VARIABLE $x
+=
+L11: T_STRING self
+L11: T_DOUBLE_COLON ::
+L11: T_STRING CONTINUE
++
+L11: T_LNUMBER 1
+;
+}
 Done
