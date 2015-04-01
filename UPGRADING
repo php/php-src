@@ -432,6 +432,11 @@ Other
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- Intl:
+  . Removed deprecated aliases datefmt_set_timezone_id() and
+    IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
+    IntlDateFormatter::setTimeZone() instead.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().

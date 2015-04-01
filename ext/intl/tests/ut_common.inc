@@ -363,7 +363,7 @@ function ut_datefmt_get_timezone_id( $fmt )
 }
 function ut_datefmt_set_timezone_id( $fmt ,$timezone_id )
 {
-    return $GLOBALS['oo-mode'] ? $fmt->setTimeZoneId( $timezone_id ) : datefmt_set_timezone_id( $fmt ,$timezone_id);
+    return $GLOBALS['oo-mode'] ? $fmt->setTimeZone( $timezone_id ) : datefmt_set_timezone( $fmt ,$timezone_id);
 }
 function ut_datefmt_get_pattern( $fmt )
 {
