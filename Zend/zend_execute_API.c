@@ -774,7 +774,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", func->common.scope->name->val, func->common.function_name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", func->common.scope->name->val, func->common.function_name->val);
+			return FAILURE;
 		}
 		if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
  			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
@@ -919,7 +920,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			fci->object->handlers->call_method(func->common.function_name, fci->object, call, fci->retval);
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
-			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot call overloaded function for non-object");
 		}
 
 		zend_vm_stack_free_args(call);
