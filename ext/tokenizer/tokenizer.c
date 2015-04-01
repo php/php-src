@@ -256,79 +256,86 @@ static zend_always_inline void t_stringify_previous(t_stream *ts, int delta)
 		 break;												\
 } while (0);
 
-static void t_parse(zval *tokens)
+static zend_always_inline void t_parse_trait_use(t_stream *ts)
 {
-	t_stream *ts = t_init(tokens);
-
-	while (t_next(ts)) {
-		switch (ts->current) {
-			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING: case T_INLINE_HTML:
-				continue;
-			case T_CLASS: case T_TRAIT: case T_INTERFACE:
-				ts->in_class++;
-				continue;
-			CASE_MEMBER_ACCESS;
-		}
-
-		if (ts->in_class) {
-			switch (ts->current) {
-				case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
-					ts->in_class++;
-					break;
-				case '{':
-					ts->in_class++;
-					if (ts->in_trait_use) while (ts->in_trait_use && t_next(ts)) {
-						switch (ts->current) { /* use ... { ... } */
-							case T_AS: /* T_STRING<?> T_AS visibility? T_STRING<?>; */
-								if (-1 != t_look(ts, 0, 1)) {
-									t_stringify_previous(ts, 1);
-									t_stringify_next(ts, 2);
-								}
-								break;
-							case '}':
-								ts->in_trait_use = 0;
-								t_previous(ts);
-								break;
-							CASE_MEMBER_ACCESS;
-						}
-					}
-					break;
-				case '}':
-					if (1 == --ts->in_class) ts->in_class--;
-					break;
-				case T_FUNCTION:
-					if(2 == ts->in_class) t_stringify_next(ts, 1);
-					break;
-				case T_USE:
-					ts->in_trait_use++;
-					break;
-				case T_CONST:
-					ts->in_const_list++;
-					while (ts->in_const_list && t_next(ts)) { /* const ...; */
-						switch (ts->current) {
-							case '(': case '[':
-								ts->in_const_list++;
-								break;
-							case ')': case ']':
-								ts->in_const_list--;
-								break;
-							case '=':
-								if (1 == ts->in_const_list) t_stringify_previous(ts, 1);
-								break;
-							case ';':
-								if (1 == ts->in_const_list) ts->in_const_list--;
-								break;
-							CASE_MEMBER_ACCESS;
-						}
-					}
-					break;
-				case '(': case ';':
-					if (ts->in_trait_use) ts->in_trait_use = 0;
-					break;
+	while (ts->in_trait_use && t_next(ts)) switch (ts->current) {
+		case T_AS: /* T_STRING<?> T_AS visibility? T_STRING<?>; */
+			if (-1 != t_look(ts, 0, 1)) {
+				t_stringify_previous(ts, 1);
+				t_stringify_next(ts, 2);
 			}
-		}
+			break;
+		case '}':
+			ts->in_trait_use = 0;
+			ts->in_class--;
+			break;
+		CASE_MEMBER_ACCESS;
 	}
-	t_destroy(ts);
+}
+
+static zend_always_inline void t_parse_const_list(t_stream *ts)
+{
+	ts->in_const_list++;
+	while (ts->in_const_list && t_next(ts)) switch (ts->current) {
+		case '(': case '[':
+			ts->in_const_list++;
+			break;
+		case ')': case ']':
+			ts->in_const_list--;
+			break;
+		case '=':
+			if (1 == ts->in_const_list) t_stringify_previous(ts, 1);
+			break;
+		case ';':
+			if (1 == ts->in_const_list) ts->in_const_list--;
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
+static zend_always_inline void t_parse_class(t_stream *ts)
+{
+	ts->in_class++;
+	while (ts->in_class && t_next(ts)) switch (ts->current) {
+		case T_CLASS: /* anonymous classe */;
+			/* TODO */
+			break;
+		case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
+			ts->in_class++;
+			break;
+		case '{':
+			ts->in_class++;
+			if(ts->in_trait_use) t_parse_trait_use(ts);
+			break;
+		case '}':
+			if (1 == --ts->in_class) ts->in_class--;
+			break;
+		case T_FUNCTION:
+			if(2 == ts->in_class) t_stringify_next(ts, 1);
+			break;
+		case T_USE:
+			ts->in_trait_use++;
+			break;
+		case T_CONST:
+			t_parse_const_list(ts);
+			break;
+		case '(': case ';':
+			if (ts->in_trait_use) ts->in_trait_use = 0;
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
+static void t_parse(t_stream *ts)
+{
+	while (t_next(ts)) switch (ts->current) {
+		case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING: case T_INLINE_HTML:
+			continue;
+		case T_CLASS: case T_TRAIT: case T_INTERFACE:
+			t_parse_class(ts);
+			continue;
+		CASE_MEMBER_ACCESS;
+	}
 }
 
 static void tokenize(zval *return_value)
@@ -402,7 +409,9 @@ static void tokenize(zval *return_value)
 		token_line = CG(zend_lineno);
 	}
 
-	t_parse(return_value);
+	t_stream *ts = t_init(return_value);
+	t_parse(ts);
+	t_destroy(ts);
 }
 
 /* {{{ proto array token_get_all(string source)
