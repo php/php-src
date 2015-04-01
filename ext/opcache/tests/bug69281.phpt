@@ -1,10 +1,10 @@
 --TEST--
-Test that script cached info is correct
+Test that script cached info is correct with validate_timestamps disabled
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.validate_timestamps=1
+opcache.validate_timestamps=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
