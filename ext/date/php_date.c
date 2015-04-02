@@ -2663,10 +2663,12 @@ PHP_METHOD(DateTime, __construct)
 	size_t time_str_len = 0;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
+	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
+		return;
 	}
+
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+	php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -2681,10 +2683,12 @@ PHP_METHOD(DateTimeImmutable, __construct)
 	size_t time_str_len = 0;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
+	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
+		return;
 	}
+
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+	php_date_initialize(Z_PHPDATE_P(getThis()), time_str, time_str_len, NULL, timezone_object, 1);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -3641,11 +3645,13 @@ PHP_METHOD(DateTimeZone, __construct)
 	php_timezone_obj *tzobj;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &tz, &tz_len)) {
-		tzobj = Z_PHPTIMEZONE_P(getThis());
-		timezone_initialize(tzobj, tz);
+	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &tz, &tz_len)) {
+		return;
 	}
+
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+	tzobj = Z_PHPTIMEZONE_P(getThis());
+	timezone_initialize(tzobj, tz);
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
@@ -4070,13 +4076,15 @@ PHP_METHOD(DateInterval, __construct)
 	timelib_rel_time *reltime;
 	zend_error_handling error_handling;
 
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &interval_string, &interval_string_length) == FAILURE) {
+		return;
+	}
+
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &interval_string, &interval_string_length) == SUCCESS) {
-		if (date_interval_initialize(&reltime, interval_string, interval_string_length) == SUCCESS) {
-			diobj = Z_PHPINTERVAL_P(getThis());
-			diobj->diff = reltime;
-			diobj->initialized = 1;
-		}
+	if (date_interval_initialize(&reltime, interval_string, interval_string_length) == SUCCESS) {
+		diobj = Z_PHPINTERVAL_P(getThis());
+		diobj->diff = reltime;
+		diobj->initialized = 1;
 	}
 	zend_restore_error_handling(&error_handling);
 }

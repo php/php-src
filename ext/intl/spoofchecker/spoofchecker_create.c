@@ -32,12 +32,11 @@ PHP_METHOD(Spoofchecker, __construct)
 	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
 		return;
 	}
+
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
 

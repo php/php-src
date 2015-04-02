@@ -561,14 +561,7 @@ SPL_METHOD(SplFixedArray, __construct)
 	spl_fixedarray_object *intern;
 	zend_long size = 0;
 
-	int rv;
-	zend_error_handling zeh;
-
-	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &zeh TSRMLS_CC);
-	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &size);
-	zend_restore_error_handling(&zeh TSRMLS_CC);
-
-	if (rv == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|l", &size) == FAILURE) {
 		return;
 	}
 

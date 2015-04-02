@@ -1253,21 +1253,17 @@ PHP_FUNCTION(dom_document_rename_node)
 PHP_METHOD(domdocument, __construct)
 {
 
-	zval *id;
+	zval *id = getThis();
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
 	char *encoding, *version = NULL;
 	size_t encoding_len = 0, version_len = 0;
 	int refcount;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ss", &id, dom_document_class_entry, &version, &version_len, &encoding, &encoding_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
 	docp = xmlNewDoc((xmlChar *) version);
 
 	if (!docp) {

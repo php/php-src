@@ -1807,19 +1807,14 @@ PHP_METHOD(snmp, __construct)
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	zend_long version = SNMP_DEFAULT_VERSION;
 	int argc = ZEND_NUM_ARGS();
-	zend_error_handling error_handling;
 
 	snmp_object = Z_SNMP_P(object);
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 
-	if (zend_parse_parameters(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
-
-	switch(version) {
+	switch (version) {
 		case SNMP_VERSION_1:
 		case SNMP_VERSION_2c:
 		case SNMP_VERSION_3:

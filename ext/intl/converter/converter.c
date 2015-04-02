@@ -557,19 +557,10 @@ static PHP_METHOD(UConverter, __construct) {
 	size_t src_len = sizeof("utf-8") - 1;
 	char *dest = src;
 	size_t dest_len = src_len;
-	zend_error_handling zeh;
-	int rv;
 
 	intl_error_reset(NULL);
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &zeh);
-	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!",
-	                          &dest, &dest_len, &src, &src_len);
-	zend_restore_error_handling(&zeh);
-
-	if (rv == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::__construct(): bad arguments", 0);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|s!s!", &dest, &dest_len, &src, &src_len) == FAILURE) {
 		return;
 	}
 

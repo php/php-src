@@ -103,17 +103,12 @@ PHP_METHOD(sqlite3, open)
 	char *filename, *encryption_key, *fullpath;
 	size_t filename_len, encryption_key_len = 0;
 	zend_long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
-	zend_error_handling error_handling;
 
 	db_obj = Z_SQLITE3_DB_P(object);
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
-		zend_restore_error_handling(&error_handling);
+	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
 		return;
 	}
-
-	zend_restore_error_handling(&error_handling);
 
 	if (db_obj->initialised) {
 		zend_throw_exception(zend_exception_get_default(), "Already initialised DB Object", 0);
@@ -1600,17 +1595,15 @@ PHP_METHOD(sqlite3stmt, __construct)
 	php_sqlite3_free_list *free_item;
 
 	stmt_obj = Z_SQLITE3_STMT_P(object);
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &db_zval, php_sqlite3_sc_entry, &sql) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "OS", &db_zval, php_sqlite3_sc_entry, &sql) == FAILURE) {
 		return;
 	}
 
 	db_obj = Z_SQLITE3_DB_P(db_zval);
 
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
-
 	zend_restore_error_handling(&error_handling);
 
 	if (!sql->len) {

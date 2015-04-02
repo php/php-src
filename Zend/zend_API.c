@@ -761,13 +761,16 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
+			zend_bool throw_exception =
+				ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW);
 
 			if (error) {
-				zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d %s",
-							class_name, space, get_active_function_name(), arg_num, error);
+				zend_internal_type_error(throw_exception, "%s%s%s() expects parameter %d %s",
+						class_name, space, get_active_function_name(), arg_num, error);
 				efree(error);
 			} else {
-				zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be %s, %s given",
+				zend_internal_type_error(throw_exception,
+						"%s%s%s() expects parameter %d to be %s, %s given",
 						class_name, space, get_active_function_name(), arg_num, expected_type,
 						zend_zval_type_name(arg));
 			}
@@ -876,7 +879,9 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
 			zend_function *active_function = EG(current_execute_data)->func;
 			const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-			zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects %s %d parameter%s, %d given",
+			zend_bool throw_exception =
+				ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW);
+			zend_internal_type_error(throw_exception, "%s%s%s() expects %s %d parameter%s, %d given",
 					class_name,
 					class_name[0] ? "::" : "",
 					active_function->common.function_name->val,
@@ -938,18 +943,19 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 }
 /* }}} */
 
-#define RETURN_IF_ZERO_ARGS(num_args, type_spec, flags) { \
+#define RETURN_IF_ZERO_ARGS(num_args, type_spec, flags) do { \
 	int __num_args = (num_args); \
-	\
 	if (0 == (type_spec)[0] && 0 != __num_args && !(flags & ZEND_PARSE_PARAMS_QUIET)) { \
 		const char *__space; \
 		const char * __class_name = get_active_class_name(&__space); \
-		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects exactly 0 parameters, %d given", \
-			__class_name, __space, \
-			get_active_function_name(), __num_args); \
+		zend_bool throw_exception = \
+			ZEND_ARG_USES_STRICT_TYPES() || (flags & ZEND_PARSE_PARAMS_THROW); \
+		zend_internal_type_error(throw_exception, \
+			"%s%s%s() expects exactly 0 parameters, %d given", \
+			__class_name, __space, get_active_function_name(), __num_args); \
 		return FAILURE; \
-	}\
-}
+	} \
+} while(0)
 
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...) /* {{{ */
 {
@@ -971,6 +977,22 @@ ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...) /* 
 	va_list va;
 	int retval;
 	int flags = 0;
+
+	RETURN_IF_ZERO_ARGS(num_args, type_spec, flags);
+
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags);
+	va_end(va);
+
+	return retval;
+}
+/* }}} */
+
+ZEND_API int zend_parse_parameters_throw(int num_args, const char *type_spec, ...) /* {{{ */
+{
+	va_list va;
+	int retval;
+	int flags = ZEND_PARSE_PARAMS_THROW;
 
 	RETURN_IF_ZERO_ARGS(num_args, type_spec, flags);
 

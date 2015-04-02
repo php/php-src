@@ -102,14 +102,14 @@ foreach($inputs as $variation =>$time) {
       
       try {
       	var_dump( new DateTime($time) );
-      } catch(Exception $e) {
+      } catch (BaseException $e) {
       	  $msg = $e->getMessage();
       	  echo "FAILED: " . $msg . "\n";
       }	
       
       try {
       	var_dump( new DateTime($time, $timezone) );
-      } catch(Exception$e) {
+      } catch (BaseException$e) {
       	 $msg = $e->getMessage();
       	 echo "FAILED: " . $msg . "\n";
       }	

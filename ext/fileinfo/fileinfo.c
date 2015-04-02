@@ -294,22 +294,16 @@ PHP_FUNCTION(finfo_open)
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
+	int flags = object ? ZEND_PARSE_PARAMS_THROW : 0;
 
-	if (object) {
-		zend_replace_error_handling(EH_THROW, NULL, &zeh);
-	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
-		if (object) {
-			zend_restore_error_handling(&zeh);
-			if (!EG(exception)) {
-				zend_throw_exception(NULL, "Constructor failed", 0);
-			}
-		}
+	if (zend_parse_parameters_ex(flags, ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (object) {
 		finfo_object *finfo_obj = Z_FINFO_P(object);
+
+		zend_replace_error_handling(EH_THROW, NULL, &zeh);
 
 		if (finfo_obj->ptr) {
 			magic_close(finfo_obj->ptr->magic);

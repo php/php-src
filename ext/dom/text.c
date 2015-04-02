@@ -65,20 +65,16 @@ const zend_function_entry php_dom_text_class_functions[] = {
 PHP_METHOD(domtext, __construct)
 {
 
-	zval *id;
+	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
 	size_t value_len;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s", &id, dom_text_class_entry, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
 	nodep = xmlNewText((xmlChar *) value);
 
 	if (!nodep) {

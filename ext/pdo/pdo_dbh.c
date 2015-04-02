@@ -210,13 +210,11 @@ static PHP_METHOD(PDO, dbh_constructor)
 	int call_factory = 1;
 	zend_error_handling zeh;
 
-	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!a!", &data_source, &data_source_len,
+	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(),
+				"s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
-		zend_restore_error_handling(&zeh);
 		return;
 	}
-	zend_restore_error_handling(&zeh);
 
 	/* parse the data source name */
 	colon = strchr(data_source, ':');

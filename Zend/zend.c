@@ -1316,14 +1316,14 @@ ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 	va_end(va);
 } /* }}} */
 
-ZEND_API void zend_internal_type_error(zend_bool strict, const char *format, ...) /* {{{ */
+ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	if (strict) {
+	if (throw_exception) {
 		zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
 	} else {
 		zend_error(E_WARNING, message);
