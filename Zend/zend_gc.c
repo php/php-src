@@ -147,8 +147,6 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_INC(zval_possible_root);
 
 	if (EXPECTED(GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK)) {
-		GC_SET_PURPLE(GC_INFO(ref));
-
 		if (!GC_ADDRESS(GC_INFO(ref))) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
@@ -159,7 +157,6 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 				GC_G(first_unused)++;
 			} else {
 				if (!GC_G(gc_enabled)) {
-					GC_SET_BLACK(GC_INFO(ref));
 					return;
 				}
 				GC_REFCOUNT(ref)++;
@@ -169,10 +166,10 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 				if (!newRoot) {
 					return;
 				}
-				GC_SET_PURPLE(GC_INFO(ref));
 				GC_G(unused) = newRoot->prev;
 			}
 
+			GC_SET_PURPLE(GC_INFO(ref));
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
 			GC_G(roots).next->prev = newRoot;
