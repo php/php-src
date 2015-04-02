@@ -216,7 +216,7 @@ static int t_look(t_stream *ts, zend_bool ahead, int delta)
 	int	t_type,
 		index = ts->index;
 
-	while (delta && ((ahead ? ++index : --index) < ts->length)) {
+	while (delta && (ahead ? (++index < ts->length) : (--index >= 0))) {
 		switch (t_type = t_get_type(ts, index)) {
 			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
 				break;
@@ -230,6 +230,21 @@ static int t_look(t_stream *ts, zend_bool ahead, int delta)
 	return -1;
 }
 
+static int t_look_for(t_stream *ts, zend_bool ahead, int t_expected)
+{
+	int	t_type = -1,
+		index = ts->index;
+
+	while (ahead ? (++index < ts->length) : (--index >= 0)) {
+		switch (t_type = t_get_type(ts, index)) {
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
+				continue;
+		}
+		break;
+	}
+	return (t_type == t_expected) ? index : -1;
+}
+
 static zend_always_inline void t_stringify(t_stream *ts, int index)
 {
 	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
@@ -237,8 +252,6 @@ static zend_always_inline void t_stringify(t_stream *ts, int index)
 	if (Z_TYPE_P(token) == IS_ARRAY)
 		ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token), 0), T_STRING);
 }
-
-#define t_stringify_current(ts) t_stringify(ts, ts->index)
 
 static zend_always_inline void t_stringify_next(t_stream *ts, int delta)
 {
@@ -293,12 +306,25 @@ static zend_always_inline void t_parse_const_list(t_stream *ts)
 	}
 }
 
+static zend_always_inline void t_parse_class(t_stream *ts);
+
+static zend_always_inline void t_parse_nested_class(t_stream *ts)
+{
+	if (ts->current == T_CLASS && -1 != t_look_for(ts, 0, T_PAAMAYIM_NEKUDOTAYIM)) return;
+
+	t_stream *temp_ts = t_init(ts->tokens);
+	temp_ts->index = ts->index; /* continue from current index */
+	t_parse_class(temp_ts);
+	ts->index = temp_ts->index; /* forward to new index */
+	t_destroy(temp_ts);
+}
+
 static zend_always_inline void t_parse_class(t_stream *ts)
 {
 	ts->in_class++;
 	while (ts->in_class && t_next(ts)) switch (ts->current) {
-		case T_CLASS: /* anonymous classe */;
-			/* TODO */
+		case T_CLASS: /* nested class */;
+			t_parse_nested_class(ts);
 			break;
 		case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
 			ts->in_class++;
@@ -330,10 +356,10 @@ static void t_parse(t_stream *ts)
 {
 	while (t_next(ts)) switch (ts->current) {
 		case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING: case T_INLINE_HTML:
-			continue;
+			break;
 		case T_CLASS: case T_TRAIT: case T_INTERFACE:
 			t_parse_class(ts);
-			continue;
+			break;
 		CASE_MEMBER_ACCESS;
 	}
 }

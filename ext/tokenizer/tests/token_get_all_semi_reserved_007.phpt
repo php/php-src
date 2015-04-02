@@ -15,9 +15,9 @@ $tokens = token_get_all('<?php
             function function(){ // T_STRING
               function function(){} // T_FUNCTION
             }
-          }
+          };
         }
-      }
+      };
     }
   }
 ');
@@ -96,8 +96,10 @@ L10: T_COMMENT // T_FUNCTION
 
 }
 }
+;
 }
 }
+;
 }
 }
 Done
