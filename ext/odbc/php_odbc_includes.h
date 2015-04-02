@@ -281,8 +281,10 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR || x == SQL_WLONGVARCHAR)
+#define PHP_ODBC_SQLCOLATTRIBUTE SQLColAttribute
 #else
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR)
+#define PHP_ODBC_SQLCOLATTRIBUTE SQLColAttributes
 #endif
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
