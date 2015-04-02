@@ -23,6 +23,7 @@
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
+#include "php_variables.h"
 #include "php_ini.h"
 #include "php_standard.h"
 #include "php_math.h"
@@ -633,6 +634,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_getenv, 0)
 	ZEND_ARG_INFO(0, varname)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_environ, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PUTENV
@@ -2913,6 +2917,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #ifdef HAVE_PUTENV
 	PHP_FE(putenv,															arginfo_putenv)
 #endif
+	PHP_FE(environ,															arginfo_environ)
 
 	PHP_FE(getopt,															arginfo_getopt)
 
@@ -4044,6 +4049,19 @@ PHP_FUNCTION(getenv)
 	}
 #endif
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array environ(void)
+   Get all environment variables */
+PHP_FUNCTION(environ)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	php_import_environment_variables(return_value);
 }
 /* }}} */
 
