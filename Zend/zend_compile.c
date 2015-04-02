@@ -983,12 +983,12 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(op2))) != NULL
 			&& old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
-			zend_error(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
+			zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
 						function->common.function_name->val,
 						old_function->op_array.filename->val,
 						old_function->op_array.opcodes[0].lineno);
 		} else {
-			zend_error(error_level, "Cannot redeclare %s()", function->common.function_name->val);
+			zend_error_noreturn(error_level, "Cannot redeclare %s()", function->common.function_name->val);
 		}
 		return FAILURE;
 	} else {
@@ -2060,7 +2060,7 @@ static inline void zend_set_class_name_op1(zend_op *opline, znode *class_node) /
 }
 /* }}} */
 
-static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast) /* {{{ */
+static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast, int throw_exception) /* {{{ */
 {
 	zend_op *opline;
 	znode name_node;
@@ -2071,7 +2071,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast) /* {{{
 		uint32_t fetch_type = zend_get_class_fetch_type(name);
 
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, NULL);
-		opline->extended_value = fetch_type;
+		opline->extended_value = fetch_type | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
 
 		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 			uint32_t type = name_ast->kind == ZEND_AST_ZVAL ? name_ast->attr : ZEND_NAME_FQ;
@@ -2083,7 +2083,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast) /* {{{
 		zend_string_release(name);
 	} else {
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, &name_node);
-		opline->extended_value = ZEND_FETCH_CLASS_DEFAULT;
+		opline->extended_value = ZEND_FETCH_CLASS_DEFAULT | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
 	}
 
 	return opline;
@@ -2300,7 +2300,7 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast);
+		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
 
 	zend_compile_expr(&prop_node, prop_ast);
@@ -3191,7 +3191,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		opline = zend_compile_class_ref(&class_node, class_ast);
+		opline = zend_compile_class_ref(&class_node, class_ast, 1);
 		extended_value = opline->extended_value;
 	}
 
@@ -3243,7 +3243,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast);
+		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
 
 	opnum = get_next_op_number(CG(active_op_array));
@@ -4924,7 +4924,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 				"Cannot use '%s' as class name as it is reserved", extends_name->val);
 		}
 
-		zend_compile_class_ref(&extends_node, extends_ast);
+		zend_compile_class_ref(&extends_node, extends_ast, 0);
 	}
 
 	opline = get_next_op(CG(active_op_array));
@@ -5915,7 +5915,7 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		opline = zend_compile_class_ref(&class_node, class_ast);
+		opline = zend_compile_class_ref(&class_node, class_ast, 0);
 		opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
 	}
 
@@ -6192,7 +6192,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		if (class_ast->kind == ZEND_AST_ZVAL) {
 			zend_string_release(resolved_name);
 		}
-		zend_compile_class_ref(&class_node, class_ast);
+		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
 
 	zend_compile_expr(&const_node, const_ast);

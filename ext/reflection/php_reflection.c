@@ -428,7 +428,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* Constants */
 	if (&ce->constants_table) {
-		zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1);
 		string_printf(str, "\n");
 		count = zend_hash_num_elements(&ce->constants_table);
 		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
@@ -437,6 +436,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zval *value;
 
 			ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, value) {
+				zval_update_constant_ex(value, 1, NULL);
 				_const_string(str, key->val, value, indent);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -1851,6 +1851,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 {
 	reflection_object *intern;
 	zend_function *fptr;
+	zval *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1866,7 +1867,11 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 			}
 			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
 		}
-		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant_inline_change, fptr->common.scope);
+		ZEND_HASH_FOREACH_VAL(fptr->op_array.static_variables, val) {
+			if (UNEXPECTED(zval_update_constant_ex(val, 1, fptr->common.scope) != SUCCESS)) {
+				return;
+			}
+		} ZEND_HASH_FOREACH_END();
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
 	}
 }
@@ -3430,7 +3435,9 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
 		if (Z_CONSTANT(prop_copy)) {
-			zval_update_constant(&prop_copy, 1);
+			if (UNEXPECTED(zval_update_constant_ex(&prop_copy, 1, NULL) != SUCCESS)) {
+				return;
+			}
 		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
@@ -3451,7 +3458,9 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce);
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		return;
+	}
 
 	array_init(return_value);
 	add_class_vars(ce, 1, return_value);
@@ -3473,7 +3482,9 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce);
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		return;
+	}
 	prop = zend_std_get_static_property(ce, name, 1);
 	if (!prop) {
 		if (def_value) {
@@ -3504,7 +3515,9 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce);
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		return;
+	}
 	variable_ptr = zend_std_get_static_property(ce, name, 1);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3528,7 +3541,9 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
-	zend_update_class_constants(ce);
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		return;
+	}
 	add_class_vars(ce, 1, return_value);
 	add_class_vars(ce, 0, return_value);
 }
@@ -4049,13 +4064,18 @@ ZEND_METHOD(reflection_class, getConstants)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	zval *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
-	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce);
+	ZEND_HASH_FOREACH_VAL(&ce->constants_table, val) {
+		if (UNEXPECTED(zval_update_constant_ex(val, 1, ce) != SUCCESS)) {
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, zval_add_ref_unref);
 }
 /* }}} */
@@ -4075,7 +4095,11 @@ ZEND_METHOD(reflection_class, getConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce);
+	ZEND_HASH_FOREACH_VAL(&ce->constants_table, value) {
+		if (UNEXPECTED(zval_update_constant_ex(value, 1, ce) != SUCCESS)) {
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
 	if ((value = zend_hash_find(&ce->constants_table, name)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -4147,7 +4171,9 @@ ZEND_METHOD(reflection_class, isCloneable)
 		if (ce->clone) {
 			RETURN_BOOL(ce->clone->common.fn_flags & ZEND_ACC_PUBLIC);
 		} else {
-			object_init_ex(&obj, ce);
+			if (UNEXPECTED(object_init_ex(&obj, ce) != SUCCESS)) {
+				return;
+			}
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
 			zval_dtor(&obj);
 		}
@@ -4232,7 +4258,9 @@ ZEND_METHOD(reflection_class, newInstance)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	object_init_ex(return_value, ce);
+	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
+		return;
+	}
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
@@ -4334,7 +4362,9 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		argc = args->nNumOfElements;
 	}
 
-	object_init_ex(return_value, ce);
+	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
+		return;
+	}
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
@@ -5012,7 +5042,9 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
-		zend_update_class_constants(intern->ce);
+		if (UNEXPECTED(zend_update_class_constants(intern->ce) != SUCCESS)) {
+			return;
+		}
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
 			php_error_docref(NULL, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);
 			/* Bails out */
@@ -5061,7 +5093,9 @@ ZEND_METHOD(reflection_property, setValue)
 				return;
 			}
 		}
-		zend_update_class_constants(intern->ce);
+		if (UNEXPECTED(zend_update_class_constants(intern->ce) != SUCCESS)) {
+			return;
+		}
 
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
 			php_error_docref(NULL, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);

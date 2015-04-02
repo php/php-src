@@ -113,8 +113,6 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 }
 
 ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change);
-ZEND_API int zval_update_constant_inline_change(zval *pp, zend_class_entry *scope);
-ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *scope);
 ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_class_entry *scope);
 
 /* dedicated Zend executor functions - do not use! */

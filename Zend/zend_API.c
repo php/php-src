@@ -1119,7 +1119,7 @@ static int zval_update_class_constant(zval *pp, int is_static, uint32_t offset) 
 						int ret;
 						zend_class_entry *old_scope = *scope;
 						*scope = prop_info->ce;
-						ret = zval_update_constant(pp, 1);
+						ret = zval_update_constant_ex(pp, 1, NULL);
 						*scope = old_scope;
 						return ret;
 					}
@@ -1128,13 +1128,13 @@ static int zval_update_class_constant(zval *pp, int is_static, uint32_t offset) 
 			} while (ce);
 
 		}
-		return zval_update_constant(pp, 1);
+		return zval_update_constant_ex(pp, 1, NULL);
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API void zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
+ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	int i;
 
@@ -1143,7 +1143,9 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type) /* {{{ *
 		zval *p;
 
 		if (class_type->parent) {
-			zend_update_class_constants(class_type->parent);
+			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
+				return FAILURE;
+			}
 		}
 #if ZTS
 		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
@@ -1177,22 +1179,29 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type) /* {{{ *
 		*scope = class_type;
 
 		ZEND_HASH_FOREACH_VAL(&class_type->constants_table, val) {
-			zval_update_constant(val, 1);
+			if (UNEXPECTED(zval_update_constant_ex(val, 1, class_type) != SUCCESS)) {
+				return FAILURE;
+			}
 		} ZEND_HASH_FOREACH_END();
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (Z_TYPE(class_type->default_properties_table[i]) != IS_UNDEF) {
-				zval_update_class_constant(&class_type->default_properties_table[i], 0, OBJ_PROP_TO_OFFSET(i));
+				if (UNEXPECTED(zval_update_class_constant(&class_type->default_properties_table[i], 0, OBJ_PROP_TO_OFFSET(i)) != SUCCESS)) {
+					return FAILURE;
+				}
 			}
 		}
 
 		for (i = 0; i < class_type->default_static_members_count; i++) {
-			zval_update_class_constant(&CE_STATIC_MEMBERS(class_type)[i], 1, i);
+			if (UNEXPECTED(zval_update_class_constant(&CE_STATIC_MEMBERS(class_type)[i], 1, i) != SUCCESS)) {
+				return FAILURE;
+			}
 		}
 
 		*scope = old_scope;
 		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1271,17 +1280,24 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
  * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC) /* {{{ */
 {
-	if (class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+	if (UNEXPECTED(class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", class_type->name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate interface %s", class_type->name->val);
 		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", class_type->name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate trait %s", class_type->name->val);
 		} else {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", class_type->name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate abstract class %s", class_type->name->val);
 		}
+		ZVAL_NULL(arg);
+		Z_OBJ_P(arg) = NULL;
+		return FAILURE;
 	}
 
-	zend_update_class_constants(class_type);
+	if (UNEXPECTED(zend_update_class_constants(class_type) != SUCCESS)) {
+		ZVAL_NULL(arg);
+		Z_OBJ_P(arg) = NULL;
+		return FAILURE;
+	}
 
 	if (class_type->create_object == NULL) {
 		ZVAL_OBJ(arg, zend_objects_new(class_type));
@@ -3103,7 +3119,7 @@ get_function_via_handler:
 					verb = "should not";
 				} else {
 					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-					severity = E_ERROR;
+					severity = E_ERROR; //TODO: add E_EXCEPTION???
 					verb = "cannot";
 				}
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {

@@ -3827,7 +3827,9 @@ PHP_FUNCTION(constant)
 	if (c) {
 		ZVAL_COPY_VALUE(return_value, c);
 		if (Z_CONSTANT_P(return_value)) {
-			zval_update_constant_ex(return_value, 1, NULL);
+			if (UNEXPECTED(zval_update_constant_ex(return_value, 1, NULL) != SUCCESS)) {
+				return;
+			}
 		}
 		zval_copy_ctor(return_value);
 	} else {
