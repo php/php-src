@@ -631,13 +631,16 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
-	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -1057,19 +1060,19 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 	zend_free_op free_op1, free_op2;
 	zval *object;
 	zval *property;
-	zval *retval;
 	zval *zptr;
 
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
-	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	retval = EX_VAR(opline->result.var);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
@@ -1083,7 +1086,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 			if (UNEXPECTED(!make_real_object(object))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 				break;
 			}
@@ -1099,7 +1102,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 
 			incdec_op(zptr);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_COPY(retval, zptr);
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
 		} else {
 			zval rv;
@@ -1124,7 +1127,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 				SEPARATE_ZVAL_NOREF(z);
 				incdec_op(z);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(retval, z);
+					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
 				Z_OBJ_HT(obj)->write_property(&obj, property, z, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
 				OBJ_RELEASE(Z_OBJ(obj));
@@ -1132,7 +1135,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 			} else {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			}
 		}
@@ -1160,19 +1163,19 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	zend_free_op free_op1, free_op2;
 	zval *object;
 	zval *property;
-	zval *retval;
 	zval *zptr;
 
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
-	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	retval = EX_VAR(opline->result.var);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
@@ -1185,7 +1188,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 			ZVAL_DEREF(object);
 			if (UNEXPECTED(!make_real_object(object))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-				ZVAL_NULL(retval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
 				break;
 			}
 		}
@@ -1196,7 +1199,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
 
 			ZVAL_DEREF(zptr);
-			ZVAL_COPY_VALUE(retval, zptr);
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
 			zval_opt_copy_ctor(zptr);
 			incdec_op(zptr);
 		} else {
@@ -1217,7 +1220,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
-				ZVAL_DUP(retval, z);
+				ZVAL_DUP(EX_VAR(opline->result.var), z);
 				ZVAL_DUP(&z_copy, z);
 				incdec_op(&z_copy);
 				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
@@ -1227,7 +1230,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				zval_ptr_dtor(z);
 			} else {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-				ZVAL_NULL(retval);
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
 		}
 	} while (0);
@@ -1797,13 +1800,15 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
-	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
@@ -1933,13 +1938,15 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
-	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
@@ -2046,13 +2053,15 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
-	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
@@ -2114,13 +2123,15 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_OP2();
@@ -6260,13 +6271,15 @@ ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|T
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
-	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 ZEND_VM_C_LABEL(isset_dim_obj_again):
 	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(container);
@@ -6382,13 +6395,15 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
-	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
-		FREE_OP2();
+		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
+
+	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);

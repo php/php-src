@@ -1544,7 +1544,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
 
-		if (op1_len > SIZE_MAX - op2_len) {
+		if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 			zend_error(E_EXCEPTION | E_ERROR, "String size overflow");
 			ZVAL_FALSE(result);
 			return FAILURE;
