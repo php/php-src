@@ -31,9 +31,9 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC);
 ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
-#define zval_dtor_func(p)         _zval_dtor_func(zv ZEND_FILE_LINE_CC)
-#define zval_dtor_func_for_ptr(p) _zval_dtor_func_for_ptr(zv ZEND_FILE_LINE_CC)
-#define zval_copy_ctor_func(zv)   _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
+#define zval_dtor_func(zv)         _zval_dtor_func(zv ZEND_FILE_LINE_CC)
+#define zval_dtor_func_for_ptr(zv) _zval_dtor_func_for_ptr(zv ZEND_FILE_LINE_CC)
+#define zval_copy_ctor_func(zv)    _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
 
 static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {

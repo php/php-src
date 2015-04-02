@@ -625,7 +625,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 		} else if (EXPECTED(zobj->properties != NULL)) {
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
-				zend_assign_to_variable(variable_ptr, value, (IS_VAR|IS_TMP_VAR));
+				zend_assign_to_variable(variable_ptr, value, IS_CV);
 				goto exit;
 			}
 		}

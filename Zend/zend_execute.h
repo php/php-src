@@ -55,6 +55,13 @@ ZEND_API void zend_verify_internal_return_error(const zend_function *zf, const c
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
+	zend_refcounted *ref = NULL;
+
+	if ((value_type & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+		ref = Z_COUNTED_P(value);
+		value = Z_REFVAL_P(value);
+	}
+
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			zend_refcounted *garbage;
@@ -81,12 +88,18 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
 						zval_copy_ctor_func(variable_ptr);
 					}
-				} else if (value_type != IS_TMP_VAR) {
+				} else if (value_type == IS_CV) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 						Z_ADDREF_P(variable_ptr);
 					}
+				} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
+					if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+						efree_size(ref, sizeof(zend_reference));
+					} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
+						Z_ADDREF_P(variable_ptr);
+					}
 				}
-				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
+				zval_dtor_func_for_ptr(garbage);
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
@@ -104,8 +117,14 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
 			zval_copy_ctor_func(variable_ptr);
 		}
-	} else if (value_type != IS_TMP_VAR) {
+	} else if (value_type == IS_CV) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+			Z_ADDREF_P(variable_ptr);
+		}
+	} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
+		if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			efree_size(ref, sizeof(zend_reference));
+		} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
 			Z_ADDREF_P(variable_ptr);
 		}
 	}

@@ -971,7 +971,7 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 static zend_always_inline void zend_assign_to_object(zval *retval, zval *object, uint32_t object_op_type, zval *property_name, uint32_t property_op_type, int value_type, znode_op value_op, const zend_execute_data *execute_data, void **cache_slot)
 {
 	zend_free_op free_value;
- 	zval *value = get_zval_ptr_deref(value_type, value_op, execute_data, &free_value, BP_VAR_R);
+	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
  	zval tmp;
 
 	if (object_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
@@ -1033,9 +1033,6 @@ fast_assign:
 				if (retval && !EG(exception)) {
 					ZVAL_COPY(retval, value);
 				}
-				if (value_type == IS_VAR) {
-					FREE_OP(free_value);
-				}
 				return;
 			}
 		} else {
@@ -1057,9 +1054,11 @@ fast_assign:
 						zval_copy_ctor_func(&tmp);
 						value = &tmp;
 					}
-				} else if (value_type != IS_TMP_VAR &&
-				           Z_REFCOUNTED_P(value)) {
-					Z_ADDREF_P(value);
+				} else if (value_type != IS_TMP_VAR) {
+					ZVAL_DEREF(value);
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property_name), value);
 				if (retval && !EG(exception)) {
@@ -1089,9 +1088,11 @@ fast_assign:
 			zval_copy_ctor_func(&tmp);
 			value = &tmp;
 		}
-	} else if (value_type != IS_TMP_VAR &&
-	           Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
+	} else if (value_type != IS_TMP_VAR) {
+		ZVAL_DEREF(value);
+		if (Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
 	}
 
 	Z_OBJ_HT_P(object)->write_property(object, property_name, value, cache_slot);
