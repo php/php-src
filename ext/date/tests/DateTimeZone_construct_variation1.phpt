@@ -97,7 +97,7 @@ foreach($inputs as $variation =>$timezone) {
       echo "\n-- $variation --\n";
       try {
       	var_dump( new DateTimezone($timezone) );
-      } catch(Exception $e) {
+      } catch (BaseException $e) {
       	  $msg = $e->getMessage();
       	  echo "FAILED: " . $msg . "\n";
       }	

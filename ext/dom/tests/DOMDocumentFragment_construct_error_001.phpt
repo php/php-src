@@ -7,11 +7,11 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$fragment = new DOMDocumentFragment("root");
+try {
+    $fragment = new DOMDocumentFragment("root");
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'DOMException' with message 'DOMDocumentFragment::__construct() expects exactly 0 parameters, 1 given' in %s:%d
-Stack trace:
-#0 %s(%d): DOMDocumentFragment->__construct('root')
-#1 {main}
-  thrown in %s on line %d
+DOMDocumentFragment::__construct() expects exactly 0 parameters, 1 given

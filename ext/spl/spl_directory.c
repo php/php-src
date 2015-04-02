@@ -1102,11 +1102,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 
 /* {{{ proto void SplFileInfo::__construct(string file_name)
  Cronstructs a new SplFileInfo from a path. */
-/* zend_replace_error_handling() is used to throw exceptions in case
-   the constructor fails. Here we use this to ensure the object
-   has a valid directory resource.
-
-   When the constructor gets called the object is already created
+/* When the constructor gets called the object is already created
    by the engine, so we must only call 'additional' initializations.
  */
 SPL_METHOD(SplFileInfo, __construct)
@@ -1114,20 +1110,14 @@ SPL_METHOD(SplFileInfo, __construct)
 	spl_filesystem_object *intern;
 	char *path;
 	size_t len;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &path, &len) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLFILESYSTEM_P(getThis());
 
 	spl_filesystem_info_set_filename(intern, path, len, 1);
-
-	zend_restore_error_handling(&error_handling);
 
 	/* intern->type = SPL_FS_INFO; already set */
 }
@@ -2272,18 +2262,15 @@ SPL_METHOD(SplFileObject, __construct)
 	size_t   tmp_path_len;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sbr!",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p|sbr!",
 			&intern->file_name, &intern->file_name_len,
 			&intern->u.file.open_mode, &intern->u.file.open_mode_len,
 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
-		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
@@ -2291,6 +2278,8 @@ SPL_METHOD(SplFileObject, __construct)
 		intern->u.file.open_mode = "r";
 		intern->u.file.open_mode_len = 1;
 	}
+
+	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
 	if (spl_filesystem_file_open(intern, use_include_path, 0) == SUCCESS) {
 		tmp_path_len = strlen(intern->u.file.stream->orig_path);
@@ -2331,10 +2320,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|l", &max_memory) == FAILURE) {
 		return;
 	}
 
@@ -2351,6 +2337,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 	intern->u.file.open_mode = "wb";
 	intern->u.file.open_mode_len = 1;
 
+	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 	if (spl_filesystem_file_open(intern, 0, 0) == SUCCESS) {
 		intern->_path_len = 0;
 		intern->_path = estrndup("", 0);

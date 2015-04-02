@@ -1,19 +1,64 @@
 --TEST--
-SPL: FilterIterator::__construct(void)
+SPL: Calling __construct(void) on class extending SPL iterator
 --CREDITS--
 Sebastian Schürmann
 --FILE--
 <?php
+
 class myFilterIterator extends FilterIterator {
-	function accept() {
-		
-	}
+	function accept() { }
 }
+
+class myCachingIterator extends CachingIterator { }
+
+class myRecursiveCachingIterator extends RecursiveCachingIterator { }
+
+class myParentIterator extends ParentIterator { }
+
+class myLimitIterator extends LimitIterator { }
+
+class myNoRewindIterator extends NoRewindIterator  {}
+
 try {
 	$it = new myFilterIterator();	
-} catch (InvalidArgumentException $e) {
-	echo 'InvalidArgumentException thrown';
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
 }
+
+try {
+	$it = new myCachingIterator();	
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+	$it = new myRecursiveCachingIterator();	
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+	$it = new myParentIterator();	
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+	$it = new myLimitIterator();
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+	$it = new myNoRewindIterator();
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
-InvalidArgumentException thrown
+FilterIterator::__construct() expects exactly 1 parameter, 0 given
+CachingIterator::__construct() expects at least 1 parameter, 0 given
+RecursiveCachingIterator::__construct() expects at least 1 parameter, 0 given
+ParentIterator::__construct() expects exactly 1 parameter, 0 given
+LimitIterator::__construct() expects at least 1 parameter, 0 given
+NoRewindIterator::__construct() expects exactly 1 parameter, 0 given

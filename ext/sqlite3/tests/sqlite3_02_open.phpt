@@ -10,7 +10,7 @@ Felix De Vliegher
 
 try {
   $db = new SQLite3();
-} catch (Exception $e) {
+} catch (TypeException $e) {
   var_dump($e->getMessage());
 }
 

@@ -1220,20 +1220,16 @@ SPL_METHOD(Array, __construct)
 	zval *array;
 	zend_long ar_flags = 0;
 	zend_class_entry *ce_get_iterator = spl_ce_Iterator;
-	zend_error_handling error_handling;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
 
-	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
-
-	intern = Z_SPLARRAY_P(object);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		return;
 	}
+
+	intern = Z_SPLARRAY_P(object);
 
 	if (ZEND_NUM_ARGS() > 2) {
 		intern->ce_get_iterator = ce_get_iterator;
@@ -1242,9 +1238,6 @@ SPL_METHOD(Array, __construct)
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
 	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
-
-	zend_restore_error_handling(&error_handling);
-
 }
  /* }}} */
 

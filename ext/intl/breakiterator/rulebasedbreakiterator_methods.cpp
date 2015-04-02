@@ -32,14 +32,13 @@ static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 
 static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval		*object		= getThis();
 	char		*rules;
 	size_t		rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_create_instance: bad arguments", 0);

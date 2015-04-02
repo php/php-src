@@ -253,20 +253,16 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 /* {{{ proto void DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
-	zval *id, *doc;
+	zval *id = getThis(), *doc;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 	dom_xpath_object *intern;
 	xmlXPathContextPtr ctx, oldctx;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &id, dom_xpath_class_entry, &doc, dom_document_class_entry) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &doc, dom_document_class_entry) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
 
 	ctx = xmlXPathNewContext(docp);

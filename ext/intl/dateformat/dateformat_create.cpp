@@ -37,7 +37,7 @@ extern "C" {
 #include "zend_exceptions.h"
 
 /* {{{ */
-static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	zval		*object;
 
@@ -58,11 +58,12 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
     int32_t     slength			= 0;
 	IntlDateFormatter_object* dfo;
+  int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|zzs",
+    if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
@@ -176,7 +177,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -194,7 +195,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = getThis();
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);

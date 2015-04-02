@@ -25,17 +25,18 @@
 #include "intl_data.h"
 
 /* {{{ */
-static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char*      locale;
 	size_t           locale_len = 0;
 	zval*            object;
 	Collator_object* co;
+	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset( NULL );
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
+	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -63,7 +64,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -76,7 +77,7 @@ PHP_METHOD( Collator, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);

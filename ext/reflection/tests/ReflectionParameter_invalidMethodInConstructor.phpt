@@ -25,7 +25,7 @@ class C {
 try {
 	new ReflectionParameter(array ('A', 'b'));
 }
-catch(ReflectionException $e) {
+catch(TypeException $e) {
 	printf( "Ok - %s\n", $e->getMessage());
 }
 
