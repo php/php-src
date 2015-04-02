@@ -553,8 +553,6 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
 			} else if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				size_t len;
-
 				zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
