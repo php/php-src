@@ -259,7 +259,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 	zend_user_iterator *iterator;
 
 	if (by_ref) {
-		zend_error_noreturn(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_error(E_EXCEPTION | E_ERROR, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	iterator = emalloc(sizeof(zend_user_iterator));

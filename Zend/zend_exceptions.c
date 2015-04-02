@@ -48,7 +48,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	}
 	ZVAL_OBJ(&tmp, add_previous);
 	if (!instanceof_function(Z_OBJCE(tmp), base_exception_ce)) {
-		zend_error_noreturn(E_ERROR, "Cannot set non exception as previous exception");
+		zend_error_noreturn(E_CORE_ERROR, "Cannot set non exception as previous exception");
 		return;
 	}
 	ZVAL_OBJ(&zv, exception);
@@ -116,7 +116,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 		if(EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
 		}
-		zend_error_noreturn(E_ERROR, "Exception thrown without a stack frame");
+		zend_error_noreturn(E_CORE_ERROR, "Exception thrown without a stack frame");
 	}
 
 	if (zend_throw_exception_hook) {
@@ -215,7 +215,8 @@ ZEND_METHOD(exception, __construct)
 	int    argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, base_exception_ce) == FAILURE) {
-		zend_error_noreturn(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
+		return;
 	}
 
 	object = getThis();
@@ -245,7 +246,8 @@ ZEND_METHOD(error_exception, __construct)
 	size_t message_len, filename_len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, base_exception_ce) == FAILURE) {
-		zend_error_noreturn(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
+		return;
 	}
 
 	object = getThis();
@@ -972,13 +974,14 @@ ZEND_API void zend_throw_exception_object(zval *exception) /* {{{ */
 	zend_class_entry *exception_ce;
 
 	if (exception == NULL || Z_TYPE_P(exception) != IS_OBJECT) {
-		zend_error_noreturn(E_ERROR, "Need to supply an object when throwing an exception");
+		zend_error_noreturn(E_CORE_ERROR, "Need to supply an object when throwing an exception");
 	}
 
 	exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, base_exception_ce)) {
-		zend_error_noreturn(E_ERROR, "Exceptions must be valid objects derived from the Exception base class");
+		zend_error(E_EXCEPTION | E_ERROR, "Exceptions must be valid objects derived from the Exception base class");
+		return;
 	}
 	zend_throw_exception_internal(exception);
 }

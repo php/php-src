@@ -3119,7 +3119,7 @@ get_function_via_handler:
 					verb = "should not";
 				} else {
 					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-					severity = E_ERROR; //TODO: add E_EXCEPTION???
+					severity = E_EXCEPTION | E_ERROR;
 					verb = "cannot";
 				}
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
@@ -3127,7 +3127,7 @@ get_function_via_handler:
 				}
 				if (error) {
 					zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb);
-					if (severity == E_ERROR) {
+					if (severity != E_DEPRECATED) {
 						retval = 0;
 					}
 				} else if (retval) {
