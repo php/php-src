@@ -961,7 +961,9 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void php_error_cb(int type, const char *error_type_str,
+	const char *error_filename, const uint error_lineno,
+	const char *additional_info, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
@@ -1043,43 +1045,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	/* display/log the error if necessary */
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
-		char *error_type_str;
-
-		switch (type) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-				error_type_str = "Fatal error";
-				break;
-			case E_RECOVERABLE_ERROR:
-				error_type_str = "Catchable fatal error";
-				break;
-			case E_WARNING:
-			case E_CORE_WARNING:
-			case E_COMPILE_WARNING:
-			case E_USER_WARNING:
-				error_type_str = "Warning";
-				break;
-			case E_PARSE:
-				error_type_str = "Parse error";
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				error_type_str = "Notice";
-				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				break;
-			case E_DEPRECATED:
-			case E_USER_DEPRECATED:
-				error_type_str = "Deprecated";
-				break;
-			default:
-				error_type_str = "Unknown error";
-				break;
-		}
-
 		if (!module_initialized || PG(log_errors)) {
 			char *log_buffer;
 #ifdef PHP_WIN32
@@ -1087,14 +1052,15 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d%s",
+				error_type_str, buffer, error_filename, error_lineno, additional_info);
 			php_log_err(log_buffer);
 			efree(log_buffer);
 		}
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%pd</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%pd</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno, additional_info);
 			} else {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
@@ -1102,10 +1068,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
 						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf->val, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b>%s<br />\n%s", STR_PRINT(prepend_string), error_type_str, buf->val, error_filename, error_lineno, additional_info, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b>%s<br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, additional_info, STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
@@ -1113,13 +1079,13 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
 #ifdef PHP_WIN32
-						fprintf(stderr, "%s: %s in %s on line %u\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: %s in %s on line %u%s\n", error_type_str, buffer, error_filename, error_lineno, additional_info);
 						fflush(stderr);
 #else
-						fprintf(stderr, "%s: %s in %s on line %u\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: %s in %s on line %u%s\n", error_type_str, buffer, error_filename, error_lineno, additional_info);
 #endif
 					} else {
-						php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s\n%s: %s in %s on line %d%s\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, additional_info, STR_PRINT(append_string));
 					}
 				}
 			}

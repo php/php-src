@@ -69,7 +69,9 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_type_str,
+	const char *error_filename, const uint error_lineno,
+	const char *additional_info, const char *format, va_list args);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -165,20 +167,22 @@ zend_class_entry* soap_var_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
-static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
+static zend_error_cb_type old_error_handler;
 
 #ifdef va_copy
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+#define call_old_error_handler(error_num, error_type_str, error_filename, error_lineno, additional_info, format, args) \
 { \
 	va_list copy; \
 	va_copy(copy, args); \
-	old_error_handler(error_num, error_filename, error_lineno, format, copy); \
+	old_error_handler(error_num, error_type_str, \
+		error_filename, error_lineno, additional_info, format, copy); \
 	va_end(copy); \
 }
 #else
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+#define call_old_error_handler(error_num, error_type_str, error_filename, error_lineno, additional_info, format, args) \
 { \
-	old_error_handler(error_num, error_filename, error_lineno, format, args); \
+	old_error_handler(error_num, error_type_str, \
+		error_filename, error_lineno, additional_info, format, args); \
 }
 #endif
 
@@ -2120,7 +2124,9 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_type_str,
+	const char *error_filename, const uint error_lineno,
+	const char *additional_info, const char *format, va_list args)
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -2133,7 +2139,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_http_status_line = SG(sapi_headers).http_status_line;
 
 	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets || (error_num & E_EXCEPTION)) {
-		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+		call_old_error_handler(error_num, error_type_str,
+			error_filename, error_lineno, additional_info, format, args);
 		return;
 	}
 
@@ -2190,7 +2197,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			PG(display_errors) = 0;
 			SG(sapi_headers).http_status_line = NULL;
 			zend_try {
-				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+				call_old_error_handler(error_num, error_type_str,
+					error_filename, error_lineno, additional_info, format, args);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
 				EG(current_execute_data) = _old_current_execute_data;
@@ -2207,7 +2215,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		           !SOAP_GLOBAL(error_code) ||
 		           strcmp(SOAP_GLOBAL(error_code),"WSDL") != 0) {
 			/* Ignore libxml warnings during WSDL parsing */
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(error_num, error_type_str,
+				error_filename, error_lineno, additional_info, format, args);
 		}
 	} else {
 		int old = PG(display_errors);
@@ -2272,7 +2281,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		PG(display_errors) = 0;
 		SG(sapi_headers).http_status_line = NULL;
 		zend_try {
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(error_num, error_type_str,
+				error_filename, error_lineno, additional_info, format, args);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(current_execute_data) = _old_current_execute_data;
