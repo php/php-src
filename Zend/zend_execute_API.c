@@ -686,7 +686,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		case sizeof(zend_fcall_info):
 			break; /* nothing to do currently */
 		default:
-			zend_error_noreturn(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
+			zend_error_noreturn(E_CORE_ERROR, "Corrupted fcall_info provided to zend_call_function()");
 			break;
 	}
 

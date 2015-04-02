@@ -1953,7 +1953,7 @@ ZEND_FUNCTION(create_function)
 
 		func = zend_hash_str_find_ptr(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
 		if (!func) {
-			zend_error_noreturn(E_ERROR, "Unexpected inconsistency in create_function()");
+			zend_error_noreturn(E_CORE_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}
 		if (func->refcount) {

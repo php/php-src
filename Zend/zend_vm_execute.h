@@ -411,7 +411,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 		}
 
 	}
-	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
+	zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
 
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
