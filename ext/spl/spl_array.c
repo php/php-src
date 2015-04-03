@@ -1474,49 +1474,49 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 {
 	spl_array_object *intern = Z_SPLARRAY_P(getThis());
 	HashTable *aht = spl_array_get_hash_table(intern, 0);
-	zval tmp, *arg = NULL;
-	zval retval;
+	zval function_name, params[2], *arg = NULL;
 	uint32_t old_refcount;
+
+	ZVAL_STRINGL(&function_name, fname, fname_len);
 
 	/* A tricky way to pass "aht" by reference, reset refcount */
 	//??? It may be not safe, if user comparison handler accesses "aht"
 	old_refcount = GC_REFCOUNT(aht);
 	GC_REFCOUNT(aht) = 1;
-	ZVAL_ARR(&tmp, aht);
+	ZVAL_NEW_EMPTY_REF(&params[0]);
+	ZVAL_ARR(Z_REFVAL(params[0]), aht);
 
 	if (!use_arg) {
 		aht->u.v.nApplyCount++;
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, 1, &tmp, NULL);
+		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 1, params, 1, NULL);
 		aht->u.v.nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-			GC_REFCOUNT(aht) = old_refcount;
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0);
-			return;
+			goto exit;
+		}
+		if (arg) {
+			ZVAL_COPY_VALUE(&params[1], arg);
 		}
 		aht->u.v.nApplyCount++;
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, arg? 2 : 1, &tmp, arg);
+		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params, 1, NULL);
 		aht->u.v.nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-			GC_REFCOUNT(aht) = old_refcount;
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0);
-			return;
+			goto exit;
 		}
+		ZVAL_COPY_VALUE(&params[1], arg);
 		aht->u.v.nApplyCount++;
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, 2, &tmp, arg);
+		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 2, params, 1, NULL);
 		aht->u.v.nApplyCount--;
 	}
+
+exit:
 	/* A tricky way to pass "aht" by reference, copy back and cleanup */
-	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp))) {
-		*aht = *Z_ARRVAL_P(Z_REFVAL(tmp));
-		GC_REMOVE_FROM_BUFFER(Z_ARR_P(Z_REFVAL(tmp)));
-		efree(Z_REF(tmp));
-	}
 	GC_REFCOUNT(aht) = old_refcount;
-	if (!Z_ISUNDEF(retval)) {
-		ZVAL_COPY_VALUE(return_value, &retval);
-	}
+	efree(Z_REF(params[0]));
+	zend_string_free(Z_STR(function_name));
 } /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \

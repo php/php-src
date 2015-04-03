@@ -670,7 +670,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
 	zend_class_entry *orig_scope;
-	zval tmp;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -775,26 +774,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
+		zval *arg = &fci->params[i];
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
-			// TODO: Scalar values don't have reference counters anymore.
-			// They are assumed to be 1, and they may be easily passed by
-			// reference now. However, previously scalars with refcount==1
-			// might be passed and with refcount>1 might not. We can support
-			// only single behavior ???
-#if 0
-			if (Z_REFCOUNTED(fci->params[i]) &&
-				// This solution breaks the following test (omit warning message) ???
-				// Zend/tests/bug61273.phpt
-				// ext/reflection/tests/bug42976.phpt
-				// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
-#else
-			if (!Z_REFCOUNTED(fci->params[i]) ||
-				// This solution breaks the following test (emit warning message) ???
-				// ext/pdo_sqlite/tests/pdo_005.phpt
-#endif
-			    (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1)) {
-
+			if (UNEXPECTED(!Z_ISREF_P(arg))) {
 				if (fci->no_separation &&
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
@@ -815,29 +798,21 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 					return FAILURE;
 				}
 
-				if (Z_REFCOUNTED(fci->params[i])) {
-					Z_DELREF(fci->params[i]);
-				}
-				ZVAL_DUP(&tmp, &fci->params[i]);
-				ZVAL_NEW_REF(&fci->params[i], &tmp);
-				Z_ADDREF(fci->params[i]);
-			} else if (!Z_ISREF(fci->params[i])) {
-				ZVAL_NEW_REF(&fci->params[i], &fci->params[i]);
-				Z_ADDREF(fci->params[i]);
-			} else if (Z_REFCOUNTED(fci->params[i])) {
-				Z_ADDREF(fci->params[i]);
+				ZVAL_NEW_REF(arg, arg);
 			}
-			param = ZEND_CALL_ARG(call, i+1);
-			ZVAL_COPY_VALUE(param, &fci->params[i]);
-		} else if (Z_ISREF(fci->params[i]) &&
-		           /* don't separate references for __call */
-		           (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
-			param = ZEND_CALL_ARG(call, i+1);
-			ZVAL_DUP(param, Z_REFVAL(fci->params[i]));
+			Z_ADDREF_P(arg);
 		} else {
-			param = ZEND_CALL_ARG(call, i+1);
-			ZVAL_COPY(param, &fci->params[i]);
+			if (Z_ISREF_P(arg) &&
+			    (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
+				/* don't separate references for __call */
+				arg = Z_REFVAL_P(arg);
+			}
+			if (Z_OPT_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
 		}
+		param = ZEND_CALL_ARG(call, i+1);
+		ZVAL_COPY_VALUE(param, arg);
 	}
 
 	EG(scope) = calling_scope;

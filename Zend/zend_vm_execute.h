@@ -1115,7 +1115,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_O
 	} else {
 		uint32_t arg_num;
 		HashTable *ht;
-		zval *arg, *param, tmp;
+		zval *arg, *param;
 
 send_array:
 		ht = Z_ARRVAL_P(args);
@@ -1141,24 +1141,7 @@ send_array:
 		param = ZEND_CALL_ARG(EX(call), 1);
 		ZEND_HASH_FOREACH_VAL(ht, arg) {
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-				// TODO: Scalar values don't have reference counters anymore.
-				// They are assumed to be 1, and they may be easily passed by
-				// reference now. However, previously scalars with refcount==1
-				// might be passed and with refcount>1 might not. We can support
-				// only single behavior ???
-#if 0
-				if (Z_REFCOUNTED_P(arg) &&
-					// This solution breaks the following test (omit warning message) ???
-					// Zend/tests/bug61273.phpt
-					// ext/reflection/tests/bug42976.phpt
-					// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
-#else
-				if (!Z_REFCOUNTED_P(arg) ||
-					// This solution breaks the following test (emit warning message) ???
-					// ext/pdo_sqlite/tests/pdo_005.phpt
-#endif
-				    (!Z_ISREF_P(arg) && Z_REFCOUNT_P(arg) > 1)) {
-
+				if (UNEXPECTED(!Z_ISREF_P(arg))) {
 					if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 
 						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -1180,26 +1163,20 @@ send_array:
 						break;
 					}
 
-					if (Z_REFCOUNTED_P(arg)) {
-						Z_DELREF_P(arg);
-					}
-					ZVAL_DUP(&tmp, arg);
-					ZVAL_NEW_REF(arg, &tmp);
-					Z_ADDREF_P(arg);
-				} else if (!Z_ISREF_P(arg)) {
 					ZVAL_NEW_REF(arg, arg);
-					Z_ADDREF_P(arg);
-				} else if (Z_REFCOUNTED_P(arg)) {
+				}
+				Z_ADDREF_P(arg);
+			} else{
+				if (Z_ISREF_P(arg) &&
+				    (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+					/* don't separate references for __call */
+					arg = Z_REFVAL_P(arg);
+				}
+				if (Z_OPT_REFCOUNTED_P(arg)) {
 					Z_ADDREF_P(arg);
 				}
-				ZVAL_COPY_VALUE(param, arg);
-			} else if (Z_ISREF_P(arg) &&
-		           /* don't separate references for __call */
-		           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
-				ZVAL_DUP(param, Z_REFVAL_P(arg));
-			} else {
-				ZVAL_COPY(param, arg);
 			}
+			ZVAL_COPY_VALUE(param, arg);
 			ZEND_CALL_NUM_ARGS(EX(call))++;
 			arg_num++;
 			param++;
@@ -14012,7 +13989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_HANDLER(Z
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *arg, *param, tmp;
+	zval *arg, *param;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
@@ -14020,23 +13997,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-		// TODO: Scalar values don't have reference counters anymore.
-		// They are assumed to be 1, and they may be easily passed by
-		// reference now. However, previously scalars with refcount==1
-		// might be passed and with refcount>1 might not. We can support
-		// only single behavior ???
-#if 0
-		if (Z_REFCOUNTED_P(arg) &&
-			// This solution breaks the following test (omit warning message) ???
-			// Zend/tests/bug61273.phpt
-			// ext/reflection/tests/bug42976.phpt
-			// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
-#else
-		if (!Z_REFCOUNTED_P(arg) ||
-			// This solution breaks the following test (emit warning message) ???
-			// ext/pdo_sqlite/tests/pdo_005.phpt
-#endif
-		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
+		if (UNEXPECTED(!Z_ISREF_P(arg))) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -14062,26 +14023,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 				ZEND_VM_NEXT_OPCODE();
 			}
 
-			if (Z_REFCOUNTED_P(arg)) {
-				Z_DELREF_P(arg);
-			}
-			ZVAL_DUP(&tmp, arg);
-			ZVAL_NEW_REF(arg, &tmp);
-			Z_ADDREF_P(arg);
-		} else if (!Z_ISREF_P(arg)) {
 			ZVAL_NEW_REF(arg, arg);
-			Z_ADDREF_P(arg);
-		} else if (Z_REFCOUNTED_P(arg)) {
+		}
+		Z_ADDREF_P(arg);
+	} else {
+		if (Z_ISREF_P(arg) &&
+		    (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+			/* don't separate references for __call */
+			arg = Z_REFVAL_P(arg);
+		}
+		if (Z_OPT_REFCOUNTED_P(arg)) {
 			Z_ADDREF_P(arg);
 		}
-		ZVAL_COPY_VALUE(param, arg);
-	} else if (Z_ISREF_P(arg) &&
-	           /* don't separate references for __call */
-	           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
-		ZVAL_DUP(param, Z_REFVAL_P(arg));
-	} else {
-		ZVAL_COPY(param, arg);
 	}
+	ZVAL_COPY_VALUE(param, arg);
 
 	zval_ptr_dtor_nogc(free_op1);
 	CHECK_EXCEPTION();
@@ -27605,7 +27560,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_HANDLER(ZE
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *arg, *param, tmp;
+	zval *arg, *param;
 
 
 	SAVE_OPLINE();
@@ -27613,23 +27568,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
-		// TODO: Scalar values don't have reference counters anymore.
-		// They are assumed to be 1, and they may be easily passed by
-		// reference now. However, previously scalars with refcount==1
-		// might be passed and with refcount>1 might not. We can support
-		// only single behavior ???
-#if 0
-		if (Z_REFCOUNTED_P(arg) &&
-			// This solution breaks the following test (omit warning message) ???
-			// Zend/tests/bug61273.phpt
-			// ext/reflection/tests/bug42976.phpt
-			// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
-#else
-		if (!Z_REFCOUNTED_P(arg) ||
-			// This solution breaks the following test (emit warning message) ???
-			// ext/pdo_sqlite/tests/pdo_005.phpt
-#endif
-		    (!Z_ISREF_P(arg) /*&& Z_REFCOUNT_P(arg) > 1???*/)) {
+		if (UNEXPECTED(!Z_ISREF_P(arg))) {
 
 			if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 
@@ -27654,26 +27593,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 				ZEND_VM_NEXT_OPCODE();
 			}
 
-			if (Z_REFCOUNTED_P(arg)) {
-				Z_DELREF_P(arg);
-			}
-			ZVAL_DUP(&tmp, arg);
-			ZVAL_NEW_REF(arg, &tmp);
-			Z_ADDREF_P(arg);
-		} else if (!Z_ISREF_P(arg)) {
 			ZVAL_NEW_REF(arg, arg);
-			Z_ADDREF_P(arg);
-		} else if (Z_REFCOUNTED_P(arg)) {
+		}
+		Z_ADDREF_P(arg);
+	} else {
+		if (Z_ISREF_P(arg) &&
+		    (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
+			/* don't separate references for __call */
+			arg = Z_REFVAL_P(arg);
+		}
+		if (Z_OPT_REFCOUNTED_P(arg)) {
 			Z_ADDREF_P(arg);
 		}
-		ZVAL_COPY_VALUE(param, arg);
-	} else if (Z_ISREF_P(arg) &&
-	           /* don't separate references for __call */
-	           (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0) {
-		ZVAL_DUP(param, Z_REFVAL_P(arg));
-	} else {
-		ZVAL_COPY(param, arg);
 	}
+	ZVAL_COPY_VALUE(param, arg);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
