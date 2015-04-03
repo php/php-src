@@ -13872,7 +13872,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND
 	USE_OPLINE
 	zval *varptr, *arg;
 	zend_free_op free_op1;
-	zend_refcounted *ref;
 
 	SAVE_OPLINE();
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -27467,7 +27466,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_
 	USE_OPLINE
 	zval *varptr, *arg;
 
-	zend_refcounted *ref;
 
 	SAVE_OPLINE();
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);

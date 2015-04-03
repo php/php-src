@@ -4048,7 +4048,6 @@ ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, ANY)
 	USE_OPLINE
 	zval *varptr, *arg;
 	zend_free_op free_op1;
-	zend_refcounted *ref;
 
 	SAVE_OPLINE();
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
