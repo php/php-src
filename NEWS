@@ -40,6 +40,7 @@ PHP                                                                        NEWS
 - OPCache:
   . Fixed bug #69297 (function_exists strange behavior with OPCache on
     disabled function). (Laruence)
+  . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
   . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
 
 - OpenSSL
@@ -279,7 +280,7 @@ PHP                                                                        NEWS
     interval). (Marc Bennewitz)
 
 - EXIF:
-  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232)
+  . Fixed bug #68799: Free called on uninitialized pointer. (CVE-2015-0232)
     (Stas)
 
 - Fileinfo:
