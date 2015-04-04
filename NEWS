@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.40
 
+- Fileinfo:
+  . Fixed bug #68819 (Fileinfo on specific file causes spurious OOM and/or 
+    segfault). (Anatol Belski))
+
 - SOAP:
   . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
     with SoapFault). (Dmitry)
