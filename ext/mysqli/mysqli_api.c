@@ -387,11 +387,11 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
    do_alloca, free_alloca
 */
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, unsigned int start)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 {
 	MYSQL_BIND	*bind;
 	int			i, ofs;
-	int			var_cnt = argc - start;
+	int			var_cnt = argc;
 	zend_long		col_type;
 	zend_ulong		rc;
 
@@ -409,8 +409,8 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 		memset(p, 0, size);
 	}
 
-	for (i=start; i < var_cnt + start ; i++) {
-		ofs = i - start;
+	for (i = 0; i < var_cnt; i++) {
+		ofs = i;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
@@ -555,9 +555,8 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 	} else {
 		stmt->result.var_cnt = var_cnt;
 		stmt->result.vars = safe_emalloc((var_cnt), sizeof(zval), 0);
-		for (i = start; i < var_cnt+start; i++) {
-			ofs = i-start;
-			ZVAL_COPY(&stmt->result.vars[ofs], &args[i]);
+		for (i = 0; i < var_cnt; i++) {
+			ZVAL_COPY(&stmt->result.vars[i], &args[i]);
 		}
 	}
 	efree(bind);
@@ -566,13 +565,13 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 }
 #else
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, unsigned int start)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 {
 	unsigned int i;
 	MYSQLND_RESULT_BIND *params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	if (params) {
-		for (i = 0; i < (argc - start); i++) {
-			ZVAL_COPY_VALUE(&params[i].zv, &args[i + start]);
+		for (i = 0; i < argc; i++) {
+			ZVAL_COPY_VALUE(&params[i].zv, &args[i]);
 		}
 		return mysqlnd_stmt_bind_result(stmt->stmt, params);
 	}
@@ -602,7 +601,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 		RETURN_FALSE;
 	}
 
-	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc, 0);
+	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc);
 	RETURN_BOOL(!rc);
 }
 /* }}} */
