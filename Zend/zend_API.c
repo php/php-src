@@ -793,6 +793,15 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num, zval *arg, const char 
 	return ret;
 }
 
+static void zend_parse_parameters_debug_error(const char *msg) {
+	zend_function *active_function = EG(current_execute_data)->func;
+	const char *class_name = active_function->common.scope
+		? active_function->common.scope->name->val : "";
+	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): %s",
+		class_name, class_name[0] ? "::" : "",
+		active_function->common.function_name->val, msg);
+}
+
 static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, int flags) /* {{{ */
 {
 	const  char *spec_walk;
@@ -834,15 +843,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case '*':
 			case '+':
 				if (have_varargs) {
-					if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-						zend_function *active_function = EG(current_execute_data)->func;
-						const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-
-						zend_error(E_WARNING, "%s%s%s(): only one varargs specifier (* or +) is permitted",
-								class_name,
-								class_name[0] ? "::" : "",
-								active_function->common.function_name->val);
-					}
+					zend_parse_parameters_debug_error(
+						"only one varargs specifier (* or +) is permitted");
 					return FAILURE;
 				}
 				have_varargs = 1;
@@ -855,14 +857,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				break;
 
 			default:
-				if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-					zend_function *active_function = EG(current_execute_data)->func;
-					const char *class_name = active_function->common.scope ? active_function->common.scope->name->val : "";
-					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters",
-							class_name,
-							class_name[0] ? "::" : "",
-							active_function->common.function_name->val);
-				}
+				zend_parse_parameters_debug_error("bad type specifier while parsing parameters");
 				return FAILURE;
 		}
 	}
@@ -896,8 +891,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
-		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
-			get_active_function_name());
+		zend_parse_parameters_debug_error("could not obtain parameters for parsing");
 		return FAILURE;
 	}
 
