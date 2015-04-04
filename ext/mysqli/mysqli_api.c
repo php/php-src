@@ -586,42 +586,23 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
 	zval		*args;
-	int			argc = ZEND_NUM_ARGS();
-	int			start = 1;
+	int			argc;
 	zend_ulong		rc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 
-	if (getThis()) {
-		start = 0;
-	}
-
-	if (zend_parse_method_parameters((getThis()) ? 0:1, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+", &mysql_stmt, mysqli_stmt_class_entry, &args, &argc) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (argc < (getThis() ? 1 : 2)) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((argc - start) != mysql_stmt_field_count(stmt->stmt)) {
+	if (argc != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
 
-	args = safe_emalloc(argc, sizeof(zval), 0);
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc, start);
-
-	efree(args);
-
+	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc, 0);
 	RETURN_BOOL(!rc);
 }
 /* }}} */
