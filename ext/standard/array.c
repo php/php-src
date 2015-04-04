@@ -4412,9 +4412,7 @@ PHP_FUNCTION(array_multisort)
 
 		ZVAL_DEREF(arg);
 		if (Z_TYPE_P(arg) == IS_ARRAY) {
-			if (Z_IMMUTABLE_P(arg)) {
-				zval_copy_ctor(arg);
-			}
+			SEPARATE_ARRAY(arg);
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
