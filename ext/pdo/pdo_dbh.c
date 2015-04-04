@@ -216,6 +216,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		zend_restore_error_handling(&zeh);
 		return;
 	}
+	zend_restore_error_handling(&zeh);
 
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
@@ -226,7 +227,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
-			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
 			return;
 		}
@@ -235,7 +235,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 		colon = strchr(data_source, ':');
 
 		if (!colon) {
-			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
 			return;
 		}
@@ -245,13 +244,11 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* the specified URI holds connection details */
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
-			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
-			zend_restore_error_handling(&zeh);
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
 			return;
 		}
@@ -262,7 +259,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 	if (!driver) {
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
-		zend_restore_error_handling(&zeh);
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
 		return;
 	}
@@ -317,15 +313,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
-				if (!pdbh) {
-					php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO handle");
-					/* NOTREACHED */
-				}
-
 				pdbh->is_persistent = 1;
-				if (!(pdbh->persistent_id = pemalloc(plen + 1, 1))) {
-					php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO handle");
-				}
+				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
@@ -362,6 +351,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* we got a persistent guy from our cache */
 		goto options;
 	}
+
+	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
 
 	if (driver->db_handle_factory(dbh, options)) {
 		/* all set */
