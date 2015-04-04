@@ -516,6 +516,13 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
+#ifdef ZEND_WIN32
+	ZeroMemory(&executor_globals->windows_version_info, sizeof(OSVERSIONINFOEX));
+	executor_globals->windows_version_info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	if (!GetVersionEx((OSVERSIONINFO *) &executor_globals->windows_version_info)) {
+		ZEND_ASSERT(0); /* Should not happen as sizeof is used. */
+	}
+#endif
 }
 /* }}} */
 
