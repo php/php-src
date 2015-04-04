@@ -2931,7 +2931,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CONST_HA
 		}
 	} else if (IS_CONST == IS_CV) {
 		ZVAL_DEREF(retval);
-		ZVAL_COPY_VALUE(&generator->retval, retval);
+		ZVAL_COPY(&generator->retval, retval);
 	} else /* if (IS_CONST == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(retval))) {
 			zend_refcounted *ref = Z_COUNTED_P(retval);
@@ -10750,7 +10750,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 		}
 	} else if (IS_TMP_VAR == IS_CV) {
 		ZVAL_DEREF(retval);
-		ZVAL_COPY_VALUE(&generator->retval, retval);
+		ZVAL_COPY(&generator->retval, retval);
 	} else /* if (IS_TMP_VAR == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(retval))) {
 			zend_refcounted *ref = Z_COUNTED_P(retval);
@@ -13783,7 +13783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 		}
 	} else if (IS_VAR == IS_CV) {
 		ZVAL_DEREF(retval);
-		ZVAL_COPY_VALUE(&generator->retval, retval);
+		ZVAL_COPY(&generator->retval, retval);
 	} else /* if (IS_VAR == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(retval))) {
 			zend_refcounted *ref = Z_COUNTED_P(retval);
@@ -27355,7 +27355,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CV_HANDL
 		}
 	} else if (IS_CV == IS_CV) {
 		ZVAL_DEREF(retval);
-		ZVAL_COPY_VALUE(&generator->retval, retval);
+		ZVAL_COPY(&generator->retval, retval);
 	} else /* if (IS_CV == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(retval))) {
 			zend_refcounted *ref = Z_COUNTED_P(retval);

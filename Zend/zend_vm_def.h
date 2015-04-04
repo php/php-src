@@ -3888,7 +3888,7 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
 		}
 	} else if (OP1_TYPE == IS_CV) {
 		ZVAL_DEREF(retval);
-		ZVAL_COPY_VALUE(&generator->retval, retval);
+		ZVAL_COPY(&generator->retval, retval);
 	} else /* if (OP1_TYPE == IS_VAR) */ {
 		if (UNEXPECTED(Z_ISREF_P(retval))) {
 			zend_refcounted *ref = Z_COUNTED_P(retval);
