@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.40
 
+- Apache2 Handler SAPI:
+  . Fixed bug #69218 (potential remote code execution with apache 2.4
+    apache2handler). (Patrick Schaaf)
+
 - Fileinfo:
   . Fixed bug #68819 (Fileinfo on specific file causes spurious OOM and/or 
     segfault). (Anatol Belski))
