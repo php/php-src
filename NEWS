@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #69218 (potential remote code execution with apache 2.4
     apache2handler). (Patrick Schaaf)
 
+- cURL:
+  . Fixed bug #69316 (Use-after-free in php_curl related to CURLOPT_FILE/
+    _INFILE/_WRITEHEADER). (Laruence)
+
 - Fileinfo:
   . Fixed bug #68819 (Fileinfo on specific file causes spurious OOM and/or 
     segfault). (Anatol Belski))
