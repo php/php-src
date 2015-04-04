@@ -57,7 +57,7 @@
 #include "zend_extensions.h"
 #include "php_ini.h"
 #include "php_globals.h"
-#include "php_main.h"
+#include "php_main.h
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
@@ -2056,19 +2056,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf, NULL);
-
-#ifdef PHP_WIN32
-	{
-		OSVERSIONINFOEX *osvi = &EG(windows_version_info);
-
-		ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
-		osvi->dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		if( !GetVersionEx((OSVERSIONINFO *) osvi)) {
-			php_printf("\nGetVersionEx unusable. %d\n", GetLastError());
-			return FAILURE;
-		}
-	}
-#endif
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
