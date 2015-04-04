@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Ereg:
   . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
 
+- ODBC:
+  . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
+    (Anatol)
+
 - OPCache:
   . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
   . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
