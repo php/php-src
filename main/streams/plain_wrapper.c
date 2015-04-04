@@ -1040,10 +1040,8 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *u
 	}
 
 #ifdef PHP_WIN32
-	if (EG(windows_version_info).dwMajorVersion >= 5) {
-		if (flags & PHP_STREAM_URL_STAT_LINK) {
-			return VCWD_LSTAT(url, &ssb->sb);
-		}
+	if (flags & PHP_STREAM_URL_STAT_LINK) {
+		return VCWD_LSTAT(url, &ssb->sb);
 	}
 #else
 # ifdef HAVE_SYMLINK
