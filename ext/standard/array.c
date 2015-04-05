@@ -4538,6 +4538,8 @@ PHP_FUNCTION(array_multisort)
 		hash->nNextFreeElement = array_size;
 		if (repack) {
 			zend_hash_to_packed(hash);
+		} else {
+			zend_hash_rehash(hash);
 		}
 	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();

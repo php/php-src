@@ -8,6 +8,8 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed bug #69371 (Hash table collision leads to inaccessible array keys).
+    (Laruence)
   . Fixed bug #68933 (Invalid read of size 8 in zend_std_read_property).
     (Laruence, arjen at react dot com)
   . Fixed bug #68868 (Segfault in clean_non_persistent_constants() in SugarCRM
