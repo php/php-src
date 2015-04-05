@@ -399,6 +399,16 @@ static void zend_set_default_compile_time_values(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
+{
+	ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
+	osvi->dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	if(!GetVersionEx((OSVERSIONINFO *) osvi)) {
+		ZEND_ASSERT(0); /* Should not happen as sizeof is used. */
+	}
+}
+/* }}} */
+
 static void zend_init_exception_op(void) /* {{{ */
 {
 	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
@@ -517,11 +527,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
 #ifdef ZEND_WIN32
-	ZeroMemory(&executor_globals->windows_version_info, sizeof(OSVERSIONINFOEX));
-	executor_globals->windows_version_info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if (!GetVersionEx((OSVERSIONINFO *) &executor_globals->windows_version_info)) {
-		ZEND_ASSERT(0); /* Should not happen as sizeof is used. */
-	}
+	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 }
 /* }}} */
@@ -773,6 +779,9 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
+#ifdef ZEND_WIN32
+	zend_get_windows_version_info(&EG(windows_version_info));
+#endif
 	virtual_cwd_deactivate();
 #endif
 }
