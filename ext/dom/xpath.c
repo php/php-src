@@ -464,7 +464,6 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						node->ns = curns;
 					}
 					php_dom_create_object(node, &child, &intern->dom);
-					php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)node, (void *)intern);
 					add_next_index_zval(&retval, &child);
 				}
 			}
