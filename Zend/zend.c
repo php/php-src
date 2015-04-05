@@ -399,6 +399,7 @@ static void zend_set_default_compile_time_values(void) /* {{{ */
 }
 /* }}} */
 
+#ifdef ZEND_WIN32
 static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
 {
 	ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
@@ -408,6 +409,7 @@ static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
 	}
 }
 /* }}} */
+#endif
 
 static void zend_init_exception_op(void) /* {{{ */
 {
