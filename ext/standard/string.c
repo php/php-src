@@ -197,7 +197,10 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 	tsrm_mutex_lock( locale_mutex );
 # endif
 
-#if defined(PHP_WIN32) && defined(ZTS)
+/*  cur->locinfo is struct __crt_locale_info which implementation is
+	hidden in vc14. TODO revisit this and check if a workaround available
+	and needed. */
+#if defined(PHP_WIN32) && _MSC_VER < 1900 && defined(ZTS)
 	{
 		/* Even with the enabled per thread locale, localeconv
 			won't check any locale change in the master thread. */
