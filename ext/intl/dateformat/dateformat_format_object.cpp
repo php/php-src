@@ -189,8 +189,8 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (pattern) {
 		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_P(format), Z_STRLEN_P(format),
-						UnicodeString::kInvariant),
+				UnicodeString(Z_STRVAL_PP(format)),
+				//UnicodeString::fromUTF8(Z_STRVAL_PP(format)), // ICU 4.02
 				Locale::createFromName(locale_str),
 				status);
 
