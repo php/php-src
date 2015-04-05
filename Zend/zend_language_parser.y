@@ -35,7 +35,7 @@
 #include "zend_globals.h"
 #include "zend_API.h"
 #include "zend_constants.h"
-#include "zend_language_scanner_defs.h"
+#include "zend_language_scanner.h"
 
 #define YYSIZE_T size_t
 #define yytnamerr zend_yytnamerr
@@ -48,12 +48,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYMALLOC malloc
 #define YYFREE free
 #endif
-
-#define REWIND { \
-	zend_stack_push(&LANG_SCNG(state_stack), (void *) &LANG_SCNG(yy_state)); \
-	LANG_SCNG(yy_state) = yycST_LOOKING_FOR_SEMI_RESERVED_NAME; \
-	LANG_SCNG(yy_cursor) = (unsigned char*)LANG_SCNG(yy_text); \
-	LANG_SCNG(yy_leng)   = 0; }
 
 %}
 
@@ -290,7 +284,11 @@ semi_reserved:
 
 identifier:
 		T_STRING { $$ = $1; }
-	| 	/* if */ semi_reserved { REWIND } /* and rematch as */ T_STRING { $$ = $3; }
+	| 	semi_reserved  {
+			zval zv;
+			zend_lex_tstring(&zv);
+			$$ = zend_ast_create_zval(&zv);
+		}
 ;
 
 top_statement_list:
