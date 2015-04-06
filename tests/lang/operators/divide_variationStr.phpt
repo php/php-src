@@ -22,7 +22,7 @@ foreach ($strVals as $strVal) {
 ===DONE===
 --EXPECT--
 --- testing: '0' / '0' ---
-float(INF)
+float(NAN)
 --- testing: '0' / '65' ---
 int(0)
 --- testing: '0' / '-44' ---
@@ -32,7 +32,7 @@ float(0)
 --- testing: '0' / '-7.7' ---
 float(-0)
 --- testing: '0' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: '0' / '123abc' ---
 int(0)
 --- testing: '0' / '123e5' ---
@@ -48,7 +48,7 @@ int(0)
 --- testing: '0' / '3.4a' ---
 float(0)
 --- testing: '0' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '65' / '0' ---
 float(INF)
 --- testing: '65' / '65' ---
@@ -162,7 +162,7 @@ float(-2.2647058823529)
 --- testing: '-7.7' / 'a5.9' ---
 float(-INF)
 --- testing: 'abc' / '0' ---
-float(INF)
+float(NAN)
 --- testing: 'abc' / '65' ---
 int(0)
 --- testing: 'abc' / '-44' ---
@@ -172,7 +172,7 @@ float(0)
 --- testing: 'abc' / '-7.7' ---
 float(-0)
 --- testing: 'abc' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: 'abc' / '123abc' ---
 int(0)
 --- testing: 'abc' / '123e5' ---
@@ -188,7 +188,7 @@ int(0)
 --- testing: 'abc' / '3.4a' ---
 float(0)
 --- testing: 'abc' / 'a5.9' ---
-float(INF)
+float(NAN)
 --- testing: '123abc' / '0' ---
 float(INF)
 --- testing: '123abc' / '65' ---
@@ -386,7 +386,7 @@ float(1)
 --- testing: '3.4a' / 'a5.9' ---
 float(INF)
 --- testing: 'a5.9' / '0' ---
-float(INF)
+float(NAN)
 --- testing: 'a5.9' / '65' ---
 int(0)
 --- testing: 'a5.9' / '-44' ---
@@ -396,7 +396,7 @@ float(0)
 --- testing: 'a5.9' / '-7.7' ---
 float(-0)
 --- testing: 'a5.9' / 'abc' ---
-float(INF)
+float(NAN)
 --- testing: 'a5.9' / '123abc' ---
 int(0)
 --- testing: 'a5.9' / '123e5' ---
@@ -412,5 +412,5 @@ int(0)
 --- testing: 'a5.9' / '3.4a' ---
 float(0)
 --- testing: 'a5.9' / 'a5.9' ---
-float(INF)
+float(NAN)
 ===DONE===

@@ -1064,22 +1064,6 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
-static zend_always_inline void make_inf(zval *result, int neg) /* {{{ */
-{
-#if HAVE_HUGE_VAL_INF
-	ZVAL_DOUBLE(result, neg ? -HUGE_VAL : HUGE_VAL);
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-	result->value.ww.w1 = neg ? 0xfff00000 : 0x7ff00000;
-	result->value.ww.w2 = 0;
-	Z_TYPE_INFO_P(result) = IS_DOUBLE;
-#elif HAVE_ATOF_ACCEPTS_INF
-	ZVAL_DOUBLE(neg ? aatof("-INF") : tof("INF"));
-#else
-	ZVAL_DOUBLE(result, neg ? (-1.0/0.0) : (1.0/0.0));
-#endif
-}
-/* }}} */
-
 ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy, op2_copy;
@@ -1090,7 +1074,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 			case TYPE_PAIR(IS_LONG, IS_LONG):
 				if (Z_LVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					make_inf(result, Z_LVAL_P(op1) < 0);
+					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
 					return SUCCESS;
 				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 					/* Prevent overflow error/crash */
@@ -1107,8 +1091,6 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
 				if (Z_LVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					make_inf(result, Z_DVAL_P(op1) < 0.0);
-					return SUCCESS;
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 				return SUCCESS;
@@ -1116,8 +1098,6 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
 				if (Z_DVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					make_inf(result, Z_LVAL_P(op1) < 0);
-					return SUCCESS;
 				}
 				ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
@@ -1125,8 +1105,6 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
 				if (Z_DVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					make_inf(result, Z_LVAL_P(op1) < 0.0);
-					return SUCCESS;
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
