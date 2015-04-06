@@ -216,6 +216,8 @@ static PHP_METHOD(PDO, dbh_constructor)
 		return;
 	}
 
+	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
+
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
 
