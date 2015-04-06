@@ -1252,6 +1252,7 @@ PHP_METHOD(sqlite3stmt, paramCount)
 		return;
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	RETURN_LONG(sqlite3_bind_parameter_count(stmt_obj->stmt));
@@ -1269,6 +1270,8 @@ PHP_METHOD(sqlite3stmt, close)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
 	if(stmt_obj->db_obj) {
         	zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
@@ -1290,6 +1293,7 @@ PHP_METHOD(sqlite3stmt, reset)
 		return;
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	if (sqlite3_reset(stmt_obj->stmt) != SQLITE_OK) {
@@ -1312,6 +1316,7 @@ PHP_METHOD(sqlite3stmt, clear)
 		return;
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	if (sqlite3_clear_bindings(stmt_obj->stmt) != SQLITE_OK) {
@@ -1335,6 +1340,7 @@ PHP_METHOD(sqlite3stmt, readOnly)
 		return;
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 #if SQLITE_VERSION_NUMBER >= 3007004
@@ -1410,6 +1416,7 @@ PHP_METHOD(sqlite3stmt, bindParam)
 		}
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -1444,6 +1451,7 @@ PHP_METHOD(sqlite3stmt, bindValue)
 		}
 	}
 
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -1475,7 +1483,7 @@ PHP_METHOD(sqlite3stmt, execute)
 		return;
 	}
 
-	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
 	if (stmt_obj->bound_params) {
 		ZEND_HASH_FOREACH_PTR(stmt_obj->bound_params, param) {
