@@ -179,3 +179,5 @@
 #define HAVE_MBRLEN 1
 #define HAVE_MBSTATE_T 1
 
+#define HAVE_HUGE_VAL_INF 1
+
