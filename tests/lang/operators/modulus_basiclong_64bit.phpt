@@ -24,15 +24,23 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal % $otherVal ---\n";   
-      var_dump($longVal%$otherVal);
+	  echo "--- testing: $longVal % $otherVal ---\n";
+	  try {
+	    var_dump($longVal%$otherVal);
+      } catch (Exception $e) {
+        echo "Exception: " . $e->getMessage() . "\n";
+      }
    }
 }
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	   echo "--- testing: $otherVal % $longVal ---\n";   
-      var_dump($otherVal%$longVal);
+	  echo "--- testing: $otherVal % $longVal ---\n";
+	  try {
+        var_dump($otherVal%$longVal);
+      } catch (Exception $e) {
+        echo "Exception: " . $e->getMessage() . "\n";
+      }
    }
 }
    
@@ -40,7 +48,7 @@ foreach ($otherVals as $otherVal) {
 ===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 9223372036854775807 % 1 ---
 int(0)
 --- testing: 9223372036854775807 % -1 ---
@@ -58,7 +66,7 @@ int(1)
 --- testing: 9223372036854775807 % 9223372036854775807 ---
 int(0)
 --- testing: -9223372036854775808 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -9223372036854775808 % 1 ---
 int(0)
 --- testing: -9223372036854775808 % -1 ---
@@ -76,7 +84,7 @@ int(-2)
 --- testing: -9223372036854775808 % 9223372036854775807 ---
 int(-1)
 --- testing: 2147483647 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 2147483647 % 1 ---
 int(0)
 --- testing: 2147483647 % -1 ---
@@ -94,7 +102,7 @@ int(0)
 --- testing: 2147483647 % 9223372036854775807 ---
 int(2147483647)
 --- testing: -2147483648 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -2147483648 % 1 ---
 int(0)
 --- testing: -2147483648 % -1 ---
@@ -112,7 +120,7 @@ int(-1)
 --- testing: -2147483648 % 9223372036854775807 ---
 int(-2147483648)
 --- testing: 9223372034707292160 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 9223372034707292160 % 1 ---
 int(0)
 --- testing: 9223372034707292160 % -1 ---
@@ -130,7 +138,7 @@ int(1)
 --- testing: 9223372034707292160 % 9223372036854775807 ---
 int(9223372034707292160)
 --- testing: -9223372034707292160 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -9223372034707292160 % 1 ---
 int(0)
 --- testing: -9223372034707292160 % -1 ---
@@ -148,7 +156,7 @@ int(-1)
 --- testing: -9223372034707292160 % 9223372036854775807 ---
 int(-9223372034707292160)
 --- testing: 2147483648 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 2147483648 % 1 ---
 int(0)
 --- testing: 2147483648 % -1 ---
@@ -166,7 +174,7 @@ int(1)
 --- testing: 2147483648 % 9223372036854775807 ---
 int(2147483648)
 --- testing: -2147483649 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -2147483649 % 1 ---
 int(0)
 --- testing: -2147483649 % -1 ---
@@ -184,7 +192,7 @@ int(-2)
 --- testing: -2147483649 % 9223372036854775807 ---
 int(-2147483649)
 --- testing: 4294967294 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 4294967294 % 1 ---
 int(0)
 --- testing: 4294967294 % -1 ---
@@ -202,7 +210,7 @@ int(0)
 --- testing: 4294967294 % 9223372036854775807 ---
 int(4294967294)
 --- testing: 4294967295 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 4294967295 % 1 ---
 int(0)
 --- testing: 4294967295 % -1 ---
@@ -220,7 +228,7 @@ int(1)
 --- testing: 4294967295 % 9223372036854775807 ---
 int(4294967295)
 --- testing: 4294967293 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 4294967293 % 1 ---
 int(0)
 --- testing: 4294967293 % -1 ---
@@ -238,7 +246,7 @@ int(2147483646)
 --- testing: 4294967293 % 9223372036854775807 ---
 int(4294967293)
 --- testing: 9223372036854775806 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 9223372036854775806 % 1 ---
 int(0)
 --- testing: 9223372036854775806 % -1 ---
@@ -256,7 +264,7 @@ int(0)
 --- testing: 9223372036854775806 % 9223372036854775807 ---
 int(9223372036854775806)
 --- testing: 9.2233720368548E+18 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: 9.2233720368548E+18 % 1 ---
 int(0)
 --- testing: 9.2233720368548E+18 % -1 ---
@@ -274,7 +282,7 @@ int(-2)
 --- testing: 9.2233720368548E+18 % 9223372036854775807 ---
 int(-1)
 --- testing: -9223372036854775807 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -9223372036854775807 % 1 ---
 int(0)
 --- testing: -9223372036854775807 % -1 ---
@@ -292,7 +300,7 @@ int(-1)
 --- testing: -9223372036854775807 % 9223372036854775807 ---
 int(0)
 --- testing: -9.2233720368548E+18 % 0 ---
-bool(false)
+Exception: Division by zero
 --- testing: -9.2233720368548E+18 % 1 ---
 int(0)
 --- testing: -9.2233720368548E+18 % -1 ---

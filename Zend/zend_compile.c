@@ -5538,12 +5538,30 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&right_node, right_ast);
 
 	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
-		result->op_type = IS_CONST;
-		zend_ct_eval_binary_op(&result->u.constant, opcode,
-			&left_node.u.constant, &right_node.u.constant);
-		zval_ptr_dtor(&left_node.u.constant);
-		zval_ptr_dtor(&right_node.u.constant);
-		return;
+		do {
+			/* don't evaluate divsion by zero at compile-time */
+			if (opcode == ZEND_DIV) {
+				zval *op2 = &right_node.u.constant;
+
+				convert_scalar_to_number(op2);
+				if (Z_TYPE_P(op2) == IS_LONG) {
+					if (Z_LVAL_P(op2) == 0) {
+						break;
+					}
+				} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
+					if (Z_DVAL_P(op2) == 0.0) {
+						break;
+					}
+				}
+			}
+
+			result->op_type = IS_CONST;
+			zend_ct_eval_binary_op(&result->u.constant, opcode,
+				&left_node.u.constant, &right_node.u.constant);
+			zval_ptr_dtor(&left_node.u.constant);
+			zval_ptr_dtor(&right_node.u.constant);
+			return;
+		} while (0);
 	}
 
 	do {
@@ -6935,6 +6953,22 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[1]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
+			}
+
+			/* don't evaluate divsion by zero at compile-time */
+			if (ast->attr == ZEND_DIV) {
+				zval *op2 = zend_ast_get_zval(ast->child[1]);
+
+				convert_scalar_to_number(op2);
+				if (Z_TYPE_P(op2) == IS_LONG) {
+					if (Z_LVAL_P(op2) == 0) {
+						return;
+					}
+				} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
+					if (Z_DVAL_P(op2) == 0.0) {
+						return;
+					}
+				}
 			}
 
 			zend_ct_eval_binary_op(&result, ast->attr,

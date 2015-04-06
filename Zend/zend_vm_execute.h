@@ -4074,10 +4074,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CONST_HANDLER(Z
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -7764,10 +7763,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CV_HANDLER(ZEND
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -9383,10 +9381,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_TMPVAR_HANDLER(
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -28579,10 +28576,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CONST_HANDLER(ZEND
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -33709,10 +33705,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CV_HANDLER(ZEND_OP
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -36356,10 +36351,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_TMPVAR_HANDLER(ZEN
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -39312,10 +39306,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CONST_HANDLER(
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -41553,10 +41546,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CV_HANDLER(ZEN
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -42571,10 +42563,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_TMPVAR_HANDLER
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);

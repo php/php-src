@@ -187,10 +187,9 @@ ZEND_VM_HANDLER(5, ZEND_MOD, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				// TODO: change into exception ???
 				SAVE_OPLINE();
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_FALSE(result);
+				zend_throw_exception_ex(NULL, 0, "Division by zero");
+				HANDLE_EXCEPTION();
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
