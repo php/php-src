@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
   . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
 
+- Sqlite3:
+  . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
+
 ?? ??? 2015, PHP 5.5.24
 
 - Core:
