@@ -162,7 +162,7 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 		zend_hash_apply(&ce->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
 	}
 	if (ce->static_members_table) {
-		zval *static_members = ce->static_members_table;
+		zval **static_members = ce->static_members_table;
 		int count = ce->default_static_members_count;
 		int i;
 
