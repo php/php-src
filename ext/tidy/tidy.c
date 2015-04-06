@@ -926,9 +926,9 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 		case TidyString: {
 			char *val = (char *) tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
 			if (val) {
-				return (void *) estrdup(val);
+				return (void *) zend_string_init(val, strlen(val), 0);
 			} else {
-				return (void *) estrdup("");
+				return (void *) STR_EMPTY_ALLOC();
 			}
 		}
 			break;
@@ -1396,9 +1396,7 @@ static PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 		switch (optt) {
 			case TidyString:
-				// TODO: avoid reallocation ???
-				add_assoc_string(return_value, opt_name, (char*)opt_value);
-				efree(opt_value);
+				add_assoc_str(return_value, opt_name, (zend_string*)opt_value);
 				break;
 
 			case TidyInteger:
@@ -1530,8 +1528,7 @@ static PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 	switch (optt) {
 		case TidyString:
-			RETVAL_STRING((char *)optval);
-			efree(optval);
+			RETVAL_STR((zend_string*)optval);
 			return;
 
 		case TidyInteger:
