@@ -1541,7 +1541,9 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 				q->h = p->h;
 				q->key = NULL;
 				if (Z_OPT_REFCOUNTED_P(data)) {
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1 &&
+					    (Z_TYPE_P(Z_REFVAL_P(data)) != IS_ARRAY ||
+					      Z_ARRVAL_P(Z_REFVAL_P(data)) != source)) {
 						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
 					} else {
 						ZVAL_COPY(&q->val, data);
