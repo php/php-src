@@ -1287,6 +1287,8 @@ PHP_METHOD(sqlite3stmt, paramCount)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1305,6 +1307,8 @@ PHP_METHOD(sqlite3stmt, close)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1325,6 +1329,8 @@ PHP_METHOD(sqlite3stmt, reset)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1347,6 +1353,8 @@ PHP_METHOD(sqlite3stmt, clear)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1370,6 +1378,8 @@ PHP_METHOD(sqlite3stmt, readOnly)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1439,6 +1449,8 @@ PHP_METHOD(sqlite3stmt, bindParam)
 	zval *object = getThis();
 	struct php_sqlite3_bound_param param = {0};
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	param.param_number = -1;
 	param.type = SQLITE3_TEXT;
@@ -1472,6 +1484,8 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	zval *object = getThis();
 	struct php_sqlite3_bound_param param = {0};
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+	
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	param.param_number = -1;
 	param.type = SQLITE3_TEXT;
@@ -1508,6 +1522,8 @@ PHP_METHOD(sqlite3stmt, execute)
 	struct php_sqlite3_bound_param *param;
 
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
+
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
