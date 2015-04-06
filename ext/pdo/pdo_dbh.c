@@ -345,12 +345,12 @@ static PHP_METHOD(PDO, dbh_constructor)
 		php_error_docref(NULL, E_ERROR, "out of memory");
 	}
 
+	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
+
 	if (!call_factory) {
 		/* we got a persistent guy from our cache */
 		goto options;
 	}
-
-	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
 
 	if (driver->db_handle_factory(dbh, options)) {
 		/* all set */
