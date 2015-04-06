@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
     (Anatol)
 
+- Sqlite3:
+  . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
+
 16 Apr 2015, PHP 5.6.8
 
 - Core:
