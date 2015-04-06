@@ -1146,6 +1146,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 		} else {
 			zend_error_noreturn(E_ERROR, "Division by zero");
 		}
+		ZVAL_UNDEF(result);
 		return FAILURE;
 	}
 
@@ -1462,6 +1463,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
+			ZVAL_UNDEF(result);
 			return FAILURE;
 		}
 	}
@@ -1492,6 +1494,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
+			ZVAL_UNDEF(result);
 			return FAILURE;
 		}
 	}
