@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.25
 
 - Core:
+  . Fixed bug #60022 ("use statement [...] has no effect" depends on leading
+    backslash). (Nikita)
   . Fixed bug #68652 (segmentation fault in destructor). (Dmitry)
 
 - cURL:
