@@ -1070,7 +1070,7 @@ static zend_always_inline void make_inf(zval *result, int neg) /* {{{ */
 	ZVAL_DOUBLE(result, neg ? -HUGE_VAL : HUGE_VAL);
 #elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	result->value.ww.w1 = neg ? 0xfff00000 : 0x7ff00000;
-	result->value.ww.w2 = 0
+	result->value.ww.w2 = 0;
 	Z_TYPE_INFO_P(result) = IS_DOUBLE;
 #elif HAVE_ATOF_ACCEPTS_INF
 	ZVAL_DOUBLE(neg ? aatof("-INF") : tof("INF"));
