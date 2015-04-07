@@ -156,6 +156,18 @@ typedef enum mysqlnd_res_type
 	MYSQLND_RES_PS_UNBUF
 } enum_mysqlnd_res_type;
 
+typedef enum mysqlnd_send_query_type
+{
+	MYSQLND_SEND_QUERY_IMPLICIT = 0,
+	MYSQLND_SEND_QUERY_EXPLICIT
+} enum_mysqlnd_send_query_type;
+
+typedef enum mysqlnd_reap_result_type
+{
+	MYSQLND_REAP_RESULT_IMPLICIT = 0,
+	MYSQLND_REAP_RESULT_EXPLICIT
+} enum_mysqlnd_reap_result_type;
+
 typedef enum mysqlnd_option
 {
 	MYSQL_OPT_CONNECT_TIMEOUT,

@@ -113,9 +113,9 @@ PHPAPI void _mysqlnd_debug(const char *mode);
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
-#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len))
+#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), MYSQLND_SEND_QUERY_EXPLICIT, NULL, NULL)
 #define mysqlnd_poll(r, err, d_pull,sec,usec,desc_num)	_mysqlnd_poll((r), (err), (d_pull), (sec), (usec), (desc_num))
-#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data)
+#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data, MYSQLND_REAP_RESULT_EXPLICIT)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result))
 
 PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
