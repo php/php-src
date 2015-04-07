@@ -86,6 +86,15 @@ PHP_FUNCTION(openssl_csr_get_public_key);
 #endif
 
 #endif
+typedef struct php_ssl_error{
+	 char *err_str;
+	 struct php_ssl_error* next;
+}PHP_SSL_ERROR_QUEUE ;
+
+
+typedef struct php_ssl_error_context{
+	struct php_ssl_error* current;
+}PHP_SSL_ERROR_CONTEXT;
 
 /*
  * Local variables:

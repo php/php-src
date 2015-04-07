@@ -498,6 +498,11 @@ static int le_x509;
 static int le_csr;
 static int ssl_stream_data_index;
 
+
+
+
+
+
 int php_openssl_get_x509_list_id(void) /* {{{ */
 {
 	return le_x509;
@@ -807,6 +812,52 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
+
+
+
+
+static PHP_SSL_ERROR_CONTEXT *ssl_error_context;
+
+void php_openssl_store_errors(void)
+{
+		PHP_SSL_ERROR_QUEUE *err,*tmp;
+		char buf[512];
+		unsigned long val;
+
+		//initialize error context if is null;
+		if(ssl_error_context==NULL) {
+			ssl_error_context = emalloc(sizeof(PHP_SSL_ERROR_CONTEXT));
+			ssl_error_context->current=NULL;
+		}
+
+		err = emalloc(sizeof(PHP_SSL_ERROR_QUEUE));
+		err->next=NULL;
+
+		// Retrieve error from openssl error queue
+		val = ERR_get_error();
+		if (val) {
+			ERR_error_string(val, buf);
+			err->err_str=emalloc(strlen(buf));
+			strcpy(err->err_str,buf);
+			ERR_clear_error();
+		}else{
+			return ;
+		}
+
+		//If error queue is empty, create the first
+		if(ssl_error_context->current==NULL){
+			ssl_error_context->current=err;
+		}else{
+			//Else, append error to last element
+			tmp=ssl_error_context->current;
+			while(tmp->next!=NULL)
+			{
+				tmp=tmp->next;
+			}
+			tmp->next=err;
+		}
+
+}
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
@@ -3323,6 +3374,7 @@ PHP_FUNCTION(openssl_pkey_get_public)
 	pkey = php_openssl_evp_from_zval(cert, 1, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
+		php_openssl_store_errors();
 		RETURN_FALSE;
 	}
 	zend_list_addref(Z_LVAL_P(return_value));
@@ -4204,19 +4256,36 @@ PHP_FUNCTION(openssl_public_decrypt)
    Returns a description of the last error, and alters the index of the error messages. Returns false when the are no more messages */
 PHP_FUNCTION(openssl_error_string)
 {
-	char buf[512];
-	unsigned long val;
+	PHP_SSL_ERROR_QUEUE *tmp;
+	char *err_str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	    return;
 	}
 
-	val = ERR_get_error();
-	if (val) {
-		RETURN_STRING(ERR_error_string(val, buf), 1);
-	} else {
-		RETURN_FALSE;
+	// Return false if error queue is empty
+	if(ssl_error_context->current==NULL){
+		RETURN_FALSE;;
 	}
+
+	// Get first error
+	tmp=ssl_error_context->current;
+
+	//Store error msg
+	err_str=emalloc(strlen(tmp->err_str));
+	strcpy(err_str,tmp->err_str);
+
+	//Update references of the error queue
+	if(tmp->next!=NULL){
+		ssl_error_context->current=tmp->next;
+	}else{
+		ssl_error_context->current=NULL;
+	}
+
+	//Free memory of the current error
+	efree(tmp);
+	RETURN_STRING(err_str,1);
+
 }
 /* }}} */
 
