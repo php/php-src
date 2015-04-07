@@ -531,14 +531,6 @@ PHP_FUNCTION(hash_final)
 	digest->val[digest_len] = 0;
 	efree(hash->context);
 	hash->context = NULL;
-
-	//???
-	//??? /* zend_list_REAL_delete() */
-	//??? if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void *) &le)==SUCCESS) {
-	//??? 	/* This is a hack to avoid letting the resource hide elsewhere (like in separated vars)
-	//??? 		FETCH_RESOURCE is intelligent enough to handle dealing with any issues this causes */
-	//??? 	le->refcount = 1;
-	//??? } /* FAILURE is not an option */
 	zend_list_close(Z_RES_P(zhash));
 
 	if (raw_output) {

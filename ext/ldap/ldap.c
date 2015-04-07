@@ -1975,7 +1975,8 @@ PHP_FUNCTION(ldap_sort)
 		RETURN_FALSE;
 	}
 
-	if ((le = zend_hash_index_find_ptr(&EG(regular_list), Z_RES_HANDLE_P(result))) == NULL || le->type != le_result) {
+	le = Z_RES_P(result);
+	if (le->type != le_result) {
 		php_error_docref(NULL, E_WARNING, "Supplied resource is not a valid ldap result resource");
 		RETURN_FALSE;
 	}

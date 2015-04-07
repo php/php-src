@@ -65,15 +65,6 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void)
 	return &url_stream_wrappers_hash;
 }
 
-static int _php_stream_release_context(zval *zv, void *pContext)
-{
-	zend_resource *le = Z_RES_P(zv);
-	if (le->ptr == pContext) {
-		return --GC_REFCOUNT(le) == 0;
-	}
-	return 0;
-}
-
 static int forget_persistent_resource_id_numbers(zval *el)
 {
 	php_stream *stream;
@@ -91,11 +82,8 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 
 	stream->res = NULL;
 
-	if (PHP_STREAM_CONTEXT(stream)) {
-		zend_hash_apply_with_argument(&EG(regular_list),
-				_php_stream_release_context,
-				PHP_STREAM_CONTEXT(stream));
-		stream->ctx = NULL;
+	if (stream->ctx) {
+		zend_list_delete(stream->ctx);
 	}
 
 	return 0;
@@ -336,7 +324,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options) /* {{{ */
 {
-	return _php_stream_free(stream_enclosed,
+	return php_stream_free(stream_enclosed,
 		close_options | PHP_STREAM_FREE_IGNORE_ENCLOSING);
 }
 /* }}} */
@@ -418,7 +406,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 		/* we force PHP_STREAM_CALL_DTOR because that's from where the
 		 * enclosing stream can free this stream. We remove rsrc_dtor because
 		 * we want the enclosing stream to be deleted from the resource list */
-		return _php_stream_free(enclosing_stream,
+		return php_stream_free(enclosing_stream,
 			(close_options | PHP_STREAM_FREE_CALL_DTOR) & ~PHP_STREAM_FREE_RSRC_DTOR);
 	}
 
