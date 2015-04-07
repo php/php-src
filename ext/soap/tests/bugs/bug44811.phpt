@@ -14,6 +14,6 @@ try {
 die('ok');
 ?>
 --EXPECTF--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://slashdot.org' : %s
+[WSDL] SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://slashdot.org' : %s
 
 ok
