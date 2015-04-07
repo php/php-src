@@ -102,7 +102,7 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	tar_header *header = (tar_header *) buf;
 	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
 	php_uint32 ret;
-	char save[sizeof(header->checksum)];
+	char save[sizeof(header->checksum)], *bname;
 
 	/* assume that the first filename in a tar won't begin with <?php */
 	if (!strncmp(buf, "<?php", sizeof("<?php")-1)) {
@@ -113,7 +113,10 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	memset(header->checksum, ' ', sizeof(header->checksum));
 	ret = (checksum == phar_tar_checksum(buf, 512));
 	memcpy(header->checksum, save, sizeof(header->checksum));
-	if (!ret && strstr(fname, ".tar")) {
+	if ((bname = strrchr(fname, PHP_DIR_SEPARATOR))) {
+		fname = bname;
+	}
+	if (!ret && (bname = strstr(fname, ".tar")) && (bname[4] == '\0' || bname[4] == '.')) {
 		/* probably a corrupted tar - so we will pretend it is one */
 		return 1;
 	}
@@ -254,6 +257,12 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));
+
+		/* skip global/file headers (pax) */
+		if (!old && (hdr->typeflag == TAR_GLOBAL_HDR || hdr->typeflag == TAR_FILE_HDR)) {
+			size = (size+511)&~511;
+			goto next;
+		}
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			off_t curloc;
@@ -548,6 +557,7 @@ bail:
 		size = (size+511)&~511;
 
 		if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
+next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
 			if ((uint)php_stream_tell(fp) > totalsize) {

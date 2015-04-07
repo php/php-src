@@ -322,13 +322,24 @@ foreach (glob($ICU_DLLS) as $filename) {
 	copy($filename, "$dist_dir/" . basename($filename));
 }
 $ENCHANT_DLLS = array(
-	'glib-2.dll',
-	'gmodule-2.dll',
-	'libenchant_myspell.dll',
-	'libenchant_ispell.dll',
+	array('', 'glib-2.dll'),
+	array('', 'gmodule-2.dll'),
+	array('lib/enchant', 'libenchant_myspell.dll'),
+	array('lib/enchant', 'libenchant_ispell.dll'),
 );
-foreach ($ENCHANT_DLLS as $filename) {
-	copy($php_build_dir . '/bin/' . $filename, "$dist_dir/" . basename($filename));
+foreach ($ENCHANT_DLLS as $dll) {
+	$dest  = "$dist_dir/$dll[0]";
+	$filename = $dll[1];
+
+	if (!file_exists("$dest") || !is_dir("$dest")) {
+		if (!mkdir("$dest", 0777, true)) {
+			echo "WARNING: couldn't create '$dest' for enchant plugins ";
+		}
+	}
+
+	if (!copy($php_build_dir . '/bin/' . $filename, "$dest/" . basename($filename))) {
+			echo "WARNING: couldn't copy $filename into the dist dir";
+	}
 }
 
 /* and those for pecl */

@@ -115,6 +115,7 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 	}
 	if (PS(id)) {
 		efree(PS(id));
+		PS(id) = NULL;
 	}
 }
 /* }}} */
