@@ -1696,10 +1696,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *sou
 }
 
 
-/* Returns SUCCESS if found and FAILURE if not. The pointer to the
- * data is returned in pData. The reason is that there's no reason
- * someone using the hash table might not want to have NULL data
- */
+/* Returns the hash table data if found and NULL if not. */
 ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key)
 {
 	Bucket *p;
