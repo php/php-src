@@ -1363,9 +1363,9 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 #endif
 
 
-/* {{{ _mysqlnd_poll */
+/* {{{ mysqlnd_poll */
 PHPAPI enum_func_status
-_mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
+mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
 {
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
@@ -3139,9 +3139,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ _mysqlnd_init */
+/* {{{ mysqlnd_init */
 PHPAPI MYSQLND *
-_mysqlnd_init(unsigned int flags, zend_bool persistent)
+mysqlnd_init(unsigned int flags, zend_bool persistent)
 {
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_init");
