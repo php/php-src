@@ -620,6 +620,7 @@ END_EXTERN_C()
 #define RETVAL_STRINGL(s, l)		 	ZVAL_STRINGL(return_value, s, l)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_RES(r)			 		ZVAL_RES(return_value, r)
+#define RETVAL_ARR(r)			 		ZVAL_ARR(return_value, r)
 #define RETVAL_OBJ(r)			 		ZVAL_OBJ(return_value, r)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_FALSE(return_value)
@@ -637,6 +638,7 @@ END_EXTERN_C()
 #define RETURN_STRINGL(s, l) 			{ RETVAL_STRINGL(s, l); return; }
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
 #define RETURN_RES(r) 					{ RETVAL_RES(r); return; }
+#define RETURN_ARR(r) 					{ RETVAL_ARR(r); return; }
 #define RETURN_OBJ(r) 					{ RETVAL_OBJ(r); return; }
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
