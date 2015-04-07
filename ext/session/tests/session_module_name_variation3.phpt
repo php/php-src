@@ -41,11 +41,10 @@ ob_end_flush();
 string(%d) "%s"
 string(4) "user"
 
-Warning: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
+Exception: Stop...! in %s on line %d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
 #1 %s(%d): session_start()
 #2 {main}
-  thrown in %s on line %d
 
 Fatal error: session_start(): Failed to initialize storage module: %s in %s%esession_module_name_variation3.php on line %d

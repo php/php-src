@@ -24,13 +24,12 @@ unset($ar);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'First' in %sexception_008.php:%d
+Exception: First in %sexception_008.php on line %d
 Stack trace:
 #0 %sexception_008.php(%d): TestFirst->__destruct()
 #1 {main}
 
-Next exception 'Exception' with message 'Second' in %sexception_008.php:%d
+Next Exception: Second in %sexception_008.php on line %d
 Stack trace:
 #0 %sexception_008.php(%d): TestSecond->__destruct()
 #1 {main}
-  thrown in %sexception_008.php on line %d

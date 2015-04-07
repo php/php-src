@@ -12,8 +12,7 @@ foreach($it as $k=>$v) { }
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'LogicException' with message 'The object is in an invalid state as the parent constructor was not called' in %s:%d
+LogicException: The object is in an invalid state as the parent constructor was not called in %s on line %d
 Stack trace:
 #0 %s%ebug54281.php(8): RecursiveIteratorIterator->rewind()
 #1 {main}
-  thrown in %s%ebug54281.php on line 8

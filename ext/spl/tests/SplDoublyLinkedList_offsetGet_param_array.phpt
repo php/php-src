@@ -11,8 +11,7 @@ $get = $array->offsetGet( array( 'fail' ) );
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'OutOfRangeException' with message 'Offset invalid or out of range' in %s
+OutOfRangeException: Offset invalid or out of range in %s on line %d
 Stack trace:
 #0 %s
 #1 {main}
-  thrown in %s on line %d

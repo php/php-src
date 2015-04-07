@@ -21,8 +21,7 @@ var_dump($fileInfo->getGroup());
 ?>
 
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileInfo::getGroup(): stat failed for not_existing' in %s
+RuntimeException: SplFileInfo::getGroup(): stat failed for not_existing in %s on line %d
 Stack trace:
 #0 %s: SplFileInfo->getGroup()
 #1 {main}
-  thrown in %s on line %d

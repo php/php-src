@@ -15,9 +15,8 @@ class Two extends One {}
 new Two();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'AssertionException' with message 'assert(false)' in %sexpect_010.php:%d
+AssertionException: assert(false) in %sexpect_010.php on line %d
 Stack trace:
 #0 %sexpect_010.php(%d): assert(false, 'assert(false)')
 #1 %sexpect_010.php(%d): One->__construct()
 #2 {main}
-  thrown in %sexpect_010.php on line %d

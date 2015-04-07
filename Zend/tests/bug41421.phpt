@@ -21,9 +21,8 @@ echo "Done\n";
 --EXPECTF--	
 Warning: feof(): wrapper::stream_eof is not implemented! Assuming EOF in %s on line %d
 
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 [internal function]: wrapper->stream_eof()
 #1 %s(%d): feof(Resource id #%d)
 #2 {main}
-  thrown in %s on line %d

@@ -10,8 +10,7 @@ foreach ($gen as &$value) { }
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'You can only iterate a generator by-reference if it declared that it yields by-reference' in %s:%d
+Exception: You can only iterate a generator by-reference if it declared that it yields by-reference in %s on line %d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
 

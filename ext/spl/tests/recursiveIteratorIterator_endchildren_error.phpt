@@ -34,9 +34,8 @@ foreach ($recItIt2 as $val) echo "$val\n";
 1
 2
 
-Fatal error: Uncaught exception 'Exception' in %s
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->endchildren()
 #1 %s: RecursiveIteratorIterator->next()
 #2 {main}
-  thrown in %s on line %d

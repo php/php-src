@@ -12,10 +12,9 @@ $data = 'a:2:{s:4:"file";O:8:"CURLFile":3:{s:4:"name";s:13:"testdata1.txt";s:4:"
 var_dump(unserialize($data));
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'Unserialization of CURLFile instances is not allowed' in %s
+Exception: Unserialization of CURLFile instances is not allowed in %s on line %d
 Stack trace:
 #0 [internal function]: CURLFile->__wakeup()
 #1 %s
 #2 {main}
-  thrown in %s on line %d
 

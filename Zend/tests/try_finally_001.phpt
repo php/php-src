@@ -15,8 +15,7 @@ foo("finally");
 --EXPECTF--
 string(7) "finally"
 
-Fatal error: Uncaught exception 'Exception' with message 'ex' %s
+Exception: ex in %s on line %d
 Stack trace:
 #0 %stry_finally_001.php(%d): foo('finally')
 #1 {main}
-  thrown in %stry_finally_001.php on line %d

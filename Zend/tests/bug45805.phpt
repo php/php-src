@@ -38,11 +38,10 @@ $o = new B;
 $o->bar();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' in %sbug45805.php:%d
+RuntimeException: (empty message) in %sbug45805.php on line %d
 Stack trace:
 #0 %sbug45805.php(%d): PHPUnit_Util_ErrorHandler::handleError(8, 'Only variables ...', '%s', %d, Array)
 #1 [internal function]: B->foo()
 #2 %sbug45805.php(%d): ReflectionMethod->invoke(Object(B))
 #3 %sbug45805.php(%d): B->bar()
 #4 {main}
-  thrown in %sbug45805.php on line %d

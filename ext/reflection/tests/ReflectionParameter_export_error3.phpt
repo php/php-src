@@ -14,9 +14,8 @@ foreach($params as $key => $value) {
 }
 --EXPECTF--
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'The parameter specified by its name could not be found' in %s.php:%d
+ReflectionException: The parameter specified by its name could not be found in %s.php on line %d
 Stack trace:
 #0 [internal function]: ReflectionParameter->__construct('ReflectionParam...', 'incorrect_param...')
 #1 %s.php(%d): ReflectionParameter::export('ReflectionParam...', 'incorrect_param...')
 #2 {main}
-  thrown in %s.php on line %d

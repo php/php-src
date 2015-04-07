@@ -13,8 +13,7 @@ assert(false);
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
-Fatal error: Uncaught exception 'AssertionException' with message 'assert(false)' in %sexception_011.php:%d
+AssertionException: assert(false) in %sexception_011.php on line %d
 Stack trace:
 #0 %sexception_011.php(%d): assert(false, 'assert(false)')
 #1 {main}
-  thrown in %sexception_011.php on line %d

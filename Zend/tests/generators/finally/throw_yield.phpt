@@ -17,8 +17,7 @@ foreach (foo(1, 5) as $x) {
 --EXPECTF--
 1
 
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 %s(%d): foo(1, 5)
 #1 {main}
-  thrown in %s on line %d

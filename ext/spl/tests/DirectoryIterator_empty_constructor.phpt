@@ -8,8 +8,7 @@ Havard Eide <nucleuz@gmail.com>
 $it = new DirectoryIterator("");
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'Directory name must not be empty.' in %s:%d
+RuntimeException: Directory name must not be empty. in %s on line %d
 Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('')
 #1 {main}
-  thrown in %s on line %d

@@ -21,8 +21,7 @@ var_dump($fileInfo->getPerms() == 0100557);
 ?>
 
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileInfo::getPerms(): stat failed for %s' in %s
+RuntimeException: SplFileInfo::getPerms(): stat failed for %s in %s on line %d
 Stack trace:
 #0 %s: SplFileInfo->getPerms()
 #1 {main}
-  thrown in %s
