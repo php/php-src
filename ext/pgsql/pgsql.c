@@ -882,15 +882,14 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 /* {{{ _php_pgsql_trim_message */
 static char * _php_pgsql_trim_message(const char *message, size_t *len)
 {
-	register size_t i = strlen(message)-1;
+	register size_t i = strlen(message);
 
-	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
+	if (i>2 && (message[i-2] == '\r' || message[i-2] == '\n') && message[i-1] == '.') {
 		--i;
 	}
-	while (i>0 && (message[i] == '\r' || message[i] == '\n')) {
+	while (i>1 && (message[i-1] == '\r' || message[i-1] == '\n')) {
 		--i;
 	}
-	++i;
 	if (len) {
 		*len = i;
 	}
