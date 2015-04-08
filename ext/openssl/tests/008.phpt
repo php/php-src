@@ -38,11 +38,16 @@ if ($exists) {
 }
 echo "---\n";
 
+if (PHP_EOL !== "\n") {
+	$a = str_replace(PHP_EOL, "\n", $a);
+}
+
 var_dump(strcmp($output, $a));
 var_dump(strcmp($output, $output2));
 var_dump(strcmp($output, $output3));
 var_dump(strcmp($output, $output4));	// different
 var_dump(strcmp($output, $output5));	// different
+
 ?>
 --EXPECTF--
 bool(true)
