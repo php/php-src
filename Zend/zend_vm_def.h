@@ -2376,6 +2376,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			OBJ_RELEASE(object);
 		}
+
 		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2417,7 +2418,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			EG(current_execute_data) = EX(prev_execute_data);
 			if (EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
-			}
+			} 
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
 
@@ -3768,8 +3769,8 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if (!EX(return_value)) {
 		FREE_OP1();
 	} else {
@@ -7558,3 +7559,42 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
+{
+	zval args;
+	zend_function *fbc = EX(func);
+	zend_object *obj = Z_OBJ(EX(This));
+	zval *return_value = EX(return_value);
+	zend_call_kind call_kind = EX_CALL_KIND();
+	uint32_t num_args = EX_NUM_ARGS();
+	zend_execute_data *call, *prev_execute_data = EX(prev_execute_data);
+
+	array_init_size(&args, num_args);
+	if (num_args) {
+		zval *p;
+		zend_hash_real_init(Z_ARRVAL(args), 1);
+
+		p = ZEND_CALL_ARG(execute_data, 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL(args)) {
+			uint32_t i;
+			for (i = 0; i < num_args; ++i) {
+				ZEND_HASH_FILL_ADD(p);
+				p++;
+			}
+		} ZEND_HASH_FILL_END();
+	}
+
+	zend_vm_stack_free_call_frame(execute_data);
+	call = zend_vm_stack_push_call_frame(call_kind,
+			fbc->common.prototype, 2, fbc->common.scope, obj, prev_execute_data);
+
+	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
+	ZVAL_COPY_VALUE(ZEND_CALL_ARG(call, 2), &args);
+
+	efree(fbc); 
+
+	call->symbol_table = NULL;
+	i_init_func_execute_data(call, &call->func->op_array, return_value, 1);
+
+	ZEND_VM_ENTER();
+}

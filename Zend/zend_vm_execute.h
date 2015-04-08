@@ -466,6 +466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 			}
 			OBJ_RELEASE(object);
 		}
+
 		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1772,6 +1773,45 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_HANDLER(
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zval args;
+	zend_function *fbc = EX(func);
+	zend_object *obj = Z_OBJ(EX(This));
+	zval *return_value = EX(return_value);
+	zend_call_kind call_kind = EX_CALL_KIND();
+	uint32_t num_args = EX_NUM_ARGS();
+	zend_execute_data *call, *prev_execute_data = EX(prev_execute_data);
+
+	array_init_size(&args, num_args);
+	if (num_args) {
+		zval *p;
+		zend_hash_real_init(Z_ARRVAL(args), 1);
+
+		p = ZEND_CALL_ARG(execute_data, 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL(args)) {
+			uint32_t i;
+			for (i = 0; i < num_args; ++i) {
+				ZEND_HASH_FILL_ADD(p);
+				p++;
+			}
+		} ZEND_HASH_FILL_END();
+	}
+
+	zend_vm_stack_free_call_frame(execute_data);
+	call = zend_vm_stack_push_call_frame(call_kind,
+			fbc->common.prototype, 2, fbc->common.scope, obj, prev_execute_data);
+
+	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
+	ZVAL_COPY_VALUE(ZEND_CALL_ARG(call, 2), &args);
+
+	efree(fbc);
+
+	call->symbol_table = NULL;
+	i_init_func_execute_data(call, &call->func->op_array, return_value, 1);
+
+	ZEND_VM_ENTER();
+}
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2813,8 +2853,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_HANDLER(ZEND
 
 
 	SAVE_OPLINE();
-	retval_ptr = EX_CONSTANT(opline->op1);
 
+	retval_ptr = EX_CONSTANT(opline->op1);
 	if (!EX(return_value)) {
 
 	} else {
@@ -10617,8 +10657,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_O
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 
+	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 	if (!EX(return_value)) {
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
@@ -13649,8 +13689,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_O
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 
+	retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 	if (!EX(return_value)) {
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
@@ -27222,8 +27262,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OP
 
 
 	SAVE_OPLINE();
-	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 
+	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 	if (!EX(return_value)) {
 
 	} else {
@@ -47346,31 +47386,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_FETCH_CLASS_NAME_SPEC_HANDLER,
   	ZEND_FETCH_CLASS_NAME_SPEC_HANDLER,
   	ZEND_FETCH_CLASS_NAME_SPEC_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
+  	ZEND_PROXY_CALL_SPEC_HANDLER,
   	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
   	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
   	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
