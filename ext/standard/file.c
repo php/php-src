@@ -900,11 +900,9 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
-	if (!stream->is_persistent) {
-		php_stream_close(stream);
-	} else {
-		php_stream_pclose(stream);
-	}
+	php_stream_free(stream,
+		PHP_STREAM_FREE_KEEP_RSRC |
+		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
 
 	RETURN_TRUE;
 }

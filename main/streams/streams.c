@@ -439,15 +439,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
 	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && stream->res) {
-		/* zend_list_delete actually only decreases the refcount; if we're
-		 * releasing the stream, we want to actually delete the resource from
-		 * the resource list, otherwise the resource will point to invalid memory.
-		 * In any case, let's always completely delete it from the resource list,
-		 * not only when PHP_STREAM_FREE_RELEASE_STREAM is set */
-//???		while (zend_list_delete(stream->res) == SUCCESS) {}
-//???		stream->res->gc.refcount = 0;
+		/* Close resource, but keep it in resource list */
 		zend_list_close(stream->res);
-		if (!stream->__exposed) {
+		if ((close_options & PHP_STREAM_FREE_KEEP_RSRC) == 0) {
+			/* Completely delete zend_resource, if not referenced */
 			zend_list_delete(stream->res);
 			stream->res = NULL;
 		}

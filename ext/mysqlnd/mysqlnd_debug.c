@@ -460,7 +460,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 		}
 #endif
 
-		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE);
+		php_stream_close(self->stream);
 		self->stream = NULL;
 	}
 	/* no DBG_RETURN please */

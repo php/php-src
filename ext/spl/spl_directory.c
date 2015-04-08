@@ -108,9 +108,9 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 			}
 			*/
 			if (!intern->u.file.stream->is_persistent) {
-				php_stream_free(intern->u.file.stream, PHP_STREAM_FREE_CLOSE);
+				php_stream_close(intern->u.file.stream);
 			} else {
-				php_stream_free(intern->u.file.stream, PHP_STREAM_FREE_CLOSE_PERSISTENT);
+				php_stream_pclose(intern->u.file.stream);
 			}
 			if (intern->u.file.open_mode) {
 				efree(intern->u.file.open_mode);

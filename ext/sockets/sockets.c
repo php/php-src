@@ -1079,7 +1079,8 @@ PHP_FUNCTION(socket_close)
 		if (stream != NULL) {
 			/* close & destroy stream, incl. removing it from the rsrc list;
 			 * resource stored in php_sock->zstream will become invalid */
-			php_stream_free(stream, PHP_STREAM_FREE_CLOSE |
+			php_stream_free(stream,
+					PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_CLOSE |
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
 	}

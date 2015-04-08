@@ -226,6 +226,9 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 	self = emalloc(sizeof(*self));
 
 	self->stream = innerstream;
+	if (innerstream) {
+		GC_REFCOUNT(innerstream->res)++;
+	}
 	self->bz_file = bz;
 
 	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
