@@ -914,7 +914,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 #ifdef F_SETFL
 			} else if (modenr == DBA_CREAT) {
-				int flags = fcntl(info->fd, F_SETFL);
+				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #endif
 			}
