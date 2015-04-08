@@ -35,6 +35,8 @@
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
+  . Fixed bug #63734 (Garbage collector can free zvals that are still
+    referenced). (Dmitry)
   . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
     modifier. (Guilherme Blanco)
   . is_long() & is_integer() is now an alias of is_int(). (Kalle)
