@@ -452,7 +452,15 @@ static void dba_close_rsrc(zend_resource *rsrc)
 /* {{{ dba_close_pe_rsrc_deleter */
 int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
-	return ((zend_resource *)Z_PTR_P(el))->ptr == pDba ? ZEND_HASH_APPLY_REMOVE: ZEND_HASH_APPLY_KEEP;
+	if (Z_RES_P(el)->ptr == pDba) {
+		if (Z_DELREF_P(el) == 0) {
+			return ZEND_HASH_APPLY_REMOVE;
+		} else {
+			return ZEND_HASH_APPLY_KEEP | ZEND_HASH_APPLY_STOP;
+		}
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 }
 /* }}} */
 
@@ -675,7 +683,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			info = (dba_info *)le->ptr;
 
 			GC_REFCOUNT(le)++;
-			RETURN_RES(le);
+			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}
 	}
@@ -933,11 +941,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = NULL;
 
 	if (persistent) {
-		zend_resource new_le;
+		zval new_le;
 
-		new_le.type = le_pdb;
-		new_le.ptr = info;
-		if (zend_hash_str_update_mem(&EG(persistent_list), key, keylen, &new_le, sizeof(zend_resource)) == NULL) {
+		ZVAL_NEW_PERSISTENT_RES(&new_le, -1, info, le_pdb);
+		if (zend_hash_str_update(&EG(persistent_list), key, keylen, &new_le) == NULL) {
 			dba_close(info);
 			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
