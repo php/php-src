@@ -1644,7 +1644,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
-			if (container_op_type != IS_VAR && UNEXPECTED(container == &EG(error_zval))) {
+			if (container_op_type == IS_VAR && UNEXPECTED(container == &EG(error_zval))) {
 				ZVAL_INDIRECT(result, &EG(error_zval));
 				return;
 			}
