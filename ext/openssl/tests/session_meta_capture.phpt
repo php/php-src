@@ -35,11 +35,6 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_SSLv3_CLIENT);
-    @stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
-    $meta = stream_context_get_options($clientCtx)['ssl']['session_meta'];
-    var_dump($meta['protocol']);
-
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
     @stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
     $meta = stream_context_get_options($clientCtx)['ssl']['session_meta'];
@@ -59,7 +54,6 @@ CODE;
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-string(5) "SSLv3"
 string(5) "TLSv1"
 string(7) "TLSv1.1"
 string(7) "TLSv1.2"
