@@ -1035,29 +1035,37 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
+static inline zend_op_array *zend_get_proxy_call_function(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */ {
+	zend_op_array *call_user_call = ecalloc(1, ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)) + sizeof(zend_op));
+
+	ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
+
+	call_user_call->type = ZEND_USER_FUNCTION;
+	call_user_call->scope = ce;
+	call_user_call->prototype = is_static? ce->__callstatic : ce->__call;
+	call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | (is_static? (ZEND_ACC_STATIC | ZEND_ACC_PUBLIC) : 0);
+	call_user_call->this_var = -1;
+	call_user_call->filename = is_static? ce->__callstatic->op_array. filename : ce->__call->op_array.filename;
+	call_user_call->opcodes = (zend_op *)((char *)call_user_call + ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)));
+	call_user_call->opcodes[0].opcode = ZEND_PROXY_CALL;
+	call_user_call->opcodes[0].op1_type = IS_UNUSED;
+	call_user_call->opcodes[0].op2_type = IS_UNUSED;
+	call_user_call->opcodes[0].result_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(&call_user_call->opcodes[0]);
+	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+		call_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+	} else {
+		call_user_call->function_name = zend_string_copy(method_name);
+	}
+
+	return call_user_call;
+}
+/* }}} */
+
 static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
 	if (ce->type == ZEND_USER_CLASS) {
-		zend_op_array *call_user_call = ecalloc(1, ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)) + sizeof(zend_op));
-		call_user_call->type = ZEND_USER_FUNCTION;
-		call_user_call->scope = ce;
-		call_user_call->prototype = ce->__call;
-		call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		call_user_call->this_var = -1;
-		call_user_call->filename = ce->__call->op_array.filename;
-		call_user_call->opcodes = (zend_op *)((char *)call_user_call + ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)));
-		call_user_call->opcodes[0].opcode = ZEND_PROXY_CALL;
-		call_user_call->opcodes[0].op1_type = IS_UNUSED;
-		call_user_call->opcodes[0].op2_type = IS_UNUSED;
-		call_user_call->opcodes[0].result_type = IS_UNUSED;
-		ZEND_VM_SET_OPCODE_HANDLER(&call_user_call->opcodes[0]);
-
-		if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-			call_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
-		} else {
-			call_user_call->function_name = zend_string_copy(method_name);
-		}
-		return (union _zend_function *)call_user_call;
+		return (union _zend_function *)zend_get_proxy_call_function(ce, method_name, 0);
 	} else {
 		zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 		call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -1206,23 +1214,27 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	zend_internal_function *callstatic_user_call = emalloc(sizeof(zend_internal_function));
-	callstatic_user_call->type     = ZEND_INTERNAL_FUNCTION;
-	callstatic_user_call->module   = (ce->type == ZEND_INTERNAL_CLASS) ? ce->info.internal.module : NULL;
-	callstatic_user_call->handler  = zend_std_callstatic_user_call;
-	callstatic_user_call->arg_info = NULL;
-	callstatic_user_call->num_args = 0;
-	callstatic_user_call->scope    = ce;
-	callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
-	//??? keep compatibility for "\0" characters
-	//??? see: Zend/tests/bug46238.phpt
-	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-		callstatic_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+	if (ce->type == ZEND_USER_CLASS) {
+		return (union _zend_function *)zend_get_proxy_call_function(ce, method_name, 1);
 	} else {
-		callstatic_user_call->function_name = zend_string_copy(method_name);
-	}
+		zend_internal_function *callstatic_user_call = emalloc(sizeof(zend_internal_function));
+		callstatic_user_call->type     = ZEND_INTERNAL_FUNCTION;
+		callstatic_user_call->module   = (ce->type == ZEND_INTERNAL_CLASS) ? ce->info.internal.module : NULL;
+		callstatic_user_call->handler  = zend_std_callstatic_user_call;
+		callstatic_user_call->arg_info = NULL;
+		callstatic_user_call->num_args = 0;
+		callstatic_user_call->scope    = ce;
+		callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
+		//??? keep compatibility for "\0" characters
+		//??? see: Zend/tests/bug46238.phpt
+		if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+			callstatic_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+		} else {
+			callstatic_user_call->function_name = zend_string_copy(method_name);
+		}
 
-	return (zend_function *)callstatic_user_call;
+		return (zend_function *)callstatic_user_call;
+	}
 }
 /* }}} */
 

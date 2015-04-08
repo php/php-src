@@ -7591,10 +7591,11 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
 	ZVAL_COPY_VALUE(ZEND_CALL_ARG(call, 2), &args);
 
-	efree(fbc); 
 
 	call->symbol_table = NULL;
-	i_init_func_execute_data(call, &call->func->op_array, return_value, 1);
+	i_init_func_execute_data(call, &call->func->op_array, return_value, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
+
+	efree(fbc); 
 
 	ZEND_VM_ENTER();
 }
