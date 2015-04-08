@@ -840,7 +840,7 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	zval retval;
 	int ret;
 
-
+	ZVAL_UNDEF(&retval);
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
 	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
