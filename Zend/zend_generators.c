@@ -123,10 +123,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zend_generator_cleanup_unfinished_execution(generator);
 		}
 
-		/* Free a clone of closure */
+		/* Free closure object */
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			destroy_op_array(op_array);
-			efree_size(op_array, sizeof(zend_op_array));
+			OBJ_RELEASE((zend_object *) op_array->prototype);
 		}
 
 		efree(generator->stack);
@@ -214,17 +213,6 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-static int copy_closure_static_var(zval *var, int num_args, va_list args, zend_hash_key *key) /* {{{ */
-{
-	HashTable *target = va_arg(args, HashTable *);
-
-	ZVAL_MAKE_REF(var);
-	Z_ADDREF_P(var);
-	zend_hash_update(target, key->key, var);
-	return 0;
-}
-/* }}} */
-
 /* Requires globals EG(scope), EG(This) and EG(current_execute_data). */
 ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
@@ -234,31 +222,6 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	zend_vm_stack current_stack = EG(vm_stack);
 
 	current_stack->top = EG(vm_stack_top);
-	/* Create a clone of closure, because it may be destroyed */
-	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
-		*op_array_copy = *op_array;
-
-		if (op_array->refcount) {
-			(*op_array->refcount)++;
-		}
-		op_array->run_time_cache = NULL;
-		if (op_array->static_variables) {
-			ALLOC_HASHTABLE(op_array_copy->static_variables);
-			zend_hash_init(
-				op_array_copy->static_variables,
-				zend_hash_num_elements(op_array->static_variables),
-				NULL, ZVAL_PTR_DTOR, 0
-			);
-			zend_hash_apply_with_arguments(
-				op_array->static_variables,
-				copy_closure_static_var, 1,
-				op_array_copy->static_variables
-			);
-		}
-
-		op_array = op_array_copy;
-	}
 
 	/* Create new execution context. We have to back up and restore
 	 * EG(current_execute_data) here. */
