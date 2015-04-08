@@ -488,7 +488,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (return_array) {
-		ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(agent)));
+		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(agent)));
 	}
 	else {
 		object_init(return_value);

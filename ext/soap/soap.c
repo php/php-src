@@ -3182,7 +3182,7 @@ PHP_METHOD(SoapClient, __getCookies)
 
 	if ((cookies = zend_hash_str_find(Z_OBJPROP_P(getThis()), "_cookies", sizeof("_cookies")-1)) != NULL &&
 	    Z_TYPE_P(cookies) == IS_ARRAY) {
-		ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(cookies)));
+		RETURN_ARR(zend_array_dup(Z_ARRVAL_P(cookies)));
 	} else {
 		array_init(return_value);
 	}

@@ -3313,7 +3313,7 @@ PHP_FUNCTION(array_unique)
 
 	php_set_compare_func(sort_type);
 
-	ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(array)));
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
 		return;
@@ -3668,7 +3668,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	}
 
 	/* copy the argument array */
-	ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL(args[0])));
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL(args[0])));
 
 	/* go through the lists and look for common values */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {
@@ -4087,7 +4087,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	}
 
 	/* copy the argument array */
-	ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL(args[0])));
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL(args[0])));
 
 	/* go through the lists and look for values of ptr[0] that are not in the others */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {

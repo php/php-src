@@ -825,7 +825,7 @@ SPL_METHOD(Array, getArrayCopy)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
+	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern, 0)));
 } /* }}} */
 
 static HashTable *spl_array_get_properties(zval *object) /* {{{ */
@@ -1317,7 +1317,7 @@ SPL_METHOD(Array, exchangeArray)
 	zval *object = getThis(), *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
+	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern, 0)));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
 		return;
 	}
