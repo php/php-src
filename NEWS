@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60022 ("use statement [...] has no effect" depends on leading
     backslash). (Nikita)
+  . Fixed bug #67314 (Segmentation fault in gc_remove_zval_from_buffer).
+    (Dmitry)
   . Fixed bug #68652 (segmentation fault in destructor). (Dmitry)
 
 - ODBC:

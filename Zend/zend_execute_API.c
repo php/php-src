@@ -1585,6 +1585,10 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			ex->symbol_table = EG(active_symbol_table);
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				if (*EX_CV_NUM(ex, i)) {
+					if (UNEXPECTED(**EX_CV_NUM(ex, i) == &EG(uninitialized_zval))) {
+						Z_DELREF(EG(uninitialized_zval));
+						ALLOC_INIT_ZVAL(**EX_CV_NUM(ex, i));
+					}
 					zend_hash_quick_update(EG(active_symbol_table),
 						ex->op_array->vars[i].name,
 						ex->op_array->vars[i].name_len + 1,
