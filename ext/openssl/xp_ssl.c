@@ -2592,6 +2592,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
 #else
 		php_error_docref(NULL, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
 		return NULL;
 #endif
 	} else if (strncmp(proto, "sslv3", protolen) == 0) {
@@ -2600,6 +2601,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
 #else
 		php_error_docref(NULL, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
 		return NULL;
 #endif
 	} else if (strncmp(proto, "tls", protolen) == 0) {
@@ -2614,6 +2616,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
 #else
 		php_error_docref(NULL, E_WARNING, "TLSv1.1 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
 		return NULL;
 #endif
 	} else if (strncmp(proto, "tlsv1.2", protolen) == 0) {
@@ -2622,6 +2625,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
 #else
 		php_error_docref(NULL, E_WARNING, "TLSv1.2 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
 		return NULL;
 #endif
 	}
