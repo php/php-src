@@ -172,6 +172,8 @@
     required_num_args). (Julien)
 
 - Standard:
+  . Fixed bug #69325 (php_copy_file_ex does not pass the argument).
+    (imbolk at gmail dot com)
   . Fixed bug #69299 (Regression in array_filter's $flag argument in PHP 7).
     (Laruence)
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
