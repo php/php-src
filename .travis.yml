@@ -5,9 +5,9 @@ notifications:
        on_failure: change
     irc:
       channels:
-        - "irc.paraphysics.net#php.pecl"
-      on_success: [change]
-      on_failure: [always]
+        - "irc.efnet.org#php.pecl"
+      on_success: change
+      on_failure: always
 
 cache: 
     - apt
