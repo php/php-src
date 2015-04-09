@@ -7568,6 +7568,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	zend_class_entry *scope = EX(called_scope);
 	uint32_t num_args = EX_NUM_ARGS();
 	zend_execute_data *call;
+	USE_OPLINE
 
 	args = emalloc(sizeof(zend_array));
 	zend_hash_init(args, num_args, NULL, ZVAL_PTR_DTOR, 0);
@@ -7689,9 +7690,9 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 		if (RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
-		HANDLE_EXCEPTION();
+		HANDLE_EXCEPTION_LEAVE();
 	}
 
-	ZEND_VM_INTERRUPT_CHECK();
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_LEAVE();
 }
