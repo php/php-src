@@ -1227,7 +1227,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				CG(in_compilation) = 0;
 			}
 
-			ZVAL_UNDEF(&retval);
 			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
@@ -1390,7 +1389,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 					EG(exception) = NULL;
 					ZVAL_OBJ(&params[0], old_exception);
 					ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
-					ZVAL_UNDEF(&retval2);
+
 					if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
 						zval_ptr_dtor(&retval2);
 						if (EG(exception)) {
