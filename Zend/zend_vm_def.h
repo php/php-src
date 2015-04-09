@@ -6940,7 +6940,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				zend_string_release(call->func->common.function_name);
-				efree(call->func);
+				zend_free_proxy_call_func(call->func);
 			}
 
 			EX(call) = call->prev_execute_data;
@@ -7596,7 +7596,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 		i_init_func_execute_data(call, &call->func->op_array,
 				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
 
-		efree(fbc); 
+		zend_free_proxy_call_func(fbc);
 
 		ZEND_VM_ENTER();
 	} else {
@@ -7618,7 +7618,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 
 		execute_data = EG(current_execute_data) = call->prev_execute_data;
 
-		efree(fbc);
+		zend_free_proxy_call_func(fbc);
 
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);

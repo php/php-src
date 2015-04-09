@@ -2242,7 +2242,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
 				}
-				efree(fptr);
+				zend_free_proxy_call_func(fptr);
 			}
 			if (is_closure) {
 				zval_ptr_dtor(reference);

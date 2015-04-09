@@ -29,7 +29,6 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
-#include "zend_vm.h"
 #include "zend_hash.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
@@ -1035,39 +1034,9 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-static inline zend_op_array *zend_get_proxy_call_function(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */ {
-	zend_op_array *call_user_call = ecalloc(1, ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)) + sizeof(zend_op));
-	zend_function *fbc = is_static? ce->__callstatic : ce->__call;
-
-	ZEND_ASSERT(fbc);
-
-	call_user_call->type = ZEND_USER_FUNCTION;
-	call_user_call->scope = ce;
-	call_user_call->prototype = fbc;
-	call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | (is_static? (ZEND_ACC_STATIC | ZEND_ACC_PUBLIC) : 0);
-	call_user_call->this_var = -1;
-	call_user_call->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : STR_EMPTY_ALLOC();
-	call_user_call->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
-	call_user_call->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
-	call_user_call->opcodes = (zend_op *)((char *)call_user_call + ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)));
-	call_user_call->opcodes[0].opcode = ZEND_PROXY_CALL;
-	call_user_call->opcodes[0].op1_type = IS_UNUSED;
-	call_user_call->opcodes[0].op2_type = IS_UNUSED;
-	call_user_call->opcodes[0].result_type = IS_UNUSED;
-	ZEND_VM_SET_OPCODE_HANDLER(&call_user_call->opcodes[0]);
-	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-		call_user_call->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
-	} else {
-		call_user_call->function_name = zend_string_copy(method_name);
-	}
-
-	return call_user_call;
-}
-/* }}} */
-
 static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return (union _zend_function *)zend_get_proxy_call_function(ce, method_name, 0);
+	return (union _zend_function *)zend_get_proxy_call_func(ce, method_name, 0);
 }
 /* }}} */
 
@@ -1198,7 +1167,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return (union _zend_function *)zend_get_proxy_call_function(ce, method_name, 1);
+	return (union _zend_function *)zend_get_proxy_call_func(ce, method_name, 1);
 }
 /* }}} */
 
