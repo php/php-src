@@ -1007,7 +1007,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 
 	func->type = ZEND_USER_FUNCTION;
-	func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PUBLIC;
+	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_PUBLIC;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
