@@ -827,6 +827,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 
 	if (func->type == ZEND_USER_FUNCTION) {
+		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
 		if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
@@ -838,6 +839,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_execute_ex(call);
 		} else {
 			zend_generator_create_zval(call, &func->op_array, fci->retval);
+		}
+		if (call_via_handler) {
+			/* We must re-initialize function again */
+			fci_cache->initialized = 0;
 		}
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;

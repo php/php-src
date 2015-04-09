@@ -237,6 +237,9 @@ struct _zend_executor_globals {
 	XPFPA_CW_DATATYPE saved_fpu_cw;
 #endif
 
+	zend_op_array proxy_call_func;
+	zend_op       proxy_call_op;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

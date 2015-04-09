@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
+#include "zend_vm.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
 
@@ -222,6 +223,57 @@ ZEND_API void zend_object_store_ctor_failed(zend_object *obj)
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
 {
 	return &std_object_handlers;
+}
+
+ZEND_API void zend_init_proxy_call_func(zend_op_array *func, zend_op *opline)
+{
+	func->type = ZEND_USER_FUNCTION;
+
+	func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PUBLIC;
+	func->this_var = -1;
+
+	opline->opcode = ZEND_PROXY_CALL;
+	opline->op1_type = IS_UNUSED;
+	opline->op2_type = IS_UNUSED;
+	opline->result_type = IS_UNUSED;
+
+	ZEND_VM_SET_OPCODE_HANDLER(opline);
+
+	func->opcodes = opline;
+}
+
+ZEND_API zend_op_array *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static)
+{
+	zend_op_array *func;
+	zend_function *fbc = is_static? ce->__callstatic : ce->__call;
+
+	ZEND_ASSERT(fbc);
+
+	if (EXPECTED(EG(proxy_call_func).function_name == NULL)) {
+		func = &EG(proxy_call_func);
+	} else {
+		func = ecalloc(1, ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array)) + sizeof(zend_op));
+		zend_init_proxy_call_func(func, (zend_op *)((char *)func + ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array))));
+	}
+
+	if (is_static) {
+		func->fn_flags |= ZEND_ACC_STATIC;
+	} else {
+		func->fn_flags &= ~ZEND_ACC_STATIC;
+	}
+
+	func->scope = ce;
+	func->prototype = fbc;
+	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : STR_EMPTY_ALLOC();
+	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
+	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
+	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+		func->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+	} else {
+		func->function_name = zend_string_copy(method_name);
+	}
+
+	return func;
 }
 
 /*
