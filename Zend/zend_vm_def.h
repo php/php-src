@@ -7566,6 +7566,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 	zend_object *obj = Z_OBJ(EX(This));
 	zval *ret = EX(return_value);
 	zend_call_kind call_kind = EX_CALL_KIND();
+	zend_class_entry *scope = EX(called_scope);
 	uint32_t num_args = EX_NUM_ARGS();
 	zend_execute_data *call, *prev_execute_data = EX(prev_execute_data);
 
@@ -7586,8 +7587,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 
 	zend_vm_stack_free_call_frame(execute_data);
 
-	call = zend_vm_stack_push_call_frame(call_kind,
-			fbc->common.prototype, 2, fbc->common.scope, obj, prev_execute_data);
+	call = zend_vm_stack_push_call_frame(call_kind, fbc->common.prototype, 2, scope, obj, prev_execute_data);
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
 	ZVAL_COPY_VALUE(ZEND_CALL_ARG(call, 2), &args);
