@@ -242,7 +242,7 @@ ZEND_API void zend_init_proxy_call_func(zend_op_array *func, zend_op *opline)
 	func->opcodes = opline;
 }
 
-ZEND_API zend_op_array *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static)
+ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static)
 {
 	zend_op_array *func;
 	zend_function *fbc = is_static? ce->__callstatic : ce->__call;
@@ -273,7 +273,7 @@ ZEND_API zend_op_array *zend_get_proxy_call_func(zend_class_entry *ce, zend_stri
 		func->function_name = zend_string_copy(method_name);
 	}
 
-	return func;
+	return (zend_function*)func;
 }
 
 /*

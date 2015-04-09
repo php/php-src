@@ -73,7 +73,7 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers(void);
 
 ZEND_API void zend_init_proxy_call_func(zend_op_array *func, zend_op *opline);
 
-ZEND_API zend_op_array *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static);
+ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 
 END_EXTERN_C()
 

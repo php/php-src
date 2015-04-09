@@ -915,47 +915,6 @@ static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
-{
-	zend_internal_function *func = (zend_internal_function *)EX(func);
-	zval method_name, method_args;
-	zval method_result;
-	zend_class_entry *ce = Z_OBJCE_P(getThis());
-
-	array_init_size(&method_args, ZEND_NUM_ARGS());
-
-	if (UNEXPECTED(zend_copy_parameters_array(ZEND_NUM_ARGS(), &method_args) == FAILURE)) {
-		zval_dtor(&method_args);
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot get arguments for __call");
-		RETURN_FALSE;
-	}
-
-	ZVAL_STR(&method_name, func->function_name); /* no dup - it's a copy */
-
-	/* __call handler is called with two arguments:
-	   method name
-	   array of method parameters
-
-	*/
-	zend_call_method_with_2_params(getThis(), ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result, &method_name, &method_args);
-
-	if (Z_TYPE(method_result) != IS_UNDEF) {
-		RETVAL_ZVAL_FAST(&method_result);
-		zval_ptr_dtor(&method_result);
-	}
-
-	/* now destruct all auxiliaries */
-	zval_ptr_dtor(&method_args);
-	zval_ptr_dtor(&method_name);
-
-	/* destruct the function also, then - we have allocated it in get_method */
-	efree_size(func, sizeof(zend_internal_function));
-#if ZEND_DEBUG
-	execute_data->func = NULL;
-#endif
-}
-/* }}} */
-
 /* Ensures that we're allowed to call a private method.
  * Returns the function address that should be called, or NULL
  * if no such function exists.
@@ -1034,12 +993,6 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return (union _zend_function *)zend_get_proxy_call_func(ce, method_name, 0);
-}
-/* }}} */
-
 static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
@@ -1063,7 +1016,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			STR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_user_call_function(zobj->ce, method_name);
+			return zend_get_proxy_call_func(zobj->ce, method_name, 0);
 		} else {
 			return NULL;
 		}
@@ -1082,7 +1035,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			fbc = updated_fbc;
 		} else {
 			if (zobj->ce->__call) {
-				fbc = zend_get_user_call_function(zobj->ce, method_name);
+				fbc = zend_get_proxy_call_func(zobj->ce, method_name, 0);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;
@@ -1109,7 +1062,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_user_call_function(zobj->ce, method_name);
+					fbc = zend_get_proxy_call_func(zobj->ce, method_name, 0);
 				} else {
 					zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name->val, EG(scope) ? EG(scope)->name->val : "");
 					fbc = NULL;
@@ -1124,54 +1077,6 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	return fbc;
 }
 /* }}} */
-
-ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
-{
-	zend_internal_function *func = (zend_internal_function *)EX(func);
-	zval method_name, method_args;
-	zval method_result;
-	zend_class_entry *ce = EG(scope);
-
-	array_init_size(&method_args, ZEND_NUM_ARGS());
-
-	if (UNEXPECTED(zend_copy_parameters_array(ZEND_NUM_ARGS(), &method_args) == FAILURE)) {
-		zval_dtor(&method_args);
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot get arguments for " ZEND_CALLSTATIC_FUNC_NAME);
-		RETURN_FALSE;
-	}
-
-	ZVAL_STR(&method_name, func->function_name); /* no dup - it's a copy */
-
-	/* __callStatic handler is called with two arguments:
-	   method name
-	   array of method parameters
-	*/
-	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result, &method_name, &method_args);
-
-	if (Z_TYPE(method_result) != IS_UNDEF) {
-		RETVAL_ZVAL_FAST(&method_result);
-		zval_ptr_dtor(&method_result);
-	}
-
-	/* now destruct all auxiliaries */
-	zval_ptr_dtor(&method_args);
-	zval_ptr_dtor(&method_name);
-
-	/* destruct the function also, then - we have allocated it in get_method */
-	efree_size(func, sizeof(zend_internal_function));
-#if ZEND_DEBUG
-	execute_data->func = NULL;
-#endif
-}
-/* }}} */
-
-static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
-{
-	return (union _zend_function *)zend_get_proxy_call_func(ce, method_name, 1);
-}
-/* }}} */
-
-/* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
@@ -1207,9 +1112,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (ce->__call &&
 			    Z_OBJ(EG(current_execute_data)->This) &&
 			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce)) {
-				return zend_get_user_call_function(ce, function_name);
+				return zend_get_proxy_call_func(ce, function_name, 0);
 			} else if (ce->__callstatic) {
-				return zend_get_user_callstatic_function(ce, function_name);
+				return zend_get_proxy_call_func(ce, function_name, 1);
 			} else {
 	   			return NULL;
 			}
@@ -1235,7 +1140,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = updated_fbc;
 		} else {
 			if (ce->__callstatic) {
-				fbc = zend_get_user_callstatic_function(ce, function_name);
+				fbc = zend_get_proxy_call_func(ce, function_name, 1);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;
@@ -1246,7 +1151,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		 */
 		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
 			if (ce->__callstatic) {
-				fbc = zend_get_user_callstatic_function(ce, function_name);
+				fbc = zend_get_proxy_call_func(ce, function_name, 1);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;
