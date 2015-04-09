@@ -20,7 +20,7 @@ class A
 
 class B
 {
-	public function __construct($A)
+	public function B($A)
 	{
 		$this->A = $A;
 	}

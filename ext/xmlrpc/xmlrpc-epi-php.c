@@ -73,6 +73,8 @@
 #include "php_xmlrpc.h"
 #include "xmlrpc.h"
 
+#define PHP_EXT_VERSION "0.51"
+
 static int le_xmlrpc_server;
 
 /* {{{ arginfo */
@@ -168,7 +170,7 @@ zend_module_entry xmlrpc_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xmlrpc),
-	PHP_XMLRPC_VERSION,
+	PHP_EXT_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -298,7 +300,7 @@ PHP_MINFO_FUNCTION(xmlrpc)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "core library version", XMLRPC_GetVersionString());
-	php_info_print_table_row(2, "php extension version", PHP_XMLRPC_VERSION);
+	php_info_print_table_row(2, "php extension version", PHP_EXT_VERSION);
 	php_info_print_table_row(2, "author", "Dan Libby");
 	php_info_print_table_row(2, "homepage", "http://xmlrpc-epi.sourceforge.net");
 	php_info_print_table_row(2, "open sourced by", "Epinions.com");

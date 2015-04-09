@@ -33,7 +33,7 @@ echo "\n*** Testing stat(): with filename
 // creating object with members as numeric and non-numeric filename and directory name
 class object_temp {
 public $var_name;
-public function __construct($name) {
+public function object_temp($name) {
 $this->var_name = $name;
   }
 }

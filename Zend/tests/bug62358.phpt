@@ -29,4 +29,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of B::foo() should be compatible with A::foo() in %sbug62358.php on line %d
+Strict Standards: Declaration of B::foo() should be compatible with A::foo() in %sbug62358.php on line %d

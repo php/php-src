@@ -76,7 +76,7 @@ int(6)
 --getEndline--
 int(8)
 --getDocComment--
-string(%d) "/**
+string(11) "/**
 hoho
 */"
 --getStaticVariables--

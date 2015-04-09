@@ -292,11 +292,7 @@ static int filename_is_in_cache(zend_string *filename)
 			handle.filename = filename->val;
 			handle.type = ZEND_HANDLE_FILENAME;
 
-			if (ZCG(accel_directives).validate_timestamps) {
-				return validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
-			}
-
-			return 1;
+			return validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 		}
 	}
 

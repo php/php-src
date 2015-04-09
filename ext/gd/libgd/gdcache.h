@@ -41,7 +41,7 @@
 /*********************************************************/
 
 #include <stdlib.h>
-#if (!defined(__OpenBSD__)) && HAVE_MALLOC_H
+#ifdef HAVE_MALLOC_H
  #include <malloc.h>
 #endif
 #ifndef NULL

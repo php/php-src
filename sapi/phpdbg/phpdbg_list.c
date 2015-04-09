@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,7 +35,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[12], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[13], flags)
 
 const phpdbg_command_t phpdbg_list_commands[] = {
 	PHPDBG_LIST_COMMAND_D(lines,     "lists the specified lines",    'l', list_lines,  NULL, "l", PHPDBG_ASYNC_SAFE),
@@ -235,7 +235,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake = {{0}};
 	zend_op_array *ret;
-	char *filename = (char *)(file->opened_path ? file->opened_path->val : file->filename);
+	char *filename = (char *)(file->opened_path ? file->opened_path : file->filename);
 	uint line;
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];

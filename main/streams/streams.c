@@ -65,6 +65,15 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void)
 	return &url_stream_wrappers_hash;
 }
 
+static int _php_stream_release_context(zval *zv, void *pContext)
+{
+	zend_resource *le = Z_RES_P(zv);
+	if (le->ptr == pContext) {
+		return --GC_REFCOUNT(le) == 0;
+	}
+	return 0;
+}
+
 static int forget_persistent_resource_id_numbers(zval *el)
 {
 	php_stream *stream;
@@ -82,8 +91,11 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 
 	stream->res = NULL;
 
-	if (stream->ctx) {
-		zend_list_delete(stream->ctx);
+	if (PHP_STREAM_CONTEXT(stream)) {
+		zend_hash_apply_with_argument(&EG(regular_list),
+				_php_stream_release_context,
+				PHP_STREAM_CONTEXT(stream));
+		stream->ctx = NULL;
 	}
 
 	return 0;
@@ -324,7 +336,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 
 PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options) /* {{{ */
 {
-	return php_stream_free(stream_enclosed,
+	return _php_stream_free(stream_enclosed,
 		close_options | PHP_STREAM_FREE_IGNORE_ENCLOSING);
 }
 /* }}} */
@@ -406,7 +418,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 		/* we force PHP_STREAM_CALL_DTOR because that's from where the
 		 * enclosing stream can free this stream. We remove rsrc_dtor because
 		 * we want the enclosing stream to be deleted from the resource list */
-		return php_stream_free(enclosing_stream,
+		return _php_stream_free(enclosing_stream,
 			(close_options | PHP_STREAM_FREE_CALL_DTOR) & ~PHP_STREAM_FREE_RSRC_DTOR);
 	}
 
@@ -439,10 +451,15 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
 	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && stream->res) {
-		/* Close resource, but keep it in resource list */
+		/* zend_list_delete actually only decreases the refcount; if we're
+		 * releasing the stream, we want to actually delete the resource from
+		 * the resource list, otherwise the resource will point to invalid memory.
+		 * In any case, let's always completely delete it from the resource list,
+		 * not only when PHP_STREAM_FREE_RELEASE_STREAM is set */
+//???		while (zend_list_delete(stream->res) == SUCCESS) {}
+//???		stream->res->gc.refcount = 0;
 		zend_list_close(stream->res);
-		if ((close_options & PHP_STREAM_FREE_KEEP_RSRC) == 0) {
-			/* Completely delete zend_resource, if not referenced */
+		if (!stream->__exposed) {
 			zend_list_delete(stream->res);
 			stream->res = NULL;
 		}
@@ -1460,7 +1477,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			result = zend_string_extend(result, max_len + step, persistent);
+			result = zend_string_realloc(result, max_len + step, persistent);
 			max_len += step;
 			ptr = result->val + len;
 		} else {
@@ -1468,7 +1485,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 	}
 	if (len) {
-		result = zend_string_truncate(result, len, persistent);
+		result = zend_string_realloc(result, len, persistent);
 		result->val[len] = '\0';
 	} else {
 		zend_string_free(result);

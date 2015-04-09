@@ -49,19 +49,11 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 
 ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce);
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce);
-ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg);
-ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind);
-ZEND_API void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind);
+ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg);
+ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind);
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
-	zend_refcounted *ref = NULL;
-
-	if ((value_type & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-		ref = Z_COUNTED_P(value);
-		value = Z_REFVAL_P(value);
-	}
-
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			zend_refcounted *garbage;
@@ -88,18 +80,12 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
 						zval_copy_ctor_func(variable_ptr);
 					}
-				} else if (value_type == IS_CV) {
+				} else if (value_type != IS_TMP_VAR) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 						Z_ADDREF_P(variable_ptr);
 					}
-				} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
-					if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-						efree_size(ref, sizeof(zend_reference));
-					} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
-						Z_ADDREF_P(variable_ptr);
-					}
 				}
-				zval_dtor_func_for_ptr(garbage);
+				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
 				return variable_ptr;
 			} else { /* we need to split */
 				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
@@ -117,14 +103,8 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
 			zval_copy_ctor_func(variable_ptr);
 		}
-	} else if (value_type == IS_CV) {
+	} else if (value_type != IS_TMP_VAR) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
-			Z_ADDREF_P(variable_ptr);
-		}
-	} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
-		if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-			efree_size(ref, sizeof(zend_reference));
-		} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
 			Z_ADDREF_P(variable_ptr);
 		}
 	}
@@ -132,6 +112,8 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 }
 
 ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change);
+ZEND_API int zval_update_constant_inline_change(zval *pp, zend_class_entry *scope);
+ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *scope);
 ZEND_API int zval_update_constant_ex(zval *pp, zend_bool inline_change, zend_class_entry *scope);
 
 /* dedicated Zend executor functions - do not use! */
@@ -269,6 +251,8 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 typedef zval* zend_free_op;
 
 ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type);
+
+ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 void zend_free_compiled_variables(zend_execute_data *execute_data);

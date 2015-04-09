@@ -53,7 +53,7 @@ error_reporting(E_ALL);
 class cr {
 	private $priv_member;
 	public  $public_member;
-	function __construct($val) {
+	function cr($val) {
 		$this->priv_member = $val;
 		$this->public_member = $val;
 	}

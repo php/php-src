@@ -6,16 +6,8 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 
-try {
-	new ReflectionMethod();
-} catch (TypeException $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
-try {
-	new ReflectionMethod('a', 'b', 'c');
-} catch (TypeException $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
-}
+var_dump(new ReflectionMethod());
+var_dump(new ReflectionMethod('a', 'b', 'c'));
 
 class C {
     public function f() {}
@@ -43,8 +35,21 @@ var_dump($rm->getName(1));
 
 ?>
 --EXPECTF--
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 0 given in %s on line %d
+object(ReflectionMethod)#%d (2) {
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
+}
+
+Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 3 given in %s on line %d
+object(ReflectionMethod)#%d (2) {
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
+}
 
 Warning: ReflectionMethod::isFinal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

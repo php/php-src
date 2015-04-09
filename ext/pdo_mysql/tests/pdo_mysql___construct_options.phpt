@@ -67,11 +67,8 @@ MySQLPDOTest::skip();
 			PDO::MYSQL_ATTR_INIT_COMMAND					=> '',
 		);
 
-		try {
-			if (NULL !== ($db = @new PDO($dsn, $user, $pass, 'wrong type')))
-				printf("[001] Expecting NULL got %s/%s\n", gettype($db), $db);
-		} catch (TypeException $e) {
-		}
+		if (NULL !== ($db = @new PDO($dsn, $user, $pass, 'wrong type')))
+			printf("[001] Expecting NULL got %s/%s\n", gettype($db), $db);
 
 		if (!is_object($db = new PDO($dsn, $user, $pass, array())))
 			printf("[002] Expecting object got %s/%s¸\n", gettype($db), $db);

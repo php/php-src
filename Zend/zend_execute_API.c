@@ -132,6 +132,7 @@ void init_executor(void) /* {{{ */
 	zend_init_fpu();
 
 	ZVAL_NULL(&EG(uninitialized_zval));
+	/* trick to make uninitialized_zval never be modified, passed by ref, etc. */
 	ZVAL_NULL(&EG(error_zval));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG
@@ -520,7 +521,6 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 #define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
-#define RESET_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) &= ~IS_VISITED_CONSTANT
 
 ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_class_entry *scope) /* {{{ */
 {
@@ -528,34 +528,30 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
-		return FAILURE;
+		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 
 		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
-		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
-			ZEND_ASSERT(EG(current_execute_data));
-			if (inline_change) {
-				zend_string_release(Z_STR_P(p));
-			}
-			if (EG(scope) && EG(scope)->name) {
-				ZVAL_STR_COPY(p, EG(scope)->name);
-			} else {
-				ZVAL_EMPTY_STRING(p);
-			}
-		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
+		const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p));
+		if (!const_value) {
 			char *actual = Z_STRVAL_P(p);
 
-			if (UNEXPECTED(EG(exception))) {
-				RESET_CONSTANT_VISITED(p);
-				return FAILURE;
-			} else if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				RESET_CONSTANT_VISITED(p);
-				return FAILURE;
+			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+				size_t len;
+
+				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
+				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
+				if (inline_change) {
+					zend_string *tmp = zend_string_init(colon + 1, len, 0);
+					zend_string_release(Z_STR_P(p));
+					Z_STR_P(p) = tmp;
+				} else {
+					Z_STR_P(p) = zend_string_init(colon + 1, len, 0);
+				}
+				Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
@@ -580,25 +576,23 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (save->val[0] == '\\') {
-						zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", save->val + 1);
+						zend_error(E_ERROR, "Undefined constant '%s'", save->val + 1);
 					} else {
-						zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", save->val);
+						zend_error(E_ERROR, "Undefined constant '%s'", save->val);
 					}
 					if (inline_change) {
 						zend_string_release(save);
 					}
-					RESET_CONSTANT_VISITED(p);
-					return FAILURE;
+					save = NULL;
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
+				if (!inline_change) {
+					ZVAL_STRINGL(p, actual, actual_len);
 				} else {
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
-					if (!inline_change) {
-						ZVAL_STRINGL(p, actual, actual_len);
-					} else {
-						Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
-							IS_STRING_EX : IS_INTERNED_STRING_EX;
-						if (save && save->val != actual) {
-							zend_string_release(save);
-						}
+					Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
+						IS_STRING_EX : IS_INTERNED_STRING_EX;
+					if (save && save->val != actual) {
+						zend_string_release(save);
 					}
 				}
 			}
@@ -608,10 +602,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			}
 			ZVAL_COPY_VALUE(p, const_value);
 			if (Z_OPT_CONSTANT_P(p)) {
-				if (UNEXPECTED(zval_update_constant_ex(p, 1, NULL) != SUCCESS)) {
-					RESET_CONSTANT_VISITED(p);
-					return FAILURE;
-				}
+				zval_update_constant_ex(p, 1, NULL);
 			}
 			zval_opt_copy_ctor(p);
 		}
@@ -619,16 +610,29 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
-
-		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
-			return FAILURE;
-		}
 		if (inline_change) {
-			zval_ptr_dtor(p);
+			SEPARATE_ZVAL_NOREF(p);
+		}
+		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope);
+		if (inline_change) {
+			zend_ast_destroy_and_free(Z_ASTVAL_P(p));
+			efree_size(Z_AST_P(p), sizeof(zend_ast_ref));
 		}
 		ZVAL_COPY_VALUE(p, &tmp);
 	}
-	return SUCCESS;
+	return 0;
+}
+/* }}} */
+
+ZEND_API int zval_update_constant_inline_change(zval *pp, zend_class_entry *scope) /* {{{ */
+{
+	return zval_update_constant_ex(pp, 1, scope);
+}
+/* }}} */
+
+ZEND_API int zval_update_constant_no_inline_change(zval *pp, zend_class_entry *scope) /* {{{ */
+{
+	return zval_update_constant_ex(pp, 0, scope);
 }
 /* }}} */
 
@@ -670,6 +674,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
 	zend_class_entry *orig_scope;
+	zval tmp;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -685,7 +690,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		case sizeof(zend_fcall_info):
 			break; /* nothing to do currently */
 		default:
-			zend_error_noreturn(E_CORE_ERROR, "Corrupted fcall_info provided to zend_call_function()");
+			zend_error(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
 			break;
 	}
 
@@ -739,7 +744,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			if (error[0] >= 'a' && error[0] <= 'z') {
 				error[0] += ('A' - 'a');
 			}
-			zend_error(E_DEPRECATED, "%s", error);
+			zend_error(E_STRICT, "%s", error);
 			efree(error);
 		}
 		zend_string_release(callable_name);
@@ -761,8 +766,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", func->common.scope->name->val, func->common.function_name->val);
-			return FAILURE;
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", func->common.scope->name->val, func->common.function_name->val);
 		}
 		if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
  			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
@@ -774,10 +778,26 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
-		zval *arg = &fci->params[i];
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
-			if (UNEXPECTED(!Z_ISREF_P(arg))) {
+			// TODO: Scalar values don't have reference counters anymore.
+			// They are assumed to be 1, and they may be easily passed by
+			// reference now. However, previously scalars with refcount==1
+			// might be passed and with refcount>1 might not. We can support
+			// only single behavior ???
+#if 0
+			if (Z_REFCOUNTED(fci->params[i]) &&
+				// This solution breaks the following test (omit warning message) ???
+				// Zend/tests/bug61273.phpt
+				// ext/reflection/tests/bug42976.phpt
+				// ext/standard/tests/general_functions/call_user_func_array_variation_001.phpt
+#else
+			if (!Z_REFCOUNTED(fci->params[i]) ||
+				// This solution breaks the following test (emit warning message) ???
+				// ext/pdo_sqlite/tests/pdo_005.phpt
+#endif
+			    (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1)) {
+
 				if (fci->no_separation &&
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
@@ -798,21 +818,29 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 					return FAILURE;
 				}
 
-				ZVAL_NEW_REF(arg, arg);
+				if (Z_REFCOUNTED(fci->params[i])) {
+					Z_DELREF(fci->params[i]);
+				}
+				ZVAL_DUP(&tmp, &fci->params[i]);
+				ZVAL_NEW_REF(&fci->params[i], &tmp);
+				Z_ADDREF(fci->params[i]);
+			} else if (!Z_ISREF(fci->params[i])) {
+				ZVAL_NEW_REF(&fci->params[i], &fci->params[i]);
+				Z_ADDREF(fci->params[i]);
+			} else if (Z_REFCOUNTED(fci->params[i])) {
+				Z_ADDREF(fci->params[i]);
 			}
-			Z_ADDREF_P(arg);
+			param = ZEND_CALL_ARG(call, i+1);
+			ZVAL_COPY_VALUE(param, &fci->params[i]);
+		} else if (Z_ISREF(fci->params[i]) &&
+		           /* don't separate references for __call */
+		           (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
+			param = ZEND_CALL_ARG(call, i+1);
+			ZVAL_DUP(param, Z_REFVAL(fci->params[i]));
 		} else {
-			if (Z_ISREF_P(arg) &&
-			    (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
-				/* don't separate references for __call */
-				arg = Z_REFVAL_P(arg);
-			}
-			if (Z_OPT_REFCOUNTED_P(arg)) {
-				Z_ADDREF_P(arg);
-			}
+			param = ZEND_CALL_ARG(call, i+1);
+			ZVAL_COPY(param, &fci->params[i]);
 		}
-		param = ZEND_CALL_ARG(call, i+1);
-		ZVAL_COPY_VALUE(param, arg);
 	}
 
 	EG(scope) = calling_scope;
@@ -829,10 +857,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (func->type == ZEND_USER_FUNCTION) {
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
-		if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
-			ZEND_ASSERT(GC_TYPE(func->op_array.prototype) == IS_OBJECT);
-			GC_REFCOUNT(func->op_array.prototype)++;
-		}
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);
@@ -883,7 +907,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			fci->object->handlers->call_method(func->common.function_name, fci->object, call, fci->retval);
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call overloaded function for non-object");
+			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
 
 		zend_vm_stack_free_args(call);
@@ -1146,7 +1170,7 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error(E_ERROR, "Maximum execution time of %pd second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
 
@@ -1188,7 +1212,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
 			EG(timed_out) = 0;
 			tq_timer = NULL;
-			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			zend_error(E_ERROR, "Could not delete queued timer");
 			return;
 		}
 		tq_timer = NULL;
@@ -1198,7 +1222,7 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(timed_out), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
 		EG(timed_out) = 0;
 		tq_timer = NULL;
-		zend_error_noreturn(E_ERROR, "Could not queue new timer");
+		zend_error(E_ERROR, "Could not queue new timer");
 		return;
 	}
 	EG(timed_out) = 0;
@@ -1247,7 +1271,7 @@ void zend_unset_timeout(void) /* {{{ */
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
 			EG(timed_out) = 0;
 			tq_timer = NULL;
-			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
+			zend_error(E_ERROR, "Could not delete queued timer");
 			return;
 		}
 		tq_timer = NULL;
@@ -1274,59 +1298,50 @@ void zend_unset_timeout(void) /* {{{ */
 zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type) /* {{{ */
 {
 	zend_class_entry *ce;
-	int fetch_sub_type = fetch_type & ZEND_FETCH_CLASS_MASK;
+	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
+	int silent       = (fetch_type & ZEND_FETCH_CLASS_SILENT) != 0;
+
+	fetch_type &= ZEND_FETCH_CLASS_MASK;
 
 check_fetch_type:
-	switch (fetch_sub_type) {
+	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (UNEXPECTED(!EG(scope))) {
-				int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-						(E_EXCEPTION | E_ERROR) : E_ERROR;
-				zend_error(error_type, "Cannot access self:: when no class scope is active");
+			if (!EG(scope)) {
+				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 			}
 			return EG(scope);
 		case ZEND_FETCH_CLASS_PARENT:
-			if (UNEXPECTED(!EG(scope))) {
-				int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-						(E_EXCEPTION | E_ERROR) : E_ERROR;
-				zend_error(error_type, "Cannot access parent:: when no class scope is active");
-				return NULL;
+			if (!EG(scope)) {
+				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			}
-			if (UNEXPECTED(!EG(scope)->parent)) {
-				int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-						(E_EXCEPTION | E_ERROR) : E_ERROR;
-				zend_error(error_type, "Cannot access parent:: when current class scope has no parent");
+			if (!EG(scope)->parent) {
+				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
-			if (UNEXPECTED(!EG(current_execute_data)) || UNEXPECTED(!EG(current_execute_data)->called_scope)) {
-				int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-						(E_EXCEPTION | E_ERROR) : E_ERROR;
-				zend_error(error_type, "Cannot access static:: when no class scope is active");
-				return NULL;
+			if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
+				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
 			return EG(current_execute_data)->called_scope;
 		case ZEND_FETCH_CLASS_AUTO: {
-				fetch_sub_type = zend_get_class_fetch_type(class_name);
-				if (UNEXPECTED(fetch_sub_type != ZEND_FETCH_CLASS_DEFAULT)) {
+				fetch_type = zend_get_class_fetch_type(class_name);
+				if (fetch_type!=ZEND_FETCH_CLASS_DEFAULT) {
 					goto check_fetch_type;
 				}
 			}
 			break;
 	}
 
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, NULL, 0);
-	} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
-		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
-			int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-						(E_EXCEPTION | E_ERROR) : E_ERROR;
-			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
-				zend_error(error_type, "Interface '%s' not found", class_name->val);
-			} else if (fetch_sub_type == ZEND_FETCH_CLASS_TRAIT) {
-				zend_error(error_type, "Trait '%s' not found", class_name->val);
-			} else {
-				zend_error(error_type, "Class '%s' not found", class_name->val);
+	if ((ce = zend_lookup_class_ex(class_name, NULL, use_autoload)) == NULL) {
+		if (use_autoload) {
+			if (!silent && !EG(exception)) {
+				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
+					zend_error(E_ERROR, "Interface '%s' not found", class_name->val);
+				} else if (fetch_type == ZEND_FETCH_CLASS_TRAIT) {
+                	zend_error(E_ERROR, "Trait '%s' not found", class_name->val);
+                } else {
+					zend_error(E_ERROR, "Class '%s' not found", class_name->val);
+				}
 			}
 		}
 		return NULL;
@@ -1338,19 +1353,18 @@ check_fetch_type:
 zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type) /* {{{ */
 {
 	zend_class_entry *ce;
+	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 
-	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, key, 0);
-	} else if ((ce = zend_lookup_class_ex(class_name, key, 1)) == NULL) {
-		if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
-			int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
-							(E_EXCEPTION | E_ERROR) : E_ERROR;
-			if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-				zend_error(error_type, "Interface '%s' not found", class_name->val);
-			} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-				zend_error(error_type, "Trait '%s' not found", class_name->val);
-			} else {
-				zend_error(error_type, "Class '%s' not found", class_name->val);
+	if ((ce = zend_lookup_class_ex(class_name, key, use_autoload)) == NULL) {
+		if (use_autoload) {
+			if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
+				if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
+					zend_error(E_ERROR, "Interface '%s' not found", class_name->val);
+				} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
+					zend_error(E_ERROR, "Trait '%s' not found", class_name->val);
+				} else {
+					zend_error(E_ERROR, "Class '%s' not found", class_name->val);
+				}
 			}
 		}
 		return NULL;
@@ -1406,7 +1420,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 		} ZEND_HASH_FOREACH_END();
 
 		if (ai.cnt) {
-			zend_error_noreturn(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+			zend_error(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
 				ce->name->val, ai.cnt,
 				ai.cnt > 1 ? "s" : "",
 				DISPLAY_ABSTRACT_FN(0),
@@ -1459,6 +1473,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
 	for (i = 0; i < ex->func->op_array.last_var; i++) {
+		zend_string_addref(ex->func->op_array.vars[i]);
 		_zend_hash_append_ind(symbol_table, ex->func->op_array.vars[i],
 			ZEND_CALL_VAR_NUM(ex, i));
 	}

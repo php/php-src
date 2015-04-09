@@ -10,4 +10,5 @@ abstract class TestClass
 ===DONE===
 --EXPECTF--
 
+Strict Standards: Static function TestClass::getName() should not be abstract in %sabstract-static.php on line %d
 ===DONE===

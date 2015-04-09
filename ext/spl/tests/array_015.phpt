@@ -56,7 +56,9 @@ object(ArrayObject)#%d (1) {
     int(5)
   }
 }
-int(3)
+
+Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_015.php on line %d
+int(2)
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
   array(4) {
@@ -82,11 +84,14 @@ object(ArrayObject)#%d (1) {
   }
 }
 1=>2
+
+Notice: main(): ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_015.php on line %d
+3=>4
+
+Notice: main(): ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_015.php on line %d
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
-  array(1) {
-    [3]=>
-    int(4)
+  array(0) {
   }
 }
 ===DONE===

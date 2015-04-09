@@ -27,9 +27,6 @@
 extern zend_module_entry php_ftp_module_entry;
 #define php_ftp_module_ptr &php_ftp_module_entry
 
-#include "php_version.h"
-#define PHP_FTP_VERSION PHP_VERSION
-
 #define PHP_FTP_OPT_TIMEOUT_SEC	0
 #define PHP_FTP_OPT_AUTOSEEK	1
 #define PHP_FTP_AUTORESUME		-1
@@ -38,7 +35,7 @@ PHP_MINIT_FUNCTION(ftp);
 PHP_MINFO_FUNCTION(ftp);
 
 PHP_FUNCTION(ftp_connect);
-#ifdef HAVE_FTP_SSL
+#ifdef HAVE_OPENSSL_EXT
 PHP_FUNCTION(ftp_ssl_connect);
 #endif
 PHP_FUNCTION(ftp_login);

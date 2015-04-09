@@ -2184,10 +2184,15 @@ SXE_METHOD(__construct)
 	xmlDocPtr       docp;
 	zend_long            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;
+	zend_error_handling error_handling;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
+		zend_restore_error_handling(&error_handling);
 		return;
 	}
+
+	zend_restore_error_handling(&error_handling);
 
 	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
 
@@ -2519,7 +2524,7 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(simplexml),
-	PHP_SIMPLEXML_VERSION,
+	"0.1",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

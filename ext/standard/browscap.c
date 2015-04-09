@@ -88,7 +88,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
-	t[j++] = '~';
+	t[j++] = '\xA7'; /* section sign */
 	t[j++] = '^';
 
 	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
@@ -116,9 +116,9 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 				t[j++] = '\\';
 				t[j] = ')';
 				break;
-			case '~':
+			case '\xA7':
 				t[j++] = '\\';
-				t[j] = '~';
+				t[j] = '\xA7';
 				break;
 			default:
 				t[j] = lc_pattern[i];
@@ -127,7 +127,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	}
 
 	t[j++] = '$';
-	t[j++] = '~';
+	t[j++] = '\xA7';
 
 	t[j]=0;
 	res->len = j;
@@ -488,7 +488,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (return_array) {
-		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(agent)));
+		ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(agent)));
 	}
 	else {
 		object_init(return_value);

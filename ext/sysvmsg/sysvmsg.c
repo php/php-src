@@ -110,7 +110,7 @@ zend_module_entry sysvmsg_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(sysvmsg),
-	PHP_SYSVMSG_VERSION,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

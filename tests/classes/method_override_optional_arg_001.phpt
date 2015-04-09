@@ -28,6 +28,6 @@ $b->foo(1);
 
 ?>
 --EXPECTF--
-Warning: Declaration of C::foo() should be compatible with A::foo($arg1 = 1) in %s on line %d
+Strict Standards: Declaration of C::foo() should be compatible with A::foo($arg1 = 1) in %s on line %d
 int(1)
 int(3)

@@ -9,13 +9,9 @@ class foo {
 	}
 }
 
-try {
-	$a = 'foo::';
-	$a();
-} catch (EngineException $e) {
-	echo $e->getMessage();
-}
+$a = 'foo::';
+$a();
 
 ?>
---EXPECT--
-Call to undefined function foo::()
+--EXPECTF--
+Fatal error: Call to undefined function foo::() in %s on line %d

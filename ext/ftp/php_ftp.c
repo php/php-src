@@ -29,7 +29,7 @@
 #include <novsock2.h>
 #endif
 
-#ifdef HAVE_FTP_SSL
+#if HAVE_OPENSSL_EXT
 # include <openssl/ssl.h>
 #endif
 
@@ -51,7 +51,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_FTP_SSL
+#if HAVE_OPENSSL_EXT
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, port)
@@ -243,7 +243,7 @@ ZEND_END_ARG_INFO()
 
 const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			arginfo_ftp_connect)
-#ifdef HAVE_FTP_SSL
+#if HAVE_OPENSSL_EXT
 	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
 #endif
 	PHP_FE(ftp_login,			arginfo_ftp_login)
@@ -282,9 +282,7 @@ const zend_function_entry php_ftp_functions[] = {
 };
 
 zend_module_entry php_ftp_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+    STANDARD_MODULE_HEADER,
 	"ftp",
 	php_ftp_functions,
 	PHP_MINIT(ftp),
@@ -292,7 +290,7 @@ zend_module_entry php_ftp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(ftp),
-	PHP_FTP_VERSION,
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -309,15 +307,6 @@ static void ftp_destructor_ftpbuf(zend_resource *rsrc)
 
 PHP_MINIT_FUNCTION(ftp)
 {
-#ifdef HAVE_FTP_SSL
-	SSL_library_init();
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_algorithms();
-
-	SSL_load_error_strings();
-#endif
-
 	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, le_ftpbuf_name, module_number);
 	REGISTER_LONG_CONSTANT("FTP_ASCII",  FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_TEXT",   FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
@@ -336,11 +325,6 @@ PHP_MINFO_FUNCTION(ftp)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "FTP support", "enabled");
-#ifdef HAVE_FTP_SSL
-	php_info_print_table_row(2, "FTPS support", "enabled");
-#else
-	php_info_print_table_row(2, "FTPS support", "disabled");
-#endif
 	php_info_print_table_end();
 }
 
@@ -379,7 +363,7 @@ PHP_FUNCTION(ftp_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
-#ifdef HAVE_FTP_SSL
+#if HAVE_OPENSSL_EXT
 	/* disable ssl */
 	ftp->use_ssl = 0;
 #endif
@@ -388,7 +372,7 @@ PHP_FUNCTION(ftp_connect)
 }
 /* }}} */
 
-#ifdef HAVE_FTP_SSL
+#if HAVE_OPENSSL_EXT
 /* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout]])
    Opens a FTP-SSL stream */
 PHP_FUNCTION(ftp_ssl_connect)

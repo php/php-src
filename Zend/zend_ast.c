@@ -177,7 +177,7 @@ ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	return (zend_ast *) list;
 }
 
-static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
+static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 {
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
@@ -203,90 +203,68 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
 			break;
 		default:
-			zend_error(E_EXCEPTION | E_ERROR, "Illegal offset type");
-			return FAILURE;
+			zend_error(E_ERROR, "Illegal offset type");
+			break;
  	}
-	return SUCCESS;
 }
 
-ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
-	int ret = SUCCESS;
 
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_dtor(&op1);
-				ret = FAILURE;
-			} else {
-				binary_op_type op = get_binary_op(ast->attr);
-				ret = op(result, &op1, &op2);
-				zval_dtor(&op1);
-				zval_dtor(&op2);
-			}
+		{
+			binary_op_type op = get_binary_op(ast->attr);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
+			op(result, &op1, &op2);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
 			break;
+		}
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_dtor(&op1);
-				ret = FAILURE;
-			} else {
-				/* op1 > op2 is the same as op2 < op1 */
-				binary_op_type op = ast->kind == ZEND_AST_GREATER
-					? is_smaller_function : is_smaller_or_equal_function;
-				ret = op(result, &op2, &op1);
-				zval_dtor(&op1);
-				zval_dtor(&op2);
-			}
+		{
+			/* op1 > op2 is the same as op2 < op1 */
+			binary_op_type op = ast->kind == ZEND_AST_GREATER
+				? is_smaller_function : is_smaller_or_equal_function;
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
+			op(result, &op2, &op1);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
 			break;
+		}
 		case ZEND_AST_UNARY_OP:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else {
-				unary_op_type op = get_unary_op(ast->attr);
-				ret = op(result, &op1);
-				zval_dtor(&op1);
-			}
+		{
+			unary_op_type op = get_unary_op(ast->attr);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			op(result, &op1);
+			zval_dtor(&op1);
 			break;
+		}
 		case ZEND_AST_ZVAL:
 		{
 			zval *zv = zend_ast_get_zval(ast);
 			if (scope) {
 				/* class constants may be updated in-place */
 				if (Z_OPT_CONSTANT_P(zv)) {
-					if (UNEXPECTED(zval_update_constant_ex(zv, 1, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
+					zval_update_constant_ex(zv, 1, scope);
 				}
 				ZVAL_DUP(result, zv);
 			} else {
 				ZVAL_DUP(result, zv);
 				if (Z_OPT_CONSTANT_P(result)) {
-					if (UNEXPECTED(zval_update_constant_ex(result, 1, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
+					zval_update_constant_ex(result, 1, scope);
 				}
 			}
 			break;
 		}
 		case ZEND_AST_AND:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-				break;
-			}
+			zend_ast_evaluate(&op1, ast->child[0], scope);
 			if (zend_is_true(&op1)) {
-				if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-					zval_dtor(&op1);
-					ret = FAILURE;
-					break;
-				}
+				zend_ast_evaluate(&op2, ast->child[1], scope);
 				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			} else {
@@ -295,65 +273,41 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			zval_dtor(&op1);
 			break;
 		case ZEND_AST_OR:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-				break;
-			}
+			zend_ast_evaluate(&op1, ast->child[0], scope);
 			if (zend_is_true(&op1)) {
 				ZVAL_TRUE(result);
 			} else {
-				if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-					zval_dtor(&op1);
-					ret = FAILURE;
-					break;
-				}
+				zend_ast_evaluate(&op2, ast->child[1], scope);
 				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			}
 			zval_dtor(&op1);
 			break;
 		case ZEND_AST_CONDITIONAL:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-				break;
-			}
+			zend_ast_evaluate(&op1, ast->child[0], scope);
 			if (zend_is_true(&op1)) {
 				if (!ast->child[1]) {
 					*result = op1;
 				} else {
-					if (UNEXPECTED(zend_ast_evaluate(result, ast->child[1], scope) != SUCCESS)) {
-						zval_dtor(&op1);
-						ret = FAILURE;
-						break;
-					}
+					zend_ast_evaluate(result, ast->child[1], scope);
 					zval_dtor(&op1);
 				}
 			} else {
-				if (UNEXPECTED(zend_ast_evaluate(result, ast->child[2], scope) != SUCCESS)) {
-					zval_dtor(&op1);
-					ret = FAILURE;
-					break;
-				}
+				zend_ast_evaluate(result, ast->child[2], scope);
 				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_AST_UNARY_PLUS:
-			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else {
-				ZVAL_LONG(&op1, 0);
-				ret = add_function(result, &op1, &op2);
-				zval_dtor(&op2);
-			}
+			ZVAL_LONG(&op1, 0);
+			zend_ast_evaluate(&op2, ast->child[0], scope);
+			add_function(result, &op1, &op2);
+			zval_dtor(&op2);
 			break;
 		case ZEND_AST_UNARY_MINUS:
-			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else {
-				ZVAL_LONG(&op1, 0);
-				ret = sub_function(result, &op1, &op2);
-				zval_dtor(&op2);
-			}
+			ZVAL_LONG(&op1, 0);
+			zend_ast_evaluate(&op2, ast->child[0], scope);
+			sub_function(result, &op1, &op2);
+			zval_dtor(&op2);
 			break;
 		case ZEND_AST_ARRAY:
 			array_init(result);
@@ -363,47 +317,29 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
-						if (UNEXPECTED(zend_ast_evaluate(&op1, elem->child[1], scope) != SUCCESS)) {
-							zval_dtor(result);
-							return FAILURE;
-						}
+						zend_ast_evaluate(&op1, elem->child[1], scope);
 					} else {
 						ZVAL_UNDEF(&op1);
 					}
-					if (UNEXPECTED(zend_ast_evaluate(&op2, elem->child[0], scope) != SUCCESS)) {
-						zval_dtor(&op1);
-						zval_dtor(result);
-						return FAILURE;
-					}
-					if (UNEXPECTED(zend_ast_add_array_element(result, &op1, &op2) != SUCCESS)) {
-						zval_dtor(&op1);
-						zval_dtor(&op2);
-						zval_dtor(result);
-						return FAILURE;
-					}
+					zend_ast_evaluate(&op2, elem->child[0], scope);
+					zend_ast_add_array_element(result, &op1, &op2);
 				}
 			}
 			break;
 		case ZEND_AST_DIM:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_dtor(&op1);
-				ret = FAILURE;
-			} else {
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
+			{
 				zval tmp;
-
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
 				ZVAL_ZVAL(result, &tmp, 1, 1);
-				zval_dtor(&op1);
-				zval_dtor(&op2);
 			}
+			zval_dtor(&op1);
+			zval_dtor(&op2);
 			break;
 		default:
-			zend_error(E_EXCEPTION | E_ERROR, "Unsupported constant expression");
-			ret = FAILURE;
+			zend_error(E_ERROR, "Unsupported constant expression");
 	}
-	return ret;
 }
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)

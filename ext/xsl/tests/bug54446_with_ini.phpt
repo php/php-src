@@ -44,9 +44,9 @@ if (file_exists($outputfile)) {
 }
 
 #SET NO SECURITY PREFS
-$proc->setSecurityPrefs(XSL_SECPREF_NONE);
+ini_set("xsl.security_prefs", XSL_SECPREF_NONE);
 
-# TRANSFORM & PRINT 
+# TRASNFORM & PRINT 
 print $proc->transformToXML( $dom ); 
 
 
@@ -59,9 +59,9 @@ if (file_exists($outputfile)) {
 unlink($outputfile);
 
 #SET SECURITY PREFS AGAIN
-$proc->setSecurityPrefs(XSL_SECPREF_WRITE_FILE | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
+ini_set("xsl.security_prefs", XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
 
-# TRANSFORM & PRINT 
+# TRASNFORM & PRINT 
 print $proc->transformToXML( $dom ); 
 
 if (file_exists($outputfile)) {
@@ -70,7 +70,31 @@ if (file_exists($outputfile)) {
     print "OK, no file created\n";
 }
 
-?>
+#SET NO SECURITY PREFS with ini, but set them with ->setSecurityPrefs
+ini_set("xsl.security_prefs", XSL_SECPREF_NONE);
+$proc->setSecurityPrefs( XSL_SECPREF_WRITE_FILE |  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
+
+print $proc->transformToXML( $dom ); 
+if (file_exists($outputfile)) {
+    print "$outputfile exists, but shouldn't!\n";
+} else {
+    print "OK, no file created\n";
+}
+
+#don't throw a warning if both ini and through-the-method have the same value
+$proc->setSecurityPrefs(XSL_SECPREF_NONE);
+
+print $proc->transformToXML( $dom ); 
+
+if (file_exists($outputfile)) {
+    print "OK, file exists\n";
+} else {
+    print "$outputfile doesn't exist, but should!\n";
+}
+unlink($outputfile);
+
+
+
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
@@ -80,6 +104,8 @@ Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element
 
 Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test.txt denied in %s on line %d
 OK, no file created
+
+Deprecated: XSLTProcessor::transformToXml(): The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead in %s on line %d
 OK, file exists
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
@@ -90,6 +116,20 @@ Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element
 
 Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test.txt denied in %s on line %d
 OK, no file created
+
+Deprecated: XSLTProcessor::transformToXml(): The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead in %s on line %d
+
+Notice: XSLTProcessor::transformToXml(): The xsl.security_prefs php.ini was not used, since the  XsltProcessor->setSecurityPrefs() method was used in %s on line %d
+
+Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
+
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %s
+
+Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
+
+Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test.txt denied in %s on line %d
+OK, no file created
+OK, file exists
 --CREDITS--
 Christian Stocker, chregu@php.net
 

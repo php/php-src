@@ -177,7 +177,7 @@ require_once('skipifconnectfailure.inc');
 
 	class foo {
 		public $foo;
-		function __construct() {
+		function foo() {
 			$this->foo = &$this->bar;
 		}
 	}

@@ -23,6 +23,7 @@ Bar::foo();
 Foo::bar();
 ?>
 --EXPECTF--
+Strict Standards: Static function Foo::bar() should not be abstract in %sbug63111.php on line 3
 bool(false)
 bool(false)
 bool(false)

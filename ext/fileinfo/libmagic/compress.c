@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,14 +29,14 @@
  * compress routines:
  *	zmagic() - returns 0 if not recognized, uncompresses and prints
  *		   information if recognized
- *	uncompress(method, old, n, newch) - uncompress old into new, 
+ *	uncompress(method, old, n, newch) - uncompress old into new,
  *					    using method, return sizeof new
  */
 #include "config.h"
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.77 2014/12/12 16:33:01 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.73 2014/01/05 15:55:21 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -46,12 +46,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.77 2014/12/12 16:33:01 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-# ifndef HAVE_SIG_T
-typedef void (*sig_t)(int);
-# endif /* HAVE_SIG_T */
-#endif 
+#include <sys/types.h>
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -112,16 +107,13 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	size_t i, nsz;
 	int rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
-#ifdef HAVE_SIGNAL_H
-	sig_t osigpipe;
-#endif
+	size_t ncompr;
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
 
-#ifdef HAVE_SIGNAL_H
-	osigpipe = signal(SIGPIPE, SIG_IGN);
-#endif
+	ncompr = sizeof(compr) / sizeof(compr[0]);
+
 	for (i = 0; i < ncompr; i++) {
 		if (nbytes < compr[i].maglen)
 			continue;
@@ -148,9 +140,6 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 		}
 	}
 error:
-#ifdef HAVE_SIGNAL_H
-	(void)signal(SIGPIPE, osigpipe);
-#endif
 	if (newbuf)
 		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
@@ -358,7 +347,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 	if ((*newch = CAST(unsigned char *, emalloc(HOWMANY + 1))) == NULL) {
 		return 0;
 	}
-	
+
 	/* XXX: const castaway, via strchr */
 	z.next_in = (Bytef *)strchr((const char *)old + data_start,
 	    old[data_start]);
@@ -384,7 +373,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 
 	n = (size_t)z.total_out;
 	(void)inflateEnd(&z);
-	
+
 	/* let's keep the nul-terminate tradition */
 	(*newch)[n] = '\0';
 
@@ -397,8 +386,8 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
     const unsigned char *old, unsigned char **newch, size_t n)
 {
 	int fdin[2], fdout[2];
-	int status;
 	ssize_t r;
+	pid_t pid;
 
 #ifdef BUILTIN_DECOMPRESS
         /* FIXME: This doesn't cope with bzip2 */
@@ -409,10 +398,10 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 	(void)fflush(stderr);
 
 	if ((fd != -1 && pipe(fdin) == -1) || pipe(fdout) == -1) {
-		file_error(ms, errno, "cannot create pipe");	
+		file_error(ms, errno, "cannot create pipe");
 		return NODATA;
 	}
-	switch (fork()) {
+	switch (pid = fork()) {
 	case 0:	/* child */
 		(void) close(0);
 		if (fd != -1) {
@@ -449,7 +438,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 		(void) close(fdout[1]);
 		if (fd == -1) {
 			(void) close(fdin[0]);
-			/* 
+			/*
 			 * fork again, to avoid blocking because both
 			 * pipes filled
 			 */
@@ -490,7 +479,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 			    strerror(errno));
 #endif
 			efree(*newch);
-			n = NODATA-;
+			n = 0;
 			*newch = NULL;
 			goto err;
 		} else {
@@ -508,9 +497,8 @@ err:
 #else
 		(void)wait(NULL);
 #endif
-
 		(void) close(fdin[0]);
-	    
+
 		return n;
 	}
 }

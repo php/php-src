@@ -39,7 +39,7 @@ class object_class {
   }
   public $array_var  = array( "key1" => 1, "key2 " => 3);
 
-  function __construct () {
+  function object_class () {
       $this->value1 = 5;
       $this->object_class1 = $this;
   }
@@ -65,7 +65,7 @@ class contains_object_class
      echo "func() is called \n";
    }
 
-   function __construct () {
+   function contains_object_class () {
      $this->class_object1 = new object_class();
      $this->class_object2 = new object_class();
      $this->class_object3 = $this->class_object1;

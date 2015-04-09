@@ -272,7 +272,6 @@ char *GetIniPathFromRegistry()
 		DWORD buflen = MAXPATHLEN;
 		reg_location = emalloc(MAXPATHLEN+1);
 		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
-			RegCloseKey(hKey);
 			efree(reg_location);
 			reg_location = NULL;
 			return reg_location;

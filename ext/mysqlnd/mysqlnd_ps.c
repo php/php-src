@@ -247,7 +247,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s)
 	/* Free space for next result */
 	s->m->free_stmt_result(s);
 	{
-		enum_func_status ret = s->m->parse_execute_response(s, MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_NEXT_RESULT);
+		enum_func_status ret = s->m->parse_execute_response(s);
 		DBG_RETURN(ret);
 	}
 }
@@ -489,7 +489,7 @@ fail:
 
 /* {{{ mysqlnd_stmt_execute_parse_response */
 static enum_func_status
-mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_exec_response_type type)
+mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret;
@@ -590,15 +590,9 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 		s->m->free_stmt_content(s);
 		DBG_INF("PS OUT Variable RSet, skipping");
 		/* OUT params result set. Skip for now to retain compatibility */
-		ret = mysqlnd_stmt_execute_parse_response(s, MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_OUT_VARIABLES);
+		ret = mysqlnd_stmt_execute_parse_response(s);
 	}
 #endif
-
-	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
-
-	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status->affected_rows) {
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status->affected_rows);
-	}
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -610,21 +604,6 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s)
 {
-	DBG_ENTER("mysqlnd_stmt::execute");
-	if (FAIL == s->m->send_execute(s, MYSQLND_SEND_EXECUTE_IMPLICIT, NULL, NULL) ||
-		FAIL == s->m->parse_execute_response(s, MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT))
-	{
-		DBG_RETURN(FAIL);
-	}
-	DBG_RETURN(PASS);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stmt::send_execute */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_send_execute_type type, zval * read_cb, zval * err_cb)
-{
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret;
 	MYSQLND_CONN_DATA * conn;
@@ -632,7 +611,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	size_t		request_len;
 	zend_bool	free_request;
 
-	DBG_ENTER("mysqlnd_stmt::send_execute");
+	DBG_ENTER("mysqlnd_stmt::execute");
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
 	}
@@ -741,7 +720,14 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	}
 	stmt->execute_count++;
 
-	DBG_RETURN(PASS);
+	ret = s->m->parse_execute_response(s);
+
+	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
+
+	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status->affected_rows) {
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status->affected_rows);
+	}
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -2315,7 +2301,6 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result_bind)(MYSQLND_STMT * const s, MYSQLND_R
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, prepare),
-	MYSQLND_METHOD(mysqlnd_stmt, send_execute),
 	MYSQLND_METHOD(mysqlnd_stmt, execute),
 	MYSQLND_METHOD(mysqlnd_stmt, use_result),
 	MYSQLND_METHOD(mysqlnd_stmt, store_result),

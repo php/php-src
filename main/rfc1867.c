@@ -203,7 +203,7 @@ static void free_filename(zval *el) {
 	zend_string_release(filename);
 }
 
-PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
+void destroy_uploaded_files_hash(void) /* {{{ */
 {
 	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));

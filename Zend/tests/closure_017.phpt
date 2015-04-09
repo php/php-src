@@ -8,6 +8,5 @@ $a = function(&$a) { $a = 1; };
 $a($a);
 
 ?>
-DONE
---EXPECT--
-DONE
+--EXPECTF--
+Fatal error: Cannot destroy active lambda function in %s on line %d

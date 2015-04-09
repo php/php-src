@@ -25,7 +25,7 @@ string(44) "Exception: Extension unknown does not exist
 "
 string(37) "Exception: Extension  does not exist
 "
-string(%d) "Extension [ <persistent> extension #%d pcre version %d.%d.%d%a ] {
+string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
 
   - INI {
     Entry [ pcre.backtrack_limit <ALL> ]
@@ -95,15 +95,6 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %d.%d.%d%a ] {
         Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> $limit ]
         Parameter #4 [ <optional> &$count ]
-      }
-    }
-    Function [ <internal:pcre> function preg_replace_callback_array ] {
-
-      - Parameters [4] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> $limit ]
-        Parameter #3 [ <optional> &$count ]
       }
     }
     Function [ <internal:pcre> function preg_filter ] {

@@ -102,7 +102,7 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	tar_header *header = (tar_header *) buf;
 	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
 	php_uint32 ret;
-	char save[sizeof(header->checksum)], *bname;
+	char save[sizeof(header->checksum)];
 
 	/* assume that the first filename in a tar won't begin with <?php */
 	if (!strncmp(buf, "<?php", sizeof("<?php")-1)) {
@@ -113,10 +113,7 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 	memset(header->checksum, ' ', sizeof(header->checksum));
 	ret = (checksum == phar_tar_checksum(buf, 512));
 	memcpy(header->checksum, save, sizeof(header->checksum));
-	if ((bname = strrchr(fname, PHP_DIR_SEPARATOR))) {
-		fname = bname;
-	}
-	if (!ret && (bname = strstr(fname, ".tar")) && (bname[4] == '\0' || bname[4] == '.')) {
+	if (!ret && strstr(fname, ".tar")) {
 		/* probably a corrupted tar - so we will pretend it is one */
 		return 1;
 	}
@@ -257,12 +254,6 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));
-
-		/* skip global/file headers (pax) */
-		if (!old && (hdr->typeflag == TAR_GLOBAL_HDR || hdr->typeflag == TAR_FILE_HDR)) {
-			size = (size+511)&~511;
-			goto next;
-		}
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			zend_off_t curloc;
@@ -564,7 +555,6 @@ bail:
 		size = (size+511)&~511;
 
 		if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
-next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
 			if ((uint)php_stream_tell(fp) > totalsize) {
@@ -625,7 +615,7 @@ next:
 
 	phar_request_initialize();
 
-	if (NULL == (actual = zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len, myphar))) {
+	if (NULL == (actual = zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, myphar))) {
 		if (error) {
 			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
 		}
@@ -641,31 +631,31 @@ next:
 
 		myphar->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
+		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len))) {
 			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
-				zend_hash_str_del(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len);
+				zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len);
 				return FAILURE;
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len, myphar);
+		zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, myphar);
 	} else {
 		phar_archive_data *fd_ptr;
 
 		if (alias_len) {
-			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
+			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
 				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 					}
-					zend_hash_str_del(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len);
+					zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len);
 					return FAILURE;
 				}
 			}
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, myphar);
+			zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, myphar);
 			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
 			myphar->alias_len = alias_len;
 		} else {

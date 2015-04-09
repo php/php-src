@@ -11,10 +11,7 @@ php_cli_server_start(<<<'SCRIPT'
 	ini_set('display_errors', 0);
 	switch($_SERVER["REQUEST_URI"]) {
 	        case "/parse":
-	                try {
-                        eval("this is a parse error");
-                    } catch (ParseException $e) {
-                    }
+	                eval("this is a parse error");
 					echo "OK\n";
 	                break;
 	        case "/fatal":

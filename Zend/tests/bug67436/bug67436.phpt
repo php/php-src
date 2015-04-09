@@ -2,7 +2,7 @@
 bug67436: Autoloader isn't called if user defined error handler is present
 
 --INI--
-error_reporting=-1
+error_reporting=
 
 --FILE--
 <?php

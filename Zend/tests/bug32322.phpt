@@ -68,13 +68,13 @@ Try static instance inside class :
 New class Singleton1 created 
 Using old class Singleton1
 
-Notice: Only variables should be assigned by reference in %sbug32322.php on line 49
+Strict Standards: Only variables should be assigned by reference in %sbug32322.php on line 49
 Using old class Singleton1
 Try static instance inside function :
 New class Singleton2 created 
 Using old class Singleton2
 
-Notice: Only variables should be assigned by reference in %sbug32322.php on line 55
+Strict Standards: Only variables should be assigned by reference in %sbug32322.php on line 55
 Using old class Singleton2
 Class Singleton1 destroyed at script end
 Class Singleton2 destroyed at script end

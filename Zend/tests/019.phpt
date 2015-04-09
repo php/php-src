@@ -201,7 +201,7 @@ class Point
   var $y;
   var $lable;
   
-  function __construct($x, $y) {
+  function Point($x, $y) {
     $this->x = $x;
     $this->y = $y;
   }
@@ -1271,7 +1271,7 @@ bool(false)
 bool(true)
 array(3) {
   [0]=>
-  string(11) "__construct"
+  string(5) "Point"
   [1]=>
   string(8) "setLable"
   [2]=>

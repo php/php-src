@@ -33,4 +33,4 @@ array(3) {
   }
 }
 
-Fatal error: Argument 3 passed to test() must be of the type array, integer given, called in %s on line %d
+Catchable fatal error: Argument 3 passed to test() must be of the type array, integer given, called in %s on line %d

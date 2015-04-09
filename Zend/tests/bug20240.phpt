@@ -9,7 +9,7 @@ class test
 {
     public $member;
 
-    function __construct() {
+    function test() {
         $this->member = 1;
         register_shutdown_function(array($this, 'destructor'));
     }

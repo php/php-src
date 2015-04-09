@@ -231,6 +231,36 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 
 	if (!EG(current_execute_data)) {
 		return NULL;
+	} else if (name_len == sizeof("__CLASS__")-1 &&
+	          !memcmp(name, "__CLASS__", sizeof("__CLASS__")-1)) {
+
+		/* Returned constants may be cached, so they have to be stored */
+		if (EG(scope) && EG(scope)->name) {
+			size_t const_name_len;
+			zend_string *const_name;
+
+			const_name_len = sizeof("\0__CLASS__") + EG(scope)->name->len;
+			const_name = zend_string_alloc(const_name_len, 0);
+			memcpy(const_name->val, "\0__CLASS__", sizeof("\0__CLASS__")-1);
+			zend_str_tolower_copy(const_name->val + sizeof("\0__CLASS__")-1, EG(scope)->name->val, EG(scope)->name->len);
+			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
+				c = emalloc(sizeof(zend_constant));
+				memset(c, 0, sizeof(zend_constant));
+				ZVAL_STR_COPY(&c->value, EG(scope)->name);
+				zend_hash_add_ptr(EG(zend_constants), const_name, c);
+			}
+			zend_string_release(const_name);
+		} else {
+			zend_string *const_name = zend_string_init("\0__CLASS__", sizeof("\0__CLASS__")-1, 0);
+			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
+				c = emalloc(sizeof(zend_constant));
+				memset(c, 0, sizeof(zend_constant));
+				ZVAL_EMPTY_STRING(&c->value);
+				zend_hash_add_ptr(EG(zend_constants), const_name, c);
+			}
+			zend_string_release(const_name);
+		}
+		return c;
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
 		const char *cfilename;
@@ -331,30 +361,27 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 
 		if (class_name_len == sizeof("self")-1 &&
 		    !memcmp(lcname, "self", sizeof("self")-1)) {
-			if (UNEXPECTED(!scope)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot access self:: when no class scope is active");
-				return NULL;
+			if (scope) {
+				ce = scope;
+			} else {
+				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 			}
-			ce = scope;
 		} else if (class_name_len == sizeof("parent")-1 &&
 		           !memcmp(lcname, "parent", sizeof("parent")-1)) {
-			if (UNEXPECTED(!scope)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot access parent:: when no class scope is active");
-				return NULL;
-			} else if (UNEXPECTED(!scope->parent)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot access parent:: when current class scope has no parent");
-				return NULL;
+			if (!scope) {
+				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+			} else if (!scope->parent) {
+				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			} else {
 				ce = scope->parent;
 			}
 		} else if (class_name_len == sizeof("static")-1 &&
 		           !memcmp(lcname, "static", sizeof("static")-1)) {
-			if (UNEXPECTED(!EG(current_execute_data)) ||
-			    UNEXPECTED(!EG(current_execute_data)->called_scope)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot access static:: when no class scope is active");
-				return NULL;
+			if (EG(current_execute_data) && EG(current_execute_data)->called_scope) {
+				ce = EG(current_execute_data)->called_scope;
+			} else {
+				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
-			ce = EG(current_execute_data)->called_scope;
 		} else {
 			ce = zend_fetch_class(class_name, flags);
 		}
@@ -363,10 +390,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
-					zend_string_release(class_name);
-					zend_string_free(constant_name);
-					return NULL;
+					zend_error(E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
 				}
 			} else if (Z_ISREF_P(ret_constant)) {
 				ret_constant = Z_REFVAL_P(ret_constant);
@@ -375,9 +399,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		zend_string_release(class_name);
 		zend_string_free(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
-				return NULL;
-			}
+			zval_update_constant_ex(ret_constant, 1, ce);
 		}
 		return ret_constant;
 	}
@@ -443,12 +465,12 @@ zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags)
 					    (c->flags & CONST_CS) != 0) {
 
 						key--;
-						c = NULL;
+						c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key));
 					}
 				}
 			} else {
 				key--;
-				c = NULL;
+				c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key));
 			}
 		}
 	}

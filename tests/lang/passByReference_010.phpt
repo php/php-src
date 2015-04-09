@@ -37,14 +37,14 @@ var_dump($a);
 
 ---> Pass constant assignment by reference:
 
-Notice: Only variables should be passed by reference in %s on line 9
+Strict Standards: Only variables should be passed by reference in %s on line 9
 string(10) "a.original"
 string(10) "a.original"
 
 
 ---> Pass variable assignment by reference:
 
-Notice: Only variables should be passed by reference in %s on line 15
+Strict Standards: Only variables should be passed by reference in %s on line 15
 string(10) "a.original"
 string(10) "a.original"
 
@@ -56,6 +56,6 @@ string(9) "a.changed"
 
 ---> Pass concat assignment by reference:
 
-Notice: Only variables should be passed by reference in %s on line 28
+Strict Standards: Only variables should be passed by reference in %s on line 28
 string(20) "b.originala.original"
 string(10) "a.original"

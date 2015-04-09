@@ -17,4 +17,4 @@ var_dump(isset($obj->a));
 bool(false)
 bool(false)
 
-Fatal error: Closure object cannot have properties in %s on line %d
+Catchable fatal error: Closure object cannot have properties in %s on line %d

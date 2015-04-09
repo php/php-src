@@ -451,7 +451,7 @@ zend_module_entry ibase_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(ibase),
 	PHP_MINFO(ibase),
-	PHP_INTERBASE_VERSION,
+	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(ibase),
 	PHP_GINIT(ibase),
 	NULL,

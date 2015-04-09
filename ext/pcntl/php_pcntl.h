@@ -21,13 +21,8 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
-#define HAVE_WCONTINUED defined(WCONTINUED) && defined (WIFCONTINUED)
-
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
-
-#include "php_version.h"
-#define PHP_PCNTL_VERSION PHP_VERSION
 
 PHP_MINIT_FUNCTION(pcntl);
 PHP_MSHUTDOWN_FUNCTION(pcntl);
@@ -42,9 +37,6 @@ PHP_FUNCTION(pcntl_wait);
 PHP_FUNCTION(pcntl_wifexited);
 PHP_FUNCTION(pcntl_wifstopped);
 PHP_FUNCTION(pcntl_wifsignaled);
-#ifdef HAVE_WCONTINUED
-PHP_FUNCTION(pcntl_wifcontinued);
-#endif
 PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);

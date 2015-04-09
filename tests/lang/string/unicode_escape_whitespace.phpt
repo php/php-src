@@ -5,4 +5,4 @@ Invalid Unicode escape sequence: Whitespace
 
 var_dump("\u{1F602 }");
 --EXPECTF--
-Parse error: Invalid UTF-8 codepoint escape sequence in %s on line %d
+Fatal error: Invalid UTF-8 codepoint escape sequence in %s on line %d

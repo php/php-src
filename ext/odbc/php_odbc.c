@@ -401,7 +401,7 @@ zend_module_entry odbc_module_entry = {
 	PHP_RINIT(odbc), 
 	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
-	PHP_ODBC_VERSION,
+	"1.0",
 	PHP_MODULE_GLOBALS(odbc),
 	PHP_GINIT(odbc),
 	NULL,
@@ -411,9 +411,6 @@ zend_module_entry odbc_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_ODBC
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
-#endif
 ZEND_GET_MODULE(odbc)
 #endif
 
@@ -698,9 +695,6 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(odbc)
 {
-#if defined(COMPILE_DL_ODBC) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	odbc_globals->num_persistent = 0;
 }
 
@@ -954,9 +948,9 @@ int odbc_bindcols(odbc_result *result)
 		charextraalloc = 0;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
-		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), PHP_ODBC_DESC_BASE_COLUMN_NAME,
+		rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_NAME, 
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
-		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_TYPE, 
+		rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_TYPE, 
 				NULL, 0, NULL, &result->values[i].coltype);
 		
 		/* Don't bind LONG / BINARY columns, so that fetch behaviour can
@@ -991,7 +985,7 @@ int odbc_bindcols(odbc_result *result)
 				charextraalloc = 1;
 #endif
 			default:
-				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
+				rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
 				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
 				if (result->values[i].coltype == SQL_TIMESTAMP) {
@@ -1089,7 +1083,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	SQLColAttributes(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
 
 	RETURN_LONG(len);
 }
@@ -2135,7 +2129,7 @@ PHP_FUNCTION(odbc_result)
 				   fieldsize = result->longreadlen;
 				}
 			} else {
-			   PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(field_ind + 1), 
+			   SQLColAttributes(result->stmt, (SQLUSMALLINT)(field_ind + 1), 
 					   			(SQLUSMALLINT)((sql_c_type == SQL_C_BINARY) ? SQL_COLUMN_LENGTH :
 					   			SQL_COLUMN_DISPLAY_SIZE),
 					   			NULL, 0, NULL, &fieldsize);
@@ -2890,7 +2884,7 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
+	SQLColAttributes(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
 	RETURN_STRING(tmp)
 }
 /* }}} */
@@ -3094,7 +3088,7 @@ PHP_FUNCTION(odbc_setoption)
 			}
 			break;
 		case 2:		/* SQLSetStmtOption */
-			if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_handle), "ODBC result", le_result)) == NULL) {
+			if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_handle), "ODBC-Link", le_conn, le_pconn))) {
 				RETURN_FALSE;
 			}
 			

@@ -21,10 +21,10 @@ foo::__construct();
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method foo::aa() should not be called statically in %s on line %d
+Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
 
-Deprecated: Non-static method foo::aa() should not be called statically in %s on line %d
+Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
 
 Fatal error: Cannot call constructor in %s on line %d

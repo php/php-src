@@ -61,7 +61,9 @@ const zend_function_entry tokenizer_functions[] = {
 /* {{{ tokenizer_module_entry
  */
 zend_module_entry tokenizer_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
+#endif
 	"tokenizer",
 	tokenizer_functions,
 	PHP_MINIT(tokenizer),
@@ -69,7 +71,9 @@ zend_module_entry tokenizer_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(tokenizer),
-	PHP_TOKENIZER_VERSION,
+#if ZEND_MODULE_API_NO >= 20010901
+	"0.1", /* Replace with version number for your extension */
+#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -123,8 +127,6 @@ static void tokenize(zval *return_value)
 			case T_DOC_COMMENT:
 				destroy = 0;
 				break;
-			case T_ERROR:
-				return;
 		}
 
 		if (token_type >= 256) {

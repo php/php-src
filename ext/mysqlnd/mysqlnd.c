@@ -1183,8 +1183,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 	DBG_INF_FMT("conn=%p conn=%llu query=%s", conn, conn->thread_id, query);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		if (PASS == conn->m->send_query(conn, query, query_len, MYSQLND_SEND_QUERY_IMPLICIT, NULL, NULL) &&
-			PASS == conn->m->reap_query(conn, MYSQLND_REAP_RESULT_IMPLICIT))
+		if (PASS == conn->m->send_query(conn, query, query_len) &&
+			PASS == conn->m->reap_query(conn))
 		{
 			ret = PASS;
 			if (conn->last_query_type == QUERY_UPSERT && conn->upsert_status->affected_rows) {
@@ -1200,8 +1200,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 
 /* {{{ mysqlnd_conn_data::send_query */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len,
-											  enum_mysqlnd_send_query_type type, zval *read_cb, zval *err_cb)
+MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, send_query);
 	enum_func_status ret = FAIL;
@@ -1211,8 +1210,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->m->simple_command(conn, COM_QUERY, (zend_uchar *) query, query_len,
-									  PROT_LAST /* we will handle the OK packet*/,
-									  FALSE, FALSE);
+											 PROT_LAST /* we will handle the OK packet*/,
+											 FALSE, FALSE);
 		if (PASS == ret) {
 			CONN_SET_STATE(conn, CONN_QUERY_SENT);
 		}
@@ -1226,7 +1225,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 
 /* {{{ mysqlnd_conn_data::reap_query */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mysqlnd_reap_result_type type)
+MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, reap_query);
 	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
@@ -1363,9 +1362,9 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 #endif
 
 
-/* {{{ mysqlnd_poll */
+/* {{{ _mysqlnd_poll */
 PHPAPI enum_func_status
-mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
+_mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
 {
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
@@ -2054,7 +2053,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 /* {{{ mysqlnd_get_client_info */
 PHPAPI const char * mysqlnd_get_client_info()
 {
-	return PHP_MYSQLND_VERSION;
+	return MYSQLND_VERSION;
 }
 /* }}} */
 
@@ -3139,9 +3138,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_init */
+/* {{{ _mysqlnd_init */
 PHPAPI MYSQLND *
-mysqlnd_init(unsigned int flags, zend_bool persistent)
+_mysqlnd_init(unsigned int flags, zend_bool persistent)
 {
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_init");

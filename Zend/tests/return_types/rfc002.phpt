@@ -1,5 +1,5 @@
 --TEST--
-RFC example: Scalar Types
+RFC example: expected class int and returned integer
 
 --FILE--
 <?php
@@ -7,7 +7,7 @@ function answer(): int {
     return 42;
 }
 
-var_dump(answer());
+answer();
 
 --EXPECTF--
-int(42)
+Catchable fatal error: Return value of answer() must be an instance of int, integer returned in %s on line %d

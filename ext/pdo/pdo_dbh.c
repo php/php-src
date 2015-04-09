@@ -208,11 +208,10 @@ static PHP_METHOD(PDO, dbh_constructor)
 	zval *options = NULL;
 	char alt_dsn[512];
 	int call_factory = 1;
-	zend_error_handling zeh;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(),
-				"s|s!s!a!", &data_source, &data_source_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -226,6 +225,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 
@@ -234,6 +234,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -243,11 +244,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
+			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 	}
@@ -258,6 +261,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
+		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -311,8 +315,15 @@ static PHP_METHOD(PDO, dbh_constructor)
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
+				if (!pdbh) {
+					php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO handle");
+					/* NOTREACHED */
+				}
+
 				pdbh->is_persistent = 1;
-				pdbh->persistent_id = pemalloc(plen + 1, 1);
+				if (!(pdbh->persistent_id = pemalloc(plen + 1, 1))) {
+					php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO handle");
+				}
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
@@ -344,8 +355,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL, E_ERROR, "out of memory");
 	}
-
-	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
 
 	if (!call_factory) {
 		/* we got a persistent guy from our cache */
@@ -387,16 +396,12 @@ options:
 			} ZEND_HASH_FOREACH_END();
 		}
 
-		zend_restore_error_handling(&zeh);
 		return;
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
-	zend_restore_error_handling(&zeh);
-	if (!EG(exception)) {
-		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
-	}
+	ZEND_CTOR_MAKE_NULL();
 }
 /* }}} */
 
@@ -413,9 +418,7 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 		}
 	}
 
-	if (UNEXPECTED(object_init_ex(object, dbstmt_ce) != SUCCESS)) {
-		return NULL;
-	}
+	object_init_ex(object, dbstmt_ce);
 	// ??? Z_SET_REFCOUNT_P(object, 1);
 	//Z_SET_ISREF_P(object);
 
@@ -456,7 +459,11 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
-		if (zend_call_function(&fci, &fcc) != FAILURE) {
+		if (zend_call_function(&fci, &fcc) == FAILURE) {
+			Z_OBJ_P(object) = NULL;
+			ZEND_CTOR_MAKE_NULL();
+			object = NULL; /* marks failure */
+		} else if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
 
@@ -529,11 +536,9 @@ static PHP_METHOD(PDO, prepare)
 	}
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, &ctor_args)) {
-		if (EXPECTED(!EG(exception))) {
-			pdo_raise_impl_error(dbh, NULL, "HY000",
-				"failed to instantiate user-supplied statement class"
-				);
-		}
+		pdo_raise_impl_error(dbh, NULL, "HY000",
+			"failed to instantiate user-supplied statement class"
+			);
 		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
 	}
@@ -1070,9 +1075,7 @@ static PHP_METHOD(PDO, query)
 	PDO_CONSTRUCT_CHECK;
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
-		if (EXPECTED(!EG(exception))) {
-			pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class");
-		}
+		pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class");
 		return;
 	}
 	stmt = Z_PDO_STMT_P(return_value);

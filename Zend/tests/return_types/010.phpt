@@ -11,4 +11,4 @@ $array = [1, 2, 3];
 var_dump(foo($array));
 
 --EXPECTF--
-Fatal error: Return value of foo() must be of the type array, null returned in %s on line %d
+Catchable fatal error: Return value of foo() must be of the type array, null returned in %s on line %d

@@ -36,8 +36,7 @@ try {
 }
 
 echo "===DONE===\n";?>
---EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; a has a deprecated constructor in %s on line %d
+--EXPECT--
 Non-object passed to Invoke()
 Given object is not an instance of the class this method was declared in
 ===DONE===

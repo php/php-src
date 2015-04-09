@@ -715,6 +715,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( datefmt_set_calendar, arginfo_datefmt_set_calendar )
 	PHP_FE( datefmt_get_locale, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_get_timezone_id, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_set_timezone_id, arginfo_datefmt_set_timezone )
 	PHP_FE( datefmt_get_timezone, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_set_timezone, arginfo_datefmt_set_timezone )
 	PHP_FE( datefmt_get_pattern, arginfo_msgfmt_get_locale )
@@ -873,7 +874,9 @@ static PHP_GINIT_FUNCTION(intl);
 
 /* {{{ intl_module_entry */
 zend_module_entry intl_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
+#endif
 	"intl",
 	intl_functions,
 	PHP_MINIT( intl ),

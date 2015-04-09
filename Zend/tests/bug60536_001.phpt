@@ -8,17 +8,17 @@ class X {
 }
 class Y extends X {
 	  use T;
-	  function __construct() {
+	  function x() {
 	      return ++$this->x;
       }
 }
 class Z extends Y {
-	  function __construct() {
+	  function z() {
 		  return ++$this->x;
       }
 }
 $a = new Z();
-$a->__construct();
+$a->x();
 echo "DONE";
 ?>
 --EXPECTF--

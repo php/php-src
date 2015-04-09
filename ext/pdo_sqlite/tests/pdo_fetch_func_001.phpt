@@ -34,14 +34,14 @@ $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
 
 class foo { 
-	public function method($x) {
+	public function foo($x) {
 		return "--- $x ---";
 	}
 }
 class bar extends foo {
 	public function __construct($db) {
 		$st = $db->query('SELECT * FROM testing');
-		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
+		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::foo')));
 	}
 	
 	static public function test($x, $y) {

@@ -320,79 +320,8 @@ Relevant RFCs:
 * https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
 * https://wiki.php.net/rfc/unicode_escape
 
-Changes to error handling
--------------------------
-
-* The new base class of the exception hierarchy is BaseException, from which
-  Exception extends. Typehints in exception handling code may need to be changed
-  to account for this.
-
-* Some fatal errors and recoverable fatal errors now throw an EngineException
-  instead. As EngineException extends BaseException but not Exception, these
-  exceptions will not caught by existing try/catch blocks.
-
-  For the recoverable fatal errors which have been converted into an exception,
-  it is no longer possible to silently ignore the error from an error handler.
-  In particular, it is no longer possible to ignore typehint failures.
-
-* Parser errors now generate a ParseException (extends BaseException). Error
-  handling for eval()s on potentially invalid code should be changed to catch
-  ParseException in addition to the previous return value / error_get_last()
-  based handling.
-
-* Constructors of internal classes will now always throw an exception on
-  failure. Previously some constructors returned NULL or an unusable object.
-
-* The error level of some E_STRICT notices has been changed.
-
-Relevant RFCs:
-* https://wiki.php.net/rfc/engine_exceptions_for_php7
-* https://wiki.php.net/rfc/internal_constructor_behaviour
-* https://wiki.php.net/rfc/reclassify_e_strict
-
 Other language changes
 ----------------------
-
-* Removed support for static calls to non-static calls form an incompatible
-  $this context. In this case $this will not be defined, but the call will be
-  allowed with a deprecation notice. An example:
-
-      class A {
-          public function test() { var_dump($this); }
-      }
-
-      // Note: Does NOT extend A
-      class B {
-          public function callNonStaticMethodOfA() { A::test(); }
-      }
-      
-      (new B)->callNonStaticMethodOfA();
-
-      // Deprecated: Non-static method A::test() should not be called statically
-      // Notice: Undefined variable $this
-      NULL
-
-  Note that this only applies to calls from an incompatible context. If class B
-  extended from A the call would be allowed without any notices.
-
-* The yield language construct no longer requires parentheses when used in an
-  expression context. It is now a right-associative operator with precedence
-  between the "print" and "=>" operators. This can result in different behavior
-  in some cases, for example:
-
-      echo yield -1;
-      // Was previously interpreted as
-      echo (yield) - 1;
-      // And is now interpreted as
-      echo yield (-1);
-
-      yield $foo or die;
-      // Was previously interpreted as
-      yield ($foo or die);
-      // And is now interpreted as
-      (yield $foo) or die;
-
-  Such cases can always be resolved by adding additional parentheses.
 
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
@@ -416,10 +345,6 @@ Standard library changes
 Other
 =====
 
-- Curl:
-  . Removed support for disabling the CURLOPT_SAFE_UPLOAD option. All curl file
-    uploads must use the curl_file / CURLFile APIs.
-
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
 
@@ -431,18 +356,6 @@ Other
   . Requires libgmp version 4.2 or newer now.
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
-
-- Intl:
-  . Removed deprecated aliases datefmt_set_timezone_id() and
-    IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
-    IntlDateFormatter::setTimeZone() instead.
-
-- Mcrypt
-  . Removed deprecated mcrypt_generic_end() alias in favor of
-    mcrypt_generic_deinit().
-  . Removed deprecated mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb()
-    functions in favor of mcrypt_encrypt() and mcrypt_decrypt() with an
-    MCRYPT_MODE_* flag.
 
 - Session
   . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
@@ -478,17 +391,11 @@ Other
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
 
-- XSL:
-  . Removed xsl.security_prefs ini option. Use XsltProcessor::setSecurityPrefs()
-    instead.
-
 ========================================
 2. New Features
 ========================================
 
 - Core
-  . Added group use declarations.
-    (RFC: https://wiki.php.net/rfc/group_use_declarations)
   . Added null coalesce operator (??).
     (RFC: https://wiki.php.net/rfc/isset_ternary)
   . Support for strings with length >= 2^31 bytes in 64 bit builds.
@@ -503,7 +410,7 @@ Other
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
     streams to negotiate alternative protocols using the ALPN TLS extension when
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
-    accessible through stream_get_meta_data() output.
+    accessible by passing streams to the new stream_socket_crypto_info().
 
 ========================================
 3. Changes in SAPI modules
@@ -517,15 +424,6 @@ Other
 4. Deprecated Functionality
 ========================================
 
-- Core
-  . PHP 4 style constructors, where the constructor name is the same as the
-    class name, are now deprecated.
-  . Static calls to non-static methods are now deprecated.
-
-- OpenSSL
-  . The "capture_session_meta" SSL context option is now deprecated. Meta
-    data concerning active crypto on a stream resource is now accessible
-    through the return result from stream_get_meta_data().
 
 ========================================
 5. Changed Functions
@@ -547,13 +445,12 @@ Other
 - GMP
   . Added gmp_random_seed().
 
-- PCRE:
-  . Added preg_replace_callback_array function
-    (RFC: https://wiki.php.net/rfc/preg_replace_callback_array)
-
 - Standard
   . Added intdiv() function for integer division.
-  . Added error_clear_last() function to reset error state.
+
+- Stream:
+  . Added stream_socket_crypto_info() allowing inspection of negotiated TLS
+    connection properties
 
 ========================================
 7. New Classes and Interfaces
@@ -611,15 +508,6 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
   . Support for native 64 bit integers in 64 bit builds.
   . Support for large files in 64 bit builds.
 
-- ftp
-  . The ftp extension is always shipped shared
-  . For SSL support, the dependency on the openssl extension was abolished. Instead
-    it depends alone on the openssl library. If it's presend at the compile time,
-    ftp_ssl_connect() is enabled automatically.
-
-- odbc
-  . The odbc extension is always shipped shared
-
 ========================================
 13. Other Changes
 ========================================
@@ -629,7 +517,4 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object.
-  . Error messages for zend_parse_parameters, type hints and conversions now
-    always say "integer" and "float" instead of "long" and "double".
-  . Output buffering now continues to work for an aborted connection if
-    ignore_user_abort is set to true.
+  . Error messages for zend_parse_parameters, type hints and conversions now always say "integer" and "float" instead of "long" and "double".

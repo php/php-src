@@ -22,13 +22,6 @@ class C extends B {
 new C();
 
 ?>
---EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; AA has a deprecated constructor in %s on line %d
-
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; CC has a deprecated constructor in %s on line %d
-
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
-
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; C has a deprecated constructor in %s on line %d
+--EXPECT--
 foo
 bar

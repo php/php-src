@@ -118,7 +118,7 @@ zend_module_entry bcmath_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(bcmath),
-	PHP_BCMATH_VERSION,
+	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(bcmath),
 	PHP_GINIT(bcmath),
     PHP_GSHUTDOWN(bcmath),

@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class BaseStruct {
-    function __construct($f, $s) {
+    function BaseStruct($f, $s) {
         $this->floatMessage = $f;
         $this->shortMessage = $s;
     }

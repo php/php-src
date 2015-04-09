@@ -10,8 +10,8 @@ $test = "
 
 	var_dump(strip_tags($test));
 ?>
---EXPECTF--
-string(8%d) "
+--EXPECT--
+string(80) "
 
 	first cell before < first cell after
 	second cell before < second cell after

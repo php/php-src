@@ -8,14 +8,14 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
+    function SOAPStruct($s, $i, $f) {
         $this->varString = $s;
         $this->varInt = $i;
         $this->varFloat = $f;
     }
 }
 class BaseStruct {
-    function __construct($f, $s) {
+    function BaseStruct($f, $s) {
         $this->structMessage = $f;
         $this->shortMessage = $s;
     }

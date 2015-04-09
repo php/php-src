@@ -4,7 +4,6 @@ FTP login (SSL)
 <?php
 $ssl = 1;
 require 'skipif.inc';
-if (!function_exists("ftp_ssl_connect")) die("skip ftp_ssl is disabled");
 ?>
 --FILE--
 <?php

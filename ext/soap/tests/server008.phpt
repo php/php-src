@@ -6,7 +6,7 @@ SOAP Server 8: setclass and getfunctions
 <?php
 class Foo {
 
-  function __construct() {
+  function Foo() {
   }
 
   function test() {
@@ -22,7 +22,7 @@ echo "ok\n";
 --EXPECT--
 array(2) {
   [0]=>
-  string(11) "__construct"
+  string(3) "Foo"
   [1]=>
   string(4) "test"
 }

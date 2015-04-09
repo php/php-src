@@ -126,11 +126,9 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 	}
 	if (PS(id)) {
 		zend_string_release(PS(id));
-		PS(id) = NULL;
 	}
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
-		PS(session_vars) = NULL;
 	}
 }
 /* }}} */
@@ -768,7 +766,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
 	int tmp;
-	tmp = zend_atoi(new_value->val, (int)new_value->len);
+	tmp = zend_atoi(new_value->val, new_value->len);
 	if(tmp < 0) {
 		php_error_docref(NULL, E_WARNING, "session.upload_progress.freq must be greater than or equal to zero");
 		return FAILURE;
@@ -1004,7 +1002,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	const char *endptr = val + vallen;
 	zval current;
 	int has_value;
-	ptrdiff_t namelen;
+	int namelen;
 	zend_string *name;
 	php_unserialize_data_t var_hash;
 
@@ -1474,7 +1472,7 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		smart_str_0(&var);
 		if (sid) {
 			zend_string_release(Z_STR_P(sid));
-			ZVAL_NEW_STR(sid, var.s);
+			ZVAL_STR(sid, var.s);
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
 			smart_str_free(&var);
@@ -1988,11 +1986,11 @@ static PHP_FUNCTION(session_id)
 	if (PS(id)) {
 		/* keep compatibility for "\0" characters ???
 		 * see: ext/session/tests/session_id_error3.phpt */
-		size_t len = strlen(PS(id)->val);
+		int len = strlen(PS(id)->val);
 		if (UNEXPECTED(len != PS(id)->len)) {
-			RETVAL_NEW_STR(zend_string_init(PS(id)->val, len, 0));
+			RETVAL_STR(zend_string_init(PS(id)->val, len, 0));
 		} else {
-			RETVAL_STR_COPY(PS(id));
+			RETVAL_STR(zend_string_copy(PS(id)));
 		}
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -2087,7 +2085,7 @@ static PHP_FUNCTION(session_create_id)
 		RETURN_FALSE;
 	}
 	smart_str_0(&id);
-	RETVAL_NEW_STR(id.s);
+	RETVAL_STR(id.s);
 	smart_str_free(&id);
 }
 /* }}} */
@@ -2197,14 +2195,14 @@ static PHP_FUNCTION(session_start)
 	zval *value;
 	zend_ulong num_idx;
 	zend_string *str_idx;
-	zend_long read_and_close = 0;
+	int read_and_close = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (PS(id) && !(PS(id)->len)) {
-		php_error_docref(NULL, E_WARNING, "Cannot start session with empty session ID");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
 		RETURN_FALSE;
 	}
 
@@ -2634,7 +2632,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_id_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_IFACE_NAME, php_session_update_timestamp_iface_functions);
-	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce);
+	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_session_update_timestamp_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	/* Register base class */
@@ -3015,7 +3013,7 @@ zend_module_entry session_module_entry = {
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
-	PHP_SESSION_VERSION,
+	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(ps),
 	PHP_GINIT(ps),
 	NULL,

@@ -22,8 +22,6 @@
 #include "php.h"
 #include <stdarg.h>
 
-#define PHP_SPL_VERSION PHP_VERSION
-
 #if 0
 #define SPL_DEBUG(x)	x
 #else

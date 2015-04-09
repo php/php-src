@@ -101,7 +101,7 @@ zend_module_entry sysvshm_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	PHP_SYSVSHM_VERSION,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
