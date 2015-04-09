@@ -2615,7 +2615,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 
 ZEND_API zend_string* zend_debug_backtrace_as_string(zval *trace)
 {
-	zval *frame, rv;
+	zval *frame;
 	zend_ulong index;
 	smart_str str = {0};
 	uint32_t num = 0;
