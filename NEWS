@@ -68,6 +68,7 @@
   . Implemented the RFC `Group Use Declarations`. (Marcio)
   . Implemented the RFC `Continue Output Buffering`. (Mike)
   . Implemented the RFC `Constructor behaviour of internal classes`. (Dan, Dmitry)
+  . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
@@ -163,6 +164,10 @@
   . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes). (Laruence)
 
 - SPL:
+  . Changed ArrayIterator implementation using zend_hash_iterator_... API.
+    Allowed modification of itterated ArrayObject using the same behavior
+    as proposed in `Fix "foreach" behavior`. Removed "Array was modified
+    outside object and internal position is no longer valid" hack. (Dmitry)
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
