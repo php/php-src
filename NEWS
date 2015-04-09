@@ -165,7 +165,7 @@
 
 - SPL:
   . Changed ArrayIterator implementation using zend_hash_iterator_... API.
-    Allowed modification of itterated ArrayObject using the same behavior
+    Allowed modification of iterated ArrayObject using the same behavior
     as proposed in `Fix "foreach" behavior`. Removed "Array was modified
     outside object and internal position is no longer valid" hack. (Dmitry)
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
