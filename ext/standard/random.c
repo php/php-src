@@ -103,9 +103,8 @@ static int php_random_bytes(void *bytes, size_t size)
 		RANDOM_G(fd) = fd;
 	}
 
-	ssize_t n = 0;
 	while (read_bytes < size) {
-		n = read(fd, bytes + read_bytes, size - read_bytes);
+		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n < 0) {
 			break;
 		}
@@ -156,18 +155,13 @@ PHP_FUNCTION(random_bytes)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
-	zend_long min = ZEND_LONG_MIN;
-	zend_long max = ZEND_LONG_MAX;
+	zend_long min;
+	zend_long max;
 	zend_ulong limit;
 	zend_ulong umax;
 	zend_ulong result;
 
-	if (ZEND_NUM_ARGS() == 1) {
-		php_error_docref(NULL, E_WARNING, "A minimum and maximum value are expected, only minimum given");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &min, &max) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
 		return;
 	}
 
