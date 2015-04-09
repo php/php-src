@@ -1808,7 +1808,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_O
 	if (call->func->type == ZEND_USER_FUNCTION) {
 		call->symbol_table = NULL;
 		i_init_func_execute_data(call, &call->func->op_array,
-				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
+				ret, (call->func->common.fn_flags & ZEND_ACC_STATIC) == 0);
 
 		zend_free_proxy_call_func(fbc);
 

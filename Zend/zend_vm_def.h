@@ -7594,7 +7594,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 	if (call->func->type == ZEND_USER_FUNCTION) {
 		call->symbol_table = NULL;
 		i_init_func_execute_data(call, &call->func->op_array,
-				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
+				ret, (call->func->common.fn_flags & ZEND_ACC_STATIC) == 0);
 
 		zend_free_proxy_call_func(fbc);
 
