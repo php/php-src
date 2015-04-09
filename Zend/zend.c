@@ -26,6 +26,7 @@
 #include "zend_list.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
+#include "zend_objects_API.h"
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
@@ -531,6 +532,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
+	memset(&EG(proxy_call_func), 0, sizeof(zend_op_array));
+	zend_init_proxy_call_func(&EG(proxy_call_func), &EG(proxy_call_op));
 }
 /* }}} */
 
@@ -722,6 +725,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #ifndef ZTS
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_proxy_call_func(&EG(proxy_call_func), &EG(proxy_call_op));
 #endif
 
 	zend_ini_startup();
