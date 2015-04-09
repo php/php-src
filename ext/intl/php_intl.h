@@ -30,6 +30,7 @@
 #include "collator/collator_sort.h"
 #include <unicode/ubrk.h>
 #include "intl_error.h"
+#include "Zend/zend_exceptions.h"
 
 extern zend_module_entry intl_module_entry;
 #define phpext_intl_ptr &intl_module_entry

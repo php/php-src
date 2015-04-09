@@ -27,12 +27,13 @@
 #include "ext/standard/info.h"
 #include "zend_interfaces.h"
 
+#include "php_simplexml.h"
 #include "ext/spl/php_spl.h"
 #include "ext/spl/spl_iterators.h"
 #include "sxe.h"
 
-zend_class_entry *ce_SimpleXMLIterator = NULL;
-zend_class_entry *ce_SimpleXMLElement;
+PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator = NULL;
+PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 #include "php_simplexml_exports.h"
 

@@ -36,6 +36,9 @@ extern zend_module_entry com_dotnet_module_entry;
 # define PHP_COM_DOTNET_API
 #endif
 
+#include "php_version.h"
+#define PHP_COM_DOTNET_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(com_dotnet);
 PHP_MSHUTDOWN_FUNCTION(com_dotnet);
 PHP_RINIT_FUNCTION(com_dotnet);

@@ -242,9 +242,6 @@ PHPAPI int php_output_get_status(void)
  * Unbuffered write */
 PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len)
 {
-	if (OG(flags) & PHP_OUTPUT_DISABLED) {
-		return 0;
-	}
 	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
 		return sapi_module.ub_write(str, len);
 	}
@@ -256,12 +253,12 @@ PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len)
  * Buffered write */
 PHPAPI size_t php_output_write(const char *str, size_t len)
 {
-	if (OG(flags) & PHP_OUTPUT_DISABLED) {
-		return 0;
-	}
 	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
 		php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len);
 		return len;
+	}
+	if (OG(flags) & PHP_OUTPUT_DISABLED) {
+		return 0;
 	}
 	return php_output_direct(str, len);
 }

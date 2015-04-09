@@ -8,11 +8,13 @@ set_error_handler(function($_, $msg, $file) {
 	echo $undefined;
 });
 
-eval('class A { function a() {} function __construct() {} }');
+/* This is just a particular example of a non-fatal compile-time error
+ * If this breaks in future, just find another example and use it instead */
+eval('class A { function test() { } } class B extends A { function test($a) { } }');
 
 ?>
 --EXPECTF--
-string(50) "Redefining already defined constructor for class A"
+string(60) "Declaration of B::test() should be compatible with A::test()"
 string(%d) "%s(%d) : eval()'d code"
 
 Notice: Undefined variable: undefined in %s on line %d

@@ -114,7 +114,7 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
 	INIT_CLASS_ENTRY(ce, "AssertionException", NULL);
-	assertion_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C));
+	assertion_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default());
 
 	return SUCCESS;
 }
@@ -244,14 +244,14 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(exception)) {
 		if (!description) {
-			zend_throw_exception(assertion_exception_ce, NULL, E_ERROR TSRMLS_CC);
+			zend_throw_exception(assertion_exception_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_exception_ce TSRMLS_CC)) {
+			instanceof_function(Z_OBJCE_P(description), assertion_exception_ce)) {
 			Z_ADDREF_P(description);
-			zend_throw_exception_object(description TSRMLS_CC);
+			zend_throw_exception_object(description);
 		} else {
 			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_exception_ce, str->val, E_ERROR TSRMLS_CC);
+			zend_throw_exception(assertion_exception_ce, str->val, E_ERROR);
 			zend_string_release(str);
 		}
 	} else if (ASSERTG(warning)) {
@@ -360,7 +360,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *key = zend_string_init("assert.exception", sizeof("assert.exception")-1, 0);
 			zend_string *val = zval_get_string(value);
-			zend_alter_ini_entry_ex(key, val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release(val);
 			zend_string_release(key);
 		}

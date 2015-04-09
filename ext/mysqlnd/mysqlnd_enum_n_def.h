@@ -156,6 +156,32 @@ typedef enum mysqlnd_res_type
 	MYSQLND_RES_PS_UNBUF
 } enum_mysqlnd_res_type;
 
+typedef enum mysqlnd_send_query_type
+{
+	MYSQLND_SEND_QUERY_IMPLICIT = 0,
+	MYSQLND_SEND_QUERY_EXPLICIT
+} enum_mysqlnd_send_query_type;
+
+typedef enum mysqlnd_reap_result_type
+{
+	MYSQLND_REAP_RESULT_IMPLICIT = 0,
+	MYSQLND_REAP_RESULT_EXPLICIT
+} enum_mysqlnd_reap_result_type;
+
+typedef enum mysqlnd_send_execute_type
+{
+	MYSQLND_SEND_EXECUTE_IMPLICIT = 0,
+	MYSQLND_SEND_EXECUTE_EXPLICIT
+} enum_mysqlnd_send_execute_type;
+
+typedef enum mysqlnd_parse_exec_response_type
+{
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT = 0,
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_NEXT_RESULT,
+	MYSQLND_PARSE_EXEC_RESPONSE_IMPLICIT_OUT_VARIABLES,
+	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT,
+} enum_mysqlnd_parse_exec_response_type;
+
 typedef enum mysqlnd_option
 {
 	MYSQL_OPT_CONNECT_TIMEOUT,

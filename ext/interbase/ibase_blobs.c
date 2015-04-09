@@ -300,7 +300,7 @@ PHP_FUNCTION(ibase_blob_add)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &blob_arg, &string_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &blob_arg, &string_arg)) {
 		return;
 	}
 
@@ -327,7 +327,7 @@ PHP_FUNCTION(ibase_blob_get)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &blob_arg, &len_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &blob_arg, &len_arg)) {
 		return;
 	}
 
@@ -352,7 +352,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &blob_arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &blob_arg)) {
 		return;
 	}
 

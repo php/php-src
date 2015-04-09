@@ -98,7 +98,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t alg
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
-	int algo_len = strlen(algo);
+	size_t algo_len = strlen(algo);
 	char *lower = zend_str_tolower_dup(algo, algo_len);
 	zend_hash_str_add_ptr(&php_hash_hashtable, lower, algo_len, (void *) ops);
 	efree(lower);
@@ -151,7 +151,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		size_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
@@ -167,14 +167,14 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (raw_output) {
 		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
 		hex_digest->val[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -293,14 +293,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (raw_output) {
 		digest->val[ops->digest_size] = 0;
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
 		hex_digest->val[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -531,25 +531,17 @@ PHP_FUNCTION(hash_final)
 	digest->val[digest_len] = 0;
 	efree(hash->context);
 	hash->context = NULL;
-
-	//???
-	//??? /* zend_list_REAL_delete() */
-	//??? if (zend_hash_index_find(&EG(regular_list), Z_RESVAL_P(zhash), (void *) &le)==SUCCESS) {
-	//??? 	/* This is a hack to avoid letting the resource hide elsewhere (like in separated vars)
-	//??? 		FETCH_RESOURCE is intelligent enough to handle dealing with any issues this causes */
-	//??? 	le->refcount = 1;
-	//??? } /* FAILURE is not an option */
 	zend_list_close(Z_RES_P(zhash));
 
 	if (raw_output) {
-		RETURN_STR(digest);
+		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
 		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, digest_len);
 		hex_digest->val[2 * digest_len] = 0;
 		zend_string_release(digest);
-		RETURN_STR(hex_digest);
+		RETURN_NEW_STR(hex_digest);
 	}
 }
 /* }}} */
@@ -727,7 +719,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	returnval->val[length] = 0;
 	efree(result);
-	RETURN_STR(returnval);
+	RETURN_NEW_STR(returnval);
 }
 /* }}} */
 
@@ -814,7 +806,7 @@ zend_module_entry mhash_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(mhash),
-	NO_VERSION_YET,
+	PHP_MHASH_VERSION,
 	STANDARD_MODULE_PROPERTIES,
 };
 
@@ -1271,9 +1263,7 @@ const zend_function_entry hash_functions[] = {
 /* {{{ hash_module_entry
  */
 zend_module_entry hash_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	PHP_HASH_EXTNAME,
 	hash_functions,
 	PHP_MINIT(hash),
@@ -1281,9 +1271,7 @@ zend_module_entry hash_module_entry = {
 	NULL, /* RINIT */
 	NULL, /* RSHUTDOWN */
 	PHP_MINFO(hash),
-#if ZEND_MODULE_API_NO >= 20010901
-	PHP_HASH_EXTVER, /* Replace with version number for your extension */
-#endif
+	PHP_HASH_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

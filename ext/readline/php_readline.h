@@ -29,6 +29,9 @@
 extern zend_module_entry readline_module_entry;
 #define phpext_readline_ptr &readline_module_entry
 
+#include "php_version.h"
+#define PHP_READLINE_VERSION PHP_VERSION
+
 #else
 
 #define phpext_readline_ptr NULL

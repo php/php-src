@@ -1268,6 +1268,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	zval *timezone_zval = timezone_convert_to_datetimezone(
 		&tz, CALENDAR_ERROR_P(co), "intlcal_to_date_time", &tmp);
 	if (timezone_zval == NULL) {
+		zval_ptr_dtor(&ts_zval);
 		RETURN_FALSE;
 	}
 

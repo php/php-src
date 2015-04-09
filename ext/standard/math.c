@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
+#include "zend_exceptions.h"
 
 #include <math.h>
 #include <float.h>
@@ -1452,8 +1453,8 @@ PHP_FUNCTION(intdiv)
 	}
 
 	if (divisor == 0) {
-		php_error_docref(NULL, E_WARNING, "Division by zero");
-		RETURN_BOOL(0);
+		zend_throw_exception_ex(NULL, 0, "Division by zero");
+		return;
 	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
 		/* Prevent overflow error/crash
 		   We don't return a float here as that violates function contract */

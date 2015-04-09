@@ -4,9 +4,13 @@ SplFixedArray::__construct() with string passed as parameter.
 PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
+try {
+	$array = new SplFixedArray( "string" );
+} catch (TypeException $iae) {
+	echo "Ok - ".$iae->getMessage().PHP_EOL;
+}
 
-$array = new SplFixedArray( "string" );
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be integer, %unicode_string_optional% given in %s on line %d
+Ok - SplFixedArray::__construct() expects parameter 1 to be integer, %unicode_string_optional% given

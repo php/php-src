@@ -48,21 +48,16 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 /* {{{ proto void DOMEntityReference::__construct(string name); */
 PHP_METHOD(domentityreference, __construct)
 {
-	zval *id;
+	zval *id = getThis();
 	xmlNode *node;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name;
 	size_t name_len, name_valid;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
-
-	zend_restore_error_handling(&error_handling);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {

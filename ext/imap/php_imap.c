@@ -574,7 +574,7 @@ zend_module_entry imap_module_entry = {
 	PHP_RINIT(imap),
 	PHP_RSHUTDOWN(imap),
 	PHP_MINFO(imap),
-	NO_VERSION_YET,
+	PHP_IMAP_VERSION,
 	PHP_MODULE_GLOBALS(imap),
 	PHP_GINIT(imap),
 	NULL,

@@ -66,7 +66,6 @@ PHP_FUNCTION(com_create_instance)
 			&typelib_name, &typelib_name_len)) {
 
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -230,7 +229,6 @@ PHP_FUNCTION(com_create_instance)
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 

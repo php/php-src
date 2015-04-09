@@ -1272,7 +1272,7 @@ static void model_to_zval_any(zval *ret, xmlNodePtr node)
 					if (Z_TYPE(val2) != IS_STRING ||  *Z_STRVAL(val) != '<') {
 						break;
 					}
-					add_string_to_string(&val, &val, &val2);
+					concat_function(&val, &val, &val2);
 					zval_ptr_dtor(&val2);
 					node = node->next;
 				}

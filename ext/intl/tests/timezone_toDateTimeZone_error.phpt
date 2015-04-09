@@ -35,4 +35,4 @@ Warning: intltz_to_date_time_zone() expects exactly 1 parameter, 0 given in %s o
 Warning: intltz_to_date_time_zone(): intltz_to_date_time_zone: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intltz_to_date_time_zone() must be an instance of IntlTimeZone, integer given in %s on line %d
+Fatal error: Argument 1 passed to intltz_to_date_time_zone() must be an instance of IntlTimeZone, integer given in %s on line %d

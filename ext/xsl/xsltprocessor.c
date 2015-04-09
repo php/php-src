@@ -483,7 +483,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
-	int secPrefsValue, secPrefsIni;
+	int secPrefsValue;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp);
@@ -541,23 +541,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zval_ptr_dtor(&member);
 
 	secPrefsValue = intern->securityPrefs;
-
-	/* This whole if block can be removed, when we remove the xsl.security_prefs php.ini option in PHP 6+ */
-	secPrefsIni= INI_INT("xsl.security_prefs");
-	/* if secPrefsIni has the same value as secPrefsValue, all is fine */
-	if (secPrefsIni != secPrefsValue) {
-		if (secPrefsIni != XSL_SECPREF_DEFAULT) {
-			/* if the ini value is not set to the default, throw an E_DEPRECATED warning */
-			php_error_docref(NULL, E_DEPRECATED, "The xsl.security_prefs php.ini option is deprecated; use XsltProcessor->setSecurityPrefs() instead");
-			if (intern->securityPrefsSet == 0) {
-				/* if securityPrefs were not set through the setSecurityPrefs method, take the ini setting */
-				secPrefsValue = secPrefsIni;
-			} else {
-				/* else throw a notice, that the ini setting was not used */
-				php_error_docref(NULL, E_NOTICE, "The xsl.security_prefs php.ini was not used, since the  XsltProcessor->setSecurityPrefs() method was used");
-			}
-		}
-	}
 
 	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
 	if (secPrefsValue != XSL_SECPREF_NONE) {
@@ -820,7 +803,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
 		convert_to_string_ex(value);
-		RETURN_STR(zend_string_copy(Z_STR_P(value)));
+		RETURN_STR_COPY(Z_STR_P(value));
 	} else {
 		RETURN_FALSE;
 	}

@@ -80,18 +80,4 @@
 #define PROCESSOR_ARCHITECTURE_AMD64            9
 #endif
 
-typedef struct _php_win_OSVERSIONINFOEXA {
-    DWORD dwOSVersionInfoSize;
-    DWORD dwMajorVersion;
-    DWORD dwMinorVersion;
-    DWORD dwBuildNumber;
-    DWORD dwPlatformId;
-    CHAR  szCSDVersion[128];
-    WORD  wServicePackMajor;
-    WORD  wServicePackMinor;
-    WORD  wSuiteMask;
-    BYTE  wProductType;
-    BYTE  wReserved;
-} php_win_OSVERSIONINFOEX;
-
 #endif

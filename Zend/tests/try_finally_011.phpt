@@ -12,4 +12,4 @@ function foo () {
 foo();
 ?>
 --EXPECTF--
-Fatal error: Cannot break/continue 1 level in %stry_finally_011.php on line %d
+Fatal error: 'break' not in the 'loop' or 'switch' context in %stry_finally_011.php on line %d

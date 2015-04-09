@@ -84,7 +84,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(current_execute_data) ? E_ERROR : E_WARNING,
+					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to private %s::__destruct() from context '%s'%s",
 						ce->name->val,
 						EG(scope) ? EG(scope)->name->val : "",
@@ -97,7 +97,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(current_execute_data) ? E_ERROR : E_WARNING,
+					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to protected %s::__destruct() from context '%s'%s",
 						ce->name->val,
 						EG(scope) ? EG(scope)->name->val : "",
@@ -117,7 +117,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		old_exception = NULL;
 		if (EG(exception)) {
 			if (EG(exception) == object) {
-				zend_error(E_ERROR, "Attempt to destruct pending exception");
+				zend_error_noreturn(E_CORE_ERROR, "Attempt to destruct pending exception");
 			} else {
 				old_exception = EG(exception);
 				EG(exception) = NULL;

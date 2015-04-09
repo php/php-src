@@ -46,7 +46,7 @@ toolset_setup_common_cflags();
 ARG_WITH('prefix', 'PHP installation prefix', '');
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
-if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
+if (VS_TOOLSET && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -106,13 +106,9 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 /* XXX inspect this for other toolsets */
-if (VS_TOOLSET && VCVERS == 1200) {
-	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
-}
+//AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 
-if (!VS_TOOLSET || VS_TOOLSET && VCVERS >= 1400) {
-	AC_DEFINE('HAVE_STRNLEN', 1);
-}
+AC_DEFINE('HAVE_STRNLEN', 1);
 
 STDOUT.WriteBlankLines(1);
 

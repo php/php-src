@@ -23,6 +23,9 @@
 #ifndef PHP_ZLIB_H
 #define PHP_ZLIB_H
 
+#include "php_version.h"
+#define PHP_ZLIB_VERSION PHP_VERSION
+
 #include <zlib.h>
 
 #define PHP_ZLIB_ENCODING_RAW		-0xf

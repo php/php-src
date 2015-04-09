@@ -33,7 +33,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		goto skip_phar;
 	}
@@ -106,7 +106,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		goto skip_phar;
 	}
@@ -239,7 +239,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		goto skip_phar;
 	}
@@ -339,7 +339,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
@@ -910,7 +910,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		goto skip_phar;
 	}
@@ -977,7 +977,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.u.flags && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
 		&& !cached_phars.u.flags) {
 		goto skip_phar;
 	}

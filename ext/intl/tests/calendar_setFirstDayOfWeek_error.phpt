@@ -37,4 +37,4 @@ bool(false)
 Warning: intlcal_set_first_day_of_week(): intlcal_set_first_day_of_week: invalid day of week in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_set_first_day_of_week() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_set_first_day_of_week() must be an instance of IntlCalendar, integer given in %s on line %d

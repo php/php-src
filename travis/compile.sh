@@ -16,13 +16,12 @@ $TS \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
---with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
 --enable-intl \
---without-pear \
+--with-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \

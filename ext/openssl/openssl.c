@@ -525,7 +525,7 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(openssl),
-	NO_VERSION_YET,
+	PHP_OPENSSL_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -993,11 +993,13 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
+#ifdef HAVE_RAND_EGD
 	} else if (RAND_egd(file) > 0) {
 		/* if the given filename is an EGD socket, don't
 		 * write anything back to it */
 		*egdsocket = 1;
 		return SUCCESS;
+#endif
 	}
 	if (file == NULL || !RAND_load_file(file, -1)) {
 		if (RAND_status() == 0) {
@@ -4008,7 +4010,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)out_buffer->val) == 1) {
 		out_buffer->val[key_length] = 0;
-		RETURN_STR(out_buffer);
+		RETURN_NEW_STR(out_buffer);
 	} else {
 		zend_string_release(out_buffer);
 		RETURN_FALSE;

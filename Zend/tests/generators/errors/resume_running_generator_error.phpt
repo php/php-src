@@ -5,7 +5,12 @@ It is not possible to resume an already running generator
 
 function gen() {
     $gen = yield;
-    $gen->next();
+    try {
+	    $gen->next();
+	} catch (EngineException $e) {
+		echo "\nException: " . $e->getMessage() . "\n";
+	}
+	$gen->next();
 }
 
 $gen = gen();
@@ -14,4 +19,6 @@ $gen->next();
 
 ?>
 --EXPECTF--
+Exception: Cannot resume an already running generator
+
 Fatal error: Cannot resume an already running generator in %s on line %d

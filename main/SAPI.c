@@ -243,15 +243,15 @@ static void sapi_read_post_data(void)
 	}
 }
 
-SAPI_API int sapi_read_post_block(char *buffer, size_t buflen)
+SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 {
-	int read_bytes;
+	size_t read_bytes;
 
 	if (!sapi_module.read_post) {
-		return -1;
+		return 0;
 	}
 
-	read_bytes = (int)sapi_module.read_post(buffer, buflen);
+	read_bytes = sapi_module.read_post(buffer, buflen);
 
 	if (read_bytes > 0) {
 		/* gogo */
@@ -277,7 +277,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 	SG(request_info).request_body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
 
 	if (sapi_module.read_post) {
-		int read_bytes;
+		size_t read_bytes;
 
 		for (;;) {
 			char buffer[SAPI_POST_BLOCK_SIZE];
@@ -509,7 +509,7 @@ SAPI_API void sapi_deactivate(void)
 		if (!SG(post_read)) {
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
-			int read_bytes;
+			size_t read_bytes;
 
 			do {
 				read_bytes = sapi_read_post_block(dummy, SAPI_POST_BLOCK_SIZE);
@@ -595,7 +595,7 @@ static void sapi_update_response_code(int ncode)
  * since zend_llist_del_element only remove one matched item once,
  * we should remove them by ourself
  */
-static void sapi_remove_header(zend_llist *l, char *name, uint len) {
+static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;
 	zend_llist_element *next;
 	zend_llist_element *current=l->head;
@@ -623,7 +623,7 @@ static void sapi_remove_header(zend_llist *l, char *name, uint len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -666,7 +666,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	char *header_line;
-	uint header_line_len;
+	size_t header_line_len;
 	int http_response_code;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {

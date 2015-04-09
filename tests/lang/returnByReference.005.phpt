@@ -43,7 +43,7 @@ var_dump($a, $b);
 
 ---> 1. Trying to assign by reference the return value of a function that returns by value:
 
-Strict Standards: Only variables should be assigned by reference in %s on line 20
+Notice: Only variables should be assigned by reference in %s on line 20
 int(5)
 int(100)
 

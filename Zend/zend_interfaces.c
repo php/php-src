@@ -78,7 +78,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		if (!fn_proxy || !*fn_proxy) {
 			if ((fcic.function_handler = zend_hash_find_ptr(function_table, Z_STR(fci.function_name))) == NULL) {
 				/* error at c-level */
-				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
+				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;
@@ -107,7 +107,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
 		if (!EG(exception)) {
-			zend_error(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
+			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
 		}
 	}
 	/* copy arguments back, they might be changed by references */
@@ -259,7 +259,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 	zend_user_iterator *iterator;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_error(E_EXCEPTION | E_ERROR, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	iterator = emalloc(sizeof(zend_user_iterator));
@@ -312,7 +313,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 			return SUCCESS;
 		}
 	}
-	zend_error(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
+	zend_error_noreturn(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
 		class_type->name->val,
 		zend_ce_traversable->name->val,
 		zend_ce_iterator->name->val,
@@ -336,7 +337,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			if (class_type->num_interfaces) {
 				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
-						zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
+						zend_error_noreturn(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
 									class_type->name->val,
 									interface->name->val,
 									zend_ce_iterator->name->val);
@@ -368,7 +369,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		} else {
 			/* c-level get_iterator cannot be changed */
 			if (class_type->get_iterator == zend_user_it_get_new_iterator) {
-				zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
+				zend_error_noreturn(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
 							class_type->name->val,
 							interface->name->val,
 							zend_ce_aggregate->name->val);
@@ -447,7 +448,9 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 {
 	zval zdata;
 
-	object_init_ex(object, ce);
+	if (UNEXPECTED(object_init_ex(object, ce) != SUCCESS)) {
+		return FAILURE;
+	}
 
 	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
 

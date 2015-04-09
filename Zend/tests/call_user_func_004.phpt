@@ -13,6 +13,6 @@ call_user_func(array('foo', 'teste'));
 
 ?>
 --EXPECTF--
-Strict Standards: %son-static method foo::teste() should not be called statically in %s on line %d
+Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
 
 Fatal error: Using $this when not in object context in %s on line %d

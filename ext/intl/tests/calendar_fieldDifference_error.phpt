@@ -39,4 +39,4 @@ Warning: intlcal_field_difference() expects exactly 3 parameters, 4 given in %s 
 Warning: intlcal_field_difference(): intlcal_field_difference: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_field_difference() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_field_difference() must be an instance of IntlCalendar, integer given in %s on line %d

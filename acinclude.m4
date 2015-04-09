@@ -3031,3 +3031,21 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   ])
   AC_DEFINE([PHP_HAVE_STDINT_TYPES], [1], [Checked for stdint types])
 ])
+
+dnl PHP_CHECK_BUILTIN_EXPECT
+AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
+  AC_MSG_CHECKING([for __builtin_expect])
+
+  AC_TRY_LINK(, [
+    return __builtin_expect(1,1) ? 1 : 0;
+  ], [
+    have_builtin_expect=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_expect=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+
+])

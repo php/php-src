@@ -153,20 +153,19 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 
 
 /* {{{ mysqlnd_plugin_find */
-PHPAPI void * _mysqlnd_plugin_find(const char * const name)
+PHPAPI void * mysqlnd_plugin_find(const char * const name)
 {
 	void * plugin;
 	if ((plugin = zend_hash_str_find_ptr(&mysqlnd_registered_plugins, name, strlen(name))) != NULL) {
 		return plugin;
 	}
 	return NULL;
-
 }
 /* }}} */
 
 
-/* {{{ _mysqlnd_plugin_apply_with_argument */
-PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument)
+/* {{{ mysqlnd_plugin_apply_with_argument */
+PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument)
 {
 	zval *val;
 	int result;

@@ -128,15 +128,13 @@ const zend_function_entry exif_functions[] = {
 };
 /* }}} */
 
-#define EXIF_VERSION "1.4 $Id$"
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(exif)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "EXIF Support", "enabled");
-	php_info_print_table_row(2, "EXIF Version", EXIF_VERSION);
+	php_info_print_table_row(2, "EXIF Version", PHP_EXIF_VERSION);
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG,TIFF");
 	php_info_print_table_end();
@@ -265,18 +263,12 @@ zend_module_entry exif_module_entry = {
 	PHP_MSHUTDOWN(exif),
 	NULL, NULL,
 	PHP_MINFO(exif),
-#if ZEND_MODULE_API_NO >= 20010901
-	EXIF_VERSION,
-#endif
-#if ZEND_MODULE_API_NO >= 20060613
+	PHP_EXIF_VERSION,
 	PHP_MODULE_GLOBALS(exif),
 	PHP_GINIT(exif),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
-#else
-	STANDARD_MODULE_PROPERTIES
-#endif
 };
 /* }}} */
 

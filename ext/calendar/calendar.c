@@ -161,7 +161,7 @@ zend_module_entry calendar_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(calendar),
-	NO_VERSION_YET,
+	PHP_CALENDAR_VERSION,
 	STANDARD_MODULE_PROPERTIES,
 };
 

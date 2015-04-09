@@ -9,8 +9,8 @@ var_dump(file_get_contents('php://stdin'));
 --STDIN--
 fooBar
 use this to input some thing to the php script
---EXPECT--
-string(54) "fooBar
+--EXPECTF--
+string(5%d) "fooBar
 use this to input some thing to the php script
 "
 string(0) ""

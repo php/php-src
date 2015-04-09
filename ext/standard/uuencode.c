@@ -122,7 +122,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	*p++ = '\n';
 	*p = '\0';
 
-	dest = zend_string_realloc(dest, p - dest->val, 0);
+	dest = zend_string_truncate(dest, p - dest->val, 0);
 	return dest;
 }
 /* }}} */

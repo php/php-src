@@ -35,9 +35,9 @@ echo "Done";
 
 -- Incorrect Method: --
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
+Notice: Only variables should be passed by reference in %s on line %d
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
+Notice: Only variables should be passed by reference in %s on line %d
 string(4) "zero"
 
 -- Correct Method: --

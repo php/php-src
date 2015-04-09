@@ -387,11 +387,11 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
    do_alloca, free_alloca
 */
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, unsigned int start)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 {
 	MYSQL_BIND	*bind;
 	int			i, ofs;
-	int			var_cnt = argc - start;
+	int			var_cnt = argc;
 	zend_long		col_type;
 	zend_ulong		rc;
 
@@ -409,8 +409,8 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 		memset(p, 0, size);
 	}
 
-	for (i=start; i < var_cnt + start ; i++) {
-		ofs = i - start;
+	for (i = 0; i < var_cnt; i++) {
+		ofs = i;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
@@ -555,9 +555,8 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 	} else {
 		stmt->result.var_cnt = var_cnt;
 		stmt->result.vars = safe_emalloc((var_cnt), sizeof(zval), 0);
-		for (i = start; i < var_cnt+start; i++) {
-			ofs = i-start;
-			ZVAL_COPY(&stmt->result.vars[ofs], &args[i]);
+		for (i = 0; i < var_cnt; i++) {
+			ZVAL_COPY(&stmt->result.vars[i], &args[i]);
 		}
 	}
 	efree(bind);
@@ -566,13 +565,13 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 }
 #else
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, unsigned int start)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 {
 	unsigned int i;
 	MYSQLND_RESULT_BIND *params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	if (params) {
-		for (i = 0; i < (argc - start); i++) {
-			ZVAL_COPY_VALUE(&params[i].zv, &args[i + start]);
+		for (i = 0; i < argc; i++) {
+			ZVAL_COPY_VALUE(&params[i].zv, &args[i]);
 		}
 		return mysqlnd_stmt_bind_result(stmt->stmt, params);
 	}
@@ -586,42 +585,23 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
 	zval		*args;
-	int			argc = ZEND_NUM_ARGS();
-	int			start = 1;
+	int			argc;
 	zend_ulong		rc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 
-	if (getThis()) {
-		start = 0;
-	}
-
-	if (zend_parse_method_parameters((getThis()) ? 0:1, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O+", &mysql_stmt, mysqli_stmt_class_entry, &args, &argc) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (argc < (getThis() ? 1 : 2)) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((argc - start) != mysql_stmt_field_count(stmt->stmt)) {
+	if (argc != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
 
-	args = safe_emalloc(argc, sizeof(zval), 0);
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc, start);
-
-	efree(args);
-
+	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc);
 	RETURN_BOOL(!rc);
 }
 /* }}} */
@@ -1988,9 +1968,9 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 
 	newstr = zend_string_alloc(2 * escapestr_len, 0);
 	newstr->len = mysql_real_escape_string(mysql->mysql, newstr->val, escapestr, escapestr_len);
-	newstr = zend_string_realloc(newstr, newstr->len, 0);
+	newstr = zend_string_truncate(newstr, newstr->len, 0);
 
-	RETURN_STR(newstr);
+	RETURN_NEW_STR(newstr);
 }
 /* }}} */
 

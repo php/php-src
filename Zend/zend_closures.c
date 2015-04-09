@@ -32,7 +32,7 @@
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
-	zend_error(E_RECOVERABLE_ERROR, "Closure object cannot have properties")
+	zend_error(E_EXCEPTION | E_ERROR, "Closure object cannot have properties")
 
 typedef struct _zend_closure {
 	zend_object    std;
@@ -53,7 +53,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		efree(arguments);
-		zend_error(E_RECOVERABLE_ERROR, "Cannot get arguments for calling closure");
+		zend_error(E_EXCEPTION | E_ERROR, "Cannot get arguments for calling closure");
 		RETVAL_FALSE;
 	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
 		RETVAL_FALSE;
@@ -168,7 +168,7 @@ ZEND_METHOD(Closure, bind)
 
 static zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_error(E_RECOVERABLE_ERROR, "Instantiation of 'Closure' is not allowed");
+	zend_error(E_EXCEPTION | E_ERROR, "Instantiation of 'Closure' is not allowed");
 	return NULL;
 }
 /* }}} */
@@ -266,13 +266,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
-		zend_execute_data *ex = EG(current_execute_data);
-		while (ex) {
-			if (ex->func == &closure->func) {
-				zend_error(E_ERROR, "Cannot destroy active lambda function");
-			}
-			ex = ex->prev_execute_data;
-		}
 		destroy_op_array(&closure->func.op_array);
 	}
 
@@ -418,7 +411,7 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
    Private constructor preventing instantiation */
 ZEND_METHOD(Closure, __construct)
 {
-	zend_error(E_RECOVERABLE_ERROR, "Instantiation of 'Closure' is not allowed");
+	zend_error(E_EXCEPTION | E_ERROR, "Instantiation of 'Closure' is not allowed");
 }
 /* }}} */
 
@@ -484,7 +477,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure = (zend_closure *)Z_OBJ_P(res);
 
 	closure->func = *func;
-	closure->func.common.prototype = NULL;
+	closure->func.common.prototype = (zend_function*)closure;
 	closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {

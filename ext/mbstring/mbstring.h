@@ -51,6 +51,9 @@
 #define HAVE_MBSTRING 1
 #endif
 
+#include "php_version.h"
+#define PHP_MBSTRING_VERSION PHP_VERSION
+
 #ifdef PHP_WIN32
 #	undef MBSTRING_API
 #	ifdef MBSTRING_EXPORTS

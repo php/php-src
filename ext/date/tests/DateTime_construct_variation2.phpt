@@ -102,7 +102,7 @@ foreach($inputs as $variation =>$timezone) {
       
       try {
 			var_dump( new DateTime($time, $timezone) );
-      } catch(Exception $e) {
+      } catch (BaseException $e) {
 			$msg = $e->getMessage();
 			echo "FAILED: " . $msg . "\n";
       }	

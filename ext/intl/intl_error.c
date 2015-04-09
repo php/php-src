@@ -29,7 +29,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
-static zend_class_entry *IntlException_ce_ptr;
+zend_class_entry *IntlException_ce_ptr;
 
 /* {{{ intl_error* intl_g_error_get()
  * Return global error structure.
@@ -101,7 +101,7 @@ void intl_error_reset( intl_error* err )
 /* {{{ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
  * Set last error message to msg copying it if needed.
  */
-void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
+void intl_error_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
 {
 	if( !msg )
 		return;
@@ -122,7 +122,7 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
 	err->free_custom_error_message = copyMsg;
 
 	/* Set user's error text message */
-	err->custom_error_message = copyMsg ? estrdup( msg ) : msg;
+	err->custom_error_message = copyMsg ? estrdup( msg ) : (char *) msg;
 }
 /* }}} */
 
@@ -180,7 +180,7 @@ UErrorCode intl_error_get_code( intl_error* err )
 /* {{{ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
  * Set error code and message.
  */
-void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
+void intl_error_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
 {
 	intl_error_set_code( err, code );
 	intl_error_set_custom_msg( err, msg, copyMsg );
@@ -190,7 +190,7 @@ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
 /* {{{ void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
  * Set error code and message.
  */
-void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
+void intl_errors_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
 {
 	intl_errors_set_code( err, code );
 	intl_errors_set_custom_msg( err, msg, copyMsg );
@@ -210,7 +210,7 @@ void intl_errors_reset( intl_error* err )
 
 /* {{{ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
  */
-void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
+void intl_errors_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
 {
 	if(err) {
 		intl_error_set_custom_msg( err, msg, copyMsg );

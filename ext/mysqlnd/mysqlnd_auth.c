@@ -394,7 +394,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 		MYSQLND_PLUGIN_API_VERSION,
 		"auth_plugin_mysql_native_password",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{
@@ -443,7 +443,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 		MYSQLND_PLUGIN_API_VERSION,
 		"auth_plugin_mysql_clear_password",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
@@ -555,7 +555,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
 				zend_string_release(key_str);
 			}
-			php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
+			php_stream_close(stream);
 		}
 	}
 	DBG_RETURN(ret);
@@ -627,7 +627,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 		MYSQLND_PLUGIN_API_VERSION,
 		"auth_plugin_sha256_password",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>",
 		{

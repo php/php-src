@@ -42,9 +42,7 @@ var_dump($b);
 
 ?>
 --EXPECTF--
-Strict Standards: BaseWithPropA and AHelloProperty define the same property ($hello) in the composition of SubclassA. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %s on line %d
 
-Strict Standards: BaseWithTPropB and AHelloProperty define the same property ($hello) in the composition of SubclassB. This might be incompatible, to improve maintainability consider using accessor methods in traits instead. Class was composed in %s on line %d
 object(SubclassClassicInheritance)#1 (1) {
   ["hello"]=>
   int(0)

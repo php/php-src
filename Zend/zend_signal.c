@@ -214,7 +214,7 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		sa.sa_mask      = global_sigmask;
 
 		if (sigaction(signo, &sa, NULL) < 0) {
-			zend_error(E_ERROR, "Error installing signal handler for %d", signo);
+			zend_error_noreturn(E_ERROR, "Error installing signal handler for %d", signo);
 		}
 
 		/* unsure this signal is not blocked */
@@ -266,7 +266,7 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
 		sa.sa_mask      = global_sigmask;
 
 		if (sigaction(signo, &sa, NULL) < 0) {
-			zend_error(E_ERROR, "Error installing signal handler for %d", signo);
+			zend_error_noreturn(E_ERROR, "Error installing signal handler for %d", signo);
 		}
 
 		return SUCCESS;

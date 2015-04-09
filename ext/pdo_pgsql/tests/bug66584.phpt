@@ -3,6 +3,7 @@ PDO PgSQL Bug #66584 (Segmentation fault on statement deallocation)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
+if (!extension_loaded('json')) die('skip json ext not loaded');
 require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();

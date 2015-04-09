@@ -248,15 +248,15 @@ static void accel_interned_strings_restore_state(void)
 		ZCSG(interned_strings).nNumUsed--;
 		ZCSG(interned_strings).nNumOfElements--;
 
-		nIndex = p->h & ZCSG(interned_strings).nTableMask;
-		if (ZCSG(interned_strings).arHash[nIndex] == idx) {
-			ZCSG(interned_strings).arHash[nIndex] = Z_NEXT(p->val);
+		nIndex = p->h | ZCSG(interned_strings).nTableMask;
+		if (HT_HASH(&ZCSG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {
+			HT_HASH(&ZCSG(interned_strings), nIndex) = Z_NEXT(p->val);
 		} else {
-			uint prev = ZCSG(interned_strings).arHash[nIndex];
-			while (Z_NEXT(ZCSG(interned_strings).arData[prev].val) != idx) {
-				prev = Z_NEXT(ZCSG(interned_strings).arData[prev].val);
+			uint32_t prev = HT_HASH(&ZCSG(interned_strings), nIndex);
+			while (Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) != idx) {
+				prev = Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val);
  			}
-			Z_NEXT(ZCSG(interned_strings).arData[prev].val) = Z_NEXT(p->val);
+			Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) = Z_NEXT(p->val);
  		}
 	}
 }
@@ -267,14 +267,14 @@ static void accel_interned_strings_save_state(void)
 }
 #endif
 
+#ifndef ZTS
 static zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
-#ifndef ZTS
 	zend_ulong h;
 	uint nIndex;
 	uint idx;
-	Bucket *p;
+	Bucket *arData, *p;
 
 	if (IS_ACCEL_INTERNED(str)) {
 		/* this is already an interned string */
@@ -282,12 +282,13 @@ static zend_string *accel_find_interned_string(zend_string *str)
 	}
 
 	h = zend_string_hash_val(str);
-	nIndex = h & ZCSG(interned_strings).nTableMask;
+	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
-	idx = ZCSG(interned_strings).arHash[nIndex];
-	while (idx != INVALID_IDX) {
-		p = ZCSG(interned_strings).arData + idx;
+	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
+	arData = ZCSG(interned_strings).arData;
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET_EX(arData, idx);
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
 				return p->key;
@@ -295,10 +296,10 @@ static zend_string *accel_find_interned_string(zend_string *str)
 		}
 		idx = Z_NEXT(p->val);
 	}
-#endif
 
 	return NULL;
 }
+#endif
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
@@ -315,12 +316,12 @@ zend_string *accel_new_interned_string(zend_string *str)
 	}
 
 	h = zend_string_hash_val(str);
-	nIndex = h & ZCSG(interned_strings).nTableMask;
+	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
-	idx = ZCSG(interned_strings).arHash[nIndex];
-	while (idx != INVALID_IDX) {
-		p = ZCSG(interned_strings).arData + idx;
+	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET(&ZCSG(interned_strings), idx);
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
 				zend_string_release(str);
@@ -356,9 +357,9 @@ zend_string *accel_new_interned_string(zend_string *str)
 	p->key->h = str->h;
 	p->key->len = str->len;
 	memcpy(p->key->val, str->val, str->len);
-	ZVAL_STR(&p->val, p->key);
-	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
-	ZCSG(interned_strings).arHash[nIndex] = idx;
+	ZVAL_INTERNED_STR(&p->val, p->key);
+	Z_NEXT(p->val) = HT_HASH(&ZCSG(interned_strings), nIndex);
+	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
 	zend_string_release(str);
 	return p->key;
 #else
@@ -1349,21 +1350,6 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		return NULL;
 	}
 
-	if (file_handle->type == ZEND_HANDLE_STREAM &&
-	    (!strstr(file_handle->filename, ".phar") ||
-	     strstr(file_handle->filename, "://"))) {
-		char *buf;
-		size_t size;
-
-		/* Stream callbacks needs to be called in context of original
-		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
-		 */
-		if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
-			*op_array_p = NULL;
-			return NULL;
-		}
-	}
-
 	if (ZCG(accel_directives).validate_timestamps ||
 	    ZCG(accel_directives).file_update_protection ||
 	    ZCG(accel_directives).max_file_size > 0) {
@@ -1900,96 +1886,88 @@ static void accel_activate(void)
  * allocated block separately, but we like to call all the destructors and
  * callbacks in exactly the same order.
  */
-static void accel_fast_zval_dtor(zval *zvalue);
-
-static void accel_fast_hash_destroy(HashTable *ht)
-{
-	uint idx;
-	Bucket *p;
-
-	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		accel_fast_zval_dtor(&p->val);
-	}
-}
+static void accel_fast_hash_destroy(HashTable *ht);
 
 static void accel_fast_zval_dtor(zval *zvalue)
 {
-	if (Z_REFCOUNTED_P(zvalue) && Z_DELREF_P(zvalue) == 0) {
-		switch (Z_TYPE_P(zvalue)) {
-			case IS_ARRAY: {
-									GC_REMOVE_FROM_BUFFER(Z_ARR_P(zvalue));
-					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
-						/* break possible cycles */
-						ZVAL_NULL(zvalue);
-						accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
+tail_call:
+	switch (Z_TYPE_P(zvalue)) {
+		case IS_ARRAY:
+			GC_REMOVE_FROM_BUFFER(Z_ARR_P(zvalue));
+			if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
+				/* break possible cycles */
+				ZVAL_NULL(zvalue);
+				accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
+			}
+			break;
+		case IS_OBJECT:
+			OBJ_RELEASE(Z_OBJ_P(zvalue));
+			break;
+		case IS_RESOURCE:
+			zend_list_delete(Z_RES_P(zvalue));
+			break;
+		case IS_REFERENCE: {
+				zend_reference *ref = Z_REF_P(zvalue);
+
+				if (--GC_REFCOUNT(ref) == 0) {
+					if (Z_REFCOUNTED(ref->val) && Z_DELREF(ref->val) == 0) {
+						zvalue = &ref->val;
+						goto tail_call;
 					}
 				}
-				break;
-			case IS_OBJECT:
-				{
+			}
+			break;
+	}
+}
 
-					OBJ_RELEASE(Z_OBJ_P(zvalue));
-				}
-				break;
-			case IS_RESOURCE:
-				{
+static void accel_fast_hash_destroy(HashTable *ht)
+{
+	Bucket *p = ht->arData;
+	Bucket *end = p + ht->nNumUsed;
 
-					/* destroy resource */
-					zend_list_delete(Z_RES_P(zvalue));
-				}
-				break;
-			case IS_LONG:
-			case IS_DOUBLE:
-			case IS_FALSE:
-			case IS_TRUE:
-			case IS_NULL:
-			case IS_STRING:
-			case IS_CONSTANT:
-			default:
-				return;
-				break;
+	while (p != end) {
+		if (Z_REFCOUNTED(p->val) && Z_DELREF(p->val) == 0) {
+			accel_fast_zval_dtor(&p->val);
 		}
+		p++;
 	}
 }
 
 static inline void zend_accel_fast_del_bucket(HashTable *ht, uint32_t idx, Bucket *p)
 {
-	uint32_t nIndex = p->h & ht->nTableMask;
-	uint32_t i = ht->arHash[nIndex];
+	uint32_t nIndex = p->h | ht->nTableMask;
+	uint32_t i = HT_HASH(ht, nIndex);
 
 	ht->nNumUsed--;
 	ht->nNumOfElements--;
 	if (idx != i) {
-		Bucket *prev = ht->arData + i;
+		Bucket *prev = HT_HASH_TO_BUCKET(ht, i);
 		while (Z_NEXT(prev->val) != idx) {
 			i = Z_NEXT(prev->val);
-			prev = ht->arData + i;
+			prev = HT_HASH_TO_BUCKET(ht, i);
 		}
 		Z_NEXT(prev->val) = Z_NEXT(p->val);
  	} else {
-		ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
+		HT_HASH(ht, p->h | ht->nTableMask) = Z_NEXT(p->val);
 	}
 }
 
 static void zend_accel_fast_shutdown(void)
 {
 	if (EG(full_tables_cleanup)) {
-		EG(symbol_table).pDestructor = accel_fast_zval_dtor;
-	} else {
-		dtor_func_t old_destructor;
+		return;
+	}
 
-		if (EG(objects_store).top > 1 || zend_hash_num_elements(&EG(regular_list)) > 0) {
-			/* We don't have to destroy all zvals if they cannot call any destructors */
-
-		    old_destructor = EG(symbol_table).pDestructor;
-			EG(symbol_table).pDestructor = accel_fast_zval_dtor;
-			zend_try {
-				zend_hash_graceful_reverse_destroy(&EG(symbol_table));
-			} zend_end_try();
-			EG(symbol_table).pDestructor = old_destructor;
-		}
+	if (EG(objects_store).top > 1 || zend_hash_num_elements(&EG(regular_list)) > 0) {
+		/* We don't have to destroy all zvals if they cannot call any destructors */
+		zend_try {
+			ZEND_HASH_REVERSE_FOREACH(&EG(symbol_table), 0) {
+				if (Z_REFCOUNTED(_p->val) && Z_DELREF(_p->val) == 0) {
+					accel_fast_zval_dtor(&_p->val);
+				}
+				zend_accel_fast_del_bucket(&EG(symbol_table), HT_IDX_TO_HASH(_idx-1), _p);
+			} ZEND_HASH_FOREACH_END();
+		} zend_end_try();
 		zend_hash_init(&EG(symbol_table), 8, NULL, NULL, 0);
 
 		ZEND_HASH_REVERSE_FOREACH(EG(function_table), 0) {
@@ -2005,7 +1983,7 @@ static void zend_accel_fast_shutdown(void)
 						}
 					}
 				}
-				zend_accel_fast_del_bucket(EG(function_table), _idx-1, _p);
+				zend_accel_fast_del_bucket(EG(function_table), HT_IDX_TO_HASH(_idx-1), _p);
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -2035,25 +2013,53 @@ static void zend_accel_fast_shutdown(void)
 					int i;
 
 					for (i = 0; i < ce->default_static_members_count; i++) {
-						accel_fast_zval_dtor(&ce->static_members_table[i]);
+						zval *zv = &ce->static_members_table[i];
 						ZVAL_UNDEF(&ce->static_members_table[i]);
+						if (Z_REFCOUNTED_P(zv) && Z_DELREF_P(zv) == 0) {
+							accel_fast_zval_dtor(zv);
+						}
 					}
 					ce->static_members_table = NULL;
 				}
-				zend_accel_fast_del_bucket(EG(class_table), _idx-1, _p);
+				zend_accel_fast_del_bucket(EG(class_table), HT_IDX_TO_HASH(_idx-1), _p);
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_REVERSE_FOREACH(EG(zend_constants), 0) {
-			zend_constant *c = Z_PTR(_p->val);
+	} else {
 
-			if (c->flags & CONST_PERSISTENT) {
+		zend_hash_init(&EG(symbol_table), 8, NULL, NULL, 0);
+
+		ZEND_HASH_REVERSE_FOREACH(EG(function_table), 0) {
+			zend_function *func = Z_PTR(_p->val);
+
+			if (func->type == ZEND_INTERNAL_FUNCTION) {
 				break;
 			} else {
-				zend_accel_fast_del_bucket(EG(zend_constants), _idx-1, _p);
+				zend_accel_fast_del_bucket(EG(function_table), HT_IDX_TO_HASH(_idx-1), _p);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_REVERSE_FOREACH(EG(class_table), 0) {
+			zend_class_entry *ce = Z_PTR(_p->val);
+
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			} else {
+				zend_accel_fast_del_bucket(EG(class_table), HT_IDX_TO_HASH(_idx-1), _p);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+
+	ZEND_HASH_REVERSE_FOREACH(EG(zend_constants), 0) {
+		zend_constant *c = Z_PTR(_p->val);
+
+		if (c->flags & CONST_PERSISTENT) {
+			break;
+		} else {
+			zend_accel_fast_del_bucket(EG(zend_constants), HT_IDX_TO_HASH(_idx-1), _p);
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	CG(unclean_shutdown) = 1;
 }
 #endif
@@ -2165,15 +2171,17 @@ static int zend_accel_init_shm(void)
 # ifndef ZTS
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / (sizeof(Bucket) + sizeof(Bucket*) + 8 /* average string length */), NULL, NULL, 1);
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
-		ZCSG(interned_strings).arData = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket));
-		ZCSG(interned_strings).arHash = (uint32_t*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
+		void *data;
+
+		ZCSG(interned_strings).nTableMask = -ZCSG(interned_strings).nTableSize;
+		data = zend_shared_alloc(HT_SIZE(&ZCSG(interned_strings)));
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
-		if (!ZCSG(interned_strings).arData || !ZCSG(interned_strings_start)) {
+		if (!data || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
 			return FAILURE;
 		}
-		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(uint32_t));
+		HT_SET_DATA_ADDR(&ZCSG(interned_strings), data);
+		HT_HASH_RESET(&ZCSG(interned_strings));
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 

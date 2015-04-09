@@ -460,7 +460,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 		}
 #endif
 
-		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE);
+		php_stream_close(self->stream);
 		self->stream = NULL;
 	}
 	/* no DBG_RETURN please */
@@ -723,8 +723,8 @@ mysqlnd_debug_init(const char * skip_functions[])
 /* }}} */
 
 
-/* {{{ _mysqlnd_debug */
-PHPAPI void _mysqlnd_debug(const char * mode)
+/* {{{ mysqlnd_debug */
+PHPAPI void mysqlnd_debug(const char * mode)
 {
 #if PHP_DEBUG
 	MYSQLND_DEBUG * dbg = MYSQLND_G(dbg);
@@ -759,7 +759,7 @@ static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 		MYSQLND_PLUGIN_API_VERSION,
 		"debug_trace",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{

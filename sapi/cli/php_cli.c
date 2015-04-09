@@ -77,7 +77,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 #include "zend_exceptions.h"
 
 #include "php_getopt.h"
@@ -109,7 +108,6 @@ ZEND_TSRMLS_CACHE_DEFINE();
 
 #define PHP_MODE_STANDARD      1
 #define PHP_MODE_HIGHLIGHT     2
-#define PHP_MODE_INDENT        3
 #define PHP_MODE_LINT          4
 #define PHP_MODE_STRIP         5
 #define PHP_MODE_CLI_DIRECT    6
@@ -770,16 +768,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				behavior=PHP_MODE_LINT;
 				break;
 
-#if 0 /* not yet operational, see also below ... */
-			case '': /* generate indented source mode*/
-				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
-					param_error = "Source indenting only works for files.\n";
-					break;
-				}
-				behavior=PHP_MODE_INDENT;
-				break;
-#endif
-
 			case 'q': /* do not generate HTTP headers */
 				/* This is default so NOP */
 				break;
@@ -1005,15 +993,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 			}
 			break;
-#if 0
-			/* Zeev might want to do something with this one day */
-		case PHP_MODE_INDENT:
-			open_file_for_scanning(&file_handle);
-			zend_indent();
-			zend_file_handle_dtor(file_handle.handle);
-			goto out;
-			break;
-#endif
 		case PHP_MODE_CLI_DIRECT:
 			cli_register_file_handles();
 			if (zend_eval_string_ex(exec_direct, NULL, "Command line code", 1) == FAILURE) {

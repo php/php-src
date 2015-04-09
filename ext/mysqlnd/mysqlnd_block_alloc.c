@@ -44,9 +44,9 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk)
 		}
 		pool->refcount--;
 	} else {
-		mnd_free(chunk->ptr);
+		mnd_efree(chunk->ptr);
 	}
-	mnd_free(chunk);
+	mnd_efree(chunk);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -67,7 +67,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			*/
 			if ((chunk->size + pool->free_size) < size) {
 				zend_uchar *new_ptr;
-				new_ptr = mnd_malloc(size);
+				new_ptr = mnd_emalloc(size);
 				if (!new_ptr) {
 					DBG_RETURN(FAIL);
 				}
@@ -87,7 +87,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 				; /* nop */
 			} else {
 				zend_uchar *new_ptr;
-				new_ptr = mnd_malloc(size);
+				new_ptr = mnd_emalloc(size);
 				if (!new_ptr) {
 					DBG_RETURN(FAIL);
 				}
@@ -99,7 +99,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 			}
 		}
 	} else {
-		zend_uchar *new_ptr = mnd_realloc(chunk->ptr, size);
+		zend_uchar *new_ptr = mnd_erealloc(chunk->ptr, size);
 		if (!new_ptr) {
 			DBG_RETURN(FAIL);
 		}
@@ -117,7 +117,7 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");
 
-	chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
+	chunk = mnd_emalloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
 	if (chunk) {
 		chunk->free_chunk = mysqlnd_mempool_free_chunk;
 		chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
@@ -130,7 +130,7 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 		chunk->pool = pool;
 		if (size > pool->free_size) {
 			chunk->from_pool = FALSE;
-			chunk->ptr = mnd_malloc(size);
+			chunk->ptr = mnd_emalloc(size);
 			if (!chunk->ptr) {
 				chunk->free_chunk(chunk);
 				chunk = NULL;
@@ -153,14 +153,14 @@ PHPAPI MYSQLND_MEMORY_POOL *
 mysqlnd_mempool_create(size_t arena_size)
 {
 	/* We calloc, because we free(). We don't mnd_calloc()  for a reason. */
-	MYSQLND_MEMORY_POOL * ret = mnd_calloc(1, sizeof(MYSQLND_MEMORY_POOL));
+	MYSQLND_MEMORY_POOL * ret = mnd_ecalloc(1, sizeof(MYSQLND_MEMORY_POOL));
 	DBG_ENTER("mysqlnd_mempool_create");
 	if (ret) {
 		ret->get_chunk = mysqlnd_mempool_get_chunk;
 		ret->free_size = ret->arena_size = arena_size ? arena_size : 0;
 		ret->refcount = 0;
 		/* OOM ? */
-		ret->arena = mnd_malloc(ret->arena_size);
+		ret->arena = mnd_emalloc(ret->arena_size);
 		if (!ret->arena) {
 			mysqlnd_mempool_destroy(ret);
 			ret = NULL;
@@ -177,8 +177,8 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 {
 	DBG_ENTER("mysqlnd_mempool_destroy");
 	/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
-	mnd_free(pool->arena);
-	mnd_free(pool);
+	mnd_efree(pool->arena);
+	mnd_efree(pool);
 	DBG_VOID_RETURN;
 }
 /* }}} */

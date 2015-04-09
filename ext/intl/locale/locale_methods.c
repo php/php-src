@@ -898,7 +898,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 }
 /* }}} */
 
-#define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_STR((str)->s)
+#define RETURN_SMART_STR(str) smart_str_0((str)); RETURN_NEW_STR((str)->s)
 /* {{{ proto static string Locale::composeLocale($array)
 * Creates a locale by combining the parts of locale-ID passed
 * }}} */
@@ -1203,14 +1203,12 @@ static int strToMatch(const char* str ,char *retstr)
 	char* 	anchor 	= NULL;
 	const char* 	anchor1 = NULL;
 	int 	result 	= 0;
-	int 	len 	= 0;
 
     if( (!str) || str[0] == '\0'){
         return result;
     } else {
 	anchor = retstr;
 	anchor1 = str;
-        len = strlen(str);
         while( (*str)!='\0' ){
 		if( *str == '-' ){
 			*retstr =  '_';

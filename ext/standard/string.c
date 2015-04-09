@@ -1004,7 +1004,7 @@ PHP_FUNCTION(wordwrap)
 		for (current = 0; current < text->len; current++) {
 			if (chk <= 0) {
 				alloced += (size_t) (((text->len - current + 1)/linelength + 1) * breakchar_len) + 1;
-				newtext = zend_string_realloc(newtext, alloced, 0);
+				newtext = zend_string_extend(newtext, alloced, 0);
 				chk = (size_t) ((text->len - current)/linelength) + 1;
 			}
 			/* when we hit an existing break, copy to new buffer, and
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(wordwrap)
 
 		newtext->val[newtextlen] = '\0';
 		/* free unused memory */
-		newtext = zend_string_realloc(newtext, newtextlen, 0);
+		newtext = zend_string_truncate(newtext, newtextlen, 0);
 
 		RETURN_NEW_STR(newtext);
 	}
@@ -1247,7 +1247,7 @@ again:
 	smart_str_0(&implstr);
 
 	if (implstr.s) {
-		RETURN_STR(implstr.s);
+		RETURN_NEW_STR(implstr.s);
 	} else {
 		smart_str_free(&implstr);
 		RETURN_EMPTY_STRING();
@@ -2447,12 +2447,12 @@ PHP_FUNCTION(substr_replace)
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
 			php_error_docref(NULL, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
-			RETURN_STR(zend_string_copy(Z_STR_P(str)));
+			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
 				php_error_docref(NULL, E_WARNING, "'from' and 'len' should have the same number of elements");
-				RETURN_STR(zend_string_copy(Z_STR_P(str)));
+				RETURN_STR_COPY(Z_STR_P(str));
 			}
 		}
 	}
@@ -2521,7 +2521,7 @@ PHP_FUNCTION(substr_replace)
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
-			RETURN_STR(zend_string_copy(Z_STR_P(str)));
+			RETURN_STR_COPY(Z_STR_P(str));
 		}
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
@@ -2743,7 +2743,7 @@ PHP_FUNCTION(quotemeta)
 
 	*q = '\0';
 
-	RETURN_NEW_STR(zend_string_realloc(str, q - str->val, 0));
+	RETURN_NEW_STR(zend_string_truncate(str, q - str->val, 0));
 }
 /* }}} */
 
@@ -3148,10 +3148,10 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
 		smart_str_0(&result);
-		RETVAL_STR(result.s);
+		RETVAL_NEW_STR(result.s);
 	} else {
 		smart_str_free(&result);
-		RETVAL_STR(zend_string_copy(input));
+		RETVAL_STR_COPY(input);
 	}
 
 	if (pats == &str_hash) {
@@ -3446,7 +3446,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, 
 			}
 
 			*e = '\0';
-			new_str = zend_string_realloc(new_str, e - s, 0);
+			new_str = zend_string_truncate(new_str, e - s, 0);
 			return new_str;
 		}
 	} else if (needle_len > length || memcmp(haystack, needle, length)) {
@@ -3497,7 +3497,7 @@ PHP_FUNCTION(strtr)
 		HashTable *pats = HASH_OF(from);
 
 		if (zend_hash_num_elements(pats) < 1) {
-			RETURN_STR(zend_string_copy(str));
+			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
 			zend_string *str_key, *replace;
@@ -3512,7 +3512,7 @@ PHP_FUNCTION(strtr)
 				}		
 				replace = zval_get_string(entry);
 				if (str_key->len < 1) {
-					RETVAL_STR(zend_string_copy(str));
+					RETVAL_STR_COPY(str);
 				} else if (str_key->len == 1) {
 					RETVAL_STR(php_char_to_str_ex(str,
 								str_key->val[0],
@@ -3883,7 +3883,7 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 	*target = 0;
 	newlen = target - new_str->val;
 	if (newlen < str->len * 4) {
-		new_str = zend_string_realloc(new_str, newlen, 0);
+		new_str = zend_string_truncate(new_str, newlen, 0);
 	}
 	if (should_free) {
 		zend_string_release(str);
@@ -3959,7 +3959,7 @@ do_escape:
 	}
 
 	if (new_str->len - (target - new_str->val) > 16) {
-		new_str = zend_string_realloc(new_str, target - new_str->val, 0);
+		new_str = zend_string_truncate(new_str, target - new_str->val, 0);
 	} else {
 		new_str->len = target - new_str->val;
 	}
@@ -4590,7 +4590,7 @@ PHP_FUNCTION(setlocale)
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
 						zend_string_release(loc);
-						RETURN_STR(zend_string_copy(BG(locale_string)));
+						RETURN_STR_COPY(BG(locale_string));
 					}
 				} else if (len == loc->len && !memcmp(loc->val, retval, len)) {
 					RETURN_STR(loc);
@@ -5653,7 +5653,7 @@ PHP_FUNCTION(money_format)
 	str->len = (size_t)res_len;
 	str->val[str->len] = '\0';
 
-	RETURN_NEW_STR(zend_string_realloc(str, str->len, 0));
+	RETURN_NEW_STR(zend_string_truncate(str, str->len, 0));
 }
 /* }}} */
 #endif

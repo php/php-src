@@ -3,15 +3,10 @@ ReflectionFunction::isDeprecated
 --CREDITS--
 Stefan Koopmanschap <stefan@phpgg.nl>
 TestFest PHP|Tek
---SKIPIF--
-<?php
-
-if (!extension_loaded('mcrypt')) echo "skip no deprecated functions available";
-
-?>
 --FILE-- 
 <?php
-$rc = new ReflectionFunction('mcrypt_ecb');
+// We currently don't have any deprecated functions :/
+$rc = new ReflectionFunction('var_dump');
 var_dump($rc->isDeprecated());
 --EXPECTF--
-bool(true)
+bool(false)

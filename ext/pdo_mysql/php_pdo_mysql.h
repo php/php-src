@@ -24,6 +24,9 @@
 extern zend_module_entry pdo_mysql_module_entry;
 #define phpext_pdo_mysql_ptr &pdo_mysql_module_entry
 
+#include "php_version.h"
+#define PHP_PDO_MYSQL_VERSION PHP_VERSION
+
 #ifdef PHP_WIN32
 #define PHP_PDO_MYSQL_API __declspec(dllexport)
 #else

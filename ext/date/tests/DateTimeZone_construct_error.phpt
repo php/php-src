@@ -15,7 +15,11 @@ echo "*** Testing DateTimeZone() : error conditions ***\n";
 echo "\n-- Testing new DateTimeZone() with more than expected no. of arguments --\n";
 $timezone = "GMT";
 $extra_arg = 99;
-var_dump( new DateTimeZone($timezone, $extra_arg) );
+try {
+    new DateTimeZone($timezone, $extra_arg);
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -23,10 +27,5 @@ var_dump( new DateTimeZone($timezone, $extra_arg) );
 *** Testing DateTimeZone() : error conditions ***
 
 -- Testing new DateTimeZone() with more than expected no. of arguments --
-
-Fatal error: Uncaught exception 'Exception' with message 'DateTimeZone::__construct() expects exactly 1 parameter, 2 given' in %s:%d
-Stack trace:
-#0 %s(%d): DateTimeZone->__construct('GMT', 99)
-#1 {main}
-  thrown in %s on line %d
-  
+DateTimeZone::__construct() expects exactly 1 parameter, 2 given
+===DONE===

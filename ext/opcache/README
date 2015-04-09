@@ -145,7 +145,7 @@ opcache.optimization_level (default "0xffffffff")
 	passes
 
 opcache.inherited_hack (default "1")
-	Enable this hack as a workaround for "can't redeclare class" errors.
+	Enable this hack as a workaround for "Cannot redeclare class" errors.
 	The OPcache stores the places where DECLARE_CLASS opcodes use
 	inheritance (These are the only opcodes that can be executed by PHP,
 	but which may not be executed because the parent class is missing due to

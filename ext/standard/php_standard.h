@@ -60,6 +60,9 @@
 #include "php_type.h"
 #include "php_password.h"
 
+#include "php_version.h"
+#define PHP_STANDARD_VERSION PHP_VERSION
+
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);
 PHP_MSHUTDOWN_FUNCTION(standard_filters);

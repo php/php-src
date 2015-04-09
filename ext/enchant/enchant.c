@@ -151,9 +151,7 @@ zend_function_entry enchant_functions[] = {
 /* {{{ enchant_module_entry
  */
 zend_module_entry enchant_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"enchant",
 	enchant_functions,
 	PHP_MINIT(enchant),
@@ -161,9 +159,7 @@ zend_module_entry enchant_module_entry = {
 	NULL,	/* Replace with NULL if there's nothing to do at request start */
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(enchant),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_ENCHANT_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

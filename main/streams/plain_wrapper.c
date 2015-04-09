@@ -336,7 +336,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 #if HAVE_FLUSHIO
 		if (!data->is_pipe && data->last_op == 'r') {
-			fseek(data->file, 0, SEEK_CUR);
+			zend_fseek(data->file, 0, SEEK_CUR);
 		}
 		data->last_op = 'w';
 #endif
@@ -1040,10 +1040,8 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *u
 	}
 
 #ifdef PHP_WIN32
-	if (EG(windows_version_info).dwMajorVersion >= 5) {
-		if (flags & PHP_STREAM_URL_STAT_LINK) {
-			return VCWD_LSTAT(url, &ssb->sb);
-		}
+	if (flags & PHP_STREAM_URL_STAT_LINK) {
+		return VCWD_LSTAT(url, &ssb->sb);
 	}
 #else
 # ifdef HAVE_SYMLINK
@@ -1474,7 +1472,7 @@ not_relative_path:
 		const char *exec_fname = exec_filename->val;
 		size_t exec_fname_length = exec_filename->len;
 
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length<=0) {
 			/* no path */
 			pathbuf = estrdup(path);

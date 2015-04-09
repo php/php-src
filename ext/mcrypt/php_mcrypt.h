@@ -30,6 +30,9 @@
 extern zend_module_entry mcrypt_module_entry;
 #define mcrypt_module_ptr &mcrypt_module_entry
 
+#include "php_version.h"
+#define PHP_MCRYPT_VERSION PHP_VERSION
+
 /* Functions for both old and new API */
 PHP_FUNCTION(mcrypt_ecb);
 PHP_FUNCTION(mcrypt_cbc);

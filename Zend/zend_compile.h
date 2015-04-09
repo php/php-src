@@ -129,16 +129,10 @@ void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
-
-typedef int (*user_opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
-typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
-
-extern ZEND_API opcode_handler_t *zend_opcode_handlers;
+typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
 struct _zend_op {
-	opcode_handler_t handler;
+	const void *handler;
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
@@ -257,6 +251,9 @@ typedef struct _zend_try_catch_element {
 
 /* Function has a return type hint (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
+
+/* op_array uses strict mode types */
+#define ZEND_ACC_STRICT_TYPES			0x80000000
 
 char *zend_visibility_string(uint32_t fn_flags);
 
@@ -465,6 +462,20 @@ struct _zend_execute_data {
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
+#define ZEND_CALL_USES_STRICT_TYPES(call) \
+	(((call)->func->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0)
+
+#define EX_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(execute_data)
+
+#define ZEND_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data)->prev_execute_data && \
+	 EG(current_execute_data)->prev_execute_data->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_RET_USES_STRICT_TYPES() \
+	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
+
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
@@ -637,9 +648,9 @@ const char *zend_get_zendtext(void);
 int zend_get_zendleng(void);
 #endif
 
+typedef int (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
+typedef int (ZEND_FASTCALL *binary_op_type)(zval *, zval *, zval *);
 
-typedef int (*unary_op_type)(zval *, zval *);
-typedef int (*binary_op_type)(zval *, zval *, zval *);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
@@ -738,6 +749,8 @@ int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
 
+ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
+
 /* BEGIN: OPCODES */
 
 #include "zend_vm_opcodes.h"
@@ -757,6 +770,7 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
+#define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 
 /* variable parsing type (compile-time) */
 #define ZEND_PARSED_MEMBER				(1<<0)

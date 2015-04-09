@@ -264,7 +264,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 			RETURN_EMPTY_STRING();
 		}
 		smart_str_0(&ch->handlers->write->buf);
-		RETURN_STR(zend_string_copy(ch->handlers->write->buf.s));
+		RETURN_STR_COPY(ch->handlers->write->buf.s);
 	}
 
 	RETURN_NULL();

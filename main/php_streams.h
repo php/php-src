@@ -284,6 +284,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
 #define PHP_STREAM_FREE_IGNORE_ENCLOSING	32 /* don't close the enclosing stream instead */
+#define PHP_STREAM_FREE_KEEP_RSRC			64 /* keep associated zend_resource */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 #define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
@@ -503,7 +504,6 @@ END_EXTERN_C()
 #define USE_PATH                        0x00000001
 #define IGNORE_URL                      0x00000002
 #define REPORT_ERRORS                   0x00000008
-#define ENFORCE_SAFE_MODE               0 /* for BC only */
 
 /* If you don't need to write to the stream, but really need to
  * be able to seek, use this flag in your options. */

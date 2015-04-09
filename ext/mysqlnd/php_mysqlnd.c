@@ -349,7 +349,7 @@ zend_module_entry mysqlnd_module_entry = {
 	NULL,
 #endif
 	PHP_MINFO(mysqlnd),
-	MYSQLND_VERSION,
+	PHP_MYSQLND_VERSION,
 	PHP_MODULE_GLOBALS(mysqlnd),
 	PHP_GINIT(mysqlnd),
 	NULL,

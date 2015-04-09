@@ -524,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_realloc(start, to - (unsigned char*)start->val, 0);
+	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
 
 	return start;
 }
@@ -631,7 +631,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 		}
 	}
 	str->val[y] = '\0';
-	str = zend_string_realloc(str, y, 0);
+	str = zend_string_truncate(str, y, 0);
 
 	return str;
 }
@@ -768,7 +768,7 @@ no_name_header:
 				}
 
 				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));

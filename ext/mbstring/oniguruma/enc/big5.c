@@ -126,7 +126,7 @@ big5_left_adjust_char_head(const UChar* start, const UChar* s)
 	p++;
 	break;
       }
-    }
+    } 
   }
   len = enclen(ONIG_ENCODING_BIG5, p);
   if (p + len > s) return (UChar* )p;

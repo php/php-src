@@ -417,8 +417,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__connect)(MYSQLND_CONN_DATA * 
 typedef zend_ulong				(*func_mysqlnd_conn_data__escape_string)(MYSQLND_CONN_DATA * const conn, char *newstr, const char *escapestr, size_t escapestr_len);
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_charset)(MYSQLND_CONN_DATA * const conn, const char * const charset);
 typedef enum_func_status	(*func_mysqlnd_conn_data__query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len);
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_query)(MYSQLND_CONN_DATA * conn, const char *query, unsigned int query_len);
-typedef enum_func_status	(*func_mysqlnd_conn_data__reap_query)(MYSQLND_CONN_DATA * conn);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_query)(MYSQLND_CONN_DATA * conn, const char *query, unsigned int query_len, enum_mysqlnd_send_query_type type, zval *read_cb, zval *err_cb);
+typedef enum_func_status	(*func_mysqlnd_conn_data__reap_query)(MYSQLND_CONN_DATA * conn, enum_mysqlnd_reap_result_type type);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__use_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__store_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags);
 typedef enum_func_status	(*func_mysqlnd_conn_data__next_result)(MYSQLND_CONN_DATA * const conn);
@@ -746,6 +746,7 @@ struct st_mysqlnd_res_meta_methods
 
 
 typedef enum_func_status	(*func_mysqlnd_stmt__prepare)(MYSQLND_STMT * const stmt, const char * const query, unsigned int query_len);
+typedef enum_func_status	(*func_mysqlnd_stmt__send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_send_execute_type type, zval * read_cb, zval * err_cb);
 typedef enum_func_status	(*func_mysqlnd_stmt__execute)(MYSQLND_STMT * const stmt);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__use_result)(MYSQLND_STMT * const stmt);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__store_result)(MYSQLND_STMT * const stmt);
@@ -783,7 +784,7 @@ typedef	void 				(*func_mysqlnd_stmt__free_parameter_bind)(MYSQLND_STMT * const 
 typedef	void 				(*func_mysqlnd_stmt__free_result_bind)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND *);
 typedef unsigned int		(*func_mysqlnd_stmt__server_status)(const MYSQLND_STMT * const stmt);
 typedef enum_func_status 	(*func_mysqlnd_stmt__generate_execute_request)(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer);
-typedef enum_func_status	(*func_mysqlnd_stmt__parse_execute_response)(MYSQLND_STMT * const s);
+typedef enum_func_status	(*func_mysqlnd_stmt__parse_execute_response)(MYSQLND_STMT * const s, enum_mysqlnd_parse_exec_response_type type);
 typedef void 				(*func_mysqlnd_stmt__free_stmt_content)(MYSQLND_STMT * const s);
 typedef enum_func_status	(*func_mysqlnd_stmt__flush)(MYSQLND_STMT * const stmt);
 typedef void 				(*func_mysqlnd_stmt__free_stmt_result)(MYSQLND_STMT * const s);
@@ -791,6 +792,7 @@ typedef void 				(*func_mysqlnd_stmt__free_stmt_result)(MYSQLND_STMT * const s);
 struct st_mysqlnd_stmt_methods
 {
 	func_mysqlnd_stmt__prepare prepare;
+	func_mysqlnd_stmt__send_execute send_execute;
 	func_mysqlnd_stmt__execute execute;
 	func_mysqlnd_stmt__use_result use_result;
 	func_mysqlnd_stmt__store_result store_result;
@@ -968,6 +970,11 @@ struct st_mysqlnd_connection_data
 
 	unsigned int	client_api_capabilities;
 
+	zval			async_read_cb;
+	zval			async_err_cb;
+	zend_bool		in_async_read_cb;
+	zend_bool		in_async_err_cb;
+
 	struct st_mysqlnd_conn_data_methods * m;
 
 	/* persistent connection */
@@ -1121,8 +1128,8 @@ struct st_mysqlnd_result_bind
 struct st_mysqlnd_stmt_data
 {
 	MYSQLND_CONN_DATA			*conn;
-	zend_ulong				stmt_id;
-	zend_ulong				flags;/* cursor is set here */
+	zend_ulong					stmt_id;
+	zend_ulong					flags;/* cursor is set here */
 	enum_mysqlnd_stmt_state		state;
 	unsigned int				warning_count;
 	MYSQLND_RES					*result;
@@ -1141,10 +1148,15 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_ERROR_INFO			error_info_impl;
 
 	zend_bool					update_max_length;
-	zend_ulong				prefetch_rows;
+	zend_ulong					prefetch_rows;
 
 	zend_bool					cursor_exists;
 	mysqlnd_stmt_use_or_store_func default_rset_handler;
+
+	zval						execute_read_cb;
+	zval						execute_err_cb;
+	zend_bool					in_execute_read_cb;
+	zend_bool					in_execute_err_cb;
 
 	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */
