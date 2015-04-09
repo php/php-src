@@ -1774,59 +1774,91 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_HANDLER(
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zval args;
+	zend_array *args;
 	zend_function *fbc = EX(func);
-	zend_object *obj = Z_OBJ(EX(This));
+	zend_object *object = Z_OBJ(EX(This));
 	zval *ret = EX(return_value);
 	zend_call_kind call_kind = EX_CALL_KIND();
 	zend_class_entry *scope = EX(called_scope);
 	uint32_t num_args = EX_NUM_ARGS();
-	zend_execute_data *call, *prev_execute_data = EX(prev_execute_data);
+	zend_execute_data *call;
 
-	array_init_size(&args, num_args);
+	args = emalloc(sizeof(zend_array));
+	zend_hash_init(args, num_args, NULL, ZVAL_PTR_DTOR, 0);
 	if (num_args) {
-		zval *p;
-		zend_hash_real_init(Z_ARRVAL(args), 1);
+		zval *p = ZEND_CALL_ARG(execute_data, 1);
+		zval *end = p + num_args;
 
-		p = ZEND_CALL_ARG(execute_data, 1);
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL(args)) {
-			uint32_t i;
-			for (i = 0; i < num_args; ++i) {
+		zend_hash_real_init(args, 1);
+		ZEND_HASH_FILL_PACKED(args) {
+			do {
 				ZEND_HASH_FILL_ADD(p);
 				p++;
-			}
+			} while (p != end);
 		} ZEND_HASH_FILL_END();
 	}
 
-	zend_vm_stack_free_call_frame(execute_data);
-
-	call = zend_vm_stack_push_call_frame(call_kind, fbc->common.prototype, 2, scope, obj, prev_execute_data);
+	SAVE_OPLINE();
+	call = execute_data;
+	execute_data = EG(current_execute_data) = EX(prev_execute_data);
+	zend_vm_stack_free_call_frame(call);
+	call = zend_vm_stack_push_call_frame(call_kind, fbc->common.prototype, 2, scope, object, execute_data);
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
-	ZVAL_COPY_VALUE(ZEND_CALL_ARG(call, 2), &args);
-	if (call->func->type == ZEND_USER_FUNCTION) {
+	ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
+	zend_free_proxy_call_func(fbc);
+	fbc = call->func;
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+
+		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
+
+		EG(scope) = fbc->common.scope;
 		call->symbol_table = NULL;
-		i_init_func_execute_data(call, &call->func->op_array,
-				ret, (call->func->common.fn_flags & ZEND_ACC_STATIC) == 0);
+		i_init_func_execute_data(call, &fbc->op_array,
+				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
 
-		zend_free_proxy_call_func(fbc);
-
-		/* the previously call to current execute_data already check zend_execute_ex */
-		ZEND_VM_ENTER();
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			ZEND_VM_ENTER();
+		} else {
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
+		}
 	} else {
 		zval retval;
 
-		ZEND_ASSERT(call->func->type == ZEND_INTERNAL_FUNCTION);
-		SAVE_OPLINE();
+		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
+
+		EG(scope) = object ? NULL : fbc->common.scope;
+		EG(current_execute_data) = call;
+
+		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			uint32_t i;
+			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+			zval *p = ZEND_CALL_ARG(call, 1);
+
+			EG(current_execute_data) = call;
+
+			for (i = 0; i < num_args; ++i) {
+				zend_verify_internal_arg_type(fbc, i + 1, p);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					EG(current_execute_data) = call->prev_execute_data;
+					zend_vm_stack_free_args(call);
+					zend_vm_stack_free_call_frame(call);
+					if (ret) {
+						ZVAL_UNDEF(ret);
+					}
+					goto proxy_call_end;
+				}
+				p++;
+			}
+		}
 
 		if (ret == NULL) {
 			ZVAL_NULL(&retval);
 			ret = &retval;
 		}
-
-		Z_VAR_FLAGS_P(ret) = (call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
-
-		EG(current_execute_data) = call;
+		Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
@@ -1835,9 +1867,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_O
 			zend_execute_internal(call, ret);
 		}
 
-		execute_data = EG(current_execute_data) = call->prev_execute_data;
+#if ZEND_DEBUG
+		ZEND_ASSERT(
+			!call->func ||
+			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+#endif
 
-		zend_free_proxy_call_func(fbc);
+		EG(current_execute_data) = call->prev_execute_data;
 
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
@@ -1845,19 +1882,32 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_O
 		if (ret == &retval) {
 			zval_ptr_dtor(ret);
 		}
-
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zend_throw_exception_internal(NULL);
-			if (ret != &retval) {
-				zval_ptr_dtor(ret);
-			}
-			HANDLE_EXCEPTION_LEAVE();
-		}
-
-		LOAD_OPLINE();
-		ZEND_VM_INC_OPCODE();
-		ZEND_VM_LEAVE();
 	}
+
+proxy_call_end:
+	execute_data = EG(current_execute_data);
+
+	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type)) {
+		ZEND_VM_RETURN();
+	}
+
+	LOAD_OPLINE();
+
+	if (object) {
+		OBJ_RELEASE(object);
+	}
+	EG(scope) = EX(func)->op_array.scope;
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_throw_exception_internal(NULL);
+		if (RETURN_VALUE_USED(opline)) {
+			zval_ptr_dtor(EX_VAR(opline->result.var));
+		}
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_INTERRUPT_CHECK();
+	ZEND_VM_NEXT_OPCODE();
 }
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
