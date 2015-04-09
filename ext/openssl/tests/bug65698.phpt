@@ -13,7 +13,7 @@ var_dump($info["validFrom"], $info["validFrom_time_t"], $info["validTo"], $info[
 Done
 --EXPECTF--
 string(15) "20090303125318Z"
-int(1236084798)
+int(12360%d)
 string(15) "20240303125318Z"
-int(1709470398)
+int(17094%d)
 Done
