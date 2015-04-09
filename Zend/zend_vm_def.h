@@ -7598,6 +7598,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 
 		zend_free_proxy_call_func(fbc);
 
+		/* the previously call to current execute_data already check zend_execute_ex */
 		ZEND_VM_ENTER();
 	} else {
 		zval retval;
@@ -7614,7 +7615,12 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 
 		EG(current_execute_data) = call;
 
-		call->func->internal_function.handler(call, ret);
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			fbc->internal_function.handler(call, ret);
+		} else {
+			zend_execute_internal(call, ret);
+		}
 
 		execute_data = EG(current_execute_data) = call->prev_execute_data;
 

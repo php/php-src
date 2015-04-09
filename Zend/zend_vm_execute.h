@@ -1812,6 +1812,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_O
 
 		zend_free_proxy_call_func(fbc);
 
+		/* the previously call to current execute_data already check zend_execute_ex */
 		ZEND_VM_ENTER();
 	} else {
 		zval retval;
@@ -1828,7 +1829,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PROXY_CALL_SPEC_HANDLER(ZEND_O
 
 		EG(current_execute_data) = call;
 
-		call->func->internal_function.handler(call, ret);
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			fbc->internal_function.handler(call, ret);
+		} else {
+			zend_execute_internal(call, ret);
+		}
 
 		execute_data = EG(current_execute_data) = call->prev_execute_data;
 
