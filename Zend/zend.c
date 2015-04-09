@@ -26,7 +26,6 @@
 #include "zend_list.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
-#include "zend_objects_API.h"
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
@@ -433,6 +432,17 @@ static void zend_init_exception_op(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_init_proxy_call_op(void) /* {{{ */
+{
+	memset(&EG(proxy_call_op), 0, sizeof(EG(proxy_call_op)));
+	EG(proxy_call_op).opcode = ZEND_PROXY_CALL;
+	EG(proxy_call_op).op1_type = IS_UNUSED;
+	EG(proxy_call_op).op2_type = IS_UNUSED;
+	EG(proxy_call_op).result_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(&EG(proxy_call_op));
+}
+/* }}} */
+
 #ifdef ZTS
 static void function_copy_ctor(zval *zv)
 {
@@ -512,6 +522,9 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_proxy_call_op();
+	memset(&executor_globals->proxy_call_func, 0, sizeof(zend_op_array));
+	zend_init_proxy_call_func(&executor_globals->proxy_call_func);
 	executor_globals->lambda_count = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
@@ -532,8 +545,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
-	memset(&EG(proxy_call_func), 0, sizeof(zend_op_array));
-	zend_init_proxy_call_func(&EG(proxy_call_func), &EG(proxy_call_op));
 }
 /* }}} */
 
@@ -725,7 +736,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #ifndef ZTS
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
-	zend_init_proxy_call_func(&EG(proxy_call_func), &EG(proxy_call_op));
+	zend_init_proxy_call_op();
+	zend_init_proxy_call_func(&EG(proxy_call_func));
 #endif
 
 	zend_ini_startup();

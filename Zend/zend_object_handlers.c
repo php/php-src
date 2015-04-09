@@ -993,6 +993,59 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
+ZEND_API void zend_init_proxy_call_func(zend_op_array *func) /* {{{ */
+{
+	func->type = ZEND_USER_FUNCTION;
+	func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PUBLIC;
+	func->this_var = -1;
+	func->opcodes = &EG(proxy_call_op);
+}
+/* }}} */
+
+ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
+{
+	zend_op_array *func;
+	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
+
+	ZEND_ASSERT(fbc);
+
+	if (EXPECTED(EG(proxy_call_func).function_name == NULL)) {
+		func = &EG(proxy_call_func);
+	} else {
+		func = ecalloc(1, sizeof(zend_op_array));
+		zend_init_proxy_call_func(func);
+	}
+
+	if (is_static) {
+		func->fn_flags |= ZEND_ACC_STATIC;
+	} else {
+		func->fn_flags &= ~ZEND_ACC_STATIC;
+	}
+
+	func->scope = ce;
+	func->prototype = fbc;
+	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : STR_EMPTY_ALLOC();
+	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
+	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
+
+	//??? keep compatibility for "\0" characters
+	//??? see: Zend/tests/bug46238.phpt
+	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+		func->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+	} else {
+		func->function_name = zend_string_copy(method_name);
+	}
+
+	return (zend_function*)func;
+}
+/* }}} */
+
+static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
+{
+	return zend_get_proxy_call_func(ce, method_name, 0);
+}
+/* }}} */
+
 static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
@@ -1016,7 +1069,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			STR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
-			return zend_get_proxy_call_func(zobj->ce, method_name, 0);
+			return zend_get_user_call_function(zobj->ce, method_name);
 		} else {
 			return NULL;
 		}
@@ -1035,7 +1088,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			fbc = updated_fbc;
 		} else {
 			if (zobj->ce->__call) {
-				fbc = zend_get_proxy_call_func(zobj->ce, method_name, 0);
+				fbc = zend_get_user_call_function(zobj->ce, method_name);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;
@@ -1062,7 +1115,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
 				if (zobj->ce->__call) {
-					fbc = zend_get_proxy_call_func(zobj->ce, method_name, 0);
+					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
 					zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name->val, EG(scope) ? EG(scope)->name->val : "");
 					fbc = NULL;
@@ -1075,6 +1128,12 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		STR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
 	return fbc;
+}
+/* }}} */
+
+static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
+{
+	return zend_get_proxy_call_func(ce, method_name, 1);
 }
 /* }}} */
 
@@ -1112,9 +1171,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (ce->__call &&
 			    Z_OBJ(EG(current_execute_data)->This) &&
 			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce)) {
-				return zend_get_proxy_call_func(ce, function_name, 0);
+				return zend_get_user_call_function(ce, function_name);
 			} else if (ce->__callstatic) {
-				return zend_get_proxy_call_func(ce, function_name, 1);
+				return zend_get_user_callstatic_function(ce, function_name);
 			} else {
 	   			return NULL;
 			}
@@ -1140,7 +1199,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = updated_fbc;
 		} else {
 			if (ce->__callstatic) {
-				fbc = zend_get_proxy_call_func(ce, function_name, 1);
+				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;
@@ -1151,7 +1210,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		 */
 		if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), EG(scope)))) {
 			if (ce->__callstatic) {
-				fbc = zend_get_proxy_call_func(ce, function_name, 1);
+				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name->val, EG(scope) ? EG(scope)->name->val : "");
 				fbc = NULL;

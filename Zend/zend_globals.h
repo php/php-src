@@ -36,6 +36,7 @@
 #include "zend_modules.h"
 #include "zend_float.h"
 #include "zend_multibyte.h"
+#include "zend_multiply.h"
 #include "zend_arena.h"
 
 /* Define ZTS if you want a thread-safe Zend */

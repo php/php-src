@@ -70,20 +70,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member);
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void);
-
-ZEND_API void zend_init_proxy_call_func(zend_op_array *func, zend_op *opline);
-
-ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static);
-
 END_EXTERN_C()
-
-#define zend_free_proxy_call_func(func)  do { \
-	if (((zend_op_array *)func) == &EG(proxy_call_func)) { \
-		((zend_op_array *)func)->function_name = NULL; \
-	} else { \
-		efree(func); \
-	} \
-} while (0)
 
 static zend_always_inline void zend_object_release(zend_object *obj)
 {
