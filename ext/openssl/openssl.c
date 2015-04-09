@@ -859,6 +859,25 @@ void php_openssl_store_errors(void)
 
 }
 
+void php_openssl_deinitialize_error_queue(void)
+{
+	PHP_SSL_ERROR_QUEUE *tmp;
+	/* deinitialize error queue*/
+	if(ssl_error_context != NULL  ){
+
+		//Empty error
+		while(ssl_error_context->current!=NULL){
+			tmp=ssl_error_context->current;
+			ssl_error_context->current=tmp->next;
+			efree(tmp);
+		}
+
+		efree(ssl_error_context);
+
+	}
+
+}
+
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
 	char * str;
@@ -1272,6 +1291,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC);
+
+
+	php_openssl_deinitialize_error_queue();
 
 	return SUCCESS;
 }
@@ -4265,8 +4287,8 @@ PHP_FUNCTION(openssl_error_string)
 	    return;
 	}
 
-	// Return false if error queue is empty
-	if(ssl_error_context->current==NULL){
+	// Return false if error queue is empty or not initialized
+	if(ssl_error_context == NULL || ssl_error_context->current==NULL ){
 		RETURN_FALSE;;
 	}
 
