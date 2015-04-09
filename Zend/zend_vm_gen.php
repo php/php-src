@@ -1531,6 +1531,12 @@ function gen_vm($def, $skel) {
 		out($f, "#endif\n");
 		out($f, "\treturn ret;\n");
 		out($f, "}\n\n");
+	} else {
+		out($f, "ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
+		out($f, "{\n");
+		out($f, "\tzend_error_noreturn(E_CORE_ERROR, \"zend_vm_call_opcode_handler() is not supported\");\n");
+		out($f, "\treturn 0;\n");
+		out($f, "}\n\n");
 	}
 
 	// Export handlers and helpers

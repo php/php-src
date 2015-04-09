@@ -1,7 +1,5 @@
 --TEST--
 Bug #69335 (SplArray BC break)
---XFAIL--
-see https://bugs.php.net/bug.php?id=69335
 --FILE--
 <?php
 $a = array(1=>1, 3=>3, 5=>5, 7=>7);
