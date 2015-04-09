@@ -6939,7 +6939,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				zend_string_release(call->func->common.function_name);
-				zend_free_proxy_call_func(call->func);
+				zend_free_trampoline(call->func);
 			}
 
 			EX(call) = call->prev_execute_data;
@@ -7558,7 +7558,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
+ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 {
 	zend_array *args;
 	zend_function *fbc = EX(func);
@@ -7592,7 +7592,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
 	ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
-	zend_free_proxy_call_func(fbc);
+	zend_free_trampoline(fbc);
 	fbc = call->func;
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
@@ -7634,7 +7634,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 					if (ret) {
 						ZVAL_UNDEF(ret);
 					}
-					ZEND_VM_C_GOTO(proxy_call_end);
+					ZEND_VM_C_GOTO(call_trampoline_end);
 				}
 				p++;
 			}
@@ -7670,7 +7670,7 @@ ZEND_VM_HANDLER(158, ZEND_PROXY_CALL, ANY, ANY)
 		}
 	}
 
-ZEND_VM_C_LABEL(proxy_call_end):
+ZEND_VM_C_LABEL(call_trampoline_end):
 	execute_data = EG(current_execute_data);
 
 	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type)) {

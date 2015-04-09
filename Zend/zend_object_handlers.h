@@ -22,8 +22,6 @@
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
-#include "zend_compile.h"
-
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
@@ -180,18 +178,15 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);
 
-ZEND_API void zend_init_proxy_call_func(zend_op_array *func);
+ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 
-ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static);
-
-static zend_always_inline void zend_free_proxy_call_func(zend_function *func)
-{
-	if (&func->op_array == &EG(proxy_call_func)) {
-		EG(proxy_call_func).function_name = NULL;
-	} else {
-		efree(func);
-	}
-}
+#define zend_free_trampoline(func) do { \
+		if ((func) == &EG(trampoline)) { \
+			EG(trampoline).common.function_name = NULL; \
+		} else { \
+			efree(func); \
+		} \
+	} while (0)
 
 END_EXTERN_C()
 

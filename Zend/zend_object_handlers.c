@@ -993,34 +993,26 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-ZEND_API void zend_init_proxy_call_func(zend_op_array *func) /* {{{ */
-{
-	func->type = ZEND_USER_FUNCTION;
-	func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PUBLIC;
-	func->this_var = -1;
-	func->opcodes = &EG(proxy_call_op);
-}
-/* }}} */
-
-ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
+ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
 	zend_op_array *func;
 	zend_function *fbc = is_static ? ce->__callstatic : ce->__call;
 
 	ZEND_ASSERT(fbc);
 
-	if (EXPECTED(EG(proxy_call_func).function_name == NULL)) {
-		func = &EG(proxy_call_func);
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		func = &EG(trampoline).op_array;
 	} else {
 		func = ecalloc(1, sizeof(zend_op_array));
-		zend_init_proxy_call_func(func);
 	}
 
+	func->type = ZEND_USER_FUNCTION;
+	func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_PUBLIC;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
-	} else {
-		func->fn_flags &= ~ZEND_ACC_STATIC;
 	}
+	func->this_var = -1;
+	func->opcodes = &EG(call_trampoline_op);
 
 	func->scope = ce;
 	func->prototype = fbc;
@@ -1042,7 +1034,7 @@ ZEND_API zend_function *zend_get_proxy_call_func(zend_class_entry *ce, zend_stri
 
 static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_proxy_call_func(ce, method_name, 0);
+	return zend_get_call_trampoline_func(ce, method_name, 0);
 }
 /* }}} */
 
@@ -1133,7 +1125,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 
 static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_proxy_call_func(ce, method_name, 1);
+	return zend_get_call_trampoline_func(ce, method_name, 1);
 }
 /* }}} */
 

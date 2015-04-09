@@ -1292,7 +1292,7 @@ ZEND_FUNCTION(method_exists)
 
 				zend_string_release(lcname);
 				zend_string_release(func->common.function_name);
-				zend_free_proxy_call_func(func);
+				zend_free_trampoline(func);
 				return;
 			}
 			zend_string_release(lcname);

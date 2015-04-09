@@ -3070,7 +3070,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 get_function_via_handler:
 		if (fcc->object && fcc->calling_scope == ce_org) {
 			if (strict_class && ce_org->__call) {
-				fcc->function_handler = zend_get_proxy_call_func(ce_org, mname, 0);
+				fcc->function_handler = zend_get_call_trampoline_func(ce_org, mname, 0);
 				call_via_handler = 1;
 				retval = 1;
 			} else if (fcc->object->handlers->get_method) {
@@ -3083,7 +3083,7 @@ get_function_via_handler:
 							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
 								zend_string_release(fcc->function_handler->common.function_name);
 							}
-							zend_free_proxy_call_func(fcc->function_handler);
+							zend_free_trampoline(fcc->function_handler);
 						}
 					} else {
 						retval = 1;
@@ -3247,7 +3247,7 @@ again:
 				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fcc->function_handler->common.function_name);
 				}
-				zend_free_proxy_call_func(fcc->function_handler);
+				zend_free_trampoline(fcc->function_handler);
 			}
 			return ret;
 
@@ -3334,7 +3334,7 @@ again:
 						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
 							zend_string_release(fcc->function_handler->common.function_name);
 						}
-						zend_free_proxy_call_func(fcc->function_handler);
+						zend_free_trampoline(fcc->function_handler);
 					}
 					return ret;
 
@@ -3409,7 +3409,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 			if (fcc.function_handler->type != ZEND_OVERLOADED_FUNCTION) {
 				zend_string_release(fcc.function_handler->common.function_name);
 			}
-			zend_free_proxy_call_func(fcc.function_handler);
+			zend_free_trampoline(fcc.function_handler);
 		}
 		return 1;
 	}

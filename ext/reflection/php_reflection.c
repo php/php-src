@@ -285,7 +285,7 @@ static void _free_function(zend_function *fptr) /* {{{ */
 		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
 	{
 		zend_string_release(fptr->internal_function.function_name);
-		zend_free_proxy_call_func(fptr);
+		zend_free_trampoline(fptr);
 	}
 }
 /* }}} */
@@ -2240,7 +2240,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
 				}
-				zend_free_proxy_call_func(fptr);
+				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {
 				zval_ptr_dtor(reference);
@@ -2278,7 +2278,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
 				}
-				zend_free_proxy_call_func(fptr);
+				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {
 				zval_ptr_dtor(reference);
