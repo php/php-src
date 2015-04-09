@@ -466,7 +466,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 			}
 			OBJ_RELEASE(object);
 		}
-
 		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2901,8 +2900,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_HANDLER(ZEND
 
 
 	SAVE_OPLINE();
-
 	retval_ptr = EX_CONSTANT(opline->op1);
+
 	if (!EX(return_value)) {
 
 	} else {
@@ -10705,8 +10704,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_O
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-
 	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+
 	if (!EX(return_value)) {
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
@@ -13737,8 +13736,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_O
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-
 	retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+
 	if (!EX(return_value)) {
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
@@ -27310,8 +27309,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OP
 
 
 	SAVE_OPLINE();
-
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+
 	if (!EX(return_value)) {
 
 	} else {

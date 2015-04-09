@@ -2376,7 +2376,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			OBJ_RELEASE(object);
 		}
-
 		EG(scope) = EX(func)->op_array.scope;
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2418,7 +2417,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			EG(current_execute_data) = EX(prev_execute_data);
 			if (EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
-			} 
+			}
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
 
@@ -3769,8 +3768,8 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-
 	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
 	if (!EX(return_value)) {
 		FREE_OP1();
 	} else {
