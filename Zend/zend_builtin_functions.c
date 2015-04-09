@@ -2478,17 +2478,17 @@ static void smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
 				case '\\': *res++ = '\\'; break;
 				case VK_ESCAPE: *res++ = 'e'; break;
 				default:
-								*res++ = 'x';
-								if ((c >> 4) < 10) {
-									*res++ = (c >> 4) + '0';
-								} else {
-									*res++ = (c >> 4) + 'A' - 10;
-								}
-								if ((c & 0xf) < 10) {
-									*res++ = (c & 0xf) + '0';
-								} else {
-									*res++ = (c & 0xf) + 'A' - 10;
-								}
+					*res++ = 'x';
+					if ((c >> 4) < 10) {
+						*res++ = (c >> 4) + '0';
+					} else {
+						*res++ = (c >> 4) + 'A' - 10;
+					}
+					if ((c & 0xf) < 10) {
+						*res++ = (c & 0xf) + '0';
+					} else {
+						*res++ = (c & 0xf) + 'A' - 10;
+					}
 			}
 		} else {
 			*res++ = c;
