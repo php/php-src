@@ -24,9 +24,6 @@
 extern zend_module_entry shmop_module_entry;
 #define phpext_shmop_ptr &shmop_module_entry
 
-#include "php_version.h"
-#define PHP_SHMOP_VERSION PHP_VERSION
-
 PHP_MINIT_FUNCTION(shmop);
 PHP_MINFO_FUNCTION(shmop);
 

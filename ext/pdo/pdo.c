@@ -140,8 +140,12 @@ static const zend_module_dep pdo_deps[] = {
 
 /* {{{ pdo_module_entry */
 zend_module_entry pdo_module_entry = {
+#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_deps,
+#else
+	STANDARD_MODULE_HEADER,
+#endif
 	"PDO",
 	pdo_functions,
 	PHP_MINIT(pdo),
@@ -149,7 +153,7 @@ zend_module_entry pdo_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo),
-	PHP_PDO_VERSION,
+	"1.0.4dev",
 	PHP_MODULE_GLOBALS(pdo),
 	PHP_GINIT(pdo),
 	NULL,

@@ -40,8 +40,6 @@ typedef struct _zend_generator {
 	zval value;
 	/* Current key */
 	zval key;
-	/* Return value */
-	zval retval;
 	/* Variable to put sent value into */
 	zval *send_target;
 	/* Largest used integer key for auto-incrementing keys */

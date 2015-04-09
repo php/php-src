@@ -52,7 +52,7 @@
 
 typedef struct {
 	char *header;
-	size_t header_len;
+	uint header_len;
 } sapi_header_struct;
 
 
@@ -169,7 +169,7 @@ END_EXTERN_C()
 
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
-	size_t line_len;
+	uint line_len;
 	zend_long response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
 
@@ -185,14 +185,14 @@ BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
 
 /* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace);
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
-SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
+SAPI_API int sapi_read_post_block(char *buffer, size_t buflen);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);

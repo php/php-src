@@ -120,7 +120,7 @@ zend_module_entry bz2_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(bz2),
-	PHP_BZ2_VERSION,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -226,9 +226,6 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 	self = emalloc(sizeof(*self));
 
 	self->stream = innerstream;
-	if (innerstream) {
-		GC_REFCOUNT(innerstream->res)++;
-	}
 	self->bz_file = bz;
 
 	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
@@ -255,7 +252,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 #ifdef VIRTUAL_DIR
 	virtual_filepath_ex(path, &path_copy, NULL);
 #else
-	path_copy = (char *)path;
+	path_copy = path;
 #endif
 
 	if (php_check_open_basedir(path_copy)) {
@@ -382,7 +379,7 @@ static PHP_FUNCTION(bzread)
 	data->len = php_stream_read(stream, data->val, data->len);
 	data->val[data->len] = '\0';
 
-	RETURN_NEW_STR(data);
+	RETURN_STR(data);
 }
 /* }}} */
 
@@ -548,7 +545,7 @@ static PHP_FUNCTION(bzcompress)
 		   so we erealloc() the buffer to the proper size */
 		dest->len = dest_len;
 		dest->val[dest->len] = '\0';
-		RETURN_NEW_STR(dest);
+		RETURN_STR(dest);
 	}
 }
 /* }}} */

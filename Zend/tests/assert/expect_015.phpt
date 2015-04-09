@@ -78,16 +78,14 @@ assert(0 && ($a = function &(array &$a, X $b = null) use ($c,&$d) : X {
 					return 9;
 				}
 L0:
-                do {
-					switch ($x) {
-						case 4: break;
-						case 5: continue;
-						case 6: break 2;
-						case 7: continue 2;
-						case 8: goto L0;
-						default: return;
-					}
-				} while (0);
+				switch ($x) {
+					case 4: break;
+					case 5: continue;
+					case 6: break 2;
+					case 7: continue 2;
+					case 8: goto L0;
+					default: return;
+				}
 			}
 		}
 	}
@@ -224,22 +222,20 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null) use($c, 
                     return 9;
                 }
                 L0:
-                do {
-                    switch ($x) {
-                        case 4:
-                            break;
-                        case 5:
-                            continue;
-                        case 6:
-                            break 2;
-                        case 7:
-                            continue 2;
-                        case 8:
-                            goto L0;
-                        default:
-                            return;
-                    }
-                } while (0);
+                switch ($x) {
+                    case 4:
+                        break;
+                    case 5:
+                        continue;
+                    case 6:
+                        break 2;
+                    case 7:
+                        continue 2;
+                    case 8:
+                        goto L0;
+                    default:
+                        return;
+                }
             }
         }
 

@@ -25,9 +25,6 @@
 extern zend_module_entry xmlwriter_module_entry;
 #define phpext_xmlwriter_ptr &xmlwriter_module_entry
 
-#include "php_version.h"
-#define PHP_XMLWRITER_VERSION PHP_VERSION
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

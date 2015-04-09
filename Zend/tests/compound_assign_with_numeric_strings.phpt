@@ -8,32 +8,20 @@ $n <<= $n;
 var_dump($n);
 
 $n = "-1";
-try {
-    $n <<= $n;
-    var_dump($n);
-} catch (Exception $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
-}
+$n <<= $n;
+var_dump($n);
 
 $n = "65";
 $n >>= $n;
 var_dump($n);
 
 $n = "-1";
-try {
-  $n >>= $n;
-  var_dump($n);
-} catch (Exception $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
-}
+$n >>= $n;
+var_dump($n);
 
 $n = "0";
-try{
-  $n %= $n;
-  var_dump($n);
-} catch (Exception $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
-}
+$n %= $n;
+var_dump($n);
 
 $n = "-1";
 $n %= $n;
@@ -41,10 +29,13 @@ var_dump($n);
 --EXPECTF--
 int(0)
 
-Exception: Bit shift by negative number
+Warning: Bit shift by negative number in %s on line %d
+bool(false)
 int(0)
 
-Exception: Bit shift by negative number
+Warning: Bit shift by negative number in %s on line %d
+bool(false)
 
-Exception: Division by zero
+Warning: Division by zero in %s on line %d
+bool(false)
 int(0)

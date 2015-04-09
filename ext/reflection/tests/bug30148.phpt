@@ -26,8 +26,7 @@ var_dump($d->isConstructor());
 var_dump($e->isConstructor());
 ?>
 ===DONE===
---EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; Root has a deprecated constructor in %s on line %d
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

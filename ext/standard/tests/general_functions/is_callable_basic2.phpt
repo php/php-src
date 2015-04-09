@@ -71,7 +71,7 @@ class contains_object_class
      echo "func() is called \n";
    }
 
-   function __construct () {
+   function contains_object_class () {
      $this->class_object1 = new object_class();
      $this->no_member_class_object = new no_member_class();
    }

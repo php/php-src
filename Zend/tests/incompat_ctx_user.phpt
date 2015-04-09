@@ -1,5 +1,7 @@
 --TEST--
 Incompatible context call (non-internal function)
+--INI--
+error_reporting=E_ALL
 --FILE--
 <?php
 
@@ -14,7 +16,5 @@ $b->bar();
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method A::foo() should not be called statically in %s on line %d
-
-Notice: Undefined variable: this in %s on line %d
-string(1) "A"
+Deprecated: Non-static method A::foo() should not be called statically, assuming $this from incompatible context in %s on line %d
+string(1) "B"

@@ -21,8 +21,8 @@ $b = new Blah();
 $b->show();
 ?>
 --EXPECTF--
-Notice: Accessing static property Blah::$x as non static in %sbug30820.php on line 7
+Strict Standards: Accessing static property Blah::$x as non static in %sbug30820.php on line 7
 Blah::$x = 1
 
-Notice: Accessing static property Blah::$x as non static in %sbug30820.php on line 10
+Strict Standards: Accessing static property Blah::$x as non static in %sbug30820.php on line 10
 $this->x = 5

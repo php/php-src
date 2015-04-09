@@ -7,11 +7,11 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-try {
-    $comment = new DOMComment("comment1", "comment2");
-} catch (TypeException $e) {
-    echo $e->getMessage(), "\n";
-}
+$comment = new DOMComment("comment1", "comment2");
 ?>
 --EXPECTF--
-DOMComment::__construct() expects at most 1 parameter, 2 given
+Fatal error: Uncaught exception 'DOMException' with message 'DOMComment::__construct() expects at most 1 parameter, 2 given' in %s:%d
+Stack trace:
+#0 %s(%d): DOMComment->__construct('comment1', 'comment2')
+#1 {main}
+  thrown in %s on line %d

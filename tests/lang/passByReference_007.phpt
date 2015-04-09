@@ -79,7 +79,7 @@ var_dump($a);
 --EXPECTF--
 Pass a function call that returns a value:
 
-Notice: Only variables should be passed by reference in %s on line 44
+Strict Standards: Only variables should be passed by reference in %s on line 44
 string(8) "original"
 string(8) "original"
 Pass a function call that returns a reference:
@@ -88,7 +88,7 @@ string(7) "changed"
 
 Pass a static method call that returns a value:
 
-Notice: Only variables should be passed by reference in %s on line 55
+Strict Standards: Only variables should be passed by reference in %s on line 55
 string(8) "original"
 string(8) "original"
 Pass a static method call that returns a reference:
@@ -97,7 +97,7 @@ string(7) "changed"
 
 Pass a method call that returns a value:
 
-Notice: Only variables should be passed by reference in %s on line 67
+Strict Standards: Only variables should be passed by reference in %s on line 67
 string(8) "original"
 string(8) "original"
 Pass a method call that returns a reference:

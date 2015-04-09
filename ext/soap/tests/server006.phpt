@@ -7,7 +7,7 @@ SOAP Server 6: setclass with constructor
 class Foo {
   private $str = "";
 
-  function __construct($str) {
+  function Foo($str) {
     $this->str = $str . " World";
   }
 

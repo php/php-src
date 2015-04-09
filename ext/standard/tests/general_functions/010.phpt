@@ -11,16 +11,9 @@ class test {
         }
 }
 
-try {
-	var_dump(register_shutdown_function(array("test","__call")));
-} catch (EngineException $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
-}
+var_dump(register_shutdown_function(array("test","__call")));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Exception: Non-static method test::__call() cannot be called statically
-Done
-
+--EXPECTF--	
 Fatal error: Non-static method test::__call() cannot be called statically in %s on line %d

@@ -1,14 +1,16 @@
 --TEST--
 SPL: RecursiveTreeIterator(non-traversable)
+--INI--
+error_reporting=E_ALL&~E_NOTICE
 --FILE--
 <?php
 try {
 	new RecursiveTreeIterator(new ArrayIterator(array()));
-} catch (TypeException $e) {
-    echo $e->getMessage(), "\n";
+} catch (InvalidArgumentException $e) {
+	echo "InvalidArgumentException thrown\n";
 }
 ?>
 ===DONE===
---EXPECT--
-RecursiveCachingIterator::__construct() expects parameter 1 to be RecursiveIterator, object given
+--EXPECTF--
+InvalidArgumentException thrown
 ===DONE===

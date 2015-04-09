@@ -3,7 +3,7 @@ $this in constructor test
 --FILE--
 <?php
 class foo {
-	function __construct($name) {
+	function foo($name) {
      	$GLOBALS['List']= &$this;
      	$this->Name = $name;
 		$GLOBALS['List']->echoName();

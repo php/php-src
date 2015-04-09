@@ -3,15 +3,13 @@ ReflectionParameter::getClass(), getDeclaringClass(), getDeclaringFunction()
 --FILE--
 <?php
 
-function test($nix, Array $ar, &$ref, stdClass $std,
-    NonExistingClass $na, stdClass &$opt = NULL, $def = "FooBar")
+function test($nix, Array $ar, &$ref, stdClass $std, NonExistingClass $na, stdClass &$opt = NULL, $def = "FooBar")
 {
 }
 
 class test
 {
-	function method($nix, Array $ar, &$ref, stdClass $std,
-        NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
+	function test($nix, Array $ar, &$ref, stdClass $std, NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
 	{
 	}
 }
@@ -19,8 +17,7 @@ class test
 function check_params_decl_func($r, $f)
 {
 	$c = $r->$f();
-    $sep = $c instanceof ReflectionMethod ? $c->class . '::' : '';
-	echo $f . ': ' . ($c ? $sep . $c->name : 'NULL') . "()\n";
+	echo $f . ': ' . ($c ? ($c instanceof ReflectionMethod ? $c->class . '::' : '') . $c->name : 'NULL') . "()\n";
 }
 
 function check_params_decl_class($r, $f)
@@ -69,7 +66,7 @@ function check_params($r)
 
 check_params(new ReflectionFunction('test'));
 
-check_params(new ReflectionMethod('test::method'));
+check_params(new ReflectionMethod('test::test'));
 
 ?>
 ===DONE===
@@ -141,7 +138,7 @@ allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
 getDefaultValue: string(6) "FooBar"
-#####test::method()#####
+#####test::test()#####
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)

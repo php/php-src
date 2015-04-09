@@ -7,11 +7,11 @@ Josh Sweeney <jsweeney@alt-invest.net>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-try {
-    $attr = new DOMAttr();
-} catch (TypeException $e) {
-    echo $e->getMessage(), "\n";
-}
+$attr = new DOMAttr();
 ?>
 --EXPECTF--
-DOMAttr::__construct() expects at least 1 parameter, 0 given
+Fatal error: Uncaught exception 'DOMException' with message 'DOMAttr::__construct() expects at least 1 parameter, 0 given' in %s:%d
+Stack trace:
+#0 %s(%d): DOMAttr->__construct()
+#1 {main}
+  thrown in %s on line %d

@@ -8,22 +8,22 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class BaseStruct {
-    function __construct($f, $s) {
+    function BaseStruct($f, $s) {
         $this->floatMessage = $f;
         $this->shortMessage = $s;
     }
 }
 class ExtendedStruct extends BaseStruct {
-    function __construct($f, $s, $x1, $x2, $x3) {
-        parent::__construct($f,$s);
+    function ExtendedStruct($f, $s, $x1, $x2, $x3) {
+        $this->BaseStruct($f,$s);
         $this->stringMessage = $x1;
         $this->intMessage = $x2;
         $this->anotherIntMessage = $x3;
     }
 }
 class MoreExtendedStruct extends ExtendedStruct {
-    function __construct($f, $s, $x1, $x2, $x3, $b) {
-        parent::__construct($f, $s, $x1, $x2, $x3);
+    function MoreExtendedStruct($f, $s, $x1, $x2, $x3, $b) {
+        $this->ExtendedStruct($f, $s, $x1, $x2, $x3);
         $this->booleanMessage = $b;
     }
 }

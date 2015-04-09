@@ -27,7 +27,7 @@ fclose($file_handle);
 // creating object with members as filename
 class object_temp {
   public $filename;
-  function __construct($file) {
+  function object_temp($file) {
     $this->filename = $file;
   }
 }

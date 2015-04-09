@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -272,7 +272,7 @@ static PHP_FUNCTION(phpdbg_exec)
 	}
 
 	{
-		zend_stat_t sb;
+		struct stat sb;
 		zend_bool result = 1;
 
 		if (VCWD_STAT(exec->val, &sb) != FAILURE) {
@@ -761,7 +761,6 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'a', 1, "address-or-any"},
 #endif
 	{'x', 0, "xml output"},
-	{'h', 0, "help"},
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -984,14 +983,7 @@ void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
 
 void phpdbg_free_wrapper(void *p) /* {{{ */
 {
-	zend_mm_heap *heap = phpdbg_mm_get_heap();
-	if (UNEXPECTED(heap == p)) {
-		/* TODO: heap maybe allocated by mmap(zend_mm_init) or malloc(USE_ZEND_ALLOC=0) 
-		 * let's prevent it from segfault for now
-		 */
-	} else {
-		zend_mm_free(heap, p);
-	}
+	zend_mm_free(phpdbg_mm_get_heap(), p);
 } /* }}} */
 
 void *phpdbg_realloc_wrapper(void *ptr, size_t size) /* {{{ */
@@ -1202,18 +1194,6 @@ phpdbg_main:
 			case 'x':
 				flags |= PHPDBG_WRITE_XML;
 			break;
-
-
-			case 'h': {
-				sapi_startup(phpdbg);
-				phpdbg->startup(phpdbg);
-				PHPDBG_G(flags) = 0;
-				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
-				phpdbg_do_help(NULL);
-				sapi_deactivate();
-				sapi_shutdown();
-				return 0;
-			} break;
 
 			case 'V': {
 				sapi_startup(phpdbg);

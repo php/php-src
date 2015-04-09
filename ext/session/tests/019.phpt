@@ -15,7 +15,7 @@ error_reporting(E_ALL);
 
 class TFoo {
 	public $c;
-	function __construct($c) {
+	function TFoo($c) {
 		$this->c = $c;
 	}
 	function inc() {

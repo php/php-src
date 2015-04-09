@@ -35,7 +35,9 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
-#define PHP_SOAP_VERSION PHP_VERSION
+#ifndef PHP_HAVE_STREAMS
+# error You lose - must be compiled against PHP 4.3.0 or later
+#endif
 
 #ifndef PHP_WIN32
 # define TRUE 1

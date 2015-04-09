@@ -5,13 +5,15 @@ Bug #60261 (phar dos null pointer)
 --FILE--
 <?php
 
+$nx = new Phar();
 try {
-    $nx = new Phar();
 	$nx->getLinkTarget();
-} catch (TypeException $e) {
+} catch (Exception $e) {
 	echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Phar::__construct() expects at least 1 parameter, 0 given
+
+Warning: Phar::__construct() expects at least 1 parameter, 0 given in %s on line %d
+SplFileInfo::getLinkTarget(): Empty filename

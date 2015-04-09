@@ -117,6 +117,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->common.function_name);
 		destroy_op_array(&function->op_array);
 		/* op_arrays are allocated on arena, so we don't have to free them */
+//???		efree_size(function, sizeof(zend_op_array));
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
@@ -797,6 +798,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					if (opline->op1_type != IS_CONST || Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) != IS_NULL) {
+						CG(zend_lineno) = opline->lineno;
+						zend_error_noreturn(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+					}
+
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
@@ -860,7 +866,6 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_SR:
 		case ZEND_ASSIGN_SR:
 			return (binary_op_type) shift_right_function;
-		case ZEND_FAST_CONCAT:
 		case ZEND_CONCAT:
 		case ZEND_ASSIGN_CONCAT:
 			return (binary_op_type) concat_function;

@@ -5,7 +5,7 @@ Bug #32226 (SEGV with exception handler on non existing instance)
 
 class A
 {
-        public function __construct()
+        public function A()
         {
                 set_exception_handler(array($this, 'EH'));
 

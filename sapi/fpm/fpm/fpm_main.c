@@ -93,6 +93,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
+#include "zend_indent.h"
 
 #include "php_getopt.h"
 

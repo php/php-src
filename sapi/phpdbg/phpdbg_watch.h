@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,6 +21,7 @@
 #ifndef PHPDBG_WATCH_H
 #define PHPDBG_WATCH_H
 
+#include "TSRM.h"
 #include "phpdbg_cmd.h"
 
 #ifdef _WIN32
@@ -40,7 +41,6 @@ extern const phpdbg_command_t phpdbg_watch_commands[];
 
 /* Watchpoint functions/typedefs */
 
-/* References are managed through their parent zval *, being a simple WATCH_ON_ZVAL and eventually WATCH_ON_REFCOUNTED */
 typedef enum {
 	WATCH_ON_ZVAL,
 	WATCH_ON_HASHTABLE,
@@ -66,10 +66,11 @@ struct _phpdbg_watchpoint_t {
 	phpdbg_watchtype type;
 	char flags;
 	phpdbg_watchpoint_t *parent;
-	phpdbg_watchpoint_t *reference;
 	HashTable *parent_container;
-	zend_string *name_in_parent;
-	zend_string *str;
+	char *name_in_parent;
+	size_t name_in_parent_len;
+	char *str;
+	size_t str_len;
 };
 
 typedef struct {

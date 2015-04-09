@@ -26,8 +26,6 @@
 extern zend_module_entry reflection_module_entry;
 #define phpext_reflection_ptr &reflection_module_entry
 
-#define PHP_REFLECTION_VERSION PHP_VERSION
-
 BEGIN_EXTERN_C()
 
 /* Class entry pointers */

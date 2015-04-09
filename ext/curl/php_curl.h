@@ -42,9 +42,6 @@
 # define PHP_CURL_API
 #endif
 
-#include "php_version.h"
-#define PHP_CURL_VERSION PHP_VERSION
-
 #include <curl/curl.h>
 #include <curl/multi.h>
 
@@ -182,6 +179,7 @@ typedef struct {
 	zend_resource           *res;
 	zend_bool                in_callback;
 	uint32_t				 clone;
+	zend_bool                safe_upload;
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1

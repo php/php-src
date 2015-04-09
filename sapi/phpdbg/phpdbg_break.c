@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #define PHPDBG_BREAK_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[9], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[10], flags)
 
 /**
  * Commands

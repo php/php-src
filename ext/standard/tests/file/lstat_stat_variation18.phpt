@@ -30,7 +30,7 @@ echo "*** Testing stat() with filename & directory name stored inside an object 
 
 class names {
   public $var_name;
-  public function __construct($name) {
+  public function names($name) {
     $this->var_name = $name;
   }
 }

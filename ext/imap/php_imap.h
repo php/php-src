@@ -46,8 +46,6 @@
 extern zend_module_entry imap_module_entry;
 #define imap_module_ptr &imap_module_entry
 
-#include "php_version.h"
-#define PHP_IMAP_VERSION PHP_VERSION
 
 /* Data types */
 

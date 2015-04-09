@@ -8,7 +8,7 @@ array_udiff_assoc(): Test return type and value for expected input
 */
 class cr {
     private $priv_member;
-    function __construct($val) {
+    function cr($val) {
         $this->priv_member = $val;
     }
     static function comp_func_cr($a, $b) {

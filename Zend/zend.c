@@ -399,18 +399,6 @@ static void zend_set_default_compile_time_values(void) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
-static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
-{
-	ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
-	osvi->dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if(!GetVersionEx((OSVERSIONINFO *) osvi)) {
-		ZEND_ASSERT(0); /* Should not happen as sizeof is used. */
-	}
-}
-/* }}} */
-#endif
-
 static void zend_init_exception_op(void) /* {{{ */
 {
 	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
@@ -528,9 +516,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
-#ifdef ZEND_WIN32
-	zend_get_windows_version_info(&executor_globals->windows_version_info);
-#endif
 }
 /* }}} */
 
@@ -781,9 +766,6 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
-#ifdef ZEND_WIN32
-	zend_get_windows_version_info(&EG(windows_version_info));
-#endif
 	virtual_cwd_deactivate();
 #endif
 }
@@ -860,12 +842,7 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* this should be compatible with the standard zenderror */
 void zenderror(const char *error) /* {{{ */
 {
-	if (EG(exception)) {
-		/* An exception was thrown in the lexer, don't throw another in the parser. */
-		return;
-	}
-
-	zend_throw_exception(zend_get_parse_exception(), error, E_PARSE);
+	zend_error(E_PARSE, "%s", error);
 }
 /* }}} */
 
@@ -1039,25 +1016,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_stack context_stack;
 	zend_array *symbol_table;
 
-	if (type & E_EXCEPTION) {
-		type &= ~E_EXCEPTION;
-		//TODO: we can't convert compile-time errors to exceptions yet???
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			char *message = NULL;
-
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-			va_start(args, format);
-#endif
-			zend_vspprintf(&message, 0, format, args);
-			zend_throw_exception(zend_get_engine_exception(), message, type);
-			efree(message);
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-			va_end(args);
-#endif
-			return;
-		}
-	}
-
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1227,6 +1185,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				CG(in_compilation) = 0;
 			}
 
+			ZVAL_UNDEF(&retval);
 			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
@@ -1303,35 +1262,6 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 # endif
 #endif
 
-ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
-{
-	va_list va;
-	char *message = NULL;
-
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
-	efree(message);
-	va_end(va);
-} /* }}} */
-
-ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
-{
-	va_list va;
-	char *message = NULL;
-
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	if (throw_exception) {
-		zend_throw_exception(zend_get_type_exception(), message, E_ERROR);
-	} else {
-		zend_error(E_WARNING, message);
-	}
-	efree(message);
-
-	va_end(va);
-} /* }}} */
-
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
@@ -1389,7 +1319,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 					EG(exception) = NULL;
 					ZVAL_OBJ(&params[0], old_exception);
 					ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
-
+					ZVAL_UNDEF(&retval2);
 					if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
 						zval_ptr_dtor(&retval2);
 						if (EG(exception)) {

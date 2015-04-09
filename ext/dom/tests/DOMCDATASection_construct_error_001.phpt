@@ -7,9 +7,13 @@ Nic Rosental nicrosental@gmail.com
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	try {
+	try 
+	{
 	    $section = new DOMCDataSection();
-	} catch (TypeException $e) {
+		
+	} 
+	catch (Exception $e) 
+	{
 	    echo $e->getMessage();
 	}
 ?>

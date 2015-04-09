@@ -38,7 +38,7 @@ class point
   var $x;
   var $y;
 
-  function __construct($x, $y) {
+  function point($x, $y) {
      $this->x = $x;
      $this->y = $y;
   }

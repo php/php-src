@@ -2,11 +2,11 @@
 SPL SplTempFileObject constructor sets correct defaults when pass 0 arguments
 --FILE--
 <?php
-try {
-    new SplTempFileObject('invalid');
-} catch (TypeException $e) {
-    echo $e->getMessage(), "\n";
-}
+new SplTempFileObject('invalid');
 ?>
 --EXPECTF--
-SplTempFileObject::__construct() expects parameter 1 to be integer, string given
+Fatal error: Uncaught exception 'RuntimeException' with message 'SplTempFileObject::__construct() expects parameter 1 to be integer, string given' in %s
+Stack trace:
+#0 %s: SplTempFileObject->__construct('invalid')
+#1 {main}
+  thrown in %s

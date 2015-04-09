@@ -40,6 +40,8 @@
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
+static const uint32_t uninitialized_bucket = {INVALID_IDX};
+
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
 static zend_ast *zend_ast_clone(zend_ast *ast);
 
@@ -288,22 +290,24 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
 	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->arData = NULL;
+	ht->arHash = NULL;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		ht->arData = source->arData;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	if (source->u.flags & HASH_FLAG_PACKED) {
 		ht->u.flags |= HASH_FLAG_PACKED;
-		HT_SET_DATA_ADDR(ht, (Bucket *) emalloc(HT_SIZE(ht)));
-		HT_HASH_RESET_PACKED(ht);
+		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			nIndex = p->h | ht->nTableMask;
+			nIndex = p->h & ht->nTableMask;
 
 			r = ht->arData + ht->nNumUsed;
 			q = ht->arData + p->h;
@@ -322,18 +326,19 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			zend_clone_zval(&q->val, bind);
 		}
 	} else {
-		HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-		HT_HASH_RESET(ht);
+		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+		ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+		memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 		for (idx = 0; idx < source->nNumUsed; idx++) {
 			p = source->arData + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			nIndex = p->h | ht->nTableMask;
+			nIndex = p->h & ht->nTableMask;
 
 			/* Insert into hash collision list */
 			q = ht->arData + ht->nNumUsed;
-			Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-			HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
+			Z_NEXT(q->val) = ht->arHash[nIndex];
+			ht->arHash[nIndex] = ht->nNumUsed++;
 
 			/* Initialize key */
 			q->h = p->h;
@@ -364,27 +369,28 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
 	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		ht->arData = source->arData;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t *)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
-		nIndex = p->h | ht->nTableMask;
+		nIndex = p->h & ht->nTableMask;
 
 		/* Insert into hash collision list */
 		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
+		Z_NEXT(q->val) = ht->arHash[nIndex];
+		ht->arHash[nIndex] = ht->nNumUsed++;
 
 		/* Initialize key */
 		q->h = p->h;
@@ -422,27 +428,28 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
 	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		ht->arData = source->arData;
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 
 	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
-	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
-	HT_HASH_RESET(ht);
+	ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(uint32_t)));
+	ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
+	memset(ht->arHash, INVALID_IDX, sizeof(uint32_t) * ht->nTableSize);
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
-		nIndex = p->h | ht->nTableMask;
+		nIndex = p->h & ht->nTableMask;
 
 		/* Insert into hash collision list */
 		q = ht->arData + ht->nNumUsed;
-		Z_NEXT(q->val) = HT_HASH(ht, nIndex);
-		HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(ht->nNumUsed++);
+		Z_NEXT(q->val) = ht->arHash[nIndex];
+		ht->arHash[nIndex] = ht->nNumUsed++;
 
 		/* Initialize key */
 		q->h = p->h;
@@ -659,7 +666,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			}
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 	return;
 
 failure:
@@ -702,7 +709,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		}
 		Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 	return;
 
 failure:
@@ -747,7 +754,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 			pCopyConstructor(&Z_PTR_P(t));
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 	return;
 
 failure:
@@ -755,7 +762,7 @@ failure:
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(ce1->info.user.filename);
 	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ce1->name->val);
+	zend_error(E_ERROR, "Cannot redeclare class %s", ce1->name->val);
 }
 
 #ifdef __SSE2__
@@ -770,6 +777,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	do {
 		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
+		_mm_prefetch(dqsrc + 6, _MM_HINT_NTA);
 
 		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
 		__m128i xmm1 = _mm_load_si128(dqsrc + 1);

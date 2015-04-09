@@ -24,9 +24,6 @@
 extern zend_module_entry simplexml_module_entry;
 #define phpext_simplexml_ptr &simplexml_module_entry
 
-#include "php_version.h"
-#define PHP_SIMPLEXML_VERSION PHP_VERSION
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

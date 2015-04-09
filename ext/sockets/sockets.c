@@ -360,7 +360,7 @@ zend_module_entry sockets_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(sockets),
 	PHP_MINFO(sockets),
-	PHP_SOCKETS_VERSION,
+	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(sockets),
 	PHP_GINIT(sockets),
 	NULL,
@@ -1079,8 +1079,7 @@ PHP_FUNCTION(socket_close)
 		if (stream != NULL) {
 			/* close & destroy stream, incl. removing it from the rsrc list;
 			 * resource stored in php_sock->zstream will become invalid */
-			php_stream_free(stream,
-					PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_CLOSE |
+			php_stream_free(stream, PHP_STREAM_FREE_CLOSE |
 					(stream->is_persistent?PHP_STREAM_FREE_CLOSE_PERSISTENT:0));
 		}
 	}
@@ -1178,11 +1177,11 @@ PHP_FUNCTION(socket_read)
 		RETURN_EMPTY_STRING();
 	}
 
-	tmpbuf = zend_string_truncate(tmpbuf, retval, 0);
+	tmpbuf = zend_string_realloc(tmpbuf, retval, 0);
 	tmpbuf->len = retval;
 	tmpbuf->val[tmpbuf->len] = '\0' ;
 
-	RETURN_NEW_STR(tmpbuf);
+	RETURN_STR(tmpbuf);
 }
 /* }}} */
 

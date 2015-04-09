@@ -18,10 +18,10 @@ $testClassInstance = new TestClass();
 
 try {
     var_dump($foo->invokeArgs($testClassInstance, true));
-} catch (EngineException $e) {
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
 
 ?>
---EXPECT--
-string(92) "Argument 2 passed to ReflectionMethod::invokeArgs() must be of the type array, boolean given"
+--EXPECTF--
+Catchable fatal error: Argument 2 passed to ReflectionMethod::invokeArgs() must be of the type array, boolean given in %s on line %d

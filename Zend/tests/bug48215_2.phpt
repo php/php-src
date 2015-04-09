@@ -8,7 +8,7 @@ class a {
 }
 class b extends a {}
 class c extends b { 
-	function __construct() {
+	function C() {
 		b::b();
 	}
 }

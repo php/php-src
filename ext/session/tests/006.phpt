@@ -21,7 +21,7 @@ class a {
  
 class b {
     public $a;
-    function __construct(&$a) {
+    function b(&$a) {
         $this->a = &$a;
     }
 }

@@ -70,7 +70,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
-	PHP_PDO_DBLIB_VERSION,
+	"1.0.1",
 	PHP_MODULE_GLOBALS(dblib),
 	PHP_GINIT(dblib),
 	NULL,

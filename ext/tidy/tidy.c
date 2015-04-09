@@ -38,6 +38,8 @@
 #define TIDY_CALL
 #endif
 
+#define PHP_TIDY_MODULE_VERSION	"2.0"
+
 /* {{{ ext/tidy macros
 */
 #define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
@@ -456,7 +458,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_RINIT(tidy),
 	NULL,
 	PHP_MINFO(tidy),
-	PHP_TIDY_VERSION,
+	PHP_TIDY_MODULE_VERSION,
 	PHP_MODULE_GLOBALS(tidy),
 	NULL,
 	NULL,
@@ -926,9 +928,9 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 		case TidyString: {
 			char *val = (char *) tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
 			if (val) {
-				return (void *) zend_string_init(val, strlen(val), 0);
+				return (void *) estrdup(val);
 			} else {
-				return (void *) STR_EMPTY_ALLOC();
+				return (void *) estrdup("");
 			}
 		}
 			break;
@@ -1075,7 +1077,7 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Tidy support", "enabled");
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
+	php_info_print_table_row(2, "Extension Version", PHP_TIDY_MODULE_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1396,7 +1398,9 @@ static PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 		switch (optt) {
 			case TidyString:
-				add_assoc_str(return_value, opt_name, (zend_string*)opt_value);
+				// TODO: avoid reallocation ???
+				add_assoc_string(return_value, opt_name, (char*)opt_value);
+				efree(opt_value);
 				break;
 
 			case TidyInteger:
@@ -1528,7 +1532,8 @@ static PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 	switch (optt) {
 		case TidyString:
-			RETVAL_STR((zend_string*)optval);
+			RETVAL_STRING((char *)optval);
+			efree(optval);
 			return;
 
 		case TidyInteger:

@@ -194,7 +194,7 @@ require_once('skipifconnectfailure.inc');
 	unset($bar); unset($id); unset($label_ref);
 	class foo {
 		public $foo;
-		public function __construct() {
+		public function foo() {
 			$this->foo = &$this->bar;
 		}
 	}
@@ -219,8 +219,8 @@ require_once('skipifconnectfailure.inc');
 	class mega_bar extends bar {
 		private $id;
 		public $id_ref;
-		public function __construct() {
-			parent::__construct();
+		public function mega_bar() {
+			$this->foo();
 			$this->id_ref = &$this->id;
 		}
 	}

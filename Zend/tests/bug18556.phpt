@@ -8,7 +8,7 @@ setlocale(LC_ALL, $g_lang);
 
 class InfoBlob {
    var $foo;
-   function __construct() {
+   function InfoBlob() {
       $this->foo = "Foo";
    }
 }

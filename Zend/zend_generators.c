@@ -123,9 +123,10 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zend_generator_cleanup_unfinished_execution(generator);
 		}
 
-		/* Free closure object */
+		/* Free a clone of closure */
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			OBJ_RELEASE((zend_object *) op_array->prototype);
+			destroy_op_array(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
 		}
 
 		efree(generator->stack);
@@ -185,7 +186,6 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 
 	zend_generator_close(generator, 0);
 
-	zval_ptr_dtor(&generator->retval);
 	zend_object_std_dtor(&generator->std);
 
 	if (generator->iterator) {
@@ -204,12 +204,21 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	/* The key will be incremented on first use, so it'll start at 0 */
 	generator->largest_used_integer_key = -1;
 
-	ZVAL_UNDEF(&generator->retval);
-
 	zend_object_std_init(&generator->std, class_type);
 	generator->std.handlers = &zend_generator_handlers;
 
 	return (zend_object*)generator;
+}
+/* }}} */
+
+static int copy_closure_static_var(zval *var, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	HashTable *target = va_arg(args, HashTable *);
+
+	ZVAL_MAKE_REF(var);
+	Z_ADDREF_P(var);
+	zend_hash_update(target, key->key, var);
+	return 0;
 }
 /* }}} */
 
@@ -222,6 +231,31 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	zend_vm_stack current_stack = EG(vm_stack);
 
 	current_stack->top = EG(vm_stack_top);
+	/* Create a clone of closure, because it may be destroyed */
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
+		*op_array_copy = *op_array;
+
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
+		op_array->run_time_cache = NULL;
+		if (op_array->static_variables) {
+			ALLOC_HASHTABLE(op_array_copy->static_variables);
+			zend_hash_init(
+				op_array_copy->static_variables,
+				zend_hash_num_elements(op_array->static_variables),
+				NULL, ZVAL_PTR_DTOR, 0
+			);
+			zend_hash_apply_with_arguments(
+				op_array->static_variables,
+				copy_closure_static_var, 1,
+				op_array_copy->static_variables
+			);
+		}
+
+		op_array = op_array_copy;
+	}
 
 	/* Create new execution context. We have to back up and restore
 	 * EG(current_execute_data) here. */
@@ -252,7 +286,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 static zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_error(E_EXCEPTION | E_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
+	zend_error(E_RECOVERABLE_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
 
 	return NULL;
 }
@@ -266,8 +300,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 	}
 
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot resume an already running generator");
-		return;
+		zend_error(E_ERROR, "Cannot resume an already running generator");
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
@@ -504,34 +537,6 @@ ZEND_METHOD(Generator, throw)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::getReturn()
- * Retrieves the return value of the generator */
-ZEND_METHOD(Generator, getReturn)
-{
-	zend_generator *generator;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	generator = (zend_generator *) Z_OBJ_P(getThis());
-
-	zend_generator_ensure_initialized(generator);
-	if (EG(exception)) {
-		return;
-	}
-
-	if (Z_ISUNDEF(generator->retval)) {
-		/* Generator hasn't returned yet -> error! */
-		zend_throw_exception(NULL,
-			"Cannot get return value of a generator that hasn't returned", 0);
-		return;
-	}
-
-	ZVAL_COPY(return_value, &generator->retval);
-}
-/* }}} */
-
 /* {{{ proto void Generator::__wakeup()
  * Throws an Exception as generators can't be serialized */
 ZEND_METHOD(Generator, __wakeup)
@@ -665,7 +670,6 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

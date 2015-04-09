@@ -158,58 +158,18 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 {
 	zend_string *ret;
 
-	if (!IS_INTERNED(s)) {
-		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
-			ret->len = len;
-			zend_string_forget_hash_val(ret);
-			return ret;
-		} else {
-			GC_REFCOUNT(s)--;
-		}
+	if (IS_INTERNED(s)) {
+		ret = zend_string_alloc(len, persistent);
+		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
+	} else if (EXPECTED(GC_REFCOUNT(s) == 1)) {
+		ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
+		ret->len = len;
+		zend_string_forget_hash_val(ret);
+	} else {
+		ret = zend_string_alloc(len, persistent);
+		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
+		GC_REFCOUNT(s)--;
 	}
-	ret = zend_string_alloc(len, persistent);
-	memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
-	return ret;
-}
-
-static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t len, int persistent)
-{
-	zend_string *ret;
-
-	ZEND_ASSERT(len >= s->len);
-	if (!IS_INTERNED(s)) {
-		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
-			ret->len = len;
-			zend_string_forget_hash_val(ret);
-			return ret;
-		} else {
-			GC_REFCOUNT(s)--;
-		}
-	}
-	ret = zend_string_alloc(len, persistent);
-	memcpy(ret->val, s->val, s->len + 1);
-	return ret;
-}
-
-static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size_t len, int persistent)
-{
-	zend_string *ret;
-
-	ZEND_ASSERT(len <= s->len);
-	if (!IS_INTERNED(s)) {
-		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
-			ret->len = len;
-			zend_string_forget_hash_val(ret);
-			return ret;
-		} else {
-			GC_REFCOUNT(s)--;
-		}
-	}
-	ret = zend_string_alloc(len, persistent);
-	memcpy(ret->val, s->val, len + 1);
 	return ret;
 }
 
@@ -217,18 +177,18 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 {
 	zend_string *ret;
 
-	if (!IS_INTERNED(s)) {
-		if (GC_REFCOUNT(s) == 1) {
-			ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
-			ret->len = (n * m) + l;
-			zend_string_forget_hash_val(ret);
-			return ret;
-		} else {
-			GC_REFCOUNT(s)--;
-		}
+	if (IS_INTERNED(s)) {
+		ret = zend_string_safe_alloc(n, m, l, persistent);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
+	} else if (GC_REFCOUNT(s) == 1) {
+		ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + l + 1), persistent);
+		ret->len = (n * m) + l;
+		zend_string_forget_hash_val(ret);
+	} else {
+		ret = zend_string_safe_alloc(n, m, l, persistent);
+		memcpy(ret->val, s->val, ((n * m) + l > (size_t)s->len ? (size_t)s->len : ((n * m) + l)) + 1);
+		GC_REFCOUNT(s)--;
 	}
-	ret = zend_string_safe_alloc(n, m, l, persistent);
-	memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
 	return ret;
 }
 
@@ -324,14 +284,8 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	/* Hash value can't be zero, so we always set the high bit */
-#if SIZEOF_ZEND_LONG == 8
-	return hash | Z_UL(0x8000000000000000);
-#elif SIZEOF_ZEND_LONG == 4
-	return hash | Z_UL(0x80000000);
-#else
-# error "Unknown SIZEOF_ZEND_LONG"
-#endif
+	ZEND_ASSERT(hash != 0);
+	return hash;
 }
 
 static zend_always_inline void zend_interned_empty_string_init(zend_string **s)

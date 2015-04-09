@@ -127,7 +127,7 @@ zend_module_entry php_gettext_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(php_gettext),
-	PHP_GETTEXT_VERSION,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

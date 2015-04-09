@@ -11,4 +11,4 @@ function get_config(): array {
 get_config();
 
 --EXPECTF--
-Fatal error: Return value of get_config() must be of the type array, integer returned in %s on line %d
+Catchable fatal error: Return value of get_config() must be of the type array, integer returned in %s on line %d

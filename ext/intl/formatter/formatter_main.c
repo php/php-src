@@ -25,7 +25,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern = NULL;
@@ -33,11 +33,10 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	zend_long   style;
 	UChar*      spattern     = NULL;
 	int32_t     spattern_len = 0;
-	int         zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "sl|s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -79,7 +78,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		RETURN_NULL();
 	}
@@ -91,17 +90,15 @@ PHP_FUNCTION( numfmt_create )
  */
 PHP_METHOD( NumberFormatter, __construct )
 {
-	zend_error_handling error_handling;
+	zval orig_this = *getThis();
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
+		zend_object_store_ctor_failed(Z_OBJ(orig_this));
+		ZEND_CTOR_MAKE_NULL();
 	}
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 

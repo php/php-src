@@ -25,21 +25,18 @@
 #include <unicode/gregocal.h>
 extern "C" {
 #include "../php_intl.h"
-#include "../intl_common.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
 #include <ext/date/php_date.h>
-#include "zend_exceptions.h"
 }
 
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 	return (GregorianCalendar*)co->ucal;
 }
 
-static void _php_intlgregcal_constructor_body(
-    INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*tz_object	= NULL;
 	zval		args_a[6] = {0},
@@ -49,7 +46,6 @@ static void _php_intlgregcal_constructor_body(
 	zend_long		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
-  int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset(NULL);
 
 	// parameter number validation / variant determination
@@ -73,7 +69,7 @@ static void _php_intlgregcal_constructor_body(
 
 	// argument parsing
 	if (variant <= 2) {
-		if (zend_parse_parameters_ex(zpp_flags, MIN(ZEND_NUM_ARGS(), 2),
+		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
 				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: bad arguments", 0);
@@ -81,7 +77,7 @@ static void _php_intlgregcal_constructor_body(
 			return;
 		}
 	}
-	if (variant > 2 && zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(),
+	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
 			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
 			&largs[5]) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -183,7 +179,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
 	ZVAL_COPY_VALUE(&orig, return_value);
 
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zval_dtor(&orig);
@@ -193,17 +189,17 @@ U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 {
-	zend_error_handling error_handling;
+	zval	orig_this	= *getThis();
+	intl_error_reset(NULL);
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	//changes this to IS_NULL (without first destroying) if there's an error
+	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
+		zend_object_store_ctor_failed(Z_OBJ(orig_this));
+		ZEND_CTOR_MAKE_NULL();
 	}
-	zend_restore_error_handling(&error_handling);
 }
 
 U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)

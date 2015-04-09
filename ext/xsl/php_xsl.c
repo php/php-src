@@ -47,8 +47,12 @@ static const zend_module_dep xsl_deps[] = {
 /* {{{ xsl_module_entry
  */
 zend_module_entry xsl_module_entry = {
+#if ZEND_MODULE_API_NO >= 20050617
 	STANDARD_MODULE_HEADER_EX, NULL,
 	xsl_deps,
+#elif ZEND_MODULE_API_NO >= 20010901
+	STANDARD_MODULE_HEADER,
+#endif
 	"xsl",
 	xsl_functions,
 	PHP_MINIT(xsl),
@@ -56,7 +60,9 @@ zend_module_entry xsl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xsl),
-	PHP_XSL_VERSION,
+#if ZEND_MODULE_API_NO >= 20010901
+	"0.1", /* Replace with version number for your extension */
+#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -123,6 +129,13 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+PHP_INI_BEGIN()
+/* Default is not allowing any write operations.
+   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44
+*/
+PHP_INI_ENTRY("xsl.security_prefs", "44", PHP_INI_ALL, NULL)
+PHP_INI_END()
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(xsl)
@@ -167,6 +180,8 @@ PHP_MINIT_FUNCTION(xsl)
 	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION",           LIBEXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION",  LIBEXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
 #endif
+
+    REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
@@ -244,6 +259,8 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 				   (const xmlChar *) "http://php.net/xsl");
 	xsltSetGenericErrorFunc(NULL, NULL);
 	xsltCleanupGlobals();
+
+	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }

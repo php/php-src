@@ -95,7 +95,7 @@ $oop_global = 0;
 class oop_class {
 	var $oop_name;
 	
-	function __construct() {
+	function oop_class() {
 		global $oop_global;
 		echo "oop_class()\n";
 		$this->oop_name = 'oop:' . ++$oop_global;
@@ -105,7 +105,7 @@ class oop_class {
 class oop_test {
 	static $oop_value;
 	
-	function __construct() {
+	function oop_test() {
 		echo "oop_test()\n";
 	}
 	
@@ -146,7 +146,7 @@ foo:1
 bar_static()
 bar_global()
 
-Notice: Only variables should be assigned by reference in %sbug20175.php on line 47
+Strict Standards: Only variables should be assigned by reference in %sbug20175.php on line 47
 bar:1
 bar_static()
 bar:1

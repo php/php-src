@@ -112,7 +112,7 @@ static void xmlwriter_free_resource_ptr(xmlwriter_object *intern)
 		ze_xmlwriter_object *obj = Z_XMLWRITER_P(object); \
 		intern = obj->xmlwriter_ptr; \
 		if (!intern) { \
-			php_error_docref(NULL, E_WARNING, "Invalid or uninitialized XMLWriter object"); \
+			php_error_docref(NULL, E_WARNING, "Invalid or unitialized XMLWriter object"); \
 			RETURN_FALSE; \
 		} \
 	}
@@ -664,7 +664,7 @@ zend_module_entry xmlwriter_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(xmlwriter),
-	PHP_XMLWRITER_VERSION,
+	"0.1",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

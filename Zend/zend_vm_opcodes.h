@@ -21,13 +21,6 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
-#define ZEND_VM_SPEC		1
-#define ZEND_VM_LINES		0
-#define ZEND_VM_KIND_CALL	1
-#define ZEND_VM_KIND_SWITCH	2
-#define ZEND_VM_KIND_GOTO	3
-#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
-
 BEGIN_EXTERN_C()
 
 ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
@@ -85,10 +78,9 @@ END_EXTERN_C()
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
-#define ZEND_FAST_CONCAT                      53
-#define ZEND_ROPE_INIT                        54
-#define ZEND_ROPE_ADD                         55
-#define ZEND_ROPE_END                         56
+#define ZEND_ADD_CHAR                         54
+#define ZEND_ADD_STRING                       55
+#define ZEND_ADD_VAR                          56
 #define ZEND_BEGIN_SILENCE                    57
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
@@ -187,7 +179,6 @@ END_EXTERN_C()
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
-#define ZEND_FETCH_CLASS_NAME                157
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161

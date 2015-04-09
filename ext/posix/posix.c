@@ -360,7 +360,7 @@ zend_module_entry posix_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(posix),
-	PHP_POSIX_VERSION,
+	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(posix),
 	PHP_GINIT(posix),
 	NULL,

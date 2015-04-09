@@ -9,4 +9,4 @@ echo "Should not get here!\n";
 ?>
 --EXPECTF--
 
-Fatal error: Call to a member function method() on null in %s on line %d 
+Catchable fatal error: Call to a member function method() on null in %s on line %d 

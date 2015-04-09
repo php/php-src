@@ -16,12 +16,8 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	  echo "--- testing: '$strVal' << '$otherVal' ---\n";
-      try {
-        var_dump(strVal<<$otherVal);
-      } catch (Exception $e) {
-        echo "Exception: " . $e->getMessage() . "\n";
-      }
+	   echo "--- testing: '$strVal' << '$otherVal' ---\n";   
+      var_dump(strVal<<$otherVal);
    }
 }
    
@@ -33,11 +29,11 @@ int(0)
 --- testing: '0' << '65' ---
 int(0)
 --- testing: '0' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '0' << '1.2' ---
 int(0)
 --- testing: '0' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '0' << 'abc' ---
 int(0)
 --- testing: '0' << '123abc' ---
@@ -61,11 +57,11 @@ int(0)
 --- testing: '65' << '65' ---
 int(0)
 --- testing: '65' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '65' << '1.2' ---
 int(0)
 --- testing: '65' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '65' << 'abc' ---
 int(0)
 --- testing: '65' << '123abc' ---
@@ -89,11 +85,11 @@ int(0)
 --- testing: '-44' << '65' ---
 int(0)
 --- testing: '-44' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '-44' << '1.2' ---
 int(0)
 --- testing: '-44' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '-44' << 'abc' ---
 int(0)
 --- testing: '-44' << '123abc' ---
@@ -117,11 +113,11 @@ int(0)
 --- testing: '1.2' << '65' ---
 int(0)
 --- testing: '1.2' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '1.2' << '1.2' ---
 int(0)
 --- testing: '1.2' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '1.2' << 'abc' ---
 int(0)
 --- testing: '1.2' << '123abc' ---
@@ -145,11 +141,11 @@ int(0)
 --- testing: '-7.7' << '65' ---
 int(0)
 --- testing: '-7.7' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '-7.7' << '1.2' ---
 int(0)
 --- testing: '-7.7' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '-7.7' << 'abc' ---
 int(0)
 --- testing: '-7.7' << '123abc' ---
@@ -173,11 +169,11 @@ int(0)
 --- testing: 'abc' << '65' ---
 int(0)
 --- testing: 'abc' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: 'abc' << '1.2' ---
 int(0)
 --- testing: 'abc' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: 'abc' << 'abc' ---
 int(0)
 --- testing: 'abc' << '123abc' ---
@@ -201,11 +197,11 @@ int(0)
 --- testing: '123abc' << '65' ---
 int(0)
 --- testing: '123abc' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123abc' << '1.2' ---
 int(0)
 --- testing: '123abc' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123abc' << 'abc' ---
 int(0)
 --- testing: '123abc' << '123abc' ---
@@ -229,11 +225,11 @@ int(0)
 --- testing: '123e5' << '65' ---
 int(0)
 --- testing: '123e5' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123e5' << '1.2' ---
 int(0)
 --- testing: '123e5' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123e5' << 'abc' ---
 int(0)
 --- testing: '123e5' << '123abc' ---
@@ -257,11 +253,11 @@ int(0)
 --- testing: '123e5xyz' << '65' ---
 int(0)
 --- testing: '123e5xyz' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123e5xyz' << '1.2' ---
 int(0)
 --- testing: '123e5xyz' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123e5xyz' << 'abc' ---
 int(0)
 --- testing: '123e5xyz' << '123abc' ---
@@ -285,11 +281,11 @@ int(0)
 --- testing: ' 123abc' << '65' ---
 int(0)
 --- testing: ' 123abc' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: ' 123abc' << '1.2' ---
 int(0)
 --- testing: ' 123abc' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: ' 123abc' << 'abc' ---
 int(0)
 --- testing: ' 123abc' << '123abc' ---
@@ -313,11 +309,11 @@ int(0)
 --- testing: '123 abc' << '65' ---
 int(0)
 --- testing: '123 abc' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123 abc' << '1.2' ---
 int(0)
 --- testing: '123 abc' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123 abc' << 'abc' ---
 int(0)
 --- testing: '123 abc' << '123abc' ---
@@ -341,11 +337,11 @@ int(0)
 --- testing: '123abc ' << '65' ---
 int(0)
 --- testing: '123abc ' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123abc ' << '1.2' ---
 int(0)
 --- testing: '123abc ' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '123abc ' << 'abc' ---
 int(0)
 --- testing: '123abc ' << '123abc' ---
@@ -369,11 +365,11 @@ int(0)
 --- testing: '3.4a' << '65' ---
 int(0)
 --- testing: '3.4a' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '3.4a' << '1.2' ---
 int(0)
 --- testing: '3.4a' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: '3.4a' << 'abc' ---
 int(0)
 --- testing: '3.4a' << '123abc' ---
@@ -397,11 +393,11 @@ int(0)
 --- testing: 'a5.9' << '65' ---
 int(0)
 --- testing: 'a5.9' << '-44' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: 'a5.9' << '1.2' ---
 int(0)
 --- testing: 'a5.9' << '-7.7' ---
-Exception: Bit shift by negative number
+bool(false)
 --- testing: 'a5.9' << 'abc' ---
 int(0)
 --- testing: 'a5.9' << '123abc' ---

@@ -17,11 +17,7 @@ echo $e->getMessage() . "\n";
 unlink($fname);
 }
 
-try {
 $a = new PharFileInfo(array());
-} catch (TypeException $e) {
-echo $e->getMessage() . "\n";
-}
 
 $a = new Phar($fname);
 $a['a'] = 'hi';
@@ -50,8 +46,9 @@ echo $e->getMessage() . "\n";
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
-PharFileInfo::__construct() expects parameter 1 to be string, array given
-Cannot access phar file entry '%s' in archive '%s'
+
+Warning: PharFileInfo::__construct() expects parameter 1 to be %string, array given in %spharfileinfo_construct.php on line %d
+Cannot access phar file entry '/oops/I/do/not/exist' in archive '%spharfileinfo_construct.phar'
 Cannot call constructor twice
-'%s' is not a valid phar archive URL (must have at least phar://filename.phar)
+'%spharfileinfo_construct.php' is not a valid phar archive URL (must have at least phar://filename.phar)
 ===DONE===

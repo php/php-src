@@ -265,7 +265,7 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request startup function */
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
-    PHP_XML_VERSION,
+    NO_VERSION_YET,
     PHP_MODULE_GLOBALS(xml), /* globals descriptor */
     PHP_GINIT(xml),          /* globals ctor */
     NULL,                    /* globals dtor */
@@ -559,7 +559,7 @@ static xml_encoding *xml_get_encoding(const XML_Char *name)
 /* }}} */
 
 /* {{{ xml_utf8_encode() */
-PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Char *encoding)
+PHPAPI zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Char *encoding)
 {
 	size_t pos = len;
 	zend_string *str;
@@ -604,13 +604,13 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 		s++;
 	}
 	str->val[str->len] = '\0';
-	str = zend_string_truncate(str, str->len, 0);
+	str = zend_string_realloc(str, str->len, 0);
 	return str;
 }
 /* }}} */
 
 /* {{{ xml_utf8_decode() */
-PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Char *encoding)
+PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Char *encoding)
 {
 	size_t pos = 0;
 	unsigned int c;
@@ -644,7 +644,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 	}
 	str->val[str->len] = '\0';
 	if (str->len < len) {
-		str = zend_string_truncate(str, str->len, 0);
+		str = zend_string_realloc(str, str->len, 0);
 	}
 
 	return str;
@@ -665,7 +665,7 @@ static int _xml_xmlcharlen(const XML_Char *s)
 /* }}} */
 
 /* {{{ _xml_zval_strdup() */
-PHP_XML_API char *_xml_zval_strdup(zval *val)
+PHPAPI char *_xml_zval_strdup(zval *val)
 {
 	if (Z_TYPE_P(val) == IS_STRING) {
 		char *buf = emalloc(Z_STRLEN_P(val) + 1);
@@ -892,7 +892,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					/* check if the current tag already has a value - if yes append to that! */
 					if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
 						int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+						Z_STR_P(myval) = zend_string_realloc(Z_STR_P(myval), newlen, 0);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 								decoded_value->val, decoded_value->len + 1);
 						zend_string_release(decoded_value);
@@ -909,7 +909,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
 									int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+									Z_STR_P(myval) = zend_string_realloc(Z_STR_P(myval), newlen, 0);
 									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 											decoded_value->val, decoded_value->len + 1);
 									zend_string_release(decoded_value);

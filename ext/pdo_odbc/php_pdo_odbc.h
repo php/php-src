@@ -24,9 +24,6 @@
 extern zend_module_entry pdo_odbc_module_entry;
 #define phpext_pdo_odbc_ptr &pdo_odbc_module_entry
 
-#include "php_version.h"
-#define PHP_PDO_ODBC_VERSION PHP_VERSION
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif

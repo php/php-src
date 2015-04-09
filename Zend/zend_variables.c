@@ -27,7 +27,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
-ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -84,7 +84,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 	}
 }
 
-ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -147,7 +147,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -178,7 +178,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -223,7 +223,7 @@ ZEND_API void zval_add_ref_unref(zval *p)
 	}
 }
 
-ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
 		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
@@ -255,6 +255,12 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 
 
 #if ZEND_DEBUG
+ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
+{
+	zval_copy_ctor(zvalue);
+}
+
+
 ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 {
 	zval_internal_dtor(zvalue);

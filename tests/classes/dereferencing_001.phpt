@@ -6,7 +6,7 @@ ZE2 dereferencing of objects from methods
 <?php
 
 class Name {
-	function __construct($_name) {
+	function Name($_name) {
 		$this->name = $_name;
 	}
 
@@ -18,7 +18,7 @@ class Name {
 class Person {
 	private $name;
 
-	function __construct($_name, $_address) {
+	function person($_name, $_address) {
 		$this->name = new Name($_name);
 	}
 

@@ -19,7 +19,7 @@ echo "\n--- Testing Abstract Class ---\n";
 // abstract class
 abstract class Name 
 {
-  public function __construct() {
+  public function Name() {
     $this->a = 10;
     $this->b = 12.222;
     $this->c = "string";
