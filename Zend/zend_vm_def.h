@@ -7674,7 +7674,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 ZEND_VM_C_LABEL(call_trampoline_end):
 	execute_data = EG(current_execute_data);
 
-	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type)) {
+	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type) || (call_kind & ZEND_CALL_TOP)) {
 		ZEND_VM_RETURN();
 	}
 
