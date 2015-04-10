@@ -45,7 +45,7 @@ PHP_FUNCTION(confirm_extname_compiled)
 
 	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
 
-	RETVAL_STRINGL(strg, len);
+	RETVAL_STRING(strg, len);
 	efree(strg);
 }
 /* }}} */
