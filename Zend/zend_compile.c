@@ -3942,6 +3942,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
+			fn->common.prototype = NULL;
 		}
 	}
 
