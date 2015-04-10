@@ -1814,7 +1814,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
 
-		EG(scope) = fbc->common.scope;
+		/* This must be already set on invokation of trampoline function */
+		/*EG(scope) = fbc->common.scope;*/
 		call->symbol_table = NULL;
 		i_init_func_execute_data(call, &fbc->op_array,
 				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
