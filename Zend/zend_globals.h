@@ -36,6 +36,7 @@
 #include "zend_modules.h"
 #include "zend_float.h"
 #include "zend_multibyte.h"
+#include "zend_multiply.h"
 #include "zend_arena.h"
 
 /* Define ZTS if you want a thread-safe Zend */
@@ -236,6 +237,9 @@ struct _zend_executor_globals {
 #if XPFPA_HAVE_CW
 	XPFPA_CW_DATATYPE saved_fpu_cw;
 #endif
+
+	zend_function trampoline;
+	zend_op       call_trampoline_op;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

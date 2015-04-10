@@ -188,6 +188,7 @@ END_EXTERN_C()
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
 #define ZEND_FETCH_CLASS_NAME                157
+#define ZEND_CALL_TRAMPOLINE                 158
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161

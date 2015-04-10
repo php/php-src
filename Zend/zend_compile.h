@@ -226,8 +226,11 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
 
-/* function flag for internal user call handlers __call, __callstatic */
-#define ZEND_ACC_CALL_VIA_HANDLER     0x200000
+/* call through user function trampoline. e.g. __call, __callstatic */
+#define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
+
+/* call through internal function handler. e.g. Closure::invoke() */
+#define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
 /* disable inline caching */
 #define ZEND_ACC_NEVER_CACHE          0x400000

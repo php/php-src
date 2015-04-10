@@ -8,6 +8,9 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Improved __call() and __callStatic() magic method handling. Now they are
+    called in a stackless way using ZEND_CALL_TRAMPOLINE opcode, without
+    additional stack frame. (Laruence, Dmitry)
   . Fixed weird operators behavior. Division by zero now emits warning and 
     returns +/-INF, modulo by zero and intdid() throws an exception, shifts
     by negative offset throw exceptions. Compile-time evaluation of division

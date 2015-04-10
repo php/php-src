@@ -1285,16 +1285,14 @@ ZEND_FUNCTION(method_exists)
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
 		&& (func = Z_OBJ_HT_P(klass)->get_method(&Z_OBJ_P(klass), method_name, NULL)) != NULL
 		) {
-			if (func->type == ZEND_INTERNAL_FUNCTION
-			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
-			) {
+			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true to the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
 					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
 
 				zend_string_release(lcname);
 				zend_string_release(func->common.function_name);
-				efree(func);
+				zend_free_trampoline(func);
 				return;
 			}
 			zend_string_release(lcname);
@@ -2508,8 +2506,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				if (prev_call &&
 				    prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type) &&
-					!(prev_call->func->common.type == ZEND_INTERNAL_FUNCTION &&
-						(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
+					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					break;
 				}
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {

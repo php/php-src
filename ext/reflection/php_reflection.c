@@ -265,8 +265,7 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
-		&& fptr->type == ZEND_INTERNAL_FUNCTION
-		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
+		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
 		zend_function *copy_fptr;
 		copy_fptr = emalloc(sizeof(zend_function));
@@ -283,11 +282,10 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 static void _free_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
-		&& fptr->type == ZEND_INTERNAL_FUNCTION
-		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
+		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
 		zend_string_release(fptr->internal_function.function_name);
-		efree(fptr);
+		zend_free_trampoline(fptr);
 	}
 }
 /* }}} */
@@ -2238,11 +2236,11 @@ ZEND_METHOD(reflection_parameter, __construct)
 	if (Z_TYPE_P(parameter) == IS_LONG) {
 		position= (int)Z_LVAL_P(parameter);
 		if (position < 0 || (uint32_t)position >= num_args) {
-			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
 				}
-				efree(fptr);
+				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {
 				zval_ptr_dtor(reference);
@@ -2276,11 +2274,11 @@ ZEND_METHOD(reflection_parameter, __construct)
 			}
 		}
 		if (position == -1) {
-			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
 				}
-				efree(fptr);
+				zend_free_trampoline(fptr);
 			}
 			if (is_closure) {
 				zval_ptr_dtor(reference);
@@ -2841,8 +2839,8 @@ ZEND_METHOD(reflection_method, getClosure)
 		}
 
 		/* This is an original closure object and __invoke is to be called. */
-		if (Z_OBJCE_P(obj) == zend_ce_closure && mptr->type == ZEND_INTERNAL_FUNCTION &&
-			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0)
+		if (Z_OBJCE_P(obj) == zend_ce_closure &&
+			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 		{
 			RETURN_ZVAL(obj, 1, 0);
 		} else {
@@ -3043,8 +3041,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	/*
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
 	 */
-	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
-		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
+	if ((mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 		fcc.function_handler = _copy_function(mptr);
 	}
 

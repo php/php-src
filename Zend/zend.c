@@ -432,6 +432,17 @@ static void zend_init_exception_op(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_init_call_trampoline_op(void) /* {{{ */
+{
+	memset(&EG(call_trampoline_op), 0, sizeof(EG(call_trampoline_op)));
+	EG(call_trampoline_op).opcode = ZEND_CALL_TRAMPOLINE;
+	EG(call_trampoline_op).op1_type = IS_UNUSED;
+	EG(call_trampoline_op).op2_type = IS_UNUSED;
+	EG(call_trampoline_op).result_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(&EG(call_trampoline_op));
+}
+/* }}} */
+
 #ifdef ZTS
 static void function_copy_ctor(zval *zv)
 {
@@ -511,6 +522,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_call_trampoline_op();
+	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->lambda_count = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
@@ -722,6 +735,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #ifndef ZTS
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_call_trampoline_op();
 #endif
 
 	zend_ini_startup();
