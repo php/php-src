@@ -130,7 +130,7 @@ PHP_FUNCTION(random_bytes)
 	zend_string *bytes;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (size < 1) {
@@ -162,7 +162,7 @@ PHP_FUNCTION(random_int)
 	zend_ulong result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (min >= max) {

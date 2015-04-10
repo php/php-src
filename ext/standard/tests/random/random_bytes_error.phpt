@@ -11,7 +11,7 @@ var_dump(random_bytes(-1));
 ?>
 --EXPECTF--
 Warning: random_bytes() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: random_bytes(): Length must be greater than 0 in %s on line %d
 bool(false)
