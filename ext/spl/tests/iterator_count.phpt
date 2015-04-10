@@ -23,4 +23,4 @@ Warning: iterator_count() expects exactly 1 parameter, 0 given in %s
 
 Warning: iterator_count() expects exactly 1 parameter, 2 given in %s
 
-Catchable fatal error: Argument 1 passed to iterator_count() must implement interface Traversable, %unicode_string_optional% given %s
+Fatal error: Argument 1 passed to iterator_count() must implement interface Traversable, %unicode_string_optional% given %s

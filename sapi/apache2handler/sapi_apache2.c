@@ -53,12 +53,6 @@
 
 #include "php_apache.h"
 
-#ifdef PHP_WIN32
-# if _MSC_VER <= 1300
-#  include "win32/php_strtoi64.h"
-# endif
-#endif
-
 /* UnixWare and Netware define shutdown to _shutdown, which causes problems later
  * on when using a structure member named shutdown. Since this source
  * file does not use the system call shutdown, it is safe to #undef it.K
@@ -72,7 +66,7 @@
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 
 static size_t
@@ -220,8 +214,13 @@ php_apache_sapi_get_stat(void)
 {
 	php_struct *ctx = SG(server_context);
 
+#ifdef PHP_WIN32
+	ctx->finfo.st_uid = 0;
+	ctx->finfo.st_gid = 0;
+#else
 	ctx->finfo.st_uid = ctx->r->finfo.user;
 	ctx->finfo.st_gid = ctx->r->finfo.group;
+#endif
 	ctx->finfo.st_dev = ctx->r->finfo.device;
 	ctx->finfo.st_ino = ctx->r->finfo.inode;
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
@@ -454,7 +453,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	(void)ts_resource(0);
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
@@ -546,8 +545,8 @@ static int php_handler(request_rec *r)
 	request_rec * volatile parent_req = NULL;
 #ifdef ZTS
 	/* initial resource fetch */
-	void ***tsrm_ls = ts_resource(0);
-	ZEND_TSRMLS_CACHE_UPDATE;
+	(void)ts_resource(0);
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req);
@@ -712,6 +711,9 @@ void php_ap2_register_hook(apr_pool_t *p)
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
+#ifdef ZEND_SIGNALS
+	ap_hook_child_init(zend_signal_init, NULL, NULL, APR_HOOK_MIDDLE);
+#endif
 	ap_hook_child_init(php_apache_child_init, NULL, NULL, APR_HOOK_MIDDLE);
 }
 

@@ -19,6 +19,6 @@ class Child extends Base {
 }
 ?>
 --EXPECT--
-Strict Standards: Declaration of Child::foo() should be compatible with Base::foo($var = '123', $more = NULL) in %sbug63336.php on line %d
+Warning: Declaration of Child::foo() should be compatible with Base::foo($var = '123', $more = NULL) in %sbug63336.php on line %d
 
-Strict Standards: Declaration of Child::bar() should be compatible with Base::bar($var, $more = 'XXX') in %sbug63336.php on line %d
+Warning: Declaration of Child::bar() should be compatible with Base::bar($var, $more = 'XXX') in %sbug63336.php on line %d

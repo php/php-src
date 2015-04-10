@@ -24,6 +24,9 @@
 extern zend_module_entry xmlreader_module_entry;
 #define phpext_xmlreader_ptr &xmlreader_module_entry
 
+#include "php_version.h"
+#define PHP_XMLREADER_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -34,7 +37,7 @@ extern zend_module_entry xmlreader_module_entry;
 /* If xmlreader and dom both are compiled statically,
    no DLL import should be used in xmlreader for dom symbols. */
 #ifdef PHP_WIN32
-# if defined(HAVE_DOM) && !defined(COMPILE_DL_DOM)
+# if defined(HAVE_DOM) && !defined(COMPILE_DL_DOM) && !defined(COMPILE_DL_XMLREADER)
 #  define DOM_LOCAL_DEFINES 1
 # endif
 #endif

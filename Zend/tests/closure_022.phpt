@@ -8,5 +8,5 @@ $foo = function() use ($a) {
 $foo->a = 1;
 ?>
 --EXPECTF--
-Catchable fatal error: Closure object cannot have properties in %sclosure_022.php on line 5
+Fatal error: Closure object cannot have properties in %sclosure_022.php on line 5
 

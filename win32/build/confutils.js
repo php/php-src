@@ -105,6 +105,7 @@ var PHP_RELEASE_VERSION = 0;
 var PHP_EXTRA_VERSION = "";
 var PHP_VERSION_STRING = "5.0.0";
 
+/* Get version numbers and DEFINE as a string */
 function get_version_numbers()
 {
 	var cin = file_get_contents("configure.in");
@@ -436,7 +437,7 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 't1lib', 'pgi', 'pgo'
+		 't1lib', 'pgi', 'pgo', 'all-shared'
 		);
 	var force;
 
@@ -906,7 +907,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (typeof(p) == "string") {
 		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
 	} else if (p == false) {
-		/* not found in the defaults or the explicit paths,
+		/* Not found in the defaults or the explicit paths,
 		 * so check the general extra includes; if we find
 		 * it here, no need to add another /I for it as we
 		 * already have it covered, unless we are adding
@@ -935,7 +936,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
-/* emits rule to generate version info for a SAPI
+/* Emits rule to generate version info for a SAPI
  * or extension.  Returns the name of the .res file
  * that will be generated */
 function generate_version_info_resource(makefiletarget, basename, creditspath, sapi)
@@ -1036,7 +1037,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 
 /* Check if PGO is enabled for given module. To disable PGO for a particular module,
 define a global variable by the following name scheme before SAPI() or EXTENSION() call
-	var PHP_MYMODULE_PGO = false; */
+var PHP_MYMODULE_PGO = false; */
 function is_pgo_desired(mod)
 {
 	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
@@ -1258,7 +1259,12 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	var ldflags;
 
 	if (shared == null) {
-		eval("shared = PHP_" + EXT + "_SHARED;");
+		if (force_all_shared()) {
+			shared = true;
+			eval("PHP_" + EXT + "_SHARED = true;");
+		} else { 
+			eval("shared = PHP_" + EXT + "_SHARED;");
+		}
 	} else {
 		eval("PHP_" + EXT + "_SHARED = shared;");
 	}
@@ -1576,7 +1582,7 @@ function output_as_table(header, ar_out)
 	for (j=0; j < l; j++) {
 		var tmax, tmin;
 
-		/*Figure out the max length per column */
+		/* Figure out the max length per column */
 		tmin = 0;
 		tmax = 0;
 		for (k = 0; k < ar_out.length; k++) {
@@ -1934,6 +1940,7 @@ function generate_config_h()
 	outfile.Close();
 }
 
+/* Generate phpize */
 function generate_phpize()
 {
 	STDOUT.WriteLine("Generating phpize");
@@ -1984,6 +1991,7 @@ function generate_phpize()
 	CJ.Close();
 }
 
+/* Generate the Makefile */
 function generate_makefile()
 {
 	STDOUT.WriteLine("Generating Makefile");
@@ -2033,6 +2041,7 @@ function generate_makefile()
 			var lib = "php_" + extensions_enabled[i][0] + ".lib";
 			var dll = "php_" + extensions_enabled[i][0] + ".dll";
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
 			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
 		}
 	} else {
@@ -2266,6 +2275,7 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
+/* Install Headers */
 function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
@@ -2318,7 +2328,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 	}
 }
 
-// for snapshot builders, this option will attempt to enable everything
+// For snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
 // by running "nmake snap"
 PHP_SNAPSHOT_BUILD = "no";
@@ -2330,7 +2340,6 @@ if (!MODE_PHPIZE) {
 	// compiler processes.
 	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
-
 
 function toolset_option_handle()
 {
@@ -2372,11 +2381,14 @@ function toolset_setup_compiler()
 		// 1400 is vs.net 2005
 		// 1500 is vs.net 2008
 		// 1600 is vs.net 2010
-		// Which version of the compiler do we have?
+		// 1700 is vs.net 2011
+		// 1800 is vs.net 2012
+		// 1900 is vs.net 2014
+		// Which version of the compiler do we have?12
 		VCVERS = COMPILER_NUMERIC_VERSION;
 
-		if (VCVERS < 1500) {
-			ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
+		if (VCVERS < 1700) {
+			ERROR("Unsupported MS C++ Compiler, VC11 (2011) minimum is required");
 		}
 
 		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
@@ -2437,12 +2449,12 @@ function toolset_setup_project_tools()
 	// avoid picking up midnight commander from cygwin
 	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
-	// Try locating manifest tool
-	if (VS_TOOLSET && VCVERS > 1200) {
+	// Try locating the manifest tool
+	if (VS_TOOLSET) {
 		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
 	}
 }
-
+/* Get compiler if the toolset is supported */
 function toolset_get_compiler()
 {
 	if (VS_TOOLSET) {
@@ -2456,6 +2468,7 @@ function toolset_get_compiler()
 	ERROR("Unsupported toolset");
 }
 
+/* Get compiler version if the toolset is supported */
 function toolset_get_compiler_version()
 {
 	var version;
@@ -2491,6 +2504,7 @@ function toolset_get_compiler_version()
 	ERROR("Failed to parse compiler version or unsupported toolset");
 }
 
+/* Get compiler name if the toolset is supported */
 function toolset_get_compiler_name()
 {
 	var version;
@@ -2580,7 +2594,7 @@ function toolset_setup_common_cflags()
 	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
 
 	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
-
+1
 	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3");
@@ -2588,30 +2602,18 @@ function toolset_setup_common_cflags()
 	if (VS_TOOLSET) {
 		ADD_FLAG("CFLAGS", " /FD ");
 
-		if (VCVERS < 1400) {
-			// Enable automatic precompiled headers
-			ADD_FLAG('CFLAGS', ' /YX ');
-
-			if (PHP_DEBUG == "yes") {
-				// Set some debug/release specific options
-				ADD_FLAG('CFLAGS', ' /GZ ');
-			}
+		// fun stuff: MS deprecated ANSI stdio and similar functions
+		// disable annoying warnings.  In addition, time_t defaults
+		// to 64-bit.  Ask for 32-bit.
+		if (X64) {
+			ADD_FLAG('CFLAGS', ' /wd4996 ');
+		} else {
+			ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
 		}
 
-		if (VCVERS >= 1400) {
-			// fun stuff: MS deprecated ANSI stdio and similar functions
-			// disable annoying warnings.  In addition, time_t defaults
-			// to 64-bit.  Ask for 32-bit.
-			if (X64) {
-				ADD_FLAG('CFLAGS', ' /wd4996 ');
-			} else {
-				ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
-			}
-
-			if (PHP_DEBUG == "yes") {
-				// Set some debug/release specific options
-				ADD_FLAG('CFLAGS', ' /RTC1 ');
-			}
+		if (PHP_DEBUG == "yes") {
+			// Set some debug/release specific options
+			ADD_FLAG('CFLAGS', ' /RTC1 ');
 		}
 
 	} else if (CLANG_TOOLSET) {
@@ -2635,16 +2637,7 @@ function toolset_setup_common_ldlags()
 	// PHP DLL link flags
 	DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
-	if (VS_TOOLSET) {
-		if (VCVERS >= 1700) {
-			DEFINE("LDFLAGS", "/nologo ");
-		} else {
-			DEFINE("LDFLAGS", "/nologo /version:" +
-					PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
-		}
-	} else {
-		DEFINE("LDFLAGS", "/nologo ");
-	}
+	DEFINE("LDFLAGS", "/nologo ");
 
 	// we want msvcrt in the PHP DLL
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
@@ -2816,5 +2809,10 @@ function add_extra_dirs()
 function trim(s)
 {
 	return s.replace(/^\s+/, "").replace(/\s+$/, "");
+}
+
+function force_all_shared()
+{
+	return !!PHP_ALL_SHARED && "yes" == PHP_ALL_SHARED;
 }
 

@@ -983,7 +983,7 @@ int php_oci_bind_post_exec(void *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-		Z_STR(bind->zval) = zend_string_realloc(Z_STR(bind->zval), Z_STRLEN(bind->zval)+1, 0);
+		Z_STR(bind->zval) = zend_string_extend(Z_STR(bind->zval), Z_STRLEN(bind->zval)+1, 0);
 		Z_STRVAL(bind->zval)[ Z_STRLEN(bind->zval) ] = '\0';
 	} else if (Z_TYPE(bind->zval) == IS_ARRAY) {
 		int i;

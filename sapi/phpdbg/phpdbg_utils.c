@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -502,7 +502,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 				parent = Z_ARRVAL_P(zv);
 			} else {
-				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) i, input);
+				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) (input[i] == '>' ? i - 1 : i), input);
 				return FAILURE;
 			}
 			index_len = 0;
@@ -516,11 +516,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 }
 
 int phpdbg_is_auto_global(char *name, int len) {
-	int ret;
-	zend_string *str = zend_string_init(name, len, 0);
-	ret = zend_is_auto_global(str);
-	efree(str);
-	return ret;
+	return zend_is_auto_global_str(name, len);
 }
 
 static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong num) {

@@ -21,6 +21,5 @@ if (PHP_OPCACHE != "no") {
   
 	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
-	ADD_FLAG('CFLAGS_OPCACHE', "/Dregexec=php_regexec /Dregerror=php_regerror /Dregfree=php_regfree /Dregcomp=php_regcomp /Iext/ereg/regex");
-
 }
+	

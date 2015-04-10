@@ -192,6 +192,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			port = ZEND_STRTOL(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
+				if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
+				    s += 2;
+				}
 			} else {
 				if (ret->scheme) efree(ret->scheme);
 				efree(ret);
@@ -201,12 +204,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			if (ret->scheme) efree(ret->scheme);
 			efree(ret);
 			return NULL;
-		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+		} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 			s += 2;
 		} else {
 			goto just_path;
 		}
-	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 		s += 2;
 	} else {
 		just_path:
@@ -521,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_realloc(start, to - (unsigned char*)start->val, 0);
+	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
 
 	return start;
 }
@@ -628,7 +631,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 		}
 	}
 	str->val[y] = '\0';
-	str = zend_string_realloc(str, y, 0);
+	str = zend_string_truncate(str, y, 0);
 
 	return str;
 }
@@ -765,7 +768,7 @@ no_name_header:
 				}
 
 				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));

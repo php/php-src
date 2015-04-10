@@ -28,8 +28,11 @@ MySQLPDOTest::skip();
 
 	try {
 
-		if (NULL !== ($db = @new PDO()))
-			printf("[001] Too few parameters\n");
+	    try {
+			if (NULL !== ($db = @new PDO()))
+				printf("[001] Too few parameters\n");
+		} catch (TypeException $ex) {
+		}
 
 		print tryandcatch(2, '$db = new PDO(chr(0));');
 		print tryandcatch(3, '$db = new PDO("a" . chr(0) . "b");');

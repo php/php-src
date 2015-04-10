@@ -38,7 +38,7 @@ ZEND_END_MODULE_GLOBALS(extname)
 #ifdef ZTS
 #define EXTNAME_G(v) ZEND_TSRMG(extname_globals_id, zend_extname_globals *, v)
 #ifdef COMPILE_DL_EXTNAME
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define EXTNAME_G(v) (extname_globals.v)

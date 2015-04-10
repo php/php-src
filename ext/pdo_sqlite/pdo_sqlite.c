@@ -31,8 +31,6 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 
-#define PHP_PDO_SQLITE_MODULE_VERSION	"1.0.1"
-
 /* {{{ pdo_sqlite_functions[] */
 const zend_function_entry pdo_sqlite_functions[] = {
 	PHP_FE_END
@@ -52,12 +50,8 @@ static const zend_module_dep pdo_sqlite_deps[] = {
 /* {{{ pdo_sqlite_module_entry
  */
 zend_module_entry pdo_sqlite_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_sqlite_deps,
-#else
-	STANDARD_MODULE_HEADER,
-#endif
 	"pdo_sqlite",
 	pdo_sqlite_functions,
 	PHP_MINIT(pdo_sqlite),
@@ -65,7 +59,7 @@ zend_module_entry pdo_sqlite_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_sqlite),
-	PHP_PDO_SQLITE_MODULE_VERSION,
+	PHP_PDO_SQLITE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -208,7 +208,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			if (err)
 				LocalFree(err);
 			php_com_throw_exception(hr, buf);
-			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
 		stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -248,7 +247,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			&datatype_name, &datatype_name_len,
 			&obj->code_page)) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!");
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
@@ -314,7 +312,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			LocalFree(err);
 		}
 		php_com_throw_exception(hr, buf);
-		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 }

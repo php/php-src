@@ -26,6 +26,9 @@
 extern zend_module_entry gmp_module_entry;
 #define phpext_gmp_ptr &gmp_module_entry
 
+#include "php_version.h"
+#define PHP_GMP_VERSION PHP_VERSION
+
 ZEND_MODULE_STARTUP_D(gmp);
 ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
@@ -95,7 +98,7 @@ ZEND_END_MODULE_GLOBALS(gmp)
 #ifdef ZTS
 #define GMPG(v) ZEND_TSRMG(gmp_globals_id, zend_gmp_globals *, v)
 #ifdef COMPILE_DL_GMP
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define GMPG(v) (gmp_globals.v)

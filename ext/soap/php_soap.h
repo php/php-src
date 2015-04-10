@@ -35,9 +35,7 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 
-#ifndef PHP_HAVE_STREAMS
-# error You lose - must be compiled against PHP 4.3.0 or later
-#endif
+#define PHP_SOAP_VERSION PHP_VERSION
 
 #ifndef PHP_WIN32
 # define TRUE 1
@@ -195,7 +193,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 #ifdef ZTS
 # define SOAP_GLOBAL(v) ZEND_TSRMG(soap_globals_id, zend_soap_globals *, v)
 # ifdef COMPILE_DL_SOAP
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 # endif
 #else
 # define SOAP_GLOBAL(v) (soap_globals.v)

@@ -76,17 +76,7 @@ END_EXTERN_C()
 
 /* MSVC detection (MSVC people usually don't use autoconf) */
 #if defined(_MSC_VER) && !defined(_WIN64)
-# if _MSC_VER >= 1500
-   /* Visual C++ 2008 or higher, supports _controlfp_s */
 #  define HAVE__CONTROLFP_S
-# else
-   /* Visual C++ (up to 2005), supports _controlfp */
-#  define HAVE__CONTROLFP
-# endif /* MSC_VER >= 1500 */
-  /* Tell MSVC optimizer that we access FP environment */
-# if _MSC_VER >= 1500
-#  pragma fenv_access (on)
-# endif
 #endif /* _MSC_VER */
 
 #ifdef HAVE__CONTROLFP_S

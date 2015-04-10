@@ -30,6 +30,7 @@
 #include "collator/collator_sort.h"
 #include <unicode/ubrk.h>
 #include "intl_error.h"
+#include "Zend/zend_exceptions.h"
 
 extern zend_module_entry intl_module_entry;
 #define phpext_intl_ptr &intl_module_entry
@@ -58,7 +59,7 @@ ZEND_END_MODULE_GLOBALS(intl)
 #ifdef ZTS
 #define INTL_G(v) ZEND_TSRMG(intl_globals_id, zend_intl_globals *, v)
 #ifdef COMPILE_DL_INTL
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define INTL_G(v) (intl_globals.v)

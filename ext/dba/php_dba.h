@@ -21,6 +21,9 @@
 #ifndef PHP_DBA_H
 #define PHP_DBA_H
 
+#include "php_version.h"
+#define PHP_DBA_VERSION PHP_VERSION
+
 #if HAVE_DBA
 
 typedef enum {

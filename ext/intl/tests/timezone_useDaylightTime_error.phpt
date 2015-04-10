@@ -19,4 +19,4 @@ Warning: IntlTimeZone::useDaylightTime() expects exactly 0 parameters, 1 given i
 Warning: IntlTimeZone::useDaylightTime(): intltz_use_daylight_time: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intltz_use_daylight_time() must be an instance of IntlTimeZone, null given in %s on line %d
+Fatal error: Argument 1 passed to intltz_use_daylight_time() must be an instance of IntlTimeZone, null given in %s on line %d

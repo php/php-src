@@ -273,9 +273,9 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	if (ret == SUCCESS) {
 		zend_string *opened_path;
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = estrndup(class_file, class_file_len);
+			file_handle.opened_path = zend_string_init(class_file, class_file_len, 0);
 		}
-		opened_path = zend_string_init(file_handle.opened_path, strlen(file_handle.opened_path), 0);
+		opened_path = zend_string_copy(file_handle.opened_path);
 		ZVAL_NULL(&dummy);
 		if (zend_hash_add(&EG(included_files), opened_path, &dummy)) {
 			new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
@@ -552,7 +552,7 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			lc_name = zend_string_realloc(lc_name, lc_name->len + sizeof(uint32_t), 0);
+			lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
 			memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
 			lc_name->val[lc_name->len] = '\0';
 			ZVAL_OBJ(&alfi.obj, obj_ptr);
@@ -663,7 +663,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			if (success != SUCCESS && obj_ptr) {
-				lc_name = zend_string_realloc(lc_name, lc_name->len + sizeof(uint32_t), 0);
+				lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
 				memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
 				lc_name->val[lc_name->len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);
@@ -956,7 +956,7 @@ zend_module_entry spl_module_entry = {
 	PHP_RINIT(spl),
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
-	"0.2",
+	PHP_SPL_VERSION,
 	PHP_MODULE_GLOBALS(spl),
 	PHP_GINIT(spl),
 	NULL,

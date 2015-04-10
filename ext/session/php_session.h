@@ -29,17 +29,20 @@
 
 #define PHP_SESSION_API 20150121
 
+#include "php_version.h"
+#define PHP_SESSION_VERSION PHP_VERSION
+
 /* save handler macros */
 #define PS_NUM_APIS      9
 #define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS    void **mod_data
-#define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val
-#define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val
+#define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
+#define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
 #define PS_DESTROY_ARGS  void **mod_data, zend_string *key
-#define PS_GC_ARGS       void **mod_data, int maxlifetime, int *nrdels
+#define PS_GC_ARGS       void **mod_data, zend_long maxlifetime, int *nrdels
 #define PS_CREATE_SID_ARGS void **mod_data
 #define PS_VALIDATE_SID_ARGS void **mod_data, zend_string *key
-#define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val
+#define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val, zend_long maxlifetime
 
 typedef struct ps_module_struct {
 	const char *s_name;
@@ -217,14 +220,14 @@ extern zend_module_entry session_module_entry;
 #ifdef ZTS
 #define PS(v) ZEND_TSRMG(ps_globals_id, php_ps_globals *, v)
 #ifdef COMPILE_DL_SESSION
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define PS(v) (ps_globals.v)
 #endif
 
 #define PS_SERIALIZER_ENCODE_ARGS void
-#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen
+#define PS_SERIALIZER_DECODE_ARGS const char *val, size_t vallen
 
 typedef struct ps_serializer_struct {
 	const char *name;
@@ -309,7 +312,6 @@ PHPAPI void php_session_reset_id(void);
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
-void php_session_shutdown(void *data);
 
 #define PS_CLASS_NAME "SessionHandler"
 extern zend_class_entry *php_session_class_entry;

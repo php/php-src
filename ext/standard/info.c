@@ -45,9 +45,6 @@ typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # include "winver.h"
 
-# if _MSC_VER < 1300
-#  define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
-# endif
 #endif
 
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
@@ -204,7 +201,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -294,21 +291,14 @@ PHPAPI zend_string *php_info_html_esc(char *string)
 
 char* php_get_windows_name()
 {
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
 	PGNSI pGNSI;
 	PGPI pGPI;
-	BOOL bOsVersionInfoEx;
 	DWORD dwType;
 	char *major = NULL, *sub = NULL, *retval;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-	if (!(bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi))) {
-		return NULL;
-	}
 
 	pGNSI = (PGNSI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
 	if(NULL != pGNSI) {
@@ -317,7 +307,7 @@ char* php_get_windows_name()
 		GetSystemInfo(&si);
 	}
 
-	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
+	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6 ) {
 		if (osvi.dwMajorVersion == 6) {
 			if( osvi.dwMinorVersion == 0 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION ) {
@@ -325,8 +315,7 @@ char* php_get_windows_name()
 				} else {
 					major = "Windows Server 2008";
 				}
-			} else
-			if ( osvi.dwMinorVersion == 1 ) {
+			} else if ( osvi.dwMinorVersion == 1 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION )  {
 					major = "Windows 7";
 				} else {
@@ -423,78 +412,6 @@ char* php_get_windows_name()
 				case PRODUCT_WEB_SERVER:
 					sub = "Web Server Edition";
 					break;
-			}
-		}
-
-		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 ) {
-			if (GetSystemMetrics(SM_SERVERR2))
-				major = "Windows Server 2003 R2";
-			else if (osvi.wSuiteMask==VER_SUITE_STORAGE_SERVER)
-				major = "Windows Storage Server 2003";
-			else if (osvi.wSuiteMask==VER_SUITE_WH_SERVER)
-				major = "Windows Home Server";
-			else if (osvi.wProductType == VER_NT_WORKSTATION &&
-				si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64) {
-				major = "Windows XP Professional x64 Edition";
-			} else {
-				major = "Windows Server 2003";
-			}
-
-			/* Test for the server type. */
-			if ( osvi.wProductType != VER_NT_WORKSTATION ) {
-				if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_IA64 ) {
-					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-						sub = "Datacenter Edition for Itanium-based Systems";
-					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-						sub = "Enterprise Edition for Itanium-based Systems";
-				}
-
-				else if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64 ) {
-					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-						sub = "Datacenter x64 Edition";
-					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-						sub = "Enterprise x64 Edition";
-					else sub = "Standard x64 Edition";
-				} else {
-					if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
-						sub = "Compute Cluster Edition";
-					else if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-						sub = "Datacenter Edition";
-					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-						sub = "Enterprise Edition";
-					else if ( osvi.wSuiteMask & VER_SUITE_BLADE )
-						sub = "Web Edition";
-					else sub = "Standard Edition";
-				}
-			}
-		}
-
-		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )	{
-			major = "Windows XP";
-			if( osvi.wSuiteMask & VER_SUITE_PERSONAL ) {
-				sub = "Home Edition";
-			} else if (GetSystemMetrics(SM_MEDIACENTER)) {
-				sub = "Media Center Edition";
-			} else if (GetSystemMetrics(SM_STARTER)) {
-				sub = "Starter Edition";
-			} else if (GetSystemMetrics(SM_TABLETPC)) {
-				sub = "Tablet PC Edition";
-			} else {
-				sub = "Professional";
-			}
-		}
-
-		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) {
-			major = "Windows 2000";
-
-			if (osvi.wProductType == VER_NT_WORKSTATION ) {
-				sub = "Professional";
-			} else {
-				if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
-					sub = "Datacenter Server";
-				else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
-					sub = "Advanced Server";
-				else sub = "Server";
 			}
 		}
 	} else {
@@ -899,16 +816,16 @@ PHPAPI void php_print_info(int flag)
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_P(data));
 		}
 		php_print_gpcse_array(ZEND_STRL("_REQUEST"));

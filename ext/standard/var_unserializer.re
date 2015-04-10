@@ -396,6 +396,8 @@ string_key:
 			return 0;
 		}
 
+		var_push_dtor(var_hash, data);
+
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
 			return 0;

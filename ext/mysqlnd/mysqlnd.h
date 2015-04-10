@@ -22,8 +22,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.11-dev - 20120503 - $Id$"
-#define MYSQLND_VERSION_ID 50011
+#define PHP_MYSQLND_VERSION "mysqlnd 5.0.12-dev - 20150407 - $Id$"
+#define MYSQLND_VERSION_ID 50012
 
 #define MYSQLND_PLUGIN_API_VERSION 2
 
@@ -69,11 +69,9 @@ PHPAPI void mysqlnd_library_end(void);
 PHPAPI unsigned int mysqlnd_plugin_register();
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin);
 PHPAPI unsigned int mysqlnd_plugin_count();
-PHPAPI void * _mysqlnd_plugin_find(const char * const name);
-#define mysqlnd_plugin_find(name) _mysqlnd_plugin_find((name));
+PHPAPI void * mysqlnd_plugin_find(const char * const name);
 
-PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument);
-#define mysqlnd_plugin_apply_with_argument(func, argument) _mysqlnd_plugin_apply_with_argument((func), (argument));
+PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument);
 
 #define mysqlnd_restart_psession(conn)	((conn)->data)->m->restart_psession((conn)->data)
 #define mysqlnd_end_psession(conn)		((conn)->data)->m->end_psession((conn)->data)
@@ -85,8 +83,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-#define mysqlnd_init(client_flags, persistent) _mysqlnd_init((client_flags), (persistent))
-PHPAPI MYSQLND * _mysqlnd_init(unsigned int client_flags, zend_bool persistent);
+PHPAPI MYSQLND * mysqlnd_init(unsigned int client_flags, zend_bool persistent);
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						  const char * host, const char * user,
 						  const char * passwd, unsigned int passwd_len,
@@ -100,8 +97,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)))
 #define mysqlnd_change_user_ex(conn, user, passwd, db, silent, passwd_len)	((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), (passwd_len))
 
-#define mysqlnd_debug(x)								_mysqlnd_debug((x))
-PHPAPI void _mysqlnd_debug(const char *mode);
+PHPAPI void mysqlnd_debug(const char *mode);
 
 /* Query */
 #define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) ZEND_FILE_LINE_CC)
@@ -113,12 +109,11 @@ PHPAPI void _mysqlnd_debug(const char *mode);
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
-#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len))
-#define mysqlnd_poll(r, err, d_pull,sec,usec,desc_num)	_mysqlnd_poll((r), (err), (d_pull), (sec), (usec), (desc_num))
-#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data)
+#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), MYSQLND_SEND_QUERY_EXPLICIT, NULL, NULL)
+#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data, MYSQLND_REAP_RESULT_EXPLICIT)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result))
 
-PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
+PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
 
 #define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0)
 #define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY)
@@ -290,7 +285,7 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)
 #ifdef ZTS
 #define MYSQLND_G(v) ZEND_TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
 #ifdef COMPILE_DL_MYSQLND
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define MYSQLND_G(v) (mysqlnd_globals.v)

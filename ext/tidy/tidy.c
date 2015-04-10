@@ -38,8 +38,6 @@
 #define TIDY_CALL
 #endif
 
-#define PHP_TIDY_MODULE_VERSION	"2.0"
-
 /* {{{ ext/tidy macros
 */
 #define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
@@ -458,7 +456,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_RINIT(tidy),
 	NULL,
 	PHP_MINFO(tidy),
-	PHP_TIDY_MODULE_VERSION,
+	PHP_TIDY_VERSION,
 	PHP_MODULE_GLOBALS(tidy),
 	NULL,
 	NULL,
@@ -468,7 +466,7 @@ zend_module_entry tidy_module_entry = {
 
 #ifdef COMPILE_DL_TIDY
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(tidy)
 #endif
@@ -928,15 +926,15 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 		case TidyString: {
 			char *val = (char *) tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
 			if (val) {
-				return (void *) estrdup(val);
+				return (void *) zend_string_init(val, strlen(val), 0);
 			} else {
-				return (void *) estrdup("");
+				return (void *) STR_EMPTY_ALLOC();
 			}
 		}
 			break;
 
 		case TidyInteger:
-			return (void *) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
+			return (void *) (uintptr_t) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
 			break;
 
 		case TidyBoolean:
@@ -1058,7 +1056,7 @@ static PHP_MINIT_FUNCTION(tidy)
 static PHP_RINIT_FUNCTION(tidy)
 {
 #if defined(COMPILE_DL_TIDY) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	php_tidy_clean_output_start(ZEND_STRL("ob_tidyhandler"));
@@ -1077,7 +1075,7 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Tidy support", "enabled");
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_MODULE_VERSION " ($Id$)");
+	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -1398,9 +1396,7 @@ static PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 		switch (optt) {
 			case TidyString:
-				// TODO: avoid reallocation ???
-				add_assoc_string(return_value, opt_name, (char*)opt_value);
-				efree(opt_value);
+				add_assoc_str(return_value, opt_name, (zend_string*)opt_value);
 				break;
 
 			case TidyInteger:
@@ -1532,8 +1528,7 @@ static PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 	switch (optt) {
 		case TidyString:
-			RETVAL_STRING((char *)optval);
-			efree(optval);
+			RETVAL_STR((zend_string*)optval);
 			return;
 
 		case TidyInteger:

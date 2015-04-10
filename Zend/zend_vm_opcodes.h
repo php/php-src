@@ -21,6 +21,13 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#define ZEND_VM_SPEC		1
+#define ZEND_VM_LINES		0
+#define ZEND_VM_KIND_CALL	1
+#define ZEND_VM_KIND_SWITCH	2
+#define ZEND_VM_KIND_GOTO	3
+#define ZEND_VM_KIND		ZEND_VM_KIND_CALL
+
 BEGIN_EXTERN_C()
 
 ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
@@ -78,9 +85,10 @@ END_EXTERN_C()
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
-#define ZEND_ADD_CHAR                         54
-#define ZEND_ADD_STRING                       55
-#define ZEND_ADD_VAR                          56
+#define ZEND_FAST_CONCAT                      53
+#define ZEND_ROPE_INIT                        54
+#define ZEND_ROPE_ADD                         55
+#define ZEND_ROPE_END                         56
 #define ZEND_BEGIN_SILENCE                    57
 #define ZEND_END_SILENCE                      58
 #define ZEND_INIT_FCALL_BY_NAME               59
@@ -101,8 +109,8 @@ END_EXTERN_C()
 #define ZEND_UNSET_VAR                        74
 #define ZEND_UNSET_DIM                        75
 #define ZEND_UNSET_OBJ                        76
-#define ZEND_FE_RESET                         77
-#define ZEND_FE_FETCH                         78
+#define ZEND_FE_RESET_R                       77
+#define ZEND_FE_FETCH_R                       78
 #define ZEND_EXIT                             79
 #define ZEND_FETCH_R                          80
 #define ZEND_FETCH_DIM_R                      81
@@ -149,6 +157,13 @@ END_EXTERN_C()
 #define ZEND_DEFINED                         122
 #define ZEND_TYPE_CHECK                      123
 #define ZEND_VERIFY_RETURN_TYPE              124
+#define ZEND_FE_RESET_RW                     125
+#define ZEND_FE_FETCH_RW                     126
+#define ZEND_FE_FREE                         127
+#define ZEND_INIT_DYNAMIC_CALL               128
+#define ZEND_DO_ICALL                        129
+#define ZEND_DO_UCALL                        130
+#define ZEND_DO_FCALL_BY_NAME                131
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
@@ -166,11 +181,13 @@ END_EXTERN_C()
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ          148
 #define ZEND_HANDLE_EXCEPTION                149
 #define ZEND_USER_OPCODE                     150
+#define ZEND_ASSERT_CHECK                    151
 #define ZEND_JMP_SET                         152
 #define ZEND_DECLARE_LAMBDA_FUNCTION         153
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
+#define ZEND_FETCH_CLASS_NAME                157
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161
@@ -182,5 +199,6 @@ END_EXTERN_C()
 #define ZEND_ASSIGN_POW                      167
 #define ZEND_BIND_GLOBAL                     168
 #define ZEND_COALESCE                        169
+#define ZEND_SPACESHIP                       170
 
 #endif

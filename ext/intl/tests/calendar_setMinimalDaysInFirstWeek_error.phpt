@@ -36,5 +36,5 @@ bool(false)
 Warning: intlcal_set_minimal_days_in_first_week(): intlcal_set_minimal_days_in_first_week: invalid number of days; must be between 1 and 7 in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_set_minimal_days_in_first_week() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_set_minimal_days_in_first_week() must be an instance of IntlCalendar, integer given in %s on line %d
 

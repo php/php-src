@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 	if (Z_TYPE(PG(http_globals)[type]) != IS_UNDEF) {
 		zval_dtor(&PG(http_globals)[type]);
 	}
-	if ((zvp = zend_hash_str_find(&EG(symbol_table).ht, name, strlen(name)))) {
+	if ((zvp = zend_hash_str_find(&EG(symbol_table), name, strlen(name)))) {
 		Z_ADDREF_P(zvp);
 		PG(http_globals)[type] = *zvp;
 	}
@@ -157,7 +157,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		PG(auto_globals_jit) = 0;
 		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_dearm_autoglobals);
 
-		zend_hash_clean(&EG(symbol_table).ht);
+		zend_hash_clean(&EG(symbol_table));
 		EG(symbol_table) = *Z_ARR_P(zvp);
 
 		/* Rebuild cookies, env vars etc. from GLOBALS (PG(http_globals)) */

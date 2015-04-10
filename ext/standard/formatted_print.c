@@ -61,7 +61,7 @@ php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
 	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(), (*buffer)->len));
-		*buffer = zend_string_realloc(*buffer, (*buffer)->len << 1, 0);
+		*buffer = zend_string_extend(*buffer, (*buffer)->len << 1, 0);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	(*buffer)->val[(*pos)++] = add;
@@ -101,7 +101,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 			size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %d bytes\n", size));
-		*buffer = zend_string_realloc(*buffer, size, 0);
+		*buffer = zend_string_extend(*buffer, size, 0);
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {

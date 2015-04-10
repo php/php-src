@@ -137,27 +137,27 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 	return entry;
 }
 
-/* Returns the data associated with key on success
- * Returns NULL if data doesn't exist
- */
-void* zend_accel_hash_find(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_ulong hash_value, int data)
 {
-	zend_ulong hash_value;
-	zend_ulong index;
-	zend_accel_hash_entry *entry;
+	zend_ulong index = hash_value % accel_hash->max_num_entries;
+	zend_accel_hash_entry *entry = accel_hash->hash_table[index];
 
-	hash_value = zend_inline_hash_func(key, key_length);
-	index = hash_value % accel_hash->max_num_entries;
-
-	entry = accel_hash->hash_table[index];
 	while (entry) {
 		if (entry->hash_value == hash_value
 			&& entry->key_length == key_length
 			&& !memcmp(entry->key, key, key_length)) {
 			if (entry->indirect) {
-				return ((zend_accel_hash_entry *) entry->data)->data;
+				if (data) {
+					return ((zend_accel_hash_entry*)entry->data)->data;
+				} else {
+					return entry->data;
+				}
 			} else {
-				return entry->data;
+				if (data) {
+					return entry->data;
+				} else {
+					return entry;
+				}
 			}
 		}
 		entry = entry->next;
@@ -165,32 +165,56 @@ void* zend_accel_hash_find(zend_accel_hash *accel_hash, char *key, uint32_t key_
 	return NULL;
 }
 
+/* Returns the data associated with key on success
+ * Returns NULL if data doesn't exist
+ */
+void* zend_accel_hash_find(zend_accel_hash *accel_hash, zend_string *key)
+{
+	return zend_accel_hash_find_ex(
+		accel_hash,
+		key->val,
+		key->len,
+		zend_string_hash_val(key),
+		1);
+}
+
 /* Returns the hash entry associated with key on success
  * Returns NULL if it doesn't exist
  */
-zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, zend_string *key)
 {
-	zend_ulong hash_value;
-	zend_ulong index;
-	zend_accel_hash_entry *entry;
+	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(
+		accel_hash,
+		key->val,
+		key->len,
+		zend_string_hash_val(key),
+		0);
+}
 
-	hash_value = zend_inline_hash_func(key, key_length);
-	index = hash_value % accel_hash->max_num_entries;
+/* Returns the data associated with key on success
+ * Returns NULL if data doesn't exist
+ */
+void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+{
+	return zend_accel_hash_find_ex(
+		accel_hash,
+		key,
+		key_length,
+		zend_inline_hash_func(key, key_length),
+		1);
+}
 
-	entry = accel_hash->hash_table[index];
-	while (entry) {
-		if (entry->hash_value == hash_value
-			&& entry->key_length == key_length
-			&& !memcmp(entry->key, key, key_length)) {
-			if (entry->indirect) {
-				return (zend_accel_hash_entry *) entry->data;
-			} else {
-				return entry;
-			}
-		}
-		entry = entry->next;
-	}
-	return NULL;
+/* Returns the hash entry associated with key on success
+ * Returns NULL if it doesn't exist
+ */
+zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+{
+	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(
+		accel_hash,
+		key,
+		key_length,
+		zend_inline_hash_func(key, key_length),
+		0);
 }
 
 int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, uint32_t key_length)

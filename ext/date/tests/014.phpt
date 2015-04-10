@@ -37,4 +37,4 @@ Warning: timezone_offset_get() expects exactly 2 parameters, 0 given in %s on li
 bool(false)
 int(0)
 
-Catchable fatal error: Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of DateTime given in %s
+Fatal error: Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of DateTime given in %s

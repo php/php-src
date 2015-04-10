@@ -24,6 +24,9 @@
 extern zend_module_entry xsl_module_entry;
 #define phpext_xsl_ptr &xsl_module_entry
 
+#include "php_version.h"
+#define PHP_XSL_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

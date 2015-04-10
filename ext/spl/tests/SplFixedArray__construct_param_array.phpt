@@ -5,8 +5,12 @@ PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
 
-$array = new SplFixedArray( array("string", 1) );
+try {
+	$array = new SplFixedArray( array("string", 1) );
+} catch (TypeException $iae) {
+	echo "Ok - ".$iae->getMessage().PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be integer, array given in %s on line %d
+Ok - SplFixedArray::__construct() expects parameter 1 to be integer, array given

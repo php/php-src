@@ -16,4 +16,4 @@ $baz = new foo();
 var_dump($func=$baz->bar(), $func());
 
 --EXPECTF--
-Catchable fatal error: Return value of foo::{closure}() must be of the type array, null returned in %s on line %d
+Fatal error: Return value of foo::{closure}() must be of the type array, null returned in %s on line %d

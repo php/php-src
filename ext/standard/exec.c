@@ -189,6 +189,10 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
 	}
+	if (strlen(cmd) != cmd_len) {
+		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
+		RETURN_FALSE;
+	}
 
 	if (!ret_array) {
 		ret = php_exec(mode, cmd, NULL, return_value);
@@ -322,7 +326,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = zend_string_realloc(cmd, y, 0);
+		cmd = zend_string_truncate(cmd, y, 0);
 	}
 
 	cmd->len = y;
@@ -388,7 +392,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = zend_string_realloc(cmd, y, 0);
+		cmd = zend_string_truncate(cmd, y, 0);
 	}
 	cmd->len = y;
 	return cmd;

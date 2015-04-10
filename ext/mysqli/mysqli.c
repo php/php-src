@@ -537,7 +537,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(mysqli)
 {
 #if defined(COMPILE_DL_MYSQLI) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	mysqli_globals->num_links = 0;
 	mysqli_globals->num_active_persistent = 0;
@@ -1008,12 +1008,8 @@ static const  zend_module_dep mysqli_deps[] = {
 /* {{{ mysqli_module_entry
  */
 zend_module_entry mysqli_module_entry = {
-#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	mysqli_deps,
-#elif ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
-#endif
 	"mysqli",
 	mysqli_functions,
 	PHP_MINIT(mysqli),
@@ -1021,7 +1017,7 @@ zend_module_entry mysqli_module_entry = {
 	PHP_RINIT(mysqli),
 	PHP_RSHUTDOWN(mysqli),
 	PHP_MINFO(mysqli),
-	"0.1", /* Replace with version number for your extension */
+	PHP_MYSQLI_VERSION,
 	PHP_MODULE_GLOBALS(mysqli),
 	PHP_GINIT(mysqli),
 	NULL,
@@ -1032,7 +1028,7 @@ zend_module_entry mysqli_module_entry = {
 
 #ifdef COMPILE_DL_MYSQLI
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(mysqli)
 #endif

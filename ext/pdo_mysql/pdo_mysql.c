@@ -33,7 +33,7 @@
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(pdo_mysql)
 #endif
@@ -210,7 +210,7 @@ static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
 static PHP_GINIT_FUNCTION(pdo_mysql)
 {
 #if defined(COMPILE_DL_PDO_MYSQL) && defined(ZTS)
-ZEND_TSRMLS_CACHE_UPDATE;
+ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 #ifndef PHP_WIN32
 	pdo_mysql_globals->default_socket = NULL;
@@ -256,7 +256,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	NULL,
 #endif
 	PHP_MINFO(pdo_mysql),
-	"1.0.2",
+	PHP_PDO_MYSQL_VERSION,
 	PHP_MODULE_GLOBALS(pdo_mysql),
 	PHP_GINIT(pdo_mysql),
 	NULL,

@@ -154,7 +154,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 PHP_METHOD(domelement, __construct)
 {
 
-	zval *id;
+	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL, *uri = NULL;
@@ -163,14 +163,10 @@ PHP_METHOD(domelement, __construct)
 	size_t name_len, value_len = 0, uri_len = 0;
 	int name_valid;
 	xmlNsPtr nsptr = NULL;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s!s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s!s", &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
 		return;
 	}
-	zend_restore_error_handling(&error_handling);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {

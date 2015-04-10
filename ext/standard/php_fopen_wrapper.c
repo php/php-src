@@ -82,7 +82,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count)
 
 	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
-		int read_bytes = sapi_read_post_block(buf, count);
+		size_t read_bytes = sapi_read_post_block(buf, count);
 
 		if (read_bytes > 0) {
 			php_stream_seek(input->body, 0, SEEK_END);
@@ -172,7 +172,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 /* }}} */
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-									 char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+									 zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -345,6 +345,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			efree(pathdup);
 			return NULL;
 		}
+
 		if (!(stream = php_stream_open_wrapper(p + 10, mode, options, opened_path))) {
 			efree(pathdup);
 			return NULL;

@@ -98,20 +98,8 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 	timezone_object_construct(tz_clone, return_value, 1);
 }
 
-U_CFUNC PHP_FUNCTION(datefmt_set_timezone_id)
-{
-	php_error_docref0(NULL, E_DEPRECATED,
-			"Use datefmt_set_timezone() instead, which also accepts a plain "
-			"time zone identifier and for which this function is now an "
-			"alias");
-	PHP_FN(datefmt_set_timezone)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
 /* {{{ proto boolean IntlDateFormatter::setTimeZone(mixed $timezone)
- * Set formatter's timezone. }}} */
-/* {{{ proto boolean datefmt_set_timezone_id(IntlDateFormatter $mf, $timezone_id)
- * Set formatter timezone_id.
- */
+ * Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
 	zval		*timezone_zv;

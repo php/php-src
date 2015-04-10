@@ -28,4 +28,4 @@ Warning: intlcal_get_time() expects exactly 1 parameter, 2 given in %s on line %
 Warning: intlcal_get_time(): intlcal_get_time: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_time() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_time() must be an instance of IntlCalendar, integer given in %s on line %d

@@ -765,7 +765,7 @@ PHP_FUNCTION(touch)
 			}
 			stream = php_stream_open_wrapper_ex(filename, "c", REPORT_ERRORS, NULL, NULL);
 			if(stream != NULL) {
-				php_stream_pclose(stream);
+				php_stream_close(stream);
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;

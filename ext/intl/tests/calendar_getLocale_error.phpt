@@ -39,4 +39,4 @@ Warning: intlcal_get_locale() expects exactly 2 parameters, 1 given in %s on lin
 Warning: intlcal_get_locale(): intlcal_get_locale: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_locale() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_locale() must be an instance of IntlCalendar, integer given in %s on line %d

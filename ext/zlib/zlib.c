@@ -82,10 +82,7 @@ static int php_zlib_output_encoding(void)
 	zval *enc;
 
 	if (!ZLIBG(compression_coding)) {
-		zend_string *name = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
-		zend_is_auto_global(name);
-		zend_string_release(name);
-		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
 			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
 			convert_to_string(enc);
 			if (strstr(Z_STRVAL_P(enc), "gzip")) {
@@ -339,7 +336,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
-			out = zend_string_realloc(out, Z.total_out, 0);
+			out = zend_string_truncate(out, Z.total_out, 0);
 			out->val[out->len] = '\0';
 			return out;
 		} else {
@@ -736,7 +733,7 @@ PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 
 #ifdef COMPILE_DL_ZLIB
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(php_zlib)
 #endif
@@ -1023,7 +1020,7 @@ static PHP_MINFO_FUNCTION(zlib)
 static PHP_GINIT_FUNCTION(zlib)
 {
 #if defined(COMPILE_DL_ZLIB) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;
@@ -1040,7 +1037,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_RINIT(zlib),
 	PHP_RSHUTDOWN(zlib),
 	PHP_MINFO(zlib),
-	"2.0",
+	PHP_ZLIB_VERSION,
 	PHP_MODULE_GLOBALS(zlib),
 	PHP_GINIT(zlib),
 	NULL,

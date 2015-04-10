@@ -9,19 +9,24 @@ set_error_handler(function($code, $message) {
 $comparator= null;
 $list= [1, 4, 2, 3, -1];
 usort($list, function($a, $b) use ($comparator) {
-  return $comparator->compare($a, $b);
+  try {
+	  return $comparator->compare($a, $b);
+  } catch (EngineException $e) {
+	  var_dump($e->getCode(), $e->getMessage());
+	  return 0;
+  }
 });
 var_dump($list);
 echo "Alive\n";
 ?>
 --EXPECTF--
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
 array(5) {
   [0]=>

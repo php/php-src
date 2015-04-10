@@ -16,7 +16,11 @@ echo "\n-- Testing new DateTime() with more than expected no. of arguments --\n"
 $time = "GMT";
 $timezone  = timezone_open("GMT");
 $extra_arg = 99;
-var_dump( new DateTime($time, $timezone, $extra_arg) );
+try {
+    var_dump( new DateTime($time, $timezone, $extra_arg) );
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -24,9 +28,5 @@ var_dump( new DateTime($time, $timezone, $extra_arg) );
 *** Testing date_create() : error conditions ***
 
 -- Testing new DateTime() with more than expected no. of arguments --
-
-Fatal error: Uncaught exception 'Exception' with message 'DateTime::__construct() expects at most 2 parameters, 3 given' in %s:%d
-Stack trace:
-#0 %s(%d): DateTime->__construct('GMT', Object(DateTimeZone), 99)
-#1 {main}
-  thrown in %s on line %d
+DateTime::__construct() expects at most 2 parameters, 3 given
+===DONE===

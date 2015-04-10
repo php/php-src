@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -60,7 +60,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 					zend_hash_index_update_mem(vars, (zend_ulong) ops->vars - op->var, &id, sizeof(zend_ulong));
 				}
 			}
-			asprintf(&decode, "@%llu", id);
+			asprintf(&decode, "@" ZEND_ULONG_FMT, id);
 		} break;
 
 		case IS_CONST:
@@ -91,7 +91,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 
 	case ZEND_JMPZNZ:
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
-			asprintf(&decode[2], "J%u or J%llu", op->op2.opline_num, op->extended_value);
+			asprintf(&decode[2], "J%u or J%" PRIu32, op->op2.opline_num, op->extended_value);
 		goto result;
 
 	case ZEND_JMPZ:

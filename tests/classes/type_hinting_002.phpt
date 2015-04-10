@@ -13,4 +13,4 @@ $o = new Foo;
 $o->a($o);
 ?>
 --EXPECTF--
-Catchable fatal error: Argument 1 passed to Foo::a() must be an instance of NonExisting, instance of Foo given, called in %s on line %d and defined in %s on line %d
+Fatal error: Argument 1 passed to Foo::a() must be an instance of NonExisting, instance of Foo given, called in %s on line %d and defined in %s on line %d

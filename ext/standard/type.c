@@ -228,7 +228,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce = Z_OBJCE_P(arg);
 			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1
-					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
+					&& !memcmp(ce->name->val, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1)) {
 				RETURN_FALSE;
 			}
 		} else if (type == IS_RESOURCE) {

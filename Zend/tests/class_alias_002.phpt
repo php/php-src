@@ -9,4 +9,4 @@ class_alias('foo', 'FOO');
 
 ?>
 --EXPECTF--
-Warning: Cannot redeclare class FOO in %s on line %d
+Warning: Cannot declare class FOO, because the name is already in use in %s on line %d

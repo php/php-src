@@ -20,5 +20,5 @@ class test3 extends test {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Strict Standards: Declaration of test3::foo() should be compatible with test::foo(Test $arg) in %s on line %d
+Warning: Declaration of test3::foo() should be compatible with test::foo(Test $arg) in %s on line %d
 Done

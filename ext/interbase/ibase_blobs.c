@@ -229,8 +229,8 @@ PHP_FUNCTION(ibase_blob_create)
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, ib_blob, le_blob);
-	Z_ADDREF_P(return_value);
+	RETVAL_RES(zend_register_resource(ib_blob, le_blob));
+	Z_TRY_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -280,8 +280,8 @@ PHP_FUNCTION(ibase_blob_open)
 			break;
 		}
 
-		ZEND_REGISTER_RESOURCE(return_value, ib_blob, le_blob);
-		Z_ADDREF_P(return_value);
+		RETVAL_RES(zend_register_resource(ib_blob, le_blob));
+		Z_TRY_ADDREF_P(return_value);
 		return;
 
 	} while (0);
@@ -300,11 +300,11 @@ PHP_FUNCTION(ibase_blob_add)
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &blob_arg, &string_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rr", &blob_arg, &string_arg)) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
+	ib_blob = (ibase_blob *)zend_fetch_resource_ex(blob_arg, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_INPUT) {
 		_php_ibase_module_error("BLOB is not open for input");
@@ -321,25 +321,24 @@ PHP_FUNCTION(ibase_blob_add)
    Get len bytes data from open blob */
 PHP_FUNCTION(ibase_blob_get)
 {
-	zval *blob_arg, *len_arg;
+	zval *blob_arg;
+	unsigned long len_arg;
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &blob_arg, &len_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &blob_arg, &len_arg)) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
+	ib_blob = (ibase_blob *)zend_fetch_resource_ex(blob_arg, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_OUTPUT) {
 		_php_ibase_module_error("BLOB is not open for output");
 		RETURN_FALSE;
 	}
 
-	convert_to_long_ex(len_arg);
-
-	if (_php_ibase_blob_get(return_value, ib_blob, Z_LVAL_P(len_arg)) != SUCCESS) {
+	if (_php_ibase_blob_get(return_value, ib_blob, len_arg) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -353,11 +352,11 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &blob_arg)) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
+	ib_blob = (ibase_blob *)zend_fetch_resource_ex(blob_arg, "Interbase blob", le_blob);
 
 	if (bl_end == BLOB_CLOSE) { /* return id here */
 

@@ -91,7 +91,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->literals = NULL;
 
 	op_array->run_time_cache = NULL;
-	op_array->last_cache_slot = 0;
+	op_array->cache_size = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -117,7 +117,6 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->common.function_name);
 		destroy_op_array(&function->op_array);
 		/* op_arrays are allocated on arena, so we don't have to free them */
-//???		efree_size(function, sizeof(zend_op_array));
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
@@ -130,7 +129,8 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
-	if (op_array->static_variables) {
+	if (op_array->static_variables &&
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
 		zend_hash_clean(op_array->static_variables);
 	}
 }
@@ -220,9 +220,14 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
+				size_t j = 0;
+				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
+				while (cur_precedence->exclude_from_classes[j].class_name) {
+					zend_string_release(cur_precedence->exclude_from_classes[j].class_name);
+					j++;
+				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
 			}
-
 			efree(ce->trait_precedences[i]);
 			i++;
 		}
@@ -232,6 +237,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 ZEND_API void destroy_zend_class(zval *zv)
 {
+	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (--ce->refcount > 0) {
@@ -259,6 +265,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+					zend_string_release(prop_info->name);
+					if (prop_info->doc_comment) {
+						zend_string_release(prop_info->doc_comment);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
@@ -317,16 +331,18 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zval *end;
 	uint32_t i;
 
-	if (op_array->static_variables) {
-		zend_hash_destroy(op_array->static_variables);
-		FREE_HASHTABLE(op_array->static_variables);
+	if (op_array->static_variables &&
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+	    if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+			zend_array_destroy(op_array->static_variables);
+		}
 	}
 
 	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
 	}
 
-	if (--(*op_array->refcount)>0) {
+	if (!op_array->refcount || --(*op_array->refcount)>0) {
 		return;
 	}
 
@@ -766,8 +782,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
@@ -778,11 +797,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-					if (opline->op1_type != IS_CONST || Z_TYPE_P(RT_CONSTANT(op_array, opline->op1)) != IS_NULL) {
-						CG(zend_lineno) = opline->lineno;
-						zend_error_noreturn(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
-					}
-
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
@@ -846,6 +860,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_SR:
 		case ZEND_ASSIGN_SR:
 			return (binary_op_type) shift_right_function;
+		case ZEND_FAST_CONCAT:
 		case ZEND_CONCAT:
 		case ZEND_ASSIGN_CONCAT:
 			return (binary_op_type) concat_function;
@@ -861,6 +876,8 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 			return (binary_op_type) is_smaller_function;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			return (binary_op_type) is_smaller_or_equal_function;
+		case ZEND_SPACESHIP:
+			return (binary_op_type) compare_function;
 		case ZEND_BW_OR:
 		case ZEND_ASSIGN_BW_OR:
 			return (binary_op_type) bitwise_or_function;

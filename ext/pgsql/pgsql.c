@@ -36,7 +36,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 #include "zend_smart_str.h"
-#include "ext/ereg/php_regex.h"
+#include "ext/pcre/php_pcre.h"
 #ifdef PHP_WIN32
 # include "win32/time.h"
 #endif
@@ -72,7 +72,7 @@
 		smart_str s = {0}; \
 		smart_str_append_unsigned(&s, oid); \
 		smart_str_0(&s); \
-		RETURN_STR(s.s); \
+		RETURN_NEW_STR(s.s); \
 	} \
 	RETURN_LONG((zend_long)oid); \
 } while(0)
@@ -762,7 +762,7 @@ zend_module_entry pgsql_module_entry = {
 	PHP_RINIT(pgsql),
 	PHP_RSHUTDOWN(pgsql),
 	PHP_MINFO(pgsql),
-	NO_VERSION_YET,
+	PHP_PGSQL_VERSION,
 	PHP_MODULE_GLOBALS(pgsql),
 	PHP_GINIT(pgsql),
 	NULL,
@@ -773,7 +773,7 @@ zend_module_entry pgsql_module_entry = {
 
 #ifdef COMPILE_DL_PGSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(pgsql)
 #endif
@@ -882,15 +882,14 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 /* {{{ _php_pgsql_trim_message */
 static char * _php_pgsql_trim_message(const char *message, size_t *len)
 {
-	register size_t i = strlen(message)-1;
+	register size_t i = strlen(message);
 
-	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
+	if (i>2 && (message[i-2] == '\r' || message[i-2] == '\n') && message[i-1] == '.') {
 		--i;
 	}
-	while (i>0 && (message[i] == '\r' || message[i] == '\n')) {
+	while (i>1 && (message[i-1] == '\r' || message[i-1] == '\n')) {
 		--i;
 	}
-	++i;
 	if (len) {
 		*len = i;
 	}
@@ -1093,7 +1092,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(pgsql)
 {
 #if defined(COMPILE_DL_PGSQL) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initilize notice message hash at MINIT only */
@@ -2431,7 +2430,7 @@ PHP_FUNCTION(pg_field_table)
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
-			RETURN_STR(oidstr.s);
+			RETURN_NEW_STR(oidstr.s);
 		} else
 #endif
 			RETURN_LONG((zend_long)oid);
@@ -2536,7 +2535,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
 				smart_str_0(&s);
-				RETURN_STR(s.s);
+				RETURN_NEW_STR(s.s);
 			} else
 #endif
 			{
@@ -3515,7 +3514,7 @@ PHP_FUNCTION(pg_lo_read)
 
 	buf->len = nbytes;
 	buf->val[buf->len] = '\0';
-	RETURN_STR(buf);
+	RETURN_NEW_STR(buf);
 }
 /* }}} */
 
@@ -4362,8 +4361,8 @@ PHP_FUNCTION(pg_escape_string)
 		to->len = PQescapeString(to->val, from->val, from->len);
 	}
 
-	to = zend_string_realloc(to, to->len, 0);
-	RETURN_STR(to);
+	to = zend_string_truncate(to, to->len, 0);
+	RETURN_NEW_STR(to);
 }
 /* }}} */
 
@@ -5717,10 +5716,10 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase)
 {
-	regex_t re;
-	regmatch_t *subs;
-	int regopt = REG_EXTENDED;
-	int regerr, ret = SUCCESS;
+	pcre *re;
+	const char *err_msg;
+	int err_offset;
+	int options = PCRE_NO_AUTO_CAPTURE, res;
 	size_t i;
 
 	/* Check invalid chars for POSIX regex */
@@ -5733,31 +5732,24 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if (icase) {
-		regopt |= REG_ICASE;
+		options |= PCRE_CASELESS;
 	}
 
-	regerr = regcomp(&re, regex, regopt);
-	if (regerr) {
+	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex");
-		regfree(&re);
 		return FAILURE;
 	}
-	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t), re.re_nsub+1);
 
-	regerr = regexec(&re, str, re.re_nsub+1, subs, 0);
-	if (regerr == REG_NOMATCH) {
-#ifdef PHP_DEBUG
-		php_error_docref(NULL, E_NOTICE, "'%s' does not match with '%s'", str, regex);
-#endif
-		ret = FAILURE;
-	}
-	else if (regerr) {
+	res = pcre_exec(re, NULL, str, str_len, 0, 0, NULL, 0);
+	pcre_free(re);
+
+	if (res == PCRE_ERROR_NOMATCH) {
+		return FAILURE;
+	} else if (res) {
 		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
-		ret = FAILURE;
+		return FAILURE;
 	}
-	regfree(&re);
-	efree(subs);
-	return ret;
+	return SUCCESS;
 }
 
 /* }}} */
@@ -5987,7 +5979,12 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						else {
 							/* better regex? */
 							if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", 0) == FAILURE) {
-								err = 1;
+								if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^[+-]{0,1}(inf)(inity){0,1}$", 1) == FAILURE) {
+									err = 1;
+								} else {
+									ZVAL_STRING(&new_val, Z_STRVAL_P(val));
+									php_pgsql_add_quotes(&new_val, 1);
+								}
 							}
 							else {
 								ZVAL_STRING(&new_val, Z_STRVAL_P(val));
@@ -6050,7 +6047,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
-							str = zend_string_realloc(str, str->len, 0);
+							str = zend_string_truncate(str, str->len, 0);
 							ZVAL_NEW_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1);
 						}

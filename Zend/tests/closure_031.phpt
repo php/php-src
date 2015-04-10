@@ -8,9 +8,12 @@ function foo($errno, $errstr, $errfile, $errline) {
 set_error_handler('foo');
 $foo = function() {
 };
-var_dump($foo->a);
+try {
+	var_dump($foo->a);
+} catch (EngineException $ex) {
+	echo "Error: {$ex->getMessage()}\n";
+}
 ?>
 --EXPECT--
 Error: Closure object cannot have properties
-NULL
 

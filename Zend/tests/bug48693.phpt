@@ -3,26 +3,43 @@ Bug #48693 (Double declaration of __lambda_func when lambda wrongly formatted)
 --FILE--
 <?php
 
-$x = create_function('', 'return 1; }');
-$y = create_function('', 'function a() { }; return 2;');
-$z = create_function('', '{');
-$w = create_function('', 'return 3;');
+try {
+	$x = create_function('', 'return 1; }');
+} catch (ParseException $e) {
+	echo "$e\n\n";
+}
+try {
+	$y = create_function('', 'function a() { }; return 2;');
+} catch (ParseException $e) {
+	echo "$e\n\n";
+}
+try {
+	$z = create_function('', '{');
+} catch (ParseException $e) {
+	echo "$e\n\n";
+}
+try {
+	$w = create_function('', 'return 3;');
+} catch (ParseException $e) {
+	echo "$e\n\n";
+}
 
 var_dump(
-	$x,
 	$y(),
-	$z,
-	$w(),
-	$y != $z
+	$w()
 );
 
 ?>
 --EXPECTF--
-Parse error: %s in %s(%d) : runtime-created function on line 1
+exception 'ParseException' with message 'syntax error, unexpected '}', expecting end of file' in %sbug48693.php(4) : runtime-created function:1
+Stack trace:
+#0 %sbug48693.php(4): create_function('', 'return 1; }')
+#1 {main}
 
-Parse error: %s %s(%d) : runtime-created function on line 1
-bool(false)
+exception 'ParseException' with message 'syntax error, unexpected end of file' in %sbug48693.php(14) : runtime-created function:1
+Stack trace:
+#0 %sbug48693.php(14): create_function('', '{')
+#1 {main}
+
 int(2)
-bool(false)
 int(3)
-bool(true)

@@ -87,7 +87,6 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 
 #include "php_getopt.h"
 
@@ -127,7 +126,6 @@ static pid_t pgroup;
 
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
-#define PHP_MODE_INDENT		3
 #define PHP_MODE_LINT		4
 #define PHP_MODE_STRIP		5
 
@@ -201,7 +199,7 @@ static void user_config_cache_entry_dtor(zval *el)
 static int php_cgi_globals_id;
 #define CGIG(v) ZEND_TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
 #if defined(PHP_WIN32)
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 #else
 static php_cgi_globals_struct php_cgi_globals;
@@ -1440,7 +1438,7 @@ PHP_INI_END()
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
 #ifdef ZTS
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
@@ -1668,9 +1666,6 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 		return;
 	}
 
-	if (!&SG(sapi_headers).headers) {
-		RETURN_FALSE;
-	}
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
 }
@@ -1769,7 +1764,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	sapi_startup(&cgi_sapi_module);
@@ -2183,12 +2178,6 @@ consult the installation file that came with this distribution, or visit \n\
 							exit_status = 0;
 							goto out;
 
-#if 0 /* not yet operational, see also below ... */
-						case '': /* generate indented source mode*/
-							behavior=PHP_MODE_INDENT;
-							break;
-#endif
-
 						case 'q': /* do not generate HTTP headers */
 							no_headers = 1;
 							break;
@@ -2474,16 +2463,6 @@ consult the installation file that came with this distribution, or visit \n\
 						return SUCCESS;
 					}
 					break;
-#if 0
-				/* Zeev might want to do something with this one day */
-				case PHP_MODE_INDENT:
-					open_file_for_scanning(&file_handle);
-					zend_indent();
-					zend_file_handle_dtor(&file_handle);
-					php_output_teardown();
-					return SUCCESS;
-					break;
-#endif
 			}
 
 fastcgi_request_done:

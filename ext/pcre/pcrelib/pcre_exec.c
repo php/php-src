@@ -686,7 +686,7 @@ the alternative names that are used. */
 #define foc           number
 #define save_mark     data
 
-/* These statements are here to stop the compiler complaining about unitialized
+/* These statements are here to stop the compiler complaining about uninitialized
 variables. */
 
 #ifdef SUPPORT_UCP

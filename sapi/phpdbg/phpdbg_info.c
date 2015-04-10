@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 #define PHPDBG_INFO_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[14], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[13], flags)
 
 const phpdbg_command_t phpdbg_info_commands[] = {
 	PHPDBG_INFO_COMMAND_D(break,     "show breakpoints",              'b', info_break,     NULL, 0, PHPDBG_ASYNC_SAFE),
@@ -188,7 +188,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&symtable->ht, var, data) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(symtable, var, data) {
 			if (zend_is_auto_global(var) ^ !show_globals) {
 				zend_hash_update(&vars, var, data);
 			}

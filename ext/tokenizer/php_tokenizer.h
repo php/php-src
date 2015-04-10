@@ -24,6 +24,9 @@
 extern zend_module_entry tokenizer_module_entry;
 #define phpext_tokenizer_ptr &tokenizer_module_entry
 
+#include "php_version.h"
+#define PHP_TOKENIZER_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

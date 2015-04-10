@@ -6,18 +6,37 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 
-$a = new ReflectionFunction(array(1, 2, 3));
+try {
+	$a = new ReflectionFunction(array(1, 2, 3));
+	echo "exception not thrown.".PHP_EOL;
+} catch (TypeException $re) {
+	echo "Ok - ".$re->getMessage().PHP_EOL;
+}
 try {
 	$a = new ReflectionFunction('nonExistentFunction');
-} catch (Exception $e) {
-	echo $e->getMessage();
+} catch (ReflectionException $e) {
+	echo $e->getMessage().PHP_EOL;
 }
-$a = new ReflectionFunction();
-$a = new ReflectionFunction(1, 2);
+try {
+	$a = new ReflectionFunction();
+} catch (TypeException $re) {
+	echo "Ok - ".$re->getMessage().PHP_EOL;
+}
+try {
+	$a = new ReflectionFunction(1, 2);
+} catch (TypeException $re) {
+	echo "Ok - ".$re->getMessage().PHP_EOL;
+}
+try {
+	$a = new ReflectionFunction([]);
+} catch (TypeException $re) {
+	echo "Ok - ".$re->getMessage().PHP_EOL;
+}
+
 ?>
 --EXPECTF--
-Warning: ReflectionFunction::__construct() expects parameter 1 to be string, array given in %s on line %d
+Ok - ReflectionFunction::__construct() expects parameter 1 to be string, array given
 Function nonExistentFunction() does not exist
-Warning: ReflectionFunction::__construct() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: ReflectionFunction::__construct() expects exactly 1 parameter, 2 given in %s on line %d
+Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 0 given
+Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 2 given
+Ok - ReflectionFunction::__construct() expects parameter 1 to be string, array given

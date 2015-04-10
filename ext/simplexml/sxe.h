@@ -23,7 +23,8 @@
 
 #include "php.h"
 
-extern zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 PHP_MINIT_FUNCTION(sxe);
 

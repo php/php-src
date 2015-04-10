@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -33,7 +33,7 @@
 #	include <stdint.h>
 #	include <stddef.h>
 #else
-#	include "win32/php_stdint.h"
+#	include "main/php_stdint.h"
 #endif
 #include "php.h"
 #include "php_globals.h"

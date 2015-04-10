@@ -202,13 +202,13 @@ static int
 onig_region_resize_clear(OnigRegion* region, int n)
 {
   int r;
-
+  
   r = onig_region_resize(region, n);
   if (r != 0) return r;
   onig_region_clear(region);
   return 0;
 }
-
+    
 extern int
 onig_region_set(OnigRegion* region, int at, int beg, int end)
 {
@@ -218,7 +218,7 @@ onig_region_set(OnigRegion* region, int at, int beg, int end)
     int r = onig_region_resize(region, at + 1);
     if (r < 0) return r;
   }
-
+  
   region->beg[at] = beg;
   region->end[at] = end;
   return 0;
@@ -2141,7 +2141,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	int len;
 	UChar *pstart, *pend;
 
-	/* if you want to remove following line,
+	/* if you want to remove following line, 
 	   you should check in parse and compile time. */
 	if (mem > num_mem) goto fail;
 	if (mem_end_stk[mem]   == INVALID_STACK_INDEX) goto fail;
@@ -2173,7 +2173,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	int len;
 	UChar *pstart, *pend;
 
-	/* if you want to remove following line,
+	/* if you want to remove following line, 
 	   you should check in parse and compile time. */
 	if (mem > num_mem) goto fail;
 	if (mem_end_stk[mem]   == INVALID_STACK_INDEX) goto fail;
@@ -2302,7 +2302,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 	MOP_OUT;
 	continue;
       }
-
+      
       break;
 #endif
 
@@ -2968,7 +2968,7 @@ bm_search(regex_t* reg, const UChar* target, const UChar* target_end,
 static int
 set_bm_backward_skip(UChar* s, UChar* end, OnigEncoding enc ARG_UNUSED,
 		     int** skip)
-
+		     
 {
   int i, len;
 

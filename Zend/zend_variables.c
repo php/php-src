@@ -27,7 +27,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
-ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -40,15 +40,12 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
 
-				if (arr != &EG(symbol_table)) {
-					ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
+				ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
 
-					/* break possible cycles */
-					GC_TYPE(arr) = IS_NULL;
-					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht);
-					efree_size(arr, sizeof(zend_array));
-				}
+				/* break possible cycles */
+				GC_TYPE(arr) = IS_NULL;
+				GC_REMOVE_FROM_BUFFER(arr);
+				zend_array_destroy(arr);
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -87,7 +84,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 	}
 }
 
-ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
@@ -100,13 +97,10 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
 
-				if (arr != &EG(symbol_table)) {
-					/* break possible cycles */
-					GC_TYPE(arr) = IS_NULL;
-					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht);
-					efree_size(arr, sizeof(zend_array));
-				}
+				/* break possible cycles */
+				GC_TYPE(arr) = IS_NULL;
+				GC_REMOVE_FROM_BUFFER(arr);
+				zend_array_destroy(arr);
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -153,7 +147,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -184,7 +178,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -229,39 +223,21 @@ ZEND_API void zval_add_ref_unref(zval *p)
 	}
 }
 
-ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zvalue)) {
-		case IS_CONSTANT:
-		case IS_STRING:
-			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
-			break;
-		case IS_ARRAY: {
-				HashTable *ht;
+	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
+		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING) ||
+	           EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
+		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
+		zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
 
-				if (Z_ARR_P(zvalue) == &EG(symbol_table)) {
-					return; /* do nothing */
-				}
-				ht = Z_ARRVAL_P(zvalue);
-				ZVAL_NEW_ARR(zvalue);
-				zend_array_dup(Z_ARRVAL_P(zvalue), ht);
-			}
-			break;
-		case IS_CONSTANT_AST: {
-				zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
-
-				GC_REFCOUNT(ast) = 1;
-				GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
-				ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
-				Z_AST_P(zvalue) = ast;
-			}
-			break;
-		case IS_OBJECT:
-		case IS_RESOURCE:
-		case IS_REFERENCE:
-			Z_ADDREF_P(zvalue);
-			break;
+		GC_REFCOUNT(ast) = 1;
+		GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
+		ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
+		Z_AST_P(zvalue) = ast;
 	}
 }
 
@@ -279,12 +255,6 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 
 
 #if ZEND_DEBUG
-ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue)
-{
-	zval_copy_ctor(zvalue);
-}
-
-
 ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 {
 	zval_internal_dtor(zvalue);
@@ -315,13 +285,13 @@ ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash
 		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
 
 		symbol_table = zend_rebuild_symbol_table();
-		p = zend_hash_find(&symbol_table->ht, key->key);
+		p = zend_hash_find(symbol_table, key->key);
 		if (!p) {
 			p = &tmp;
 			ZVAL_NULL(&tmp);
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add_new(&symbol_table->ht, key->key, &tmp);
+				zend_hash_add_new(symbol_table, key->key, &tmp);
 				Z_ADDREF_P(p);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);

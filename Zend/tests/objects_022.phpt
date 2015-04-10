@@ -36,4 +36,4 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Catchable fatal error: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in %s on line %d and defined in %s on line %d
+Fatal error: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in %s on line %d and defined in %s on line %d

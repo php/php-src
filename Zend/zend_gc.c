@@ -137,7 +137,7 @@ ZEND_API void gc_init(void)
 	}
 }
 
-ZEND_API void gc_possible_root(zend_refcounted *ref)
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
 	if (UNEXPECTED(GC_TYPE(ref) == IS_NULL) || UNEXPECTED(CG(unclean_shutdown))) {
 		return;
@@ -147,8 +147,6 @@ ZEND_API void gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_INC(zval_possible_root);
 
 	if (EXPECTED(GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK)) {
-		GC_SET_PURPLE(GC_INFO(ref));
-
 		if (!GC_ADDRESS(GC_INFO(ref))) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
@@ -159,7 +157,6 @@ ZEND_API void gc_possible_root(zend_refcounted *ref)
 				GC_G(first_unused)++;
 			} else {
 				if (!GC_G(gc_enabled)) {
-					GC_SET_BLACK(GC_INFO(ref));
 					return;
 				}
 				GC_REFCOUNT(ref)++;
@@ -169,10 +166,10 @@ ZEND_API void gc_possible_root(zend_refcounted *ref)
 				if (!newRoot) {
 					return;
 				}
-				GC_SET_PURPLE(GC_INFO(ref));
 				GC_G(unused) = newRoot->prev;
 			}
 
+			GC_SET_PURPLE(GC_INFO(ref));
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
 			GC_G(roots).next->prev = newRoot;
@@ -189,7 +186,7 @@ ZEND_API void gc_possible_root(zend_refcounted *ref)
 	}
 }
 
-ZEND_API void gc_remove_from_buffer(zend_refcounted *ref)
+ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
 
@@ -231,9 +228,7 @@ tail_call:
 			for (i = 0; i < n; i++) {
 				if (Z_REFCOUNTED(table[i])) {
 					ref = Z_COUNTED(table[i]);
-					if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-						GC_REFCOUNT(ref)++;
-					}
+					GC_REFCOUNT(ref)++;
 					if (GC_GET_COLOR(GC_INFO(ref)) != GC_BLACK) {
 						if (!props && i == n - 1) {
 							goto tail_call;
@@ -250,14 +245,12 @@ tail_call:
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		if ((zend_array*)ref != &EG(symbol_table)) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
-			if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-				GC_REFCOUNT(ref)++;
-			}
+			GC_REFCOUNT(ref)++;
 			if (GC_GET_COLOR(GC_INFO(ref)) != GC_BLACK) {
 				goto tail_call;
 			}
@@ -269,9 +262,7 @@ tail_call:
 		p = ht->arData + idx;
 		if (!Z_REFCOUNTED(p->val)) continue;
 		ref = Z_COUNTED(p->val);
-		if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-			GC_REFCOUNT(ref)++;
-		}
+		GC_REFCOUNT(ref)++;
 		if (GC_GET_COLOR(GC_INFO(ref)) != GC_BLACK) {
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
@@ -312,9 +303,7 @@ tail_call:
 				for (i = 0; i < n; i++) {
 					if (Z_REFCOUNTED(table[i])) {
 						ref = Z_COUNTED(table[i]);
-						if (GC_TYPE(ref) != IS_ARRAY || ((zend_array*)ref) != &EG(symbol_table)) {
-							GC_REFCOUNT(ref)--;
-						}
+						GC_REFCOUNT(ref)--;
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
@@ -331,7 +320,7 @@ tail_call:
 			if (((zend_array*)ref) == &EG(symbol_table)) {
 				GC_SET_BLACK(GC_INFO(ref));
 			} else {
-				ht = &((zend_array*)ref)->ht;
+				ht = (zend_array*)ref;
 			}
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -341,9 +330,7 @@ tail_call:
 					return;
 				}
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-					GC_REFCOUNT(ref)--;
-				}
+				GC_REFCOUNT(ref)--;
 				goto tail_call;
 			}
 			return;
@@ -358,9 +345,7 @@ tail_call:
 				continue;
 			}
 			ref = Z_COUNTED(p->val);
-			if (GC_TYPE(ref) != IS_ARRAY || ((zend_array*)ref) != &EG(symbol_table)) {
-				GC_REFCOUNT(ref)--;
-			}
+			GC_REFCOUNT(ref)--;
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
@@ -428,7 +413,7 @@ tail_call:
 				if ((zend_array*)ref == &EG(symbol_table)) {
 					GC_SET_BLACK(GC_INFO(ref));
 				} else {
-					ht = &((zend_array*)ref)->ht;
+					ht = (zend_array*)ref;
 				}
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -529,9 +514,7 @@ tail_call:
 				for (i = 0; i < n; i++) {
 					if (Z_REFCOUNTED(table[i])) {
 						ref = Z_COUNTED(table[i]);
-						if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-							GC_REFCOUNT(ref)++;
-						}
+						GC_REFCOUNT(ref)++;
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
@@ -548,13 +531,11 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-					GC_REFCOUNT(ref)++;
-				}
+				GC_REFCOUNT(ref)++;
 				goto tail_call;
 			}
 			return count;
@@ -571,9 +552,7 @@ tail_call:
 				continue;
 			}
 			ref = Z_COUNTED(p->val);
-			if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
-				GC_REFCOUNT(ref)++;
-			}
+			GC_REFCOUNT(ref)++;
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
@@ -681,7 +660,7 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -802,8 +781,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 			} else if (GC_TYPE(p) == IS_ARRAY) {
 				zend_array *arr = (zend_array*)p;
 
+				GC_REFCOUNT(arr) = 0;
 				GC_TYPE(arr) = IS_NULL;
-				zend_hash_destroy(&arr->ht);
+				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);
 		}

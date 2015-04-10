@@ -346,6 +346,9 @@ PHP_FUNCTION(password_hash)
 	if (options && (option_buffer = zend_symtable_str_find(options, "salt", sizeof("salt")-1)) != NULL) {
 		char *buffer;
 		size_t buffer_len = 0;
+
+		php_error_docref(NULL, E_DEPRECATED, "Use of the 'salt' option to password_hash is deprecated");
+
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING:
 				buffer = estrndup(Z_STRVAL_P(option_buffer), Z_STRLEN_P(option_buffer));

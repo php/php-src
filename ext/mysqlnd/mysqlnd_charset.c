@@ -865,7 +865,7 @@ static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 		MYSQLND_PLUGIN_API_VERSION,
 		"charsets",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{

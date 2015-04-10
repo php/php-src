@@ -269,7 +269,7 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	zend_is_auto_global(table);
 
 	/* find the table and ensure it's an array */
-	data = zend_hash_find(&EG(symbol_table).ht, table);
+	data = zend_hash_find(&EG(symbol_table), table);
 	if (!data || Z_TYPE_P(data) != IS_ARRAY) {
 		return NULL;
 	}

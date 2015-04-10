@@ -111,6 +111,13 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 	return i;
 }
 
+int zend_optimizer_is_disabled_func(const char *name, size_t len) {
+	zend_function *fbc = (zend_function *)zend_hash_str_find_ptr(EG(function_table), name, len);
+
+	return (fbc && fbc->type == ZEND_INTERNAL_FUNCTION &&
+			fbc->internal_function.handler == ZEND_FN(display_disabled_function));
+}
+
 void zend_optimizer_update_op1_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zval          *val)
@@ -129,7 +136,8 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 				case ZEND_NEW:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
-					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->last_cache_slot++;
+					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
+					op_array->cache_size += sizeof(void*);
 					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					zend_optimizer_add_literal(op_array, val);
 					zend_string_hash_val(Z_STR(op_array->literals[opline->op1.constant+1]));
@@ -140,6 +148,10 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 					break;
 			}
 		} else {
+			if (opline->opcode == ZEND_CONCAT ||
+			    opline->opcode == ZEND_FAST_CONCAT) {
+				convert_to_string(val);
+			}
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 		}
 	}
@@ -154,8 +166,15 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 		opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 		zend_string_hash_val(Z_STR(ZEND_OP2_LITERAL(opline)));
-		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+		op_array->cache_size += sizeof(void*);
 		return;
+	} else if (opline->opcode == ZEND_ROPE_INIT ||
+			opline->opcode == ZEND_ROPE_ADD ||
+			opline->opcode == ZEND_ROPE_END ||
+			opline->opcode == ZEND_CONCAT ||
+			opline->opcode == ZEND_FAST_CONCAT) {
+		convert_to_string(val);
 	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 	if (Z_TYPE_P(val) == IS_STRING) {
@@ -175,7 +194,16 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ADD_INTERFACE:
 			case ZEND_ADD_TRAIT:
 			case ZEND_INSTANCEOF:
-				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += sizeof(void*);
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+				zend_optimizer_add_literal(op_array, val);
+				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				break;
+			case ZEND_INIT_DYNAMIC_CALL:
+				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += sizeof(void*);
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
@@ -200,8 +228,8 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_POST_INC_OBJ:
 			case ZEND_POST_DEC_OBJ:
 			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
-				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot;
-				op_array->last_cache_slot += 2;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += 2 * sizeof(void*);
 				break;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
@@ -215,8 +243,8 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ASSIGN_BW_AND:
 			case ZEND_ASSIGN_BW_XOR:
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot;
-					op_array->last_cache_slot += 2;
+					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+					op_array->cache_size += 2 * sizeof(void*);
 				}
 				break;
 			case ZEND_OP_DATA:
@@ -239,6 +267,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			case ZEND_ADD_ARRAY_ELEMENT:
 			case ZEND_INIT_ARRAY:
+			case ZEND_ASSIGN_DIM:
 			case ZEND_UNSET_DIM:
 			case ZEND_FETCH_DIM_R:
 			case ZEND_FETCH_DIM_W:
@@ -294,6 +323,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_SEND_VAR_NO_REF:
 					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
+							zval_dtor(val);
 							return 0;
 						}
 						opline->extended_value = 0;
@@ -309,19 +339,48 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				 * and allows its reuse. The number of ZEND_CASE instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
-				case ZEND_CASE: {
-					zval old_val;
-					ZVAL_COPY_VALUE(&old_val, val);
-					zval_copy_ctor(val);
-					zend_optimizer_update_op1_const(op_array, opline, val);
-					ZVAL_COPY_VALUE(val, &old_val);
-					opline++;
-					continue;
-				}
 				case ZEND_FREE:
-					MAKE_NOP(opline);
+				case ZEND_CASE: {
+					zend_op *m, *n;
+					int brk = op_array->last_brk_cont;
+					zend_bool in_switch = 0;
+					while (brk--) {
+						if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
+								op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
+							in_switch = 1;
+							break;
+						}
+					}
+
+					if (!in_switch) {
+						ZEND_ASSERT(opline->opcode == ZEND_FREE);
+						MAKE_NOP(opline);
+						zval_dtor(val);
+						return 1;
+					}
+
+					m = opline;
+					n = op_array->opcodes + op_array->brk_cont_array[brk].brk + 1;
+					while (m < n) {
+						if (ZEND_OP1_TYPE(m) == type &&
+								ZEND_OP1(m).var == var) {
+							if (m->opcode == ZEND_CASE) {
+								zval old_val;
+								ZVAL_COPY_VALUE(&old_val, val);
+								zval_copy_ctor(val);
+								zend_optimizer_update_op1_const(op_array, m, val);
+								ZVAL_COPY_VALUE(val, &old_val);
+							} else if (m->opcode == ZEND_FREE) {
+								MAKE_NOP(m);
+							} else {
+								ZEND_ASSERT(0);
+							}
+						}
+						m++;
+					}
 					zval_dtor(val);
 					return 1;
+				}
 				default:
 					break;
 			}
@@ -333,6 +392,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 			ZEND_OP2(opline).var == var) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN_REF:
+					zval_dtor(val);
 					return 0;
 				default:
 					break;
@@ -450,8 +510,11 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}
@@ -488,8 +551,11 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}

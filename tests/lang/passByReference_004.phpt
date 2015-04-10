@@ -17,5 +17,5 @@ foo(bar(5));
 
 ?>
 --EXPECTF--
-Strict Standards: Only variables should be passed by reference in %s on line 13
+Notice: Only variables should be passed by reference in %s on line 13
 int(5)

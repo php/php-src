@@ -64,6 +64,9 @@ PHPAPI extern const char php_sig_png[8];
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 
+#include "php_version.h"
+#define PHP_GD_VERSION PHP_VERSION
+
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);

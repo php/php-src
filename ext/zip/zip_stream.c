@@ -254,7 +254,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											const char *path,
 											const char *mode,
 											int options,
-											char **opened_path,
+											zend_string **opened_path,
 											php_stream_context *context STREAMS_DC)
 {
 	int path_len;
@@ -314,7 +314,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
 
 			if (opened_path) {
-				*opened_path = estrdup(path);
+				*opened_path = zend_string_init(path, strlen(path), 0);
 			}
 		} else {
 			zip_close(za);

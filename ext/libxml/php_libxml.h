@@ -26,6 +26,9 @@
 extern zend_module_entry libxml_module_entry;
 #define libxml_module_ptr &libxml_module_entry
 
+#include "php_version.h"
+#define PHP_LIBXML_VERSION PHP_VERSION
+
 #ifdef PHP_WIN32
 #	define PHP_LIBXML_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -115,7 +118,7 @@ PHP_LIBXML_API void php_libxml_shutdown(void);
 #ifdef ZTS
 #define LIBXML(v) ZEND_TSRMG(libxml_globals_id, zend_libxml_globals *, v)
 #ifdef COMPILE_DL_LIBXML
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define LIBXML(v) (libxml_globals.v)

@@ -61,9 +61,9 @@
 
 void closelog(void)
 {
-	if (PW32G(log_source)) {
+	if (INVALID_HANDLE_VALUE != PW32G(log_source)) {
 		DeregisterEventSource(PW32G(log_source));
-		PW32G(log_source) = NULL;
+		PW32G(log_source) = INVALID_HANDLE_VALUE;
 	}
 	if (PW32G(log_header)) {
 		efree(PW32G(log_header));
@@ -86,7 +86,7 @@ void syslog(int priority, const char *message, ...)
 	DWORD evid;
 
 	/* default event source */
-	if (!PW32G(log_source))
+	if (INVALID_HANDLE_VALUE == PW32G(log_source))
 		openlog("php", LOG_PID, LOG_SYSLOG);
 
 	switch (priority) {			/* translate UNIX type into NT type */
@@ -122,11 +122,7 @@ void syslog(int priority, const char *message, ...)
 void openlog(const char *ident, int logopt, int facility)
 {
 
-	if (PW32G(log_source)) {
-		closelog();
-	}
-
-	efree(PW32G(log_header));
+	closelog();
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());

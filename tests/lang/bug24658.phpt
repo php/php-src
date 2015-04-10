@@ -53,4 +53,4 @@ int(2)
 object(foo)#%d (0) {
 }
 
-Catchable fatal error: Argument 1 passed to typehint() must be an instance of foo, integer given in %s on line %d
+Fatal error: Argument 1 passed to typehint() must be an instance of foo, integer given in %s on line %d

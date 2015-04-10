@@ -58,7 +58,6 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
-#include "zend_indent.h"
 #include "zend_exceptions.h"
 
 #include "sapi/cli/cli.h"
@@ -430,7 +429,7 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 	char *retval, *tmp;
 	zend_array *symbol_table = &EG(symbol_table);
 
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table ? &symbol_table->ht : NULL, NULL);
+	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table, NULL);
 	if (retval) {
 		retval = malloc(strlen(tmp) + 2);
 		retval[0] = '$';

@@ -12,5 +12,8 @@ ini_set('intl.error_level', E_WARNING);
 $x = new IntlDateFormatter('en', 1, 1);
 var_dump($x->__construct('en', 1, 1));
 --EXPECTF--
-Warning: IntlDateFormatter::__construct(): datefmt_create: cannot call constructor twice in %s on line %d
-NULL
+Fatal error: Uncaught exception 'IntlException' with message 'IntlDateFormatter::__construct(): datefmt_create: cannot call constructor twice' in %sbug62081.php:4
+Stack trace:
+#0 %sbug62081.php(4): IntlDateFormatter->__construct('en', 1, 1)
+#1 {main}
+  thrown in %sbug62081.php on line 4

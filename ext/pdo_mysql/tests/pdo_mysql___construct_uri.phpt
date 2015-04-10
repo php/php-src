@@ -68,9 +68,9 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-Warning: PDO::__construct(%s
+Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
 [002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI
 
-Warning: PDO::__construct(%s
+Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
 [003] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, invalid data source URI
 done!

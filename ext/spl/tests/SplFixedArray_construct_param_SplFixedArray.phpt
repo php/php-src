@@ -4,10 +4,12 @@ Create an SplFixedArray using an SplFixedArray object.
 Philip Norton philipnorton42@gmail.com
 --FILE--
 <?php
-$array = new SplFixedArray(new SplFixedArray(3));
-var_dump($array);
+try {
+	$array = new SplFixedArray(new SplFixedArray(3));
+} catch (TypeException $iae) {
+	echo "Ok - ".$iae->getMessage().PHP_EOL;
+}
+
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be integer, object given in %s on line %d
-object(SplFixedArray)#1 (0) {
-}
+Ok - SplFixedArray::__construct() expects parameter 1 to be integer, object given

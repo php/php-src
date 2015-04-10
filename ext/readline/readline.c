@@ -160,7 +160,7 @@ zend_module_entry readline_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(readline),
 	PHP_MINFO(readline),
-	PHP_VERSION,
+	PHP_READLINE_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -402,12 +402,13 @@ PHP_FUNCTION(readline_read_history)
 		return;
 	}
 
-	if (php_check_open_basedir(arg)) {
+	if (arg && php_check_open_basedir(arg)) {
 		RETURN_FALSE;
 	}
 
 	/* XXX from & to NYI */
 	if (read_history(arg)) {
+		/* If filename is NULL, then read from `~/.history' */
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -426,7 +427,7 @@ PHP_FUNCTION(readline_write_history)
 		return;
 	}
 
-	if (php_check_open_basedir(arg)) {
+	if (arg && php_check_open_basedir(arg)) {
 		RETURN_FALSE;
 	}
 

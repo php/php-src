@@ -20,7 +20,11 @@ var_dump( finfo_open( FILEINFO_MIME, $magicFile, 'extraArg' ) );
 var_dump( finfo_open( PHP_INT_MAX - 1, $magicFile ) );
 var_dump( finfo_open( 'foobar' ) );
 
-var_dump( new finfo('foobar') );
+try {
+    var_dump( new finfo('foobar') );
+} catch (TypeException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -45,7 +49,5 @@ resource(6) of type (file_info)
 
 Warning: finfo_open() expects parameter 1 to be integer, string given in %sfinfo_open_error.php on line 16
 bool(false)
-
-Warning: finfo::finfo() expects parameter 1 to be integer, string given in %sfinfo_open_error.php on line 18
-NULL
+finfo::finfo() expects parameter 1 to be integer, string given
 ===DONE===

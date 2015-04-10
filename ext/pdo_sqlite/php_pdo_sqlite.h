@@ -25,6 +25,9 @@
 extern zend_module_entry pdo_sqlite_module_entry;
 #define phpext_pdo_sqlite_ptr &pdo_sqlite_module_entry
 
+#include "php_version.h"
+#define PHP_PDO_SQLITE_VERSION PHP_VERSION
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

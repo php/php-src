@@ -178,7 +178,7 @@ zend_module_entry dba_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(dba),
-	NO_VERSION_YET,
+	PHP_DBA_VERSION,
 	PHP_MODULE_GLOBALS(dba),
 	PHP_GINIT(dba),
 	NULL,
@@ -452,7 +452,15 @@ static void dba_close_rsrc(zend_resource *rsrc)
 /* {{{ dba_close_pe_rsrc_deleter */
 int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
-	return ((zend_resource *)Z_PTR_P(el))->ptr == pDba ? ZEND_HASH_APPLY_REMOVE: ZEND_HASH_APPLY_KEEP;
+	if (Z_RES_P(el)->ptr == pDba) {
+		if (Z_DELREF_P(el) == 0) {
+			return ZEND_HASH_APPLY_REMOVE;
+		} else {
+			return ZEND_HASH_APPLY_KEEP | ZEND_HASH_APPLY_STOP;
+		}
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 }
 /* }}} */
 
@@ -627,7 +635,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
-	char *opened_path = NULL;
+	zend_string *opened_path = NULL;
 	char *lock_name;
 
 	if (ac < 2) {
@@ -675,7 +683,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			info = (dba_info *)le->ptr;
 
 			GC_REFCOUNT(le)++;
-			RETURN_RES(le);
+			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}
 	}
@@ -853,13 +861,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
 				lock_file_mode = "a+b";
 			} else {
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					if (opened_path) {
-						info->lock.name = pestrdup(opened_path, persistent);
-						efree(opened_path);
-					}
+				if (opened_path) {
+					info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+					zend_string_release(opened_path);
 				}
 			}
 		}
@@ -869,15 +873,11 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (lock_dbf) {
 					/* replace the path info with the real path of the opened file */
 					pefree(info->path, persistent);
-					info->path = pestrdup(opened_path, persistent);
+					info->path = pestrndup(opened_path->val, opened_path->len, persistent);
 				}
 				/* now store the name of the lock */
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					info->lock.name = pestrdup(opened_path, persistent);
-					efree(opened_path);
-				}
+				info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+				zend_string_release(opened_path);
 			}
 		}
 		if (!lock_dbf) {
@@ -921,7 +921,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 #ifdef F_SETFL
 			} else if (modenr == DBA_CREAT) {
-				int flags = fcntl(info->fd, F_SETFL);
+				int flags = fcntl(info->fd, F_GETFL);
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #endif
 			}
@@ -941,11 +941,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = NULL;
 
 	if (persistent) {
-		zend_resource new_le;
+		zval new_le;
 
-		new_le.type = le_pdb;
-		new_le.ptr = info;
-		if (zend_hash_str_update_mem(&EG(persistent_list), key, keylen, &new_le, sizeof(zend_resource)) == NULL) {
+		ZVAL_NEW_PERSISTENT_RES(&new_le, -1, info, le_pdb);
+		if (zend_hash_str_update(&EG(persistent_list), key, keylen, &new_le) == NULL) {
 			dba_close(info);
 			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;

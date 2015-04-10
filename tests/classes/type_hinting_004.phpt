@@ -16,13 +16,36 @@ Ensure type hints are enforced for functions invoked as callbacks.
   function f2(A $a = null)  {
       echo "in f2;\n";
   }
-  call_user_func('f1', 1);
-  call_user_func('f1', new A);
-  call_user_func('f2', 1);
-  call_user_func('f2');
-  call_user_func('f2', new A);
-  call_user_func('f2', null);
-  
+  try {
+    call_user_func('f1', 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func('f1', new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func('f2', 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func('f2');
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func('f2', new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func('f2', null);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
   
   echo "\n\n---> Type hints with callback static method:\n";
   class C {
@@ -41,13 +64,37 @@ Ensure type hints are enforced for functions invoked as callbacks.
           }
       }
   }
-  call_user_func(array('C', 'f1'), 1);
-  call_user_func(array('C', 'f1'), new A);
-  call_user_func(array('C', 'f2'), 1);
-  call_user_func(array('C', 'f2'));
-  call_user_func(array('C', 'f2'), new A);
-  call_user_func(array('C', 'f2'), null);
-  
+
+  try {
+    call_user_func(array('C', 'f1'), 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array('C', 'f1'), new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array('C', 'f2'), 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array('C', 'f2'));
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array('C', 'f2'), new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array('C', 'f2'), null);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
   
   echo "\n\n---> Type hints with callback instance method:\n";
   class D {
@@ -67,43 +114,68 @@ Ensure type hints are enforced for functions invoked as callbacks.
       }
   }
   $d = new D;
-  call_user_func(array($d, 'f1'), 1);
-  call_user_func(array($d, 'f1'), new A);
-  call_user_func(array($d, 'f2'), 1);
-  call_user_func(array($d, 'f2'));
-  call_user_func(array($d, 'f2'), new A);
-  call_user_func(array($d, 'f2'), null);
+
+  try {
+    call_user_func(array($d, 'f1'), 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array($d, 'f1'), new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array($d, 'f2'), 1);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array($d, 'f2'));
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array($d, 'f2'), new A);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
+  try {
+    call_user_func(array($d, 'f2'), null);
+  } catch (EngineException $ex) {
+    echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
+  }
   
 ?>
 --EXPECTF--
 ---> Type hints with callback function:
-4096: Argument 1 passed to f1() must be an instance of A, integer given%s(10)
+1: Argument 1 passed to f1() must be an instance of A, integer given%s(%d)
+
 in f1;
-in f1;
-4096: Argument 1 passed to f2() must be an instance of A, integer given%s(13)
-in f2;
+1: Argument 1 passed to f2() must be an instance of A, integer given%s(%d)
+
 in f2;
 in f2;
 in f2;
 
 
 ---> Type hints with callback static method:
-4096: Argument 1 passed to C::f1() must be an instance of A, integer given%s(26)
+1: Argument 1 passed to C::f1() must be an instance of A, integer given%s(%d)
+
 in C::f1 (static);
-in C::f1 (static);
-4096: Argument 1 passed to C::f2() must be an instance of A, integer given%s(33)
-in C::f2 (static);
+1: Argument 1 passed to C::f2() must be an instance of A, integer given%s(%d)
+
 in C::f2 (static);
 in C::f2 (static);
 in C::f2 (static);
 
 
 ---> Type hints with callback instance method:
-4096: Argument 1 passed to D::f1() must be an instance of A, integer given%s(51)
+1: Argument 1 passed to D::f1() must be an instance of A, integer given%s(%d)
+
 in C::f1 (instance);
-in C::f1 (instance);
-4096: Argument 1 passed to D::f2() must be an instance of A, integer given%s(58)
-in C::f2 (instance);
+1: Argument 1 passed to D::f2() must be an instance of A, integer given%s(%d)
+
 in C::f2 (instance);
 in C::f2 (instance);
 in C::f2 (instance);

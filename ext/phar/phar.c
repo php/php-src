@@ -27,7 +27,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-char *(*phar_save_resolve_path)(const char *filename, int filename_len);
+zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -82,8 +82,8 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	if (entry->name->len == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.u.flags) {
-			zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_fname_map), phar_set_writeable_bit, (void *)&ini);
+		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags)) {
+			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
 		}
 	} else {
 		PHAR_G(require_hash) = ini;
@@ -105,16 +105,16 @@ static void phar_split_cache_list(void) /* {{{ */
 	phar_archive_data *phar;
 	uint i = 0;
 
-	if (!PHAR_GLOBALS->cache_list || !(PHAR_GLOBALS->cache_list[0])) {
+	if (!PHAR_G(cache_list) || !(PHAR_G(cache_list)[0])) {
 		return;
 	}
 
 	ds[0] = DEFAULT_DIR_SEPARATOR;
 	ds[1] = '\0';
-	tmp = estrdup(PHAR_GLOBALS->cache_list);
+	tmp = estrdup(PHAR_G(cache_list));
 
 	/* fake request startup */
-	PHAR_GLOBALS->request_init = 1;
+	PHAR_G(request_init) = 1;
 	zend_hash_init(&EG(regular_list), 0, NULL, NULL, 0);
 	EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
 
@@ -124,10 +124,10 @@ static void phar_split_cache_list(void) /* {{{ */
 	zend_hash_init(&cached_phars, sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  1);
 	zend_hash_init(&cached_alias, sizeof(phar_archive_data*), zend_get_hash_value, NULL, 1);
 	/* these two are real and will be copied over cached_phars/cached_alias later */
-	zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  1);
-	zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 1);
-	PHAR_GLOBALS->manifest_cached = 1;
-	PHAR_GLOBALS->persist = 1;
+	zend_hash_init(&(PHAR_G(phar_fname_map)), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  1);
+	zend_hash_init(&(PHAR_G(phar_alias_map)), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 1);
+	PHAR_G(manifest_cached) = 1;
+	PHAR_G(persist) = 1;
 
 	for (key = php_strtok_r(tmp, ds, &lasts);
 			key;
@@ -142,19 +142,19 @@ finish_up:
 				phar->fp = NULL;
 			} else {
 finish_error:
-				PHAR_GLOBALS->persist = 0;
-				PHAR_GLOBALS->manifest_cached = 0;
+				PHAR_G(persist) = 0;
+				PHAR_G(manifest_cached) = 0;
 				efree(tmp);
 				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-				PHAR_GLOBALS->phar_fname_map.u.flags = 0;
+				PHAR_G(phar_fname_map.u.flags) = 0;
 				zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-				PHAR_GLOBALS->phar_alias_map.u.flags = 0;
+				PHAR_G(phar_alias_map.u.flags) = 0;
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
 				zend_hash_graceful_reverse_destroy(&EG(regular_list));
 				memset(&EG(regular_list), 0, sizeof(HashTable));
 				/* free cached manifests */
-				PHAR_GLOBALS->request_init = 0;
+				PHAR_G(request_init) = 0;
 				return;
 			}
 		} else {
@@ -166,15 +166,15 @@ finish_error:
 		}
 	}
 
-	PHAR_GLOBALS->persist = 0;
-	PHAR_GLOBALS->request_init = 0;
+	PHAR_G(persist) = 0;
+	PHAR_G(request_init) = 0;
 	/* destroy dummy values from before */
 	zend_hash_destroy(&cached_phars);
 	zend_hash_destroy(&cached_alias);
-	cached_phars = PHAR_GLOBALS->phar_fname_map;
-	cached_alias = PHAR_GLOBALS->phar_alias_map;
-	PHAR_GLOBALS->phar_fname_map.u.flags = 0;
-	PHAR_GLOBALS->phar_alias_map.u.flags = 0;
+	cached_phars = PHAR_G(phar_fname_map);
+	cached_alias = PHAR_G(phar_alias_map);
+	PHAR_G(phar_fname_map.u.flags) = 0;
+	PHAR_G(phar_alias_map.u.flags) = 0;
 	zend_hash_graceful_reverse_destroy(&EG(regular_list));
 	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
@@ -274,8 +274,8 @@ int phar_archive_delref(phar_archive_data *phar) /* {{{ */
 	}
 
 	if (--phar->refcount < 0) {
-		if (PHAR_GLOBALS->request_done
-		|| zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+		if (PHAR_G(request_done)
+		|| zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 			phar_destroy_phar_data(phar);
 		}
 		return 1;
@@ -296,7 +296,7 @@ int phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		if (!zend_hash_num_elements(&phar->manifest)) {
 			/* this is a new phar that has perhaps had an alias/metadata set, but has never
 			been flushed */
-			if (zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+			if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
 			return 1;
@@ -355,7 +355,7 @@ static void destroy_phar_data(zval *zv) /* {{{ */
 {
 	phar_archive_data *phar_data = (phar_archive_data *)Z_PTR_P(zv);
 
-	if (PHAR_GLOBALS->request_ends) {
+	if (PHAR_G(request_ends)) {
 		/* first, iterate over the manifest and close all PHAR_TMP entry fp handles,
 		this prevents unnecessary unfreed stream resources */
 		zend_hash_apply(&(phar_data->manifest), phar_tmpclose_apply);
@@ -363,7 +363,7 @@ static void destroy_phar_data(zval *zv) /* {{{ */
 		return;
 	}
 
-	zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_alias_map), phar_unalias_apply, phar_data);
+	zend_hash_apply_with_argument(&(PHAR_G(phar_alias_map)), phar_unalias_apply, phar_data);
 
 	if (--phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data);
@@ -1214,7 +1214,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			MAPPHAR_FAIL("Cannot open archive \"%s\", invalid alias");
 		}
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
+		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 				signature = NULL;
 				fp = NULL;
@@ -1222,12 +1222,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, mydata);
+		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
 	} else {
 		mydata->is_temporary_alias = 1;
 	}
 
-	zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, mydata);
+	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 	efree(savebuf);
 
 	if (pphar) {
@@ -1322,7 +1322,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 {
 	phar_archive_data *mydata;
 	php_stream *fp;
-	char *actual = NULL, *p;
+	zend_string *actual = NULL;
+	char *p;
 
 	if (!pphar) {
 		pphar = &mydata;
@@ -1340,8 +1341,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, &actual);
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	if (fp) {
@@ -1350,20 +1351,20 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 				(*pphar)->is_writeable = 1;
 			}
 			if (actual) {
-				efree(actual);
+				zend_string_release(actual);
 			}
 			return SUCCESS;
 		} else {
 			/* file exists, but is either corrupt or not a phar archive */
 			if (actual) {
-				efree(actual);
+				zend_string_release(actual);
 			}
 			return FAILURE;
 		}
 	}
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	if (PHAR_G(readonly) && !is_data) {
@@ -1412,7 +1413,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	mydata->is_writeable = 1;
 	mydata->is_brandnew = 1;
 	phar_request_initialize();
-	zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, mydata);
+	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
 	if (is_data) {
 		alias = NULL;
@@ -1423,13 +1424,13 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	} else {
 		phar_archive_data *fd_ptr;
 
-		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
+		if (alias && NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 			if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
 				}
 
-				zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 
 				if (pphar) {
 					*pphar = NULL;
@@ -1444,14 +1445,14 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	}
 
 	if (alias_len && alias) {
-		if (NULL == zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, mydata)) {
+		if (NULL == zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata)) {
 			if (options & REPORT_ERRORS) {
 				if (error) {
 					spprintf(error, 0, "archive \"%s\" cannot be associated with alias \"%s\", already in use", fname, alias);
 				}
 			}
 
-			zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+			zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 
 			if (pphar) {
 				*pphar = NULL;
@@ -1475,7 +1476,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	php_stream *fp;
-	char *actual;
+	zend_string *actual;
 	int ret, is_data = 0;
 
 	if (error) {
@@ -1509,20 +1510,20 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 			}
 		}
 		if (actual) {
-			efree(actual);
+			zend_string_release(actual);
 		}
 		return FAILURE;
 	}
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error);
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	return ret;
@@ -1745,7 +1746,7 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
-		if (zend_hash_str_exists(&(PHAR_GLOBALS->phar_fname_map), realpath, strlen(realpath))) {
+		if (zend_hash_str_exists(&(PHAR_G(phar_fname_map)), realpath, strlen(realpath))) {
 			efree(realpath);
 			efree(filename);
 			return SUCCESS;
@@ -1914,7 +1915,7 @@ int phar_detect_phar_fname_ext(const char *filename, int filename_len, const cha
 			*ext_str = NULL;
 			return FAILURE;
 		}
-		if (zend_hash_str_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
+		if (zend_hash_str_exists(&(PHAR_G(phar_alias_map)), (char *) filename, pos - filename)) {
 			*ext_str = pos;
 			*ext_len = -1;
 			return FAILURE;
@@ -1927,11 +1928,11 @@ int phar_detect_phar_fname_ext(const char *filename, int filename_len, const cha
 		}
 	}
 
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)) || PHAR_G(manifest_cached)) {
+	if (zend_hash_num_elements(&(PHAR_G(phar_fname_map))) || PHAR_G(manifest_cached)) {
 		phar_archive_data *pphar;
 
 		if (is_complete) {
-			if (NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), (char *) filename, filename_len))) {
+			if (NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), (char *) filename, filename_len))) {
 				*ext_str = filename + (filename_len - pphar->ext_len);
 woohoo:
 				*ext_len = pphar->ext_len;
@@ -1959,9 +1960,9 @@ woohoo:
 			zend_string *str_key;
 			zend_ulong unused;
 
-			for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
-				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_GLOBALS->phar_fname_map), &str_key, &unused);
-				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map))
+			for (zend_hash_internal_pointer_reset(&(PHAR_G(phar_fname_map)));
+				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
+				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
 			) {
 				if (str_key->len > (uint) filename_len) {
 					continue;
@@ -1969,7 +1970,7 @@ woohoo:
 
 				if (!memcmp(filename, str_key->val, str_key->len) && ((uint)filename_len == str_key->len
 					|| filename[str_key->len] == '/' || filename[str_key->len] == '\0')) {
-					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_GLOBALS->phar_fname_map)))) {
+					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
 						break;
 					}
 					*ext_str = filename + (str_key->len - pphar->ext_len);
@@ -2252,7 +2253,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 	char *fname;
 	php_stream *fp;
 	int fname_len;
-	char *actual = NULL;
+	zend_string *actual = NULL;
 	int ret;
 
 	if (error) {
@@ -2298,20 +2299,20 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
 		}
 		if (actual) {
-			efree(actual);
+			zend_string_release(actual);
 		}
 		return FAILURE;
 	}
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	return ret;
@@ -3226,7 +3227,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 #ifdef COMPILE_DL_PHAR
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(phar)
 #endif
@@ -3254,7 +3255,7 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 #define phar_orig_zend_open zend_stream_open_function
 
-static char *phar_resolve_path(const char *filename, int filename_len)
+static zend_string *phar_resolve_path(const char *filename, int filename_len)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL);
 }
@@ -3298,7 +3299,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 				file_handle->handle.stream.fsizer  = phar_zend_stream_fsizer;
 				file_handle->handle.stream.isatty  = 0;
 				phar->is_persistent ?
-					php_stream_rewind(PHAR_GLOBALS->cached_fp[phar->phar_pos].fp) :
+					php_stream_rewind(PHAR_G(cached_fp)[phar->phar_pos].fp) :
 					php_stream_rewind(phar->fp);
 				memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
 			}
@@ -3337,7 +3338,7 @@ static void mime_type_dtor(zval *zv)
 PHP_GINIT_FUNCTION(phar) /* {{{ */
 {
 #if defined(COMPILE_DL_PHAR) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	phar_mime_type mime;
 
@@ -3443,18 +3444,18 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 
 void phar_request_initialize(void) /* {{{ */
 {
-	if (!PHAR_GLOBALS->request_init)
+	if (!PHAR_G(request_init))
 	{
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 		PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);
 		PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", sizeof("zlib")-1);
-		PHAR_GLOBALS->request_init = 1;
-		PHAR_GLOBALS->request_ends = 0;
-		PHAR_GLOBALS->request_done = 0;
-		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), 5, zend_get_hash_value, destroy_phar_data,  0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_persist_map), 5, zend_get_hash_value, NULL,  0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), 5, zend_get_hash_value, NULL, 0);
+		PHAR_G(request_init) = 1;
+		PHAR_G(request_ends) = 0;
+		PHAR_G(request_done) = 0;
+		zend_hash_init(&(PHAR_G(phar_fname_map)), 5, zend_get_hash_value, destroy_phar_data,  0);
+		zend_hash_init(&(PHAR_G(phar_persist_map)), 5, zend_get_hash_value, NULL,  0);
+		zend_hash_init(&(PHAR_G(phar_alias_map)), 5, zend_get_hash_value, NULL, 0);
 
 		if (PHAR_G(manifest_cached)) {
 			phar_archive_data *pphar;
@@ -3466,10 +3467,10 @@ void phar_request_initialize(void) /* {{{ */
 				stuff[pphar->phar_pos].manifest = (phar_entry_fp_info *) ecalloc( zend_hash_num_elements(&(pphar->manifest)), sizeof(phar_entry_fp_info));
 			}
 
-			PHAR_GLOBALS->cached_fp = stuff;
+			PHAR_G(cached_fp) = stuff;
 		}
 
-		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
+		PHAR_G(phar_SERVER_mung_list) = 0;
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
@@ -3481,34 +3482,34 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	int i;
 
-	PHAR_GLOBALS->request_ends = 1;
+	PHAR_G(request_ends) = 1;
 
-	if (PHAR_GLOBALS->request_init)
+	if (PHAR_G(request_init))
 	{
 		phar_release_functions();
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_alias_map));
-		PHAR_GLOBALS->phar_alias_map.u.flags = 0;
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
-		PHAR_GLOBALS->phar_fname_map.u.flags = 0;
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_persist_map));
-		PHAR_GLOBALS->phar_persist_map.u.flags = 0;
-		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
+		zend_hash_destroy(&(PHAR_G(phar_alias_map)));
+		PHAR_G(phar_alias_map.u.flags) = 0;
+		zend_hash_destroy(&(PHAR_G(phar_fname_map)));
+		PHAR_G(phar_fname_map.u.flags) = 0;
+		zend_hash_destroy(&(PHAR_G(phar_persist_map)));
+		PHAR_G(phar_persist_map.u.flags) = 0;
+		PHAR_G(phar_SERVER_mung_list) = 0;
 
-		if (PHAR_GLOBALS->cached_fp) {
+		if (PHAR_G(cached_fp)) {
 			for (i = 0; i < zend_hash_num_elements(&cached_phars); ++i) {
-				if (PHAR_GLOBALS->cached_fp[i].fp) {
-					php_stream_close(PHAR_GLOBALS->cached_fp[i].fp);
+				if (PHAR_G(cached_fp)[i].fp) {
+					php_stream_close(PHAR_G(cached_fp)[i].fp);
 				}
-				if (PHAR_GLOBALS->cached_fp[i].ufp) {
-					php_stream_close(PHAR_GLOBALS->cached_fp[i].ufp);
+				if (PHAR_G(cached_fp)[i].ufp) {
+					php_stream_close(PHAR_G(cached_fp)[i].ufp);
 				}
-				efree(PHAR_GLOBALS->cached_fp[i].manifest);
+				efree(PHAR_G(cached_fp)[i].manifest);
 			}
-			efree(PHAR_GLOBALS->cached_fp);
-			PHAR_GLOBALS->cached_fp = 0;
+			efree(PHAR_G(cached_fp));
+			PHAR_G(cached_fp) = 0;
 		}
 
-		PHAR_GLOBALS->request_init = 0;
+		PHAR_G(request_init) = 0;
 
 		if (PHAR_G(cwd)) {
 			efree(PHAR_G(cwd));
@@ -3519,7 +3520,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_G(cwd_init) = 0;
 	}
 
-	PHAR_GLOBALS->request_done = 1;
+	PHAR_G(request_done) = 1;
 	return SUCCESS;
 }
 /* }}} */

@@ -88,7 +88,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
-	t[j++] = '\xA7'; /* section sign */
+	t[j++] = '~';
 	t[j++] = '^';
 
 	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
@@ -116,9 +116,9 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 				t[j++] = '\\';
 				t[j] = ')';
 				break;
-			case '\xA7':
+			case '~':
 				t[j++] = '\\';
-				t[j] = '\xA7';
+				t[j] = '~';
 				break;
 			default:
 				t[j] = lc_pattern[i];
@@ -127,7 +127,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	}
 
 	t[j++] = '$';
-	t[j++] = '\xA7';
+	t[j++] = '~';
 
 	t[j]=0;
 	res->len = j;
@@ -311,8 +311,7 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 	char *browscap = INI_STR("browscap");
 
 #ifdef ZTS
-	ts_allocate_id(&browscap_globals_id, sizeof(browser_data),
-		(ts_allocate_ctor) browscap_globals_ctor, NULL);
+	ts_allocate_id(&browscap_globals_id, sizeof(browser_data), (ts_allocate_ctor) browscap_globals_ctor, NULL);
 #endif
 	/* ctor call not really needed for non-ZTS */
 
@@ -463,11 +462,8 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (agent_name == NULL) {
-		zend_string *key = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
-		zend_is_auto_global(key);
-		zend_string_release(key);
-		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF ||
-			(http_user_agent = zend_hash_str_find(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
+		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) ||
+			(http_user_agent = zend_hash_str_find(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
 		) {
 			php_error_docref(NULL, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 			RETURN_FALSE;
@@ -492,8 +488,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (return_array) {
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(agent));
+		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(agent)));
 	}
 	else {
 		object_init(return_value);

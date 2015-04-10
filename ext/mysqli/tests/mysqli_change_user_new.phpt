@@ -41,4 +41,4 @@ Warning: mysqli_query(): MySQL server has gone away in %s on line %d
 Warning: mysqli_query(): Error reading result set's header in %s on line %d
 [003] [2006] MySQL server has gone away
 
-Catchable fatal error: Call to a member function fetch_assoc() on %s in %s on line %d
+Fatal error: Call to a member function fetch_assoc() on %s in %s on line %d

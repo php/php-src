@@ -55,21 +55,17 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 /* {{{ proto void DOMAttr::__construct(string name, [string value]); */
 PHP_METHOD(domattr, __construct)
 {
-	zval *id;
+	zval *id = getThis();
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
 	size_t name_len, value_len, name_valid;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling);
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
 	intern = Z_DOMOBJ_P(id);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
