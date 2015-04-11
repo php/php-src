@@ -1014,8 +1014,8 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	func->this_var = -1;
 	func->opcodes = &EG(call_trampoline_op);
 
-	func->scope = ce;
 	func->prototype = fbc;
+	func->scope = fbc->common.scope;
 	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : STR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
 	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;

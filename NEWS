@@ -8,6 +8,8 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed bug #69427 (Segfault on magic method __call of private method in 
+    superclass). (Laruence)
   . Improved __call() and __callStatic() magic method handling. Now they are
     called in a stackless way using ZEND_CALL_TRAMPOLINE opcode, without
     additional stack frame. (Laruence, Dmitry)
