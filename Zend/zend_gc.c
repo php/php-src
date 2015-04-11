@@ -254,7 +254,10 @@ tail_call:
 			if (EXPECTED(!ht)) {
 				ref = Z_COUNTED_P(zv);
 				GC_REFCOUNT(ref)++;
-				goto tail_call;
+				if (GC_GET_COLOR(GC_INFO(ref)) != GC_BLACK) {
+					goto tail_call;
+				}
+				return;
 			}
 		} else {
 			return;
