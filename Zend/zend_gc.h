@@ -49,29 +49,16 @@
 
 #define GC_ADDRESS(v) \
 	((v) & ~GC_COLOR)
-#define GC_SET_ADDRESS(v, a) \
-	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
-#define GC_GET_COLOR(v) \
+#define GC_INFO_GET_COLOR(v) \
 	(((zend_uintptr_t)(v)) & GC_COLOR)
-#define GC_SET_COLOR(v, c) \
+#define GC_INFO_SET_ADDRESS(v, a) \
+	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
+#define GC_INFO_SET_COLOR(v, c) \
 	do {(v) = ((v) & ~GC_COLOR) | (c);} while (0)
-#define GC_SET_BLACK(v) \
+#define GC_INFO_SET_BLACK(v) \
 	do {(v) = (v) & ~GC_COLOR;} while (0)
-#define GC_SET_PURPLE(v) \
+#define GC_INFO_SET_PURPLE(v) \
 	do {(v) = (v) | GC_COLOR;} while (0)
-
-#define GC_ZVAL_ADDRESS(v) \
-	GC_ADDRESS(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_ADDRESS(v, a) \
-	GC_SET_ADDRESS(Z_GC_INFO_P(v), (a))
-#define GC_ZVAL_GET_COLOR(v) \
-	GC_GET_COLOR(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_COLOR(v, c) \
-	GC_SET_COLOR(Z_GC_INFO_P(v), (c))
-#define GC_ZVAL_SET_BLACK(v) \
-	GC_SET_BLACK(Z_GC_INFO_P(v))
-#define GC_ZVAL_SET_PURPLE(v) \
-	GC_SET_PURPLE(Z_GC_INFO_P(v))
 
 typedef struct _gc_root_buffer {
 	zend_refcounted          *ref;
