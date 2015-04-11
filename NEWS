@@ -68,7 +68,8 @@
   . Added error_clear_last() function. (Reeze Xia)
   . Fixed bug #68797 (Number 2.2250738585072012e-308 converted incorrectly).
     (Anatol)
-  . Added hybrid sorting algo zend_sort for better performance. (Laruence)
+  . Improved zend_qsort(using hybrid sorting algo) for better performance, 
+    and also renamed zend_qsort to zend_sort. (Laruence)
   . Added stable sorting algo zend_insert_sort. (Laruence)
   . Implemented the RFC `Scalar Type Decalarations v0.5`. (Anthony)
   . Implemented the RFC `Group Use Declarations`. (Marcio)
