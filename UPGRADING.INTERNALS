@@ -195,6 +195,12 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      as first argument, if you still need to fetch a resource from zval, use 
      zend_fetch_resource_ex. More details can be found in Zend/zend_list.c.
 
+  t. Optimized strings concatenation.
+     ZEND_ADD_STRING/VAR/CHAR are replaced with ZEND_ROPE_INTI, ZEND_ROPE_ADD,
+     ZEND_ROPE_END.
+     Instead of reallocation and copying string on each ZEND_ADD_STRING/VAR/CAHR,
+     collect all the strings and then alloca te and construct the resulting string once.
+
 
 ========================
 2. Build system changes
