@@ -143,6 +143,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path");
 			RETURN_FALSE;
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
@@ -258,6 +259,10 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 		RETURN_FALSE;
 	}
 	if (isfilename) {
+		if (CHECK_NULL_PATH(data, data_len)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path");
+			RETURN_FALSE;
+		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, DEFAULT_CONTEXT);
 		if (!stream) {
 			/* Stream will report errors opening file */
@@ -462,7 +467,7 @@ PHP_FUNCTION(hash_update_file)
 	char *filename, buf[1024];
 	int filename_len, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
