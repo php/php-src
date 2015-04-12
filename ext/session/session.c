@@ -1216,7 +1216,7 @@ CACHE_LIMITER_FUNC(private_no_expire) /* {{{ */
 {
 	char buf[MAX_STR + 1];
 
-	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=" ZEND_LONG_FMT ", pre-check=" ZEND_LONG_FMT, PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
+	snprintf(buf, sizeof(buf), "Cache-Control: private, max-age=" ZEND_LONG_FMT, PS(cache_expire) * 60); /* SAFE */
 	ADD_HEADER(buf);
 
 	last_modified();
@@ -1234,8 +1234,8 @@ CACHE_LIMITER_FUNC(nocache) /* {{{ */
 {
 	ADD_HEADER("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 
-	/* For HTTP/1.1 conforming clients and the rest (MSIE 5) */
-	ADD_HEADER("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+	/* For HTTP/1.1 conforming clients */
+	ADD_HEADER("Cache-Control: no-store, no-cache, must-revalidate");
 
 	/* For HTTP/1.0 conforming clients */
 	ADD_HEADER("Pragma: no-cache");
