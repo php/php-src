@@ -2550,6 +2550,29 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         return res;
 }
 
+#elif defined(__GNUC__) && defined(__powerpc64__)
+
+static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
+{
+        size_t res;
+        unsigned long overflow;
+
+        __asm__ ("mulld %0,%2,%3\n\t"
+                 "mulhdu %1,%2,%3\n\t"
+                 "addc %0,%0,%4\n\t"
+                 "addze %1,%1\n"
+             : "=&r"(res), "=&r"(overflow)
+             : "r"(nmemb),
+               "r"(size),
+               "r"(offset));
+
+        if (UNEXPECTED(overflow)) {
+                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
+                return 0;
+        }
+        return res;
+}
+
 #elif SIZEOF_SIZE_T == 4 && defined(HAVE_ZEND_LONG64)
 
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
