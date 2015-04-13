@@ -645,6 +645,11 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	zval_ptr_dtor(&zbufptr);
 
 	didwrite = 0;
+
+	if (EG(exception)) {
+		return 0;
+	}
+
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_long(retval);
 		didwrite = Z_LVAL_P(retval);
@@ -692,6 +697,12 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 			1, args,
 			0, NULL TSRMLS_CC);
 
+	zval_ptr_dtor(&zcount);
+
+	if (EG(exception)) {
+		return 0;
+	}
+
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_string(retval);
 		didread = Z_STRLEN_P(retval);
@@ -706,7 +717,6 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 				us->wrapper->classname);
 	}
-	zval_ptr_dtor(&zcount);
 
 	if (retval) {
 		zval_ptr_dtor(&retval);

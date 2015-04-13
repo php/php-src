@@ -635,7 +635,7 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_DC);
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
-void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use(znode *name, znode *new_name TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);

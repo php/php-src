@@ -27,6 +27,10 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#ifndef MAXFQDNLEN
+#define MAXFQDNLEN 255
+#endif
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -611,7 +615,11 @@ int fcgi_listen(const char *path, int backlog)
 			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
 				struct hostent *hep;
 
-				hep = gethostbyname(host);
+				if(strlen(host) > MAXFQDNLEN) {
+					hep = NULL;
+				} else {
+					hep = gethostbyname(host);
+				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
 					fprintf(stderr, "Cannot resolve host name '%s'!\n", host);
 					return -1;
@@ -990,6 +998,7 @@ static int fcgi_read_request(fcgi_request *req)
 		q = req->env.list;
 		while (q != NULL) {
 			if (zend_hash_find(&fcgi_mgmt_vars, q->var, q->var_len, (void**) &value) != SUCCESS) {
+				q = q->list_next;
 				continue;
 			}
 			zlen = Z_STRLEN_PP(value);
@@ -1016,6 +1025,7 @@ static int fcgi_read_request(fcgi_request *req)
 			p += q->var_len;
 			memcpy(p, Z_STRVAL_PP(value), zlen);
 			p += zlen;
+			q = q->list_next;
 		}
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);

@@ -3,6 +3,11 @@ language: c
 notifications:
     email: 
        on_failure: change
+    irc:
+      channels:
+        - "irc.efnet.org#php.pecl"
+      on_success: change
+      on_failure: always
 
 cache: 
     - apt

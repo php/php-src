@@ -162,16 +162,16 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 		zend_hash_apply(&ce->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
 	}
 	if (ce->static_members_table) {
+		zval **static_members = ce->static_members_table;
+		int count = ce->default_static_members_count;
 		int i;
 
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			if (ce->static_members_table[i]) {
-				zval *p = ce->static_members_table[i];
-				ce->static_members_table[i] = NULL;
-				zval_ptr_dtor(&p);
-			}
+		ce->default_static_members_count = 0;
+		ce->default_static_members_table = ce->static_members_table = NULL;
+		for (i = 0; i < count; i++) {
+			zval_ptr_dtor(&static_members[i]);
 		}
-		ce->static_members_table = NULL;
+		efree(static_members);
 	}
 }
 
@@ -256,9 +256,14 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
+				zend_uint j = 0;
+				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
+				while (cur_precedence->exclude_from_classes[j]) {
+					efree(cur_precedence->exclude_from_classes[j]);
+					j++;
+				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
 			}
-
 			efree(ce->trait_precedences[i]);
 			i++;
 		}

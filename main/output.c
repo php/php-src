@@ -172,21 +172,22 @@ PHPAPI void php_output_deactivate(TSRMLS_D)
 {
 	php_output_handler **handler = NULL;
 
-	php_output_header(TSRMLS_C);
+	if ((OG(flags) & PHP_OUTPUT_ACTIVATED)) {
+		php_output_header(TSRMLS_C);
 
-	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
-	OG(active) = NULL;
-	OG(running) = NULL;
+		OG(flags) ^= PHP_OUTPUT_ACTIVATED;
+		OG(active) = NULL;
+		OG(running) = NULL;
 
-	/* release all output handlers */
-	if (OG(handlers).elements) {
-		while (SUCCESS == zend_stack_top(&OG(handlers), (void *) &handler)) {
-			php_output_handler_free(handler TSRMLS_CC);
-			zend_stack_del_top(&OG(handlers));
+		/* release all output handlers */
+		if (OG(handlers).elements) {
+			while (SUCCESS == zend_stack_top(&OG(handlers), (void *) &handler)) {
+				php_output_handler_free(handler TSRMLS_CC);
+				zend_stack_del_top(&OG(handlers));
+			}
+			zend_stack_destroy(&OG(handlers));
 		}
-		zend_stack_destroy(&OG(handlers));
 	}
-
 }
 /* }}} */
 

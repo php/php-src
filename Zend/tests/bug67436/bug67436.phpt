@@ -2,14 +2,14 @@
 bug67436: Autoloader isn't called if user defined error handler is present
 
 --INI--
-error_reporting=
+error_reporting=-1
 
 --FILE--
 <?php
 
 spl_autoload_register(function($classname) {
 	if (in_array($classname, array('a','b','c'))) {
-		require_once ($classname . '.php');
+		require_once __DIR__ . "/{$classname}.php";
 	}
 });
 

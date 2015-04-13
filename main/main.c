@@ -1087,7 +1087,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						size_t len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
-						efree(buf);
+						str_efree(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
@@ -1243,6 +1243,10 @@ PHPAPI char *php_get_current_user(TSRMLS_D)
 		}
 		pwbuf = emalloc(pwbuflen);
 		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+			efree(pwbuf);
+			return "";
+		}
+		if (retpwptr == NULL) {
 			efree(pwbuf);
 			return "";
 		}
@@ -2503,8 +2507,23 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 #endif
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
-		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 
+		/*
+		   If cli primary file has shabang line and there is a prepend file,
+		   the `start_lineno` will be used by prepend file but not primary file,
+		   save it and restore after prepend file been executed.
+		 */
+		if (CG(start_lineno) && prepend_file_p) {
+			int orig_start_lineno = CG(start_lineno);
+
+			CG(start_lineno) = 0;
+			if (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p) == SUCCESS) {
+				CG(start_lineno) = orig_start_lineno;
+				retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 2, primary_file, append_file_p) == SUCCESS);
+			}
+		} else {
+			retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		}
 	} zend_end_try();
 
 #if HAVE_BROKEN_GETCWD

@@ -121,7 +121,8 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-    struct stat sbuf;
+	struct stat sbuf;
+	int ret;
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -164,7 +165,9 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 				return;
 			}
 #endif
-			flock(data->fd, LOCK_EX);
+			do {
+				ret = flock(data->fd, LOCK_EX);
+			} while (ret == -1 && errno == EINTR);
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC
@@ -218,7 +221,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 				/* NUL terminate it and */
 				buf[dirname_len + entry_len + 1] = '\0';
 
-				/* check whether its last access was more than maxlifet ago */
+				/* check whether its last access was more than maxlifetime ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 &&
 						(now - sbuf.st_mtime) > maxlifetime) {
 					VCWD_UNLINK(buf);

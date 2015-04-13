@@ -1337,7 +1337,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int 
 			break;
 		case PHP_STREAM_META_GROUP:
 		case PHP_STREAM_META_GROUP_NAME:
-			if(option == PHP_STREAM_META_OWNER_NAME) {
+			if(option == PHP_STREAM_META_GROUP_NAME) {
 				if(php_get_gid_by_name((char *)value, &gid TSRMLS_CC) != SUCCESS) {
 					php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "Unable to find gid for %s", (char *)value);
 					return 0;

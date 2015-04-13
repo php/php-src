@@ -85,6 +85,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mktime, 0, 0, 0)
 	ZEND_ARG_INFO(0, mon)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, is_dst)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmmktime, 0, 0, 0)
@@ -94,6 +95,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmmktime, 0, 0, 0)
 	ZEND_ARG_INFO(0, mon)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, is_dst)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_checkdate, 0)
@@ -163,7 +165,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, time)
-	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse, 0, 0, 1)
@@ -2779,12 +2781,9 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	timelib_tzinfo   *tzi;
 	php_timezone_obj *tzobj;
 
-	if (zend_hash_find(myht, "date", 5, (void**) &z_date) == SUCCESS) {
-		convert_to_string(*z_date);
-		if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
-			convert_to_long(*z_timezone_type);
-			if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
-				convert_to_string(*z_timezone);
+	if (zend_hash_find(myht, "date", 5, (void**) &z_date) == SUCCESS && Z_TYPE_PP(z_date) == IS_STRING) {
+		if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS && Z_TYPE_PP(z_timezone_type) == IS_LONG) {
+			if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS && Z_TYPE_PP(z_timezone) == IS_STRING) {
 
 				switch (Z_LVAL_PP(z_timezone_type)) {
 					case TIMELIB_ZONETYPE_OFFSET:
@@ -2799,7 +2798,6 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 
 					case TIMELIB_ZONETYPE_ID: {
 						int ret;
-						convert_to_string(*z_timezone);
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_PP(z_timezone), DATE_TIMEZONEDB TSRMLS_CC);
 
@@ -2991,7 +2989,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 			add_assoc_long(element, "weekdays", parsed_time->relative.special.amount);
 		}
 		if (parsed_time->relative.first_last_day_of) {
-			add_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
+			add_assoc_bool(element, parsed_time->relative.first_last_day_of == TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH ? "first_day_of_month" : "last_day_of_month", 1);
 		}
 		add_assoc_zval(return_value, "relative", element);
 	}
@@ -3716,9 +3714,8 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	zval            **z_timezone = NULL;
 	zval            **z_timezone_type = NULL;
 
-	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
-		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
-			convert_to_long(*z_timezone_type);
+	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS && Z_TYPE_PP(z_timezone_type) == IS_LONG) {
+		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS && Z_TYPE_PP(z_timezone) == IS_STRING) {
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
 				return SUCCESS;
 			}
@@ -3743,7 +3740,9 @@ PHP_METHOD(DateTimeZone, __set_state)
 
 	php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC) != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 
@@ -3759,7 +3758,9 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 	
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC) != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 
