@@ -922,8 +922,13 @@ out:
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
 		}
-	} else if (transfer_encoding) {
-		php_stream_filter_free(transfer_encoding TSRMLS_CC);
+	} else {
+		if(response_header) {
+			Z_DELREF_P(response_header);
+		}
+		if (transfer_encoding) {
+			php_stream_filter_free(transfer_encoding TSRMLS_CC);
+		}
 	}
 
 	return stream;
