@@ -97,6 +97,273 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
+typedef struct {
+	zval *tokens;
+	int	index,
+		length,
+		current,
+		in_class,
+		in_trait_use,
+		in_const_list;
+} t_stream;
+
+/* This function will be soon generated based on zend_language_parser.y
+ */
+static zend_bool t_is_semi_reserved(int token_type)
+{
+	switch (token_type) {
+	/* [[[ semi-reserved */
+		case T_INCLUDE:
+		case T_INCLUDE_ONCE:
+		case T_EVAL:
+		case T_REQUIRE:
+		case T_REQUIRE_ONCE:
+		case T_LOGICAL_OR:
+		case T_LOGICAL_XOR:
+		case T_LOGICAL_AND:
+		case T_INSTANCEOF:
+		case T_NEW:
+		case T_CLONE:
+		case T_EXIT:
+		case T_IF:
+		case T_ELSEIF:
+		case T_ELSE:
+		case T_ENDIF:
+		case T_ECHO:
+		case T_DO:
+		case T_WHILE:
+		case T_ENDWHILE:
+		case T_FOR:
+		case T_ENDFOR:
+		case T_FOREACH:
+		case T_ENDFOREACH:
+		case T_DECLARE:
+		case T_ENDDECLARE:
+		case T_AS:
+		case T_TRY:
+		case T_CATCH:
+		case T_FINALLY:
+		case T_THROW:
+		case T_USE:
+		case T_INSTEADOF:
+		case T_GLOBAL:
+		case T_VAR:
+		case T_UNSET:
+		case T_ISSET:
+		case T_EMPTY:
+		case T_CONTINUE:
+		case T_GOTO:
+		case T_FUNCTION:
+		case T_CONST:
+		case T_RETURN:
+		case T_PRINT:
+		case T_YIELD:
+		case T_LIST:
+		case T_SWITCH:
+		case T_ENDSWITCH:
+		case T_CASE:
+		case T_DEFAULT:
+		case T_BREAK:
+		case T_ARRAY:
+		case T_CALLABLE:
+		case T_EXTENDS:
+		case T_IMPLEMENTS:
+		case T_NAMESPACE:
+		case T_TRAIT:
+		case T_INTERFACE:
+	/* ]]] */
+		return 1;
+	}
+	return 0;
+}
+
+static zend_always_inline t_stream *t_init(zval *tokens)
+{
+	t_stream *ts = (t_stream *)malloc (sizeof (t_stream));
+	ts->index = ts->current = -1;
+	ts->in_class = ts->in_trait_use = ts->in_const_list = 0;
+	ts->tokens = tokens;
+	ts->length = zend_hash_num_elements(Z_ARRVAL_P(tokens));
+	return ts;
+}
+
+static zend_always_inline void t_destroy(t_stream *ts) { free(ts); }
+
+static int t_get_type(t_stream *ts, int index)
+{
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
+	switch (Z_TYPE_P(token)) {
+		case IS_ARRAY:
+			return zval_get_long(zend_hash_index_find(Z_ARRVAL_P(token), 0));
+		case IS_STRING:
+			return Z_STRVAL_P(token)[0];
+	}
+	ZEND_ASSERT(0);
+}
+
+static zend_always_inline zend_bool t_next(t_stream *ts)
+{
+	return (++ts->index < ts->length) ? ts->current = t_get_type(ts, ts->index) : 0;
+}
+
+static zend_always_inline zend_bool t_previous(t_stream *ts)
+{
+	return (--ts->index >= 0) ? ts->current = t_get_type(ts, ts->index) : 0;
+}
+
+static int t_look(t_stream *ts, zend_bool ahead, int delta)
+{
+	int	t_type,
+		index = ts->index;
+
+	while (delta && (ahead ? (++index < ts->length) : (--index >= 0))) {
+		switch (t_type = t_get_type(ts, index)) {
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
+				break;
+			case T_STRING:
+				return index;
+			default:
+				if (t_is_semi_reserved(t_type)) return index;
+				else delta--;
+		}
+	}
+	return -1;
+}
+
+static int t_look_for(t_stream *ts, zend_bool ahead, int t_expected)
+{
+	int	t_type = -1,
+		index = ts->index;
+
+	while (ahead ? (++index < ts->length) : (--index >= 0)) {
+		switch (t_type = t_get_type(ts, index)) {
+			case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT:
+				continue;
+		}
+		break;
+	}
+	return (t_type == t_expected) ? index : -1;
+}
+
+static zend_always_inline void t_stringify(t_stream *ts, int index)
+{
+	zval *token = zend_hash_index_find(Z_ARRVAL_P(ts->tokens), index);
+
+	if (Z_TYPE_P(token) == IS_ARRAY)
+		ZVAL_LONG(zend_hash_index_find(Z_ARRVAL_P(token), 0), T_STRING);
+}
+
+static zend_always_inline void t_stringify_next(t_stream *ts, int delta)
+{
+	if (-1 != (delta = t_look(ts, 1, delta))) t_stringify(ts, delta);
+}
+
+static zend_always_inline void t_stringify_previous(t_stream *ts, int delta)
+{
+	if (-1 != (delta = t_look(ts, 0, delta))) t_stringify(ts, delta);
+}
+
+#define CASE_MEMBER_ACCESS do {								\
+	case T_PAAMAYIM_NEKUDOTAYIM: case T_OBJECT_OPERATOR:	\
+		 t_stringify_next(ts, 1);							\
+		 break;												\
+} while (0);
+
+static zend_always_inline void t_parse_trait_use(t_stream *ts)
+{
+	while (ts->in_trait_use && t_next(ts)) switch (ts->current) {
+		case T_AS: /* T_STRING<?> T_AS visibility? T_STRING<?>; */
+			if (-1 != t_look(ts, 0, 1)) {
+				t_stringify_previous(ts, 1);
+				t_stringify_next(ts, 2);
+			}
+			break;
+		case '}':
+			ts->in_trait_use = 0;
+			ts->in_class--;
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
+static zend_always_inline void t_parse_const_list(t_stream *ts)
+{
+	ts->in_const_list++;
+	while (ts->in_const_list && t_next(ts)) switch (ts->current) {
+		case '(': case '[':
+			ts->in_const_list++;
+			break;
+		case ')': case ']':
+			ts->in_const_list--;
+			break;
+		case '=':
+			if (1 == ts->in_const_list) t_stringify_previous(ts, 1);
+			break;
+		case ';':
+			if (1 == ts->in_const_list) ts->in_const_list--;
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
+static zend_always_inline void t_parse_class(t_stream *ts);
+
+static zend_always_inline void t_parse_nested_class(t_stream *ts)
+{
+	if (ts->current == T_CLASS && -1 != t_look_for(ts, 0, T_PAAMAYIM_NEKUDOTAYIM)) return;
+
+	t_stream *temp_ts = t_init(ts->tokens);
+	temp_ts->index = ts->index; /* continue from current index */
+	t_parse_class(temp_ts);
+	ts->index = temp_ts->index; /* forward to new index */
+	t_destroy(temp_ts);
+}
+
+static zend_always_inline void t_parse_class(t_stream *ts)
+{
+	ts->in_class++;
+	while (ts->in_class && t_next(ts)) switch (ts->current) {
+		case T_CLASS: /* nested class */;
+			t_parse_nested_class(ts);
+			break;
+		case T_CURLY_OPEN: case T_DOLLAR_OPEN_CURLY_BRACES:
+			ts->in_class++;
+			break;
+		case '{':
+			ts->in_class++;
+			if(ts->in_trait_use) t_parse_trait_use(ts);
+			break;
+		case '}':
+			if (1 == --ts->in_class) ts->in_class--;
+			break;
+		case T_FUNCTION:
+			if(2 == ts->in_class) t_stringify_next(ts, 1);
+			break;
+		case T_USE:
+			ts->in_trait_use++;
+			break;
+		case T_CONST:
+			t_parse_const_list(ts);
+			break;
+		case '(': case ';':
+			if (ts->in_trait_use) ts->in_trait_use = 0;
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
+static void t_parse(t_stream *ts)
+{
+	while (t_next(ts)) switch (ts->current) {
+		case T_WHITESPACE: case T_COMMENT: case T_DOC_COMMENT: case T_STRING: case T_INLINE_HTML:
+			break;
+		case T_CLASS: case T_TRAIT: case T_INTERFACE:
+			t_parse_class(ts);
+			break;
+		CASE_MEMBER_ACCESS;
+	}
+}
+
 static void tokenize(zval *return_value)
 {
 	zval token;
@@ -104,7 +371,7 @@ static void tokenize(zval *return_value)
 	int token_type;
 	zend_bool destroy;
 	int token_line = 1;
-	int need_tokens = -1; // for __halt_compiler lexing. -1 = disabled
+	int need_tokens = -1; /* for __halt_compiler lexing. -1 = disabled */
 
 	array_init(return_value);
 
@@ -147,13 +414,13 @@ static void tokenize(zval *return_value)
 		}
 		ZVAL_NULL(&token);
 
-		// after T_HALT_COMPILER collect the next three non-dropped tokens
+		/* after T_HALT_COMPILER collect the next three non-dropped tokens */
 		if (need_tokens != -1) {
 			if (token_type != T_WHITESPACE && token_type != T_OPEN_TAG
-			    && token_type != T_COMMENT && token_type != T_DOC_COMMENT
-			    && --need_tokens == 0
+				&& token_type != T_COMMENT && token_type != T_DOC_COMMENT
+				&& --need_tokens == 0
 			) {
-				// fetch the rest into a T_INLINE_HTML
+				/* fetch the rest into a T_INLINE_HTML */
 				if (zendcursor != zendlimit) {
 					array_init(&keyword);
 					add_next_index_long(&keyword, T_INLINE_HTML);
@@ -169,6 +436,10 @@ static void tokenize(zval *return_value)
 
 		token_line = CG(zend_lineno);
 	}
+
+	t_stream *ts = t_init(return_value);
+	t_parse(ts);
+	t_destroy(ts);
 }
 
 /* {{{ proto array token_get_all(string source)
