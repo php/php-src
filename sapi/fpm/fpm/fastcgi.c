@@ -37,15 +37,13 @@
 
 #include <windows.h>
 
-  typedef unsigned int in_addr_t;
+	struct sockaddr_un {
+		short   sun_family;
+		char    sun_path[MAXPATHLEN];
+	};
 
-  struct sockaddr_un {
-    short   sun_family;
-    char    sun_path[MAXPATHLEN];
-  };
-
-  static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
-  static int is_impersonate = 0;
+	static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
+	static int is_impersonate = 0;
 
 #define FCGI_LOCK(fd) \
 	if (fcgi_accept_mutex != INVALID_HANDLE_VALUE) { \
@@ -249,38 +247,42 @@ void fcgi_set_allowed_clients(char *ip)
 	char *cur, *end;
 	int n;
 
-  if (ip) {
-    ip = strdup(ip);
-    cur = ip;
-    n = 0;
-    while (*cur) {
-      if (*cur == ',') n++;
-      cur++;
-    }
-    if (allowed_clients) free(allowed_clients);
-    allowed_clients = malloc(sizeof(in_addr_t) * (n+2));
-    n = 0;
-    cur = ip;
-    while (cur) {
-      end = strchr(cur, ',');
-      if (end) {
-        *end = 0;
-        end++;
-      }
-      if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
-        allowed_clients[n].sa.sa_family = AF_INET;
-        n++;
-      } else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
-        allowed_clients[n].sa.sa_family = AF_INET6;
-        n++;
-      } else {
-        zlog(ZLOG_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
-      }
-      cur = end;
-    }
-    allowed_clients[n].sa.sa_family = 0;
-    free(ip);
-  }
+	if (ip) {
+		ip = strdup(ip);
+		cur = ip;
+		n = 0;
+		while (*cur) {
+			if (*cur == ',') n++;
+			cur++;
+		}
+		if (allowed_clients) free(allowed_clients);
+		allowed_clients = malloc(sizeof(sa_t) * (n+2));
+		n = 0;
+		cur = ip;
+		while (cur) {
+			end = strchr(cur, ',');
+			if (end) {
+				*end = 0;
+				end++;
+			}
+			if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
+				allowed_clients[n].sa.sa_family = AF_INET;
+				n++;
+			} else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
+				allowed_clients[n].sa.sa_family = AF_INET6;
+				n++;
+			} else {
+				zlog(ZLOG_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
+			}
+			cur = end;
+		}
+		allowed_clients[n].sa.sa_family = 0;
+		free(ip);
+		if (!n) {
+			zlog(ZLOG_ERROR, "There are no allowed addresses for this pool");
+			/* don't clear allowed_clients as it will create an "open for all" security issue */
+		}
+	}
 }
 
 void fcgi_init_request(fcgi_request *req, int listen_socket)
@@ -1015,19 +1017,20 @@ int fcgi_flush(fcgi_request *req, int close)
 	if (close) {
 		fcgi_end_request_rec *rec = (fcgi_end_request_rec*)(req->out_pos);
 
-    fcgi_make_header(&rec->hdr, FCGI_END_REQUEST, req->id, sizeof(fcgi_end_request));
-    rec->body.appStatusB3 = 0;
-    rec->body.appStatusB2 = 0;
-    rec->body.appStatusB1 = 0;
-    rec->body.appStatusB0 = 0;
-    rec->body.protocolStatus = FCGI_REQUEST_COMPLETE;
-    len += sizeof(fcgi_end_request_rec);
-  }
+		fcgi_make_header(&rec->hdr, FCGI_END_REQUEST, req->id, sizeof(fcgi_end_request));
+		rec->body.appStatusB3 = 0;
+		rec->body.appStatusB2 = 0;
+		rec->body.appStatusB1 = 0;
+		rec->body.appStatusB0 = 0;
+		rec->body.protocolStatus = FCGI_REQUEST_COMPLETE;
+		len += sizeof(fcgi_end_request_rec);
+	}
 
-  if (safe_write(req, req->out_buf, len) != len) {
-    req->keep = 0;
-    return 0;
-  }
+	if (safe_write(req, req->out_buf, len) != len) {
+		req->keep = 0;
+		req->out_pos = req->out_buf;
+		return 0;
+	}
 
 	req->out_pos = req->out_buf;
 	return 1;
