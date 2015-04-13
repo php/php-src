@@ -25,6 +25,9 @@
 /* one (0) is reserved */
 #define GC_ROOT_BUFFER_MAX_ENTRIES 10001
 
+#define GC_HAS_DESTRUCTORS  (1<<0)
+#define GC_HAS_INNER_CYCLES (1<<1)
+
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
 #endif
@@ -563,7 +566,7 @@ static void gc_scan_roots(void)
 	}
 }
 
-static int gc_collect_white(zend_refcounted *ref)
+static int gc_collect_white(zend_refcounted *ref, uint32_t *flags)
 {
 	int count = 0;
 	HashTable *ht;
@@ -579,39 +582,6 @@ tail_call:
 			count++;
 		}
 
-#if 1
-		if ((GC_TYPE(ref) == IS_OBJECT || GC_TYPE(ref) == IS_ARRAY) &&
-		    !GC_ADDRESS(GC_INFO(ref))) {
-			/* inner-cycle garbage, add it into list */
-			gc_root_buffer *buf = GC_G(unused);
-
-			if (buf) {
-				GC_G(unused) = buf->prev;
-			} else if (GC_G(first_unused) != GC_G(last_unused)) {
-				buf = GC_G(first_unused);
-				GC_G(first_unused)++;
-			} else {
-				/* TODO: find a perfect way to handle such case ??? */
-				/* See: Zend/tests/gc_033.phpt and Zend/tests/bug63635.phpt */
-#if ZEND_GC_DEBUG
-				if (!GC_G(gc_full)) {
-					fprintf(stderr, "GC: no space to record inner-cycle garbage\n");
-					GC_G(gc_full) = 1;
-				}
-#endif
-			}
-
-			if (buf) {
-				buf->ref = ref;
-				buf->next = GC_G(roots).next;
-				buf->prev = &GC_G(roots);
-				GC_G(roots).next->prev = buf;
-				GC_G(roots).next = buf;
-				GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-			}
-		}
-#endif
-
 		if (GC_TYPE(ref) == IS_OBJECT) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
@@ -622,6 +592,37 @@ tail_call:
 				zval *zv, *end;
 				zval tmp;
 
+				if (obj->handlers->dtor_obj &&
+				    ((obj->handlers->dtor_obj != zend_objects_destroy_object) ||
+				     (obj->ce->destructor != NULL))) {
+					if (!GC_ADDRESS(GC_INFO(ref))) {
+						/* try to add object into list */
+						gc_root_buffer *buf = GC_G(unused);
+
+						if (buf) {
+							GC_G(unused) = buf->prev;
+						} else if (GC_G(first_unused) != GC_G(last_unused)) {
+							buf = GC_G(first_unused);
+							GC_G(first_unused)++;
+						} else {
+							*flags |= GC_HAS_INNER_CYCLES;
+						}
+						if (buf) {
+							buf->ref = ref;
+							buf->next = GC_G(roots).next;
+							buf->prev = &GC_G(roots);
+							GC_G(roots).next->prev = buf;
+							GC_G(roots).next = buf;
+							GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
+							*flags |= GC_HAS_DESTRUCTORS;
+						}
+					} else {
+						*flags |= GC_HAS_DESTRUCTORS;
+					}
+				} else if (!GC_ADDRESS(GC_INFO(ref))) {
+					GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
+					*flags |= GC_HAS_INNER_CYCLES;
+				}
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
@@ -639,7 +640,7 @@ tail_call:
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
 						GC_REFCOUNT(ref)++;
-						count += gc_collect_white(ref);
+						count += gc_collect_white(ref, flags);
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
 						count++;
@@ -655,8 +656,13 @@ tail_call:
 				return count;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
+			if (!GC_ADDRESS(GC_INFO(ref))) {
+				GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
+				*flags |= GC_HAS_INNER_CYCLES;
+			}
 			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_REFCOUNT(ref)++;
@@ -681,7 +687,7 @@ tail_call:
 			if (Z_REFCOUNTED(p->val)) {
 				ref = Z_COUNTED(p->val);
 				GC_REFCOUNT(ref)++;
-				count += gc_collect_white(ref);
+				count += gc_collect_white(ref, flags);
 				/* count non-refcounted for compatibility ??? */
 			} else if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
 					count++;
@@ -695,7 +701,7 @@ tail_call:
 	return count;
 }
 
-static int gc_collect_roots(void)
+static int gc_collect_roots(uint32_t *flags)
 {
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
@@ -714,7 +720,7 @@ static int gc_collect_roots(void)
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
 			GC_REFCOUNT(current->ref)++;
-			count += gc_collect_white(current->ref);
+			count += gc_collect_white(current->ref, flags);
 		}
 		current = current->next;
 	}
@@ -739,6 +745,84 @@ static int gc_collect_roots(void)
 		GC_G(roots).prev = &GC_G(roots);
 	}
 	return count;
+}
+
+static void gc_break_cycles(zend_refcounted *ref, zval *zv)
+{
+	HashTable *ht = NULL;
+	Bucket *p, *end;
+
+tail_call:
+	if (zv && !(GC_FLAGS(ref) & IS_GC_INNER_CYCLE)) {
+		GC_REFCOUNT(ref)--;
+		ZVAL_NULL(zv);
+		return;
+	}
+	GC_FLAGS(ref) &= ~IS_GC_INNER_CYCLE;
+
+	if (GC_TYPE(ref) == IS_OBJECT) {
+		zend_object_get_gc_t get_gc;
+		zend_object *obj = (zend_object*)ref;
+
+		if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		             (get_gc = obj->handlers->get_gc) != NULL)) {
+			int n;
+			zval *end;
+			zval tmp;
+
+			ZVAL_OBJ(&tmp, obj);
+			ht = get_gc(&tmp, &zv, &n);
+			end = zv + n;
+			if (EXPECTED(!ht)) {
+				if (!n) return;
+				while (!Z_REFCOUNTED_P(--end)) {
+					if (zv == end) return;
+				}
+			}
+			while (zv != end) {
+				if (Z_REFCOUNTED_P(zv)) {
+					ref = Z_COUNTED_P(zv);
+					gc_break_cycles(ref, zv);
+				}
+				zv++;
+			}
+			if (EXPECTED(!ht)) {
+				ref = Z_COUNTED_P(zv);
+				goto tail_call;
+			}
+		} else {
+			return;
+		}
+	} else if (GC_TYPE(ref) == IS_ARRAY) {
+		ht = (zend_array*)ref;
+	} else if (GC_TYPE(ref) == IS_REFERENCE) {
+		zend_reference *r = (zend_reference*)ref;
+		if (Z_REFCOUNTED(r->val)) {
+			zv = &r->val;
+			ref = Z_COUNTED_P(zv);
+			goto tail_call;
+		}
+		return;
+	} else {
+		return;
+	}
+
+	if (!ht->nNumUsed) return;
+	p = ht->arData;
+	end = p + ht->nNumUsed;
+	while (!Z_REFCOUNTED((--end)->val)) {
+		if (p == end) return;
+	}
+	while (p != end) {
+		if (Z_REFCOUNTED(p->val)) {
+			ref = Z_COUNTED(p->val);
+			gc_break_cycles(ref, &p->val);
+		}
+		p++;
+	}
+	zv = &p->val;
+	ref = Z_COUNTED_P(zv);
+	goto tail_call;
 }
 
 static void gc_remove_nested_data_from_buffer(zend_refcounted *ref)
@@ -822,6 +906,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		gc_root_buffer *current, *next, *orig_next_to_free;
 		zend_refcounted *p;
 		gc_root_buffer to_free;
+		uint32_t gc_flags = 0;
 #if ZEND_GC_DEBUG
 		zend_bool orig_gc_full;
 #endif
@@ -845,7 +930,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 #endif
 
 		GC_TRACE("Collecting roots");
-		count = gc_collect_roots();
+		count = gc_collect_roots(&gc_flags);
 #if ZEND_GC_DEBUG
 		GC_G(gc_full) = orig_gc_full;
 #endif
@@ -874,45 +959,56 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(gc_full) = 0;
 #endif
 
-		/* Remember reference counters before calling destructors */
-		current = to_free.next;
-		while (current != &to_free) {
-			current->refcount = GC_REFCOUNT(current->ref);
-			current = current->next;
-		}
-
-		/* Call destructors */
-		GC_TRACE("Calling destructors");
-		if (EG(objects_store).object_buckets) {
+		if (gc_flags & GC_HAS_DESTRUCTORS) {
+			/* Remember reference counters before calling destructors */
 			current = to_free.next;
 			while (current != &to_free) {
-				p = current->ref;
-				GC_G(next_to_free) = current->next;
-				if (GC_TYPE(p) == IS_OBJECT) {
-					zend_object *obj = (zend_object*)p;
-
-					if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
-						!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
-						GC_TRACE_REF(obj, "calling destructor");
-						GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-						if (obj->handlers->dtor_obj) {
-							GC_REFCOUNT(obj)++;
-							obj->handlers->dtor_obj(obj);
-							GC_REFCOUNT(obj)--;
-						}
-					}
-				}
-				current = GC_G(next_to_free);
+				current->refcount = GC_REFCOUNT(current->ref);
+				current = current->next;
 			}
 
-			/* Remove values captured in destructors */
+			/* Call destructors */
+			GC_TRACE("Calling destructors");
+			if (EG(objects_store).object_buckets) {
+				current = to_free.next;
+				while (current != &to_free) {
+					p = current->ref;
+					GC_G(next_to_free) = current->next;
+					if (GC_TYPE(p) == IS_OBJECT) {
+						zend_object *obj = (zend_object*)p;
+
+						if (IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+							!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+							GC_TRACE_REF(obj, "calling destructor");
+							GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+							if (obj->handlers->dtor_obj) {
+								GC_REFCOUNT(obj)++;
+								obj->handlers->dtor_obj(obj);
+								GC_REFCOUNT(obj)--;
+							}
+						}
+					}
+					current = GC_G(next_to_free);
+				}
+
+				/* Remove values captured in destructors */
+				current = to_free.next;
+				while (current != &to_free) {
+					GC_G(next_to_free) = current->next;
+					if (GC_REFCOUNT(current->ref) > current->refcount) {
+						gc_remove_nested_data_from_buffer(current->ref);
+					}
+					current = GC_G(next_to_free);
+				}
+			}
+		}
+
+		if (gc_flags & GC_HAS_INNER_CYCLES) {
+			GC_TRACE("Breake cycles");
 			current = to_free.next;
 			while (current != &to_free) {
-				GC_G(next_to_free) = current->next;
-				if (GC_REFCOUNT(current->ref) > current->refcount) {
-					gc_remove_nested_data_from_buffer(current->ref);
-				}
-				current = GC_G(next_to_free);
+				gc_break_cycles(current->ref, NULL);
+				current = current->next;
 			}
 		}
 
