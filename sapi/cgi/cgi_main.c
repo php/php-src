@@ -776,7 +776,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
-				*ptr = '/';
+				*ptr = DEFAULT_SLASH;
 				ptr++;
 			}
 		} else {
