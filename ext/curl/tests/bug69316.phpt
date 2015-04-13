@@ -36,4 +36,10 @@ unlink(dirname(__FILE__) . '/body.tmp');
 ?>
 --EXPECTF--
 Warning: curl_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
+array(1) {
+  ["test"]=>
+  string(7) "getpost"
+}
+array(0) {
+}
 ===DONE===
