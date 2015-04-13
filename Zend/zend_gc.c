@@ -678,17 +678,14 @@ tail_call:
 			if (p == end) return count;
 		}
 		while (p != end) {
-			if (!Z_REFCOUNTED(p->val)) {
+			if (Z_REFCOUNTED(p->val)) {
+				ref = Z_COUNTED(p->val);
+				GC_REFCOUNT(ref)++;
+				count += gc_collect_white(ref);
 				/* count non-refcounted for compatibility ??? */
-				if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
+			} else if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
 					count++;
-				}
-				p++;
-				continue;
 			}
-			ref = Z_COUNTED(p->val);
-			GC_REFCOUNT(ref)++;
-			count += gc_collect_white(ref);
 			p++;
 		}
 		ref = Z_COUNTED(p->val);
@@ -705,11 +702,12 @@ static int gc_collect_roots(void)
 
 	/* remove non-garbage from the list */
 	while (current != &GC_G(roots)) {
+		gc_root_buffer *next = current->next;
 		if (GC_REF_GET_COLOR(current->ref) != GC_WHITE) {
 			GC_REF_SET_ADDRESS(current->ref, 0);
 			GC_REMOVE_FROM_ROOTS(current);
 		}
-		current = current->next;
+		current = next;
 	}
 
 	current = GC_G(roots).next;
