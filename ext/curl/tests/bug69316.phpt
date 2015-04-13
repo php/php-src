@@ -1,10 +1,7 @@
 --TEST--
 Bug #69316: Use-after-free in php_curl related to CURLOPT_FILE/_INFILE/_WRITEHEADER
 --SKIPIF--
-<?php 
-if (!extension_loaded("curl")) exit("skip curl extension not loaded");
-if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
-?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
   function hdr_callback($ch, $data) {
@@ -18,8 +15,9 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_R
       }
       return strlen($data);
   }
-  $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
-  
+
+  include 'server.inc';
+  $host = curl_cli_server_start();
   $temp_file = dirname(__FILE__) . '/body.tmp';
   $url = "{$host}/get.php?test=getpost";
   $ch = curl_init();
