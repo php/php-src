@@ -1420,6 +1420,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -2855,6 +2856,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
 			}
+			break;
 
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 		case CURLOPT_FNMATCH_FUNCTION:
