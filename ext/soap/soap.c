@@ -2570,7 +2570,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    (Z_LVAL_PP(trace) == IS_BOOL || Z_LVAL_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
+	    (Z_TYPE_PP(trace) == IS_BOOL || Z_TYPE_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
 		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 	}
 
@@ -2605,7 +2605,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		}
 		ret = FALSE;
 	} else if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	           (Z_LVAL_PP(trace) == IS_BOOL || Z_LVAL_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
+	           (Z_TYPE_PP(trace) == IS_BOOL || Z_TYPE_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
 		add_property_stringl(this_ptr, "__last_response", Z_STRVAL_P(response), Z_STRLEN_P(response), 1);
 	}
 	zval_ptr_dtor(&params[4]);
@@ -2650,7 +2650,7 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_CLIENT_BEGIN_CODE();
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    (Z_LVAL_PP(trace) == IS_BOOL || Z_LVAL_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
+	    (Z_TYPE_PP(trace) == IS_BOOL || Z_TYPE_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "__last_request", sizeof("__last_request"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "__last_response", sizeof("__last_response"));
 	}
