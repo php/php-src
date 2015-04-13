@@ -200,7 +200,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *
  		zval *p = end + (ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args);
 		do {
 			p--;
-			zval_ptr_dtor_nogc(p);
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
 		} while (p != end);
  	}
 }
