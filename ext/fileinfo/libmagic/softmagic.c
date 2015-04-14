@@ -624,7 +624,6 @@ mprint(struct magic_set *ms, struct magic *m)
 		t = ms->offset + sizeof(double);
   		break;
 
-	case FILE_SEARCH:
 	case FILE_REGEX: {
 		char *cp;
 		int rval;
@@ -647,6 +646,15 @@ mprint(struct magic_set *ms, struct magic *m)
 			t = ms->search.offset + ms->search.rm_len;
 		break;
 	}
+
+	case FILE_SEARCH:
+		if (file_printf(ms, F(ms, m, "%s"), m->value.s) == -1)
+			return -1;
+		if ((m->str_flags & REGEX_OFFSET_START))
+			t = ms->search.offset;
+		else
+			t = ms->search.offset + m->vallen;
+		break;
 
 	case FILE_DEFAULT:
 	case FILE_CLEAR:
