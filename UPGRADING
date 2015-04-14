@@ -499,6 +499,8 @@ Other
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
   . Added the comparison operator (<=>), aka the spaceship operator.
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
+  . Added the yield from operator for delegating Generators like coroutines.
+    (RFC: https://wiki.php.net/rfc/generator-delegation)
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
