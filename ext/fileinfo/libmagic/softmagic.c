@@ -1101,7 +1101,14 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			if (bytecnt > nbytes) {
 				bytecnt = nbytes;
 			}
-
+			if (offset > bytecnt) {
+				offset = bytecnt;
+			}
+			if (s == NULL) {
+				ms->search.s_len = 0;
+				ms->search.s = NULL;
+				return 0;
+			}
 			buf = RCAST(const char *, s) + offset;
 			end = last = RCAST(const char *, s) + bytecnt;
 			/* mget() guarantees buf <= last */

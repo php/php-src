@@ -3126,7 +3126,7 @@ PHP_FUNCTION(pg_trace)
 	php_stream *stream;
 	zend_resource *link;
 
-	if (zend_parse_parameters(argc, "s|sr", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(argc, "p|sr", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link) == FAILURE) {
 		return;
 	}
 

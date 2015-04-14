@@ -588,7 +588,7 @@ static PHP_FUNCTION(gzopen)
 	php_stream *stream;
 	zend_long use_include_path = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
 		return;
 	}
 
@@ -616,7 +616,7 @@ static PHP_FUNCTION(readgzfile)
 	size_t size;
 	zend_long use_include_path = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path) == FAILURE) {
 		return;
 	}
 

@@ -604,46 +604,35 @@ int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len
  *
  * data is the serialized zval
  */
-int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len) /* {{{ */
+int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_len) /* {{{ */
 {
-	const unsigned char *p;
-	php_uint32 buf_len;
 	php_unserialize_data_t var_hash;
 
-	if (!zip_metadata_len) {
-		PHAR_GET_32(*buffer, buf_len);
-	} else {
-		buf_len = zip_metadata_len;
-	}
-
-	if (buf_len) {
+	if (zip_metadata_len) {
+		const unsigned char *p, *p_buff = estrndup(*buffer, zip_metadata_len);
+		p = p_buff;
 		ZVAL_NULL(metadata);
-		p = (const unsigned char*) *buffer;
 		PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-		if (!php_var_unserialize(metadata, &p, p + buf_len, &var_hash)) {
+		if (!php_var_unserialize(metadata, &p, p + zip_metadata_len, &var_hash)) {
+			efree(p_buff);
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_ptr_dtor(metadata);
 			ZVAL_UNDEF(metadata);
 			return FAILURE;
 		}
-
+		efree(p_buff);
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 		if (PHAR_G(persist)) {
 			/* lazy init metadata */
 			zval_ptr_dtor(metadata);
-			Z_PTR_P(metadata) = pemalloc(buf_len, 1);
-			memcpy(Z_PTR_P(metadata), *buffer, buf_len);
-			*buffer += buf_len;
+			Z_PTR_P(metadata) = pemalloc(zip_metadata_len, 1);
+			memcpy(Z_PTR_P(metadata), *buffer, zip_metadata_len);
 			return SUCCESS;
 		}
 	} else {
 		ZVAL_UNDEF(metadata);
-	}
-
-	if (!zip_metadata_len) {
-		*buffer += buf_len;
 	}
 
 	return SUCCESS;
@@ -666,6 +655,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	phar_entry_info entry;
 	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
+	php_uint32 len;
 	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
@@ -1031,16 +1021,21 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	mydata->is_persistent = PHAR_G(persist);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
+	PHAR_GET_32(buffer, len);
 	if (mydata->is_persistent) {
-		PHAR_GET_32(buffer, mydata->metadata_len);
-		if (phar_parse_metadata(&buffer, &mydata->metadata, mydata->metadata_len) == FAILURE) {
-			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
-		}
-	} else {
-		if (phar_parse_metadata(&buffer, &mydata->metadata, 0) == FAILURE) {
-			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
+		mydata->metadata_len = len;
+		if(!len) {
+			/* FIXME: not sure why this is needed but removing it breaks tests */
+			PHAR_GET_32(buffer, len);
 		}
 	}
+	if(len > endbuffer - buffer) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (trying to read past buffer end)");
+	}
+	if (phar_parse_metadata(&buffer, &mydata->metadata, len) == FAILURE) {
+		MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
+	}
+	buffer += len;
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
@@ -1075,7 +1070,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (buffer + entry.filename_len + 20 > endbuffer) {
+		if (entry.filename_len + 20 > endbuffer - buffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
@@ -1111,19 +1106,20 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		}
 
+		PHAR_GET_32(buffer, len);
 		if (entry.is_persistent) {
-			PHAR_GET_32(buffer, entry.metadata_len);
-			if (!entry.metadata_len) buffer -= 4;
-			if (phar_parse_metadata(&buffer, &entry.metadata, entry.metadata_len) == FAILURE) {
-				pefree(entry.filename, entry.is_persistent);
-				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-			}
+			entry.metadata_len = len;
 		} else {
-			if (phar_parse_metadata(&buffer, &entry.metadata, 0) == FAILURE) {
-				pefree(entry.filename, entry.is_persistent);
-				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-			}
+			entry.metadata_len = 0;
 		}
+		if (len > endbuffer - buffer) {
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
+		}
+		if (phar_parse_metadata(&buffer, &entry.metadata, len) == FAILURE) {
+			pefree(entry.filename, entry.is_persistent);
+			MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
+		}
+		buffer += len;
 
 		entry.offset = entry.offset_abs = offset;
 		offset += entry.compressed_filesize;

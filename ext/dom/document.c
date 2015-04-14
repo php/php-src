@@ -1379,7 +1379,11 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	xmlInitParser();
 
 	if (mode == DOM_LOAD_FILE) {
-		char *file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN );
+		char *file_dest;
+		if (CHECK_NULL_PATH(source, source_len)) {
+			return NULL;
+		}
+		file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
@@ -1979,7 +1983,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	id = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &source, &source_len, &options) == FAILURE) {
 		return;
 	}
 

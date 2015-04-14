@@ -529,10 +529,13 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 {
 	char tmp[MAXPATHLEN];
 	int tmp_len;
+	size_t len;
 
-	tmp_len = entry->filename_len + entry->phar->fname_len;
-	memcpy(tmp, entry->phar->fname, entry->phar->fname_len);
-	memcpy(tmp + entry->phar->fname_len, entry->filename, entry->filename_len);
+	tmp_len = MIN(MAXPATHLEN, entry->filename_len + entry->phar->fname_len);
+	len = MIN(entry->phar->fname_len, tmp_len);
+	memcpy(tmp, entry->phar->fname, len);
+	len = MIN(tmp_len - len, entry->filename_len);
+	memcpy(tmp + entry->phar->fname_len, entry->filename, len);
 	entry->inode = (unsigned short)zend_hash_func(tmp, tmp_len);
 }
 /* }}} */
@@ -565,7 +568,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 zend_string *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len);
+int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_len);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);

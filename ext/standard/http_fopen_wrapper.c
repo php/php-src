@@ -670,6 +670,7 @@ finish:
 	}
 
 	response_header = zend_hash_str_find_ind(symbol_table, "http_response_header", sizeof("http_response_header")-1);
+	Z_ADDREF_P(response_header);
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;
@@ -905,6 +906,10 @@ out:
 	if (stream) {
 		if (header_init) {
 			ZVAL_COPY(&stream->wrapperdata, response_header);
+		} else {
+			if(response_header) {
+				Z_DELREF_P(response_header);
+			}
 		}
 		php_stream_notify_progress_init(context, 0, file_size);
 
@@ -925,8 +930,13 @@ out:
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
 		}
-	} else if (transfer_encoding) {
-		php_stream_filter_free(transfer_encoding);
+	} else {
+		if(response_header) {
+			Z_DELREF_P(response_header);
+		}
+		if (transfer_encoding) {
+			php_stream_filter_free(transfer_encoding);
+		}
 	}
 
 	return stream;
