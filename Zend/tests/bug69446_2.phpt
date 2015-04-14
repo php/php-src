@@ -1,13 +1,11 @@
 --TEST--
-Bug #64896 (Segfault with gc_collect_cycles using unserialize on certain objects)
---INI--
-zend.enable_gc=1
+Bug #69446 (GC leak relating to removal of nested data after dtors run)
 --FILE--
 <?php
 $bar = NULL;
 class bad
 {
-	private $_private = array();
+	public $_private = array();
 
 	public function __construct()
 	{
@@ -25,22 +23,14 @@ $foo = new stdclass;
 $foo->foo = $foo;
 $foo->bad = new bad;
 
-gc_disable();
-
 unserialize(serialize($foo));
+//unset($foo);
+
 gc_collect_cycles();
-var_dump($bar); 
-gc_enable();
-/*  will output:
+var_dump($bar);
+--EXPECT--
 object(bad)#4 (1) {
-  ["_private":"bad":private]=>
-  &UNKNOWN:0
-}
-*/
-?>
---EXPECTF--
-object(bad)#%d (1) {
-  ["_private":"bad":private]=>
+  ["_private"]=>
   array(1) {
     [0]=>
     string(3) "php"

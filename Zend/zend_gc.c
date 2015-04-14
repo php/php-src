@@ -720,7 +720,6 @@ static int gc_collect_roots(uint32_t *flags)
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
-			GC_REFCOUNT(current->ref)++;
 			count += gc_collect_white(current->ref, flags);
 		}
 		current = current->next;
@@ -832,7 +831,7 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref)
 	Bucket *p, *end;
 
 tail_call:
-	if (GC_ADDRESS(GC_INFO(ref)) != 0) {
+	if (GC_ADDRESS(GC_INFO(ref)) != 0 && GC_REF_GET_COLOR(ref) == GC_BLACK) {
 		GC_TRACE_REF(ref, "removing from buffer");
 		GC_REMOVE_FROM_BUFFER(ref);
 
