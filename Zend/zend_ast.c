@@ -522,6 +522,7 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  *   60     right           print
  *   70     right           yield
  *   80     right           =>
+ *   85     right           yield from
  *   90     right           = += -= *= /= .= %= &= |= ^= <<= >>= **=
  *  100     left            ? :
  *  110     right           ??
@@ -1350,6 +1351,8 @@ simple_list:
 			}
 			if (priority > 70) smart_str_appendc(str, ')');
 			break;
+		case ZEND_AST_YIELD_FROM:
+			PREFIX_OP("yield from ", 85, 86);
 		case ZEND_AST_COALESCE: BINARY_OP(" ?? ", 110, 111, 110);
 		case ZEND_AST_STATIC:
 			smart_str_appends(str, "static $");

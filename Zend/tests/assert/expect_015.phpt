@@ -17,6 +17,7 @@ assert(0 && ($a = function () {
 	@foo();
 	$y = clone $x;
 	yield 1 => 2;
+	yield from $x;
 }));
 
 assert(0 && ($a = function &(array &$a, X $b = null) use ($c,&$d) : X {
@@ -163,6 +164,7 @@ Warning: assert(): assert(0 && ($a = function () {
     @foo();
     $y = clone $x;
     yield 1 => 2;
+    yield from $x;
 })) failed in %sexpect_015.php on line %d
 
 Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null) use($c, &$d): X {
