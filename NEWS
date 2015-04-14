@@ -78,6 +78,7 @@
   . Implemented the RFC `Continue Output Buffering`. (Mike)
   . Implemented the RFC `Constructor behaviour of internal classes`. (Dan, Dmitry)
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
+  . Implemented the RFC `Generator Delegation`. (Bob)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
