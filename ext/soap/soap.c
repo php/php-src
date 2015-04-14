@@ -2808,6 +2808,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 				ZVAL_COPY(return_value, fault);
 			} else {
 				add_soap_fault_ex(return_value, this_ptr, "Client", "Unknown Error", NULL, NULL);
+				Z_ADDREF_P(return_value);
 			}
 		} else {
 			zval* fault;
