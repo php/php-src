@@ -670,6 +670,7 @@ tail_call:
 			}
 			return count;
 		} else {
+			GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
 			return count;
 		}
 
