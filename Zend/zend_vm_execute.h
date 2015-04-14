@@ -4020,14 +4020,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	zval *val;
 
 
 	SAVE_OPLINE();
 	val = EX_CONSTANT(opline->op1);
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
 		if (IS_CONST != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
@@ -4047,10 +4047,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 			if (Z_ISUNDEF(new_gen->retval)) {
 				zend_generator_yield_from(generator, new_gen);
 			} else if (new_gen->execute_data == NULL) {
-				// TODO: Should be an engine exception
-				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
-				CHECK_EXCEPTION();
+				HANDLE_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
@@ -4065,10 +4064,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0,
-						"Object of type %s did not create an Iterator", ce->name->val);
+					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ce->name->val);
 				}
-				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
 			}
 
@@ -4084,8 +4081,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		// TODO: Should be an engine exception
-		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_error(E_ERROR | E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
@@ -11657,14 +11653,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	zval *val;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
 		if (IS_TMP_VAR != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
@@ -11684,10 +11680,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 			if (Z_ISUNDEF(new_gen->retval)) {
 				zend_generator_yield_from(generator, new_gen);
 			} else if (new_gen->execute_data == NULL) {
-				// TODO: Should be an engine exception
-				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
-				CHECK_EXCEPTION();
+				HANDLE_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
@@ -11703,10 +11698,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0,
-						"Object of type %s did not create an Iterator", ce->name->val);
+					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ce->name->val);
 				}
-				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
 			}
 
@@ -11722,8 +11715,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		// TODO: Should be an engine exception
-		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_error(E_ERROR | E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
@@ -15358,14 +15350,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	zval *val;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
 		if (IS_VAR != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
@@ -15387,10 +15379,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 			if (Z_ISUNDEF(new_gen->retval)) {
 				zend_generator_yield_from(generator, new_gen);
 			} else if (new_gen->execute_data == NULL) {
-				// TODO: Should be an engine exception
-				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
-				CHECK_EXCEPTION();
+				HANDLE_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
@@ -15406,10 +15397,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0,
-						"Object of type %s did not create an Iterator", ce->name->val);
+					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ce->name->val);
 				}
-				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
 			}
 
@@ -15425,8 +15414,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		// TODO: Should be an engine exception
-		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_error(E_ERROR | E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
@@ -28954,14 +28942,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	zval *val;
 
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&generator->values, val);
 		if (IS_CV != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
@@ -28981,10 +28969,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 			if (Z_ISUNDEF(new_gen->retval)) {
 				zend_generator_yield_from(generator, new_gen);
 			} else if (new_gen->execute_data == NULL) {
-				// TODO: Should be an engine exception
-				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
-				CHECK_EXCEPTION();
+				HANDLE_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
@@ -28999,10 +28986,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0,
-						"Object of type %s did not create an Iterator", ce->name->val);
+					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ce->name->val);
 				}
-				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
 			}
 
@@ -29018,8 +29003,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		// TODO: Should be an engine exception
-		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_error(E_ERROR | E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
