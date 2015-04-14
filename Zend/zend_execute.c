@@ -1151,11 +1151,11 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 		(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
 
 		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-			zval rv;
-			zval *value = Z_OBJ_HT_P(z)->get(z, &rv);
+			zval rv2;
+			zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
 
-			if (Z_REFCOUNT_P(z) == 0) {
-				zend_objects_store_del(Z_OBJ_P(z));
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
