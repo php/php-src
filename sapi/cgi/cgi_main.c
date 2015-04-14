@@ -773,11 +773,40 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
-			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
-				*ptr = 0;
-				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
-				*ptr = DEFAULT_SLASH;
-				ptr++;
+			/*
+			printf(">>> searching for '%c' in '%s'+%d\n", DEFAULT_SLASH, s2, (ptr-s2));
+			printf(">>>                       ");for (idx=0; idx<(ptr-s2); ++idx) { printf(" "); }printf("^\n");
+			printf(">>> ----------------------");for (idx=0; idx<(ptr-s2); ++idx) { printf("-"); }printf("+\n");
+			*/
+			
+			/* loop until no more slash can be found. if there is no more slash,
+			 * then search for .user.ini in the current directory and exit the loop
+			 */
+			for(;;)  {
+				
+				/* strchr may return NULL and so destroy our ptr, so we use tmp_ptr to store the result;
+				 * if tmp_ptr is not NULL, it points to the position of the next slash
+				 */
+				char *tmp_ptr = strchr(ptr, DEFAULT_SLASH);
+				
+				/* only zero out the char if it is a slash */
+				if (tmp_ptr != NULL) {  *tmp_ptr = 0; }
+				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+				
+				/* reset to slash, if it was one before */
+				if (tmp_ptr != NULL) { *tmp_ptr = DEFAULT_SLASH; }
+				
+				/* no, there was no slash, so there is also no further subdirectory; exit the loop */
+				else                 { break; }
+				
+				/* jump behind the previously found slash and enter the next iteration */
+				ptr = tmp_ptr + 1;
+				
+				/*
+			    printf(">>> searching for '%c' in '%s'+%d\n", DEFAULT_SLASH, s2, (ptr-s2));
+				printf(">>>                       ");for (idx=0; idx<(ptr-s2); ++idx) { printf(" "); }printf("^\n");
+				printf(">>> ----------------------");for (idx=0; idx<(ptr-s2); ++idx) { printf("-"); }printf("+\n");
+			    */
 			}
 		} else {
 			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
