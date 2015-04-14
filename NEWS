@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 
 16 Apr 2015, PHP 5.6.8
 
+- Apache2handler:
+  . Fixed bug #69218 (potential remote code execution with apache 2.4
+    apache2handler). (Gerrit Venema)
+
 - Core:
   . Fixed bug #66609 (php crashes with __get() and ++ operator in some cases).
     (Dmitry, Laruence)
@@ -27,16 +31,24 @@ PHP                                                                        NEWS
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
+  . Additional fix for bug #69152 (Type confusion vulnerability in
+    exception::getTraceAsString). (Stas)
   . Fixed bug #69210 (serialize function return corrupted data when sleep has
     non-string values). (Juan Basso)
   . Fixed bug #69212 (Leaking VIA_HANDLER func when exception thrown in
     __call/... arg passing). (Nikita)
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
     with an Iterator). (Nikita)
+ . Fixed bug #69337 (php_stream_url_wrap_http_ex() type-confusion
+   vulnerability). (Stas)
+ . Fixed bug #69353 (Missing null byte checks for paths in various PHP
+   extensions). (Stas)
 
 - cURL:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
   . Fixed bug #68739 (Missing break / control flow). (Laruence)
+ . Fixed bug #69316 (Use-after-free in php_curl related to
+   CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
 
 - Date:
   . Added DateTime::createFromImmutable(). (Trevor Suarez)
@@ -47,6 +59,10 @@ PHP                                                                        NEWS
 
 - Ereg:
   . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
+
+- Fileinfo:
+  . Fixed bug #68819 (Fileinfo on specific file causes spurious OOM and/or
+    segfault). (Anatol Belski)
 
 - Filter:
   . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
@@ -76,6 +92,9 @@ PHP                                                                        NEWS
   . Fixed bug #65467 (Call to undefined method cli_arg_typ_string). (Mike)
   . Fixed bug #67761 (Phar::mapPhar fails for Phars inside a path containing 
     ".tar"). (Mike)
+  . Fixed bug #69324 (Buffer Over-read in unserialize when parsing Phar). (Stas)
+  . Fixed bug #69441 (Buffer Overflow when parsing tar/zip/phar in
+    phar_set_inode). (Stas)
 
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference). (CVE-2015-1352) (Laruence)
