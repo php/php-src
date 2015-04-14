@@ -4315,6 +4315,7 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 
 	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name->val);
+		return;
 	}
 
 	object_init_ex(return_value, ce);
