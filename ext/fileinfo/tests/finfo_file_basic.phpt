@@ -29,6 +29,6 @@ string(28) "text/x-php; charset=us-ascii"
 string(22) "PHP script, ASCII text"
 string(25) "text/plain; charset=utf-8"
 
-Warning: finfo_file(): Invalid path in %s/finfo_file_basic.php on line %d
+Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
 bool(false)
 ===DONE===
