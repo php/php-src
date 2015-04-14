@@ -508,6 +508,11 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				RETVAL_FALSE;
 				goto clean;
 			}
+			if (CHECK_NULL_PATH(buffer, buffer_len)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path");
+				RETVAL_FALSE;
+				goto clean;
+			}
 
 			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
 

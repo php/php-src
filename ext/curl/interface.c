@@ -1346,6 +1346,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1411,6 +1412,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1489,6 +1491,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1566,6 +1569,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				length = CURL_READFUNC_ABORT;
 #endif
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
 					length = MIN((int) (size * nmemb), Z_STRLEN_P(retval_ptr));
 					memcpy(data, Z_STRVAL_P(retval_ptr), length);
@@ -1640,6 +1644,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
