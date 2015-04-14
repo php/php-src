@@ -557,7 +557,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	DEFAULT_0_PARAMS;
 
 	trace = zend_read_property(base_exception_ce, getThis(), "trace", sizeof("trace")-1, 1, &rv);
-	if(Z_TYPE_P(trace) != IS_ARRAY) {
+	if (Z_TYPE_P(trace) != IS_ARRAY) {
 		RETURN_FALSE;
 	}
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
