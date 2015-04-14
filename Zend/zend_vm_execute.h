@@ -1620,8 +1620,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
 			ZEND_VM_CONTINUE();
 		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			/* The generator object is stored in EX(return_value) */
-			zend_generator *generator = (zend_generator *) EX(return_value);
+			zend_generator *generator = zend_get_running_generator(execute_data);
 			zend_generator_close(generator, 1);
 			ZEND_VM_RETURN();
 		} else {
@@ -1654,8 +1653,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				/* The generator object is stored in EX(return_value) */
-				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator *generator = zend_get_running_generator(execute_data);
 				zend_generator_close(generator, 1);
 				ZEND_VM_RETURN();
 			} else {
@@ -1733,8 +1731,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 				ZEND_VM_CONTINUE();
 			} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				/* The generator object is stored in EX(return_value) */
-				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator *generator = zend_get_running_generator(execute_data);
 				zend_generator_close(generator, 1);
 				ZEND_VM_RETURN();
 			} else {
@@ -3075,8 +3072,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CONST_HA
 	zval *retval;
 
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	retval = EX_CONSTANT(opline->op1);
@@ -3964,6 +3960,96 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_SPEC_CONST_HANDLER(Z
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	zval *val;
+
+
+	SAVE_OPLINE();
+	val = EX_CONSTANT(opline->op1);
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		ZVAL_COPY_VALUE(&generator->values, val);
+		if (IS_CONST != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+		Z_FE_POS(generator->values) = 0;
+
+	} else if (IS_CONST != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
+		zend_class_entry *ce = Z_OBJCE_P(val);
+		if (ce == zend_ce_generator) {
+			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+
+			if (IS_CONST != IS_TMP_VAR) {
+				Z_ADDREF_P(val);
+			}
+
+			if (Z_ISUNDEF(new_gen->retval)) {
+				zend_generator_yield_from(generator, new_gen);
+			} else if (new_gen->execute_data == NULL) {
+				// TODO: Should be an engine exception
+				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
+				}
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else {
+			zend_object_iterator *iter = ce->get_iterator(ce, val, 0);
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0,
+						"Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			ZVAL_OBJ(&generator->values, &iter->std);
+		}
+	} else {
+		// TODO: Should be an engine exception
+		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		HANDLE_EXCEPTION();
+	}
+
+	/* This is the default return value
+	 * when the expression is a Generator, it will be overwritten in zend_generator_resume() */
+	if (RETURN_VALUE_USED(opline)) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6024,8 +6110,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -6208,8 +6293,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -6738,8 +6822,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_VAR_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -7615,8 +7698,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -9218,8 +9300,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -10879,8 +10960,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 	zval *retval;
 	zend_free_op free_op1;
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	retval = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
@@ -11476,6 +11556,97 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_SPEC_TMP_HANDLER(ZEN
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	zval *val;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	val = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		ZVAL_COPY_VALUE(&generator->values, val);
+		if (IS_TMP_VAR != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+		Z_FE_POS(generator->values) = 0;
+
+	} else if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
+		zend_class_entry *ce = Z_OBJCE_P(val);
+		if (ce == zend_ce_generator) {
+			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+
+			if (IS_TMP_VAR != IS_TMP_VAR) {
+				Z_ADDREF_P(val);
+			}
+
+			if (Z_ISUNDEF(new_gen->retval)) {
+				zend_generator_yield_from(generator, new_gen);
+			} else if (new_gen->execute_data == NULL) {
+				// TODO: Should be an engine exception
+				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
+				}
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else {
+			zend_object_iterator *iter = ce->get_iterator(ce, val, 0);
+			zval_ptr_dtor_nogc(free_op1);
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0,
+						"Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			ZVAL_OBJ(&generator->values, &iter->std);
+		}
+	} else {
+		// TODO: Should be an engine exception
+		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		HANDLE_EXCEPTION();
+	}
+
+	/* This is the default return value
+	 * when the expression is a Generator, it will be overwritten in zend_generator_resume() */
+	if (RETURN_VALUE_USED(opline)) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -11911,8 +12082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -12080,8 +12250,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -12249,8 +12418,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -12614,8 +12782,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -13136,8 +13303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -13912,8 +14078,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 	zval *retval;
 	zend_free_op free_op1;
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	retval = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -15050,6 +15215,99 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_SPEC_VAR_HANDLER(ZEN
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	zval *val;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	val = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		ZVAL_COPY_VALUE(&generator->values, val);
+		if (IS_VAR != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+		Z_FE_POS(generator->values) = 0;
+
+		zval_ptr_dtor_nogc(free_op1);
+	} else if (IS_VAR != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
+		zend_class_entry *ce = Z_OBJCE_P(val);
+		if (ce == zend_ce_generator) {
+			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+
+			if (IS_VAR != IS_TMP_VAR) {
+				Z_ADDREF_P(val);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			if (Z_ISUNDEF(new_gen->retval)) {
+				zend_generator_yield_from(generator, new_gen);
+			} else if (new_gen->execute_data == NULL) {
+				// TODO: Should be an engine exception
+				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
+				}
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else {
+			zend_object_iterator *iter = ce->get_iterator(ce, val, 0);
+			zval_ptr_dtor_nogc(free_op1);
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0,
+						"Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			ZVAL_OBJ(&generator->values, &iter->std);
+		}
+	} else {
+		// TODO: Should be an engine exception
+		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		HANDLE_EXCEPTION();
+	}
+
+	/* This is the default return value
+	 * when the expression is a Generator, it will be overwritten in zend_generator_resume() */
+	if (RETURN_VALUE_USED(opline)) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -16756,8 +17014,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -16960,8 +17217,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -17223,8 +17479,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEN
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -18183,8 +18438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -19938,8 +20192,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -23162,8 +23415,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -23300,8 +23552,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -23438,8 +23689,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -23951,8 +24201,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -25455,8 +25704,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -27505,8 +27753,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CV_HANDL
 	zval *retval;
 
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	retval = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -28493,6 +28740,96 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_SPEC_CV_HANDLER(ZEND
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	zval *val;
+
+
+	SAVE_OPLINE();
+	val = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		ZVAL_COPY_VALUE(&generator->values, val);
+		if (IS_CV != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+		Z_FE_POS(generator->values) = 0;
+
+	} else if (IS_CV != IS_CONST && Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val)->get_iterator) {
+		zend_class_entry *ce = Z_OBJCE_P(val);
+		if (ce == zend_ce_generator) {
+			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
+
+			if (IS_CV != IS_TMP_VAR) {
+				Z_ADDREF_P(val);
+			}
+
+			if (Z_ISUNDEF(new_gen->retval)) {
+				zend_generator_yield_from(generator, new_gen);
+			} else if (new_gen->execute_data == NULL) {
+				// TODO: Should be an engine exception
+				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
+				}
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else {
+			zend_object_iterator *iter = ce->get_iterator(ce, val, 0);
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0,
+						"Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			ZVAL_OBJ(&generator->values, &iter->std);
+		}
+	} else {
+		// TODO: Should be an engine exception
+		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
+		HANDLE_EXCEPTION();
+	}
+
+	/* This is the default return value
+	 * when the expression is a Generator, it will be overwritten in zend_generator_resume() */
+	if (RETURN_VALUE_USED(opline)) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -31453,8 +31790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -31727,8 +32063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -32392,8 +32727,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -33566,8 +33900,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -36192,8 +36525,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 {
 	USE_OPLINE
 
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
+	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
@@ -47148,31 +47480,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
   	ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CV_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CV_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CV_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CV_HANDLER,
+  	ZEND_YIELD_FROM_SPEC_CV_HANDLER,
   	ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

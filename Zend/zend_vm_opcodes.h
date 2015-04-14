@@ -173,6 +173,7 @@ END_EXTERN_C()
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140
 #define ZEND_DECLARE_FUNCTION                141
+#define ZEND_YIELD_FROM                      142
 #define ZEND_DECLARE_CONST                   143
 #define ZEND_ADD_INTERFACE                   144
 #define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145

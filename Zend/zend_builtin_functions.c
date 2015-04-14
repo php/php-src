@@ -27,6 +27,7 @@
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -2269,6 +2270,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 		call_type = NULL;
 		ZVAL_UNDEF(&arg_array);
 
+		ptr = zend_generator_check_placeholder_frame(ptr);
+
 		skip = ptr;
 		/* skip internal handler */
 		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
@@ -2466,6 +2469,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
 		array_init(&stack_frame);
+
+		ptr = zend_generator_check_placeholder_frame(ptr);
 
 		skip = ptr;
 		/* skip internal handler */

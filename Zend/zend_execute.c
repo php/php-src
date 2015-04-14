@@ -2137,6 +2137,16 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 }
 /* }}} */
 
+static zend_always_inline zend_generator *zend_get_running_generator(zend_execute_data *execute_data) /* {{{ */
+{
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+	/* However control may currently be delegated to another generator.
+	 * That's the one we're interested in. */
+	return generator;
+}
+/* }}} */
+
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
