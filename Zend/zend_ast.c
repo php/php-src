@@ -968,7 +968,10 @@ tail_call:
 		case ZEND_AST_ZVAL:
 			zend_ast_export_zval(str, zend_ast_get_zval(ast), priority, indent);
 			break;
-//???	case ZEND_AST_ZNODE:
+		case ZEND_AST_ZNODE:
+			/* This AST kind is only used for temporary nodes during compilation */
+			ZEND_ASSERT(0);
+			break;
 
 		/* declaration nodes */
 		case ZEND_AST_FUNC_DECL:
