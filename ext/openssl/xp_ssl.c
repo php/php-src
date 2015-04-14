@@ -195,7 +195,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
-	
+
 	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
 		int retry = 1;
@@ -271,13 +271,18 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
 				if (read) {
-				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
 				}
-				
+
+				/* Don't loop indefinitely in non-blocking mode if no data is available */
+				if (began_blocked == 0) {
+					break;
+				}
+
 				/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
 				 * available. Now, php_pollfd_for uses select to wait up to our time_left value only...
 				 */
-				if (retry && began_blocked) {
+				if (retry) {
 					if (read) {
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
 							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
