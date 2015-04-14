@@ -3630,6 +3630,7 @@ PHP_FUNCTION(timezone_open)
 	}
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
 	if (SUCCESS != timezone_initialize(tzobj, tz)) {
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
