@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
     (Anatol)
 
+- OpenSSL:
+  . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
+    (Daniel Lowrey)
+
 - Sqlite3:
   . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
 
