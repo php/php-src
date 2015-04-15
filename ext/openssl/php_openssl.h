@@ -33,6 +33,7 @@ php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
+PHP_RSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_pkey_get_private);

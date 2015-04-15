@@ -482,7 +482,7 @@ zend_module_entry openssl_module_entry = {
 	PHP_MINIT(openssl),
 	PHP_MSHUTDOWN(openssl),
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(openssl),
 	PHP_MINFO(openssl),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -497,11 +497,6 @@ static int le_key;
 static int le_x509;
 static int le_csr;
 static int ssl_stream_data_index;
-
-
-
-
-
 
 int php_openssl_get_x509_list_id(void) /* {{{ */
 {
@@ -837,7 +832,7 @@ void php_openssl_store_errors(void)
 		val = ERR_get_error();
 		if (val) {
 			ERR_error_string(val, buf);
-			err->err_str=emalloc(strlen(buf));
+			err->err_str=emalloc(strlen(buf)+1);
 			strcpy(err->err_str,buf);
 			ERR_clear_error();
 		}else{
@@ -869,10 +864,12 @@ void php_openssl_deinitialize_error_queue(void)
 		while(ssl_error_context->current!=NULL){
 			tmp=ssl_error_context->current;
 			ssl_error_context->current=tmp->next;
+			efree(tmp->err_str);
 			efree(tmp);
 		}
 
 		efree(ssl_error_context);
+		ssl_error_context=NULL;
 
 	}
 
@@ -1297,6 +1294,14 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 
 	return SUCCESS;
 }
+
+
+PHP_RSHUTDOWN_FUNCTION(openssl)
+{
+	php_openssl_deinitialize_error_queue();
+	return SUCCESS;
+}
+
 /* }}} */
 
 /* {{{ x509 cert functions */
