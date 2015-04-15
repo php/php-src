@@ -164,6 +164,10 @@ static int fpm_event_epoll_add(struct fpm_event_s *ev) /* {{{ */
 	struct epoll_event e;
 
 	/* fill epoll struct */
+#if SIZEOF_SIZE_T == 4
+	/* Completely initialize event data to prevent valgrind reports */
+	e.data.u64 = 0;
+#endif
 	e.events = EPOLLIN;
 	e.data.fd = ev->fd;
 	e.data.ptr = (void *)ev;
