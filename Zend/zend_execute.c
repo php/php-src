@@ -1030,7 +1030,7 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 			if (Z_TYPE_P(property) != IS_UNDEF) {
 fast_assign:
 				value = zend_assign_to_variable(property, value, value_type);
-				if (retval && !EG(exception)) {
+				if (retval && EXPECTED(!EG(exception))) {
 					ZVAL_COPY(retval, value);
 				}
 				return;
@@ -1044,6 +1044,8 @@ fast_assign:
 			}
 
 			if (!zobj->ce->__set) {
+				zval *ref = NULL;
+
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
 				}
@@ -1055,17 +1057,24 @@ fast_assign:
 						value = &tmp;
 					}
 				} else if (value_type != IS_TMP_VAR) {
-					ZVAL_DEREF(value);
-					if (Z_REFCOUNTED_P(value)) {
+					if (Z_ISREF_P(value)) {
+						if (value_type == IS_CV) {
+							ref = value;
+						}
+						value = Z_REFVAL_P(value);
+						if (Z_REFCOUNTED_P(value)) {
+							Z_ADDREF_P(value);
+						}
+					} else if (value_type == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property_name), value);
-				if (retval && !EG(exception)) {
+				if (retval) {
 					ZVAL_COPY(retval, value);
 				}
-				if (value_type == IS_VAR) {
-					FREE_OP(free_value);
+				if (/*value_type == IS_VAR &&*/ ref) {
+					efree_size(ref, sizeof(zend_reference));
 				}
 				return;
 			}
@@ -1090,18 +1099,16 @@ fast_assign:
 		}
 	} else if (value_type != IS_TMP_VAR) {
 		ZVAL_DEREF(value);
-		if (Z_REFCOUNTED_P(value)) {
-			Z_ADDREF_P(value);
-		}
 	}
 
 	Z_OBJ_HT_P(object)->write_property(object, property_name, value, cache_slot);
 
-	if (retval && !EG(exception)) {
+	if (retval && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(retval, value);
 	}
-	zval_ptr_dtor(value);
-	if (value_type == IS_VAR) {
+	if (value_type == IS_CONST) {
+		zval_ptr_dtor_nogc(value);
+	} else {
 		FREE_OP(free_value);
 	}
 }
@@ -1126,18 +1133,16 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 			zval_copy_ctor_func(&tmp);
 			value = &tmp;
 		}
-	} else if (value_type != IS_TMP_VAR &&
-	           Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
 	}
 
 	Z_OBJ_HT_P(object)->write_dimension(object, property_name, value);
 
-	if (retval && !EG(exception)) {
+	if (retval && EXPECTED(!EG(exception))) {
 		ZVAL_COPY(retval, value);
 	}
-	zval_ptr_dtor(value);
-	if (value_type == IS_VAR) {
+	if (value_type == IS_CONST) {
+		zval_ptr_dtor_nogc(value);
+	} else {
 		FREE_OP(free_value);
 	}
 }
