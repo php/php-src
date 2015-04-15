@@ -784,23 +784,23 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 			 */
 			for(;;)  {
 				
-				/* strchr may return NULL and so destroy our ptr, so we use tmp_ptr to store the result;
-				 * if tmp_ptr is not NULL, it points to the position of the next slash
+				/* strchr may return NULL and so destroy our ptr, so we use slash_pt to store the result;
+				 * if slash_ptr is not NULL, it points to the position of the next slash
 				 */
-				char *tmp_ptr = strchr(ptr, DEFAULT_SLASH);
+				char *slash_ptr = strchr(ptr, DEFAULT_SLASH);
 				
 				/* only zero out the char if it is a slash */
-				if (tmp_ptr != NULL) {  *tmp_ptr = 0; }
+				if (slash_ptr != NULL) {  *slash_ptr = 0; }
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
 				
 				/* reset to slash, if it was one before */
-				if (tmp_ptr != NULL) { *tmp_ptr = DEFAULT_SLASH; }
+				if (slash_ptr != NULL) { *slash_ptr = DEFAULT_SLASH; }
 				
 				/* no, there was no slash, so there is also no further subdirectory; exit the loop */
 				else                 { break; }
 				
 				/* jump behind the previously found slash and enter the next iteration */
-				ptr = tmp_ptr + 1;
+				ptr = slash_ptr + 1;
 				
 				/*
 			    printf(">>> searching for '%c' in '%s'+%d\n", DEFAULT_SLASH, s2, (ptr-s2));
