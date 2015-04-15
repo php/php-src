@@ -1256,11 +1256,11 @@ SPL_METHOD(Array, exchangeArray)
 	zval *object = getThis(), *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern, 0)));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
 		return;
 	}
 
+	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern, 0)));
 	spl_array_set_array(object, intern, array, 0L, 1);
 }
 /* }}} */
