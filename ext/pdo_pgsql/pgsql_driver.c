@@ -1149,16 +1149,16 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
 			convert_to_long(val);
-			H->emulate_prepares = Z_LVAL_P(val);
+			H->emulate_prepares = 0 != Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
 			convert_to_long(val);
 			php_error_docref(NULL, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
-			H->disable_native_prepares = Z_LVAL_P(val);
+			H->disable_native_prepares = 0 != Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
 			convert_to_long(val);
-			H->disable_prepares = Z_LVAL_P(val);
+			H->disable_prepares = 0 != Z_LVAL_P(val);
 			return 1;
 		default:
 			return 0;
