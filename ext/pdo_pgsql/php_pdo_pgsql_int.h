@@ -43,25 +43,24 @@ typedef struct {
 	unsigned 	_reserved:31;
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
+	unsigned int	stmt_counter;
 	/* The following two variables have the same purpose. Unfortunately we need
 	   to keep track of two different attributes having the same effect. */
-	int		emulate_prepares;
-	int		disable_native_prepares; /* deprecated since 5.6 */
-	int		disable_prepares;
-	unsigned int	stmt_counter;
+	zend_bool		emulate_prepares;
+	zend_bool		disable_native_prepares; /* deprecated since 5.6 */
+	zend_bool		disable_prepares;
 } pdo_pgsql_db_handle;
 
 typedef struct {
 	char         *def;
+	zend_long    intval;
 	Oid          pgsql_type;
-	zend_long         intval;
 	zend_bool    boolval;
 } pdo_pgsql_column;
 
 typedef struct {
 	pdo_pgsql_db_handle     *H;
 	PGresult                *result;
-	int                     current_row;
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
 	char *stmt_name;
@@ -70,6 +69,7 @@ typedef struct {
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
+	int                     current_row;
 	zend_bool is_prepared;
 } pdo_pgsql_stmt;
 
