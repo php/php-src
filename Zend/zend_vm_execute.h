@@ -4045,8 +4045,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CONST_HANDLER(
 			}
 
 			if (Z_ISUNDEF(new_gen->retval)) {
-				zend_generator_yield_from(generator, new_gen);
-			} else if (new_gen->execute_data == NULL) {
+				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
+					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+
+					HANDLE_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					zend_generator_yield_from(generator, new_gen);
+				}
+			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
 				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
 				HANDLE_EXCEPTION();
@@ -11678,8 +11685,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 			}
 
 			if (Z_ISUNDEF(new_gen->retval)) {
-				zend_generator_yield_from(generator, new_gen);
-			} else if (new_gen->execute_data == NULL) {
+				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
+					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+
+					HANDLE_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					zend_generator_yield_from(generator, new_gen);
+				}
+			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
 				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
 				HANDLE_EXCEPTION();
@@ -15377,8 +15391,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 			zval_ptr_dtor_nogc(free_op1);
 
 			if (Z_ISUNDEF(new_gen->retval)) {
-				zend_generator_yield_from(generator, new_gen);
-			} else if (new_gen->execute_data == NULL) {
+				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
+					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+
+					HANDLE_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					zend_generator_yield_from(generator, new_gen);
+				}
+			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
 				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
 				HANDLE_EXCEPTION();
@@ -28967,8 +28988,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_CV_HANDLER(ZEN
 			}
 
 			if (Z_ISUNDEF(new_gen->retval)) {
-				zend_generator_yield_from(generator, new_gen);
-			} else if (new_gen->execute_data == NULL) {
+				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
+					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+
+					HANDLE_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					zend_generator_yield_from(generator, new_gen);
+				}
+			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
 				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
 				HANDLE_EXCEPTION();

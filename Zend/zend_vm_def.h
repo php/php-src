@@ -7389,8 +7389,15 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 			FREE_OP1_IF_VAR();
 
 			if (Z_ISUNDEF(new_gen->retval)) {
-				zend_generator_yield_from(generator, new_gen);
-			} else if (new_gen->execute_data == NULL) {
+				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
+					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+
+					HANDLE_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					zend_generator_yield_from(generator, new_gen);
+				}
+			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
 				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 
 				HANDLE_EXCEPTION();
