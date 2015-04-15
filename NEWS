@@ -20,9 +20,6 @@ PHP                                                                        NEWS
   . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
     (Daniel Lowrey)
 
-- Sqlite3:
-  . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
-
 16 Apr 2015, PHP 5.6.8
 
 - Core:
@@ -114,10 +111,11 @@ PHP                                                                        NEWS
   . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
      (bisected, regression)). (Laruence)
 
-- SQLITE:
+- Sqlite3:
   . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
      (Dan Ackroyd)
   . Fixed bug #69287 (Upgrade bundled libsqlite to 3.8.8.3). (Anatol)
+  . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
 
 19 Mar 2015, PHP 5.6.7
 
