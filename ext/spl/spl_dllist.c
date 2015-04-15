@@ -93,7 +93,6 @@ struct _spl_dllist_object {
 	zend_function         *fptr_offset_del;
 	zend_function         *fptr_count;
 	zend_class_entry      *ce_get_iterator;
-	HashTable             *debug_info;
 	zend_object            std;
 };
 
@@ -357,11 +356,6 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 
 	spl_ptr_llist_destroy(intern->llist);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
-
-	if (intern->debug_info != NULL) {
-		zend_hash_destroy(intern->debug_info);
-		efree(intern->debug_info);
-	}
 }
 /* }}} */
 
@@ -380,7 +374,6 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval 
 
 	intern->flags = 0;
 	intern->traverse_position = 0;
-	intern->debug_info = NULL;
 
 	if (orig) {
 		spl_dllist_object *other = Z_SPLDLLIST_P(orig);
@@ -500,46 +493,41 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 	zval tmp, dllist_array;
 	zend_string *pnstr;
 	int  i = 0;
+	HashTable *debug_info;
+	*is_temp = 1;
 
-	*is_temp = 0;
-
-	if (intern->debug_info == NULL) {
-		ALLOC_HASHTABLE(intern->debug_info);
-		zend_hash_init(intern->debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+	if (!intern->std.properties) {
+		rebuild_object_properties(&intern->std);
 	}
 
-	if (intern->debug_info->u.v.nApplyCount == 0) {
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
+	ZVAL_LONG(&tmp, intern->flags);
+	zend_hash_add(debug_info, pnstr, &tmp);
+	zend_string_release(pnstr);
+
+	array_init(&dllist_array);
+
+	while (current) {
+		next = current->next;
+
+		add_index_zval(&dllist_array, i, &current->data);
+		if (Z_REFCOUNTED(current->data)) {
+			Z_ADDREF(current->data);
 		}
-		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+		i++;
 
-		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
-		ZVAL_LONG(&tmp, intern->flags);
-		zend_hash_add(intern->debug_info, pnstr, &tmp);
-		zend_string_release(pnstr);
-
-		array_init(&dllist_array);
-
-		while (current) {
-			next = current->next;
-
-			add_index_zval(&dllist_array, i, &current->data);
-			if (Z_REFCOUNTED(current->data)) {
-				Z_ADDREF(current->data);
-			}
-			i++;
-
-			current = next;
-		}
-
-		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
-		zend_hash_add(intern->debug_info, pnstr, &dllist_array);
-		zend_string_release(pnstr);
+		current = next;
 	}
 
-	return intern->debug_info;
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
+	zend_hash_add(debug_info, pnstr, &dllist_array);
+	zend_string_release(pnstr);
+
+	return debug_info;
 }
 /* }}}} */
 

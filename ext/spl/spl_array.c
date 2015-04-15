@@ -73,7 +73,6 @@ typedef struct _spl_array_object {
 	zend_function     *fptr_offset_del;
 	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
-	HashTable         *debug_info;
 	unsigned char	  nApplyCount;
 	zend_object       std;
 } spl_array_object;
@@ -131,11 +130,6 @@ static void spl_array_object_free_storage(zend_object *object)
 	zend_object_std_dtor(&intern->std);
 
 	zval_ptr_dtor(&intern->array);
-
-	if (intern->debug_info != NULL) {
-		zend_hash_destroy(intern->debug_info);
-		efree(intern->debug_info);
-	}
 }
 /* }}} */
 
@@ -154,7 +148,6 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	object_properties_init(&intern->std, class_type);
 
 	intern->ar_flags = 0;
-	intern->debug_info       = NULL;
 	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
 		spl_array_object *other = Z_SPLARRAY_P(orig);
@@ -806,34 +799,31 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 	zend_class_entry *base;
 	spl_array_object *intern = Z_SPLARRAY_P(obj);
 
-	*is_temp = 0;
-
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
 	}
 
 	if (HASH_OF(&intern->array) == intern->std.properties) {
+		*is_temp = 0;
 		return intern->std.properties;
 	} else {
-		if (intern->debug_info == NULL) {
-			ALLOC_HASHTABLE(intern->debug_info);
-			ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
-		}
+		HashTable *debug_info;
+		*is_temp = 1;
 
-		if (intern->debug_info->u.v.nApplyCount == 0) {
-			zend_hash_clean(intern->debug_info);
-			zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+		ALLOC_HASHTABLE(debug_info);
+		ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
+		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-			storage = &intern->array;
-			Z_TRY_ADDREF_P(storage);
+		storage = &intern->array;
+		Z_TRY_ADDREF_P(storage);
 
-			base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-			zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
-			zend_symtable_update(intern->debug_info, zname, storage);
-			zend_string_release(zname);
-		}
+		base = Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator
+			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
+		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
+		zend_symtable_update(debug_info, zname, storage);
+		zend_string_release(zname);
 
-		return intern->debug_info;
+		return debug_info;
 	}
 }
 /* }}} */

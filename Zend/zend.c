@@ -296,17 +296,18 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			zend_printf("%s Object (", class_name->val);
 			zend_string_release(class_name);
 
+			if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+				ZEND_PUTS(" *RECURSION*");
+				return;
+			}
+
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
 			}
 			if (properties) {
-				if (++properties->u.v.nApplyCount>1) {
-					ZEND_PUTS(" *RECURSION*");
-					properties->u.v.nApplyCount--;
-					return;
-				}
+				Z_OBJ_INC_APPLY_COUNT_P(expr);
 				print_flat_hash(properties);
-				properties->u.v.nApplyCount--;
+				Z_OBJ_DEC_APPLY_COUNT_P(expr);
 			}
 			ZEND_PUTS(")");
 			break;
@@ -351,16 +352,18 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				zend_string_release(class_name);
 
 				ZEND_PUTS_EX(" Object\n");
+				if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+					ZEND_PUTS_EX(" *RECURSION*");
+					return;
+				}
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
 				}
-				if (++properties->u.v.nApplyCount>1) {
-					ZEND_PUTS_EX(" *RECURSION*");
-					properties->u.v.nApplyCount--;
-					return;
-				}
+
+				Z_OBJ_INC_APPLY_COUNT_P(expr);
 				print_hash(write_func, properties, indent, 1);
-				properties->u.v.nApplyCount--;
+				Z_OBJ_DEC_APPLY_COUNT_P(expr);
+
 				if (is_temp) {
 					zend_hash_destroy(properties);
 					FREE_HASHTABLE(properties);

@@ -62,7 +62,7 @@ static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key,
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(key->val, key->len);
 		php_printf("\"]=>\n");
-		}
+	}
 	php_var_dump(zv, level + 2);
 }
 /* }}} */
@@ -156,13 +156,13 @@ again:
 			PUTS("}\n");
 			break;
 		case IS_OBJECT:
-			myht = Z_OBJDEBUG_P(struc, is_temp);
-			if (myht && ++myht->u.v.nApplyCount > 1) {
+			if (Z_OBJ_APPLY_COUNT_P(struc) > 0) {
 				PUTS("*RECURSION*\n");
-				--myht->u.v.nApplyCount;
 				return;
 			}
+			Z_OBJ_INC_APPLY_COUNT_P(struc);
 
+			myht = Z_OBJDEBUG_P(struc, is_temp);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
 			zend_string_release(class_name);
@@ -175,7 +175,6 @@ again:
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 					php_object_property_dump(val, num, key, level);
 				} ZEND_HASH_FOREACH_END();
-				--myht->u.v.nApplyCount;
 				if (is_temp) {
 					zend_hash_destroy(myht);
 					efree(myht);
@@ -185,6 +184,7 @@ again:
 				php_printf("%*c", level-1, ' ');
 			}
 			PUTS("}\n");
+			Z_OBJ_DEC_APPLY_COUNT_P(struc);
 			break;
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
