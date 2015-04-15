@@ -186,6 +186,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf);
+
 static void zend_generator_free_storage(zend_object *object) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
@@ -204,6 +206,15 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 
 	if (generator->iterator) {
 		zend_iterator_dtor(generator->iterator);
+	}
+
+	if (generator->node.children == 0) {
+		zend_generator *root = generator->node.ptr.root, *next;
+		while (root != generator) {
+			next = zend_generator_get_child(&root->node, generator);
+			OBJ_RELEASE(&root->std);
+			root = next;
+		}
 	}
 }
 /* }}} */
@@ -387,6 +398,7 @@ static void zend_generator_merge_child_nodes(zend_generator_node *dest, zend_gen
 	}
 }
 
+/* Make attention so that the root of each subtree of the Generators tree is referenced once per leaf */
 static void zend_generator_add_child(zend_generator *generator, zend_generator *child)
 {
 	zend_generator *leaf = child->node.children ? child->node.ptr.leaf : child;
@@ -396,6 +408,7 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 	if (was_leaf) {
 		zend_generator *next = generator->node.parent;
 		leaf->node.ptr.root = generator->node.ptr.root;
+		++GC_REFCOUNT(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
 		generator->node.ptr.leaf = leaf;
 
 		while (next) {
@@ -472,12 +485,14 @@ void zend_generator_yield_from(zend_generator *this, zend_generator *from)
 	zend_generator_add_child(from, this);
 
 	this->node.parent = from;
+	zend_generator_get_current(this);
+	--GC_REFCOUNT(from);
 }
 
 ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator)
 {
 	zend_generator *leaf;
-	zend_generator *root;
+	zend_generator *root, *old_root;
 
 	if (generator->node.parent == NULL) {
 		/* we're not in yield from mode */
@@ -492,8 +507,18 @@ ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator)
 		return root;
 	}
 
+	/* generator at the root had stopped */
+	if (root != generator) {
+		old_root = root;
+		root = zend_generator_get_child(&root->node, leaf);
+	} else {
+		old_root = NULL;
+	}
+
 	while (!root->execute_data && root != generator) {
-		/* generator at the root had stopped */
+		OBJ_RELEASE(&old_root->std);
+		old_root = root;
+
 		root = zend_generator_get_child(&root->node, leaf);
 	}
 
@@ -528,8 +553,13 @@ ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator)
 		} else {
 			do {
 				root = root->node.parent;
+				++GC_REFCOUNT(&root->std);
 			} while (root->node.parent);
 		}
+	}
+
+	if (old_root) {
+		OBJ_RELEASE(&old_root->std);
 	}
 
 	return leaf->node.ptr.root = root;
@@ -693,9 +723,8 @@ try_again:
 		 * In case we did yield from, the Exception must be rethrown into
 		 * its calling frame (see above in if (check_yield_from). */
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zend_generator_close(generator, 0);
-
 			if (generator == orig_generator) {
+				zend_generator_close(generator, 0);
 				zend_throw_exception_internal(NULL);
 			} else {
 				generator = zend_generator_get_current(orig_generator);
