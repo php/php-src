@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #69353 (Missing null byte checks for paths in various PHP
     extensions). (Stas)
 
+- Apache2handler:
+  . Fixed bug #69218 (potential remote code execution with apache 2.4
+    apache2handler). (Gerrit Venema)
+
 - cURL:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
   . Fixed bug #68739 (Missing break / control flow). (Laruence)
