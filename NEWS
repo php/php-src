@@ -22,10 +22,6 @@ PHP                                                                        NEWS
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
     (Anatol)
 
-- OPCache:
-  . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
-  . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
-
 - OpenSSL:
   . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
     (Daniel Lowrey)
@@ -33,7 +29,7 @@ PHP                                                                        NEWS
 - Sqlite3:
   . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
 
-?? ??? 2015, PHP 5.5.24
+16 Apr 2015, PHP 5.5.24
 
 - Apache2handler:
   . Fixed bug #69218 (potential remote code execution with apache 2.4
@@ -60,15 +56,15 @@ PHP                                                                        NEWS
   . Fixed bug #69353 (Missing null byte checks for paths in various PHP
     extensions). (Stas)
 
-- Date:
-  . Export date_get_immutable_ce so that it can be used by extensions. (Derick
-    Rethans)
-  . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
-
 - Curl:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
   . Fixed bug #69316 (Use-after-free in php_curl related to
     CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
+
+- Date:
+  . Export date_get_immutable_ce so that it can be used by extensions. (Derick
+    Rethans)
+  . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
 
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
@@ -88,6 +84,10 @@ PHP                                                                        NEWS
   . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
 
+- OPCache:
+  . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
+  . Fixed bug #68677 (Use After Free). (CVE-2015-1351) (Laruence)
+
 - OpenSSL:
   . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
   . Add a check for RAND_egd to allow compiling against LibreSSL (Leigh)
@@ -106,13 +106,13 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #68741 (Null pointer dereference). (CVE-2015-1352) (Laruence)
 
-- SPL:
-  . Fixed bug #69227 (Use after free in zval_scan caused by
-     spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
-
 - SOAP:
   . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
      (bisected, regression)). (thomas at shadowweb dot org, Laruence)
+
+- SPL:
+  . Fixed bug #69227 (Use after free in zval_scan caused by
+     spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
 - SQLITE:
   . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
