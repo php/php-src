@@ -54,7 +54,6 @@ PHP                                                                        NEWS
     CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
 
 - Date:
-  . Added DateTime::createFromImmutable(). (Trevor Suarez)
   . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
 
 - Enchant:
