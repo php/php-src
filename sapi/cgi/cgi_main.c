@@ -772,19 +772,21 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 #else
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
+			int has_subfolder = 1;
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
-			/*
+			
+			#ifdef teeshop_0
 			printf(">>> searching for '%c' in '%s'+%d\n", DEFAULT_SLASH, s2, (ptr-s2));
 			printf(">>>                       ");for (idx=0; idx<(ptr-s2); ++idx) { printf(" "); }printf("^\n");
 			printf(">>> ----------------------");for (idx=0; idx<(ptr-s2); ++idx) { printf("-"); }printf("+\n");
-			*/
+			#endif /* teeshop_0 */
 			
 			/* loop until no more slash can be found. if there is no more slash,
 			 * then search for .user.ini in the current directory and exit the loop
 			 */
-			for(;;)  {
+			while(has_subfolder)  {
 				
-				/* strchr may return NULL and so destroy our ptr, so we use slash_pt to store the result;
+				/* strchr may return NULL and so destroy our ptr, so we use slash_ptr to store the result;
 				 * if slash_ptr is not NULL, it points to the position of the next slash
 				 */
 				char *slash_ptr = strchr(ptr, DEFAULT_SLASH);
@@ -797,16 +799,16 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 				if (slash_ptr != NULL) { *slash_ptr = DEFAULT_SLASH; }
 				
 				/* no, there was no slash, so there is also no further subdirectory; exit the loop */
-				else                 { break; }
+				else                   { has_subfolder = 0; continue; }
 				
 				/* jump behind the previously found slash and enter the next iteration */
 				ptr = slash_ptr + 1;
 				
-				/*
+				#ifdef teeshop_0
 			    printf(">>> searching for '%c' in '%s'+%d\n", DEFAULT_SLASH, s2, (ptr-s2));
 				printf(">>>                       ");for (idx=0; idx<(ptr-s2); ++idx) { printf(" "); }printf("^\n");
 				printf(">>> ----------------------");for (idx=0; idx<(ptr-s2); ++idx) { printf("-"); }printf("+\n");
-			    */
+			    #endif /* teeshop_0 */
 			}
 		} else {
 			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
