@@ -2249,6 +2249,7 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 
 		spl_instantiate_arg_n(Z_OBJCE_P(getThis()), return_value, 5, args);
 
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&args[1]);
 	}
 	zval_ptr_dtor(&retval);
