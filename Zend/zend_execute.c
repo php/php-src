@@ -2061,8 +2061,8 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		(zend_function*)op_array,
 		num_args,
 		call->called_scope,
-		Z_OBJ(call->This),
-		NULL);
+		Z_OBJ(call->This));
+	EX(prev_execute_data) = NULL;
 	EX_NUM_ARGS() = num_args;
 
 	/* copy arguments */

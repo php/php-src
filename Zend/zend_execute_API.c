@@ -747,7 +747,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	func = fci_cache->function_handler;
 	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
-		func, fci->param_count, fci_cache->called_scope, fci_cache->object, NULL);
+		func, fci->param_count, fci_cache->called_scope, fci_cache->object);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&

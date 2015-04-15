@@ -2840,6 +2840,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 	zend_function *fbc;
 	zend_class_entry *called_scope;
 	zend_object *obj;
+	zend_execute_data *call;
 
 	SAVE_OPLINE();
 
@@ -2923,8 +2924,10 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, called_scope, obj, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, obj);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	FREE_OP2();
 	FREE_OP1();
@@ -2940,6 +2943,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 	zend_class_entry *ce;
 	zend_object *object;
 	zend_function *fbc;
+	zend_execute_data *call;
 
 	SAVE_OPLINE();
 
@@ -3054,8 +3058,10 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		}
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, ce, object, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3066,6 +3072,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST)
 	USE_OPLINE
 	zend_function *fbc;
 	zval *function_name, *func;
+	zend_execute_data *call;
 
 	if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 		fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
@@ -3080,8 +3087,10 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST)
 			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
 		}
 	}
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL, NULL, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL, NULL);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	/*CHECK_EXCEPTION();*/
 	ZEND_VM_NEXT_OPCODE();
@@ -3096,6 +3105,7 @@ ZEND_VM_HANDLER(128, ZEND_INIT_DYNAMIC_CALL, ANY, CONST|TMPVAR|CV)
 	zend_free_op free_op2;
 	zend_class_entry *called_scope;
 	zend_object *object;
+	zend_execute_data *call;
 
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -3225,8 +3235,10 @@ ZEND_VM_C_LABEL(try_function_name):
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, called_scope, object, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, object);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3242,6 +3254,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
+	zend_execute_data *call;
 
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -3285,8 +3298,10 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 		object = NULL;
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		func, opline->extended_value, called_scope, object, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		func, opline->extended_value, called_scope, object);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -3299,6 +3314,7 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 	zval *func_name;
 	zval *func;
 	zend_function *fbc;
+	zend_execute_data *call;
 
 	func_name = EX_CONSTANT(opline->op2) + 1;
 	if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
@@ -3318,8 +3334,10 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL, NULL, EX(call));
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL, NULL);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -3331,6 +3349,7 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 	zval *fname = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval *func;
 	zend_function *fbc;
+	zend_execute_data *call;
 
 	if (CACHED_PTR(Z_CACHE_SLOT_P(fname))) {
 		fbc = CACHED_PTR(Z_CACHE_SLOT_P(fname));
@@ -3343,9 +3362,11 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame_ex(
+	call = zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL, NULL, EX(call));
+		fbc, opline->extended_value, NULL, NULL);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
 
 	FREE_OP2();
 
@@ -4789,14 +4810,15 @@ ZEND_VM_HANDLER(68, ZEND_NEW, CONST|VAR, ANY)
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 	} else {
 		/* We are not handling overloaded classes right now */
-		EX(call) = zend_vm_stack_push_call_frame(
+		zend_execute_data *call = zend_vm_stack_push_call_frame(
 				ZEND_CALL_FUNCTION | ZEND_CALL_CTOR |
 				(EXPECTED(RETURN_VALUE_USED(opline)) ? 0 : ZEND_CALL_CTOR_RESULT_UNUSED),
 			constructor,
 			opline->extended_value,
 			ce,
-			Z_OBJ(object_zval),
-			EX(call));
+			Z_OBJ(object_zval));
+		call->prev_execute_data = EX(call);
+		EX(call) = call;
 
 		if (EXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
@@ -5319,7 +5341,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 		new_op_array->scope = EG(scope);
 
 		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE,
-			(zend_function*)new_op_array, 0, EX(called_scope), Z_OBJ(EX(This)), NULL);
+			(zend_function*)new_op_array, 0, EX(called_scope), Z_OBJ(EX(This)));
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
@@ -7698,7 +7720,8 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	call = execute_data;
 	execute_data = EG(current_execute_data) = EX(prev_execute_data);
 	zend_vm_stack_free_call_frame(call);
-	call = zend_vm_stack_push_call_frame(call_kind, fbc->common.prototype, 2, scope, object, execute_data);
+	call = zend_vm_stack_push_call_frame(call_kind, fbc->common.prototype, 2, scope, object);
+	call->prev_execute_data = execute_data;
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
 	ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
