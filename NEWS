@@ -46,15 +46,15 @@ PHP                                                                        NEWS
   . Fixed bug #69221 (Segmentation fault when using a generator in combination
     with an Iterator). (Nikita)
   . Fixed bug #69337 (php_stream_url_wrap_http_ex() type-confusion
-   vulnerability). (Stas)
+    vulnerability). (Stas)
   . Fixed bug #69353 (Missing null byte checks for paths in various PHP
-   extensions). (Stas)
+    extensions). (Stas)
 
 - cURL:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
   . Fixed bug #68739 (Missing break / control flow). (Laruence)
   . Fixed bug #69316 (Use-after-free in php_curl related to
-   CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
+    CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
 
 - Date:
   . Added DateTime::createFromImmutable(). (Trevor Suarez)
