@@ -50,7 +50,6 @@ typedef struct _spl_fixedarray { /* {{{ */
 
 typedef struct _spl_fixedarray_object { /* {{{ */
 	spl_fixedarray        *array;
-	zval                   retval;
 	zend_function         *fptr_offset_get;
 	zend_function         *fptr_offset_set;
 	zend_function         *fptr_offset_has;
@@ -208,7 +207,6 @@ static void spl_fixedarray_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	zend_object_std_dtor(&intern->std);
-	zval_ptr_dtor(&intern->retval);
 }
 /* }}} */
 
@@ -361,19 +359,17 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_get) {
-		zval tmp, rv;
+		zval tmp;
 		if (!offset) {
 			ZVAL_UNDEF(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", &rv, offset);
+		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
 		zval_ptr_dtor(offset);
-		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			return &intern->retval;
+		if (!Z_ISUNDEF_P(rv)) {
+			return rv;
 		}
 		return &EG(uninitialized_zval);
 	}
@@ -517,9 +513,9 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
 		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			return zend_is_true(&intern->retval);
+			zend_bool result = zend_is_true(&rv);
+			zval_ptr_dtor(&rv);
+			return result;
 		}
 		return 0;
 	}
@@ -537,10 +533,8 @@ static int spl_fixedarray_object_count_elements(zval *object, zend_long *count) 
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (zend_long) Z_LVAL(intern->retval);
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 	} else if (intern->array) {

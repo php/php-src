@@ -64,7 +64,6 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
 typedef struct _spl_array_object {
 	zval              array;
-	zval              retval;
 	uint32_t          ht_iter;
 	int               ar_flags;
 	int               is_self;
@@ -132,7 +131,6 @@ static void spl_array_object_free_storage(zend_object *object)
 	zend_object_std_dtor(&intern->std);
 
 	zval_ptr_dtor(&intern->array);
-	zval_ptr_dtor(&intern->retval);
 
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
@@ -368,26 +366,25 @@ num_index:
 	}
 } /* }}} */
 
-static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *zv) /* {{{ */
+static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zval *ret;
 
 	if (check_inherited) {
 		spl_array_object *intern = Z_SPLARRAY_P(object);
 		if (intern->fptr_offset_get) {
-			zval rv, tmp;
+			zval tmp;
 			if (!offset) {
 				ZVAL_UNDEF(&tmp);
 				offset = &tmp;
 			} else {
 				SEPARATE_ARG_IF_REF(offset);
 			}
-			zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", &rv, offset);
+			zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", rv, offset);
 			zval_ptr_dtor(offset);
-			if (!Z_ISUNDEF(rv)) {
-				zval_ptr_dtor(&intern->retval);
-				ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-				return &intern->retval;
+
+			if (!Z_ISUNDEF_P(rv)) {
+				return rv;
 			}
 			return &EG(uninitialized_zval);
 		}
@@ -663,7 +660,13 @@ num_index:
 		}
 	}
 
-	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+	{
+		zend_bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+		if (value == &rv) {
+			zval_ptr_dtor(&rv);
+		}
+		return result;
+	}
 } /* }}} */
 
 static int spl_array_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
@@ -1371,10 +1374,8 @@ int spl_array_object_count_elements(zval *object, zend_long *count) /* {{{ */
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
 		if (Z_TYPE(rv) != IS_UNDEF) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (zend_long)Z_LVAL(intern->retval);
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 		*count = 0;

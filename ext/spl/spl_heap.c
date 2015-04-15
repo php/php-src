@@ -69,7 +69,6 @@ typedef struct _spl_heap_it spl_heap_it;
 
 struct _spl_heap_object {
 	spl_ptr_heap       *heap;
-	zval                retval;
 	int                 flags;
 	zend_class_entry   *ce_get_iterator;
 	zend_function      *fptr_cmp;
@@ -371,8 +370,6 @@ static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 
 	spl_ptr_heap_destroy(intern->heap);
 
-	zval_ptr_dtor(&intern->retval);
-
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
@@ -491,10 +488,8 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (zend_long) Z_LVAL(intern->retval);
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 		*count = 0;
