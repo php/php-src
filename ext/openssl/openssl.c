@@ -4301,7 +4301,7 @@ PHP_FUNCTION(openssl_error_string)
 	tmp=ssl_error_context->current;
 
 	//Store error msg
-	err_str=emalloc(strlen(tmp->err_str));
+	err_str=emalloc(strlen(tmp->err_str)+1);
 	strcpy(err_str,tmp->err_str);
 
 	//Update references of the error queue
@@ -4312,8 +4312,9 @@ PHP_FUNCTION(openssl_error_string)
 	}
 
 	//Free memory of the current error
+	efree(tmp->err_str);
 	efree(tmp);
-	RETURN_STRING(err_str,1);
+	RETURN_STRING(err_str,0);
 
 }
 /* }}} */
