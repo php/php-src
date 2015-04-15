@@ -609,7 +609,8 @@ int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_l
 	php_unserialize_data_t var_hash;
 
 	if (zip_metadata_len) {
-		const unsigned char *p, *p_buff = estrndup(*buffer, zip_metadata_len);
+		const unsigned char *p;
+		unsigned char *p_buff = (unsigned char *)estrndup(*buffer, zip_metadata_len);
 		p = p_buff;
 		ZVAL_NULL(metadata);
 		PHP_VAR_UNSERIALIZE_INIT(var_hash);
