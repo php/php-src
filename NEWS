@@ -88,6 +88,9 @@ PHP                                                                        NEWS
   . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
 
+- MCrypt:
+  . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
 - OpenSSL:
   . Fixed bug #67403 (Add signatureType to openssl_x509_parse).
   . Add a check for RAND_egd to allow compiling against LibreSSL (Leigh)

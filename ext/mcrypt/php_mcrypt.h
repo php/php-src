@@ -77,6 +77,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
 	int le_h;
 	char *modes_dir;
 	char *algorithms_dir;
+	int fd[2]; // RANDOM = 0, URANDOM = 1
 ZEND_END_MODULE_GLOBALS(mcrypt)
 
 #ifdef ZTS
