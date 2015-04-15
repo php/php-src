@@ -58,6 +58,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Added DateTime::createFromImmutable(). (Trevor Suarez)
+  . Fixed bug #69336 (Issues with "last day of <monthname>"). (Derick Rethans)
 
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
