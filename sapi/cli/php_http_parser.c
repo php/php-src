@@ -589,7 +589,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
-          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; break;
+          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
           case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
           default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
@@ -597,7 +597,6 @@ size_t php_http_parser_execute (php_http_parser *parser,
         state = s_req_method;
         break;
       }
-
       case s_req_method:
       {
         const char *matcher;
