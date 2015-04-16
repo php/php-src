@@ -245,6 +245,9 @@ typedef struct _gmp_temp {
 
 #define GMP_MAX_BASE 62
 
+#define GMP_51_OR_NEWER \
+	((__GNU_MP_VERSION >= 6) || (__GNU_MP_VERSION >= 5 && __GNU_MP_VERSION_MINOR >= 1))
+
 #define IS_GMP(zval) \
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce))
 
@@ -1575,7 +1578,15 @@ ZEND_FUNCTION(gmp_rootrem)
 	add_next_index_zval(return_value, &result1);
 	add_next_index_zval(return_value, &result2);
 
+#if GMP_51_OR_NEWER
+	/* mpz_rootrem() is supported since GMP 4.2, but buggy wrt odd roots
+	 * of negative numbers */
 	mpz_rootrem(gmpnum_result1, gmpnum_result2, gmpnum_a, (gmp_ulong) nth);
+#else
+	mpz_root(gmpnum_result1, gmpnum_a, (gmp_ulong) nth);
+	mpz_pow_ui(gmpnum_result2, gmpnum_result1, (gmp_ulong) nth);
+	mpz_sub(gmpnum_result2, gmpnum_a, gmpnum_result2);
+#endif
 
 	FREE_GMP_TEMP(temp_a);
 }
