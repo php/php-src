@@ -22,14 +22,6 @@
 #include <zend.h>
 #include "zend_smart_str_public.h"
 
-#ifndef SMART_STR_PREALLOC
-#define SMART_STR_PREALLOC 128
-#endif
-
-#ifndef SMART_STR_START_SIZE
-#define SMART_STR_START_SIZE 78
-#endif
-
 #define smart_str_appends_ex(dest, src, what) \
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
 #define smart_str_appends(dest, src) \
@@ -49,23 +41,28 @@
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
 
+BEGIN_EXTERN_C()
+
+ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
+ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
+
+END_EXTERN_C()
+
 static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, zend_bool persistent) {
-	size_t newlen;
-	if (!str->s) {
-		newlen = len;
-		str->a = newlen < SMART_STR_START_SIZE
-				? SMART_STR_START_SIZE
-				: newlen + SMART_STR_PREALLOC;
-		str->s = zend_string_alloc(str->a, persistent);
-		str->s->len = 0;
+	if (UNEXPECTED(!str->s)) {
+		goto do_smart_str_realloc;
 	} else {
-		newlen = str->s->len + len;
-		if (newlen >= str->a) {
-			str->a = newlen + SMART_STR_PREALLOC;
-			str->s = (zend_string *) perealloc(str->s, _STR_HEADER_SIZE + str->a + 1, persistent);
+		len += str->s->len;
+		if (UNEXPECTED(len >= str->a)) {
+do_smart_str_realloc:
+			if (persistent) {
+				smart_str_realloc(str, len);
+			} else {
+				smart_str_erealloc(str, len);
+			}
 		}
 	}
-	return newlen;
+	return len;
 }
 
 static zend_always_inline void smart_str_free(smart_str *str) {

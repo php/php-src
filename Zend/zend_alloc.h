@@ -50,6 +50,20 @@ typedef struct _zend_leak_info {
 	uint orig_lineno;
 } zend_leak_info;
 
+#if ZEND_DEBUG
+typedef struct _zend_mm_debug_info {
+	size_t             size;
+	const char        *filename;
+	const char        *orig_filename;
+	uint               lineno;
+	uint               orig_lineno;
+} zend_mm_debug_info;
+
+# define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))
+#else 
+# define ZEND_MM_OVERHEAD 0
+#endif
+
 BEGIN_EXTERN_C()
 
 ZEND_API char*  ZEND_FASTCALL zend_strndup(const char *s, size_t length) ZEND_ATTRIBUTE_MALLOC;
