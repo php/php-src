@@ -261,7 +261,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	}
 
 	dwRet = pGetFinalPathNameByHandle(hFile, target, MAXPATHLEN, VOLUME_NAME_DOS);
-	if(dwRet >= MAXPATHLEN) {
+	if(dwRet >= MAXPATHLEN || dwRet == 0) {
 		return -1;
 	}
 
