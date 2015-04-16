@@ -287,16 +287,6 @@ struct _zend_mm_bin {
 	char               bytes[ZEND_MM_PAGE_SIZE * 8];
 };
 
-#if ZEND_DEBUG
-typedef struct _zend_mm_debug_info {
-	size_t             size;
-	const char        *filename;
-	const char        *orig_filename;
-	uint               lineno;
-	uint               orig_lineno;
-} zend_mm_debug_info;
-#endif
-
 struct _zend_mm_free_slot {
 	zend_mm_free_slot *next_free_slot;
 };
