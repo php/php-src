@@ -262,7 +262,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		if (pce->locale == BG(locale_string) ||
 		    (pce->locale && BG(locale_string) &&
 		     pce->locale->len == BG(locale_string)->len &&
-		     !memcmp(pce->locale->val, BG(locale_string)->val, pce->locale->len))) {
+		     !memcmp(pce->locale->val, BG(locale_string)->val, pce->locale->len)) ||
+		    (!pce->locale &&
+		     BG(locale_string)->len == 1 &&
+		     BG(locale_string)->val[0] == 'C') ||
+		    (!BG(locale_string) &&
+		     pce->locale->len == 1 &&
+		     pce->locale->val[0] == 'C')) {
 			return pce;
 		}
 #else
