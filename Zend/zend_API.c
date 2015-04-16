@@ -3204,7 +3204,6 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 	fcc->calling_scope = NULL;
 	fcc->called_scope = NULL;
 	fcc->function_handler = NULL;
-	fcc->calling_scope = NULL;
 	fcc->object = NULL;
 
 	if (object &&
