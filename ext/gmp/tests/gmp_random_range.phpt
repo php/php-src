@@ -30,7 +30,7 @@ gmp_random_range(-1, $plusTen);
 gmp_random_range($zero, $plusTen);
 gmp_random_range($minusTen, $plusTen);
 
-// 2 seconds to make sure the numbers stay in range
+// 0.5 seconds to make sure the numbers stay in range
 $start = microtime(true);
 while (1) {
 	for ($i = 0; $i < 5000; $i++) {
@@ -56,7 +56,7 @@ while (1) {
 		}
 	}
 
-	if (microtime(true) - $start > 2) {
+	if (microtime(true) - $start > 0.5) {
 		break;
 	}
 }
