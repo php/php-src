@@ -91,6 +91,7 @@ static const char *method_strings[] =
   , "MOVE"
   , "PROPFIND"
   , "PROPPATCH"
+  , "SEARCH"
   , "UNLOCK"
   , "REPORT"
   , "MKACTIVITY"
@@ -630,6 +631,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           parser->method = PHP_HTTP_PUT;
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'A') {
           parser->method = PHP_HTTP_PATCH;
+        } else if (index == 1 && parser->method == PHP_HTTP_SUBSCRIBE && ch == 'E') {
+          parser->method = PHP_HTTP_SEARCH;
         } else if (index == 2 && parser->method == PHP_HTTP_UNLOCK && ch == 'S') {
           parser->method = PHP_HTTP_UNSUBSCRIBE;
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {
