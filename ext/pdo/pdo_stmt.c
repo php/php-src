@@ -2339,6 +2339,7 @@ static void free_statement(pdo_stmt_t *stmt)
 	}
 
 	if (!Z_ISUNDEF(stmt->fetch.into) && stmt->default_fetch_type == PDO_FETCH_INTO) {
+		zval_ptr_dtor(&stmt->fetch.into);
 		ZVAL_UNDEF(&stmt->fetch.into);
 	}
 
