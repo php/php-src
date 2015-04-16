@@ -94,7 +94,6 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, TimeZone_ce_ptr);
 	timezone_object_construct(tz_clone, return_value, 1);
 }
 
