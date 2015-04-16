@@ -66,14 +66,13 @@ typedef struct _spl_array_object {
 	zval              array;
 	uint32_t          ht_iter;
 	int               ar_flags;
-	int               is_self;
+	unsigned char	  nApplyCount;
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
 	zend_function     *fptr_offset_del;
 	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
-	unsigned char	  nApplyCount;
 	zend_object       std;
 } spl_array_object;
 
