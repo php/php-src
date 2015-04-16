@@ -194,7 +194,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 
 static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_info, zend_execute_data *call)
 {
-	if (call_info & ZEND_CALL_FREE_EXTRA_ARGS) {
+	if (UNEXPECTED(call_info & ZEND_CALL_FREE_EXTRA_ARGS)) {
 		zval *end = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
  		zval *p = end + (ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args);
 		do {
