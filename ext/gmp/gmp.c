@@ -1428,11 +1428,12 @@ ZEND_FUNCTION(gmp_pow)
 		RETURN_FALSE;
 	}
 
-	INIT_GMP_RETVAL(gmpnum_result);
 	if (Z_TYPE_P(base_arg) == IS_LONG && Z_LVAL_P(base_arg) >= 0) {
+		INIT_GMP_RETVAL(gmpnum_result);
 		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
+		INIT_GMP_RETVAL(gmpnum_result);
 		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
 		FREE_GMP_TEMP(temp_base);
 	}
