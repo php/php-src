@@ -38,7 +38,6 @@ typedef struct _zend_closure {
 	zend_object    std;
 	zend_function  func;
 	zval           this_ptr;
-	HashTable     *debug_info;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -269,11 +268,6 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		destroy_op_array(&closure->func.op_array);
 	}
 
-	if (closure->debug_info != NULL) {
-		zend_hash_destroy(closure->debug_info);
-		efree(closure->debug_info);
-	}
-
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		zval_ptr_dtor(&closure->this_ptr);
 	}
@@ -335,70 +329,62 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(object);
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
+	HashTable *debug_info;
 
-	*is_temp = 0;
+	*is_temp = 1;
 
-	if (closure->debug_info == NULL) {
-		ALLOC_HASHTABLE(closure->debug_info);
-		zend_hash_init(closure->debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
-	}
-	if (closure->debug_info->u.v.nApplyCount == 0) {
-		if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
-			HashTable *static_variables = closure->func.op_array.static_variables;
-			ZVAL_ARR(&val, zend_array_dup(static_variables));
-			zend_hash_str_update(closure->debug_info, "static", sizeof("static")-1, &val);
-		}
+	ALLOC_HASHTABLE(debug_info);
+	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
-		if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-			Z_ADDREF(closure->this_ptr);
-			zend_hash_str_update(closure->debug_info, "this", sizeof("this")-1, &closure->this_ptr);
-		}
-
-		if (arg_info &&
-		    (closure->func.common.num_args ||
-		     (closure->func.common.fn_flags & ZEND_ACC_VARIADIC))) {
-			uint32_t i, num_args, required = closure->func.common.required_num_args;
-
-			array_init(&val);
-
-			num_args = closure->func.common.num_args;
-			if (closure->func.common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
-			for (i = 0; i < num_args; i++) {
-				zend_string *name;
-				zval info;
-				if (arg_info->name) {
-					name = zend_strpprintf(0, "%s$%s",
-							arg_info->pass_by_reference ? "&" : "",
-							arg_info->name->val);
-				} else {
-					name = zend_strpprintf(0, "%s$param%d",
-							arg_info->pass_by_reference ? "&" : "",
-							i + 1);
-				}
-				ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
-				zend_hash_update(Z_ARRVAL(val), name, &info);
-				zend_string_release(name);
-				arg_info++;
-			}
-			zend_hash_str_update(closure->debug_info, "parameter", sizeof("parameter")-1, &val);
-		}
+	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
+		HashTable *static_variables = closure->func.op_array.static_variables;
+		ZVAL_ARR(&val, zend_array_dup(static_variables));
+		zend_hash_str_update(debug_info, "static", sizeof("static")-1, &val);
 	}
 
-	return closure->debug_info;
+	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
+		Z_ADDREF(closure->this_ptr);
+		zend_hash_str_update(debug_info, "this", sizeof("this")-1, &closure->this_ptr);
+	}
+
+	if (arg_info &&
+		(closure->func.common.num_args ||
+		 (closure->func.common.fn_flags & ZEND_ACC_VARIADIC))) {
+		uint32_t i, num_args, required = closure->func.common.required_num_args;
+
+		array_init(&val);
+
+		num_args = closure->func.common.num_args;
+		if (closure->func.common.fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		for (i = 0; i < num_args; i++) {
+			zend_string *name;
+			zval info;
+			if (arg_info->name) {
+				name = zend_strpprintf(0, "%s$%s",
+						arg_info->pass_by_reference ? "&" : "",
+						arg_info->name->val);
+			} else {
+				name = zend_strpprintf(0, "%s$param%d",
+						arg_info->pass_by_reference ? "&" : "",
+						i + 1);
+			}
+			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
+			zend_hash_update(Z_ARRVAL(val), name, &info);
+			zend_string_release(name);
+			arg_info++;
+		}
+		zend_hash_str_update(debug_info, "parameter", sizeof("parameter")-1, &val);
+	}
+
+	return debug_info;
 }
 /* }}} */
 
 static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
-
-	if (closure->debug_info != NULL) {
-		zend_hash_destroy(closure->debug_info);
-		efree(closure->debug_info);
-		closure->debug_info = NULL;
-	}
 
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
