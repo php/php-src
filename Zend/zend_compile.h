@@ -429,19 +429,27 @@ struct _zend_execute_data {
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+#define ZEND_CALL_CLOSURE            (1 << 5)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)
 
+#define ZEND_CALL_KIND_EX(call_info) \
+	(call_info & (ZEND_CALL_CODE | ZEND_CALL_TOP))
+
 #define ZEND_CALL_KIND(call) \
-	(ZEND_CALL_INFO(call) & (ZEND_CALL_CODE | ZEND_CALL_TOP))
+	ZEND_CALL_KIND_EX(ZEND_CALL_INFO(call))
 
 #define ZEND_SET_CALL_INFO(call, info) do { \
 		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
 	} while (0)
 
-#define ZEND_ADD_CALL_FLAG(call, info) do { \
-		Z_TYPE_INFO((call)->This) |= ((info) << 24); \
+#define ZEND_ADD_CALL_FLAG_EX(call_info, flag) do { \
+		call_info |= ((flag) << 24); \
+	} while (0)
+
+#define ZEND_ADD_CALL_FLAG(call, flag) do { \
+		ZEND_ADD_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
 	} while (0)
 
 #define ZEND_CALL_NUM_ARGS(call) \

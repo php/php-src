@@ -833,6 +833,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 			ZEND_ASSERT(GC_TYPE(func->op_array.prototype) == IS_OBJECT);
 			GC_REFCOUNT(func->op_array.prototype)++;
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
 		}
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);

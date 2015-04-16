@@ -103,7 +103,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
-		zend_op_array *op_array = &execute_data->func->op_array;
 
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data);
@@ -131,8 +130,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		/* Free closure object */
-		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			OBJ_RELEASE((zend_object *) op_array->prototype);
+		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+			OBJ_RELEASE((zend_object *) EX(func)->common.prototype);
 		}
 
 		efree(generator->stack);
