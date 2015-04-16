@@ -23,5 +23,6 @@ PHP_METHOD(Spoofchecker, isSuspicious);
 PHP_METHOD(Spoofchecker, areConfusable);
 PHP_METHOD(Spoofchecker, setAllowedLocales);
 PHP_METHOD(Spoofchecker, setChecks);
+PHP_METHOD(Spoofchecker, setRestrictionLevel);
 
 #endif // SPOOFCHECKER_MAIN_H

@@ -134,6 +134,27 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
+/* {{{ proto void Spoofchecker::setRestrictionLevel( int restriction_level  )
+ * Set the loosest restriction level allowed
+ */
+
+PHP_METHOD(Spoofchecker, setRestrictionLevel)
+{
+	zend_long level;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &level)) {
+		return;
+	}
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+#if U_ICU_VERSION_MAJOR_NUM >= 51
+	uspoof_setRestrictionLevel(co->uspoof, level);
+#endif
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
