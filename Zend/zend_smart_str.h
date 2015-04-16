@@ -22,18 +22,13 @@
 #include <zend.h>
 #include "zend_smart_str_public.h"
 
-#define SMART_STR_OVERHEAD (ZEND_MM_OVERHEAD + _STR_HEADER_SIZE)
-
-#ifndef SMART_STR_PAGE
-# define SMART_STR_PAGE 4096
+#ifndef SMART_STR_PREALLOC
+#define SMART_STR_PREALLOC 128
 #endif
 
 #ifndef SMART_STR_START_SIZE
-# define SMART_STR_START_SIZE (256 - SMART_STR_OVERHEAD - 1)
+#define SMART_STR_START_SIZE 78
 #endif
-
-#define SMART_STR_NEW_SIZE(newlen) \
-	(((newlen + SMART_STR_OVERHEAD + SMART_STR_PAGE) & ~(SMART_STR_PAGE - 1)) - SMART_STR_OVERHEAD - 1)
 
 #define smart_str_appends_ex(dest, src, what) \
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
@@ -60,14 +55,14 @@ static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, zen
 		newlen = len;
 		str->a = newlen < SMART_STR_START_SIZE
 				? SMART_STR_START_SIZE
-				: SMART_STR_NEW_SIZE(newlen);
+				: newlen + SMART_STR_PREALLOC;
 		str->s = zend_string_alloc(str->a, persistent);
 		str->s->len = 0;
 	} else {
 		newlen = str->s->len + len;
 		if (newlen >= str->a) {
-			str->a = SMART_STR_NEW_SIZE(newlen);
-			str->s = (zend_string *) perealloc2(str->s, _STR_HEADER_SIZE + str->a + 1, _STR_HEADER_SIZE + str->s->len + 1, persistent);
+			str->a = newlen + SMART_STR_PREALLOC;
+			str->s = (zend_string *) perealloc(str->s, _STR_HEADER_SIZE + str->a + 1, persistent);
 		}
 	}
 	return newlen;
