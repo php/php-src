@@ -93,6 +93,8 @@ struct _spl_dllist_object {
 	zend_function         *fptr_offset_del;
 	zend_function         *fptr_count;
 	zend_class_entry      *ce_get_iterator;
+	zval                  *gc_data;
+	int                    gc_data_count;
 	zend_object            std;
 };
 
@@ -354,6 +356,10 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&tmp);
 	}
 
+	if (intern->gc_data != NULL) {
+		efree(intern->gc_data);
+	};
+
 	spl_ptr_llist_destroy(intern->llist);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 }
@@ -530,6 +536,28 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 	return debug_info;
 }
 /* }}}} */
+
+static HashTable *spl_dllist_object_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+{
+	spl_dllist_object *intern  = Z_SPLDLLIST_P(obj);
+	spl_ptr_llist_element *current = intern->llist->head;
+	int i = 0;
+
+	if (intern->gc_data_count < intern->llist->count) {
+		intern->gc_data_count = intern->llist->count;
+		intern->gc_data = safe_erealloc(intern->gc_data, intern->gc_data_count, sizeof(zval), 0);
+	}
+
+	while (current) {
+		ZVAL_COPY_VALUE(&intern->gc_data[i++], &current->data);
+		current = current->next;
+	}
+
+	*gc_data = intern->gc_data;
+	*gc_data_count = i;
+	return zend_std_get_properties(obj);
+}
+/* }}} */
 
 /* {{{ proto bool SplDoublyLinkedList::push(mixed $value)
 	   Push $value on the SplDoublyLinkedList */
@@ -1366,6 +1394,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_debug_info = spl_dllist_object_get_debug_info;
+	spl_handler_SplDoublyLinkedList.get_gc = spl_dllist_object_get_gc;
 	spl_handler_SplDoublyLinkedList.dtor_obj = zend_objects_destroy_object;
 	spl_handler_SplDoublyLinkedList.free_obj = spl_dllist_object_free_storage;
 
