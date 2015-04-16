@@ -831,6 +831,15 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 }
 /* }}} */
 
+static HashTable *spl_array_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+{
+	spl_array_object *intern = Z_SPLARRAY_P(obj);
+	*gc_data = &intern->array;
+	*gc_data_count = 1;
+	return zend_std_get_properties(obj);
+}
+/* }}} */
+
 static zval *spl_array_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
@@ -1913,6 +1922,7 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
 	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
+	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
 	spl_handler_ArrayObject.write_property = spl_array_write_property;
 	spl_handler_ArrayObject.get_property_ptr_ptr = spl_array_get_property_ptr_ptr;
