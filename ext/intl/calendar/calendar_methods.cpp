@@ -1161,11 +1161,11 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 			Z_OBJCE_P(zv_arg), php_date_get_date_ce()))) {
 		object_init_ex(&zv_tmp, php_date_get_date_ce());
 		zend_call_method_with_1_params(&zv_tmp, NULL, NULL, "__construct", NULL, zv_arg);
+		zv_datetime = &zv_tmp;
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ(zv_tmp));
 			goto error;
 		}
-		zv_datetime = &zv_tmp;
 	} else {
 		zv_datetime = zv_arg;
 	}
