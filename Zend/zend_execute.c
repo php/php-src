@@ -1806,7 +1806,15 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 	zval *cv = EX_VAR_NUM(0);
 	zval *end = cv + EX(func)->op_array.last_var;
 	while (EXPECTED(cv != end)) {
-		zval_ptr_dtor(cv);
+		if (Z_REFCOUNTED_P(cv)) {
+			if (!Z_DELREF_P(cv)) {
+				zend_refcounted *r = Z_COUNTED_P(cv);
+				ZVAL_NULL(cv);
+				zval_dtor_func_for_ptr(r);
+			} else {
+				GC_ZVAL_CHECK_POSSIBLE_ROOT(cv);
+			}
+		}
 		cv++;
  	}
 }
