@@ -13,7 +13,7 @@ var_dump(gmp_random_bits(-1));
 gmp_random_bits(1);
 gmp_random_bits(1024);
 
-// 2 seconds to make sure the numbers stay in range
+// 0.5 seconds to make sure the numbers stay in range
 $start = microtime(true);
 $limit = (2 ** 30) - 1;
 while (1) {
@@ -26,7 +26,7 @@ while (1) {
 		}
 	}
 
-	if (microtime(true) - $start > 2) {
+	if (microtime(true) - $start > 0.5) {
 		break;
 	}
 }
