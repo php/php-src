@@ -313,14 +313,17 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 
 static void zend_generator_throw_exception(zend_generator *generator, zval *exception)
 {
-	/* Throw the exception in the context of the generator */
+	/* Throw the exception in the context of the generator. Decrementing the opline
+	 * to pretend the exception happened during the YIELD opcode. */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	EG(current_execute_data) = generator->execute_data;
+	generator->execute_data->opline--;
 	if (exception) {
 		zend_throw_exception_object(exception);
 	} else {
 		zend_throw_exception_internal(NULL);
 	}
+	generator->execute_data->opline++;
 	EG(current_execute_data) = original_execute_data;
 }
 
