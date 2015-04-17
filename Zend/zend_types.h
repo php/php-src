@@ -418,9 +418,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_OBJ_USE_GUARDS           (1<<5)
 #define IS_OBJ_HAS_GUARDS           (1<<6)
 
-/* GC flags (common for all referenced) */
-#define IS_GC_INNER_GARBAGE         (1<<7)
-
 #define Z_OBJ_APPLY_COUNT(zval) \
 	(Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT)
 
