@@ -1181,7 +1181,7 @@ PHP_FUNCTION(odbc_prepare)
 	
 	result->numparams = 0;
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -1609,7 +1609,7 @@ PHP_FUNCTION(odbc_exec)
 		
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		efree(result);
@@ -3110,7 +3110,7 @@ PHP_FUNCTION(odbc_tables)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3177,7 +3177,7 @@ PHP_FUNCTION(odbc_columns)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3247,7 +3247,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3323,7 +3323,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3446,7 +3446,7 @@ PHP_FUNCTION(odbc_primarykeys)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3512,7 +3512,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3579,7 +3579,7 @@ PHP_FUNCTION(odbc_procedures)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3647,7 +3647,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3716,7 +3716,7 @@ PHP_FUNCTION(odbc_statistics)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
@@ -3779,7 +3779,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 
 	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
-	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
