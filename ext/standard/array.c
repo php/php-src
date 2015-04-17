@@ -1373,23 +1373,7 @@ static inline void php_binary_search_array(INTERNAL_FUNCTION_PARAMETERS, int beh
 	int mid;
 
     zval result;
-    if(strict){
-		while(low<=high){
-             mid=(low+high)/2;
-
-             ZVAL_DEREF(entry);
-             entry = zend_hash_index_find(arr_hash, mid);
-
-			 is_larger_function("ass","ass","sa");
-			 if(Z_LVAL(result) > 0){
-                high=mid-1;
-             }
-             else if(Z_LVAL(result) < 0){
-                low=mid+1;
-             }else{
-                 RETURN_TRUE;
-             }
-		}		
+    if(strict){		
 	}else{
 		while(low<=high){
 			 mid=(low+high)/2;
