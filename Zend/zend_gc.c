@@ -204,9 +204,7 @@ ZEND_API void gc_init(void)
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
-	if (UNEXPECTED(GC_TYPE(ref) == IS_NULL) ||
-	    UNEXPECTED(CG(unclean_shutdown)) ||
-	    UNEXPECTED(GC_G(gc_active))) {
+	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {
 		return;
 	}
 
@@ -242,13 +240,13 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 				GC_G(unused) = newRoot->prev;
 			}
 
-			GC_REF_SET_PURPLE(ref);
+			GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+			GC_INFO(ref) = (newRoot - GC_G(buf)) | GC_PURPLE;
+
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
 			GC_G(roots).next->prev = newRoot;
 			GC_G(roots).next = newRoot;
-
-			GC_REF_SET_ADDRESS(ref, newRoot - GC_G(buf));
 
 			newRoot->ref = ref;
 
@@ -283,7 +281,7 @@ tail_call:
 	ht = NULL;
 	GC_REF_SET_BLACK(ref);
 
-	if (GC_TYPE(ref) == IS_OBJECT) {
+	if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
@@ -376,7 +374,7 @@ tail_call:
 		GC_BENCH_INC(zval_marked_grey);
 		GC_REF_SET_COLOR(ref, GC_GREY);
 
-		if (GC_TYPE(ref) == IS_OBJECT) {
+		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
@@ -487,7 +485,7 @@ tail_call:
 			gc_scan_black(ref);
 		} else {
 			GC_REF_SET_COLOR(ref, GC_WHITE);
-			if (GC_TYPE(ref) == IS_OBJECT) {
+			if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
@@ -576,13 +574,16 @@ tail_call:
 	if (GC_REF_GET_COLOR(ref) == GC_WHITE) {
 		ht = NULL;
 		GC_REF_SET_BLACK(ref);
+		if (!GC_ADDRESS(GC_INFO(ref))) {
+			GC_FLAGS(ref) |= IS_GC_INNER_GARBAGE;
+		}
 
 		/* don't count references for compatibility ??? */
 		if (GC_TYPE(ref) != IS_REFERENCE) {
 			count++;
 		}
 
-		if (GC_TYPE(ref) == IS_OBJECT) {
+		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
@@ -608,20 +609,17 @@ tail_call:
 							*flags |= GC_HAS_INNER_CYCLES;
 						}
 						if (buf) {
+							GC_REFCOUNT(ref)++;
+							GC_FLAGS(ref) &= ~IS_GC_INNER_GARBAGE;
 							buf->ref = ref;
 							buf->next = GC_G(roots).next;
 							buf->prev = &GC_G(roots);
 							GC_G(roots).next->prev = buf;
 							GC_G(roots).next = buf;
 							GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-							*flags |= GC_HAS_DESTRUCTORS;
 						}
-					} else {
-						*flags |= GC_HAS_DESTRUCTORS;
 					}
-				} else if (!GC_ADDRESS(GC_INFO(ref))) {
-					GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
-					*flags |= GC_HAS_INNER_CYCLES;
+					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
@@ -657,12 +655,10 @@ tail_call:
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			if (!GC_ADDRESS(GC_INFO(ref))) {
-				GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
 				*flags |= GC_HAS_INNER_CYCLES;
 			}
 			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
-			GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_REFCOUNT(ref)++;
@@ -670,7 +666,6 @@ tail_call:
 			}
 			return count;
 		} else {
-			GC_FLAGS(ref) |= IS_GC_INNER_CYCLE;
 			return count;
 		}
 
@@ -719,6 +714,7 @@ static int gc_collect_roots(uint32_t *flags)
 
 	current = GC_G(roots).next;
 	while (current != &GC_G(roots)) {
+		GC_REFCOUNT(current->ref)++;
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
 			count += gc_collect_white(current->ref, flags);
 		}
@@ -753,14 +749,14 @@ static void gc_break_cycles(zend_refcounted *ref, zval *zv)
 	Bucket *p, *end;
 
 tail_call:
-	if (zv && !(GC_FLAGS(ref) & IS_GC_INNER_CYCLE)) {
+	if (zv && !(GC_FLAGS(ref) & IS_GC_INNER_GARBAGE)) {
 		GC_REFCOUNT(ref)--;
 		ZVAL_NULL(zv);
 		return;
 	}
-	GC_FLAGS(ref) &= ~IS_GC_INNER_CYCLE;
+	GC_FLAGS(ref) &= ~IS_GC_INNER_GARBAGE;
 
-	if (GC_TYPE(ref) == IS_OBJECT) {
+	if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
@@ -833,9 +829,10 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref)
 tail_call:
 	if (GC_ADDRESS(GC_INFO(ref)) != 0 && GC_REF_GET_COLOR(ref) == GC_BLACK) {
 		GC_TRACE_REF(ref, "removing from buffer");
+		GC_REFCOUNT(ref)--;
 		GC_REMOVE_FROM_BUFFER(ref);
 
-		if (GC_TYPE(ref) == IS_OBJECT) {
+		if (GC_TYPE(ref) == IS_OBJECT && !(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED)) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
@@ -960,16 +957,16 @@ ZEND_API int zend_gc_collect_cycles(void)
 #endif
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
-			/* Remember reference counters before calling destructors */
-			current = to_free.next;
-			while (current != &to_free) {
-				current->refcount = GC_REFCOUNT(current->ref);
-				current = current->next;
-			}
-
-			/* Call destructors */
 			GC_TRACE("Calling destructors");
 			if (EG(objects_store).object_buckets) {
+				/* Remember reference counters before calling destructors */
+				current = to_free.next;
+				while (current != &to_free) {
+					current->refcount = GC_REFCOUNT(current->ref);
+					current = current->next;
+				}
+
+				/* Call destructors */
 				current = to_free.next;
 				while (current != &to_free) {
 					p = current->ref;
@@ -1026,6 +1023,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 				if (EG(objects_store).object_buckets &&
 				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
 					GC_TYPE(obj) = IS_NULL;
+					GC_INFO_SET_COLOR(GC_INFO(obj), GC_WHITE);
 					if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 						if (obj->handlers->free_obj) {
@@ -1042,6 +1040,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
+				GC_INFO_SET_COLOR(GC_INFO(arr), GC_WHITE);
 				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);
