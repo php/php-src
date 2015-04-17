@@ -25,7 +25,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char* locale;
 	char*       pattern = NULL;
@@ -42,11 +42,10 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"numfmt_create: unable to parse input parameters", 0 );
-		Z_OBJ_P(return_value) = NULL;
-		return;
+		return FAILURE;
 	}
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
 
@@ -68,6 +67,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	}
 
 	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
+	return SUCCESS;
 }
 /* }}} */
 
@@ -79,8 +79,8 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
@@ -95,8 +95,7 @@ PHP_METHOD( NumberFormatter, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}

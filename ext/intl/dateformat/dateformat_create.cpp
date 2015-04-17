@@ -37,7 +37,7 @@ extern "C" {
 #include "zend_exceptions.h"
 
 /* {{{ */
-static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	zval		*object;
 
@@ -58,7 +58,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
     int32_t     slength			= 0;
 	IntlDateFormatter_object* dfo;
-  int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
+	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset(NULL);
 	object = return_value;
@@ -68,11 +68,10 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
 				"unable to parse input parameters", 0);
-		Z_OBJ_P(return_value) = NULL;
-		return;
+		return FAILURE;
     }
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	if (locale_len == 0) {
 		locale_str = intl_locale_get_default();
 	}
@@ -83,7 +82,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
 				"datefmt_create: cannot call constructor twice", 0);
-		return;
+		return FAILURE;
 	}
 
 	/* process calendar */
@@ -162,10 +161,8 @@ error:
 	if (calendar != NULL && calendar_owned) {
 		delete calendar;
 	}
-	if (U_FAILURE(intl_error_get_code(NULL))) {
-		/* free_object handles partially constructed instances fine */
-		Z_OBJ_P(return_value) = NULL;
-	}
+
+	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -177,8 +174,8 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
@@ -195,8 +192,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = getThis();
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}

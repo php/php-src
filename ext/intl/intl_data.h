@@ -54,7 +54,7 @@ typedef struct _intl_data {
         RETURN_FALSE;														\
     }
 
-/* Check status in object, if error - exit */
+/* Check status in object, if error return false */
 #define INTL_METHOD_CHECK_STATUS(obj, msg)											\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
@@ -63,19 +63,23 @@ typedef struct _intl_data {
         RETURN_FALSE;										\
     }
 
-/* Check status, if error - destroy value and exit */
-#define INTL_CTOR_CHECK_STATUS(obj, msg)											\
-    intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );				\
+/* Check status in object, if error return null */
+#define INTL_METHOD_CHECK_STATUS_OR_NULL(obj, msg)									\
+    intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
-        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );	\
-		/* yes, this is ugly, but it alreay is */									\
-		if (return_value != getThis()) {											\
-			zval_dtor(return_value);												\
-			RETURN_NULL();															\
-		}																			\
-		Z_OBJ_P(return_value) = NULL;												\
-		return;																		\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        zval_ptr_dtor(return_value);												\
+        RETURN_NULL();																\
+    }
+
+/* Check status in object, if error return FAILURE */
+#define INTL_CTOR_CHECK_STATUS(obj, msg)											\
+    intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
+    if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
+    {																				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        return FAILURE;																\
     }
 
 #define INTL_METHOD_RETVAL_UTF8(obj, ustring, ulen, free_it)									\
@@ -100,14 +104,11 @@ typedef struct _intl_data {
 		RETURN_NULL();																	\
 	}
 
-#define INTL_CHECK_LOCALE_LEN_OBJ(locale_len, object)									\
+#define INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len)									\
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,									\
 		"Locale string too long, should be no longer than 80 characters", 0 );			\
-		zval_dtor(object);																\
-		ZVAL_NULL(object);																\
-		RETURN_NULL();																	\
+		return FAILURE;																	\
 	}
-
 
 #endif // INTL_DATA_H

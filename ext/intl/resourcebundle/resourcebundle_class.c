@@ -75,7 +75,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	const char *bundlename;
 	size_t		bundlename_len = 0;
@@ -94,11 +94,10 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_const
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_ctor: unable to parse input parameters", 0 );
-		Z_OBJ_P(return_value) = NULL;
-		return;
+		return FAILURE;
 	}
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 
 	if (locale == NULL) {
 		locale = intl_locale_get_default();
@@ -123,8 +122,10 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_const
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1);
 		efree(pbuf);
-		Z_OBJ_P(return_value) = NULL;
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -145,8 +146,7 @@ PHP_METHOD( ResourceBundle, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}
@@ -161,8 +161,8 @@ proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 }
