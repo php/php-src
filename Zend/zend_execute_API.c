@@ -331,6 +331,12 @@ void shutdown_executor(void) /* {{{ */
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
+#if ZEND_DEBUG
+	if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		gc_collect_cycles();
+	}
+#endif
+
 	zend_try {
 		zend_objects_store_free_object_storage(&EG(objects_store));
 
