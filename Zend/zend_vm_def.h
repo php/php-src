@@ -7857,7 +7857,7 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 		ZEND_VM_RETURN();
 	}
 
-	LOAD_OPLINE();
+	opline = execute_data->opline;
 
 	if (object) {
 		OBJ_RELEASE(object);
