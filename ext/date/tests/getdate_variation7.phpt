@@ -27,7 +27,7 @@ var_dump( getdate($timestamp) );
 -- Testing getdate\(\) function by passing float 12.3456789000e10 value to timestamp --
 array\(11\) {
   \["seconds"\]=>
-  int\((36|0)\)
+  int\((.+)\)
   \["minutes"\]=>
   int\((43|0)\)
   \["hours"\]=>
@@ -53,7 +53,7 @@ array\(11\) {
 -- Testing getdate\(\) function by passing float -12.3456789000e10 value to timestamp --
 array\(11\) {
   \["seconds"\]=>
-  int\((44|12|20)\)
+  int\((.+)\)
   \["minutes"\]=>
   int\((39|23)\)
   \["hours"\]=>
