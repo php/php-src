@@ -1573,11 +1573,22 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ;session.upload_progress.min_freq = "1"
 
 [Assertion]
+; Do not compile assertions at all (to have no overhead at run-time)
+; Default Value: On
+; Development Value: On
+; Production Value: Off
+; http://php.net/zend.assertions
+zend.assertions = Off
+
 ; Assert(expr); active by default.
 ; http://php.net/assert.active
 ;assert.active = On
 
-; Issue a PHP warning for each failed assertion.
+; Throw an AssertationException on failed assertions
+; http://php.net/assert.exception
+;assert.exception = On
+
+; Issue a PHP warning for each failed assertion. (Overridden by assert.exception if active)
 ; http://php.net/assert.warning
 ;assert.warning = On
 
