@@ -36,10 +36,6 @@
     <file role="src" name="JSON_parser.c" />
     <file role="src" name="JSON_parser.h" />
     <file role="src" name="php_json.h" />
-    <file role="src" name="utf8_decode.c" />
-    <file role="src" name="utf8_decode.h" />
-    <file role="src" name="utf8_to_utf16.c" />
-    <file role="src" name="utf8_to_utf16.h" />
     <dir role="test" name="tests">
       <file role="test" name="fail001.phpt" />
       <file role="test" name="pass001.phpt" />

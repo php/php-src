@@ -102,22 +102,6 @@ SOURCE=.\JSON_parser.c
 
 SOURCE=.\JSON_parser.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\utf8_decode.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\utf8_decode.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\utf8_to_utf16.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\utf8_to_utf16.h
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
