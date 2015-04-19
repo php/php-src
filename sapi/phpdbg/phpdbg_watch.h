@@ -48,23 +48,27 @@ typedef enum {
 } phpdbg_watchtype;
 
 
-#define PHPDBG_WATCH_SIMPLE     0x0
-#define PHPDBG_WATCH_RECURSIVE  0x1
-#define PHPDBG_WATCH_ARRAY      0x2
-#define PHPDBG_WATCH_OBJECT     0x4
+#define PHPDBG_WATCH_SIMPLE     0x01
+#define PHPDBG_WATCH_RECURSIVE  0x02
+#define PHPDBG_WATCH_ARRAY      0x04
+#define PHPDBG_WATCH_OBJECT     0x08
+#define PHPDBG_WATCH_NORMAL     (PHPDBG_WATCH_SIMPLE | PHPDBG_WATCH_RECURSIVE)
+#define PHPDBG_WATCH_IMPLICIT   0x10
+
+#define PHPDBG_DESTRUCTED_ZVAL 0x80
 
 typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
 
 struct _phpdbg_watchpoint_t {
 	union {
 		zval *zv;
-		HashTable *ht;
 		zend_refcounted *ref;
 		void *ptr;
 	} addr;
 	size_t size;
 	phpdbg_watchtype type;
 	char flags;
+	unsigned int implicit_ht_count;
 	phpdbg_watchpoint_t *parent;
 	phpdbg_watchpoint_t *reference;
 	HashTable *parent_container;
@@ -73,11 +77,16 @@ struct _phpdbg_watchpoint_t {
 };
 
 typedef struct {
-	phpdbg_watchpoint_t watch;
-	unsigned int num;
+	phpdbg_watchpoint_t *watch;
 	unsigned int refs;
 	HashTable watches;
+	HashTable implicit_watches;
 } phpdbg_watch_collision;
+
+typedef struct {
+	dtor_func_t dtor;
+	HashTable watches;
+} phpdbg_watch_ht_info;
 
 void phpdbg_setup_watchpoints(void);
 

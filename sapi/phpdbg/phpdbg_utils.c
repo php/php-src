@@ -399,10 +399,10 @@ static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyna
 }
 
 PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent) {
-	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, silent, callback);
+	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, NULL, silent, callback);
 }
 
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg) {
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
 	char *last_index;
@@ -469,10 +469,34 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 					}
 
 					ret = callback(name, namelen, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
-				} else if (Z_TYPE_P(zv) == IS_OBJECT) {
-					phpdbg_parse_variable_with_arg(input, len, Z_OBJPROP_P(zv), i, callback, silent, arg);
+				} else retry_ref: if (Z_TYPE_P(zv) == IS_OBJECT) {
+					if (step_cb) {
+						char *name = estrndup(input, i);
+						char *keyname = estrndup(last_index, index_len);
+
+						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					}
+
+					phpdbg_parse_variable_with_arg(input, len, Z_OBJPROP_P(zv), i, callback, step_cb, silent, arg);
 				} else if (Z_TYPE_P(zv) == IS_ARRAY) {
-					phpdbg_parse_variable_with_arg(input, len, Z_ARRVAL_P(zv), i, callback, silent, arg);
+					if (step_cb) {
+						char *name = estrndup(input, i);
+						char *keyname = estrndup(last_index, index_len);
+
+						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					}
+
+					phpdbg_parse_variable_with_arg(input, len, Z_ARRVAL_P(zv), i, callback, step_cb, silent, arg);
+				} else if (Z_ISREF_P(zv)) {
+					if (step_cb) {
+						char *name = estrndup(input, i);
+						char *keyname = estrndup(last_index, index_len);
+
+						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					}
+
+					ZVAL_DEREF(zv);
+					goto retry_ref;
 				} else {
 					/* Ignore silently */
 				}
@@ -493,14 +517,38 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 
 			last_index[index_len] = last_chr;
 			if (i == len) {
-				char *name = estrndup(input, len);
+				char *name = estrndup(input, i);
 				char *keyname = estrndup(last_index, index_len);
 
-				ret = callback(name, len, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
-			} else if (Z_TYPE_P(zv) == IS_OBJECT) {
+				ret = callback(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+			} else retry_ref_end: if (Z_TYPE_P(zv) == IS_OBJECT) {
+				if (step_cb) {
+					char *name = estrndup(input, i);
+					char *keyname = estrndup(last_index, index_len);
+
+					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				}
+
 				parent = Z_OBJPROP_P(zv);
 			} else if (Z_TYPE_P(zv) == IS_ARRAY) {
+				if (step_cb) {
+					char *name = estrndup(input, i);
+					char *keyname = estrndup(last_index, index_len);
+
+					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				}
+
 				parent = Z_ARRVAL_P(zv);
+			} else if (Z_ISREF_P(zv)) {
+				if (step_cb) {
+					char *name = estrndup(input, i);
+					char *keyname = estrndup(last_index, index_len);
+
+					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				}
+
+				ZVAL_DEREF(zv);
+				goto retry_ref_end;
 			} else {
 				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) (input[i] == '>' ? i - 1 : i), input);
 				return FAILURE;

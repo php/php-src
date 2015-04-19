@@ -248,6 +248,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	phpdbg_watchpoint_t *watch_tmp;              /* temporary pointer for a watchpoint */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */
