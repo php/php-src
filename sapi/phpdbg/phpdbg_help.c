@@ -389,6 +389,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
 "  **-x**                          Enable xml output (instead of normal text output)" CR
+"  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
 "  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
@@ -396,12 +397,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Remote Console Mode**" CR CR
 
-"This mode is enabled by specifying the **-a** option.  Phpdbg will bind only to the loopback "
+"This mode is enabled by specifying the **-a** option. Phpdbg will bind only to the loopback "
 "interface by default, and this can only be overridden by explicitly setting the remote console "
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port."
+"interface/port." CR CR
+
+"**Opcode output**" CR CR
+
+"Outputting opcodes requires that a file path is passed as last argument. Modes of execution:" CR
+"**-p** Outputs the main execution context" CR
+"**-p* **Outputs all opcodes in the whole file (including classes and functions)" CR
+"**-p=function_name** Outputs opcodes of a given function in the file" CR
+"**-p=class_name::** Outputs opcodes of all the methods of a given class" CR
+"**-p=class_name::method** Outputs opcodes of a given method"
 },
 
 {"phpdbginit", CR

@@ -260,3 +260,121 @@ PHPDBG_PRINT(func) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+void phpdbg_print_opcodes_main() {
+	phpdbg_out("function name: (null)\n");
+	phpdbg_print_function_helper((zend_function *) PHPDBG_G(ops));
+}
+
+void phpdbg_print_opcodes_function(const char *function, size_t len) {
+	zend_function *func = zend_hash_str_find_ptr(EG(function_table), function, len);
+
+	if (!func) {
+		return;
+	}
+
+	phpdbg_out("function name: %.*s\n", (int) len, function);
+	phpdbg_print_function_helper(func);
+}
+
+void phpdbg_print_opcodes_method(const char *class, const char *function) {
+	zend_class_entry *ce = zend_hash_str_find_ptr(EG(class_table), class, strlen(class));
+	zend_function *func;
+
+	if (!ce) {
+		return;
+	}
+	if (ce->type != ZEND_USER_CLASS) {
+		phpdbg_out("function name: %s::%s (internal)\n", class, function);
+		return;
+	}
+
+	if (!(func = zend_hash_str_find_ptr(&ce->function_table, function, strlen(function)))) {
+		return;
+	}
+
+	phpdbg_out("function name: %s::%s\n", class, function);
+	phpdbg_print_function_helper(func);
+}
+
+void phpdbg_print_opcodes_class(const char *class) {
+	zend_class_entry *ce;
+	zend_function *method;
+	zend_string *method_name;
+	zend_bool first = 1;
+
+	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
+		return;
+	}
+
+	phpdbg_out("%s %s: %s\n",
+		(ce->type == ZEND_USER_CLASS) ?
+			"user" : "internal",
+		(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+			"interface" :
+			(ce->ce_flags & ZEND_ACC_ABSTRACT) ?
+				"abstract Class" :
+				"class",
+		ce->name->val);
+
+	if (ce->type != ZEND_USER_CLASS) {
+		return;
+	}
+
+	phpdbg_out("%d methods: ", zend_hash_num_elements(&ce->function_table));
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+		if (first) {
+			first = 0;
+		} else {
+			phpdbg_out(", ");
+		}
+		phpdbg_out("%s", method->common.function_name->val);
+	} ZEND_HASH_FOREACH_END();
+	if (first) {
+		phpdbg_out("-");
+	}
+	phpdbg_out("\n");
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, method_name, method) {
+		phpdbg_out("\nfunction name: %s\n", method_name);
+		phpdbg_print_function_helper(method);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHPDBG_API void phpdbg_print_opcodes(char *function)
+{
+	char *method_name;
+
+	strtok(function, ":");
+
+	if (function == NULL) {
+		phpdbg_print_opcodes_main();
+	} else if (function[0] == '*' && function[1] == 0) {
+		/* all */
+		zend_string *name;
+		zend_function *func;
+		zend_class_entry *ce;
+
+		phpdbg_print_opcodes_main();
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+			if (func->type == ZEND_USER_FUNCTION) {
+				phpdbg_out("\n");
+				phpdbg_print_opcodes_function(name->val, name->len);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
+			if (ce->type == ZEND_USER_CLASS) {
+				phpdbg_out("\n\n");
+				phpdbg_print_opcodes_class(name->val);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if ((method_name = strtok(NULL, ":")) == NULL) {
+		phpdbg_print_opcodes_function(function, strlen(function));
+	} else if (++method_name == NULL || ++method_name == NULL) {
+		phpdbg_print_opcodes_class(function);
+	} else {
+		phpdbg_print_opcodes_method(function, method_name);
+	}
+}
