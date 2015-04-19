@@ -169,6 +169,7 @@ END_EXTERN_C()
 #define ZEND_POST_INC_OBJ                    134
 #define ZEND_POST_DEC_OBJ                    135
 #define ZEND_ASSIGN_OBJ                      136
+#define ZEND_OP_DATA                         137
 #define ZEND_INSTANCEOF                      138
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140

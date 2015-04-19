@@ -1353,6 +1353,31 @@ function gen_vm($def, $skel) {
 				die("ERROR ($def:$lineno): helper '{$m[2]}' is not defined.\n");
 			}
 			$export[] = array("helper",$m[1],$m[2]);
+		} else if (strpos($line,"ZEND_VM_DEFINE_OP(") === 0) {
+			if (preg_match(
+					"/^ZEND_VM_DEFINE_OP\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*\);/",
+					$line,
+					$m) == 0) {
+				die("ERROR ($def:$lineno): Invalid ZEND_VM_DEFINE_OP definition.\n");
+			}
+			$code = (int)$m[1];
+			$op   = $m[2];
+			$len  = strlen($op);
+
+			if ($len > $max_opcode_len) {
+				$max_opcode_len = $len;
+			}
+			if ($code > $max_opcode) {
+				$max_opcode = $code;
+			}
+			if (isset($opcodes[$code])) {
+				die("ERROR ($def:$lineno): Opcode with code '$code' is already defined.\n");
+			}
+			if (isset($opnames[$op])) {
+				die("ERROR ($def:$lineno): Opcode with name '$op' is already defined.\n");
+			}
+			$opcodes[$code] = array("op"=>$op,"code"=>"");
+			$opnames[$op] = $code;
 		} else if ($handler !== null) {
 		  // Add line of code to current opcode handler
 			$opcodes[$handler]["code"] .= $line;
@@ -1418,9 +1443,9 @@ function gen_vm($def, $skel) {
 	}
 	fputs($f, "};\n\n");
 	
-    fputs($f, "ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {\n");
-    fputs($f, "\treturn zend_vm_opcodes_map[opcode];\n");
-    fputs($f, "}\n");
+	fputs($f, "ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {\n");
+	fputs($f, "\treturn zend_vm_opcodes_map[opcode];\n");
+	fputs($f, "}\n");
     
 	fclose($f);
 	echo "zend_vm_opcodes.c generated successfully.\n";

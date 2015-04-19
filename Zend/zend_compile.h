@@ -766,8 +766,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #include "zend_vm_opcodes.h"
 
-#define ZEND_OP_DATA				137
-
 /* END: OPCODES */
 
 /* class fetches */
