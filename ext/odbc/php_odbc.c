@@ -1313,7 +1313,7 @@ PHP_FUNCTION(odbc_execute)
 			params[i-1].vallen = Z_STRLEN_P(tmp);
 			params[i-1].fp = -1;
 			if (rc == SQL_ERROR) {
-				odbc_sql_error(result->conn_ptr, result->stmt, "SQLDescribeParameter");	
+				odbc_sql_error(result->conn_ptr, result->stmt, "SQLDescribeParam");
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
 					if (params[i].fp != -1) {
