@@ -63,10 +63,6 @@ END_EXTERN_C()
 #define ZEND_EARLY_BINDING_DELAYED      1
 #define ZEND_EARLY_BINDING_DELAYED_ALL  2
 
-typedef struct _zend_declarables {
-	zval ticks;
-} zend_declarables;
-
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 
@@ -93,8 +89,6 @@ struct _zend_compiler_globals {
 	zend_bool in_compilation;
 	zend_bool short_tags;
 
-	zend_declarables declarables;
-
 	zend_bool unclean_shutdown;
 
 	zend_bool ini_parser_unbuffered_errors;
@@ -106,15 +100,9 @@ struct _zend_compiler_globals {
 	uint32_t start_lineno;
 	zend_bool increment_lineno;
 
-	znode implementing_class;
-
 	zend_string *doc_comment;
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
-
-	zend_string *current_namespace;
-	zend_bool  in_namespace;
-	zend_bool  has_bracketed_namespaces;
 
 	HashTable const_filenames;
 

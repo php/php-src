@@ -593,7 +593,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_file_context_begin(&original_file_context);
 			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
-			zend_do_end_compilation();
 			zend_emit_final_return(&retval_zv);
 			pass_two(op_array);
 			zend_oparray_context_end(&original_oparray_context);
@@ -757,7 +756,6 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 			zend_file_context_begin(&original_file_context);
 			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
-			zend_do_end_compilation();
 			zend_emit_final_return(NULL);
 			pass_two(op_array);
 			zend_oparray_context_end(&original_oparray_context);

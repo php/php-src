@@ -50,6 +50,8 @@
 		} \
 	} while (0)
 
+#define FC(member) (CG(file_context).member)
+
 static inline void zend_alloc_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
 	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
@@ -219,12 +221,6 @@ static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const z
 /* }}} */
 
 
-static void init_compiler_declarables(void) /* {{{ */
-{
-	ZVAL_LONG(&CG(declarables).ticks, 0);
-}
-/* }}} */
-
 void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 {
 	*prev_context = CG(context);
@@ -252,23 +248,32 @@ void zend_oparray_context_end(zend_oparray_context *prev_context) /* {{{ */
 
 static void zend_reset_import_tables(void) /* {{{ */
 {
-	zend_file_context *ctx = &CG(file_context);
-	if (ctx->imports) {
-		zend_hash_destroy(ctx->imports);
-		efree(ctx->imports);
-		ctx->imports = NULL;
+	if (FC(imports)) {
+		zend_hash_destroy(FC(imports));
+		efree(FC(imports));
+		FC(imports) = NULL;
 	}
 
-	if (ctx->imports_function) {
-		zend_hash_destroy(ctx->imports_function);
-		efree(ctx->imports_function);
-		ctx->imports_function = NULL;
+	if (FC(imports_function)) {
+		zend_hash_destroy(FC(imports_function));
+		efree(FC(imports_function));
+		FC(imports_function) = NULL;
 	}
 
-	if (ctx->imports_const) {
-		zend_hash_destroy(ctx->imports_const);
-		efree(ctx->imports_const);
-		ctx->imports_const = NULL;
+	if (FC(imports_const)) {
+		zend_hash_destroy(FC(imports_const));
+		efree(FC(imports_const));
+		FC(imports_const) = NULL;
+	}
+}
+/* }}} */
+
+static void zend_end_namespace(void) /* {{{ */ {
+	FC(in_namespace) = 0;
+	zend_reset_import_tables();
+	if (FC(current_namespace)) {
+		zend_string_release(FC(current_namespace));
+		FC(current_namespace) = NULL;
 	}
 }
 /* }}} */
@@ -276,15 +281,19 @@ static void zend_reset_import_tables(void) /* {{{ */
 void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 {
 	*prev_context = CG(file_context);
-	CG(file_context).imports = NULL;
-	CG(file_context).imports_function = NULL;
-	CG(file_context).imports_const = NULL;
+	FC(imports) = NULL;
+	FC(imports_function) = NULL;
+	FC(imports_const) = NULL;
+	FC(current_namespace) = NULL;
+	FC(in_namespace) = 0;
+	FC(has_bracketed_namespaces) = 0;
+	FC(declarables).ticks = 0;
 }
 /* }}} */
 
 void zend_file_context_end(zend_file_context *prev_context) /* {{{ */
 {
-	zend_reset_import_tables();
+	zend_end_namespace();
 	CG(file_context) = *prev_context;
 }
 /* }}} */
@@ -296,11 +305,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
-	CG(current_namespace) = NULL;
-	CG(in_namespace) = 0;
-	CG(has_bracketed_namespaces) = 0;
 	zend_hash_init(&CG(const_filenames), 8, NULL, NULL, 0);
-	init_compiler_declarables();
 
 	CG(encoding_declared) = 0;
 }
@@ -714,8 +719,8 @@ zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_
 }
 
 zend_string *zend_prefix_with_ns(zend_string *name) {
-	if (CG(current_namespace)) {
-		zend_string *ns = CG(current_namespace);
+	if (FC(current_namespace)) {
+		zend_string *ns = FC(current_namespace);
 		return zend_concat_names(ns->val, ns->len, name->val, name->len);
 	} else {
 		return zend_string_copy(name);
@@ -777,10 +782,10 @@ zend_string *zend_resolve_non_class_name(
 		*is_fully_qualified = 1;
 	}
 
-	if (compound && CG(file_context).imports) {
+	if (compound && FC(imports)) {
 		/* If the first part of a qualified name is an alias, substitute it. */
 		size_t len = compound - name->val;
-		zend_string *import_name = zend_hash_find_ptr_lc(CG(file_context).imports, name->val, len);
+		zend_string *import_name = zend_hash_find_ptr_lc(FC(imports), name->val, len);
 
 		if (import_name) {
 			return zend_concat_names(
@@ -795,13 +800,13 @@ zend_string *zend_resolve_non_class_name(
 zend_string *zend_resolve_function_name(zend_string *name, uint32_t type, zend_bool *is_fully_qualified) /* {{{ */
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 0, CG(file_context).imports_function);
+		name, type, is_fully_qualified, 0, FC(imports_function));
 }
 /* }}} */
 
 zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, zend_bool *is_fully_qualified) /* {{{ */ {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 1, CG(file_context).imports_const);
+		name, type, is_fully_qualified, 1, FC(imports_const));
 }
 /* }}} */
 
@@ -827,13 +832,13 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		return name;
 	}
 
-	if (CG(file_context).imports) {
+	if (FC(imports)) {
 		compound = memchr(name->val, '\\', name->len);
 		if (compound) {
 			/* If the first part of a qualified name is an alias, substitute it. */
 			size_t len = compound - name->val;
 			zend_string *import_name =
-				zend_hash_find_ptr_lc(CG(file_context).imports, name->val, len);
+				zend_hash_find_ptr_lc(FC(imports), name->val, len);
 
 			if (import_name) {
 				return zend_concat_names(
@@ -842,7 +847,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		} else {
 			/* If an unqualified name is an alias, replace it. */
 			zend_string *import_name
-				= zend_hash_find_ptr_lc(CG(file_context).imports, name->val, name->len);
+				= zend_hash_find_ptr_lc(FC(imports), name->val, name->len);
 
 			if (import_name) {
 				return zend_string_copy(import_name);
@@ -1647,26 +1652,9 @@ zend_ast *zend_ast_append_doc_comment(zend_ast *list) /* {{{ */
 
 void zend_verify_namespace(void) /* {{{ */
 {
-	if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
+	if (FC(has_bracketed_namespaces) && !FC(in_namespace)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "No code may exist outside of namespace {}");
 	}
-}
-/* }}} */
-
-static void zend_end_namespace(void) /* {{{ */ {
-	CG(in_namespace) = 0;
-	zend_reset_import_tables();
-	if (CG(current_namespace)) {
-		zend_string_release(CG(current_namespace));
-		CG(current_namespace) = NULL;
-	}
-}
-/* }}} */
-
-void zend_do_end_compilation(void) /* {{{ */
-{
-	CG(has_bracketed_namespaces) = 0;
-	zend_end_namespace();
 }
 /* }}} */
 
@@ -1863,7 +1851,7 @@ static void zend_emit_tick(void) /* {{{ */
 	opline->opcode = ZEND_TICKS;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
-	opline->extended_value = Z_LVAL(CG(declarables).ticks);
+	opline->extended_value = FC(declarables).ticks;
 }
 /* }}} */
 
@@ -2774,7 +2762,7 @@ zend_bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* {{
 	ZVAL_STR(&name_node->u.constant, zend_resolve_function_name(
 		orig_name, name_ast->attr, &is_fully_qualified));
 
-	return !is_fully_qualified && CG(current_namespace);
+	return !is_fully_qualified && FC(current_namespace);
 }
 /* }}} */
 
@@ -4054,7 +4042,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *declares = zend_ast_get_list(ast->child[0]);
 	zend_ast *stmt_ast = ast->child[1];
-	zend_declarables orig_declarables = CG(declarables);
+	zend_declarables orig_declarables = FC(declarables);
 	uint32_t i;
 
 	for (i = 0; i < declares->children; ++i) {
@@ -4066,8 +4054,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 		if (zend_string_equals_literal_ci(name, "ticks")) {
 			zval value_zv;
 			zend_const_expr_to_zval(&value_zv, value_ast);
-			convert_to_long(&value_zv);
-			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
+			FC(declarables).ticks = zval_get_long(&value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
@@ -4106,7 +4093,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 	if (stmt_ast) {
 		zend_compile_stmt(stmt_ast);
 
-		CG(declarables) = orig_declarables;
+		FC(declarables) = orig_declarables;
 	}
 }
 /* }}} */
@@ -4513,8 +4500,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	lcname = zend_string_tolower(name);
 
-	if (CG(file_context).imports_function) {
-		zend_string *import_name = zend_hash_find_ptr(CG(file_context).imports_function, lcname);
+	if (FC(imports_function)) {
+		zend_string *import_name = zend_hash_find_ptr(FC(imports_function), lcname);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
@@ -4562,8 +4549,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
-
-	// TODO.AST interactive (not just here - also bpc etc!)
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
@@ -4821,7 +4806,7 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 
 		opline = get_next_op(CG(active_op_array));
 		opline->opcode = ZEND_ADD_TRAIT;
-		SET_NODE(opline->op1, &CG(implementing_class));
+		SET_NODE(opline->op1, &FC(implementing_class));
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 			zend_resolve_class_name_ast(trait_ast));
@@ -4894,11 +4879,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	lcname = zend_string_tolower(name);
 
-	if (CG(file_context).imports) {
-		import_name = zend_hash_find_ptr(CG(file_context).imports, lcname);
+	if (FC(imports)) {
+		import_name = zend_hash_find_ptr(FC(imports), lcname);
 	}
 
-	if (CG(current_namespace)) {
+	if (FC(current_namespace)) {
 		name = zend_prefix_with_ns(name);
 
 		zend_string_release(lcname);
@@ -4941,7 +4926,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_make_var_result(&declare_node, opline);
 
 	// TODO.AST drop this
-	GET_NODE(&CG(implementing_class), opline->result);
+	GET_NODE(&FC(implementing_class), opline->result);
 
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
@@ -5046,26 +5031,25 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 static HashTable *zend_get_import_ht(uint32_t type) /* {{{ */
 {
-	zend_file_context *ctx = &CG(file_context);
 	switch (type) {
 		case T_CLASS:
-			if (!ctx->imports) {
-				ctx->imports = emalloc(sizeof(HashTable));
-				zend_hash_init(ctx->imports, 8, NULL, str_dtor, 0);
+			if (!FC(imports)) {
+				FC(imports) = emalloc(sizeof(HashTable));
+				zend_hash_init(FC(imports), 8, NULL, str_dtor, 0);
 			}
-			return ctx->imports;
+			return FC(imports);
 		case T_FUNCTION:
-			if (!ctx->imports_function) {
-				ctx->imports_function = emalloc(sizeof(HashTable));
-				zend_hash_init(ctx->imports_function, 8, NULL, str_dtor, 0);
+			if (!FC(imports_function)) {
+				FC(imports_function) = emalloc(sizeof(HashTable));
+				zend_hash_init(FC(imports_function), 8, NULL, str_dtor, 0);
 			}
-			return ctx->imports_function;
+			return FC(imports_function);
 		case T_CONST:
-			if (!ctx->imports_const) {
-				ctx->imports_const = emalloc(sizeof(HashTable));
-				zend_hash_init(ctx->imports_const, 8, NULL, str_dtor, 0);
+			if (!FC(imports_const)) {
+				FC(imports_const) = emalloc(sizeof(HashTable));
+				zend_hash_init(FC(imports_const), 8, NULL, str_dtor, 0);
 			}
-			return ctx->imports_const;
+			return FC(imports_const);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
@@ -5104,7 +5088,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-	zend_string *current_ns = CG(current_namespace);
+	zend_string *current_ns = FC(current_namespace);
 	uint32_t type = ast->attr;
 	HashTable *current_import = zend_get_import_ht(type);
 	zend_bool case_sensitive = type == T_CONST;
@@ -5252,8 +5236,8 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(name);
 		name = zend_new_interned_string(name);
 
-		if (CG(file_context).imports_const
-			&& (import_name = zend_hash_find_ptr(CG(file_context).imports_const, name))
+		if (FC(imports_const)
+			&& (import_name = zend_hash_find_ptr(FC(imports_const), name))
 		) {
 			if (!zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
@@ -5279,8 +5263,8 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 	zend_bool with_bracket = stmt_ast != NULL;
 
 	/* handle mixed syntax declaration or nested namespaces */
-	if (!CG(has_bracketed_namespaces)) {
-		if (CG(current_namespace)) {
+	if (!FC(has_bracketed_namespaces)) {
+		if (FC(current_namespace)) {
 			/* previous namespace declarations were unbracketed */
 			if (with_bracket) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations "
@@ -5292,13 +5276,13 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		if (!with_bracket) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations "
 				"with unbracketed namespace declarations");
-		} else if (CG(current_namespace) || CG(in_namespace)) {
+		} else if (FC(current_namespace) || FC(in_namespace)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declarations cannot be nested");
 		}
 	}
 
-	if (((!with_bracket && !CG(current_namespace))
-		 || (with_bracket && !CG(has_bracketed_namespaces))) && CG(active_op_array)->last > 0
+	if (((!with_bracket && !FC(current_namespace))
+		 || (with_bracket && !FC(has_bracketed_namespaces))) && CG(active_op_array)->last > 0
 	) {
 		/* ignore ZEND_EXT_STMT and ZEND_TICKS */
 		uint32_t num = CG(active_op_array)->last;
@@ -5313,8 +5297,8 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	if (CG(current_namespace)) {
-		zend_string_release(CG(current_namespace));
+	if (FC(current_namespace)) {
+		zend_string_release(FC(current_namespace));
 	}
 
 	if (name_ast) {
@@ -5324,16 +5308,16 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", name->val);
 		}
 
-		CG(current_namespace) = zend_string_copy(name);
+		FC(current_namespace) = zend_string_copy(name);
 	} else {
-		CG(current_namespace) = NULL;
+		FC(current_namespace) = NULL;
 	}
 
 	zend_reset_import_tables();
 
-	CG(in_namespace) = 1;
+	FC(in_namespace) = 1;
 	if (with_bracket) {
-		CG(has_bracketed_namespaces) = 1;
+		FC(has_bracketed_namespaces) = 1;
 	}
 
 	if (stmt_ast) {
@@ -5351,7 +5335,7 @@ void zend_compile_halt_compiler(zend_ast *ast) /* {{{ */
 	zend_string *filename, *name;
 	const char const_name[] = "__COMPILER_HALT_OFFSET__";
 
-	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
+	if (FC(has_bracketed_namespaces) && FC(in_namespace)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"__HALT_COMPILER() can only be used from the outermost scope");
 	}
@@ -5436,8 +5420,8 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_NS_C:
-			if (CG(current_namespace)) {
-				ZVAL_STR_COPY(zv, CG(current_namespace));
+			if (FC(current_namespace)) {
+				ZVAL_STR_COPY(zv, FC(current_namespace));
 			} else {
 				ZVAL_EMPTY_STRING(zv);
 			}
@@ -6198,7 +6182,7 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 			CG(active_op_array), resolved_name, 0);
 	} else {
 		opline->extended_value = IS_CONSTANT_UNQUALIFIED;
-		if (CG(current_namespace)) {
+		if (FC(current_namespace)) {
 			opline->extended_value |= IS_CONSTANT_IN_NAMESPACE;
 			opline->op2.constant = zend_add_const_name_literal(
 				CG(active_op_array), resolved_name, 1);
@@ -6771,7 +6755,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		}
 	}
 
-	if (Z_LVAL(CG(declarables).ticks) && !zend_is_unticked_stmt(ast)) {
+	if (FC(declarables).ticks && !zend_is_unticked_stmt(ast)) {
 		zend_emit_tick();
 	}
 }

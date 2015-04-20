@@ -53,25 +53,6 @@
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
-/* Compilation context that is different for each op array. */
-typedef struct _zend_oparray_context {
-	uint32_t   opcodes_size;
-	int        vars_size;
-	int        literals_size;
-	int        current_brk_cont;
-	int        backpatch_count;
-	int        in_finally;
-	uint32_t   fast_call_var;
-	HashTable *labels;
-} zend_oparray_context;
-
-/* Compilation context that is different for each file, but shared between op arrays. */
-typedef struct _zend_file_context {
-	HashTable *imports;
-	HashTable *imports_function;
-	HashTable *imports_const;
-} zend_file_context;
-
 /* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
  * targets and constants, but on 64-bit systems realtive 32-bit offsets */
@@ -123,6 +104,36 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node);
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
+
+typedef struct _zend_declarables {
+	zend_long ticks;
+} zend_declarables;
+
+/* Compilation context that is different for each op array. */
+typedef struct _zend_oparray_context {
+	uint32_t   opcodes_size;
+	int        vars_size;
+	int        literals_size;
+	int        current_brk_cont;
+	int        backpatch_count;
+	int        in_finally;
+	uint32_t   fast_call_var;
+	HashTable *labels;
+} zend_oparray_context;
+
+/* Compilation context that is different for each file, but shared between op arrays. */
+typedef struct _zend_file_context {
+	zend_declarables declarables;
+	znode implementing_class;
+
+	zend_string *current_namespace;
+	zend_bool in_namespace;
+	zend_bool has_bracketed_namespaces;
+
+	HashTable *imports;
+	HashTable *imports_function;
+	HashTable *imports_const;
+} zend_file_context;
 
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
@@ -702,7 +713,6 @@ void zend_do_extended_fcall_begin(void);
 void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
-void zend_do_end_compilation(void);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
 
