@@ -187,10 +187,11 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 #define PHPDBG_WRITE_XML              (1ULL<<31)
 
 #define PHPDBG_SHOW_REFCOUNTS         (1ULL<<32)
+#define PHPDBG_PRINT_OPLINE_ADDR      (1ULL<<33)
 
-#define PHPDBG_IN_SIGNAL_HANDLER      (1ULL<<33)
+#define PHPDBG_IN_SIGNAL_HANDLER      (1ULL<<34)
 
-#define PHPDBG_DISCARD_OUTPUT         (1ULL<<34)
+#define PHPDBG_DISCARD_OUTPUT         (1ULL<<35)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL | PHPDBG_IN_FINISH | PHPDBG_IN_LEAVE)
 #define PHPDBG_BP_RESOLVE_MASK	      (PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
