@@ -1047,7 +1047,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_class_entry *saved_class_entry;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
-	zend_stack context_stack;
 	zend_array *symbol_table;
 
 	if (type & E_EXCEPTION) {
@@ -1234,7 +1233,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				CG(active_class_entry) = NULL;
 				SAVE_STACK(loop_var_stack);
 				SAVE_STACK(delayed_oplines_stack);
-				SAVE_STACK(context_stack);
 				CG(in_compilation) = 0;
 			}
 
@@ -1254,7 +1252,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				CG(active_class_entry) = saved_class_entry;
 				RESTORE_STACK(loop_var_stack);
 				RESTORE_STACK(delayed_oplines_stack);
-				RESTORE_STACK(context_stack);
 				CG(in_compilation) = 1;
 			}
 

@@ -578,22 +578,26 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		CG(ast_arena) = zend_arena_create(1024 * 32);
 		if (!zendparse()) {
 			zval retval_zv;
+			zend_file_context original_file_context;
+			zend_oparray_context original_oparray_context;
 			zend_op_array *original_active_op_array = CG(active_op_array);
 			op_array = emalloc(sizeof(zend_op_array));
 			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 			CG(active_op_array) = op_array;
 			ZVAL_LONG(&retval_zv, 1);
 
-			zend_stack_push(&CG(context_stack), (void *) &CG(context));
-			zend_init_compiler_context();
 			if (zend_ast_process) {
 				zend_ast_process(CG(ast));
 			}
+
+			zend_file_context_begin(&original_file_context);
+			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
 			zend_do_end_compilation();
 			zend_emit_final_return(&retval_zv);
 			pass_two(op_array);
-			zend_release_labels(0);
+			zend_oparray_context_end(&original_oparray_context);
+			zend_file_context_end(&original_file_context);
 
 			CG(active_op_array) = original_active_op_array;
 		}
@@ -739,21 +743,25 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 		BEGIN(ST_IN_SCRIPTING);
 
 		if (!zendparse()) {
+			zend_file_context original_file_context;
+			zend_oparray_context original_oparray_context;
 			zend_op_array *original_active_op_array = CG(active_op_array);
 			op_array = emalloc(sizeof(zend_op_array));
 			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
 			CG(active_op_array) = op_array;
 
-			zend_stack_push(&CG(context_stack), (void *) &CG(context));
-			zend_init_compiler_context();
 			if (zend_ast_process) {
 				zend_ast_process(CG(ast));
 			}
+
+			zend_file_context_begin(&original_file_context);
+			zend_oparray_context_begin(&original_oparray_context);
 			zend_compile_top_stmt(CG(ast));
 			zend_do_end_compilation();
 			zend_emit_final_return(NULL);
 			pass_two(op_array);
-			zend_release_labels(0);
+			zend_oparray_context_end(&original_oparray_context);
+			zend_file_context_end(&original_file_context);
 
 			CG(active_op_array) = original_active_op_array;
 		}

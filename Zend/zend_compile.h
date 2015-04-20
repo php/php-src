@@ -53,8 +53,9 @@
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
-typedef struct _zend_compiler_context {
-	uint32_t  opcodes_size;
+/* Compilation context that is different for each op array. */
+typedef struct _zend_oparray_context {
+	uint32_t   opcodes_size;
 	int        vars_size;
 	int        literals_size;
 	int        current_brk_cont;
@@ -62,9 +63,16 @@ typedef struct _zend_compiler_context {
 	int        in_finally;
 	uint32_t   fast_call_var;
 	HashTable *labels;
-} zend_compiler_context;
+} zend_oparray_context;
 
-/* On 64-bi systems less optimal, but more compact VM code leads to better
+/* Compilation context that is different for each file, but shared between op arrays. */
+typedef struct _zend_file_context {
+	HashTable *imports;
+	HashTable *imports_function;
+	HashTable *imports_const;
+} zend_file_context;
+
+/* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
  * targets and constants, but on 64-bit systems realtive 32-bit offsets */
 #if SIZEOF_SIZE_T == 4
@@ -637,7 +645,11 @@ BEGIN_EXTERN_C()
 void init_compiler(void);
 void shutdown_compiler(void);
 void zend_init_compiler_data_structures(void);
-void zend_init_compiler_context(void);
+
+void zend_oparray_context_begin(zend_oparray_context *prev_context);
+void zend_oparray_context_end(zend_oparray_context *prev_context);
+void zend_file_context_begin(zend_file_context *prev_context);
+void zend_file_context_end(zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
@@ -693,7 +705,6 @@ void zend_verify_namespace(void);
 void zend_do_end_compilation(void);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
-void zend_release_labels(int temporary);
 
 ZEND_API void function_add_ref(zend_function *function);
 

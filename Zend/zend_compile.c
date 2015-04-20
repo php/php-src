@@ -225,8 +225,9 @@ static void init_compiler_declarables(void) /* {{{ */
 }
 /* }}} */
 
-void zend_init_compiler_context(void) /* {{{ */
+void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 {
+	*prev_context = CG(context);
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
@@ -235,6 +236,56 @@ void zend_init_compiler_context(void) /* {{{ */
 	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
 	CG(context).labels = NULL;
+}
+/* }}} */
+
+void zend_oparray_context_end(zend_oparray_context *prev_context) /* {{{ */
+{
+	if (CG(context).labels) {
+		zend_hash_destroy(CG(context).labels);
+		FREE_HASHTABLE(CG(context).labels);
+		CG(context).labels = NULL;
+	}
+	CG(context) = *prev_context;
+}
+/* }}} */
+
+static void zend_reset_import_tables(void) /* {{{ */
+{
+	zend_file_context *ctx = &CG(file_context);
+	if (ctx->imports) {
+		zend_hash_destroy(ctx->imports);
+		efree(ctx->imports);
+		ctx->imports = NULL;
+	}
+
+	if (ctx->imports_function) {
+		zend_hash_destroy(ctx->imports_function);
+		efree(ctx->imports_function);
+		ctx->imports_function = NULL;
+	}
+
+	if (ctx->imports_const) {
+		zend_hash_destroy(ctx->imports_const);
+		efree(ctx->imports_const);
+		ctx->imports_const = NULL;
+	}
+}
+/* }}} */
+
+void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
+{
+	*prev_context = CG(file_context);
+	CG(file_context).imports = NULL;
+	CG(file_context).imports_function = NULL;
+	CG(file_context).imports_const = NULL;
+}
+/* }}} */
+
+void zend_file_context_end(zend_file_context *prev_context) /* {{{ */
+{
+	zend_reset_import_tables();
+	CG(file_context) = *prev_context;
 }
 /* }}} */
 
@@ -248,12 +299,8 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(current_namespace) = NULL;
 	CG(in_namespace) = 0;
 	CG(has_bracketed_namespaces) = 0;
-	CG(current_import) = NULL;
-	CG(current_import_function) = NULL;
-	CG(current_import_const) = NULL;
 	zend_hash_init(&CG(const_filenames), 8, NULL, NULL, 0);
 	init_compiler_declarables();
-	zend_stack_init(&CG(context_stack), sizeof(CG(context)));
 
 	CG(encoding_declared) = 0;
 }
@@ -285,7 +332,6 @@ void shutdown_compiler(void) /* {{{ */
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_hash_destroy(&CG(const_filenames));
-	zend_stack_destroy(&CG(context_stack));
 	zend_arena_destroy(CG(arena));
 }
 /* }}} */
@@ -731,10 +777,10 @@ zend_string *zend_resolve_non_class_name(
 		*is_fully_qualified = 1;
 	}
 
-	if (compound && CG(current_import)) {
+	if (compound && CG(file_context).imports) {
 		/* If the first part of a qualified name is an alias, substitute it. */
 		size_t len = compound - name->val;
-		zend_string *import_name = zend_hash_find_ptr_lc(CG(current_import), name->val, len);
+		zend_string *import_name = zend_hash_find_ptr_lc(CG(file_context).imports, name->val, len);
 
 		if (import_name) {
 			return zend_concat_names(
@@ -749,13 +795,13 @@ zend_string *zend_resolve_non_class_name(
 zend_string *zend_resolve_function_name(zend_string *name, uint32_t type, zend_bool *is_fully_qualified) /* {{{ */
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 0, CG(current_import_function));
+		name, type, is_fully_qualified, 0, CG(file_context).imports_function);
 }
 /* }}} */
 
 zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, zend_bool *is_fully_qualified) /* {{{ */ {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 1, CG(current_import_const));
+		name, type, is_fully_qualified, 1, CG(file_context).imports_const);
 }
 /* }}} */
 
@@ -781,12 +827,13 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		return name;
 	}
 
-	if (CG(current_import)) {
+	if (CG(file_context).imports) {
 		compound = memchr(name->val, '\\', name->len);
 		if (compound) {
 			/* If the first part of a qualified name is an alias, substitute it. */
 			size_t len = compound - name->val;
-			zend_string *import_name = zend_hash_find_ptr_lc(CG(current_import), name->val, len);
+			zend_string *import_name =
+				zend_hash_find_ptr_lc(CG(file_context).imports, name->val, len);
 
 			if (import_name) {
 				return zend_concat_names(
@@ -795,7 +842,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		} else {
 			/* If an unqualified name is an alias, replace it. */
 			zend_string *import_name
-				= zend_hash_find_ptr_lc(CG(current_import), name->val, name->len);
+				= zend_hash_find_ptr_lc(CG(file_context).imports, name->val, name->len);
 
 			if (import_name) {
 				return zend_string_copy(import_name);
@@ -877,21 +924,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	} else {
 		/* Set real break distance */
 		ZVAL_LONG(label, distance);
-	}
-}
-/* }}} */
-
-void zend_release_labels(int temporary) /* {{{ */
-{
-	if (CG(context).labels) {
-		zend_hash_destroy(CG(context).labels);
-		FREE_HASHTABLE(CG(context).labels);
-		CG(context).labels = NULL;
-	}
-	if (!temporary && !zend_stack_is_empty(&CG(context_stack))) {
-		zend_compiler_context *ctx = zend_stack_top(&CG(context_stack));
-		CG(context) = *ctx;
-		zend_stack_del_top(&CG(context_stack));
 	}
 }
 /* }}} */
@@ -1617,28 +1649,6 @@ void zend_verify_namespace(void) /* {{{ */
 {
 	if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "No code may exist outside of namespace {}");
-	}
-}
-/* }}} */
-
-static void zend_reset_import_tables(void) /* {{{ */
-{
-	if (CG(current_import)) {
-		zend_hash_destroy(CG(current_import));
-		efree(CG(current_import));
-		CG(current_import) = NULL;
-	}
-
-	if (CG(current_import_function)) {
-		zend_hash_destroy(CG(current_import_function));
-		efree(CG(current_import_function));
-		CG(current_import_function) = NULL;
-	}
-
-	if (CG(current_import_const)) {
-		zend_hash_destroy(CG(current_import_const));
-		efree(CG(current_import_const));
-		CG(current_import_const) = NULL;
 	}
 }
 /* }}} */
@@ -4503,8 +4513,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	lcname = zend_string_tolower(name);
 
-	if (CG(current_import_function)) {
-		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
+	if (CG(file_context).imports_function) {
+		zend_string *import_name = zend_hash_find_ptr(CG(file_context).imports_function, lcname);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
@@ -4551,6 +4561,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+	zend_oparray_context orig_oparray_context;
 
 	// TODO.AST interactive (not just here - also bpc etc!)
 
@@ -4575,8 +4586,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_op_array) = op_array;
-	zend_stack_push(&CG(context_stack), (void *) &CG(context));
-	zend_init_compiler_context();
+	zend_oparray_context_begin(&orig_oparray_context);
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_op *opline_ext = zend_emit_op(NULL, ZEND_EXT_NOP, NULL, NULL);
@@ -4606,7 +4616,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_emit_final_return(NULL);
 
 	pass_two(CG(active_op_array));
-	zend_release_labels(0);
+	zend_oparray_context_end(&orig_oparray_context);
 
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
@@ -4884,8 +4894,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	lcname = zend_string_tolower(name);
 
-	if (CG(current_import)) {
-		import_name = zend_hash_find_ptr(CG(current_import), lcname);
+	if (CG(file_context).imports) {
+		import_name = zend_hash_find_ptr(CG(file_context).imports, lcname);
 	}
 
 	if (CG(current_namespace)) {
@@ -5036,25 +5046,26 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 static HashTable *zend_get_import_ht(uint32_t type) /* {{{ */
 {
+	zend_file_context *ctx = &CG(file_context);
 	switch (type) {
 		case T_CLASS:
-			if (!CG(current_import)) {
-				CG(current_import) = emalloc(sizeof(HashTable));
-				zend_hash_init(CG(current_import), 8, NULL, str_dtor, 0);
+			if (!ctx->imports) {
+				ctx->imports = emalloc(sizeof(HashTable));
+				zend_hash_init(ctx->imports, 8, NULL, str_dtor, 0);
 			}
-			return CG(current_import);
+			return ctx->imports;
 		case T_FUNCTION:
-			if (!CG(current_import_function)) {
-				CG(current_import_function) = emalloc(sizeof(HashTable));
-				zend_hash_init(CG(current_import_function), 8, NULL, str_dtor, 0);
+			if (!ctx->imports_function) {
+				ctx->imports_function = emalloc(sizeof(HashTable));
+				zend_hash_init(ctx->imports_function, 8, NULL, str_dtor, 0);
 			}
-			return CG(current_import_function);
+			return ctx->imports_function;
 		case T_CONST:
-			if (!CG(current_import_const)) {
-				CG(current_import_const) = emalloc(sizeof(HashTable));
-				zend_hash_init(CG(current_import_const), 8, NULL, str_dtor, 0);
+			if (!ctx->imports_const) {
+				ctx->imports_const = emalloc(sizeof(HashTable));
+				zend_hash_init(ctx->imports_const, 8, NULL, str_dtor, 0);
 			}
-			return CG(current_import_const);
+			return ctx->imports_const;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
@@ -5241,8 +5252,8 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(name);
 		name = zend_new_interned_string(name);
 
-		if (CG(current_import_const)
-			&& (import_name = zend_hash_find_ptr(CG(current_import_const), name))
+		if (CG(file_context).imports_const
+			&& (import_name = zend_hash_find_ptr(CG(file_context).imports_const, name))
 		) {
 			if (!zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
