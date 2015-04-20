@@ -390,7 +390,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
 "  **-x**                          Enable xml output (instead of normal text output)" CR
 "  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
-"  **-o**                          Display opline addresses in opline dumps" CR
 "  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "

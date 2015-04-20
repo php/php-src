@@ -763,7 +763,6 @@ const opt_struct OPTIONS[] = { /* {{{ */
 #endif
 	{'x', 0, "xml output"},
 	{'p', 2, "show opcodes"},
-	{'o', 0, "display opline addresses"},
 	{'h', 0, "help"},
 	{'V', 0, "version"},
 	{'-', 0, NULL}
@@ -1213,10 +1212,6 @@ phpdbg_main:
 				show_banner = 0;
 				settings = (void *) 0x1;
 			} break;
-
-			case 'o':
-				flags |= PHPDBG_PRINT_OPLINE_ADDR;
-			break;
 
 			case 'h': {
 				sapi_startup(phpdbg);
