@@ -27,28 +27,15 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zval *literal) /* {{{ */
-{
-	int iter = 0;
-
-	while (iter < ops->last_literal) {
-		if (literal == &ops->literals[iter]) {
-			return iter;
-		}
-		iter++;
-	}
-
-	return 0;
-} /* }}} */
-
 static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type, HashTable *vars) /* {{{ */
 {
 	char *decode = NULL;
 
 	switch (type &~ EXT_TYPE_UNUSED) {
-		case IS_CV:
-			asprintf(&decode, "$%s", ops->vars[EX_VAR_TO_NUM(op->var)]->val);
-		break;
+		case IS_CV: {
+			zend_string *var = ops->vars[EX_VAR_TO_NUM(op->var)];
+			asprintf(&decode, "$%.*s%c", var->len <= 19 ? (int) var->len : 18, var->val, var->len <= 19 ? 0 : '+');
+		} break;
 
 		case IS_VAR:
 		case IS_TMP_VAR: {

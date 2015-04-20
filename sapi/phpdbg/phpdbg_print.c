@@ -85,10 +85,10 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 				do {
 					char *decode = phpdbg_decode_opline(op_array, opline, &vars);
 					if (decode != NULL) {
-						phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" opcode=\"%s\" op=\"%s\"", " L%-5u #%-5u %-36s %s",
+						phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" opcode=\"%s\" op=\"%s\"", " L%-4u #%-5u %-23s %s",
 							opline->lineno,
 							opcode,
-							phpdbg_decode_opcode(opline->opcode),
+							phpdbg_decode_opcode(opline->opcode) + 5, /* remove ZEND_ prefix */
 							decode);
 						free(decode);
 					} else {
