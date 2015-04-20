@@ -283,7 +283,7 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 			curl_easy_setopt(ch->cp, CURLOPT_FILE, (void *) ch);
 		}
 	}
-	return ;
+	return;
 }
 /* }}} */
 

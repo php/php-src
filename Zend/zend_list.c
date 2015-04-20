@@ -65,17 +65,19 @@ ZEND_API int zend_list_free(zend_resource *res)
 static void zend_resource_dtor(zend_resource *res)
 {
 	zend_rsrc_list_dtors_entry *ld;
+	zend_resource r = *res;
 
-	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+	res->type = -1;
+	res->ptr = NULL;
+
+	ld = zend_hash_index_find_ptr(&list_destructors, r.type);
 	if (ld) {
 		if (ld->list_dtor_ex) {
-			ld->list_dtor_ex(res);
+			ld->list_dtor_ex(&r);
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+		zend_error(E_WARNING, "Unknown list entry type (%d)", r.type);
 	}
-	res->ptr = NULL;
-	res->type = -1;
 }
 
 
@@ -178,8 +180,8 @@ void list_entry_destructor(zval *zv)
 {
 	zend_resource *res = Z_RES_P(zv);
 
+	ZVAL_UNDEF(zv);
 	if (res->type >= 0) {
-
 		zend_resource_dtor(res);
 	}
 	efree_size(res, sizeof(zend_resource));
