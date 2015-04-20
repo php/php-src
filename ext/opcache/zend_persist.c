@@ -72,7 +72,7 @@ static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 
 static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement)
 {
-	uint idx;
+	uint32_t idx, nIndex;
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
@@ -83,6 +83,39 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
+	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+		/* compact table */
+		void *old_data = HT_GET_DATA_ADDR(ht);
+		Bucket *old_buckets = ht->arData;
+		int32_t hash_size = -(int32_t)ht->nTableMask;
+
+		while (hash_size >> 1 > ht->nNumUsed) {
+			hash_size >>= 1;
+		}
+		ht->nTableMask = -hash_size;
+		HT_SET_DATA_ADDR(ht, ZCG(mem));
+		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
+		HT_HASH_RESET(ht);
+		memcpy(ht->arData, old_buckets, ht->nNumUsed * sizeof(Bucket));
+		efree(old_data);
+
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+
+			/* persist bucket and key */
+			if (p->key) {
+				zend_accel_store_interned_string(p->key);
+			}
+
+			/* persist the data itself */
+			pPersistElement(&p->val);
+
+			nIndex = p->h | ht->nTableMask;
+			Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+			HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+		}
+		return;
 	} else {
 		void *data = ZCG(mem);
 		void *old_data = HT_GET_DATA_ADDR(ht);
@@ -109,7 +142,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 
 static void zend_hash_persist_immutable(HashTable *ht)
 {
-	uint idx;
+	uint32_t idx, nIndex;
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
@@ -118,6 +151,39 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
+	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
+		/* compact table */
+		void *old_data = HT_GET_DATA_ADDR(ht);
+		Bucket *old_buckets = ht->arData;
+		int32_t hash_size = -(int32_t)ht->nTableMask;
+
+		while (hash_size >> 1 > ht->nNumUsed) {
+			hash_size >>= 1;
+		}
+		ht->nTableMask = -hash_size;
+		HT_SET_DATA_ADDR(ht, ZCG(mem));
+		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
+		HT_HASH_RESET(ht);
+		memcpy(ht->arData, old_buckets, ht->nNumUsed * sizeof(Bucket));
+		efree(old_data);
+
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+
+			/* persist bucket and key */
+			if (p->key) {
+				zend_accel_memdup_interned_string(p->key);
+			}
+
+			/* persist the data itself */
+			zend_persist_zval_const(&p->val);
+
+			nIndex = p->h | ht->nTableMask;
+			Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+			HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+		}
+		return;
 	} else {
 		void *data = ZCG(mem);
 
