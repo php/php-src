@@ -208,7 +208,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			arg_info--;
 			num_args++;
 		}
-		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * num_args);
 		ADD_DUP_SIZE(arg_info, sizeof(zend_arg_info) * num_args);
 		for (i = 0; i < num_args; i++) {
 			if (arg_info[i].name) {
