@@ -1044,7 +1044,7 @@ fast_assign:
 			}
 
 			if (!zobj->ce->__set) {
-				zval *ref = NULL;
+				zend_reference *ref = NULL;
 
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
@@ -1058,8 +1058,8 @@ fast_assign:
 					}
 				} else if (value_type != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
-						if (value_type == IS_CV) {
-							ref = value;
+						if (value_type == IS_VAR) {
+							ref = Z_REF_P(value);
 						}
 						value = Z_REFVAL_P(value);
 						if (Z_REFCOUNTED_P(value)) {
@@ -1074,7 +1074,9 @@ fast_assign:
 					ZVAL_COPY(retval, value);
 				}
 				if (/*value_type == IS_VAR &&*/ ref) {
-					efree_size(ref, sizeof(zend_reference));
+					if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+						efree_size(ref, sizeof(zend_reference));
+					}
 				}
 				return;
 			}
