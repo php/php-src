@@ -2,10 +2,10 @@
 non-existent imported functions should not be looked up in the global table
 --FILE--
 <?php
+use function foo\bar\baz;
 
 require 'includes/global_baz.php';
 
-use function foo\bar\baz;
 var_dump(baz());
 
 ?>

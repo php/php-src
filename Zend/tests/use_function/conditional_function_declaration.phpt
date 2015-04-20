@@ -3,15 +3,15 @@ function that is conditionally defined at runtime should not cause compiler erro
 --FILE--
 <?php
 
+use function bar\foo;
+
 if (0) {
     function foo() {
     }
 }
 
-use function bar\foo;
-
 echo "Done";
 
 ?>
---EXPECT--
-Done
+--EXPECTF--
+Fatal error: Cannot declare function foo because the name is already in use in %s on line %d

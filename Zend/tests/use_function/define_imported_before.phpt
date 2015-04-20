@@ -4,9 +4,10 @@ using function with same name as defined should fail
 <?php
 
 namespace {
+    use function foo\bar;
+
     function bar() {}
 
-    use function foo\bar;
 }
 
 namespace {
@@ -15,4 +16,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use function foo\bar as bar because the name is already in use in %s on line %d
+Fatal error: Cannot declare function bar because the name is already in use in %s on line %d

@@ -480,6 +480,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
+	compiler_globals->current_namespace_ast = NULL;
 
 #ifdef ZTS
 	zend_interned_empty_string_init(&compiler_globals->empty_string);

@@ -5,6 +5,8 @@ Magic methods in overrided stdClass inside namespace
 
 namespace test;
 
+use test\foo as stdClass;
+
 class foo {
 	public $e = array();
 	
@@ -20,8 +22,6 @@ class foo {
 		return $this;
 	}
 }
-
-use test\foo as stdClass;
 
 $x = new stdClass;
 $x->a = 1;

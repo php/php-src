@@ -115,6 +115,7 @@ struct _zend_compiler_globals {
 	zend_string *current_namespace;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+	zend_ast *current_namespace_ast;
 
 	HashTable const_filenames;
 

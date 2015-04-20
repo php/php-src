@@ -4,12 +4,12 @@
 <?php
 namespace test\ns1;
 
+use test\ns1 as ns2;
+use test as ns3;
+
 function foo() {
   echo __FUNCTION__,"\n";
 }
-
-use test\ns1 as ns2;
-use test as ns3;
 
 foo();
 bar();

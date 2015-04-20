@@ -1660,6 +1660,7 @@ static void zend_end_namespace(void) /* {{{ */ {
 		zend_string_release(CG(current_namespace));
 		CG(current_namespace) = NULL;
 	}
+	CG(current_namespace_ast) = NULL;
 }
 /* }}} */
 
@@ -5100,6 +5101,42 @@ static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend
 }
 /* }}} */
 
+static int zend_verify_namespace_use_position(zend_ast *ast) /* {{{ */
+{
+	zend_ast *stmt;
+	zend_ast_list *top_list;
+	uint32_t i, failcount = 0;
+
+
+	if (CG(current_namespace_ast) != NULL) {
+		top_list = zend_ast_get_list(CG(current_namespace_ast));
+	} else {
+		top_list = zend_ast_get_list(CG(ast));
+	}
+
+	for (i = 0; i < top_list->children; i++) {
+		stmt = top_list->child[i];
+		if (stmt == ast) {
+			if (failcount == 0) {
+				return SUCCESS;
+			}
+			return FAILURE;
+		} else if (stmt != NULL && stmt->kind == ZEND_AST_NAMESPACE) {
+			/* non-block-mode, so we need to reset the fail count */
+			failcount = 0;
+		} else if (
+			stmt != NULL
+			&& stmt->kind != ZEND_AST_USE
+			&& stmt->kind != ZEND_AST_DECLARE
+		) {
+			failcount++;
+		}
+	}
+
+	return FAILURE;
+}
+/* }}} */
+
 void zend_compile_use(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5108,6 +5145,11 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 	uint32_t type = ast->attr;
 	HashTable *current_import = zend_get_import_ht(type);
 	zend_bool case_sensitive = type == T_CONST;
+
+	if (FAILURE == zend_verify_namespace_use_position(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Use statements must come before actual "
+			"code in the file");
+	}
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *use_ast = list->child[i];
@@ -5312,9 +5354,11 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 				"the very first statement in the script");
 		}
 	}
-
-	if (CG(current_namespace)) {
-		zend_string_release(CG(current_namespace));
+	
+	zend_end_namespace();
+	CG(in_namespace) = 1;
+	if (with_bracket) {
+		CG(has_bracketed_namespaces) = 1;
 	}
 
 	if (name_ast) {
@@ -5325,18 +5369,10 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		}
 
 		CG(current_namespace) = zend_string_copy(name);
-	} else {
-		CG(current_namespace) = NULL;
-	}
-
-	zend_reset_import_tables();
-
-	CG(in_namespace) = 1;
-	if (with_bracket) {
-		CG(has_bracketed_namespaces) = 1;
 	}
 
 	if (stmt_ast) {
+		CG(current_namespace_ast) = stmt_ast;
 		zend_compile_top_stmt(stmt_ast);
 		zend_end_namespace();
 	}
