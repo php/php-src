@@ -1893,7 +1893,7 @@ call_trampoline_end:
 		ZEND_VM_RETURN();
 	}
 
-	opline = execute_data->opline;
+	LOAD_OPLINE();
 
 	if (object) {
 		OBJ_RELEASE(object);
@@ -1902,8 +1902,8 @@ call_trampoline_end:
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL);
-		if (RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
+		if (RETURN_VALUE_USED(OPLINE)) {
+			zval_ptr_dtor(EX_VAR(OPLINE->result.var));
 		}
 		HANDLE_EXCEPTION_LEAVE();
 	}
