@@ -575,14 +575,21 @@ static inline void phpdbg_handle_exception(void) /* }}} */
 
 		zval_ptr_dtor(&trace);
 	} else {
-		phpdbg_error("exception", "name=\"%s\"" "Uncaught %s!", EG(exception)->ce->name->val);
+		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", EG(exception)->ce->name->val);
 	}
 
 	/* output useful information about address */
-	phpdbg_writeln("exception", "opline=\"%p\" file=\"%s\" line=\"%u\"", "Stack entered at %p in %s on line %u", EG(current_execute_data)->func->op_array.opcodes, filename, lineno);
+/* not really useful ???
+	phpdbg_writeln("exception", "opline=\"%p\" file=\"%s\" line=\"%u\"", "Stack entered at %p in %s on line %u", PHPDBG_G(ops)->opcodes, filename, lineno); */
 
 	zval_dtor(&fci.function_name);
-	zend_clear_exception();
+	if (EG(prev_exception)) {
+		OBJ_RELEASE(EG(prev_exception));
+		EG(prev_exception) = 0;
+	}
+	OBJ_RELEASE(EG(exception));
+	EG(exception) = NULL;
+	EG(opline_before_exception) = NULL;
 } /* }}} */
 
 PHPDBG_COMMAND(run) /* {{{ */
