@@ -555,27 +555,30 @@ static inline void phpdbg_handle_exception(void) /* }}} */
 {
 	zend_fcall_info fci;
 	zval trace;
+	zend_object *ex = EG(exception);
 
 	/* get filename and linenumber before unsetting exception */
 	const char *filename = zend_get_executed_filename();
 	uint32_t lineno = zend_get_executed_lineno();
 
+	EG(exception) = NULL;
+
 	/* call __toString */
 	ZVAL_STRINGL(&fci.function_name, "__tostring", sizeof("__tostring") - 1);
 	fci.size = sizeof(fci);
-	fci.function_table = &EG(exception)->ce->function_table;
+	fci.function_table = &ex->ce->function_table;
 	fci.symbol_table = NULL;
-	fci.object = EG(exception);
+	fci.object = ex;
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
 	fci.no_separation = 1;
 	if (zend_call_function(&fci, NULL) == SUCCESS) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", EG(exception)->ce->name->val, Z_STRLEN(trace), Z_STRVAL(trace));
+		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ex->ce->name->val, Z_STRLEN(trace), Z_STRVAL(trace));
 
 		zval_ptr_dtor(&trace);
 	} else {
-		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", EG(exception)->ce->name->val);
+		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ex->ce->name->val);
 	}
 
 	/* output useful information about address */
@@ -587,8 +590,7 @@ static inline void phpdbg_handle_exception(void) /* }}} */
 		OBJ_RELEASE(EG(prev_exception));
 		EG(prev_exception) = 0;
 	}
-	OBJ_RELEASE(EG(exception));
-	EG(exception) = NULL;
+	OBJ_RELEASE(ex);
 	EG(opline_before_exception) = NULL;
 } /* }}} */
 
