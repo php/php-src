@@ -39,6 +39,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
+#include "ext/pcre/php_pcre.h"
 
 #ifndef ZEND_WIN32
 #include  <netdb.h>
@@ -1799,8 +1800,26 @@ static void zend_reset_cache_vars(void)
 	ZCSG(force_restart_time) = 0;
 }
 
+#ifndef ZTS
+static void accel_reset_pcre_cache(void)
+{
+	Bucket *p;
+
+	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
+		/* Remove PCRE cache entries with inconsistent keys */
+		if (IS_ACCEL_INTERNED(p->key)) {
+			p->key = NULL;
+			zend_hash_del_bucket(&PCRE_G(pcre_cache), p);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 static void accel_activate(void)
 {
+#ifndef ZTS
+	zend_bool reset_pcre = 0;
+#endif
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
@@ -1860,9 +1879,17 @@ static void accel_activate(void)
 
 				zend_shared_alloc_restore_state();
 				ZCSG(accelerator_enabled) = ZCSG(cache_status_before_restart);
-				ZCSG(last_restart_time) = ZCG(request_time);
+				if (ZCSG(last_restart_time) < ZCG(request_time)) {
+					ZCSG(last_restart_time) = ZCG(request_time);
+				} else {
+					ZCSG(last_restart_time)++;
+				}
 				accel_restart_leave();
 			}
+#ifndef ZTS
+		} else {
+			reset_pcre = 1;
+#endif
 		}
 		zend_shared_alloc_unlock();
 	}
@@ -1877,6 +1904,20 @@ static void accel_activate(void)
 	ZCG(cwd_check) = 1;
 
 	SHM_PROTECT();
+
+	if (ZCSG(last_restart_time) != ZCG(last_restart_time)) {
+		/* SHM was reinitialized. */
+		ZCG(last_restart_time) = ZCSG(last_restart_time);
+
+		/* Reset in-process realpath cache */
+		realpath_cache_clean();
+
+#ifndef ZTS
+		accel_reset_pcre_cache();
+	} else if (reset_pcre) {
+		accel_reset_pcre_cache();
+#endif
+	}
 }
 
 #if !ZEND_DEBUG
@@ -2316,6 +2357,9 @@ static int accel_startup(zend_extension *extension)
 			break;
 	}
 
+	/* remeber the last restart time in the process memory */
+	ZCG(last_restart_time) = ZCSG(last_restart_time);
+
 	/* from this point further, shared memory is supposed to be OK */
 
 	/* Init auto-global strings */
@@ -2400,6 +2444,8 @@ void accel_shutdown(void)
 		zend_hash_clean(CG(function_table));
 		zend_hash_clean(CG(class_table));
 		zend_hash_clean(EG(zend_constants));
+
+		accel_reset_pcre_cache();
 #endif
 	}
 

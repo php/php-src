@@ -54,7 +54,7 @@ enum {
 };
 
 
-ZEND_DECLARE_MODULE_GLOBALS(pcre)
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
@@ -482,7 +482,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	pce = zend_hash_str_update_mem(&PCRE_G(pcre_cache), regex->val, regex->len, &new_entry, sizeof(pcre_cache_entry));
+	if (!IS_INTERNED(regex) || !(GC_FLAGS(regex) & IS_STR_PERMANENT)) {
+		zend_string *str = zend_string_init(regex->val, regex->len, 1);
+		GC_REFCOUNT(str) = 0; /* will be incremented by zend_hash_update_mem() */
+		str->h = regex->h;
+		regex = str;
+	}
+
+	pce = zend_hash_update_mem(&PCRE_G(pcre_cache), regex, &new_entry, sizeof(pcre_cache_entry));
 
 	return pce;
 }

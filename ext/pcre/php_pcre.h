@@ -81,6 +81,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	int  error_code;
 ZEND_END_MODULE_GLOBALS(pcre)
 
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre);
+
 #ifdef ZTS
 # define PCRE_G(v) ZEND_TSRMG(pcre_globals_id, zend_pcre_globals *, v)
 #else

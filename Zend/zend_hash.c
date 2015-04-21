@@ -924,6 +924,13 @@ static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bu
 	_zend_hash_del_el_ex(ht, idx, p, prev);
 }
 
+ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p)
+{
+	IS_CONSISTENT(ht);
+	HT_ASSERT(GC_REFCOUNT(ht) == 1);
+	_zend_hash_del_el(ht, HT_IDX_TO_HASH(p - ht->arData), p);
+}
+
 ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
