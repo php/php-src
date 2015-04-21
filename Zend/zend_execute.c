@@ -1044,7 +1044,6 @@ fast_assign:
 			}
 
 			if (!zobj->ce->__set) {
-				zend_reference *ref = NULL;
 
 				if (EXPECTED(zobj->properties == NULL)) {
 					rebuild_object_properties(zobj);
@@ -1059,11 +1058,22 @@ fast_assign:
 				} else if (value_type != IS_TMP_VAR) {
 					if (Z_ISREF_P(value)) {
 						if (value_type == IS_VAR) {
-							ref = Z_REF_P(value);
-						}
-						value = Z_REFVAL_P(value);
-						if (Z_REFCOUNTED_P(value)) {
-							Z_ADDREF_P(value);
+							zend_reference *ref = Z_REF_P(value);
+							if (--(GC_REFCOUNT(ref)) == 0) {
+								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
+								efree_size(ref, sizeof(zend_reference));
+								value = &tmp;
+							} else {
+								value = Z_REFVAL_P(value);
+								if (Z_REFCOUNTED_P(value)) {
+									Z_ADDREF_P(value);
+								}
+							}
+						} else {
+							value = Z_REFVAL_P(value);
+							if (Z_REFCOUNTED_P(value)) {
+								Z_ADDREF_P(value);
+							}
 						}
 					} else if (value_type == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -1072,11 +1082,6 @@ fast_assign:
 				zend_hash_add_new(zobj->properties, Z_STR_P(property_name), value);
 				if (retval) {
 					ZVAL_COPY(retval, value);
-				}
-				if (/*value_type == IS_VAR &&*/ ref) {
-					if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-						efree_size(ref, sizeof(zend_reference));
-					}
 				}
 				return;
 			}
