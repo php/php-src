@@ -408,13 +408,14 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
-	while  (idx != HT_INVALID_IDX) {
+	while (EXPECTED(idx != HT_INVALID_IDX)) {
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if (p->key == key || /* check for the the same interned string */
-		    (p->h == h &&
-		     p->key &&
-		     p->key->len == key->len &&
-		     memcmp(p->key->val, key->val, key->len) == 0)) {
+		if (EXPECTED(p->key == key)) { /* check for the the same interned string */
+			return p;
+		} else if (EXPECTED(p->h == h) &&
+		     EXPECTED(p->key) &&
+		     EXPECTED(p->key->len == key->len) &&
+		     EXPECTED(memcmp(p->key->val, key->val, key->len) == 0)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
