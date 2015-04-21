@@ -41,10 +41,11 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 *	A break point must always set the correct id and type
 *	A set breakpoint function must always map new points
 */
-static inline void _phpdbg_break_mapping(int id, HashTable *table)
+static inline void _phpdbg_break_mapping(int id, HashTable *table) /* {{{ */
 {
 	zend_hash_index_update_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id, table);
 }
+/* }}} */
 
 #define PHPDBG_BREAK_MAPPING(id, table) _phpdbg_break_mapping(id, table)
 #define PHPDBG_BREAK_UNMAPPING(id) \
@@ -108,6 +109,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle) /* {{{ */
 	phpdbg_export_breakpoints_to_string(&string);
 	fputs(string, handle);
 }
+/* }}} */
 
 PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 {
@@ -622,6 +624,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 
 	zend_hash_index_update_mem(method_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
+/* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend_ulong opline) /* {{{ */
 {
@@ -667,6 +670,7 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend
 
 	zend_hash_index_update_mem(func_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
+/* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong opline) /* {{{ */
 {
@@ -712,6 +716,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong o
 
 	zend_hash_index_update_mem(file_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
+/* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len) /* {{{ */
 {
