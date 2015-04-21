@@ -726,8 +726,8 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex) {
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op > op_num; i++) {
-		if (op_num < op_array->try_catch_array[i].catch_op || op_num < op_array->try_catch_array[i].finally_op) {
+	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op < op_num; i++) {
+		if (op_num <= op_array->try_catch_array[i].catch_op || op_num <= op_array->try_catch_array[i].finally_op) {
 			return 1;
 		}
 	}
