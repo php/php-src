@@ -1446,12 +1446,12 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 					continue;
 				}
 
-				if (phpdbg_check_caught_ex(prev_ex)) {
+				if (phpdbg_check_caught_ex(prev_ex, exception)) {
 					goto ex_is_caught;
 				}
 			} while ((prev_ex = prev_ex->prev_execute_data));
 
-			PHPDBG_G(handled_exception) = EG(exception);
+			PHPDBG_G(handled_exception) = exception;
 			phpdbg_error("exception", "name=\"%s\"", "Uncaught exception %s", exception->ce->name->val);
 			DO_INTERACTIVE(1);
 		}
@@ -1474,7 +1474,7 @@ ex_is_caught:
 				goto next;
 			}
 
-#define INDEX_EXISTS_CHECK (zend_hash_index_exists(&PHPDBG_G(seek), address) || (EG(exception) && phpdbg_check_caught_ex(execute_data) == 0))
+#define INDEX_EXISTS_CHECK (zend_hash_index_exists(&PHPDBG_G(seek), address) || (exception && phpdbg_check_caught_ex(execute_data, exception) == 0))
 
 			/* run to next line */
 			if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
