@@ -603,7 +603,7 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 	} else {
 		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator->values);
 
-		if (++iter->index > 0) {
+		if (iter->index++ > 0) {
 			iter->funcs->move_forward(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				goto failure;
