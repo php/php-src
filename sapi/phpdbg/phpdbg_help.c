@@ -342,6 +342,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **step**     continue execution until other line is reached" CR
 "  **continue** continue execution" CR
 "  **until**    continue execution up to the given location" CR
+"  **next**     continue execution up to the given location and halt on the first line after it" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
@@ -901,10 +902,22 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P s" CR
 "    Will continue and break again in the next encountered line" CR CR
 },
+{"next",
+"The **next** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution will"
+"be stopped when that line is left." CR CR
 
+"Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR
+
+"Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+"skipped. " CR CR
+
+"Note **next** will trigger a \"not executing\" error if not executing."
+
+},
 {"until",
-"The **until** command causes control to be passed back to the vm, continuing execution.  Any "
-"breakpoints that are encountered before the next source line will be skipped.  Execution "
+"The **until** command causes control to be passed back to the vm, continuing execution. Any "
+"breakpoints that are encountered before the next source line will be skipped. Execution "
 "will then continue until the next breakpoint or completion of the script" CR CR
 
 "Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR
