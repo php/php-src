@@ -24,6 +24,7 @@
 #include "zend_compile.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_generators.h"
 #include "phpdbg.h"
 
 #include "phpdbg_help.h"
@@ -485,6 +486,7 @@ int phpdbg_skip_line_helper() /* {{{ */ {
 		while (++opline < op_array->opcodes + op_array->last) {
 			if (opline->lineno != EG(current_execute_data)->opline->lineno
 			 || opline->opcode == ZEND_RETURN
+			 || opline->opcode == ZEND_FAST_RET
 			 || opline->opcode == ZEND_GENERATOR_RETURN
 			 || opline->opcode == ZEND_EXIT
 			 || opline->opcode == ZEND_YIELD
@@ -528,11 +530,12 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 	while (++opline < op_array->opcodes + op_array->last) {
 		switch (opline->opcode) {
 			case ZEND_RETURN:
+			case ZEND_FAST_RET:
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_YIELD:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
-			return;
+				return;
 		}
 	}
 }
@@ -647,6 +650,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		} else {
 			zend_rebuild_symbol_table();
 		}
+		PHPDBG_G(handled_exception) = NULL;
 
 		/* clean seek state */
 		PHPDBG_G(flags) &= ~PHPDBG_SEEK_MASK;
@@ -1376,7 +1380,12 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 	}
 } /* }}} */
 
+/* code may behave weirdly if EG(exception) is set */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
+	if (exception) { \
+		++GC_REFCOUNT(exception); \
+		zend_clear_exception(); \
+	} \
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
 		const char *file_char = zend_get_executed_filename(); \
 		zend_string *file = zend_string_init(file_char, strlen(file_char), 0); \
@@ -1385,6 +1394,13 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 	} \
 	\
 	switch (phpdbg_interactive(allow_async_unsafe)) { \
+		zval zv; \
+		default: \
+			if (exception) { \
+				Z_OBJ(zv) = exception; \
+				zend_throw_exception_internal(&zv); \
+			} \
+			/* fallthrough */ \
 		case PHPDBG_LEAVE: \
 		case PHPDBG_FINISH: \
 		case PHPDBG_UNTIL: \
@@ -1408,6 +1424,8 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 	PHPDBG_G(in_execution) = 1;
 
 	while (1) {
+		zend_object *exception = EG(exception);
+
 		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
 			/* resolve nth opline breakpoints */
 			phpdbg_resolve_op_array_breaks(&execute_data->func->op_array);
@@ -1418,6 +1436,28 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			zend_timeout(0);
 		}
 #endif
+
+		/* check for uncaught exceptions */
+		if (exception && PHPDBG_G(handled_exception) != exception) {
+			zend_execute_data *prev_ex = execute_data;
+
+			do {
+				prev_ex = zend_generator_check_placeholder_frame(prev_ex);
+				/* assuming that no internal functions will silently swallow exceptions ... */
+				if (!prev_ex->func || !ZEND_USER_CODE(prev_ex->func->common.type)) {
+					continue;
+				}
+
+				if (phpdbg_check_caught_ex(prev_ex, exception)) {
+					goto ex_is_caught;
+				}
+			} while ((prev_ex = prev_ex->prev_execute_data));
+
+			PHPDBG_G(handled_exception) = exception;
+			phpdbg_error("exception", "name=\"%s\"", "Uncaught exception %s", exception->ce->name->val);
+			DO_INTERACTIVE(1);
+		}
+ex_is_caught:
 
 		/* allow conditional breakpoints and
 			initialization to access the vm uninterrupted */
@@ -1436,7 +1476,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 				goto next;
 			}
 
-#define INDEX_EXISTS_CHECK (zend_hash_index_exists(&PHPDBG_G(seek), address) || (EG(exception) && phpdbg_check_caught_ex(execute_data) == 0))
+#define INDEX_EXISTS_CHECK (zend_hash_index_exists(&PHPDBG_G(seek), address) || (exception && phpdbg_check_caught_ex(execute_data, exception) == 0))
 
 			/* run to next line */
 			if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
@@ -1540,6 +1580,7 @@ next:
 
 /* only if *not* interactive and while executing */
 void phpdbg_force_interruption(void) /* {{{ */ {
+	zend_object *exception = EG(exception);
 	zend_execute_data *data = EG(current_execute_data); /* should be always readable if not NULL */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_SIGNAL_HANDLER;
@@ -1581,4 +1622,3 @@ PHPDBG_COMMAND(eol) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
-

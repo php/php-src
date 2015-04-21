@@ -713,24 +713,46 @@ head_done:
 	} phpdbg_end_try_access();
 }
 
-PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex) {
+PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
+	zend_op *cur;
 	uint32_t op_num, i;
-	zend_op_array *op_array = &ex->func->op_array;
+	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (ex->opline >= EG(exception_op) && ex->opline < EG(exception_op) + 3) {
+	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3) {
 		op = EG(opline_before_exception);
 	} else {
-		op = ex->opline;
+		op = execute_data->opline;
 	}
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op > op_num; i++) {
-		if (op_num < op_array->try_catch_array[i].catch_op || op_num < op_array->try_catch_array[i].finally_op) {
-			return 1;
+	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op < op_num; i++) {
+		uint32_t catch = op_array->try_catch_array[i].catch_op, finally = op_array->try_catch_array[i].finally_op;
+		if (op_num <= catch || op_num <= finally) {
+			if (finally && finally < catch) {
+				return 0;
+			}
+
+			do {
+				zend_class_entry *ce;
+				cur = &op_array->opcodes[catch];
+
+				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1))))) {
+					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(cur->op1)), EX_CONSTANT(cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1)), ce);
+				}
+
+				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {
+					return 1;
+				}
+
+				catch = cur->extended_value;
+			} while (!cur->result.num);
+
+			return 0;
 		}
 	}
 
-	return 0;
+	return op->opcode == ZEND_CATCH;
 }

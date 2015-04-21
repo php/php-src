@@ -233,6 +233,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	zend_execute_data *seek_ex;                  /* call frame of oplines to seek to */
+	zend_object *handled_exception;              /* last handled exception (prevent multiple handling of same exception) */
 	phpdbg_frame_t frame;                        /* frame */
 	uint32_t last_line;                          /* last executed line */
 
