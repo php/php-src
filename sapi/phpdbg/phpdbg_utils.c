@@ -712,3 +712,25 @@ head_done:
 		}
 	} phpdbg_end_try_access();
 }
+
+PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex) {
+	const zend_op *op;
+	uint32_t op_num, i;
+	zend_op_array *op_array = &ex->func->op_array;
+
+	if (ex->opline >= EG(exception_op) && ex->opline < EG(exception_op) + 3) {
+		op = EG(opline_before_exception);
+	} else {
+		op = ex->opline;
+	}
+
+	op_num = op - op_array->opcodes;
+
+	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op > op_num; i++) {
+		if (op_num < op_array->try_catch_array[i].catch_op || op_num < op_array->try_catch_array[i].finally_op) {
+			return 1;
+		}
+	}
+
+	return 0;
+}

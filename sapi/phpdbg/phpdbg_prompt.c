@@ -90,6 +90,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
+	PHPDBG_COMMAND_D(next,    "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(eol,     "set EOL",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
@@ -473,20 +474,20 @@ PHPDBG_COMMAND(continue) /* {{{ */
 	return PHPDBG_NEXT;
 } /* }}} */
 
-PHPDBG_COMMAND(until) /* {{{ */
-{
-	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
-		return SUCCESS;
-	}
-
+int phpdbg_skip_line_helper() {
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
+	PHPDBG_G(seek_ex) = EG(current_execute_data);
 	{
 		const zend_op *opline = EG(current_execute_data)->opline;
 		const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
 
 		while (++opline < op_array->opcodes + op_array->last) {
-			if (opline->lineno != EG(current_execute_data)->opline->lineno) {
+			if (opline->lineno != EG(current_execute_data)->opline->lineno
+			 || opline->opcode == ZEND_RETURN
+			 || opline->opcode == ZEND_GENERATOR_RETURN
+			 || opline->opcode == ZEND_EXIT
+			 || opline->opcode == ZEND_YIELD
+			) {
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 				break;
 			}
@@ -494,20 +495,40 @@ PHPDBG_COMMAND(until) /* {{{ */
 	}
 
 	return PHPDBG_UNTIL;
+}
+
+PHPDBG_COMMAND(until) /* {{{ */
+{
+	if (!PHPDBG_G(in_execution)) {
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		return SUCCESS;
+	}
+
+	return phpdbg_skip_line_helper();
+} /* }}} */
+
+PHPDBG_COMMAND(next) /* {{{ */
+{
+	if (!PHPDBG_G(in_execution)) {
+		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		return SUCCESS;
+	}
+
+	PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	return phpdbg_skip_line_helper();
 } /* }}} */
 
 static void phpdbg_seek_to_end(void) {
 	const zend_op *opline = EG(current_execute_data)->opline;
 	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array - 1;
 
+	PHPDBG_G(seek_ex) = EG(current_execute_data);
 	while (++opline < op_array->opcodes + op_array->last) {
 		switch (opline->opcode) {
 			case ZEND_RETURN:
-			case ZEND_THROW:
+			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
-#ifdef ZEND_YIELD
 			case ZEND_YIELD:
-#endif
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 			return;
 		}
@@ -1402,9 +1423,15 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			/* current address */
 			zend_ulong address = (zend_ulong) execute_data->opline;
 
+			if (PHPDBG_G(seek_ex) != execute_data) {
+				goto next;
+			}
+
+#define INDEX_EXISTS_CHECK (zend_hash_index_exists(&PHPDBG_G(seek), address) || (EG(exception) && phpdbg_check_caught_ex(execute_data) == 0))
+
 			/* run to next line */
 			if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
-				if (zend_hash_index_exists(&PHPDBG_G(seek), address)) {
+				if (INDEX_EXISTS_CHECK) {
 					PHPDBG_G(flags) &= ~PHPDBG_IN_UNTIL;
 					zend_hash_clean(&PHPDBG_G(seek));
 				} else {
@@ -1415,7 +1442,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 			/* run to finish */
 			if (PHPDBG_G(flags) & PHPDBG_IN_FINISH) {
-				if (zend_hash_index_exists(&PHPDBG_G(seek), address)) {
+				if (INDEX_EXISTS_CHECK) {
 					PHPDBG_G(flags) &= ~PHPDBG_IN_FINISH;
 					zend_hash_clean(&PHPDBG_G(seek));
 				}
@@ -1425,7 +1452,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 			/* break for leave */
 			if (PHPDBG_G(flags) & PHPDBG_IN_LEAVE) {
-				if (zend_hash_index_exists(&PHPDBG_G(seek), address)) {
+				if (INDEX_EXISTS_CHECK) {
 					PHPDBG_G(flags) &= ~PHPDBG_IN_LEAVE;
 					zend_hash_clean(&PHPDBG_G(seek));
 					phpdbg_notice("breakpoint", "id=\"leave\" file=\"%s\" line=\"%u\"", "Breaking for leave at %s:%u",

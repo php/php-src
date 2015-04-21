@@ -232,6 +232,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
+	zend_execute_data *seek_ex;                  /* call frame of oplines to seek to */
 	phpdbg_frame_t frame;                        /* frame */
 	uint32_t last_line;                          /* last executed line */
 
