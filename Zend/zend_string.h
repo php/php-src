@@ -44,6 +44,7 @@ END_EXTERN_C()
 #define STR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + (_len) + 1), (use_heap)); \
 	GC_REFCOUNT(str) = 1; \
+	GC_TYPE_INFO(str) = IS_STRING; \
 	(str)->h = 0; \
 	(str)->len = (_len); \
 } while (0)

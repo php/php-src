@@ -53,6 +53,7 @@ void zend_interned_strings_init(void)
 	CG(interned_strings).nTableMask = -CG(interned_strings).nTableSize;
 	HT_SET_DATA_ADDR(&CG(interned_strings), pemalloc(HT_SIZE(&CG(interned_strings)), 1));
 	HT_HASH_RESET(&CG(interned_strings));
+	CG(interned_strings).u.flags |= HASH_FLAG_INITIALIZED;
 
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
