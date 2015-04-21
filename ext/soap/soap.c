@@ -69,7 +69,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+static void soap_error_cb(PHP_ERROR_CB_FUNC_ARGS);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -168,17 +168,17 @@ ZEND_DECLARE_MODULE_GLOBALS(soap)
 static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
 
 #ifdef va_copy
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+#define call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS) \
 { \
 	va_list copy; \
 	va_copy(copy, args); \
-	old_error_handler(error_num, error_filename, error_lineno, format, copy); \
+	old_error_handler(type, error_filename, error_lineno, format, copy); \
 	va_end(copy); \
 }
 #else
-#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+#define call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS) \
 { \
-	old_error_handler(error_num, error_filename, error_lineno, format, args); \
+	old_error_handler(PHP_ERROR_CB_FUNC_ARGS); \
 }
 #endif
 
@@ -796,7 +796,7 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_CS | CONST_PERSISTENT);
 
 	old_error_handler = zend_error_cb;
-	zend_error_cb = soap_error_handler;
+	zend_error_cb = soap_error_cb;
 
 	return SUCCESS;
 }
@@ -2120,7 +2120,7 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_cb(PHP_ERROR_CB_FUNC_ARGS)
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -2132,8 +2132,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
 
-	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets || (error_num & E_EXCEPTION)) {
-		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets || (type & E_EXCEPTION)) {
+		call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS);
 		return;
 	}
 
@@ -2147,11 +2147,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		     use_exceptions = 1;
 		}
 
-		if ((error_num == E_USER_ERROR ||
-		     error_num == E_COMPILE_ERROR ||
-		     error_num == E_CORE_ERROR ||
-		     error_num == E_ERROR ||
-		     error_num == E_PARSE) &&
+		if ((type == E_USER_ERROR ||
+		     type == E_COMPILE_ERROR ||
+		     type == E_CORE_ERROR ||
+		     type == E_ERROR ||
+		     type == E_PARSE) &&
 		    use_exceptions) {
 			zval fault;
 			char* code = SOAP_GLOBAL(error_code);
@@ -2190,7 +2190,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			PG(display_errors) = 0;
 			SG(sapi_headers).http_status_line = NULL;
 			zend_try {
-				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+				call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
 				EG(current_execute_data) = _old_current_execute_data;
@@ -2207,7 +2207,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		           !SOAP_GLOBAL(error_code) ||
 		           strcmp(SOAP_GLOBAL(error_code),"WSDL") != 0) {
 			/* Ignore libxml warnings during WSDL parsing */
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS);
 		}
 	} else {
 		int old = PG(display_errors);
@@ -2217,11 +2217,11 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		va_list argcopy;
 #endif
 
-		if (error_num == E_USER_ERROR ||
-		    error_num == E_COMPILE_ERROR ||
-		    error_num == E_CORE_ERROR ||
-		    error_num == E_ERROR ||
-		    error_num == E_PARSE) {
+		if (type == E_USER_ERROR ||
+		    type == E_COMPILE_ERROR ||
+		    type == E_CORE_ERROR ||
+		    type == E_ERROR ||
+		    type == E_PARSE) {
 
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
@@ -2272,7 +2272,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		PG(display_errors) = 0;
 		SG(sapi_headers).http_status_line = NULL;
 		zend_try {
-			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(PHP_ERROR_CB_FUNC_ARGS);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(current_execute_data) = _old_current_execute_data;
