@@ -4059,7 +4059,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 					zend_get_function_declaration(fn TSRMLS_CC),
 					zend_get_function_declaration(existing_fn TSRMLS_CC));
 			}
-		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) { 
+		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
