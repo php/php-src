@@ -329,7 +329,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_search, 0, 0, 2)
 	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_binary_search, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_binary_search, 0, 0, 2)
     ZEND_ARG_INFO(0, needle)
     ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
     ZEND_ARG_INFO(0, strict)
@@ -3279,7 +3279,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(max,																arginfo_max)
 	PHP_FE(in_array,														arginfo_in_array)
 	PHP_FE(array_search,													arginfo_array_search)
-	PHP_FE(binary_search,                                                   arginfo_binary_search)
+	PHP_FE(array_binary_search,                                             arginfo_array_binary_search)
 	PHP_FE(extract,															arginfo_extract)
 	PHP_FE(compact,															arginfo_compact)
 	PHP_FE(array_fill,														arginfo_array_fill)
