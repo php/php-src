@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.25
 
 - Core:
+  . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
+    (Laruence)
   . Fixed bug #69420 (Invalid read in zend_std_get_method). (Laruence)
   . Fixed bug #60022 ("use statement [...] has no effect" depends on leading
     backslash). (Nikita)
