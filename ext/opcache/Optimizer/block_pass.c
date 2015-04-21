@@ -1162,14 +1162,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		cur_block = cur_block->next;
 	}
 
-	if ((opline-1)->opcode == ZEND_THROW) {
-		/* if we finished with THROW, we need to add space between THROW and HANDLE to not confuse
-		   zend_throw_internal */
-		MAKE_NOP(opline);
-		opline->lineno = opline[-1].lineno;
-		opline++;
-	}
-
 	op_array->last = opline-new_opcodes;
 
 	/* adjust exception jump targets */
