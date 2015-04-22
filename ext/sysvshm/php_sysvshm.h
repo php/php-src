@@ -30,8 +30,17 @@ extern zend_module_entry sysvshm_module_entry;
 #define PHP_SYSVSHM_VERSION PHP_VERSION
 
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+
+#ifdef PHP_WIN32
+# include <TSRM/tsrm_win32.h>
+typedef int key_t;
+# ifndef THREAD_LS
+#  define THREAD_LS
+# endif
+#else
+# include <sys/ipc.h>
+# include <sys/shm.h>
+#endif
 
 #define PHP_SHM_RSRC_NAME "sysvshm"
 
