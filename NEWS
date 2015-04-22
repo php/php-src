@@ -108,6 +108,8 @@ PHP                                                                        NEWS
   . Fixed bug #68741 (Null pointer dereference). (CVE-2015-1352) (Laruence)
 
 - SOAP:
+  . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
+    with SoapFault). (Dmitry)
   . Fixed bug #69293 (NEW segfault when using SoapClient::__setSoapHeader 
      (bisected, regression)). (thomas at shadowweb dot org, Laruence)
 
