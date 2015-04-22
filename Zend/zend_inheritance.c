@@ -743,78 +743,87 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
-		int i = ce->default_properties_count + parent_ce->default_properties_count;
+		zval *src, *dst, *end;
 
-		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * i, ce->type == ZEND_INTERNAL_CLASS);
 		if (ce->default_properties_count) {
-			while (i-- > parent_ce->default_properties_count) {
-				ce->default_properties_table[i] = ce->default_properties_table[i - parent_ce->default_properties_count];
-			}
+			zval *table = pemalloc(sizeof(zval) * (ce->default_properties_count + parent_ce->default_properties_count), ce->type == ZEND_INTERNAL_CLASS);
+			src = ce->default_properties_table + ce->default_properties_count;
+//			zval *table = perealloc(ce->default_properties_table, sizeof(zval) * (ce->default_properties_count + parent_ce->default_properties_count), ce->type == ZEND_INTERNAL_CLASS);
+//			src = table + ce->default_properties_count;
+			end = table + parent_ce->default_properties_count;
+			dst = end + ce->default_properties_count;
+			ce->default_properties_table = table;
+			do {
+				dst--;
+				src--;
+				ZVAL_COPY_VALUE(dst, src);
+			} while (dst != end);
+			pefree(src, ce->type == ZEND_INTERNAL_CLASS);
+			end = ce->default_properties_table;
+		} else {
+			end = pemalloc(sizeof(zval) * parent_ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
+			dst = end + parent_ce->default_properties_count;
+			ce->default_properties_table = end;
 		}
-		for (i = 0; i < parent_ce->default_properties_count; i++) {
+		src = parent_ce->default_properties_table + parent_ce->default_properties_count;
+		do {
+			dst--;
+			src--;
 #ifdef ZTS
 			if (parent_ce->type != ce->type) {
-				ZVAL_DUP(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
-				if (Z_OPT_CONSTANT(ce->default_properties_table[i])) {
+				ZVAL_DUP(dst, src);
+				if (Z_OPT_CONSTANT_P(dst)) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
 				continue;
 			}
 #endif
 
-			ZVAL_COPY(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
-			if (Z_OPT_CONSTANT(ce->default_properties_table[i])) {
+			ZVAL_COPY(dst, src);
+			if (Z_OPT_CONSTANT_P(dst)) {
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
-		}
+		} while (dst != end);
 		ce->default_properties_count += parent_ce->default_properties_count;
 	}
 
-	if (parent_ce->type != ce->type) {
-		/* User class extends internal class */
-		zend_update_class_constants(parent_ce);
-		if (parent_ce->default_static_members_count) {
-			int i = ce->default_static_members_count + parent_ce->default_static_members_count;
+	if (parent_ce->default_static_members_count) {
+		zval *src, *dst, *end;
 
-			ce->default_static_members_table = erealloc(ce->default_static_members_table, sizeof(zval) * i);
-			if (ce->default_static_members_count) {
-				while (i-- > parent_ce->default_static_members_count) {
-					ce->default_static_members_table[i] = ce->default_static_members_table[i - parent_ce->default_static_members_count];
-				}
-			}
-			for (i = 0; i < parent_ce->default_static_members_count; i++) {
-				ZVAL_MAKE_REF(&CE_STATIC_MEMBERS(parent_ce)[i]);
-				ce->default_static_members_table[i] = CE_STATIC_MEMBERS(parent_ce)[i];
-				Z_ADDREF(ce->default_static_members_table[i]);
-				if (Z_CONSTANT_P(Z_REFVAL(ce->default_static_members_table[i]))) {
-					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-				}
-			}
-			ce->default_static_members_count += parent_ce->default_static_members_count;
-			ce->static_members_table = ce->default_static_members_table;
+		if (ce->default_static_members_count) {
+			zval *table = pemalloc(sizeof(zval) * (ce->default_static_members_count + parent_ce->default_static_members_count), ce->type == ZEND_INTERNAL_CLASS);
+			src = ce->default_static_members_table + ce->default_static_members_count;
+//			zval *table = perealloc(ce->default_static_members_table, sizeof(zval) * (ce->default_static_members_count + parent_ce->default_static_members_count), ce->type == ZEND_INTERNAL_CLASS);
+//			src = table + ce->default_static_members_count;
+			end = table + parent_ce->default_static_members_count;
+			dst = end + ce->default_static_members_count;
+			ce->default_static_members_table = table;
+			do {
+				dst--;
+				src--;
+				ZVAL_COPY_VALUE(dst, src);
+			} while (dst != end);
+			pefree(src, ce->type == ZEND_INTERNAL_CLASS);
+			end = ce->default_static_members_table;
+		} else {
+			end = pemalloc(sizeof(zval) * parent_ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
+			dst = end + parent_ce->default_static_members_count;
+			ce->default_static_members_table = end;
 		}
-	} else {
-		if (parent_ce->default_static_members_count) {
-			int i = ce->default_static_members_count + parent_ce->default_static_members_count;
-
-			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * i, ce->type == ZEND_INTERNAL_CLASS);
-			if (ce->default_static_members_count) {
-				while (i-- > parent_ce->default_static_members_count) {
-					ce->default_static_members_table[i] = ce->default_static_members_table[i - parent_ce->default_static_members_count];
-				}
+		src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
+		do {
+			dst--;
+			src--;
+			ZVAL_MAKE_REF(src);
+			ZVAL_COPY_VALUE(dst, src);
+			Z_ADDREF_P(dst);
+			if (Z_CONSTANT_P(Z_REFVAL_P(dst))) {
+				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
-			for (i = 0; i < parent_ce->default_static_members_count; i++) {
-				ZVAL_MAKE_REF(&parent_ce->default_static_members_table[i]);
-				ce->default_static_members_table[i] = parent_ce->default_static_members_table[i];
-				Z_ADDREF(ce->default_static_members_table[i]);
-				if (Z_CONSTANT_P(Z_REFVAL(ce->default_static_members_table[i]))) {
-					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-				}
-			}
-			ce->default_static_members_count += parent_ce->default_static_members_count;
-			if (ce->type == ZEND_USER_CLASS) {
-				ce->static_members_table = ce->default_static_members_table;
-			}
+		} while (dst != end);
+		ce->default_static_members_count += parent_ce->default_static_members_count;
+		if (ce->type == ZEND_USER_CLASS) {
+			ce->static_members_table = ce->default_static_members_table;
 		}
 	}
 
