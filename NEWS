@@ -14,15 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #69419 (Returning compatible sub generator produces a warning).
     (Nikita)
 
-- cURL:
-  . Fixed bug #68739 (Missing break / control flow). (Laruence)
-
-- Ereg:
-  . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
-
 - ODBC:
-  . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
-    (Anatol)
   . Fixed bug #69474 (ODBC: Query with same field name from two tables returns
     incorrect result). (Anatol)
 
@@ -57,8 +49,9 @@ PHP                                                                        NEWS
   . Fixed bug #69353 (Missing null byte checks for paths in various PHP
     extensions). (Stas)
 
-- Curl:
+- cURL:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
+  . Fixed bug #68739 (Missing break / control flow). (Laruence)
   . Fixed bug #69316 (Use-after-free in php_curl related to
     CURLOPT_FILE/_INFILE/_WRITEHEADER). (Laruence)
 
@@ -70,6 +63,9 @@ PHP                                                                        NEWS
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
+
+- Ereg:
+  . Fixed bug #68740 (NULL Pointer Dereference). (Laruence)
 
 - Fileinfo:
   . Fixed bug #68819 (Fileinfo on specific file causes spurious OOM and/or
@@ -84,6 +80,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
+
+- ODBC:
+  . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
+    (Anatol)
 
 - OPCache:
   . Fixed bug #69281 (opcache_is_script_cached no longer works). (danack)
