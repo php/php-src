@@ -47,6 +47,7 @@
 #undef gztell
 
 int le_deflate;
+int le_inflate;
 
 ZEND_DECLARE_MODULE_GLOBALS(zlib);
 
@@ -63,12 +64,19 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 }
 /* }}} */
 
-/* {{{ Incremental deflate resource destructor */
+/* {{{ Incremental deflate/inflate resource destructors */
 
 void deflate_rsrc_dtor(zend_resource *res)
 {
 	z_stream *ctx = zend_fetch_resource(res, NULL, le_deflate);
 	deflateEnd(ctx);
+	efree(ctx);
+}
+
+void inflate_rsrc_dtor(zend_resource *res)
+{
+	z_stream *ctx = zend_fetch_resource(res, NULL, le_inflate);
+	inflateEnd(ctx);
 	efree(ctx);
 }
 
@@ -744,6 +752,132 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
+/* {{{ proto resource inflate_init(int encoding)
+   Initialize an incremental inflate context with the specified encoding */
+PHP_FUNCTION(inflate_init)
+{
+	z_stream *ctx;
+	zend_long encoding;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l", &encoding)) {
+		RETURN_FALSE;
+	}
+
+	switch (encoding) {
+		case PHP_ZLIB_ENCODING_RAW:
+		case PHP_ZLIB_ENCODING_GZIP:
+		case PHP_ZLIB_ENCODING_DEFLATE:
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING,
+				"encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
+			RETURN_FALSE;
+    }
+
+	ctx = ecalloc(1, sizeof(php_zlib_context));
+	ctx->zalloc = php_zlib_alloc;
+	ctx->zfree = php_zlib_free;
+
+	if (Z_OK == inflateInit2(ctx, encoding)) {
+		RETURN_RES(zend_register_resource(ctx, le_inflate));
+	} else {
+		efree(ctx);
+		php_error_docref(NULL, E_WARNING, "failed allocating zlib.inflate context");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string inflate_add(resource context, string encoded_data[, int flush_mode = ZLIB_SYNC_FLUSH])
+   Incrementally inflate encoded data in the specified context */
+PHP_FUNCTION(inflate_add)
+{
+	zend_string *out;
+	char *in_buf;
+	size_t in_len, buffer_used = 0, CHUNK_SIZE = 8192;
+	zval *res;
+	z_stream *ctx;
+	zend_long flush_type = Z_SYNC_FLUSH;
+	int status;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &in_buf, &in_len, &flush_type)) {
+		RETURN_FALSE;
+	}
+
+	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
+		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
+		RETURN_FALSE;
+	}
+
+	switch (flush_type) {
+		case Z_NO_FLUSH:
+		case Z_PARTIAL_FLUSH:
+		case Z_SYNC_FLUSH:
+		case Z_FULL_FLUSH:
+		case Z_BLOCK:
+		case Z_FINISH:
+			break;
+
+		default:
+			php_error_docref(NULL, E_WARNING,
+				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
+			RETURN_FALSE;
+	}
+
+	if (in_len <= 0 && flush_type != Z_FINISH) {
+		RETURN_EMPTY_STRING();
+	}
+
+	out = zend_string_alloc((in_len > CHUNK_SIZE) ? in_len : CHUNK_SIZE, 0);
+	ctx->next_in = (Bytef *) in_buf;
+	ctx->next_out = (Bytef *) out->val;
+	ctx->avail_in = in_len;
+	ctx->avail_out = out->len;
+
+	do {
+		status = inflate(ctx, flush_type);
+		buffer_used = out->len - ctx->avail_out;
+
+		switch (status) {
+		case Z_OK:
+			if (ctx->avail_out == 0) {
+				/* more output buffer space needed; realloc and try again */
+				out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+				ctx->avail_out = CHUNK_SIZE;
+				ctx->next_out = (Bytef *) out->val + buffer_used;
+				break;
+			} else {
+				goto complete;
+			}
+		case Z_STREAM_END:
+			inflateReset(ctx);
+			goto complete;
+		case Z_BUF_ERROR:
+			if (flush_type == Z_FINISH && ctx->avail_out == 0) {
+				/* more output buffer space needed; realloc and try again */
+				out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+				ctx->avail_out = CHUNK_SIZE;
+				ctx->next_out = (Bytef *) out->val + buffer_used;
+				break;
+			} else {
+				/* No more input data; we're finished */
+				goto complete;
+			}
+		default:
+			zend_string_release(out);
+			php_error_docref(NULL, E_WARNING, "%s", zError(status));
+			RETURN_FALSE;
+		}
+	} while (1);
+
+	complete: {
+		out = zend_string_realloc(out, buffer_used, 0);
+		out->val[buffer_used] = 0;
+		RETURN_STR(out);
+	}
+}
+/* }}} */
+
 /* {{{ proto resource deflate_init(int encoding[, array options])
    Initialize an incremental deflate context using the specified encoding */
 PHP_FUNCTION(deflate_init)
@@ -808,7 +942,7 @@ PHP_FUNCTION(deflate_init)
 		RETURN_RES(zend_register_resource(ctx, le_deflate));
 	} else {
 		efree(ctx);
-		php_error_docref(NULL, E_WARNING, "failed allocating deflate context");
+		php_error_docref(NULL, E_WARNING, "failed allocating zlib.deflate context");
 		RETURN_FALSE;
 	}
 }
@@ -1004,6 +1138,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_deflate_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, flush_behavior)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_init, 0, 0, 1)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
+	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_INFO(0, flush_behavior)
+ZEND_END_ARG_INFO()
+
+
 /* {{{ php_zlib_functions[] */
 static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(readgzfile,						arginfo_readgzfile)
@@ -1030,8 +1174,10 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(zlib_encode,						arginfo_zlib_encode)
 	PHP_FE(zlib_decode,						arginfo_zlib_decode)
 	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
-	PHP_FE(deflate_init,						arginfo_deflate_init)
+	PHP_FE(deflate_init,					arginfo_deflate_init)
 	PHP_FE(deflate_add,						arginfo_deflate_add)
+	PHP_FE(inflate_init,					arginfo_inflate_init)
+	PHP_FE(inflate_add,						arginfo_inflate_add)
 	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
 	PHP_FE_END
 };
@@ -1122,6 +1268,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	php_output_handler_conflict_register(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), php_zlib_output_conflict_check);
 
 	le_deflate = zend_register_list_destructors_ex(deflate_rsrc_dtor, NULL, "zlib.deflate", module_number);
+	le_inflate = zend_register_list_destructors_ex(inflate_rsrc_dtor, NULL, "zlib.inflate", module_number);
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
