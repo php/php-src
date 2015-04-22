@@ -748,8 +748,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		if (ce->default_properties_count) {
 			zval *table = pemalloc(sizeof(zval) * (ce->default_properties_count + parent_ce->default_properties_count), ce->type == ZEND_INTERNAL_CLASS);
 			src = ce->default_properties_table + ce->default_properties_count;
-//			zval *table = perealloc(ce->default_properties_table, sizeof(zval) * (ce->default_properties_count + parent_ce->default_properties_count), ce->type == ZEND_INTERNAL_CLASS);
-//			src = table + ce->default_properties_count;
 			end = table + parent_ce->default_properties_count;
 			dst = end + ce->default_properties_count;
 			ce->default_properties_table = table;
@@ -793,8 +791,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		if (ce->default_static_members_count) {
 			zval *table = pemalloc(sizeof(zval) * (ce->default_static_members_count + parent_ce->default_static_members_count), ce->type == ZEND_INTERNAL_CLASS);
 			src = ce->default_static_members_table + ce->default_static_members_count;
-//			zval *table = perealloc(ce->default_static_members_table, sizeof(zval) * (ce->default_static_members_count + parent_ce->default_static_members_count), ce->type == ZEND_INTERNAL_CLASS);
-//			src = table + ce->default_static_members_count;
 			end = table + parent_ce->default_static_members_count;
 			dst = end + ce->default_static_members_count;
 			ce->default_static_members_table = table;
