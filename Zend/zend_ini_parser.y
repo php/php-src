@@ -131,7 +131,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 		}
 		ZVAL_PSTRINGL(result, Z_STRVAL_P(c), Z_STRLEN_P(c));
 		if (c == &tmp) {
-			zval_dtor(&tmp);
+			zend_string_release(Z_STR(tmp));
 		}
 		zend_string_free(Z_STR_P(name));
 	} else {
