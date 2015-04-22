@@ -1319,6 +1319,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			ifunc->num_args = 0;
 			ifunc->required_num_args = 0;
 		}
+		zend_set_function_arg_flags((zend_function*)ifunc);
 		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);
 		zend_str_tolower_copy(lc_name, funcs->fname, namelen);

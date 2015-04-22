@@ -279,6 +279,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
+		zend_set_function_arg_flags((zend_function*)&f);
 
 		fptr = &f;
 

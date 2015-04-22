@@ -51,6 +51,9 @@ static void op_array_alloc_ops(zend_op_array *op_array, uint32_t size)
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
 {
 	op_array->type = type;
+	op_array->arg_flags[0] = 0;
+	op_array->arg_flags[1] = 0;
+	op_array->arg_flags[2] = 0;
 
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;

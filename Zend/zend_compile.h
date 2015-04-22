@@ -334,6 +334,7 @@ typedef struct _zend_internal_function_info {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
+	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
@@ -384,6 +385,7 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
+	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
@@ -404,6 +406,7 @@ union _zend_function {
 
 	struct {
 		zend_uchar type;  /* never used */
+		zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
@@ -776,6 +779,7 @@ ZEND_API void zend_activate_auto_globals(void);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
+ZEND_API int zend_set_function_arg_flags(zend_function *func);
 
 int zendlex(zend_parser_stack_elem *elem);
 
@@ -909,6 +913,32 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
+
+/* Quick API to check firat 12 arguments */
+#define MAX_ARG_FLAG_NUM 12
+
+#ifdef WORDS_BIGENDIAN
+# define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
+		*(uint32_t*)&(zf)->type |= ((mask) << ((arg_num) - 1) * 2); \
+	} while (0)
+# define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
+	(((*((uint32_t*)&((zf)->type))) >> (((arg_num) - 1) * 2)) & (mask))
+#else
+# define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
+		*(uint32_t*)&(zf)->type |= (((mask) << 6) << (arg_num) * 2); \
+	} while (0)
+# define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
+	(((*(uint32_t*)&(zf)->type) >> (((arg_num) + 3) * 2)) & (mask))
+#endif
+
+#define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF)
+
+#define QUICK_ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
+
+#define QUICK_ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
+	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1

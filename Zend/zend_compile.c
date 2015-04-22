@@ -4108,6 +4108,31 @@ void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_set_function_arg_flags(zend_function *func) /* {{{ */
+{
+	uint32_t i, n;
+
+	func->common.arg_flags[0] = 0;
+	func->common.arg_flags[1] = 0;
+	func->common.arg_flags[2] = 0;
+	if (func->common.arg_info) {
+		n = MIN(func->common.num_args, MAX_ARG_FLAG_NUM);
+		i = 0;
+		while (i < n) {
+			ZEND_SET_ARG_FLAG(func, i + 1, func->common.arg_info[i].pass_by_reference);
+			i++;
+		}
+		if (func->common.fn_flags & ZEND_ACC_VARIADIC) {
+			uint32_t pass_by_reference = func->common.arg_info[i].pass_by_reference;
+			while (i < MAX_ARG_FLAG_NUM) {
+				ZEND_SET_ARG_FLAG(func, i + 1, pass_by_reference);
+				i++;
+			}
+		}
+	}
+}
+/* }}} */
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_method) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -4294,6 +4319,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 		op_array->num_args--;
 	}
+	zend_set_function_arg_flags((zend_function*)op_array);
 }
 /* }}} */
 
