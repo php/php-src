@@ -1707,17 +1707,23 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 {
 	cwd_state new_state;
+#if ZEND_EXTENSION_API_NO < PHP_5_6_X_API_NO
 	char *real_path;
+#endif
 	char *cwd;
 	int cwd_len;
 
 	/* realpath("") returns CWD */
 	if (!*path) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = (char*)emalloc(1);
+#else
 		new_state.cwd = (char*)malloc(1);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	    if ((cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
@@ -1725,18 +1731,26 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 		}
 	} else if (!IS_ABSOLUTE_PATH(path, path_len) &&
 	    (cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = estrndup(cwd, cwd_len);
+#else
 		new_state.cwd = zend_strndup(cwd, cwd_len);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd_length = cwd_len;
 	} else {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		new_state.cwd = (char*)emalloc(1);
+#else
 		new_state.cwd = (char*)malloc(1);
 		if (!new_state.cwd) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
 			return NULL;
 		}
+#endif
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
@@ -1745,14 +1759,22 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 # define CWD_REALPATH 2
 #endif
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		efree(new_state.cwd);
+#else
 		free(new_state.cwd);
+#endif
 		return NULL;
 	}
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+	return new_state.cwd;
+#else
 	real_path = emalloc(new_state.cwd_length + 1);
 	memcpy(real_path, new_state.cwd, new_state.cwd_length + 1);
 	free(new_state.cwd);
 	return real_path;
+#endif
 }
 
 static char *accel_php_resolve_path(const char *filename, int filename_length, const char *path TSRMLS_DC)
