@@ -1376,7 +1376,7 @@ static inline void php_array_binary_search(INTERNAL_FUNCTION_PARAMETERS, int beh
 			entry = zend_hash_index_find(arr_hash, mid);
 
 			compare_function(&result, value, entry);
-  
+			php_printf("%d\n",Z_LVAL(result));
 			if (Z_LVAL(result) < 0) {
 				high = mid - 1;
 			} else if (Z_LVAL(result) > 0) {
@@ -1386,7 +1386,7 @@ static inline void php_array_binary_search(INTERNAL_FUNCTION_PARAMETERS, int beh
 				if (Z_TYPE(result) == IS_TRUE) {
 					RETURN_TRUE;
 				} else {
-					high = mid - 1;
+					low = mid + 1;
 				}	
 			}
 		}
