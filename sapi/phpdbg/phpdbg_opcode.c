@@ -67,7 +67,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 					decode = zend_strndup(ZEND_STRL("true"));
 					break;
 				case IS_LONG:
-					asprintf(&decode, "%lld", Z_LVAL_P(literal));
+					asprintf(&decode, ZEND_ULONG_FMT, Z_LVAL_P(literal));
 					break;
 				case IS_DOUBLE:
 					asprintf(&decode, "%.*G", 14, Z_DVAL_P(literal));
