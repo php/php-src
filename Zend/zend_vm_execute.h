@@ -5297,6 +5297,109 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CONST_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *function_name;
+
+	zval *object;
+	zend_function *fbc;
+	zend_class_entry *called_scope;
+	zend_object *obj;
+	zend_execute_data *call;
+
+	SAVE_OPLINE();
+
+	function_name = EX_CONSTANT(opline->op2);
+
+	if (IS_CONST != IS_CONST &&
+	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Method name must be a string");
+
+
+			HANDLE_EXCEPTION();
+		} while (0);
+	}
+
+	object = EX_CONSTANT(opline->op1);
+
+	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+
+		HANDLE_EXCEPTION();
+	}
+
+	if (IS_CONST != IS_UNUSED) {
+		ZVAL_DEREF(object);
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = obj->ce;
+
+	if (IS_CONST != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Object does not support method calls");
+
+
+			HANDLE_EXCEPTION();
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
+		if (UNEXPECTED(fbc == NULL)) {
+			if (EXPECTED(!EG(exception))) {
+				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", obj->ce->name->val, Z_STRVAL_P(function_name));
+			}
+
+
+			HANDLE_EXCEPTION();
+		}
+		if (IS_CONST == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
+		obj = NULL;
+	} else {
+		GC_REFCOUNT(obj)++; /* For $this pointer */
+	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, obj);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8761,6 +8864,109 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *function_name;
+
+	zval *object;
+	zend_function *fbc;
+	zend_class_entry *called_scope;
+	zend_object *obj;
+	zend_execute_data *call;
+
+	SAVE_OPLINE();
+
+	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	if (IS_CV != IS_CONST &&
+	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Method name must be a string");
+
+
+			HANDLE_EXCEPTION();
+		} while (0);
+	}
+
+	object = EX_CONSTANT(opline->op1);
+
+	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+
+		HANDLE_EXCEPTION();
+	}
+
+	if (IS_CONST != IS_UNUSED) {
+		ZVAL_DEREF(object);
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = obj->ce;
+
+	if (IS_CV != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Object does not support method calls");
+
+
+			HANDLE_EXCEPTION();
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
+		if (UNEXPECTED(fbc == NULL)) {
+			if (EXPECTED(!EG(exception))) {
+				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", obj->ce->name->val, Z_STRVAL_P(function_name));
+			}
+
+
+			HANDLE_EXCEPTION();
+		}
+		if (IS_CV == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
+		obj = NULL;
+	} else {
+		GC_REFCOUNT(obj)++; /* For $this pointer */
+	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, obj);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10353,6 +10559,110 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *function_name;
+	zend_free_op free_op2;
+	zval *object;
+	zend_function *fbc;
+	zend_class_entry *called_scope;
+	zend_object *obj;
+	zend_execute_data *call;
+
+	SAVE_OPLINE();
+
+	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
+	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Method name must be a string");
+			zval_ptr_dtor_nogc(free_op2);
+
+			HANDLE_EXCEPTION();
+		} while (0);
+	}
+
+	object = EX_CONSTANT(opline->op1);
+
+	if (IS_CONST == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zval_ptr_dtor_nogc(free_op2);
+		HANDLE_EXCEPTION();
+	}
+
+	if (IS_CONST != IS_UNUSED) {
+		ZVAL_DEREF(object);
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+			zval_ptr_dtor_nogc(free_op2);
+
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	obj = Z_OBJ_P(object);
+	called_scope = obj->ce;
+
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST ||
+	    UNEXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
+	    zend_object *orig_obj = obj;
+
+		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Object does not support method calls");
+			zval_ptr_dtor_nogc(free_op2);
+
+			HANDLE_EXCEPTION();
+		}
+
+		/* First, locate the function. */
+		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
+		if (UNEXPECTED(fbc == NULL)) {
+			if (EXPECTED(!EG(exception))) {
+				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", obj->ce->name->val, Z_STRVAL_P(function_name));
+			}
+			zval_ptr_dtor_nogc(free_op2);
+
+			HANDLE_EXCEPTION();
+		}
+		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+		    EXPECTED(!(fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE|ZEND_ACC_NEVER_CACHE))) &&
+		    EXPECTED(obj == orig_obj)) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope, fbc);
+		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
+		obj = NULL;
+	} else {
+		GC_REFCOUNT(obj)++; /* For $this pointer */
+	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, obj);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+
+	zval_ptr_dtor_nogc(free_op2);
+
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -46973,11 +47283,11 @@ void zend_init_opcodes_handlers(void)
   	ZEND_RETURN_BY_REF_SPEC_CV_HANDLER,
   	ZEND_RETURN_BY_REF_SPEC_CV_HANDLER,
   	ZEND_RETURN_BY_REF_SPEC_CV_HANDLER,
+  	ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER,
+  	ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
+  	ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_HANDLER,
   	ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER,
   	ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
   	ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER,
