@@ -20,8 +20,8 @@
 
 #include "zend.h"
 #include "zend_errors.h"
-#include "php_globals.h"
 #include "php.h"
+#include "php_globals.h"
 #include "SAPI.h"
 #include "ext/standard/html.h"
 
