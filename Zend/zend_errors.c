@@ -26,7 +26,7 @@
 #include "ext/standard/html.h"
 
 /* {{{ zend_error_display_cb */
-ZEND_API void zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS)
+ZEND_ERROR_CB_API zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS)
 {
 	char *buffer = PG(last_error_message);
 
@@ -80,11 +80,12 @@ ZEND_API void zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS)
 		zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
 	}
 #endif
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_error_log_cb */
-ZEND_API void zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS)
+ZEND_ERROR_CB_API zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS)
 {
 	char *buffer = PG(last_error_message);
 
@@ -99,11 +100,12 @@ ZEND_API void zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS)
 		php_log_err(log_buffer);
 		efree(log_buffer);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_error_bailout_cb */
-ZEND_API zend_bool zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS)
+ZEND_ERROR_CB_API zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS)
 {
 	/* Bail out if we can't recover */
 	switch (type) {
@@ -138,11 +140,11 @@ ZEND_API zend_bool zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS)
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					zend_bailout();
-					return 1;
+					return FAILURE;
 				}
 			}
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 

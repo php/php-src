@@ -961,11 +961,12 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 /* }}} */
 
 #define CALL_ERROR_HOOKS(HOOK_LIST) for ( \
-			hook = (void (**)(ZEND_ERROR_CB_HOOK_ARGS)) zend_llist_get_first_ex(&(PG(error_hooks)[HOOK_LIST]), &pos); \
-            hook != NULL; \
+			hook_result = SUCCESS, \
+			hook = (int (**)(ZEND_ERROR_CB_HOOK_ARGS)) zend_llist_get_first_ex(&(PG(error_hooks)[HOOK_LIST]), &pos); \
+            hook != NULL && hook_result == SUCCESS; \
             hook = zend_llist_get_next_ex(&(PG(error_hooks)[HOOK_LIST]), &pos)) { \
 			va_copy(copy, args); \
-			(*hook)(type, error_filename, error_lineno, format, copy, error_type_str); \
+			hook_result = (*hook)(type, error_filename, error_lineno, format, copy, error_type_str); \
 			va_end(copy); \
 		}
 
@@ -976,10 +977,9 @@ static void php_error_cb(PHP_ERROR_CB_FUNC_ARGS)
 	char *buffer, *error_type_str;
 	int buffer_len, display;
 	zend_llist_position pos;
-	void (**hook)(ZEND_ERROR_CB_HOOK_ARGS);
-	zend_bool (**bailout_hook)(ZEND_ERROR_CB_HOOK_ARGS);
+	int (**hook)(ZEND_ERROR_CB_HOOK_ARGS);
 	va_list copy;
-	zend_bool bailout = 0;
+	int hook_result;
 
 	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -1097,19 +1097,10 @@ static void php_error_cb(PHP_ERROR_CB_FUNC_ARGS)
 		CALL_ERROR_HOOKS(E_HOOK_PROCESS);
 	}
 
-	for (
-			bailout_hook = (zend_bool (**)(ZEND_ERROR_CB_HOOK_ARGS)) zend_llist_get_first_ex(&(PG(error_hooks)[E_HOOK_BAILOUT]), &pos);
-            bailout_hook != NULL;
-            bailout_hook = zend_llist_get_next_ex(&(PG(error_hooks)[E_HOOK_BAILOUT]), &pos)) {
-			va_copy(copy, args);
-			bailout = (*bailout_hook)(type, error_filename, error_lineno, format, copy, error_type_str);
-			va_end(copy);
-			if (bailout) {
-				goto error_cb_end;
-			}
-	}
+	CALL_ERROR_HOOKS(E_HOOK_BAILOUT);
 
-	if (!display) {
+	// hook_result == FAILURE means we must bail out
+	if (hook_result == FAILURE || !display) {
 		goto error_cb_end;
 	}
 

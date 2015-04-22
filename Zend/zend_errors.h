@@ -56,11 +56,12 @@ typedef enum {
 #define ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU type, error_filename, error_lineno, format, args
 #define ZEND_ERROR_CB_HOOK_ARGS ZEND_ERROR_CB_FUNC_ARGS, const char *error_type_str
 #define ZEND_ERROR_CB_HOOK_ARGS_PASSTHRU ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU, error_type_str
+#define ZEND_ERROR_CB_API ZEND_API int
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS);
-ZEND_API void zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS);
-ZEND_API zend_bool zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_ERROR_CB_API zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_ERROR_CB_API zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_ERROR_CB_API zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS);
 ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
 ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
 ZEND_API void zend_clear_error_hook(zend_error_cb_hook_t hook_part);
