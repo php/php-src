@@ -783,13 +783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 
 		if (fbc->common.scope) {
 			should_change_scope = 1;
-			/* TODO: we don't set scope if we call an object method ??? */
-			/* See: ext/pdo_sqlite/tests/pdo_fetch_func_001.phpt */
-#if 1
-			EG(scope) = object ? NULL : fbc->common.scope;
-#else
 			EG(scope) = fbc->common.scope;
-#endif
 		} else {
 			call->called_scope = EX(called_scope);
 			Z_OBJ(call->This) = Z_OBJ(EX(This));
@@ -1814,8 +1808,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_GENERATOR));
 
-		/* This must be already set on invokation of trampoline function */
-		/*EG(scope) = fbc->common.scope;*/
 		call->symbol_table = NULL;
 		i_init_func_execute_data(call, &fbc->op_array,
 				ret, (fbc->common.fn_flags & ZEND_ACC_STATIC) == 0);
@@ -1831,7 +1823,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 
-		EG(scope) = object ? NULL : fbc->common.scope;
 		EG(current_execute_data) = call;
 
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
