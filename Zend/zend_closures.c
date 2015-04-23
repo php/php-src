@@ -184,7 +184,10 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 
 	invoke->common = closure->func.common;
-	/* TODO: return ZEND_INTERNAL_FUNCTION, but arg_info representation is suitable for ZEND_USER_FUNCTION ??? */
+	/* We return ZEND_INTERNAL_FUNCTION, but arg_info representation is the
+	 * same as for ZEND_USER_FUNCTION (uses zend_string* instead of char*).
+	 * This is not a problem, because ZEND_ACC_HAS_TYPE_HINTS is never set,
+	 * and we won't check arguments on internal function */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
 	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
