@@ -4122,10 +4122,9 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 			ZEND_SET_ARG_FLAG(func, i + 1, func->common.arg_info[i].pass_by_reference);
 			i++;
 		}
-		if (func->common.fn_flags & ZEND_ACC_VARIADIC) {
-			uint32_t pass_by_reference = func->common.arg_info[i].pass_by_reference;
+		if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_VARIADIC && func->common.arg_info[i].pass_by_reference)) {
 			while (i < MAX_ARG_FLAG_NUM) {
-				ZEND_SET_ARG_FLAG(func, i + 1, pass_by_reference);
+				ZEND_SET_ARG_FLAG(func, i + 1, 1);
 				i++;
 			}
 		}
