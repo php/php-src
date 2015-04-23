@@ -4800,6 +4800,7 @@ PHP_FUNCTION(forward_static_call)
 	zval retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zend_class_entry *called_scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
 		return;
@@ -4811,9 +4812,10 @@ PHP_FUNCTION(forward_static_call)
 
 	fci.retval = &retval;
 
-	if (EX(called_scope) &&
-		instanceof_function(EX(called_scope), fci_cache.calling_scope)) {
-			fci_cache.called_scope = EX(called_scope);
+	called_scope = zend_get_called_scope(execute_data);
+	if (called_scope &&
+		instanceof_function(called_scope, fci_cache.calling_scope)) {
+			fci_cache.called_scope = called_scope;
 	}
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4829,6 +4831,7 @@ PHP_FUNCTION(forward_static_call_array)
 	zval *params, retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zend_class_entry *called_scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "fa/", &fci, &fci_cache, &params) == FAILURE) {
 		return;
@@ -4837,9 +4840,10 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_args(&fci, params);
 	fci.retval = &retval;
 
-	if (EX(called_scope) &&
-		instanceof_function(EX(called_scope), fci_cache.calling_scope)) {
-			fci_cache.called_scope = EX(called_scope);
+	called_scope = zend_get_called_scope(execute_data);
+	if (called_scope &&
+		instanceof_function(called_scope, fci_cache.calling_scope)) {
+			fci_cache.called_scope = called_scope;
 	}
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {

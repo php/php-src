@@ -916,12 +916,15 @@ ZEND_FUNCTION(get_class)
    Retrieves the "Late Static Binding" class name */
 ZEND_FUNCTION(get_called_class)
 {
+	zend_class_entry *called_scope;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (EX(called_scope)) {
-		RETURN_STR_COPY(EX(called_scope)->name);
+	called_scope = zend_get_called_scope(execute_data);
+	if (called_scope) {
+		RETURN_STR_COPY(called_scope->name);
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}
@@ -2304,12 +2307,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		/* $this may be passed into regular internal functions */
 		object = Z_OBJ(call->This);
-		if (object &&
-			call &&
-		    call->func->type == ZEND_INTERNAL_FUNCTION &&
-		    !call->func->common.scope) {
-			object = NULL;
-		}
 
 		if (call->func) {
 			func = call->func;
@@ -2527,12 +2524,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		/* $this may be passed into regular internal functions */
 		object = call ? Z_OBJ(call->This) : NULL;
-		if (object &&
-		    call->func &&
-		    call->func->type == ZEND_INTERNAL_FUNCTION &&
-		    !call->func->common.scope) {
-			object = NULL;
-		}
 
 		if (call && call->func) {
 			func = call->func;

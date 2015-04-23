@@ -1055,6 +1055,38 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ */
+{
+	while (ex) {
+		if (ex->called_scope) {
+			return ex->called_scope;
+		} else if (ex->func) {
+			if (ex->func->type != ZEND_INTERNAL_FUNCTION || ex->func->common.scope) {
+				return ex->called_scope;
+			}
+		}
+		ex = ex->prev_execute_data;
+	}
+	return NULL;
+}
+/* }}} */
+
+ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
+{
+	while (ex) {
+		if (Z_OBJ(ex->This)) {
+			return Z_OBJ(ex->This);
+		} else if (ex->func) {
+			if (ex->func->type != ZEND_INTERNAL_FUNCTION || ex->func->common.scope) {
+				return Z_OBJ(ex->This);
+			}
+		}
+		ex = ex->prev_execute_data;
+	}
+	return NULL;
+}
+/* }}} */
+
 ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name) /* {{{ */
 {
 	zval pv;
@@ -1311,13 +1343,14 @@ check_fetch_type:
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
-			if (UNEXPECTED(!EG(current_execute_data)) || UNEXPECTED(!EG(current_execute_data)->called_scope)) {
+			ce = zend_get_called_scope(EG(current_execute_data));
+			if (UNEXPECTED(!ce)) {
 				int error_type = (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) ?
 						(E_EXCEPTION | E_ERROR) : E_ERROR;
 				zend_error(error_type, "Cannot access static:: when no class scope is active");
 				return NULL;
 			}
-			return EG(current_execute_data)->called_scope;
+			return ce;
 		case ZEND_FETCH_CLASS_AUTO: {
 				fetch_sub_type = zend_get_class_fetch_type(class_name);
 				if (UNEXPECTED(fetch_sub_type != ZEND_FETCH_CLASS_DEFAULT)) {

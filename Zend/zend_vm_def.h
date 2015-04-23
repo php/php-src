@@ -3391,9 +3391,6 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	call->called_scope = EX(called_scope);
-	Z_OBJ(call->This) = Z_OBJ(EX(This));
-
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
@@ -3504,9 +3501,6 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 				HANDLE_EXCEPTION();
 			}
 		}
-
-		call->called_scope = EX(called_scope);
-		Z_OBJ(call->This) = Z_OBJ(EX(This));
 
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
@@ -3627,9 +3621,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		if (fbc->common.scope) {
 			should_change_scope = 1;
 			EG(scope) = fbc->common.scope;
-		} else {
-			call->called_scope = EX(called_scope);
-			Z_OBJ(call->This) = Z_OBJ(EX(This));
 		}
 
 		call->prev_execute_data = execute_data;

@@ -1137,6 +1137,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	zend_function *fbc = NULL;
 	char *lc_class_name;
 	zend_string *lc_function_name;
+	zend_object *object;
 
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
@@ -1164,12 +1165,12 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				zend_string_release(lc_function_name);
 			}
 			if (ce->__call &&
-			    Z_OBJ(EG(current_execute_data)->This) &&
-			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce)) {
+				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
+			    instanceof_function(object->ce, ce)) {
 				/* Call the top-level defined __call().
 				 * see: tests/classes/__call_004.phpt  */
 
-				zend_class_entry *call_ce = Z_OBJCE(EG(current_execute_data)->This);
+				zend_class_entry *call_ce = object->ce;
 
 				while (!call_ce->__call) {
 					call_ce = call_ce->parent;

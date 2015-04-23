@@ -423,7 +423,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	}
 
 	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE,
-		(zend_function*)op_array, 0, EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL, EG(current_execute_data) ? Z_OBJ(EG(current_execute_data)->This) : NULL);
+		(zend_function*)op_array, 0, zend_get_called_scope(EG(current_execute_data)), zend_get_this_object(EG(current_execute_data)));
 	if (EG(current_execute_data)) {
 		execute_data->symbol_table = zend_rebuild_symbol_table();
 	} else {
@@ -548,9 +548,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	call->called_scope = EX(called_scope);
-	Z_OBJ(call->This) = Z_OBJ(EX(This));
-
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
@@ -661,9 +658,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(
 				HANDLE_EXCEPTION();
 			}
 		}
-
-		call->called_scope = EX(called_scope);
-		Z_OBJ(call->This) = Z_OBJ(EX(This));
 
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
@@ -784,9 +778,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 		if (fbc->common.scope) {
 			should_change_scope = 1;
 			EG(scope) = fbc->common.scope;
-		} else {
-			call->called_scope = EX(called_scope);
-			Z_OBJ(call->This) = Z_OBJ(EX(This));
 		}
 
 		call->prev_execute_data = execute_data;

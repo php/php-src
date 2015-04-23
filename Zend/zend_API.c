@@ -2864,10 +2864,10 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		if (!EG(scope)) {
 			if (error) *error = estrdup("cannot access self:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
+			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = EG(scope);
-			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
-				fcc->object = Z_OBJ(EG(current_execute_data)->This);
+			if (!fcc->object) {
+				fcc->object = zend_get_this_object(EG(current_execute_data));
 			}
 			ret = 1;
 		}
@@ -2877,22 +2877,24 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else if (!EG(scope)->parent) {
 			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
 		} else {
-			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
+			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
 			fcc->calling_scope = EG(scope)->parent;
-			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
-				fcc->object = Z_OBJ(EG(current_execute_data)->This);
+			if (!fcc->object) {
+				fcc->object = zend_get_this_object(EG(current_execute_data));
 			}
 			*strict_class = 1;
 			ret = 1;
 		}
 	} else if (zend_string_equals_literal(lcname, "static")) {
-		if (!EG(current_execute_data) || !EG(current_execute_data)->called_scope) {
+		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+
+		if (!called_scope) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
 		} else {
-			fcc->called_scope = EG(current_execute_data)->called_scope;
-			fcc->calling_scope = EG(current_execute_data)->called_scope;
-			if (!fcc->object && Z_OBJ(EG(current_execute_data)->This)) {
-				fcc->object = Z_OBJ(EG(current_execute_data)->This);
+			fcc->called_scope = called_scope;
+			fcc->calling_scope = called_scope;
+			if (!fcc->object) {
+				fcc->object = zend_get_this_object(EG(current_execute_data));
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2906,11 +2908,17 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
-		if (scope && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
-		    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), scope) &&
-		    instanceof_function(scope, fcc->calling_scope)) {
-			fcc->object = Z_OBJ(EG(current_execute_data)->This);
-			fcc->called_scope = Z_OBJCE(EG(current_execute_data)->This);
+		if (scope && !fcc->object) {
+			zend_object *object = zend_get_this_object(EG(current_execute_data));
+
+			if (object &&
+			    instanceof_function(object->ce, scope) &&
+			    instanceof_function(scope, fcc->calling_scope)) {
+				fcc->object = object;
+				fcc->called_scope = object->ce;
+			} else {
+				fcc->called_scope = fcc->calling_scope;
+			}
 		} else {
 			fcc->called_scope = fcc->object ? fcc->object->ce : fcc->calling_scope;
 		}
@@ -3101,9 +3109,12 @@ get_function_via_handler:
 			if (fcc->function_handler) {
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
-				if (call_via_handler && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
-				    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope)) {
-					fcc->object = Z_OBJ(EG(current_execute_data)->This);
+				if (call_via_handler && !fcc->object) {
+					zend_object *object = zend_get_this_object(EG(current_execute_data));
+					if (object &&
+					    instanceof_function(object->ce, fcc->calling_scope)) {
+						fcc->object = object;
+					}
 				}
 			}
 		}

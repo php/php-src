@@ -42,6 +42,8 @@ ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload);
+ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
+ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name);
 ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions);
