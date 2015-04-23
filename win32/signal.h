@@ -1,3 +1,6 @@
+#if _MSC_VER >= 1900
+#include <signal.h>
+#else
 /*
 ** Change here: if you plan to use your own version of <signal.h>
 ** the original "#include <signal.h>" produces an infinite reinclusion
@@ -11,6 +14,7 @@
 ** include file is located.
 */
 #include <../include/signal.h>
+#endif
 #define SIGALRM 13
 #define	SIGVTALRM 26			/* virtual time alarm */
 #define	SIGPROF	27				/* profiling time alarm */
