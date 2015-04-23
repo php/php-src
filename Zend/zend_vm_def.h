@@ -3396,7 +3396,7 @@ ZEND_VM_HANDLER(129, ZEND_DO_ICALL, ANY, ANY)
 
 	ret = EX_VAR(opline->result.var);
 	ZVAL_NULL(ret);
-	Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+	Z_VAR_FLAGS_P(ret) = 0;
 
 	fbc->internal_function.handler(call, ret);
 

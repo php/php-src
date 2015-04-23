@@ -553,7 +553,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_HANDLER(ZEND_OPC
 
 	ret = EX_VAR(opline->result.var);
 	ZVAL_NULL(ret);
-	Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+	Z_VAR_FLAGS_P(ret) = 0;
 
 	fbc->internal_function.handler(call, ret);
 

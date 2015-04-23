@@ -2708,7 +2708,7 @@ ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* 
 		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
 			if (!zend_execute_internal &&
 			    !fbc->common.scope &&
-			    !(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS))) {
+			    !(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_RETURN_REFERENCE))) {
 				return ZEND_DO_ICALL;
 			}
 		} else {
