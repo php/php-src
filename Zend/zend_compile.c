@@ -4108,7 +4108,7 @@ void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_set_function_arg_flags(zend_function *func) /* {{{ */
+ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 {
 	uint32_t i, n;
 
