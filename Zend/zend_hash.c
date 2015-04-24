@@ -1158,9 +1158,22 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 			SET_INCONSISTENT(HT_IS_DESTROYING);
 
 			if (ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) {
-				do {
-					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+				if (ht->nNumUsed == ht->nNumOfElements) {
+					do {
 						ht->pDestructor(&p->val);
+					} while (++p != end);
+				} else {
+					do {
+						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+							ht->pDestructor(&p->val);
+						}
+					} while (++p != end);
+				}
+			} else if (ht->nNumUsed == ht->nNumOfElements) {
+				do {
+					ht->pDestructor(&p->val);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
 					}
 				} while (++p != end);
 			} else {
@@ -1216,6 +1229,13 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 			} while (++p != end);
+		} else if (ht->nNumUsed == ht->nNumOfElements) {
+			do {
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				if (EXPECTED(p->key)) {
+					zend_string_release(p->key);
+				}
+			} while (++p != end);
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
@@ -1248,9 +1268,22 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
 			if (ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) {
-				do {
-					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+				if (ht->nNumUsed == ht->nNumOfElements) {
+					do {
 						ht->pDestructor(&p->val);
+					} while (++p != end);
+				} else {
+					do {
+						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+							ht->pDestructor(&p->val);
+						}
+					} while (++p != end);
+				}
+			} else if (ht->nNumUsed == ht->nNumOfElements) {
+				do {
+					ht->pDestructor(&p->val);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
 					}
 				} while (++p != end);
 			} else {
@@ -1265,13 +1298,21 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 			}
 		} else {
 			if (!(ht->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS))) {
-				do {
-					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+				if (ht->nNumUsed == ht->nNumOfElements) {
+					do {
 						if (EXPECTED(p->key)) {
 							zend_string_release(p->key);
 						}
-					}
-				} while (++p != end);
+					} while (++p != end);
+				} else {
+					do {
+						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+							if (EXPECTED(p->key)) {
+								zend_string_release(p->key);
+							}
+						}
+					} while (++p != end);
+				}
 			}
 		}
 		if (!(ht->u.flags & HASH_FLAG_PACKED)) {
@@ -1296,17 +1337,18 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		end = p + ht->nNumUsed;
 		if (ht->u.flags & HASH_FLAG_STATIC_KEYS) {
 			do {
-				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-					ht->pDestructor(&p->val);
-				}
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+			} while (++p != end);
+		} else if (ht->nNumUsed == ht->nNumOfElements) {
+			do {
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
+				zend_string_release(p->key);
 			} while (++p != end);
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-					if (EXPECTED(p->key)) {
-						zend_string_release(p->key);
-					}
+					zend_string_release(p->key);
 				}
 			} while (++p != end);
 		}
@@ -1535,12 +1577,107 @@ ZEND_API void ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source,
 }
 
 
+static zend_always_inline int zend_array_dup_element(HashTable *source, HashTable *target, uint32_t idx, Bucket *p, Bucket *q, int packed, int static_keys, int with_holes)
+{
+	zval *data = &p->val;
+
+	if (with_holes) {
+		if (!packed && Z_TYPE_INFO_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+		}
+		if (UNEXPECTED(Z_TYPE_INFO_P(data) == IS_UNDEF)) {
+			return 0;
+		}
+	} else if (!packed) {
+		/* INDIRECT element may point to UNDEF-ined slots */
+		if (Z_TYPE_INFO_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+			if (UNEXPECTED(Z_TYPE_INFO_P(data) == IS_UNDEF)) {
+				return 0;
+			}
+		}
+	}
+
+	do {
+		if (Z_OPT_REFCOUNTED_P(data)) {
+			if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1 &&
+			    (Z_TYPE_P(Z_REFVAL_P(data)) != IS_ARRAY ||
+			      Z_ARRVAL_P(Z_REFVAL_P(data)) != source)) {
+				data = Z_REFVAL_P(data);
+				if (!Z_OPT_REFCOUNTED_P(data)) {
+					break;
+				}
+			}
+			Z_ADDREF_P(data);
+		}
+	} while (0);
+	ZVAL_COPY_VALUE(&q->val, data);
+
+	q->h = p->h;
+	if (packed) {
+		q->key = NULL;
+	} else {
+		uint32_t nIndex;
+
+		q->key = p->key;
+		if (!static_keys && q->key) {
+			zend_string_addref(q->key);
+		}
+
+		nIndex = q->h | target->nTableMask;
+		Z_NEXT(q->val) = HT_HASH(target, nIndex);
+		HT_HASH(target, nIndex) = HT_IDX_TO_HASH(idx);
+	}
+	return 1;
+}
+
+static zend_always_inline void zend_array_dup_packed_elements(HashTable *source, HashTable *target, int with_holes)
+{
+	Bucket *p = source->arData;
+	Bucket *q = target->arData;
+	Bucket *end = p + source->nNumUsed;
+
+	do {
+		if (!zend_array_dup_element(source, target, 0, p, q, 1, 1, with_holes)) {
+			if (with_holes) {
+				ZVAL_UNDEF(&q->val);
+			}
+		}
+		p++; q++;
+	} while (p != end);
+}
+
+static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, HashTable *target, int static_keys, int with_holes)
+{
+    uint32_t idx = 0;
+	Bucket *p = source->arData;
+	Bucket *q = target->arData;
+	Bucket *end = p + source->nNumUsed;
+
+	do {
+		if (!zend_array_dup_element(source, target, idx, p, q, 0, static_keys, with_holes)) {
+			uint32_t target_idx = idx;
+
+			idx++; p++;
+			while (p != end) {
+				if (zend_array_dup_element(source, target, target_idx, p, q, 0, static_keys, with_holes)) {
+					if (source->nInternalPointer == idx) {
+						target->nInternalPointer = target_idx;
+					}
+					target_idx++; q++;
+				}
+				idx++; p++;
+			}
+			return target_idx;
+		}
+		idx++; p++; q++;
+	} while (p != end);
+	return idx;
+}
+
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 {
-    uint32_t idx, target_idx;
-	uint32_t nIndex;
-	Bucket *p, *q;
-	zval *data;
+    uint32_t idx;
 	HashTable *target;
 
 	IS_CONSISTENT(source);
@@ -1549,164 +1686,83 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	GC_REFCOUNT(target) = 1;
 	GC_TYPE_INFO(target) = IS_ARRAY;
 
-	target->nTableMask = source->nTableMask;
 	target->nTableSize = source->nTableSize;
 	target->pDestructor = source->pDestructor;
-	target->nInternalPointer = HT_INVALID_IDX;
-	target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
 
-	target_idx = 0;
-	if (target->u.flags & HASH_FLAG_INITIALIZED) {
-		if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
-			target->nNumUsed = source->nNumUsed;
-			target->nNumOfElements = source->nNumOfElements;
-			target->nNextFreeElement = source->nNextFreeElement;
-			HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
-			target->nInternalPointer = source->nInternalPointer;
-			memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
-			if (target->nNumOfElements > 0 &&
-			    target->nInternalPointer == HT_INVALID_IDX) {
-				idx = 0;
-				while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
-					idx++;
-				}
-				target->nInternalPointer = idx;
-			}
-		} else if (target->u.flags & HASH_FLAG_PACKED) {
-			target->nNumUsed = source->nNumUsed;
-			target->nNumOfElements = source->nNumOfElements;
-			target->nNextFreeElement = source->nNextFreeElement;
-			HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
-			target->nInternalPointer = source->nInternalPointer;
-			HT_HASH_RESET_PACKED(target);
-
-			for (idx = 0; idx < source->nNumUsed; idx++) {
-				p = source->arData + idx;
-				q = target->arData + idx;
-				if (Z_TYPE(p->val) == IS_UNDEF) {
-					ZVAL_UNDEF(&q->val);
-					continue;
-				}
-				data = &p->val;
-				q->h = p->h;
-				q->key = NULL;
-				if (Z_OPT_REFCOUNTED_P(data)) {
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1 &&
-					    (Z_TYPE_P(Z_REFVAL_P(data)) != IS_ARRAY ||
-					      Z_ARRVAL_P(Z_REFVAL_P(data)) != source)) {
-						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
-					} else {
-						ZVAL_COPY(&q->val, data);
-					}
-				} else {
-					ZVAL_COPY_VALUE(&q->val, data);
-				}
-			}
-			if (target->nNumOfElements > 0 &&
-			    target->nInternalPointer == HT_INVALID_IDX) {
-				idx = 0;
-				while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
-					idx++;
-				}
-				target->nInternalPointer = idx;
-			}
-		} else if (target->u.flags & HASH_FLAG_STATIC_KEYS) {
-			target->nNextFreeElement = source->nNextFreeElement;
-			HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
-			HT_HASH_RESET(target);
-
-			for (idx = 0; idx < source->nNumUsed; idx++) {
-				p = source->arData + idx;
-				if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-				/* INDIRECT element may point to UNDEF-ined slots */
-				data = &p->val;
-				if (Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-					if (UNEXPECTED(Z_TYPE_P(data) == IS_UNDEF)) {
-						continue;
-					}
-				}
-
-				if (source->nInternalPointer == idx) {
-					target->nInternalPointer = target_idx;
-				}
-
-				q = target->arData + target_idx;
-				q->h = p->h;
-				q->key = p->key;
-				nIndex = q->h | target->nTableMask;
-				Z_NEXT(q->val) = HT_HASH(target, nIndex);
-				HT_HASH(target, nIndex) = HT_IDX_TO_HASH(target_idx);
-				if (Z_OPT_REFCOUNTED_P(data)) {
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
-					} else {
-						ZVAL_COPY(&q->val, data);
-					}
-				} else {
-					ZVAL_COPY_VALUE(&q->val, data);
-				}
-				target_idx++;
-			}
-			target->nNumUsed = target_idx;
-			target->nNumOfElements = target_idx;
-			if (target->nNumOfElements > 0 &&
-			    target->nInternalPointer == HT_INVALID_IDX) {
-				target->nInternalPointer = 0;
-			}
-		} else {
-			target->nNextFreeElement = source->nNextFreeElement;
-			HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
-			HT_HASH_RESET(target);
-
-			for (idx = 0; idx < source->nNumUsed; idx++) {
-				p = source->arData + idx;
-				if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-				/* INDIRECT element may point to UNDEF-ined slots */
-				data = &p->val;
-				if (Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-					if (UNEXPECTED(Z_TYPE_P(data) == IS_UNDEF)) {
-						continue;
-					}
-				}
-
-				if (source->nInternalPointer == idx) {
-					target->nInternalPointer = target_idx;
-				}
-
-				q = target->arData + target_idx;
-				q->h = p->h;
-				q->key = p->key;
-				if (q->key) {
-					zend_string_addref(q->key);
-				}
-				nIndex = q->h | target->nTableMask;
-				Z_NEXT(q->val) = HT_HASH(target, nIndex);
-				HT_HASH(target, nIndex) = HT_IDX_TO_HASH(target_idx);
-				if (Z_OPT_REFCOUNTED_P(data)) {
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						ZVAL_COPY(&q->val, Z_REFVAL_P(data));
-					} else {
-						ZVAL_COPY(&q->val, data);
-					}
-				} else {
-					ZVAL_COPY_VALUE(&q->val, data);
-				}
-				target_idx++;
-			}
-			target->nNumUsed = target_idx;
-			target->nNumOfElements = target_idx;
-			if (target->nNumOfElements > 0 &&
-			    target->nInternalPointer == HT_INVALID_IDX) {
-				target->nInternalPointer = 0;
-			}
-		}
-	} else {
+	if (source->nNumUsed == 0) {
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
 		target->nNextFreeElement = 0;
+		target->nInternalPointer = HT_INVALID_IDX;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
+	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
+		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->nTableMask = source->nTableMask;
+		target->nNumUsed = source->nNumUsed;
+		target->nNumOfElements = source->nNumOfElements;
+		target->nNextFreeElement = source->nNextFreeElement;
+		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
+		target->nInternalPointer = source->nInternalPointer;
+		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
+		if (target->nNumOfElements > 0 &&
+		    target->nInternalPointer == HT_INVALID_IDX) {
+			idx = 0;
+			while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
+				idx++;
+			}
+			target->nInternalPointer = idx;
+		}
+	} else if (source->u.flags & HASH_FLAG_PACKED) {
+		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->nTableMask = source->nTableMask;
+		target->nNumUsed = source->nNumUsed;
+		target->nNumOfElements = source->nNumOfElements;
+		target->nNextFreeElement = source->nNextFreeElement;
+		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
+		target->nInternalPointer = source->nInternalPointer;
+		HT_HASH_RESET_PACKED(target);
+
+		if (target->nNumUsed == target->nNumOfElements) {
+			zend_array_dup_packed_elements(source, target, 0);
+		} else {
+			zend_array_dup_packed_elements(source, target, 1);
+		}
+		if (target->nNumOfElements > 0 &&
+		    target->nInternalPointer == HT_INVALID_IDX) {
+			idx = 0;
+			while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
+				idx++;
+			}
+			target->nInternalPointer = idx;
+		}
+	} else {
+		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->nTableMask = source->nTableMask;
+		target->nNextFreeElement = source->nNextFreeElement;
+		target->nInternalPointer = HT_INVALID_IDX;
+		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
+		HT_HASH_RESET(target);
+
+		if (target->u.flags & HASH_FLAG_STATIC_KEYS) {
+			if (source->nNumUsed == source->nNumOfElements) {
+				idx = zend_array_dup_elements(source, target, 1, 0);
+			} else {
+				idx = zend_array_dup_elements(source, target, 1, 1);
+			}
+		} else {
+			if (source->nNumUsed == source->nNumOfElements) {
+				idx = zend_array_dup_elements(source, target, 0, 0);
+			} else {
+				idx = zend_array_dup_elements(source, target, 0, 1);
+			}
+		}
+		target->nNumUsed = idx;
+		target->nNumOfElements = idx;
+		if (idx > 0 && target->nInternalPointer == HT_INVALID_IDX) {
+			target->nInternalPointer = 0;
+		}
 	}
 	return target;
 }
