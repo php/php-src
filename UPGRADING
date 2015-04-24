@@ -631,6 +631,7 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
   . ZLIB_SYNC_FLUSH
   . ZLIB_FULL_FLUSH
   . ZLIB_BLOCK
+  . ZLIB_FINISH
 
 ========================================
 11. Changes to INI File Handling
