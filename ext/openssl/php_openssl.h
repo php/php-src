@@ -19,6 +19,10 @@
 
 /* $Id$ */
 
+
+
+#include "zend.h"
+
 #ifndef PHP_OPENSSL_H
 #define PHP_OPENSSL_H
 /* HAVE_OPENSSL would include SSL MySQL stuff */
@@ -97,6 +101,19 @@ typedef struct php_ssl_error_context{
 	struct php_ssl_error* current;
 }PHP_SSL_ERROR_CONTEXT;
 
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	PHP_SSL_ERROR_CONTEXT *ssl_error_glogal_context;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#ifdef ZTS
+#define OPENSSL_G(v) TSRMG(openssl_globals_id, zend_openssl_globals *, v)
+#else
+#define OPENSSL_G(v) (openssl_globals.v)
+#endif
 /*
  * Local variables:
  * tab-width: 4

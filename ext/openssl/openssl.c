@@ -54,6 +54,8 @@
 /* Common */
 #include <time.h>
 
+ZEND_DECLARE_MODULE_GLOBALS(openssl);
+
 #ifdef NETWARE
 #define timezone _timezone	/* timezone is called _timezone in LibC */
 #endif
@@ -493,6 +495,11 @@ zend_module_entry openssl_module_entry = {
 ZEND_GET_MODULE(openssl)
 #endif
 
+static void php_openssl_init_globals(zend_openssl_globals *openssl_globals TSRMLS_DC)
+{
+	openssl_globals->ssl_error_glogal_context=NULL;
+}
+
 static int le_key;
 static int le_x509;
 static int le_csr;
@@ -807,22 +814,17 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
-
-
-
-
-static PHP_SSL_ERROR_CONTEXT *ssl_error_context;
-
 void php_openssl_store_errors(void)
 {
 		PHP_SSL_ERROR_QUEUE *err,*tmp;
 		char buf[512];
 		unsigned long val;
+		TSRMLS_FETCH();
 
 		//initialize error context if is null;
-		if(ssl_error_context==NULL) {
-			ssl_error_context = emalloc(sizeof(PHP_SSL_ERROR_CONTEXT));
-			ssl_error_context->current=NULL;
+		if(OPENSSL_G(ssl_error_glogal_context)==NULL) {
+			OPENSSL_G(ssl_error_glogal_context) = emalloc(sizeof(PHP_SSL_ERROR_CONTEXT));
+			OPENSSL_G(ssl_error_glogal_context)->current=NULL;
 		}
 
 		err = emalloc(sizeof(PHP_SSL_ERROR_QUEUE));
@@ -840,11 +842,11 @@ void php_openssl_store_errors(void)
 		}
 
 		//If error queue is empty, create the first
-		if(ssl_error_context->current==NULL){
-			ssl_error_context->current=err;
+		if(OPENSSL_G(ssl_error_glogal_context)->current==NULL){
+			OPENSSL_G(ssl_error_glogal_context)->current=err;
 		}else{
 			//Else, append error to last element
-			tmp=ssl_error_context->current;
+			tmp=OPENSSL_G(ssl_error_glogal_context)->current;
 			while(tmp->next!=NULL)
 			{
 				tmp=tmp->next;
@@ -856,20 +858,21 @@ void php_openssl_store_errors(void)
 
 void php_openssl_deinitialize_error_queue(void)
 {
+	TSRMLS_FETCH();
 	PHP_SSL_ERROR_QUEUE *tmp;
 	/* deinitialize error queue*/
-	if(ssl_error_context != NULL  ){
+	if(OPENSSL_G(ssl_error_glogal_context) != NULL  ){
 
 		//Empty error
-		while(ssl_error_context->current!=NULL){
-			tmp=ssl_error_context->current;
-			ssl_error_context->current=tmp->next;
+		while(OPENSSL_G(ssl_error_glogal_context)->current!=NULL){
+			tmp=OPENSSL_G(ssl_error_glogal_context)->current;
+			OPENSSL_G(ssl_error_glogal_context)->current=tmp->next;
 			efree(tmp->err_str);
 			efree(tmp);
 		}
 
-		efree(ssl_error_context);
-		ssl_error_context=NULL;
+		efree(OPENSSL_G(ssl_error_glogal_context));
+		OPENSSL_G(ssl_error_glogal_context)=NULL;
 
 	}
 
@@ -1254,6 +1257,9 @@ PHP_MINIT_FUNCTION(openssl)
 	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper TSRMLS_CC);
 	
+	ZEND_INIT_MODULE_GLOBALS(openssl, php_openssl_init_globals,	NULL);
+
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4293,12 +4299,12 @@ PHP_FUNCTION(openssl_error_string)
 	}
 
 	// Return false if error queue is empty or not initialized
-	if(ssl_error_context == NULL || ssl_error_context->current==NULL ){
+	if(OPENSSL_G(ssl_error_glogal_context) == NULL || OPENSSL_G(ssl_error_glogal_context)->current==NULL ){
 		RETURN_FALSE;;
 	}
 
 	// Get first error
-	tmp=ssl_error_context->current;
+	tmp=OPENSSL_G(ssl_error_glogal_context)->current;
 
 	//Store error msg
 	err_str=emalloc(strlen(tmp->err_str)+1);
@@ -4306,9 +4312,9 @@ PHP_FUNCTION(openssl_error_string)
 
 	//Update references of the error queue
 	if(tmp->next!=NULL){
-		ssl_error_context->current=tmp->next;
+		OPENSSL_G(ssl_error_glogal_context)->current=tmp->next;
 	}else{
-		ssl_error_context->current=NULL;
+		OPENSSL_G(ssl_error_glogal_context)->current=NULL;
 	}
 
 	//Free memory of the current error
