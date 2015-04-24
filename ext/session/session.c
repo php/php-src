@@ -105,6 +105,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
+	PS(mod_user_internal) = 0;
 	PS(define_sid) = 1;
 	PS(session_vars) = NULL;
 	ZVAL_UNDEF(&PS(http_session_vars));
@@ -2236,15 +2237,18 @@ static PHP_FUNCTION(session_start)
 		} ZEND_HASH_FOREACH_END();
 	}
 
+	PS(mod_user_internal) = 1;
 	php_session_start();
 
 	if (PS(session_status) != php_session_active) {
+		PS(mod_user_internal) = 0;
 		RETURN_FALSE;
 	}
 
 	if (read_and_close) {
 		php_session_flush(0);
 	}
+	PS(mod_user_internal) = 0;
 
 	RETURN_TRUE;
 }
@@ -2258,7 +2262,10 @@ static PHP_FUNCTION(session_destroy)
 		return;
 	}
 
-	RETURN_BOOL(php_session_destroy() == SUCCESS);
+	PS(mod_user_internal) = 1;
+	ret = php_session_destroy();
+	PS(mod_user_internal) = 0;
+	RETVAL_BOOL(ret == SUCCESS);
 }
 /* }}} */
 
@@ -2283,7 +2290,9 @@ static PHP_FUNCTION(session_unset)
    Write session data and end session */
 static PHP_FUNCTION(session_write_close)
 {
+	PS(mod_user_internal) = 1;
 	php_session_flush(1);
+	PS(mod_user_internal) = 0;
 }
 /* }}} */
 
@@ -2291,7 +2300,9 @@ static PHP_FUNCTION(session_write_close)
    Abort session and end session. Session data will not be written */
 static PHP_FUNCTION(session_abort)
 {
+	PS(mod_user_internal) = 1;
 	php_session_abort();
+	PS(mod_user_internal) = 0;
 }
 /* }}} */
 
@@ -2299,7 +2310,9 @@ static PHP_FUNCTION(session_abort)
    Reset session data from saved session data */
 static PHP_FUNCTION(session_reset)
 {
+	PS(mod_user_internal) = 1;
 	php_session_reset();
+	PS(mod_user_internal) = 0;
 }
 /* }}} */
 
