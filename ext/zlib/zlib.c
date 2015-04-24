@@ -1147,6 +1147,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, flush_behavior)
 ZEND_END_ARG_INFO()
 
+/* }}} */
 
 /* {{{ php_zlib_functions[] */
 static const zend_function_entry php_zlib_functions[] = {
