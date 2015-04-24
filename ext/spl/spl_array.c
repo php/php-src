@@ -52,11 +52,10 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_OVERLOADED_KEY     0x00040000
 #define SPL_ARRAY_OVERLOADED_CURRENT 0x00080000
 #define SPL_ARRAY_OVERLOADED_NEXT    0x00100000
-#define SPL_ARRAY_IS_REF             0x01000000
-#define SPL_ARRAY_IS_SELF            0x02000000
-#define SPL_ARRAY_USE_OTHER          0x04000000
+#define SPL_ARRAY_IS_SELF            0x01000000
+#define SPL_ARRAY_USE_OTHER          0x02000000
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
-#define SPL_ARRAY_CLONE_MASK         0x0300FFFF
+#define SPL_ARRAY_CLONE_MASK         0x0100FFFF
 
 #define SPL_ARRAY_METHOD_NO_ARG				0
 #define SPL_ARRAY_METHOD_USE_ARG    		1
@@ -165,11 +164,10 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		} else {
 			intern->array = *orig;
 			Z_ADDREF_P(&intern->array);
-			intern->ar_flags |= SPL_ARRAY_IS_REF | SPL_ARRAY_USE_OTHER;
+			intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 		}
 	} else {
 		array_init(&intern->array);
-		intern->ar_flags &= ~SPL_ARRAY_IS_REF;
 	}
 
 	while (parent) {
