@@ -438,6 +438,7 @@ PS_CLOSE_FUNC(files)
 
 	if (data->lastkey) {
 		efree(data->lastkey);
+		data->lastkey = NULL;
 	}
 
 	efree(data->basedir);
