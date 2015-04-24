@@ -484,8 +484,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	int err,
 		must_verify_peer,
 		must_verify_peer_name,
-		must_verify_fingerprint,
-		has_cnmatch_ctx_opt;
+		must_verify_fingerprint;
 
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
@@ -493,8 +492,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		? zend_is_true(val)
 		: sslsock->is_client;
 
-	has_cnmatch_ctx_opt = GET_VER_OPT("CN_match");
-	must_verify_peer_name = (has_cnmatch_ctx_opt || GET_VER_OPT("verify_peer_name"))
+	must_verify_peer_name = GET_VER_OPT("verify_peer_name")
 		? zend_is_true(val)
 		: sslsock->is_client;
 
@@ -549,12 +547,6 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	if (must_verify_peer_name) {
 		GET_VER_OPT_STRING("peer_name", peer_name);
 
-		if (has_cnmatch_ctx_opt) {
-			GET_VER_OPT_STRING("CN_match", peer_name);
-			php_error(E_DEPRECATED,
-				"the 'CN_match' SSL context option is deprecated in favor of 'peer_name'"
-			);
-		}
 		/* If no peer name was specified we use the autodetected url name in client environments */
 		if (peer_name == NULL && sslsock->is_client) {
 			peer_name = sslsock->url_name;
@@ -1428,11 +1420,6 @@ static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *
 	sni_server_name = sslsock->url_name;
 
 	GET_VER_OPT_STRING("peer_name", sni_server_name);
-
-	if (GET_VER_OPT("SNI_server_name")) {
-		GET_VER_OPT_STRING("SNI_server_name", sni_server_name);
-		php_error(E_DEPRECATED, "SNI_server_name is deprecated in favor of peer_name");
-	}
 
 	if (sni_server_name) {
 		SSL_set_tlsext_host_name(sslsock->ssl_handle, sni_server_name);

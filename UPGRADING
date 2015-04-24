@@ -482,6 +482,8 @@ Other
 - OpenSSL:
   . Removed the "rsa_key_size" SSL context option in favor of automatically
     setting the appropriate size given the negotiated crypto algorithm.
+  . Removed "CN_match" and "SNI_server_name" SSL context options. Use automatic
+    detection or the "peer_name" option instead.
 
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use

@@ -147,6 +147,8 @@
     streams to negotiate alternative protocols using the ALPN TLS extension when
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
     accessible through stream_get_meta_data() output.
+  . Removed "CN_match" and "SNI_server_name" SSL context options. Use automatic
+    detection or the "peer_name" option instead. (Nikita)
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
