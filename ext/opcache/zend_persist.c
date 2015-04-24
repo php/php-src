@@ -268,6 +268,7 @@ static void zend_persist_zval(zval *z)
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
+					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
 					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
@@ -323,6 +324,7 @@ static void zend_persist_zval_static(zval *z)
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
+					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
 					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
@@ -380,6 +382,7 @@ static void zend_persist_zval_const(zval *z)
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
+					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
 					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
@@ -445,6 +448,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			/* make immutable array */
 			GC_REFCOUNT(op_array->static_variables) = 2;
 			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
 			op_array->static_variables->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 		}
 	}

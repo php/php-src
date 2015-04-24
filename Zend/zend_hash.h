@@ -38,6 +38,7 @@
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
+#define HASH_FLAG_STATIC_KEYS      (1<<4)
 
 #define HASH_MASK_CONSISTENCY      0x60
 
@@ -879,8 +880,13 @@ static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_COPY_VALUE(&p->val, zv);
-	p->key = zend_string_copy(key);
-	p->h = zend_string_hash_val(key);
+	if (!IS_INTERNED(key)) {
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_addref(key);
+		zend_string_hash_val(key);		
+	}
+	p->key = key;
+	p->h = key->h;
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
@@ -895,8 +901,13 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_PTR(&p->val, ptr);
-	p->key = zend_string_copy(key);
-	p->h = zend_string_hash_val(key);
+	if (!IS_INTERNED(key)) {
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_addref(key);
+		zend_string_hash_val(key);		
+	}
+	p->key = key;
+	p->h = key->h;
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
@@ -911,8 +922,13 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_INDIRECT(&p->val, ptr);
-	p->key = zend_string_copy(key);
-	p->h = zend_string_hash_val(key);
+	if (!IS_INTERNED(key)) {
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_addref(key);
+		zend_string_hash_val(key);		
+	}
+	p->key = key;
+	p->h = key->h;
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
