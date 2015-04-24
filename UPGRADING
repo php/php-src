@@ -487,6 +487,10 @@ Other
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
     preg_reaplace_callback() instead.
 
+- PDO_pgsql:
+  . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
+    ATTR_EMULATE_PREPARES.
+
 - Standard:
   . Removed string category support in setlocale(). Use the LC_* constants
     instead.

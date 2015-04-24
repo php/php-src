@@ -164,6 +164,10 @@
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
     statements option). (peter dot wolanin at acquia dot com)
 
+- PDO_pgsql:
+  . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
+    ATTR_EMULATE_PREPARES). (Nikita)
+
 - Reflection
   . Fixed inheritance chain of Reflector interface. (Tjerk)
 

@@ -90,8 +90,7 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 #define pdo_pgsql_sqlstate(r) PQresultErrorField(r, PG_DIAG_SQLSTATE)
 
 enum {
-	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
-	PDO_PGSQL_ATTR_DISABLE_PREPARES,
+	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
 };
 
 struct pdo_pgsql_lob_self {
