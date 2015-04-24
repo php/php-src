@@ -580,6 +580,10 @@ Other
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
 
+- Zlib:
+  . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
+    functions allowing incremental/streaming compression/decompression.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -618,6 +622,15 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
 - Core
   . PHP_INT_MIN added.
+
+- Zlib
+  . These constants are added to control flush behavior with the new
+    incremental deflate_add() and inflate_add() functions:
+  . ZLIB_NO_FLUSH
+  . ZLIB_PARTIAL_FLUSH
+  . ZLIB_SYNC_FLUSH
+  . ZLIB_FULL_FLUSH
+  . ZLIB_BLOCK
 
 ========================================
 11. Changes to INI File Handling

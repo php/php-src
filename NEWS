@@ -216,4 +216,9 @@
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
   . Removed xsl.security_prefs ini option. (Nikita)
 
+- Zlib:
+  . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
+    functions allowing incremental/streaming compression/decompression.
+    (Daniel Lowrey & Bob Weinand)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
