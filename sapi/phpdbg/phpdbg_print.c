@@ -73,8 +73,8 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 						op_array->last);
 				} else {
 					phpdbg_writeln("printoplineinfo", "type=\"User\" startline=\"%d\" endline=\"%d\" function=\"%s\" file=\"%s\" opline=\"%p\"", "L%d-%d %s() %s - %p + %d ops",
-						method->common.function_name ? op_array->line_start : 0,
-						method->common.function_name ? op_array->line_end : 0,
+						op_array->line_start,
+						op_array->line_end,
 						method->common.function_name ? method->common.function_name->val : "{main}",
 						op_array->filename ? op_array->filename->val : "unknown",
 						opline,
