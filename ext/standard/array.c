@@ -1470,12 +1470,9 @@ PHP_FUNCTION(extract)
 		if (var_name) {
 			var_exists = zend_hash_exists_ind(symbol_table, var_name);
 		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
-			zval num;
-
-			ZVAL_LONG(&num, num_key);
-			convert_to_string(&num);
-			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), Z_STRLEN(num), 1);
-			zval_dtor(&num);
+			zend_string *str = zend_long_to_str(num_key);
+			php_prefix_varname(&final_name, prefix, str->val, str->len, 1);
+			zend_string_release(str);
 		} else {
 			continue;
 		}
@@ -3364,14 +3361,9 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-static int zval_compare(zval *a, zval *b) /* {{{ */
+static int zval_compare(zval *first, zval *second) /* {{{ */
 {
 	zval result;
-	zval *first;
-	zval *second;
-
-	first = a;
-	second = b;
 
 	if (Z_TYPE_P(first) == IS_INDIRECT) {
 		first = Z_INDIRECT_P(first);

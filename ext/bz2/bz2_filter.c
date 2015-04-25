@@ -377,28 +377,21 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "blocks", sizeof("blocks")-1))) {
 					/* How much memory to allocate (1 - 9) x 100kb */
-					zval tmp;
-
-					ZVAL_DUP(&tmp, tmpzval);
-					convert_to_long(&tmp);
-					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", Z_LVAL_P(tmpzval));
+					zend_long blocks = zval_get_long(tmpzval);
+					if (blocks < 1 || blocks > 9) {
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", blocks);
 					} else {
-						blockSize100k = (int)Z_LVAL(tmp);
+						blockSize100k = (int) blocks;
 					}
 				}
 
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "work", sizeof("work")-1))) {
 					/* Work Factor (0 - 250) */
-					zval tmp;
-
-					ZVAL_DUP(&tmp, tmpzval);
-					convert_to_long(&tmp);
-
-					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (%pd)", Z_LVAL(tmp));
+					zend_long work = zval_get_long(tmpzval);
+					if (work < 0 || work > 250) {
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (%pd)", work);
 					} else {
-						workFactor = (int)Z_LVAL(tmp);
+						workFactor = (int) work;
 					}
 				}
 			}

@@ -1065,15 +1065,9 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 		snprintf(s, sizeof(s), "%0.0F",floor(Z_DVAL_P(data)));
 		xmlNodeSetContent(ret, BAD_CAST(s));
 	} else {
-		zval tmp;
-
-		ZVAL_DUP(&tmp, data);
-		if (Z_TYPE(tmp) != IS_LONG) {
-			convert_to_long(&tmp);
-		}
-		convert_to_string(&tmp);
-		xmlNodeSetContentLen(ret, BAD_CAST(Z_STRVAL(tmp)), Z_STRLEN(tmp));
-		zval_dtor(&tmp);
+		zend_string *str = zend_long_to_str(zval_get_long(data));
+		xmlNodeSetContentLen(ret, BAD_CAST(str->val), str->len);
+		zend_string_release(str);
 	}
 
 	if (style == SOAP_ENCODED) {

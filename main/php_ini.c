@@ -886,15 +886,13 @@ PHPAPI zval *cfg_get_entry(const char *name, size_t name_length)
  */
 PHPAPI int cfg_get_long(const char *varname, zend_long *result)
 {
-	zval *tmp, var;
+	zval *tmp;
 
 	if ((tmp = zend_hash_str_find(&configuration_hash, varname, strlen(varname))) == NULL) {
 		*result = 0;
 		return FAILURE;
 	}
-	ZVAL_DUP(&var, tmp);
-	convert_to_long(&var);
-	*result = Z_LVAL(var);
+	*result = zval_get_long(tmp);
 	return SUCCESS;
 }
 /* }}} */
@@ -903,15 +901,13 @@ PHPAPI int cfg_get_long(const char *varname, zend_long *result)
  */
 PHPAPI int cfg_get_double(const char *varname, double *result)
 {
-	zval *tmp, var;
+	zval *tmp;
 
 	if ((tmp = zend_hash_str_find(&configuration_hash, varname, strlen(varname))) == NULL) {
 		*result = (double) 0;
 		return FAILURE;
 	}
-	ZVAL_DUP(&var, tmp);
-	convert_to_double(&var);
-	*result = Z_DVAL(var);
+	*result = zval_get_double(tmp);
 	return SUCCESS;
 }
 /* }}} */

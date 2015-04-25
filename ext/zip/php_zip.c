@@ -315,16 +315,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 {
 	zval *option;
 	if ((option = zend_hash_str_find(HASH_OF(options), "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
-		zend_long opt;
-		if (Z_TYPE_P(option) != IS_LONG) {
-			zval tmp;
-			ZVAL_DUP(&tmp, option);
-			convert_to_long(&tmp);
-			opt = Z_LVAL(tmp);
-		} else {
-			opt = Z_LVAL_P(option);
-		}
-		*remove_all_path = opt;
+		*remove_all_path = zval_get_long(option);
 	}
 
 	/* If I add more options, it would make sense to create a nice static struct and loop over it. */

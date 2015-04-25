@@ -1232,92 +1232,35 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	return PHP_CONV_ERR_SUCCESS;
 }
 
-#if IT_WAS_USED
-static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *pretval, char *field_name, size_t field_name_len)
-{
-	zval **tmpval;
-
-	*pretval = 0;
-
-	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
-		zval tmp, *ztval = *tmpval;
-
-		if (Z_TYPE_PP(tmpval) != IS_LONG) {
-			tmp = *ztval;
-			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
-			ztval = &tmp;
-		}
-		*pretval = Z_LVAL_P(ztval);
-	} else {
-		return PHP_CONV_ERR_NOT_FOUND;
-	}
-	return PHP_CONV_ERR_SUCCESS;
-}
-#endif
-
 static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong *pretval, char *field_name, size_t field_name_len)
 {
-	zval *tmpval;
+	zval *tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1);
+	if (tmpval != NULL) {
+		zend_long lval = zval_get_long(tmpval);
 
-	*pretval = 0;
-
-	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
-		zval tmp;
-
-		if (Z_TYPE_P(tmpval) != IS_LONG) {
-			ZVAL_DUP(&tmp, tmpval);
-			convert_to_long(&tmp);
-			tmpval = &tmp;
-		}
-		if (Z_LVAL_P(tmpval) < 0) {
+		if (lval < 0) {
 			*pretval = 0;
 		} else {
-			*pretval = Z_LVAL_P(tmpval);
+			*pretval = lval;
 		}
+		return PHP_CONV_ERR_SUCCESS;
 	} else {
+		*pretval = 0;
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
-	return PHP_CONV_ERR_SUCCESS;
 }
 
 static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	zval *tmpval;
-
-	*pretval = 0;
-
-	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
-		zval tmp;
-
-		if (Z_TYPE_P(tmpval) != IS_FALSE || Z_TYPE_P(tmpval) != IS_TRUE) {
-			ZVAL_DUP(&tmp, tmpval);
-			zval_copy_ctor(&tmp);
-			convert_to_boolean(&tmp);
-			tmpval = &tmp;
-		}
-		*pretval = (Z_TYPE_P(tmpval) == IS_TRUE);
+	zval *tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1);
+	if (tmpval != NULL) {
+		*pretval = zend_is_true(tmpval);
+		return PHP_CONV_ERR_SUCCESS;
 	} else {
+		*pretval = 0;
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
-	return PHP_CONV_ERR_SUCCESS;
 }
-
-
-#if IT_WAS_USED
-static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
-{
-	zend_long l;
-	php_conv_err_t err;
-
-	*pretval = 0;
-
-	if ((err = php_conv_get_long_prop_ex(ht, &l, field_name, field_name_len)) == PHP_CONV_ERR_SUCCESS) {
-		*pretval = l;
-	}
-	return err;
-}
-#endif
 
 /* XXX this might need an additional fix so it uses size_t, whereby unsigned is quite big so leaving as is for now */
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)

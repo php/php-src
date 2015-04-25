@@ -407,12 +407,9 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
 {
 	char tmp_buf[WDDX_BUF_LEN];
-	zval tmp;
-
-	ZVAL_DUP(&tmp, var);
-	convert_to_string(&tmp);
-	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_NUMBER, Z_STRVAL(tmp));
-	zval_ptr_dtor(&tmp);
+	zend_string *str = zval_get_string(var);
+	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_NUMBER, str->val);
+	zend_string_release(str);
 
 	php_wddx_add_chunk(packet, tmp_buf);
 }

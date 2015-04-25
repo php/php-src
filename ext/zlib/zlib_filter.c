@@ -326,15 +326,12 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
 				(tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
-				zval tmp;
-
 				/* log-2 base of history window (9 - 15) */
-				ZVAL_DUP(&tmp, tmpzval);
-				convert_to_long(&tmp);
-				if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 32) {
-					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+				zend_long tmp = zval_get_long(tmpzval);
+				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
+					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", tmp);
 				} else {
-					windowBits = Z_LVAL(tmp);
+					windowBits = tmp;
 				}
 			}
 		}
@@ -351,7 +348,8 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 
 		if (filterparams) {
-			zval *tmpzval, tmp;
+			zval *tmpzval;
+			zend_long tmp;
 
 			/* filterparams can either be a scalar value to indicate compression level (shortcut method)
                Or can be a hash containing one or more of 'window', 'memory', and/or 'level' members. */
@@ -360,31 +358,27 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_ARRAY:
 				case IS_OBJECT:
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "memory", sizeof("memory") -1))) {
-						ZVAL_DUP(&tmp, tmpzval);
-						convert_to_long(&tmp);
-
 						/* Memory Level (1 - 9) */
-						if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > MAX_MEM_LEVEL) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
+						tmp = zval_get_long(tmpzval);
+						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (%pd)", tmp);
 						} else {
-							memLevel = Z_LVAL(tmp);
+							memLevel = tmp;
 						}
 					}
 
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
-						ZVAL_DUP(&tmp, tmpzval);
-						convert_to_long(&tmp);
-
 						/* log-2 base of history window (9 - 15) */
-						if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 16) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+						tmp = zval_get_long(tmpzval);
+						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", tmp);
 						} else {
-							windowBits = Z_LVAL(tmp);
+							windowBits = tmp;
 						}
 					}
 
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "level", sizeof("level") - 1))) {
-						ZVAL_COPY_VALUE(&tmp, tmpzval);
+						tmp = zval_get_long(tmpzval);
 
 						/* Pseudo pass through to catch level validating code */
 						goto factory_setlevel;
@@ -393,16 +387,13 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_STRING:
 				case IS_DOUBLE:
 				case IS_LONG:
-					ZVAL_COPY_VALUE(&tmp, filterparams);
+					tmp = zval_get_long(filterparams);
 factory_setlevel:
-					zval_copy_ctor(&tmp);
-					convert_to_long(&tmp);
-
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
-					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
+					if (tmp < -1 || tmp > 9) {
+						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (%pd)", tmp);
 					} else {
-						level = Z_LVAL(tmp);
+						level = tmp;
 					}
 					break;
 				default:

@@ -899,7 +899,7 @@ PHP_FUNCTION(deflate_init)
 		RETURN_FALSE;
 	}
 
-	if (options && (option_buffer = zend_symtable_str_find(options, "memory", sizeof("memory")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "memory", sizeof("memory")-1)) != NULL) {
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
