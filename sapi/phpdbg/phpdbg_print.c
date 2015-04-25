@@ -30,12 +30,12 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[8], flags)
 
 const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_COMMAND_D(exec,       "print out the instructions in the execution context",  'e', print_exec,   NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_PRINT_COMMAND_D(opline,     "print out the instruction in the current opline",      'o', print_opline, NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_PRINT_COMMAND_D(class,      "print out the instructions in the specified class",    'c', print_class,  NULL, "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_PRINT_COMMAND_D(method,     "print out the instructions in the specified method",   'm', print_method, NULL, "m", PHPDBG_ASYNC_SAFE),
-	PHPDBG_PRINT_COMMAND_D(func,       "print out the instructions in the specified function", 'f', print_func,   NULL, "s", PHPDBG_ASYNC_SAFE),
-	PHPDBG_PRINT_COMMAND_D(stack,      "print out the instructions in the current stack",      's', print_stack,  NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(exec,       "print out the instructions in the main execution context", 'e', print_exec,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(opline,     "print out the instruction in the current opline",          'o', print_opline, NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(class,      "print out the instructions in the specified class",        'c', print_class,  NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(method,     "print out the instructions in the specified method",       'm', print_method, NULL, "m", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(func,       "print out the instructions in the specified function",     'f', print_func,   NULL, "s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_PRINT_COMMAND_D(stack,      "print out the instructions in the current stack",          's', print_stack,  NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 };
 

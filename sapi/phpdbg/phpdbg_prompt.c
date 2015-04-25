@@ -821,7 +821,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 PHPDBG_COMMAND(print) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		return phpdbg_do_print_exec(param);
+		return phpdbg_do_print_stack(param);
 	} else switch (param->type) {
 		case STR_PARAM:
 			return phpdbg_do_print_func(param);
