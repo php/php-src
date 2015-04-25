@@ -83,19 +83,16 @@ static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props) { /* {{{ */
-	if ((intern->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
+	if (intern->ar_flags & SPL_ARRAY_IS_SELF
+		|| (check_std_props && (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST))
+	) {
 		if (!intern->std.properties) {
 			rebuild_object_properties(&intern->std);
 		}
 		return intern->std.properties;
-	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0)) {
+	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
 		return spl_array_get_hash_table(other, check_std_props);
-	} else if ((intern->ar_flags & ((check_std_props ? SPL_ARRAY_STD_PROP_LIST : 0) | SPL_ARRAY_IS_SELF)) != 0) {
-		if (!intern->std.properties) {
-			rebuild_object_properties(&intern->std);
-		}
-		return intern->std.properties;
 	} else {
 		return HASH_OF(&intern->array);
 	}
@@ -103,7 +100,9 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 
 static inline zend_bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 {
-	//??? shouldn't this take USE_OTHER into account?
+	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
+		intern = Z_SPLARRAY_P(&intern->array);
+	}
 	return (intern->ar_flags & SPL_ARRAY_IS_SELF) || Z_TYPE(intern->array) == IS_OBJECT;
 }
 /* }}} */
@@ -1278,8 +1277,6 @@ SPL_METHOD(Array, getIterator)
 	}
 
 	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, object, 0));
-	Z_SET_REFCOUNT_P(return_value, 1);
-	//!!!PZ_SET_ISREF_P(return_value);
 }
 /* }}} */
 
@@ -1628,7 +1625,7 @@ SPL_METHOD(Array, getChildren)
 		}
 	}
 
-	ZVAL_LONG(&flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
+	ZVAL_LONG(&flags, intern->ar_flags);
 	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, entry, &flags);
 }
 /* }}} */
