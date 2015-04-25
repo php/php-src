@@ -88,7 +88,7 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 			rebuild_object_properties(&intern->std);
 		}
 		return intern->std.properties;
-	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0) && Z_TYPE(intern->array) == IS_OBJECT) {
+	} else if ((intern->ar_flags & SPL_ARRAY_USE_OTHER) && (check_std_props == 0 || (intern->ar_flags & SPL_ARRAY_STD_PROP_LIST) == 0)) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
 		return spl_array_get_hash_table(other, check_std_props);
 	} else if ((intern->ar_flags & ((check_std_props ? SPL_ARRAY_STD_PROP_LIST : 0) | SPL_ARRAY_IS_SELF)) != 0) {
@@ -100,6 +100,13 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 		return HASH_OF(&intern->array);
 	}
 } /* }}} */
+
+static inline zend_bool spl_array_is_object(spl_array_object *intern) /* {{{ */
+{
+	//??? shouldn't this take USE_OTHER into account?
+	return (intern->ar_flags & SPL_ARRAY_IS_SELF) || Z_TYPE(intern->array) == IS_OBJECT;
+}
+/* }}} */
 
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
@@ -154,16 +161,16 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		intern->ar_flags |= (other->ar_flags & SPL_ARRAY_CLONE_MASK);
 		intern->ce_get_iterator = other->ce_get_iterator;
 		if (clone_orig) {
-			intern->array = other->array;
-			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
+			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
+				ZVAL_UNDEF(&intern->array);
+			} else if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
 				ZVAL_ARR(&intern->array, zend_array_dup(HASH_OF(&other->array)));
-			}
-			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
-				Z_ADDREF_P(&other->array);
+			} else {
+				ZEND_ASSERT(Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator);
+				ZVAL_COPY(&intern->array, &other->array);
 			}
 		} else {
-			intern->array = *orig;
-			Z_ADDREF_P(&intern->array);
+			ZVAL_COPY(&intern->array, orig);
 			intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 		}
 	} else {
@@ -524,7 +531,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 						zval_ptr_dtor(data);
 						ZVAL_UNDEF(data);
 						zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
-						if (Z_TYPE(intern->array) == IS_OBJECT) {
+						if (spl_array_is_object(intern)) {
 							spl_array_skip_protected(intern, ht);
 						}
 					}
@@ -730,7 +737,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 		return;
 	}
 
-	if (Z_TYPE(intern->array) == IS_OBJECT) {
+	if (spl_array_is_object(intern)) {
 		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name->val);
 		return;
 	}
@@ -800,7 +807,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 		rebuild_object_properties(&intern->std);
 	}
 
-	if (HASH_OF(&intern->array) == intern->std.properties) {
+	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		*is_temp = 0;
 		return intern->std.properties;
 	} else {
@@ -912,7 +919,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 	zend_ulong num_key;
 	zval *data;
 
-	if (Z_TYPE(intern->array) == IS_OBJECT) {
+	if (spl_array_is_object(intern)) {
 		uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, intern);
 
 		do {
@@ -941,7 +948,7 @@ static int spl_array_next_ex(spl_array_object *intern, HashTable *aht) /* {{{ */
 	uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, intern);
 
 	zend_hash_move_forward_ex(aht, pos_ptr);
-	if (Z_TYPE(intern->array) == IS_OBJECT) {
+	if (spl_array_is_object(intern)) {
 		return spl_array_skip_protected(intern, aht);
 	} else {
 		return zend_hash_has_more_elements_ex(aht, pos_ptr);
@@ -1066,40 +1073,41 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 
 /* {{{ spl_array_set_array */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
+	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
+		zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0);
+		return;
+	}
 
-	if (Z_TYPE_P(array) == IS_OBJECT && (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator)) {
-		zval_ptr_dtor(&intern->array);
-		if (just_array)	{
-			spl_array_object *other = Z_SPLARRAY_P(array);
-			ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
-		}
-		ar_flags |= SPL_ARRAY_USE_OTHER;
-	} else {
-		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0);
-			return;
-		}
-		zval_ptr_dtor(&intern->array);
-	}
-	if (Z_TYPE_P(array) == IS_OBJECT && Z_OBJ_P(object) == Z_OBJ_P(array)) {
-		intern->ar_flags |= SPL_ARRAY_IS_SELF;
-		intern->ar_flags &= ~SPL_ARRAY_USE_OTHER;
-	} else {
-		intern->ar_flags &= ~SPL_ARRAY_IS_SELF;
-	}
-	intern->ar_flags |= ar_flags;
+	zval_ptr_dtor(&intern->array);
+
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		//??? TODO: try to avoid array duplication
 		ZVAL_DUP(&intern->array, array);
 	} else {
-		zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-		ZVAL_COPY(&intern->array, array);
-		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
-		|| !spl_array_get_hash_table(intern, 0)) {
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
+			if (just_array)	{
+				spl_array_object *other = Z_SPLARRAY_P(array);
+				ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
+			}
+			if (Z_OBJ_P(object) == Z_OBJ_P(array)) {
+				ar_flags |= SPL_ARRAY_IS_SELF;
+				ZVAL_UNDEF(&intern->array);
+			} else {
+				ar_flags |= SPL_ARRAY_USE_OTHER;
+				ZVAL_COPY(&intern->array, array);
+			}
+		} else {
+			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
+			ZVAL_COPY(&intern->array, array);
+			if (handler != std_object_handlers.get_properties
+				|| !spl_array_get_hash_table(intern, 0)) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
+			}
 		}
 	}
 
+	intern->ar_flags &= ~SPL_ARRAY_IS_SELF & ~SPL_ARRAY_USE_OTHER;
+	intern->ar_flags |= ar_flags;
 	intern->ht_iter = (uint32_t)-1;
 }
 /* }}} */
@@ -1335,7 +1343,7 @@ int static spl_array_object_count_elements_helper(spl_array_object *intern, zend
 		return FAILURE;
 	}
 
-	if (Z_TYPE(intern->array) == IS_OBJECT) {
+	if (spl_array_is_object(intern)) {
 		/* We need to store the 'pos' since we'll modify it in the functions
 		 * we're going to call and which do not support 'pos' as parameter. */
 		pos_ptr = spl_array_get_pos_ptr(aht, intern);

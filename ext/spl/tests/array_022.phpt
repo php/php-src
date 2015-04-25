@@ -50,31 +50,21 @@ object(MyArrayObject)#%d (1) {
   ["bar"]=>
   string(3) "baz"
 }
-object(MyArrayObject)#%d (3) {
+object(MyArrayObject)#%d (2) {
   ["bar"]=>
   string(3) "baz"
   ["baz"]=>
   string(3) "Foo"
-  ["storage":"ArrayObject":private]=>
-  array(1) {
-    ["bar"]=>
-    string(3) "baz"
-  }
 }
 ==ArrayIterator===
 object(MyArrayIterator)#%d (1) {
   ["bar"]=>
   string(3) "baz"
 }
-object(MyArrayIterator)#%d (3) {
+object(MyArrayIterator)#%d (2) {
   ["bar"]=>
   string(3) "baz"
   ["baz"]=>
   string(3) "Foo"
-  ["storage":"ArrayIterator":private]=>
-  object(MyArrayIterator)#%d (1) {
-    ["bar"]=>
-    string(3) "baz"
-  }
 }
 ===DONE===
