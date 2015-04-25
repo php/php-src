@@ -760,7 +760,7 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l", &encoding)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (encoding) {
@@ -801,7 +801,7 @@ PHP_FUNCTION(inflate_add)
 	int status;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &in_buf, &in_len, &flush_type)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
@@ -885,21 +885,14 @@ PHP_FUNCTION(deflate_init)
 	z_stream *ctx;
 	zend_long encoding, level = -1, memory = 8;
 	HashTable *options = 0;
-	zval *option_buffer, cast_option_buffer;
+	zval *option_buffer;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
-		RETURN_FALSE;
+		return;
 	}
 
-	if (options && (option_buffer = zend_symtable_str_find(options, "level", sizeof("level")-1)) != NULL) {
-		if (Z_TYPE_P(option_buffer) != IS_LONG) {
-			ZVAL_DUP(&cast_option_buffer, option_buffer);
-			convert_to_long(&cast_option_buffer);
-			level = Z_LVAL(cast_option_buffer);
-			zval_dtor(&cast_option_buffer);
-		} else {
-			level = Z_LVAL_P(option_buffer);
-		}
+	if (options && (option_buffer = zend_hash_str_find(options, "level", sizeof("level")-1)) != NULL) {
+		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
 		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level);
@@ -907,14 +900,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (options && (option_buffer = zend_symtable_str_find(options, "memory", sizeof("memory")-1)) != NULL) {
-		if (Z_TYPE_P(option_buffer) != IS_LONG) {
-			ZVAL_DUP(&cast_option_buffer, option_buffer);
-			convert_to_long(&cast_option_buffer);
-			memory = Z_LVAL(cast_option_buffer);
-			zval_dtor(&cast_option_buffer);
-		} else {
-			memory = Z_LVAL_P(option_buffer);
-		}
+		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
 		php_error_docref(NULL, E_WARNING, "compression memory level (%pd) must be within 1..9", memory);
