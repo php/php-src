@@ -3243,28 +3243,28 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 /* }}} */
 
 zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
-    size_t len;
-    char   *val;
-    zend_string *anon;
-    uint32_t next = get_next_op_number(CG(active_op_array));
-    
-    if (parent) {
-        zval *extends = zend_ast_get_zval(parent);
-        len = zend_spprintf(
-            &val, 0, "%s@%p",
-            Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
-        anon = zend_string_init(val, len, 1);
-        Z_DELREF_P(extends); /* ?? */
-        efree(val); 
-    } else {
-        len = zend_spprintf(
-            &val, 0, "class@%p", 
-            &CG(active_op_array)->opcodes[next-1]);
-        anon = zend_string_init(val, len, 1);
-        efree(val);
-    }
+	size_t len;
+	char   *val;
+	zend_string *anon;
+	uint32_t next = get_next_op_number(CG(active_op_array));
 
-    return anon;
+	if (parent) {
+		zval *extends = zend_ast_get_zval(parent);
+		len = zend_spprintf(
+			&val, 0, "%s@%p",
+			Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
+		anon = zend_string_init(val, len, 1);
+		Z_DELREF_P(extends); /* ?? */
+		efree(val); 
+	} else {
+		len = zend_spprintf(
+			&val, 0, "class@%p", 
+			&CG(active_op_array)->opcodes[next-1]);
+		anon = zend_string_init(val, len, 1);
+		efree(val);
+	}
+
+	return anon;
 } /* }}} */
 
 zend_class_entry *zend_compile_class_decl(zend_ast *ast);
@@ -3281,8 +3281,7 @@ void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
-	} else {
-		if (class_ast->kind == ZEND_AST_CLASS) {
+	} else if (class_ast->kind == ZEND_AST_CLASS) {
 		zend_class_entry *ce = 
 		    zend_compile_class_decl(class_ast TSRMLS_CC);
 		zend_string *name = ce->name;
@@ -3290,18 +3289,17 @@ void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 		
 		opline = zend_emit_op(&class_node,
 		    ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
-			opline->extended_value = fetch_type;
+		opline->extended_value = fetch_type;
 		
-			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-			    opline->op2_type = IS_CONST;
-			    opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-				zend_resolve_class_name(name, ZEND_NAME_FQ TSRMLS_CC) TSRMLS_CC);
-			}
-
-			zend_string_release(name);
-		} else {
-		    zend_compile_class_ref(&class_node, class_ast, 1);
+		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
+			zend_resolve_class_name(name, ZEND_NAME_FQ TSRMLS_CC) TSRMLS_CC);
 		}
+
+		zend_string_release(name);
+	} else {
+		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
 
 	opnum = get_next_op_number(CG(active_op_array));
