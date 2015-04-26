@@ -27,6 +27,7 @@
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
@@ -1054,9 +1055,16 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	}
+	
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+	    return ce;
+	}
+	
 	ce->refcount++;
+	
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
+
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -1106,7 +1114,12 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ce->name->val);
 	}
 
-	zend_do_inheritance(ce, parent_ce);
+        /* Reuse anonymous bound class */
+        if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+            return ce;
+        }
+
+        zend_do_inheritance(ce, parent_ce TSRMLS_CC);	
 
 	ce->refcount++;
 
@@ -1114,6 +1127,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ce->name->val);
 	}
+
 	return ce;
 }
 /* }}} */
@@ -3228,7 +3242,34 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
+zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
+    size_t len;
+    char   *val;
+    zend_string *anon;
+    uint32_t next = get_next_op_number(CG(active_op_array));
+    
+    if (parent) {
+        zval *extends = zend_ast_get_zval(parent);
+        len = zend_spprintf(
+            &val, 0, "%s@%p",
+            Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
+        anon = zend_string_init(val, len, 1);
+        Z_DELREF_P(extends); /* ?? */
+        efree(val); 
+    } else {
+        len = zend_spprintf(
+            &val, 0, "class@%p", 
+            &CG(active_op_array)->opcodes[next-1]);
+        anon = zend_string_init(val, len, 1);
+        efree(val);
+    }
+
+    return anon;
+} /* }}} */
+
+zend_class_entry *zend_compile_class_decl(zend_ast *ast);
+
+void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
@@ -3241,7 +3282,26 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast, 1);
+		if (class_ast->kind == ZEND_AST_CLASS) {
+		zend_class_entry *ce = 
+		    zend_compile_class_decl(class_ast TSRMLS_CC);
+		zend_string *name = ce->name;
+		uint32_t fetch_type = zend_get_class_fetch_type(name);
+		
+		opline = zend_emit_op(&class_node,
+		    ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
+			opline->extended_value = fetch_type;
+		
+			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+			    opline->op2_type = IS_CONST;
+			    opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
+				zend_resolve_class_name(name, ZEND_NAME_FQ TSRMLS_CC) TSRMLS_CC);
+			}
+
+			zend_string_release(name);
+		} else {
+		    zend_compile_class_ref(&class_node, class_ast, 1);
+		}
 	}
 
 	opnum = get_next_op_number(CG(active_op_array));
@@ -4884,7 +4944,7 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast) /* {{{ */
+zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -4895,11 +4955,21 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
+	zend_class_entry *active = CG(active_class_entry);
+	
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+	    name = 
+	        zend_name_anon_class((zend_ast*)name TSRMLS_CC);
 
-	if (CG(active_class_entry)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
+	    /* do not support serial classes */
+	    ce->serialize = zend_class_serialize_deny;
+	    ce->unserialize = zend_class_unserialize_deny;
 	}
+	
+	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
+            zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+            return NULL;
+        }
 
 	zend_assert_valid_class_name(name);
 
@@ -4913,7 +4983,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(name);
 
 		zend_string_release(lcname);
-		lcname = zend_string_tolower(name);
+		lcname = zend_string_alloc(name->len, 0);
+		zend_str_tolower_copy(lcname->val, name->val, name->len);
 	} else {
 		zend_string_addref(name);
 	}
@@ -4923,15 +4994,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			"because the name is already in use", name->val);
 	}
 
-	name = zend_new_interned_string(name);
-	lcname = zend_new_interned_string(lcname);
+	name = zend_new_interned_string(name TSRMLS_CC);
+	lcname = zend_new_interned_string(lcname TSRMLS_CC);
 
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
-	zend_initialize_class_data(ce, 1);
+	zend_initialize_class_data(ce, 1 TSRMLS_CC);
 
 	ce->ce_flags |= decl->flags;
-	ce->info.user.filename = zend_get_compiled_filename();
+	ce->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
 	if (decl->doc_comment) {
@@ -4939,6 +5010,12 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
+		if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
+				"Traits can only be composed from other traits with the 'use' keyword. Error",
+				name->val);
+		}
+
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -4948,8 +5025,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_compile_class_ref(&extends_node, extends_ast, 0);
 	}
 
-	opline = get_next_op(CG(active_op_array));
-	zend_make_var_result(&declare_node, opline);
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_make_var_result(&declare_node, opline TSRMLS_CC);
 
 	// TODO.AST drop this
 	GET_NODE(&FC(implementing_class), opline->result);
@@ -4965,7 +5042,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	{
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos TSRMLS_CC);
 
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
@@ -4976,10 +5053,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	CG(active_class_entry) = ce;
 
 	if (implements_ast) {
-		zend_compile_implements(&declare_node, implements_ast);
+		zend_compile_implements(&declare_node, implements_ast TSRMLS_CC);
 	}
 
-	zend_compile_stmt(stmt_ast);
+	zend_compile_stmt(stmt_ast TSRMLS_CC);
 
 	if (ce->num_traits == 0) {
 		/* For traits this check is delayed until after trait binding */
@@ -4992,20 +5069,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ce->name->val, ce->constructor->common.function_name->val);
 		}
-		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Constructor %s::%s() cannot declare a return type",
-				ce->name->val, ce->constructor->common.function_name->val);
-		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
-				ce->name->val, ce->destructor->common.function_name->val);
-		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Destructor %s::%s() cannot declare a return type",
 				ce->name->val, ce->destructor->common.function_name->val);
 		}
 	}
@@ -5013,10 +5081,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
-				ce->name->val, ce->clone->common.function_name->val);
-		} else if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"%s::%s() cannot declare a return type",
 				ce->name->val, ce->clone->common.function_name->val);
 		}
 	}
@@ -5029,15 +5093,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->num_traits = 0;
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
 
-		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
+		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL TSRMLS_CC);
 	}
 
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& (extends_ast || ce->num_interfaces > 0)
 	) {
-		zend_verify_abstract_class(ce);
+		zend_verify_abstract_class(ce TSRMLS_CC);
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
+			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL TSRMLS_CC);
 		}
 	}
 
@@ -5051,7 +5115,9 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = NULL;
+	CG(active_class_entry) = active;
+	
+	return ce;
 }
 /* }}} */
 

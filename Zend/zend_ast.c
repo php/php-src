@@ -457,7 +457,9 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 		case ZEND_AST_CLASS:
 		{
 			zend_ast_decl *decl = (zend_ast_decl *) ast;
-			zend_string_release(decl->name);
+			if (decl->name) {
+			    zend_string_release(decl->name);
+			}
 			if (decl->doc_comment) {
 				zend_string_release(decl->doc_comment);
 			}
