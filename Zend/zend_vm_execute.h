@@ -1307,7 +1307,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_SPEC_HANDLER(ZEN
 	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_class(&EX(func)->op_array, opline, EG(class_table), 0);
 	if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_CLASS) {
 	    if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_BOUND) {
-	        while (opline->opcode != ZEND_FETCH_CLASS) {
+	        while (opline->opcode != ZEND_NEW) {
 	            opline++;
 	        }
 	        ZEND_VM_JMP(opline);
@@ -1325,7 +1325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_INHERITED_CLASS_SPEC_H
 	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->extended_value)), 0);
 	if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_CLASS) {
 	    if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_BOUND) {
-	        while (opline->opcode != ZEND_FETCH_CLASS) {
+	        while (opline->opcode != ZEND_NEW) {
 	            opline++;
 	        }
 	        ZEND_VM_JMP(opline);

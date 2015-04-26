@@ -3257,22 +3257,9 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
-		zend_class_entry *ce =
-		    zend_compile_class_decl(class_ast TSRMLS_CC);
-		zend_string *name = ce->name;
-		uint32_t fetch_type = zend_get_class_fetch_type(name);
-		
-		opline = zend_emit_op(&class_node,
-		    ZEND_FETCH_CLASS, NULL, NULL TSRMLS_CC);
-		opline->extended_value = fetch_type;
-		
-		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-			opline->op2_type = IS_CONST;
-			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name(name, ZEND_NAME_FQ TSRMLS_CC) TSRMLS_CC);
-		}
-
-		zend_string_release(name);
+		zend_class_entry *ce = zend_compile_class_decl(class_ast TSRMLS_CC);
+		class_node.op_type = IS_CONST;
+		ZVAL_STR_COPY(&class_node.u.constant, ce->name);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
@@ -4938,7 +4925,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *active = CG(active_class_entry);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-		name = zend_generate_anon_class_name();
+		decl->name = name = zend_generate_anon_class_name();
 
 		/* Serialization is not supported for anonymous classes */
 		ce->serialize = zend_class_serialize_deny;
