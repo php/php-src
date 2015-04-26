@@ -27,6 +27,7 @@
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
@@ -1054,9 +1055,16 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	}
+
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		return ce;
+	}
+
 	ce->refcount++;
+
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
+
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -1106,6 +1114,11 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ce->name->val);
 	}
 
+	/* Reuse anonymous bound class */
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		return ce;
+	}
+
 	zend_do_inheritance(ce, parent_ce);
 
 	ce->refcount++;
@@ -1114,6 +1127,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ce->name->val);
 	}
+
 	return ce;
 }
 /* }}} */
@@ -3228,6 +3242,8 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
+zend_class_entry *zend_compile_class_decl(zend_ast *ast);
+
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
@@ -3240,6 +3256,10 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
+	} else if (class_ast->kind == ZEND_AST_CLASS) {
+		zend_class_entry *ce = zend_compile_class_decl(class_ast);
+		class_node.op_type = IS_CONST;
+		ZVAL_STR_COPY(&class_node.u.constant, ce->name);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
@@ -4884,7 +4904,15 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast) /* {{{ */
+static zend_string *zend_generate_anon_class_name() /* {{{ */
+{
+	// TODO The opline pointer may be reused, this is not safe!
+	uint32_t next = get_next_op_number(CG(active_op_array));
+	return zend_strpprintf(0, "class@%p", &CG(active_op_array)->opcodes[next-1]);
+}
+/* }}} */
+
+zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -4896,9 +4924,20 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_op *opline;
 	znode declare_node, extends_node;
 
-	if (CG(active_class_entry)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
+	zend_class_entry *original_ce = CG(active_class_entry);
+	znode original_implementing_class = FC(implementing_class);
+
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+		decl->name = name = zend_generate_anon_class_name();
+
+		/* Serialization is not supported for anonymous classes */
+		ce->serialize = zend_class_serialize_deny;
+		ce->unserialize = zend_class_unserialize_deny;
+	}
+
+	if (CG(active_class_entry) && !(decl->flags & ZEND_ACC_ANON_CLASS)) {
+		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+		return NULL;
 	}
 
 	zend_assert_valid_class_name(name);
@@ -5051,7 +5090,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = NULL;
+	FC(implementing_class) = original_implementing_class;
+	CG(active_class_entry) = original_ce;
+
+	return ce;
 }
 /* }}} */
 
