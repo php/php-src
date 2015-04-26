@@ -3242,34 +3242,9 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
-	size_t len;
-	char   *val;
-	zend_string *anon;
-	uint32_t next = get_next_op_number(CG(active_op_array));
-
-	if (parent) {
-		zval *extends = zend_ast_get_zval(parent);
-		len = zend_spprintf(
-			&val, 0, "%s@%p",
-			Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
-		anon = zend_string_init(val, len, 1);
-		Z_DELREF_P(extends); /* ?? */
-		efree(val); 
-	} else {
-		len = zend_spprintf(
-			&val, 0, "class@%p", 
-			&CG(active_op_array)->opcodes[next-1]);
-		anon = zend_string_init(val, len, 1);
-		efree(val);
-	}
-
-	return anon;
-} /* }}} */
-
 zend_class_entry *zend_compile_class_decl(zend_ast *ast);
 
-void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
+void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *args_ast = ast->child[1];
@@ -4942,6 +4917,13 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_string *zend_generate_anon_class_name() /* {{{ */
+{
+	uint32_t next = get_next_op_number(CG(active_op_array));
+	return zend_strpprintf(0, "class@%p", &CG(active_op_array)->opcodes[next-1]);
+}
+/* }}} */
+
 zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
@@ -4956,8 +4938,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *active = CG(active_class_entry);
 	
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-	    name = 
-	        zend_name_anon_class((zend_ast*)name TSRMLS_CC);
+	    name = zend_generate_anon_class_name();
 
 	    /* do not support serial classes */
 	    ce->serialize = zend_class_serialize_deny;
