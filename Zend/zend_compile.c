@@ -4983,8 +4983,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(name);
 
 		zend_string_release(lcname);
-		lcname = zend_string_alloc(name->len, 0);
-		zend_str_tolower_copy(lcname->val, name->val, name->len);
+		lcname = zend_string_tolower(name);
 	} else {
 		zend_string_addref(name);
 	}
@@ -4994,15 +4993,15 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			"because the name is already in use", name->val);
 	}
 
-	name = zend_new_interned_string(name TSRMLS_CC);
-	lcname = zend_new_interned_string(lcname TSRMLS_CC);
+	name = zend_new_interned_string(name);
+	lcname = zend_new_interned_string(lcname);
 
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
-	zend_initialize_class_data(ce, 1 TSRMLS_CC);
+	zend_initialize_class_data(ce, 1);
 
 	ce->ce_flags |= decl->flags;
-	ce->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
+	ce->info.user.filename = zend_get_compiled_filename();
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
 	if (decl->doc_comment) {
@@ -5010,12 +5009,6 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (ce->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
-				"Traits can only be composed from other traits with the 'use' keyword. Error",
-				name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -5025,8 +5018,8 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_compile_class_ref(&extends_node, extends_ast, 0);
 	}
 
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_make_var_result(&declare_node, opline TSRMLS_CC);
+	opline = get_next_op(CG(active_op_array));
+	zend_make_var_result(&declare_node, opline);
 
 	// TODO.AST drop this
 	GET_NODE(&FC(implementing_class), opline->result);
@@ -5042,7 +5035,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	{
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos TSRMLS_CC);
+		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
@@ -5053,10 +5046,10 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	CG(active_class_entry) = ce;
 
 	if (implements_ast) {
-		zend_compile_implements(&declare_node, implements_ast TSRMLS_CC);
+		zend_compile_implements(&declare_node, implements_ast);
 	}
 
-	zend_compile_stmt(stmt_ast TSRMLS_CC);
+	zend_compile_stmt(stmt_ast);
 
 	if (ce->num_traits == 0) {
 		/* For traits this check is delayed until after trait binding */
@@ -5069,11 +5062,20 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ce->name->val, ce->constructor->common.function_name->val);
 		}
+		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Constructor %s::%s() cannot declare a return type",
+				ce->name->val, ce->constructor->common.function_name->val);
+		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
+				ce->name->val, ce->destructor->common.function_name->val);
+		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Destructor %s::%s() cannot declare a return type",
 				ce->name->val, ce->destructor->common.function_name->val);
 		}
 	}
@@ -5081,6 +5083,10 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
+				ce->name->val, ce->clone->common.function_name->val);
+		} else if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"%s::%s() cannot declare a return type",
 				ce->name->val, ce->clone->common.function_name->val);
 		}
 	}
@@ -5093,15 +5099,15 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->num_traits = 0;
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_TRAITS;
 
-		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL TSRMLS_CC);
+		zend_emit_op(NULL, ZEND_BIND_TRAITS, &declare_node, NULL);
 	}
 
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& (extends_ast || ce->num_interfaces > 0)
 	) {
-		zend_verify_abstract_class(ce TSRMLS_CC);
+		zend_verify_abstract_class(ce);
 		if (ce->num_interfaces && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS)) {
-			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL TSRMLS_CC);
+			zend_emit_op(NULL, ZEND_VERIFY_ABSTRACT_CLASS, &declare_node, NULL);
 		}
 	}
 

@@ -217,10 +217,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)
 	ZEND_ARG_INFO(0, code)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_functions, 0, 0, 0)
-	ZEND_ARG_INFO(0, disabled)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
@@ -306,7 +302,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_declared_classes, 		arginfo_zend__void)
 	ZEND_FE(get_declared_traits, 		arginfo_zend__void)
 	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
-	ZEND_FE(get_defined_functions, 		arginfo_get_defined_functions)
+	ZEND_FE(get_defined_functions, 		arginfo_zend__void)
 	ZEND_FE(get_defined_vars,		arginfo_zend__void)
 	ZEND_FE(create_function,		arginfo_create_function)
 	ZEND_FE(get_resource_type,		arginfo_get_resource_type)
@@ -1864,19 +1860,15 @@ ZEND_FUNCTION(get_declared_interfaces)
 static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_function *func = Z_PTR_P(zv);
-	zval *internal_ar   = va_arg(args, zval *),
-	     *user_ar       = va_arg(args, zval *);
-	zend_bool *disabled = va_arg(args, zend_bool*);
+	zval *internal_ar = va_arg(args, zval *),
+	     *user_ar     = va_arg(args, zval *);
 
 	if (hash_key->key == NULL || hash_key->key->val[0] == 0) {
 		return 0;
 	}
 
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		zend_internal_function *intern = (zend_internal_function*) func;
-		if ((*disabled) || intern->handler != ZEND_FN(display_disabled_function)) {
-			add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
-		}
+		add_next_index_str(internal_ar, zend_string_copy(hash_key->key));
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		add_next_index_str(user_ar, zend_string_copy(hash_key->key));
 	}
@@ -1885,14 +1877,13 @@ static int copy_function_name(zval *zv, int num_args, va_list args, zend_hash_ke
 }
 /* }}} */
 
-/* {{{ proto array get_defined_functions(bool disabled = false)
+/* {{{ proto array get_defined_functions(void)
    Returns an array of all defined functions */
 ZEND_FUNCTION(get_defined_functions)
 {
 	zval internal, user;
-	zend_bool disabled = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &disabled) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1900,7 +1891,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 3, &internal, &user, &disabled);
+	zend_hash_apply_with_arguments(EG(function_table), copy_function_name, 2, &internal, &user);
 
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
