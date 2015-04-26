@@ -4923,7 +4923,9 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
-	zend_class_entry *active = CG(active_class_entry);
+
+	zend_class_entry *original_ce = CG(active_class_entry);
+	znode original_implementing_class = FC(implementing_class);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 		decl->name = name = zend_generate_anon_class_name();
@@ -5088,7 +5090,8 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = active;
+	FC(implementing_class) = original_implementing_class;
+	CG(active_class_entry) = original_ce;
 
 	return ce;
 }
