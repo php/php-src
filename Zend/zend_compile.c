@@ -1119,7 +1119,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		return ce;
 	}
 
-	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
+	zend_do_inheritance(ce, parent_ce);
 
 	ce->refcount++;
 
@@ -3257,7 +3257,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
-		zend_class_entry *ce = zend_compile_class_decl(class_ast TSRMLS_CC);
+		zend_class_entry *ce = zend_compile_class_decl(class_ast);
 		class_node.op_type = IS_CONST;
 		ZVAL_STR_COPY(&class_node.u.constant, ce->name);
 	} else {
@@ -4906,6 +4906,7 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 
 static zend_string *zend_generate_anon_class_name() /* {{{ */
 {
+	// TODO The opline pointer may be reused, this is not safe!
 	uint32_t next = get_next_op_number(CG(active_op_array));
 	return zend_strpprintf(0, "class@%p", &CG(active_op_array)->opcodes[next-1]);
 }
