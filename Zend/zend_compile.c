@@ -1055,13 +1055,13 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	}
-	
+
 	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
-	    return ce;
+		return ce;
 	}
-	
+
 	ce->refcount++;
-	
+
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
 
@@ -1114,12 +1114,12 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ce->name->val);
 	}
 
-        /* Reuse anonymous bound class */
-        if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
-            return ce;
-        }
+	/* Reuse anonymous bound class */
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		return ce;
+	}
 
-        zend_do_inheritance(ce, parent_ce TSRMLS_CC);	
+	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
 
 	ce->refcount++;
 
@@ -3257,7 +3257,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
-		zend_class_entry *ce = 
+		zend_class_entry *ce =
 		    zend_compile_class_decl(class_ast TSRMLS_CC);
 		zend_string *name = ce->name;
 		uint32_t fetch_type = zend_get_class_fetch_type(name);
@@ -4936,19 +4936,19 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_op *opline;
 	znode declare_node, extends_node;
 	zend_class_entry *active = CG(active_class_entry);
-	
-	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-	    name = zend_generate_anon_class_name();
 
-	    /* do not support serial classes */
-	    ce->serialize = zend_class_serialize_deny;
-	    ce->unserialize = zend_class_unserialize_deny;
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+		name = zend_generate_anon_class_name();
+
+		/* Serialization is not supported for anonymous classes */
+		ce->serialize = zend_class_serialize_deny;
+		ce->unserialize = zend_class_unserialize_deny;
 	}
-	
-	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
-            zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-            return NULL;
-        }
+
+	if (CG(active_class_entry) && !(decl->flags & ZEND_ACC_ANON_CLASS)) {
+		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+		return NULL;
+	}
 
 	zend_assert_valid_class_name(name);
 
@@ -5101,7 +5101,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_class_entry) = active;
-	
+
 	return ce;
 }
 /* }}} */
