@@ -761,6 +761,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
 		}
 		switch (opline->opcode) {
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
+				/* break omitted intentionally */
 			case ZEND_DECLARE_INHERITED_CLASS:
 			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 				opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
@@ -772,6 +775,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				/* break omitted intentionally */
 			case ZEND_JMP:
 			case ZEND_FAST_CALL:
+			case ZEND_DECLARE_ANON_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;
 			case ZEND_JMPZNZ:

@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-const char *zend_vm_opcodes_map[171] = {
+const char *zend_vm_opcodes_map[173] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -193,6 +193,8 @@ const char *zend_vm_opcodes_map[171] = {
 	"ZEND_BIND_GLOBAL",
 	"ZEND_COALESCE",
 	"ZEND_SPACESHIP",
+	"ZEND_DECLARE_ANON_CLASS",
+	"ZEND_DECLARE_ANON_INHERITED_CLASS",
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

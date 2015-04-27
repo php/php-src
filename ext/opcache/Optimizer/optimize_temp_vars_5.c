@@ -125,6 +125,7 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		}
 
 		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
+		    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
             opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
 			currT = VAR_NUM(opline->extended_value) - offset;
 			if (!valid_T[currT]) {

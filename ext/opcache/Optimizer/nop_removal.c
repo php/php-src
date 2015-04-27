@@ -87,6 +87,8 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_JMP:
 				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					ZEND_OP1(opline).opline_num -= shiftlist[ZEND_OP1(opline).opline_num];
 					break;
 				case ZEND_JMPZ:
