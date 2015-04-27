@@ -6,4 +6,4 @@ Return type of parent is not allowed in function
 function test(): parent {}
 
 --EXPECTF--
-Fatal error: Cannot declare a return type of parent outside of a class scope in %s on line 3
+Fatal error: Cannot use "parent" when no class scope is active in %s on line %d

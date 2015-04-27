@@ -1612,6 +1612,27 @@ uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
+{
+	/* Fully qualified names are always default refs */
+	if (name_ast->attr == ZEND_NAME_FQ) {
+		return ZEND_FETCH_CLASS_DEFAULT;
+	}
+
+	return zend_get_class_fetch_type(zend_ast_get_str(name_ast));
+}
+/* }}} */
+
+void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
+{
+	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !CG(active_class_entry)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
+			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+	}
+}
+/* }}} */
+
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var) /* {{{ */
 {
 	return op_array->vars[EX_VAR_TO_NUM(var)];
@@ -2018,19 +2039,11 @@ static inline zend_bool zend_can_write_to_variable(zend_ast *ast) /* {{{ */
 
 static inline zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) /* {{{ */
 {
-	zend_string *name;
-
 	if (name_ast->kind != ZEND_AST_ZVAL) {
 		return 0;
 	}
 
-	/* Fully qualified names are always default refs */
-	if (!name_ast->attr) {
-		return 1;
-	}
-
-	name = zend_ast_get_str(name_ast);
-	return ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(name);
+	return ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type_ast(name_ast);
 }
 /* }}} */
 
@@ -2077,6 +2090,8 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast, int th
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 				zend_resolve_class_name(name, type));
+		} else {
+			zend_ensure_valid_class_fetch_type(fetch_type);
 		}
 
 		zend_string_release(name);
@@ -4147,7 +4162,7 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_method) /* {{{ */
+void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
@@ -4173,15 +4188,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 			if (type != 0) {
 				arg_infos->type_hint = type;
 			} else {
-				if (zend_is_const_default_class_ref(return_type_ast)) {
+				uint32_t fetch_type = zend_get_class_fetch_type_ast(return_type_ast);
+				if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 					class_name = zend_resolve_class_name_ast(return_type_ast);
 					zend_assert_valid_class_name(class_name);
 				} else {
+					zend_ensure_valid_class_fetch_type(fetch_type);
 					zend_string_addref(class_name);
-					if (!is_method) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
-						return;
-					}
 				}
 
 				arg_infos->type_hint = IS_OBJECT;
@@ -4302,10 +4315,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				if (type != 0) {
 					arg_info->type_hint = type;
 				} else {
-					if (zend_is_const_default_class_ref(type_ast)) {
+					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
+					if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 						class_name = zend_resolve_class_name_ast(type_ast);
 						zend_assert_valid_class_name(class_name);
 					} else {
+						zend_ensure_valid_class_fetch_type(fetch_type);
 						zend_string_addref(class_name);
 					}
 
@@ -4626,7 +4641,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast, return_type_ast, is_method);
+	zend_compile_params(params_ast, return_type_ast);
 	if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
@@ -6329,13 +6344,10 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
+	zend_ensure_valid_class_fetch_type(fetch_type);
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (!CG(active_class_entry)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot access self::class when no class scope is active");
-			}
 			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
 				zval class_str_zv;
 				zend_ast *class_str_ast, *class_const_ast;
@@ -6354,11 +6366,7 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
-			if (!CG(active_class_entry)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot access %s::class when no class scope is active",
-					fetch_type == ZEND_FETCH_CLASS_STATIC ? "static" : "parent");
-			} else {
+			{
 				zval class_str_zv;
 				zend_ast *class_str_ast, *class_const_ast;
 
@@ -6611,15 +6619,12 @@ void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *name_ast = ast->child[0];
-	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
 	zval result;
+	uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(name_ast));
+	zend_ensure_valid_class_fetch_type(fetch_type);
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (!CG(active_class_entry)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot access self::class when no class scope is active");
-			}
 			ZVAL_STR_COPY(&result, CG(active_class_entry)->name);
 			break;
         case ZEND_FETCH_CLASS_STATIC:
