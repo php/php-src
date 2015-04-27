@@ -3245,7 +3245,6 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
-		zend_class_entry *ce = zend_compile_class_decl(class_ast);
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
 		if (opline->opcode == ZEND_FETCH_CLASS) {
