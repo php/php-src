@@ -3229,7 +3229,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
-zend_class_entry *zend_compile_class_decl(zend_ast *ast);
+void zend_compile_class_decl(zend_ast *ast);
 
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -3245,7 +3245,7 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
-		zend_class_entry *ce = zend_compile_class_decl(class_ast);
+		zend_compile_class_decl(class_ast);
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
 		if (opline->opcode == ZEND_FETCH_CLASS) {
@@ -4919,7 +4919,7 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 }
 /* }}} */
 
-zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
+void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -4943,8 +4943,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (CG(active_class_entry) && !(decl->flags & ZEND_ACC_ANON_CLASS)) {
-		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return NULL;
+		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 	}
 
 	zend_assert_valid_class_name(name);
@@ -5112,8 +5111,6 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	FC(implementing_class) = original_implementing_class;
 	CG(active_class_entry) = original_ce;
-
-	return ce;
 }
 /* }}} */
 
