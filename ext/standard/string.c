@@ -2531,25 +2531,7 @@ PHP_FUNCTION(substr_replace)
 		from_idx = len_idx = repl_idx = 0;
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(str), num_index, str_index, tmp_str) {
-			zval *orig_str;
-			zval dummy;
-
-			if (Z_ISREF_P(tmp_str)) {
-				/* see bug #55871 */
-				ZVAL_DUP(&dummy, Z_REFVAL_P(tmp_str));
-				convert_to_string(&dummy);
-				orig_str = &dummy;
-			} else if (Z_TYPE_P(tmp_str) != IS_STRING) {
-				ZVAL_DUP(&dummy, tmp_str);
-				convert_to_string(&dummy);
-				orig_str = &dummy;
-			} else {
-				orig_str = tmp_str;
-			}
-
-			/*???
-			refcount = Z_REFCOUNT_P(orig_str);
-			*/
+			zend_string *orig_str = zval_get_string(tmp_str);
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				while (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
@@ -2563,12 +2545,12 @@ PHP_FUNCTION(substr_replace)
 					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
-						f = Z_STRLEN_P(orig_str) + f;
+						f = orig_str->len + f;
 						if (f < 0) {
 							f = 0;
 						}
-					} else if (f > Z_STRLEN_P(orig_str)) {
-						f = Z_STRLEN_P(orig_str);
+					} else if (f > orig_str->len) {
+						f = orig_str->len;
 					}
 					from_idx++;
 				} else {
@@ -2577,12 +2559,12 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				f = Z_LVAL_P(from);
 				if (f < 0) {
-					f = Z_STRLEN_P(orig_str) + f;
+					f = orig_str->len + f;
 					if (f < 0) {
 						f = 0;
 					}
-				} else if (f > Z_STRLEN_P(orig_str)) {
-					f = Z_STRLEN_P(orig_str);
+				} else if (f > orig_str->len) {
+					f = orig_str->len;
 				}
 			}
 
@@ -2598,26 +2580,26 @@ PHP_FUNCTION(substr_replace)
 					l = zval_get_long(tmp_len);
 					len_idx++;
 				} else {
-					l = Z_STRLEN_P(orig_str);
+					l = orig_str->len;
 				}
 			} else if (argc > 3) {
 				l = Z_LVAL_P(len);
 			} else {
-				l = Z_STRLEN_P(orig_str);
+				l = orig_str->len;
 			}
 
 			if (l < 0) {
-				l = (Z_STRLEN_P(orig_str) - f) + l;
+				l = (orig_str->len - f) + l;
 				if (l < 0) {
 					l = 0;
 				}
 			}
 
-			if ((f + l) > Z_STRLEN_P(orig_str)) {
-				l = Z_STRLEN_P(orig_str) - f;
+			if ((f + l) > orig_str->len) {
+				l = orig_str->len - f;
 			}
 
-			result_len = Z_STRLEN_P(orig_str) - l;
+			result_len = orig_str->len - l;
 
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
 				while (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
@@ -2628,51 +2610,30 @@ PHP_FUNCTION(substr_replace)
 					repl_idx++;
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					zval *repl_str;
-					zval zrepl;
+					zend_string *repl_str = zval_get_string(tmp_repl);
 
-					ZVAL_DEREF(tmp_repl);
-					if (Z_TYPE_P(tmp_repl) != IS_STRING) {
-						ZVAL_DUP(&zrepl, tmp_repl);
-						convert_to_string(&zrepl);
-						repl_str = &zrepl;
-					} else {
-						repl_str = tmp_repl;
-					}
-					/*???
-					if (Z_REFCOUNT_P(orig_str) != refcount) {
-						php_error_docref(NULL, E_WARNING, "Argument was modified while replacing");
-						if (Z_TYPE_P(tmp_repl) != IS_STRING) {
-							zval_dtor(repl_str);
-						}
-						break;
-					}
-					*/
-
-					result_len += Z_STRLEN_P(repl_str);
+					result_len += repl_str->len;
 					repl_idx++;
 					result = zend_string_alloc(result_len, 0);
 
-					memcpy(result->val, Z_STRVAL_P(orig_str), f);
-					memcpy((result->val + f), Z_STRVAL_P(repl_str), Z_STRLEN_P(repl_str));
-					memcpy((result->val + f + Z_STRLEN_P(repl_str)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
-					if(Z_TYPE_P(tmp_repl) != IS_STRING) {
-						zval_dtor(repl_str);
-					}
+					memcpy(result->val, orig_str->val, f);
+					memcpy((result->val + f), repl_str->val, repl_str->len);
+					memcpy((result->val + f + repl_str->len), orig_str->val + f + l, orig_str->len - f - l);
+					zend_string_release(repl_str);
 				} else {
 					result = zend_string_alloc(result_len, 0);
 
-					memcpy(result->val, Z_STRVAL_P(orig_str), f);
-					memcpy((result->val + f), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
+					memcpy(result->val, orig_str->val, f);
+					memcpy((result->val + f), orig_str->val + f + l, orig_str->len - f - l);
 				}
 			} else {
 				result_len += Z_STRLEN_P(repl);
 
 				result = zend_string_alloc(result_len, 0);
 
-				memcpy(result->val, Z_STRVAL_P(orig_str), f);
+				memcpy(result->val, orig_str->val, f);
 				memcpy((result->val + f), Z_STRVAL_P(repl), Z_STRLEN_P(repl));
-				memcpy((result->val + f + Z_STRLEN_P(repl)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
+				memcpy((result->val + f + Z_STRLEN_P(repl)), orig_str->val + f + l, orig_str->len - f - l);
 			}
 
 			result->val[result->len] = '\0';
@@ -2686,11 +2647,7 @@ PHP_FUNCTION(substr_replace)
 				add_index_str(return_value, num_index, result);
 			}
 
-			if(Z_TYPE_P(tmp_str) != IS_STRING) {
-				zval_dtor(orig_str);
-			} else {
-//???			Z_SET_ISREF_TO_P(orig_str, was_ref);
-			}
+			zend_string_release(orig_str);
 		} ZEND_HASH_FOREACH_END();
 	} /* if */
 }
