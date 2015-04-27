@@ -4898,11 +4898,24 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_string *zend_generate_anon_class_name(void) /* {{{ */
+static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{ */
 {
-	// TODO The opline pointer may be reused, this is not safe!
-	uint32_t next = get_next_op_number(CG(active_op_array));
-	return zend_strpprintf(0, "class@%p", &CG(active_op_array)->opcodes[next-1]);
+	zend_string *result;
+	char char_pos_buf[32];
+	size_t filename_len, char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+
+	const char *filename;
+	if (CG(active_op_array)->filename) {
+		filename = CG(active_op_array)->filename->val;
+		filename_len = CG(active_op_array)->filename->len;
+	} else {
+		filename = "-";
+		filename_len = sizeof("-") - 1;
+	}
+	/* NULL, name length, filename length, last accepting char position length */
+	result = zend_string_alloc(sizeof("class@anonymous") + filename_len + char_pos_len, 0);
+	sprintf(result->val, "class@anonymous%c%s%s", '\0', filename, char_pos_buf);
+	return zend_new_interned_string(result);
 }
 /* }}} */
 
@@ -4922,7 +4935,7 @@ zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	znode original_implementing_class = FC(implementing_class);
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-		decl->name = name = zend_generate_anon_class_name();
+		decl->name = name = zend_generate_anon_class_name(decl->lex_pos);
 
 		/* Serialization is not supported for anonymous classes */
 		ce->serialize = zend_class_serialize_deny;
