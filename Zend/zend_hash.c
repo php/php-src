@@ -120,20 +120,27 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 #endif
 }
 
+static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
+{
+	HT_ASSERT(GC_REFCOUNT(ht) == 1);
+	ZEND_ASSERT(!((ht)->u.flags & HASH_FLAG_INITIALIZED));
+	if (packed) {
+		(ht)->u.flags |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+		HT_HASH_RESET_PACKED(ht);
+	} else {
+		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
+		(ht)->nTableMask = -(ht)->nTableSize;
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+		HT_HASH_RESET(ht);
+	}
+}
+
 static void zend_always_inline zend_hash_check_init(HashTable *ht, int packed)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_INITIALIZED))) {
-		if (packed) {
-			(ht)->u.flags |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
-			HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
-			HT_HASH_RESET_PACKED(ht);
-		} else {
-			(ht)->u.flags |= HASH_FLAG_INITIALIZED;
-			(ht)->nTableMask = -(ht)->nTableSize;
-			HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
-			HT_HASH_RESET(ht);
-		}
+		zend_hash_real_init_ex(ht, packed);
 	}
 }
 
@@ -175,7 +182,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed)
 	IS_CONSISTENT(ht);
 
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
-	CHECK_INIT(ht, packed);
+	zend_hash_real_init_ex(ht, packed);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
@@ -516,12 +523,13 @@ add_to_hash:
 	}
 	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
 	p = ht->arData + idx;
-	p->h = h = zend_string_hash_val(key);
 	p->key = key;
 	if (!IS_INTERNED(key)) {
 		zend_string_addref(key);
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_hash_val(key);
 	}
+	p->h = h = key->h;
 	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
