@@ -502,6 +502,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_JMP:
 					case ZEND_GOTO:
 					case ZEND_FAST_CALL:
+					case ZEND_DECLARE_ANON_CLASS:
+					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 						ZEND_OP1(opline).jmp_addr = &new_opcodes[ZEND_OP1(opline).jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_JMPZNZ:

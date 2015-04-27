@@ -3590,6 +3590,21 @@ ZEND_METHOD(reflection_class, isUserDefined)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isAnonymous()
+   Returns whether this class is anonymous */
+ZEND_METHOD(reflection_class, isAnonymous)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_BOOL(ce->ce_flags & ZEND_ACC_ANON_CLASS);
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionClass::getFileName()
    Returns the filename of the file this class was declared in */
 ZEND_METHOD(reflection_class, getFileName)
@@ -5943,6 +5958,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isUserDefined, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isAnonymous, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstantiable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isCloneable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getFileName, arginfo_reflection__void, 0)

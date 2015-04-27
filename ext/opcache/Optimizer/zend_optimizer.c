@@ -89,6 +89,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 				opline->result.var += sizeof(zval);
 			}
 			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
+			    opline->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS ||
 			    opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
 				opline->extended_value += sizeof(zval);
 			}
@@ -497,6 +498,8 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP:
 			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
 				break;
 			case ZEND_JMPZNZ:
@@ -538,6 +541,8 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP:
 			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
 				break;
 			case ZEND_JMPZNZ:

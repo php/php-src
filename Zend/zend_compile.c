@@ -27,6 +27,7 @@
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
@@ -3228,6 +3229,8 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 }
 /* }}} */
 
+zend_class_entry *zend_compile_class_decl(zend_ast *ast);
+
 void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
@@ -3240,6 +3243,17 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
+	} else if (class_ast->kind == ZEND_AST_CLASS) {
+		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
+		zend_class_entry *ce = zend_compile_class_decl(class_ast);
+		/* jump over anon class declaration */
+		opline = &CG(active_op_array)->opcodes[dcl_opnum];
+		if (opline->opcode == ZEND_FETCH_CLASS) {
+			opline++;
+		}
+		class_node.op_type = opline->result_type;
+		class_node.u.op.var = opline->result.var;
+		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
@@ -4884,7 +4898,28 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_class_decl(zend_ast *ast) /* {{{ */
+static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{ */
+{
+	zend_string *result;
+	char char_pos_buf[32];
+	size_t filename_len, char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+
+	const char *filename;
+	if (CG(active_op_array)->filename) {
+		filename = CG(active_op_array)->filename->val;
+		filename_len = CG(active_op_array)->filename->len;
+	} else {
+		filename = "-";
+		filename_len = sizeof("-") - 1;
+	}
+	/* NULL, name length, filename length, last accepting char position length */
+	result = zend_string_alloc(sizeof("class@anonymous") + filename_len + char_pos_len, 0);
+	sprintf(result->val, "class@anonymous%c%s%s", '\0', filename, char_pos_buf);
+	return zend_new_interned_string(result);
+}
+/* }}} */
+
+zend_class_entry *zend_compile_class_decl(zend_ast *ast) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
@@ -4896,9 +4931,20 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_op *opline;
 	znode declare_node, extends_node;
 
-	if (CG(active_class_entry)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
+	zend_class_entry *original_ce = CG(active_class_entry);
+	znode original_implementing_class = FC(implementing_class);
+
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+		decl->name = name = zend_generate_anon_class_name(decl->lex_pos);
+
+		/* Serialization is not supported for anonymous classes */
+		ce->serialize = zend_class_serialize_deny;
+		ce->unserialize = zend_class_unserialize_deny;
+	}
+
+	if (CG(active_class_entry) && !(decl->flags & ZEND_ACC_ANON_CLASS)) {
+		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+		return NULL;
 	}
 
 	zend_assert_valid_class_name(name);
@@ -4957,15 +5003,28 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
 
-	if (extends_ast) {
-		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
-		opline->extended_value = extends_node.u.op.var;
-	} else {
-		opline->opcode = ZEND_DECLARE_CLASS;
-	}
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
+		if (extends_ast) {
+			opline->opcode = ZEND_DECLARE_ANON_INHERITED_CLASS;
+			opline->extended_value = extends_node.u.op.var;
+		} else {
+			opline->opcode = ZEND_DECLARE_ANON_CLASS;
+		}
 
-	{
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+		opline->op1_type = IS_UNUSED;
+
+		zend_hash_update_ptr(CG(class_table), lcname, ce);
+	} else {
+		zend_string *key;
+
+		if (extends_ast) {
+			opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
+			opline->extended_value = extends_node.u.op.var;
+		} else {
+			opline->opcode = ZEND_DECLARE_CLASS;
+		}
+
+		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
 
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
@@ -5051,7 +5110,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = NULL;
+	FC(implementing_class) = original_implementing_class;
+	CG(active_class_entry) = original_ce;
+
+	return ce;
 }
 /* }}} */
 

@@ -144,6 +144,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				START_BLOCK_OP(opno + 1);
 				break;
 			case ZEND_JMP:
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				/* break missing intentionally */
 			case ZEND_RETURN:
@@ -287,6 +289,11 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 					break;
 				case ZEND_JMP:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					cur_block->follow_to = &blocks[opno];
 					break;
 				case ZEND_JMPZNZ:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];

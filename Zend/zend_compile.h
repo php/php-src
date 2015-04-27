@@ -206,6 +206,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
 #define ZEND_ACC_INTERFACE		            0x40
 #define ZEND_ACC_TRAIT						0x80
+#define ZEND_ACC_ANON_CLASS                 0x100
+#define ZEND_ACC_ANON_BOUND                 0x200
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */

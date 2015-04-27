@@ -6752,6 +6752,48 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(171, ZEND_DECLARE_ANON_CLASS, ANY, ANY)
+{
+	zend_class_entry *ce;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op2)));
+	Z_CE_P(EX_VAR(opline->result.var)) = ce;
+	ZEND_ASSERT(ce != NULL);
+
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
+	}
+
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
+		zend_verify_abstract_class(ce);
+	}
+	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, ANY, ANY)
+{
+	zend_class_entry *ce;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(EX_CONSTANT(opline->op2)));
+	Z_CE_P(EX_VAR(opline->result.var)) = ce;
+	ZEND_ASSERT(ce != NULL);
+
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
+	}
+
+	zend_do_inheritance(ce, Z_CE_P(EX_VAR(opline->extended_value)));
+	ce->ce_flags |= ZEND_ACC_ANON_BOUND;
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(141, ZEND_DECLARE_FUNCTION, ANY, ANY)
 {
 	USE_OPLINE
