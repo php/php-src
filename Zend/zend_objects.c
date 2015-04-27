@@ -28,40 +28,45 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
+	zval *p, *end;
+
 	GC_REFCOUNT(object) = 1;
 	GC_TYPE_INFO(object) = IS_OBJECT;
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
+	p = object->properties_table;
 	if (EXPECTED(ce->default_properties_count != 0)) {
-		zval *p = object->properties_table;
-		zval *end = p + ce->default_properties_count;
-
+		end = p + ce->default_properties_count;
 		do {
 			ZVAL_UNDEF(p);
 			p++;
 		} while (p != end);
 	}
-	if (ce->ce_flags & ZEND_ACC_USE_GUARDS) {
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
-		ZVAL_UNDEF(&object->properties_table[ce->default_properties_count]);
-		Z_PTR(object->properties_table[ce->default_properties_count]) = NULL;
+		Z_PTR_P(p) = NULL;
+		ZVAL_UNDEF(p);
 	}
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object)
 {
-	int i, count;
+	zval *p, *end;
 
 	if (object->properties) {
 		zend_array_destroy(object->properties);
 	}
-	count = object->ce->default_properties_count;
-	for (i = 0; i < count; i++) {
-		i_zval_ptr_dtor(&object->properties_table[i] ZEND_FILE_LINE_CC);
+	p = object->properties_table;
+	if (EXPECTED(object->ce->default_properties_count)) {
+		end = p + object->ce->default_properties_count;
+		do {
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			p++;
+		} while (p != end);
 	}
-	if (GC_FLAGS(object) & IS_OBJ_HAS_GUARDS) {
-		HashTable *guards = Z_PTR(object->properties_table[count]);
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
+		HashTable *guards = Z_PTR_P(p);
 
 		ZEND_ASSERT(guards != NULL);
 		zend_hash_destroy(guards);

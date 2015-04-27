@@ -1471,7 +1471,6 @@ ZEND_API int zend_delete_global_variable(zend_string *name) /* {{{ */
 
 ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 {
-	int i;
 	zend_execute_data *ex;
 	zend_array *symbol_table;
 
@@ -1503,9 +1502,16 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		zend_hash_real_init(symbol_table, 0);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
-	for (i = 0; i < ex->func->op_array.last_var; i++) {
-		_zend_hash_append_ind(symbol_table, ex->func->op_array.vars[i],
-			ZEND_CALL_VAR_NUM(ex, i));
+	if (EXPECTED(ex->func->op_array.last_var)) {
+		zend_string **str = ex->func->op_array.vars;
+		zend_string **end = str + ex->func->op_array.last_var;
+		zval *var = ZEND_CALL_VAR_NUM(ex, 0);
+
+		do {
+			_zend_hash_append_ind(symbol_table, *str, var);
+			str++;
+			var++;
+		} while (str != end);
 	}
 	return symbol_table;
 }
@@ -1513,46 +1519,60 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 
 ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
-	int i;
 	zend_op_array *op_array = &execute_data->func->op_array;
 	HashTable *ht = execute_data->symbol_table;
 
 	/* copy real values from symbol table into CV slots and create
 	   INDIRECT references to CV in symbol table  */
-	for (i = 0; i < op_array->last_var; i++) {
-		zval *zv = zend_hash_find(ht, op_array->vars[i]);
+	if (EXPECTED(op_array->last_var)) {
+		zend_string **str = op_array->vars;
+		zend_string **end = str + op_array->last_var;
+		zval *var = EX_VAR_NUM(0);
 
-		if (zv) {
-			if (Z_TYPE_P(zv) == IS_INDIRECT) {
-				zval *val = Z_INDIRECT_P(zv);
+		do {
+			zval *zv = zend_hash_find(ht, *str);
 
-				ZVAL_COPY_VALUE(EX_VAR_NUM(i), val);
+			if (zv) {
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zval *val = Z_INDIRECT_P(zv);
+
+					ZVAL_COPY_VALUE(var, val);
+				} else {
+					ZVAL_COPY_VALUE(var, zv);
+				}
 			} else {
-				ZVAL_COPY_VALUE(EX_VAR_NUM(i), zv);
+				ZVAL_UNDEF(var);
+				zv = zend_hash_add_new(ht, *str, var);
 			}
-		} else {
-			ZVAL_UNDEF(EX_VAR_NUM(i));
-			zv = zend_hash_add_new(ht, op_array->vars[i], EX_VAR_NUM(i));
-		}
-		ZVAL_INDIRECT(zv, EX_VAR_NUM(i));
+			ZVAL_INDIRECT(zv, var);
+			str++;
+			var++;
+		} while (str != end);
 	}
 }
 /* }}} */
 
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
-	int i;
 	zend_op_array *op_array = &execute_data->func->op_array;
 	HashTable *ht = execute_data->symbol_table;
 
 	/* copy real values from CV slots into symbol table */
-	for (i = 0; i < op_array->last_var; i++) {
-		if (Z_TYPE_P(EX_VAR_NUM(i)) == IS_UNDEF) {
-			zend_hash_del(ht, op_array->vars[i]);
-		} else {
-			zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
-			ZVAL_UNDEF(EX_VAR_NUM(i));
-		}
+	if (EXPECTED(op_array->last_var)) {
+		zend_string **str = op_array->vars;
+		zend_string **end = str + op_array->last_var;
+		zval *var = EX_VAR_NUM(0);
+
+		do {
+			if (Z_TYPE_P(var) == IS_UNDEF) {
+				zend_hash_del(ht, *str);
+			} else {
+				zend_hash_update(ht, *str, var);
+				ZVAL_UNDEF(var);
+			}
+			str++;
+			var++;
+		} while (str != end);
 	}
 }
 /* }}} */
@@ -1569,15 +1589,21 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 		if (!execute_data->symbol_table) {
 			zend_ulong h = zend_string_hash_val(name);
 			zend_op_array *op_array = &execute_data->func->op_array;
-			int i;
 
-			for (i = 0; i < op_array->last_var; i++) {
-				if (op_array->vars[i]->h == h &&
-				    op_array->vars[i]->len == name->len &&
-				    memcmp(op_array->vars[i]->val, name->val, name->len) == 0) {
-					ZVAL_COPY_VALUE(EX_VAR_NUM(i), value);
-					return SUCCESS;
-				}
+			if (EXPECTED(op_array->last_var)) {
+				zend_string **str = op_array->vars;
+				zend_string **end = str + op_array->last_var;
+
+				do {
+					if ((*str)->h == h &&
+					    (*str)->len == name->len &&
+					    memcmp((*str)->val, name->val, name->len) == 0) {
+						zval *var = EX_VAR_NUM(str - op_array->vars);
+						ZVAL_COPY_VALUE(var, value);
+						return SUCCESS;
+					}
+					str++;
+				} while (str != end);
 			}
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
@@ -1605,18 +1631,21 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 		if (!execute_data->symbol_table) {
 			zend_ulong h = zend_hash_func(name, len);
 			zend_op_array *op_array = &execute_data->func->op_array;
-			int i;
+			if (EXPECTED(op_array->last_var)) {
+				zend_string **str = op_array->vars;
+				zend_string **end = str + op_array->last_var;
 
-			for (i = 0; i < op_array->last_var; i++) {
-				if (op_array->vars[i]->h == h &&
-				    op_array->vars[i]->len == len &&
-				    memcmp(op_array->vars[i]->val, name, len) == 0) {
-					zval_ptr_dtor(EX_VAR_NUM(i));
-					ZVAL_COPY_VALUE(EX_VAR_NUM(i), value);
-					return SUCCESS;
-				}
+				do {
+					if ((*str)->h == h &&
+					    (*str)->len == len &&
+					    memcmp((*str)->val, name, len) == 0) {
+						zval *var = EX_VAR_NUM(str - op_array->vars);
+						ZVAL_COPY_VALUE(var, value);
+						return SUCCESS;
+					}
+					str++;
+				} while (str != end);
 			}
-
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
