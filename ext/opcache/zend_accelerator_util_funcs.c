@@ -118,26 +118,22 @@ void zend_accel_free_user_functions(HashTable *ht)
 	ht->pDestructor = orig_dtor;
 }
 
-static int move_user_function(zval *zv, int num_args, va_list args, zend_hash_key *hash_key)
-{
-	zend_function *function = Z_PTR_P(zv);
-	HashTable *function_table = va_arg(args, HashTable *);
-	(void)num_args; /* keep the compiler happy */
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		zend_hash_update_ptr(function_table, hash_key->key, function);
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
 void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 {
+	Bucket *p;
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
-	zend_hash_apply_with_arguments(src, (apply_func_args_t)move_user_function, 1, dst);
+	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
+		zend_function *function = Z_PTR(p->val);
+
+		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
+			zend_hash_add_new_ptr(dst, p->key, function);
+			zend_hash_del_bucket(src, p);
+		} else {
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
 	src->pDestructor = orig_dtor;
 }
 

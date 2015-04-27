@@ -814,6 +814,10 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
+#define ZEND_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_bucket = _p;
+
 #define ZEND_HASH_REVERSE_FOREACH_VAL(ht, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_val = _z;
