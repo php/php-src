@@ -3246,13 +3246,13 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 	} else if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
 		zend_class_entry *ce = zend_compile_class_decl(class_ast);
-		class_node.op_type = IS_CONST;
-		ZVAL_STR_COPY(&class_node.u.constant, ce->name);
 		/* jump over anon class declaration */
 		opline = &CG(active_op_array)->opcodes[dcl_opnum];
 		if (opline->opcode == ZEND_FETCH_CLASS) {
 			opline++;
 		}
+		class_node.op_type = opline->result_type;
+		class_node.u.op.var = opline->result.var;
 		opline->op1.opline_num = get_next_op_number(CG(active_op_array));
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, 1);
