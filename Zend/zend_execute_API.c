@@ -1640,6 +1640,7 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 					    (*str)->len == len &&
 					    memcmp((*str)->val, name, len) == 0) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
+						zval_ptr_dtor(var);
 						ZVAL_COPY_VALUE(var, value);
 						return SUCCESS;
 					}
