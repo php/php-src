@@ -80,6 +80,7 @@
   . Implemented the RFC `Constructor behaviour of internal classes`. (Dan, Dmitry)
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
   . Implemented the RFC `Generator Delegation`. (Bob)
+  . Implemented the RFC ` Anonymous Class Support`. (Joe, Nikita, Dmitry)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
