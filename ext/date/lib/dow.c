@@ -136,7 +136,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d)
 {
 	timelib_sll dow, day;
-	
+
 	/* Figure out the dayofweek for y-1-1 */
 	dow = timelib_day_of_week(y, 1, 1);
 	/* then use that to figure out the offset for day 1 of week 1 */

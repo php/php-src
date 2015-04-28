@@ -36,7 +36,7 @@
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
 #  undef WORDS_BIGENDIAN
-# else 
+# else
 #  if defined(__BIG_ENDIAN__)
 #   define WORDS_BIGENDIAN
 #  endif
@@ -56,7 +56,7 @@ static int read_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
 	/* read ID */
 	version = (*tzf)[3] - '0';
 	*tzf += 4;
-	
+
 	/* read BC flag */
 	tz->bc = (**tzf == '\1');
 	*tzf += 1;
@@ -119,7 +119,7 @@ static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->timecnt);
 		*tzf += sizeof(unsigned char) * tz->timecnt;
 	}
-	
+
 	tz->trans = buffer;
 	tz->trans_idx = cbuffer;
 }
@@ -307,7 +307,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 		cur_locale = strdup(tmp);
 	}
 	setlocale(LC_CTYPE, "C");
-#endif	
+#endif
 
 	do {
 		int mid = ((unsigned)left + right) >> 1;
@@ -322,7 +322,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 #ifdef HAVE_SETLOCALE
 			setlocale(LC_CTYPE, cur_locale);
 			if (cur_locale) free(cur_locale);
-#endif	
+#endif
 			return 1;
 		}
 
@@ -331,7 +331,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 #ifdef HAVE_SETLOCALE
 	setlocale(LC_CTYPE, cur_locale);
 	if (cur_locale) free(cur_locale);
-#endif	
+#endif
 	return 0;
 }
 
@@ -449,7 +449,7 @@ int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz)
 {
 	ttinfo *to;
 	timelib_sll dummy;
-	
+
 	if ((to = fetch_timezone_offset(tz, ts, &dummy))) {
 		return to->isdst;
 	}
@@ -492,12 +492,12 @@ timelib_sll timelib_get_current_offset(timelib_time *t)
 {
 	timelib_time_offset *gmt_offset;
 	timelib_sll retval;
-			
+
 	switch (t->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET:
 			return (t->z + t->dst) * -60;
-			
+
 		case TIMELIB_ZONETYPE_ID:
 			gmt_offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 			retval = gmt_offset->offset;

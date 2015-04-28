@@ -115,7 +115,7 @@ static double astro_GMST0(double d)
 	/* time, imposing no runtime or code overhead.               */
 	sidtim0 = astro_revolution((180.0 + 356.0470 + 282.9404) + (0.9856002585 + 4.70935E-5) * d);
 	return sidtim0;
-} 
+}
 
 /* This function computes the Sun's position at any instant */
 
@@ -177,32 +177,32 @@ static void astro_sun_RA_dec(double d, double *RA, double *dec, double *r)
 
 /**
  * Note: timestamp = unixtimestamp (NEEDS to be 00:00:00 UT)
- *       Eastern longitude positive, Western longitude negative       
- *       Northern latitude positive, Southern latitude negative       
- *       The longitude value IS critical in this function!            
- *       altit = the altitude which the Sun should cross              
- *               Set to -35/60 degrees for rise/set, -6 degrees       
- *               for civil, -12 degrees for nautical and -18          
- *               degrees for astronomical twilight.                   
- *         upper_limb: non-zero -> upper limb, zero -> center         
- *               Set to non-zero (e.g. 1) when computing rise/set     
- *               times, and to zero when computing start/end of       
- *               twilight.                                            
- *        *rise = where to store the rise time                        
- *        *set  = where to store the set  time                        
- *                Both times are relative to the specified altitude,  
- *                and thus this function can be used to compute       
- *                various twilight times, as well as rise/set times   
- * Return value:  0 = sun rises/sets this day, times stored at        
- *                    *trise and *tset.                               
- *               +1 = sun above the specified "horizon" 24 hours.     
- *                    *trise set to time when the sun is at south,    
- *                    minus 12 hours while *tset is set to the south  
- *                    time plus 12 hours. "Day" length = 24 hours     
- *               -1 = sun is below the specified "horizon" 24 hours   
- *                    "Day" length = 0 hours, *trise and *tset are    
- *                    both set to the time when the sun is at south.  
- *                                                                    
+ *       Eastern longitude positive, Western longitude negative
+ *       Northern latitude positive, Southern latitude negative
+ *       The longitude value IS critical in this function!
+ *       altit = the altitude which the Sun should cross
+ *               Set to -35/60 degrees for rise/set, -6 degrees
+ *               for civil, -12 degrees for nautical and -18
+ *               degrees for astronomical twilight.
+ *         upper_limb: non-zero -> upper limb, zero -> center
+ *               Set to non-zero (e.g. 1) when computing rise/set
+ *               times, and to zero when computing start/end of
+ *               twilight.
+ *        *rise = where to store the rise time
+ *        *set  = where to store the set  time
+ *                Both times are relative to the specified altitude,
+ *                and thus this function can be used to compute
+ *                various twilight times, as well as rise/set times
+ * Return value:  0 = sun rises/sets this day, times stored at
+ *                    *trise and *tset.
+ *               +1 = sun above the specified "horizon" 24 hours.
+ *                    *trise set to time when the sun is at south,
+ *                    minus 12 hours while *tset is set to the south
+ *                    time plus 12 hours. "Day" length = 24 hours
+ *               -1 = sun is below the specified "horizon" 24 hours
+ *                    "Day" length = 0 hours, *trise and *tset are
+ *                    both set to the time when the sun is at south.
+ *
  */
 int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set, timelib_sll *ts_transit)
 {
