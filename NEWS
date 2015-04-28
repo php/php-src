@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #69474 (ODBC: Query with same field name from two tables returns
     incorrect result). (Anatol)
+  . Fixed bug #69381 (out of memory with sage odbc driver). (Frederic Marchall,
+      Anatol Belski)
 
 - OpenSSL:
   . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
