@@ -863,7 +863,6 @@ do
       case OP_NOTUPTOI:
       case OP_NOT_HSPACE:
       case OP_NOT_VSPACE:
-      case OP_PROP:
       case OP_PRUNE:
       case OP_PRUNE_ARG:
       case OP_RECURSE:
@@ -879,10 +878,32 @@ do
       case OP_SOM:
       case OP_THEN:
       case OP_THEN_ARG:
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-      case OP_XCLASS:
-#endif
       return SSB_FAIL;
+
+      /* A "real" property test implies no starting bits, but the fake property
+      PT_CLIST identifies a list of characters. These lists are short, as they
+      are used for characters with more than one "other case", so there is no
+      point in recognizing them for OP_NOTPROP. */
+
+      case OP_PROP:
+      if (tcode[1] != PT_CLIST) return SSB_FAIL;
+        {
+        const pcre_uint32 *p = PRIV(ucd_caseless_sets) + tcode[2];
+        while ((c = *p++) < NOTACHAR)
+          {
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+          if (utf)
+            {
+            pcre_uchar buff[6];
+            (void)PRIV(ord2utf)(c, buff);
+            c = buff[0];
+            }
+#endif
+          if (c > 0xff) SET_BIT(0xff); else SET_BIT(c);
+          }
+        }
+      try_next = FALSE;
+      break;
 
       /* We can ignore word boundary tests. */
 
@@ -1109,24 +1130,17 @@ do
       try_next = FALSE;
       break;
 
-      /* The cbit_space table has vertical tab as whitespace; we have to
-      ensure it is set as not whitespace. Luckily, the code value is the same
-      (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate bit. */
+      /* The cbit_space table has vertical tab as whitespace; we no longer
+      have to play fancy tricks because Perl added VT to its whitespace at
+      release 5.18. PCRE added it at release 8.34. */
 
       case OP_NOT_WHITESPACE:
       set_nottype_bits(start_bits, cbit_space, table_limit, cd);
-      start_bits[1] |= 0x08;
       try_next = FALSE;
       break;
 
-      /* The cbit_space table has vertical tab as whitespace; we have to not
-      set it from the table. Luckily, the code value is the same (0x0b) in
-      ASCII and EBCDIC, so we can just adjust the appropriate bit. */
-
       case OP_WHITESPACE:
-      c = start_bits[1];    /* Save in case it was already set */
       set_type_bits(start_bits, cbit_space, table_limit, cd);
-      start_bits[1] = (start_bits[1] & ~0x08) | c;
       try_next = FALSE;
       break;
 
@@ -1257,6 +1271,16 @@ do
       with a value >= 0xc4 is a potentially valid starter because it starts a
       character with a value > 255. */
 
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+      case OP_XCLASS:
+      if ((tcode[1 + LINK_SIZE] & XCL_HASPROP) != 0)
+        return SSB_FAIL;
+      /* All bits are set. */
+      if ((tcode[1 + LINK_SIZE] & XCL_MAP) == 0 && (tcode[1 + LINK_SIZE] & XCL_NOT) != 0)
+        return SSB_FAIL;
+#endif
+      /* Fall through */
+
       case OP_NCLASS:
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
       if (utf)
@@ -1273,8 +1297,21 @@ do
       case OP_CLASS:
         {
         pcre_uint8 *map;
-        tcode++;
-        map = (pcre_uint8 *)tcode;
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+        map = NULL;
+        if (*tcode == OP_XCLASS)
+          {
+          if ((tcode[1 + LINK_SIZE] & XCL_MAP) != 0)
+            map = (pcre_uint8 *)(tcode + 1 + LINK_SIZE + 1);
+          tcode += GET(tcode, 1);
+          }
+        else
+#endif
+          {
+          tcode++;
+          map = (pcre_uint8 *)tcode;
+          tcode += 32 / sizeof(pcre_uchar);
+          }
 
         /* In UTF-8 mode, the bits in a bit map correspond to character
         values, not to byte values. However, the bit map we are constructing is
@@ -1282,31 +1319,35 @@ do
         value is > 127. In fact, there are only two possible starting bytes for
         characters in the range 128 - 255. */
 
-#if defined SUPPORT_UTF && defined COMPILE_PCRE8
-        if (utf)
-          {
-          for (c = 0; c < 16; c++) start_bits[c] |= map[c];
-          for (c = 128; c < 256; c++)
-            {
-            if ((map[c/8] && (1 << (c&7))) != 0)
-              {
-              int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
-              start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */
-              c = (c & 0xc0) + 0x40 - 1;          /* next relevant character. */
-              }
-            }
-          }
-        else
+#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
+        if (map != NULL)
 #endif
           {
-          /* In non-UTF-8 mode, the two bit maps are completely compatible. */
-          for (c = 0; c < 32; c++) start_bits[c] |= map[c];
+#if defined SUPPORT_UTF && defined COMPILE_PCRE8
+          if (utf)
+            {
+            for (c = 0; c < 16; c++) start_bits[c] |= map[c];
+            for (c = 128; c < 256; c++)
+              {
+              if ((map[c/8] && (1 << (c&7))) != 0)
+                {
+                int d = (c >> 6) | 0xc0;            /* Set bit for this starter */
+                start_bits[d/8] |= (1 << (d&7));    /* and then skip on to the */
+                c = (c & 0xc0) + 0x40 - 1;          /* next relevant character. */
+                }
+              }
+            }
+          else
+#endif
+            {
+            /* In non-UTF-8 mode, the two bit maps are completely compatible. */
+            for (c = 0; c < 32; c++) start_bits[c] |= map[c];
+            }
           }
 
         /* Advance past the bit map, and act on what follows. For a zero
         minimum repeat, continue; otherwise stop processing. */
 
-        tcode += 32 / sizeof(pcre_uchar);
         switch (*tcode)
           {
           case OP_CRSTAR:
