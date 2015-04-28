@@ -81,6 +81,11 @@ additional data. */
 
 if (c < 256)
   {
+  if ((*data & XCL_HASPROP) == 0)
+    {
+    if ((*data & XCL_MAP) == 0) return negated;
+    return (((pcre_uint8 *)(data + 1))[c/8] & (1 << (c&7))) != 0;
+    }
   if ((*data & XCL_MAP) != 0 &&
     (((pcre_uint8 *)(data + 1))[c/8] & (1 << (c&7))) != 0)
     return !negated; /* char found */

@@ -178,7 +178,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: c d e 
+Starting chars: c d e 
     this sentence eventually mentions a cat
  0: cat
     this sentences rambles on and on for a while and then reaches elephant
@@ -190,7 +190,7 @@ Options: caseless
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: C D E c d e 
+Starting chars: C D E c d e 
     this sentence eventually mentions a CAT cat
  0: CAT
     this sentences rambles on and on for a while to elephant ElePhant
@@ -202,7 +202,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(a|[^\dZ])/IS
 Capturing subpattern count = 1
@@ -210,7 +210,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
+Starting chars: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
   ? @ A B C D E F G H I J K L M N O P Q R S T U V W X Y [ \ ] ^ _ ` a b c d 
@@ -231,7 +231,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 a b 
+Starting chars: \x09 \x0a \x0b \x0c \x0d \x20 a b 
 
 /(ab\2)/
 Failed: reference to non-existent subpattern at offset 6
@@ -512,7 +512,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(?i)[abcd]/IS
 Capturing subpattern count = 0
@@ -520,7 +520,7 @@ Options: caseless
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: A B C D a b c d 
+Starting chars: A B C D a b c d 
 
 /(?m)[xy]|(b|c)/IS
 Capturing subpattern count = 1
@@ -528,7 +528,7 @@ Options: multiline
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: b c x y 
+Starting chars: b c x y 
 
 /(^a|^b)/Im
 Capturing subpattern count = 1
@@ -591,7 +591,7 @@ No options
 First char = 'b' (caseless)
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /(a*b|(?i:c*(?-i)d))/IS
 Capturing subpattern count = 1
@@ -599,7 +599,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: C a b c d 
+Starting chars: C a b c d 
 
 /a$/I
 Capturing subpattern count = 0
@@ -666,7 +666,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 
 /(?<!foo)(alpha|omega)/IS
 Capturing subpattern count = 1
@@ -675,7 +675,7 @@ No options
 No first char
 Need char = 'a'
 Subject length lower bound = 5
-Starting byte set: a o 
+Starting chars: a o 
 
 /(?!alphabet)[ab]/IS
 Capturing subpattern count = 0
@@ -683,7 +683,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 
 /(?<=foo\n)^bar/Im
 Capturing subpattern count = 0
@@ -1642,7 +1642,7 @@ Options: anchored
 No first char
 Need char = 'd'
 Subject length lower bound = 4
-No set of starting bytes
+No starting char list
 
 /\(             # ( at start
   (?:           # Non-capturing bracket
@@ -1875,7 +1875,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
+Starting chars: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 
   _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 
 /^[[:ascii:]]/DZ
@@ -1937,7 +1937,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 
+Starting chars: \x09 \x0a \x0b \x0c \x0d \x20 
 
 /^[[:cntrl:]]/DZ
 ------------------------------------------------------------------
@@ -3178,6 +3178,10 @@ Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 /\U/I
 Failed: PCRE does not support \L, \l, \N{name}, \U, or \u at offset 1
 
+/a{1,3}b/U
+    ab
+ 0: ab
+
 /[/I
 Failed: missing terminating ] for character class at offset 1
 
@@ -3434,7 +3438,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 
 /[^a]/I
 Capturing subpattern count = 0
@@ -3454,7 +3458,7 @@ No options
 No first char
 Need char = '6'
 Subject length lower bound = 4
-Starting byte set: 0 1 2 3 4 5 6 7 8 9 
+Starting chars: 0 1 2 3 4 5 6 7 8 9 
 
 /a^b/I
 Capturing subpattern count = 0
@@ -3488,7 +3492,7 @@ Options: caseless
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: A B a b 
+Starting chars: A B a b 
 
 /[ab](?i)cd/IS
 Capturing subpattern count = 0
@@ -3496,7 +3500,7 @@ No options
 No first char
 Need char = 'd' (caseless)
 Subject length lower bound = 3
-Starting byte set: a b 
+Starting chars: a b 
 
 /abc(?C)def/I
 Capturing subpattern count = 0
@@ -3537,7 +3541,7 @@ No options
 No first char
 Need char = 'f'
 Subject length lower bound = 7
-Starting byte set: 0 1 2 3 4 5 6 7 8 9 
+Starting chars: 0 1 2 3 4 5 6 7 8 9 
     1234abcdef
 --->1234abcdef
   1 ^              \d
@@ -3856,7 +3860,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 
 /(?R)/I
 Failed: recursive call could loop indefinitely at offset 3
@@ -4637,7 +4641,7 @@ Options: caseless
 No first char
 Need char = 'g' (caseless)
 Subject length lower bound = 8
-No set of starting bytes
+No starting char list
      Baby Bjorn Active Carrier - With free SHIPPING!!
  0: Baby Bjorn Active Carrier - With free SHIPPING!!
  1: Baby Bjorn Active Carrier - With free SHIPPING!!
@@ -4656,7 +4660,7 @@ No options
 No first char
 Need char = 'b'
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /(a|b)*.?c/ISDZ
 ------------------------------------------------------------------
@@ -4677,7 +4681,7 @@ No options
 No first char
 Need char = 'c'
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /abc(?C255)de(?C)f/DZ
 ------------------------------------------------------------------
@@ -4750,7 +4754,7 @@ Options:
 No first char
 Need char = 'b'
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
   ab
 --->ab
  +0 ^      a*
@@ -4893,7 +4897,7 @@ Options:
 No first char
 Need char = 'x'
 Subject length lower bound = 4
-Starting byte set: a d 
+Starting chars: a d 
   abcx
 --->abcx
  +0 ^        (abc|def)
@@ -5127,7 +5131,7 @@ Options:
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b x 
+Starting chars: a b x 
     Note: that { does NOT introduce a quantifier
 --->Note: that { does NOT introduce a quantifier
  +0         ^                                        ([ab]{,4}c|xy)
@@ -5607,7 +5611,7 @@ No options
 First char = 'a'
 Need char = 'c'
 Subject length lower bound = 3
-No set of starting bytes
+No starting char list
 Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
@@ -5642,7 +5646,7 @@ No options
 First char = 'a'
 Need char = 'c'
 Subject length lower bound = 3
-No set of starting bytes
+No starting char list
 Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
@@ -5677,7 +5681,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
@@ -5716,7 +5720,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b 
+Starting chars: a b 
 Compiled pattern written to testsavedregex
 Study data written to testsavedregex
 <testsavedregex
@@ -5817,13 +5821,13 @@ No match
 No match
 
 /a{11111111111111111111}/I
-Failed: number too big in {} quantifier at offset 22
+Failed: number too big in {} quantifier at offset 8
 
 /(){64294967295}/I
-Failed: number too big in {} quantifier at offset 14
+Failed: number too big in {} quantifier at offset 9
 
 /(){2,4294967295}/I
-Failed: number too big in {} quantifier at offset 15
+Failed: number too big in {} quantifier at offset 11
 
 "(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"I
 Capturing subpattern count = 1
@@ -6431,7 +6435,7 @@ No options
 No first char
 Need char = ','
 Subject length lower bound = 1
-Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20 , 
+Starting chars: \x09 \x0a \x0b \x0c \x0d \x20 , 
     \x0b,\x0b
  0: \x0b,\x0b
     \x0c,\x0d
@@ -6738,7 +6742,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: C a b c d 
+Starting chars: C a b c d 
 
 /()[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6746,7 +6750,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b 
+Starting chars: a b 
 
 /(|)[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6754,7 +6758,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b 
+Starting chars: a b 
 
 /(|c)[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6762,7 +6766,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b c 
+Starting chars: a b c 
 
 /(|c?)[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6770,7 +6774,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b c 
+Starting chars: a b c 
 
 /(d?|c?)[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6778,7 +6782,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(d?|c)[ab]xyz/IS
 Capturing subpattern count = 1
@@ -6786,7 +6790,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 4
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /^a*b\d/DZ
 ------------------------------------------------------------------
@@ -6879,7 +6883,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(a+|b*)[cd]/IS
 Capturing subpattern count = 1
@@ -6887,7 +6891,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(a*|b+)[cd]/IS
 Capturing subpattern count = 1
@@ -6895,7 +6899,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /(a+|b+)[cd]/IS
 Capturing subpattern count = 1
@@ -6903,7 +6907,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
  ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
@@ -9307,7 +9311,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: x y z 
+Starting chars: x y z 
 
 /(?(?=.*b)b|^)/CI
 Capturing subpattern count = 0
@@ -10096,7 +10100,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|bc)\1{2,3}/SI
 Capturing subpattern count = 1
@@ -10105,7 +10109,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|bc)(?1)/SI
 Capturing subpattern count = 1
@@ -10113,7 +10117,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|b\1)(a|b\1)/SI
 Capturing subpattern count = 2
@@ -10122,7 +10126,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|b\1){2}/SI
 Capturing subpattern count = 1
@@ -10131,7 +10135,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|bbbb\1)(a|bbbb\1)/SI
 Capturing subpattern count = 2
@@ -10140,7 +10144,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a|bbbb\1){2}/SI
 Capturing subpattern count = 1
@@ -10149,7 +10153,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 2
-Starting byte set: a b 
+Starting chars: a b 
 
 /^From +([^ ]+) +[a-zA-Z][a-zA-Z][a-zA-Z] +[a-zA-Z][a-zA-Z][a-zA-Z] +[0-9]?[0-9] +[0-9][0-9]:[0-9][0-9]/SI
 Capturing subpattern count = 1
@@ -10157,7 +10161,7 @@ Options: anchored
 No first char
 Need char = ':'
 Subject length lower bound = 22
-No set of starting bytes
+No starting char list
 
 /<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/isIS
 Capturing subpattern count = 11
@@ -10165,7 +10169,7 @@ Options: caseless dotall
 First char = '<'
 Need char = '>'
 Subject length lower bound = 47
-No set of starting bytes
+No starting char list
 
 "(?>.*/)foo"SI
 Capturing subpattern count = 0
@@ -10173,7 +10177,7 @@ No options
 No first char
 Need char = 'o'
 Subject length lower bound = 4
-No set of starting bytes
+No starting char list
 
 /(?(?=[^a-z]+[a-z])  \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} ) /xSI
 Capturing subpattern count = 0
@@ -10181,7 +10185,7 @@ Options: extended
 No first char
 Need char = '-'
 Subject length lower bound = 8
-No set of starting bytes
+No starting char list
 
 /(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))/iSI
 Capturing subpattern count = 1
@@ -10189,7 +10193,7 @@ Options: caseless
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: A B C a b c 
+Starting chars: A B C a b c 
 
 /(?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))/SI
 Capturing subpattern count = 0
@@ -10197,7 +10201,7 @@ No options
 No first char
 Need char = 'b'
 Subject length lower bound = 41
-Starting byte set: c d 
+Starting chars: c d 
 
 /<a[\s]+href[\s]*=[\s]*          # find <a href=
  ([\"\'])?                       # find single or double quote
@@ -10210,7 +10214,7 @@ Options: caseless extended dotall
 First char = '<'
 Need char = '='
 Subject length lower bound = 9
-No set of starting bytes
+No starting char list
 
 /^(?!:)                       # colon disallowed at start
   (?:                         # start of item
@@ -10226,7 +10230,7 @@ Options: anchored caseless extended
 No first char
 Need char = ':'
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 /(?|(?<a>A)|(?<a>B))/I
 Capturing subpattern count = 1
@@ -10450,7 +10454,7 @@ Options:
 No first char
 Need char = 'a'
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
     cat
  0: a
  1: 
@@ -10464,7 +10468,7 @@ No options
 No first char
 Need char = 'a'
 Subject length lower bound = 3
-No set of starting bytes
+No starting char list
     cat
 No match
 
@@ -10476,7 +10480,7 @@ No options
 First char = 'i'
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
     i
  0: i
     
@@ -10486,7 +10490,7 @@ No options
 No first char
 Need char = 'i'
 Subject length lower bound = 1
-Starting byte set: i 
+Starting chars: i 
     ia
  0: ia
  1: 
@@ -11080,7 +11084,7 @@ No options
 First char = 'a'
 Need char = '4'
 Subject length lower bound = 5
-No set of starting bytes
+No starting char list
 
 /([abc])++1234/SI
 Capturing subpattern count = 1
@@ -11088,7 +11092,7 @@ No options
 No first char
 Need char = '4'
 Subject length lower bound = 5
-Starting byte set: a b c 
+Starting chars: a b c 
 
 /(?<=(abc)+)X/
 Failed: lookbehind assertion is not fixed length at offset 10
@@ -11369,7 +11373,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /(a(?2)|b)(b(?1)|a)(?:(?1)|(?2))/SI
 Capturing subpattern count = 2
@@ -11377,7 +11381,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: a b 
+Starting chars: a b 
 
 /(a(?2)|b)(b(?1)|a)(?1)(?2)/SI
 Capturing subpattern count = 2
@@ -11385,7 +11389,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 4
-Starting byte set: a b 
+Starting chars: a b 
 
 /(abc)(?1)/SI
 Capturing subpattern count = 1
@@ -11393,7 +11397,7 @@ No options
 First char = 'a'
 Need char = 'c'
 Subject length lower bound = 6
-No set of starting bytes
+No starting char list
 
 /^(?>a)++/
     aa\M
@@ -11711,7 +11715,7 @@ No options
 First char = 't'
 Need char = 't'
 Subject length lower bound = 18
-No set of starting bytes
+No starting char list
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
 Capturing subpattern count = 0
@@ -11720,7 +11724,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 8
-Starting byte set: < o t u 
+Starting chars: < o t u 
 
 /a(*SKIP)c|b(*ACCEPT)|/+S!I
 Capturing subpattern count = 0
@@ -11729,7 +11733,7 @@ No options
 No first char
 No need char
 Subject length lower bound = -1
-No set of starting bytes
+No starting char list
     a
  0: 
  0+ 
@@ -11740,7 +11744,7 @@ No options
 No first char
 No need char
 Subject length lower bound = -1
-Starting byte set: a b x 
+Starting chars: a b x 
     ax
  0: x
 
@@ -12436,7 +12440,7 @@ No options
 No first char
 No need char
 Subject length lower bound = -1
-No set of starting bytes
+No starting char list
 
 /(?:(a)+(?C1)bb|aa(?C2)b)/
     aab\C+
@@ -12722,7 +12726,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 2
-Starting byte set: a z 
+Starting chars: a z 
     aaaaaaaaaaaaaz
 Error -21 (recursion limit exceeded)
     aaaaaaaaaaaaaz\Q1000
@@ -12735,7 +12739,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 2
-Starting byte set: a z 
+Starting chars: a z 
     aaaaaaaaaaaaaz
 Error -21 (recursion limit exceeded)
 
@@ -12746,7 +12750,7 @@ No options
 No first char
 Need char = 'z'
 Subject length lower bound = 2
-Starting byte set: a z 
+Starting chars: a z 
     aaaaaaaaaaaaaz
 No match
     aaaaaaaaaaaaaz\Q10
@@ -12790,7 +12794,7 @@ Options: dupnames
 First char = 'a'
 Need char = 'z'
 Subject length lower bound = 5
-No set of starting bytes
+No starting char list
 
 /a*[bcd]/BZ
 ------------------------------------------------------------------
@@ -13902,7 +13906,7 @@ No options
 No first char
 Need char = 'd'
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /[a-c]+d/DZS
 ------------------------------------------------------------------
@@ -13917,7 +13921,7 @@ No options
 No first char
 Need char = 'd'
 Subject length lower bound = 2
-Starting byte set: a b c 
+Starting chars: a b c 
 
 /[a-c]?d/DZS
 ------------------------------------------------------------------
@@ -13932,7 +13936,7 @@ No options
 No first char
 Need char = 'd'
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /[a-c]{4,6}d/DZS
 ------------------------------------------------------------------
@@ -13947,7 +13951,7 @@ No options
 No first char
 Need char = 'd'
 Subject length lower bound = 5
-Starting byte set: a b c 
+Starting chars: a b c 
 
 /[a-c]{0,6}d/DZS
 ------------------------------------------------------------------
@@ -13962,7 +13966,7 @@ No options
 No first char
 Need char = 'd'
 Subject length lower bound = 1
-Starting byte set: a b c d 
+Starting chars: a b c d 
 
 /-- End of special auto-possessive tests --/
 
@@ -14089,6 +14093,30 @@ Failed: malformed number or name after (?( at offset 4
 /(?(R&6yh)abc)/
 Failed: group name must start with a non-digit at offset 5
 
+/(((a\2)|(a*)\g<-1>))*a?/BZ
+------------------------------------------------------------------
+        Bra
+        Brazero
+        SCBra 1
+        Once
+        CBra 2
+        CBra 3
+        a
+        \2
+        Ket
+        Alt
+        CBra 4
+        a*
+        Ket
+        Recurse
+        Ket
+        Ket
+        KetRmax
+        a?+
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- Test the ugly "start or end of word" compatibility syntax --/
 
 /[[:<:]]red[[:>:]]/BZ
@@ -14124,5 +14152,58 @@ No match
     
 /[a[:<:]] should give error/ 
 Failed: unknown POSIX class name at offset 4
+
+/(?=ab\K)/+
+    abcd
+Start of matched string is beyond its end - displaying from end to start.
+ 0: ab
+ 0+ abcd
+
+/abcd/f<lf>
+    xx\nxabcd
+No match
+    
+/ -- Test stack check external calls --/ 
+
+/(((((a)))))/Q0
+
+/(((((a)))))/Q1
+Failed: parentheses are too deeply nested (stack check) at offset 0
+
+/(((((a)))))/Q
+** Missing 0 or 1 after /Q
+
+/^\w+(?>\s*)(?<=\w)/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        \w+
+        Once_NC
+        \s*+
+        Ket
+        AssertB
+        Reverse
+        \w
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/\othing/
+Failed: missing opening brace after \o at offset 1
+
+/\o{}/
+Failed: digits missing in \x{} or \o{} at offset 1
+
+/\o{whatever}/
+Failed: non-octal character in \o{} (closing brace missing?) at offset 3
+
+/\xthing/
+
+/\x{}/
+Failed: digits missing in \x{} or \o{} at offset 3
+
+/\x{whatever}/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 3
 
 /-- End of testinput2 --/
