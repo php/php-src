@@ -2083,11 +2083,13 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	if (num_args > 0) {
 		zval *arg_src = ZEND_CALL_ARG(call, 1);
 		zval *arg_dst = ZEND_CALL_ARG(execute_data, 1);
-		uint32_t i;
+		zval *end = arg_src + num_args;
 
-		for (i = 0; i < num_args; i++) {
-			ZVAL_COPY_VALUE(arg_dst + i, arg_src + i);
-		}
+		do {
+			ZVAL_COPY_VALUE(arg_dst, arg_src);
+			arg_src++;
+			arg_dst++;
+		} while (arg_src != end);
 	}
 
 	EX(symbol_table) = NULL;

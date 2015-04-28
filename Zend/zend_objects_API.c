@@ -42,46 +42,58 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
-	uint32_t i;
+	if (objects->top > 1) {
+		zend_object **obj_ptr = objects->object_buckets + 1;
+		zend_object **end = objects->object_buckets + objects->top;
 
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
+		do {
+			zend_object *obj = *obj_ptr;
 
-		if (IS_OBJ_VALID(obj)) {
-			if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
-				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				GC_REFCOUNT(obj)++;
-				obj->handlers->dtor_obj(obj);
-				GC_REFCOUNT(obj)--;
+			if (IS_OBJ_VALID(obj)) {
+				if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+					GC_REFCOUNT(obj)++;
+					obj->handlers->dtor_obj(obj);
+					GC_REFCOUNT(obj)--;
+				}
 			}
-		}
+			obj_ptr++;
+		} while (obj_ptr != end);
 	}
 }
 
 ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 {
-	uint32_t i;
+	if (objects->object_buckets && objects->top > 1) {
+		zend_object **obj_ptr = objects->object_buckets + 1;
+		zend_object **end = objects->object_buckets + objects->top;
 
-	if (!objects->object_buckets) {
-		return;
-	}
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
+		do {
+			zend_object *obj = *obj_ptr;
 
-		if (IS_OBJ_VALID(obj)) {
-			GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-		}
+			if (IS_OBJ_VALID(obj)) {
+				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+			}
+			obj_ptr++;
+		} while (obj_ptr != end);
 	}
 }
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects)
 {
-	uint32_t i;
+	zend_object **obj_ptr, **end, *obj;
+
+	if (objects->top <= 1) {
+		return;
+	}
 
 	/* Free object contents, but don't free objects themselves */
-	for (i = objects->top - 1; i > 0 ; i--) {
-		zend_object *obj = objects->object_buckets[i];
+	end = objects->object_buckets + 1;
+	obj_ptr = objects->object_buckets + objects->top;
 
+	do {
+		obj_ptr--;
+		obj = *obj_ptr;
 		if (IS_OBJ_VALID(obj)) {
 			if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
@@ -92,20 +104,21 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 				}
 			}
 		}
-	}
+	} while (obj_ptr != end);
 
 	/* Free objects themselves if they now have a refcount of 0, which means that
 	 * they were previously part of a cycle. Everything else will report as a leak.
 	 * Cycles are allowed because not all internal objects currently support GC. */
-	for (i = 1; i < objects->top ; i++) {
-		zend_object *obj = objects->object_buckets[i];
-
+	end = objects->object_buckets + objects->top;
+	while (obj_ptr != end) {
+		obj = *obj_ptr;
 		if (IS_OBJ_VALID(obj) && GC_REFCOUNT(obj) == 0) {
 			/* Not adding to free list as we are shutting down anyway */
 			void *ptr = ((char*)obj) - obj->handlers->offset;
 			GC_REMOVE_FROM_BUFFER(obj);
 			efree(ptr);
 		}
+		obj_ptr++;
 	}
 }
 

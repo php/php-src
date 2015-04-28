@@ -1326,16 +1326,20 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		return 1; /* different classes */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
-		int i;
+		zval *p1, *p2, *end;
 
+		if (!zobj1->ce->default_properties_count) {
+			return 0;
+		}
+		p1 = zobj1->properties_table;
+		p2 = zobj2->properties_table;
+		end = p1 + zobj1->ce->default_properties_count;
 		Z_OBJ_PROTECT_RECURSION(o1);
 		Z_OBJ_PROTECT_RECURSION(o2);
-		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
-			if (Z_TYPE(zobj1->properties_table[i]) != IS_UNDEF) {
-				if (Z_TYPE(zobj2->properties_table[i]) != IS_UNDEF) {
+		do {
+			if (Z_TYPE_P(p1) != IS_UNDEF) {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
-					zval *p1 = &zobj1->properties_table[i];
-					zval *p2 = &zobj2->properties_table[i];
 
 					if (compare_function(&result, p1, p2)==FAILURE) {
 						Z_OBJ_UNPROTECT_RECURSION(o1);
@@ -1353,13 +1357,15 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			} else {
-				if (Z_TYPE(zobj2->properties_table[i]) != IS_UNDEF) {
+				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					Z_OBJ_UNPROTECT_RECURSION(o1);
 					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			}
-		}
+			p1++;
+			p2++;
+		} while (p1 != end);
 		Z_OBJ_UNPROTECT_RECURSION(o1);
 		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;

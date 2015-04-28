@@ -151,14 +151,18 @@ ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
 
 ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
-	int i;
-
 	if (old_object->ce->default_properties_count) {
-		for (i = 0; i < old_object->ce->default_properties_count; i++) {
-			zval_ptr_dtor(&new_object->properties_table[i]);
-			ZVAL_COPY_VALUE(&new_object->properties_table[i], &old_object->properties_table[i]);
-			zval_add_ref(&new_object->properties_table[i]);
-		}
+		zval *src = old_object->properties_table;
+		zval *dst = new_object->properties_table;
+		zval *end = src + old_object->ce->default_properties_count;
+
+		do {
+			i_zval_ptr_dtor(dst ZEND_FILE_LINE_CC);
+			ZVAL_COPY_VALUE(dst, src);
+			zval_add_ref(dst);
+			src++;
+			dst++;
+		} while (src != end);
 	}
 	if (old_object->properties) {
 		zval *prop, new_prop;

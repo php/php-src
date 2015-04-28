@@ -1223,16 +1223,20 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
 {
-	int i;
-
 	if (class_type->default_properties_count) {
-		for (i = 0; i < class_type->default_properties_count; i++) {
+		zval *src = class_type->default_properties_table;
+		zval *dst = object->properties_table;
+		zval *end = src + class_type->default_properties_count;
+
+		do {
 #if ZTS
-			ZVAL_DUP(&object->properties_table[i], &class_type->default_properties_table[i]);
+			ZVAL_DUP(dst, src);
 #else
-			ZVAL_COPY(&object->properties_table[i], &class_type->default_properties_table[i]);
+			ZVAL_COPY(dst, src);
 #endif
-		}
+			src++;
+			dst++;
+		} while (src != end);
 		object->properties = NULL;
 	}
 }
@@ -3451,10 +3455,12 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
-		uint32_t i;
+		zval *p = fci->params;
+		zval *end = p + fci->param_count;
 
-		for (i = 0; i < fci->param_count; i++) {
-			zval_ptr_dtor(&fci->params[i]);
+		while (p != end) {
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			p++;
 		}
 		if (free_mem) {
 			efree(fci->params);

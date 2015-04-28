@@ -154,13 +154,15 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 	}
 	if (ce->static_members_table) {
 		zval *static_members = ce->static_members_table;
-		int count = ce->default_static_members_count;
-		int i;
+		zval *p = static_members;
+		zval *end = p + ce->default_static_members_count;
+
 
 		ce->default_static_members_count = 0;
 		ce->default_static_members_table = ce->static_members_table = NULL;
-		for (i = 0; i < count; i++) {
-			zval_ptr_dtor(&static_members[i]);
+		while (p != end) {
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			p++;
 		}
 		efree(static_members);
 	}
@@ -170,15 +172,17 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
 		zval *static_members = CE_STATIC_MEMBERS(ce);
-		int i;
+		zval *p = static_members;
+		zval *end = p + ce->default_static_members_count;
 
 #ifdef ZTS
 		CG(static_members_table)[(zend_intptr_t)(ce->static_members_table)] = NULL;
 #else
 		ce->static_members_table = NULL;
 #endif
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			zval_ptr_dtor(&static_members[i]);
+		while (p != end) {
+			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			p++;
 		}
 		efree(static_members);
 	}
@@ -249,22 +253,22 @@ ZEND_API void destroy_zend_class(zval *zv)
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
 			if (ce->default_properties_table) {
-				int i;
+				zval *p = ce->default_properties_table;
+				zval *end = p + ce->default_properties_count;
 
-				for (i = 0; i < ce->default_properties_count; i++) {
-					if (Z_TYPE(ce->default_properties_table[i]) != IS_UNDEF) {
-						zval_ptr_dtor(&ce->default_properties_table[i]);
-				    }
+				while (p != end) {
+					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					p++;
 				}
 				efree(ce->default_properties_table);
 			}
 			if (ce->default_static_members_table) {
-				int i;
+				zval *p = ce->default_static_members_table;
+				zval *end = p + ce->default_static_members_count;
 
-				for (i = 0; i < ce->default_static_members_count; i++) {
-					if (Z_TYPE(ce->default_static_members_table[i]) != IS_UNDEF) {
-						zval_ptr_dtor(&ce->default_static_members_table[i]);
-					}
+				while (p != end) {
+					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					p++;
 				}
 				efree(ce->default_static_members_table);
 			}
@@ -292,20 +296,22 @@ ZEND_API void destroy_zend_class(zval *zv)
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
-				int i;
+				zval *p = ce->default_properties_table;
+				zval *end = p + ce->default_properties_count;
 
-				for (i = 0; i < ce->default_properties_count; i++) {
-					if (Z_TYPE(ce->default_properties_table[i]) != IS_UNDEF) {
-						zval_internal_ptr_dtor(&ce->default_properties_table[i]);
-					}
+				while (p != end) {
+					zval_internal_ptr_dtor(p);
+					p++;
 				}
 				free(ce->default_properties_table);
 			}
 			if (ce->default_static_members_table) {
-				int i;
+				zval *p = ce->default_static_members_table;
+				zval *end = p + ce->default_static_members_count;
 
-				for (i = 0; i < ce->default_static_members_count; i++) {
-					zval_internal_ptr_dtor(&ce->default_static_members_table[i]);
+				while (p != end) {
+					zval_internal_ptr_dtor(p);
+					p++;
 				}
 				free(ce->default_static_members_table);
 			}
