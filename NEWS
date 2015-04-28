@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed bug #68652 (segmentation fault in destructor). (Dmitry)
   . Fixed bug #69419 (Returning compatible sub generator produces a warning).
     (Nikita)
+  . Fixed bug #69472 (php_sys_readlink ignores misc errors from 
+    GetFinalPathNameByHandleA). (Jan Starke)
 
 - ODBC:
   . Fixed bug #69474 (ODBC: Query with same field name from two tables returns
