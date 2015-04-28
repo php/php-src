@@ -261,12 +261,12 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
 	printf("BC:                %s\n",  tz->bc ? "" : "yes");
-	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisgmtcnt);
-	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisstdcnt);
-	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.leapcnt);
-	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.timecnt);
-	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.typecnt);
-	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.charcnt);
+	printf("UTC/Local count:   %lu\n", (unsigned long) tz->bit32.ttisgmtcnt);
+	printf("Std/Wall count:    %lu\n", (unsigned long) tz->bit32.ttisstdcnt);
+	printf("Leap.sec. count:   %lu\n", (unsigned long) tz->bit32.leapcnt);
+	printf("Trans. count:      %lu\n", (unsigned long) tz->bit32.timecnt);
+	printf("Local types count: %lu\n", (unsigned long) tz->bit32.typecnt);
+	printf("Zone Abbr. count:  %lu\n", (unsigned long) tz->bit32.charcnt);
 
 	printf ("%8s (%12s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 		"", "", 0,
