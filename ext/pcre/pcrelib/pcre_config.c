@@ -161,6 +161,10 @@ switch (what)
   *((int *)where) = POSIX_MALLOC_THRESHOLD;
   break;
 
+  case PCRE_CONFIG_PARENS_LIMIT:
+  *((unsigned long int *)where) = PARENS_NEST_LIMIT;
+  break;
+
   case PCRE_CONFIG_MATCH_LIMIT:
   *((unsigned long int *)where) = MATCH_LIMIT;
   break;

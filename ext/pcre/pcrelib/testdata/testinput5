@@ -1,20 +1,36 @@
 /-- This set of tests checks the API, internals, and non-Perl stuff for UTF
     support, excluding Unicode properties. However, tests that give different
     results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). --/
+    
+< forbid W 
 
 /\x{110000}/8DZ
 
+/\o{4200000}/8DZ
+
 /\x{ffffffff}/8
+
+/\o{37777777777}/8
 
 /\x{100000000}/8
 
+/\o{77777777777}/8
+
 /\x{d800}/8
+
+/\o{154000}/8
 
 /\x{dfff}/8
 
+/\o{157777}/8
+
 /\x{d7ff}/8
 
+/\o{153777}/8
+
 /\x{e000}/8
+
+/\o{170000}/8
 
 /^\x{100}a\x{1234}/8
     \x{100}a\x{1234}bcd
@@ -768,5 +784,10 @@
 /[\u0100-\u0200]/<JS>8BZ
 
 /\ud800/<JS>8
+
+/^a+[a\x{200}]/8BZ
+    aa
+
+/[b-d\x{200}-\x{250}]*[ae-h]?#[\x{200}-\x{250}]{0,8}[\x00-\xff]*#[\x{200}-\x{250}]+[a-z]/8BZ
 
 /-- End of testinput5 --/

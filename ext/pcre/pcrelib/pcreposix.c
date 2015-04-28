@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ static const int eint[] = {
   REG_BADPAT,  /* POSIX collating elements are not supported */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UTF8 support */
   REG_BADPAT,  /* spare error */
-  REG_BADPAT,  /* character value in \x{...} sequence is too large */
+  REG_BADPAT,  /* character value in \x{} or \o{} is too large */
   /* 35 */
   REG_BADPAT,  /* invalid condition (?(0) */
   REG_BADPAT,  /* \C not allowed in lookbehind assertion */
@@ -162,7 +162,18 @@ static const int eint[] = {
   /* 75 */
   REG_BADPAT,  /* overlong MARK name */
   REG_BADPAT,  /* character value in \u.... sequence is too large */
-  REG_BADPAT   /* invalid UTF-32 string (should not occur) */
+  REG_BADPAT,  /* invalid UTF-32 string (should not occur) */
+  REG_BADPAT,  /* setting UTF is disabled by the application */
+  REG_BADPAT,  /* non-hex character in \\x{} (closing brace missing?) */
+  /* 80 */
+  REG_BADPAT,  /* non-octal character in \o{} (closing brace missing?) */
+  REG_BADPAT,  /* missing opening brace after \o */
+  REG_BADPAT,  /* parentheses too deeply nested */
+  REG_BADPAT,  /* invalid range in character class */
+  REG_BADPAT,  /* group name must start with a non-digit */
+  /* 85 */
+  REG_BADPAT,  /* parentheses too deeply nested (stack check) */
+  REG_BADPAT   /* missing digits in \x{} or \o{} */
 };
 
 /* Table of texts corresponding to POSIX error codes */

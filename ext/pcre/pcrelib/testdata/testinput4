@@ -1,6 +1,8 @@
 /-- This set of tests is for UTF support, excluding Unicode properties. It is
     compatible with all versions of Perl >= 5.10 and both the 8-bit and 16-bit
     PCRE libraries. --/
+    
+< forbid 9?=ABCDEFfGILMNPTUWXZ<
    
 /a.b/8
     acb
@@ -620,5 +622,104 @@
 
 /a(*:a£b)/8K 
     abc
+
+/-- Noncharacters --/
+
+/./8
+    \x{fffe}
+    \x{ffff}
+    \x{1fffe}
+    \x{1ffff}
+    \x{2fffe}
+    \x{2ffff}
+    \x{3fffe}
+    \x{3ffff}
+    \x{4fffe}
+    \x{4ffff}
+    \x{5fffe}
+    \x{5ffff}
+    \x{6fffe}
+    \x{6ffff}
+    \x{7fffe}
+    \x{7ffff}
+    \x{8fffe}
+    \x{8ffff}
+    \x{9fffe}
+    \x{9ffff}
+    \x{afffe}
+    \x{affff}
+    \x{bfffe}
+    \x{bffff}
+    \x{cfffe}
+    \x{cffff}
+    \x{dfffe}
+    \x{dffff}
+    \x{efffe}
+    \x{effff}
+    \x{ffffe}
+    \x{fffff}
+    \x{10fffe}
+    \x{10ffff}
+    \x{fdd0}
+    \x{fdd1}
+    \x{fdd2}
+    \x{fdd3}
+    \x{fdd4}
+    \x{fdd5}
+    \x{fdd6}
+    \x{fdd7}
+    \x{fdd8}
+    \x{fdd9}
+    \x{fdda}
+    \x{fddb}
+    \x{fddc}
+    \x{fddd}
+    \x{fdde}
+    \x{fddf}
+    \x{fde0}
+    \x{fde1}
+    \x{fde2}
+    \x{fde3}
+    \x{fde4}
+    \x{fde5}
+    \x{fde6}
+    \x{fde7}
+    \x{fde8}
+    \x{fde9}
+    \x{fdea}
+    \x{fdeb}
+    \x{fdec}
+    \x{fded}
+    \x{fdee}
+    \x{fdef}
+
+/^\d*\w{4}/8
+    1234
+    123 
+    
+/^[^b]*\w{4}/8
+    aaaa
+    aaa  
+ 
+/^[^b]*\w{4}/8i
+    aaaa
+    aaa  
+ 
+/^\x{100}*.{4}/8
+    \x{100}\x{100}\x{100}\x{100}
+    \x{100}\x{100}\x{100}
+
+/^\x{100}*.{4}/8i
+    \x{100}\x{100}\x{100}\x{100}
+    \x{100}\x{100}\x{100}
+
+/^a+[a\x{200}]/8
+    aa
+
+/^.\B.\B./8
+    \x{10123}\x{10124}\x{10125}
+
+/^#[^\x{ffff}]#[^\x{ffff}]#[^\x{ffff}]#/8
+    #\x{10000}#\x{100}#\x{10ffff}#
 
 /-- End of testinput4 --/

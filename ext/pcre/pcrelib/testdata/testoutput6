@@ -1,5 +1,7 @@
 /-- This set of tests is for Unicode property support. It is compatible with
     Perl >= 5.15. --/
+    
+< forbid 9?=ABCDEFfGILMNPTUXZ<
 
 /^\pC\pL\pM\pN\pP\pS\pZ</8
     \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
@@ -543,16 +545,6 @@ No match
     abc   
 No match
 
-/\p{Lu}/8i
-    A
- 0: A
-    aZ
- 0: Z
-    ** Failers
- 0: F
-    abc   
-No match
-
 /\p{Ll}/8 
     a
  0: a
@@ -728,6 +720,8 @@ No match
     \x{060b}
  0: \x{60b}
     ** Failers
+No match
+    \x{061c}
 No match
     X\x{06e9}   
 No match
@@ -1310,7 +1304,7 @@ No match
 
 /^>\s+/8W
     >\x{20}\x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{9}\x{b} 
- 0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{09}
+ 0: > \x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{09}\x{0b}
   
 /^>\pZ+/8W
     >\x{20}\x{a0}\x{1680}\x{2028}\x{2029}\x{202f}\x{9}\x{b} 
@@ -1338,15 +1332,15 @@ No match
 
 /^[[:graph:]]*/8W
     A\x{a1}\x{a0}
- 0: A
+ 0: A\x{a1}
 
 /^[[:print:]]*/8W
     A z\x{a0}\x{a1}
- 0: A z
+ 0: A z\x{a0}\x{a1}
 
 /^[[:punct:]]*/8W
     .+\x{a1}\x{a0}
- 0: .+
+ 0: .+\x{a1}
 
 /\p{Zs}*?\R/
     ** Failers
@@ -1547,6 +1541,19 @@ No match
     \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
  0: \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
  0+ 
+
+/\X*Z/8Y
+  A\x{300}
+No match
+
+/\X*(.)/8Y
+  A\x{1111}\x{ae4c}\x{1169}
+ 0: A\x{1111}
+ 1: \x{1111}
+
+/\X?abc/8Y
+\xff\x7f\x00\x00\x03\x00\x41\xcc\x80\x41\x{300}\x61\x62\x63\x00\>06\?
+ 0: A\x{300}abc
 
 /-- --/
 
@@ -2133,5 +2140,325 @@ No match
 /\x{017f}+/8i
     \x{0053}\x{0073}\x{017f}
  0: Ss\x{17f}
+
+/^\p{Any}*\d{4}/8
+    1234
+ 0: 1234
+    123 
+No match
+
+/^\X*\w{4}/8
+    1234
+ 0: 1234
+    123  
+No match
+
+/^A\s+Z/8W
+    A\x{2005}Z
+ 0: A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
+ 0: A\x{85}\x{180e}\x{2005}Z
+
+/^A[\s]+Z/8W
+    A\x{2005}Z
+ 0: A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
+ 0: A\x{85}\x{180e}\x{2005}Z
+
+/^[[:graph:]]+$/8W
+    Letter:ABC
+ 0: Letter:ABC
+    Mark:\x{300}\x{1d172}\x{1d17b}
+ 0: Mark:\x{300}\x{1d172}\x{1d17b}
+    Number:9\x{660}
+ 0: Number:9\x{660}
+    Punctuation:\x{66a},;
+ 0: Punctuation:\x{66a},;
+    Symbol:\x{6de}<>\x{fffc}
+ 0: Symbol:\x{6de}<>\x{fffc}
+    Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+ 0: Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+    \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+ 0: \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+    \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+ 0: \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+    \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+ 0: \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+    \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+ 0: \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+    \x{feff}
+ 0: \x{feff}
+    \x{fff9}\x{fffa}\x{fffb}
+ 0: \x{fff9}\x{fffa}\x{fffb}
+    \x{110bd}
+ 0: \x{110bd}
+    \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+ 0: \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+    \x{e0001}
+ 0: \x{e0001}
+    \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+ 0: \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+    ** Failers
+No match
+    \x{09}
+No match
+    \x{0a}
+No match
+    \x{1D}
+No match
+    \x{20}
+No match
+    \x{85}
+No match
+    \x{a0}
+No match
+    \x{61c}
+No match
+    \x{1680}
+No match
+    \x{180e}
+No match
+    \x{2028}
+No match
+    \x{2029}
+No match
+    \x{202f}
+No match
+    \x{2065}
+No match
+    \x{2066}
+No match
+    \x{2067}
+No match
+    \x{2068}
+No match
+    \x{2069}
+No match
+    \x{3000}
+No match
+    \x{e0002}
+No match
+    \x{e001f}
+No match
+    \x{e0080} 
+No match
+
+/^[[:print:]]+$/8W
+    Space: \x{a0}
+ 0: Space: \x{a0}
+    \x{1680}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}
+ 0: \x{1680}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}
+    \x{2006}\x{2007}\x{2008}\x{2009}\x{200a} 
+ 0: \x{2006}\x{2007}\x{2008}\x{2009}\x{200a}
+    \x{202f}\x{205f} 
+ 0: \x{202f}\x{205f}
+    \x{3000}
+ 0: \x{3000}
+    Letter:ABC
+ 0: Letter:ABC
+    Mark:\x{300}\x{1d172}\x{1d17b}
+ 0: Mark:\x{300}\x{1d172}\x{1d17b}
+    Number:9\x{660}
+ 0: Number:9\x{660}
+    Punctuation:\x{66a},;
+ 0: Punctuation:\x{66a},;
+    Symbol:\x{6de}<>\x{fffc}
+ 0: Symbol:\x{6de}<>\x{fffc}
+    Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+ 0: Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+    \x{180e}
+ 0: \x{180e}
+    \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+ 0: \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+    \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+ 0: \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+    \x{202f}
+ 0: \x{202f}
+    \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+ 0: \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+    \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+ 0: \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+    \x{feff}
+ 0: \x{feff}
+    \x{fff9}\x{fffa}\x{fffb}
+ 0: \x{fff9}\x{fffa}\x{fffb}
+    \x{110bd}
+ 0: \x{110bd}
+    \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+ 0: \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+    \x{e0001}
+ 0: \x{e0001}
+    \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+ 0: \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+    ** Failers
+ 0: ** Failers
+    \x{09}
+No match
+    \x{1D}
+No match
+    \x{85}
+No match
+    \x{61c}
+No match
+    \x{2028}
+No match
+    \x{2029}
+No match
+    \x{2065}
+No match
+    \x{2066}
+No match
+    \x{2067}
+No match
+    \x{2068}
+No match
+    \x{2069}
+No match
+    \x{e0002}
+No match
+    \x{e001f}
+No match
+    \x{e0080} 
+No match
+
+/^[[:punct:]]+$/8W
+    \$+<=>^`|~
+ 0: $+<=>^`|~
+    !\"#%&'()*,-./:;?@[\\]_{}
+ 0: !"#%&'()*,-./:;?@[\]_{}
+    \x{a1}\x{a7}  
+ 0: \x{a1}\x{a7}
+    \x{37e} 
+ 0: \x{37e}
+    ** Failers
+No match
+    abcde  
+No match
+
+/^[[:^graph:]]+$/8W
+    \x{09}\x{0a}\x{1D}\x{20}\x{85}\x{a0}\x{61c}\x{1680}\x{180e}
+ 0: \x{09}\x{0a}\x{1d} \x{85}\x{a0}\x{61c}\x{1680}\x{180e}
+    \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
+ 0: \x{2028}\x{2029}\x{202f}\x{2065}\x{2066}\x{2067}\x{2068}\x{2069}
+    \x{3000}\x{e0002}\x{e001f}\x{e0080}
+ 0: \x{3000}\x{e0002}\x{e001f}\x{e0080}
+    ** Failers
+No match
+    Letter:ABC
+No match
+    Mark:\x{300}\x{1d172}\x{1d17b}
+No match
+    Number:9\x{660}
+No match
+    Punctuation:\x{66a},;
+No match
+    Symbol:\x{6de}<>\x{fffc}
+No match
+    Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+No match
+    \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+No match
+    \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+No match
+    \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+No match
+    \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+No match
+    \x{feff}
+No match
+    \x{fff9}\x{fffa}\x{fffb}
+No match
+    \x{110bd}
+No match
+    \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+No match
+    \x{e0001}
+No match
+    \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+No match
+
+/^[[:^print:]]+$/8W
+    \x{09}\x{1D}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
+ 0: \x{09}\x{1d}\x{85}\x{61c}\x{2028}\x{2029}\x{2065}\x{2066}\x{2067}
+    \x{2068}\x{2069}\x{e0002}\x{e001f}\x{e0080}
+ 0: \x{2068}\x{2069}\x{e0002}\x{e001f}\x{e0080}
+    ** Failers
+No match
+    Space: \x{a0}
+No match
+    \x{1680}\x{2000}\x{2001}\x{2002}\x{2003}\x{2004}\x{2005}
+No match
+    \x{2006}\x{2007}\x{2008}\x{2009}\x{200a} 
+No match
+    \x{202f}\x{205f} 
+No match
+    \x{3000}
+No match
+    Letter:ABC
+No match
+    Mark:\x{300}\x{1d172}\x{1d17b}
+No match
+    Number:9\x{660}
+No match
+    Punctuation:\x{66a},;
+No match
+    Symbol:\x{6de}<>\x{fffc}
+No match
+    Cf-property:\x{ad}\x{600}\x{601}\x{602}\x{603}\x{604}\x{6dd}\x{70f}
+No match
+    \x{180e}
+No match
+    \x{200b}\x{200c}\x{200d}\x{200e}\x{200f}
+No match
+    \x{202a}\x{202b}\x{202c}\x{202d}\x{202e}
+No match
+    \x{202f}
+No match
+    \x{2060}\x{2061}\x{2062}\x{2063}\x{2064}
+No match
+    \x{206a}\x{206b}\x{206c}\x{206d}\x{206e}\x{206f}
+No match
+    \x{feff}
+No match
+    \x{fff9}\x{fffa}\x{fffb}
+No match
+    \x{110bd}
+No match
+    \x{1d173}\x{1d174}\x{1d175}\x{1d176}\x{1d177}\x{1d178}\x{1d179}\x{1d17a}
+No match
+    \x{e0001}
+No match
+    \x{e0020}\x{e0030}\x{e0040}\x{e0050}\x{e0060}\x{e0070}\x{e007f}
+No match
+
+/^[[:^punct:]]+$/8W
+    abcde  
+ 0: abcde
+    ** Failers
+No match
+    \$+<=>^`|~
+No match
+    !\"#%&'()*,-./:;?@[\\]_{}
+No match
+    \x{a1}\x{a7}  
+No match
+    \x{37e} 
+No match
+
+/[RST]+/8iW
+    Ss\x{17f}
+ 0: Ss\x{17f}
+    
+/[R-T]+/8iW 
+    Ss\x{17f}
+ 0: Ss\x{17f}
+
+/[q-u]+/8iW 
+    Ss\x{17f}
+ 0: Ss\x{17f}
+
+/^s?c/mi8
+    scat
+ 0: sc
 
 /-- End of testinput6 --/
