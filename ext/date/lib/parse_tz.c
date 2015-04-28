@@ -89,8 +89,8 @@ static void read_header(const unsigned char **tzf, timelib_tzinfo *tz)
 static void skip_transistions_64bit(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	if (tz->timecnt) {
-		*tzf += (sizeof(int64_t) * (tz->timecnt));
-		*tzf += (sizeof(unsigned char) * (tz->timecnt));
+		*tzf += (sizeof(int64_t) * (tz->timecnt + 1));
+		*tzf += (sizeof(unsigned char) * (tz->timecnt + 1));
 	}
 }
 
