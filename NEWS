@@ -119,6 +119,9 @@
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
+- FTP:
+  . Fixed bug #69082 FTPS support on Windows
+
 - Intl:
   . Removed deprecated aliases datefmt_set_timezone_id() and
     IntlDateFormatter::setTimeZoneID(). (Nikita)

@@ -659,7 +659,7 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 - ftp
   . The ftp extension is always shipped shared
   . For SSL support, the dependency on the openssl extension was abolished. Instead
-    it depends alone on the openssl library. If it's presend at the compile time,
+    it depends alone on the openssl library. If it's present at the compile time,
     ftp_ssl_connect() is enabled automatically.
 
 - odbc
