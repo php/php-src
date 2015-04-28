@@ -2215,6 +2215,12 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 #define ZEND_VM_INC_OPCODE() \
 	OPLINE++
 
+#define ZEND_VM_REPEATABLE_OPCODE \
+	do {
+
+#define ZEND_VM_REPEAT_OPCODE(_opcode) \
+	} while (UNEXPECTED(OPLINE->opcode == _opcode))
+
 #ifdef __GNUC__
 # define ZEND_VM_GUARD(name) __asm__("#" #name)
 #else

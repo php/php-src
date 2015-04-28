@@ -4608,9 +4608,12 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	USE_OPLINE
-	uint32_t arg_num = opline->op1.num;
+	uint32_t arg_num;
 	zval *param;
 
+	ZEND_VM_REPEATABLE_OPCODE
+
+	arg_num = opline->op1.num;
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 	if (arg_num > EX_NUM_ARGS()) {
 		ZVAL_COPY_VALUE(param, EX_CONSTANT(opline->op2));
@@ -4635,7 +4638,9 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 		}
 	}
 
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_REPEAT_OPCODE(ZEND_RECV_INIT);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
@@ -7613,6 +7618,8 @@ ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
 	zval *variable_ptr;
 	uint32_t idx;
 
+	ZEND_VM_REPEATABLE_OPCODE
+
 	varname = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
@@ -7677,7 +7684,9 @@ ZEND_VM_C_LABEL(check_indirect):
 		ZVAL_REF(variable_ptr, ref);
 	}
 
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_REPEAT_OPCODE(ZEND_BIND_GLOBAL);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
