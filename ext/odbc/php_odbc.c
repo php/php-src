@@ -993,6 +993,27 @@ int odbc_bindcols(odbc_result *result)
 			default:
 				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && colfieldid == SQL_DESC_OCTET_LENGTH) {
+					SQLINTEGER err;
+					SQLCHAR errtxt[128];
+					SQLCHAR state[6];
+
+					memset(errtxt, '\0', 128);
+					memset(state, '\0', 6);
+
+					if (SQL_SUCCESS == SQLGetDiagRec(SQL_HANDLE_STMT, result->stmt, 1, state, &err, errtxt, 128, NULL)) {
+						errtxt[127] = '\0';
+						state[5] = '\0';
+						php_error_docref(NULL, E_WARNING, "SQLColAttribute can't handle SQL_DESC_OCTET_LENGTH: [%s] %s", state, errtxt);
+					}
+					 /* This is  a quirk for ODBC 2.0 compatibility for broken driver implementations.
+					  */
+					charextraalloc = 1;
+					rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_DISPLAY_SIZE,
+								NULL, 0, NULL, &displaysize);
+				}
+#endif
 				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
 				if (result->values[i].coltype == SQL_TIMESTAMP) {
 					displaysize += 3;
