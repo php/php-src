@@ -1225,7 +1225,7 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_le
 }
 /* }}} */
 
-static size_t zend_strnlen(const char* s, size_t maxlen) /* {{{ */
+static zend_always_inline size_t zend_strnlen(const char* s, size_t maxlen) /* {{{ */
 {
 	size_t len = 0;
 	while (*s++ && maxlen--) len++;
