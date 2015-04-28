@@ -527,16 +527,16 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execu
 
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
 {
+	if (EXPECTED(!Z_ISREF_P(value_ptr))) {
+		ZVAL_NEW_REF(value_ptr, value_ptr);
+	}
 	if (EXPECTED(variable_ptr != value_ptr)) {
 		zend_reference *ref;
-		ZVAL_MAKE_REF(value_ptr);
-		Z_ADDREF_P(value_ptr);
-		ref = Z_REF_P(value_ptr);
 
+		ref = Z_REF_P(value_ptr);
+		GC_REFCOUNT(ref)++;
 		zval_ptr_dtor(variable_ptr);
 		ZVAL_REF(variable_ptr, ref);
-	} else {
-		ZVAL_MAKE_REF(variable_ptr);
 	}
 }
 
@@ -743,7 +743,7 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 	}
 }
 
-static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value)
+static int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg, *class_name;
@@ -754,7 +754,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
 		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 	} else {
-		return;
+		return 1;
 	}
 
 	if (cur_arg_info->type_hint) {
@@ -764,24 +764,29 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 				need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
 				if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
 					zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+					return 0;
 				}
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
 			if (cur_arg_info->class_name) {
 				need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
 				zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
+				return 0;
 			} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_arg_error(zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
+					return 0;
 				}
 			} else if (cur_arg_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 				/* pass */
 			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, ZEND_ARG_USES_STRICT_TYPES()))) {
 				zend_verify_arg_error(zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+				return 0;
 			}
 		}
 	}
+	return 1;
 }
 
 static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_num)
@@ -804,7 +809,6 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
 			zend_verify_arg_error(zf, arg_num, need_msg, class_name, "none", "", NULL);
-			return 0;
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "", NULL);
 		} else {
@@ -815,7 +819,7 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 	return 1;
 }
 
-static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num)
+static int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num)
 {
 	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
 	    zend_verify_missing_arg_type(EX(func), arg_num)) {
@@ -829,7 +833,9 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 		} else {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);
 		}
+		return 1;
 	}
+	return 0;
 }
 
 ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)

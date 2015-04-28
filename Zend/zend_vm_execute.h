@@ -1182,14 +1182,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
 		SAVE_OPLINE();
-		zend_verify_missing_arg(execute_data, arg_num);
-		CHECK_EXCEPTION();
+		if (UNEXPECTED(!zend_verify_missing_arg(execute_data, arg_num))) {
+			HANDLE_EXCEPTION();
+		}
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
 		SAVE_OPLINE();
-		zend_verify_arg_type(EX(func), arg_num, param, NULL);
-		CHECK_EXCEPTION();
+		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, NULL))) {
+			HANDLE_EXCEPTION();
+		}
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -2225,11 +2227,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 	uint32_t arg_num = opline->op1.num;
 	zval *param;
 
-	SAVE_OPLINE();
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 	if (arg_num > EX_NUM_ARGS()) {
 		ZVAL_COPY_VALUE(param, EX_CONSTANT(opline->op2));
 		if (Z_OPT_CONSTANT_P(param)) {
+			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(param, 0, NULL) != SUCCESS)) {
 				ZVAL_UNDEF(param);
 				HANDLE_EXCEPTION();
@@ -2243,10 +2245,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 	}
 
 	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-		zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2));
+		SAVE_OPLINE();
+		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2)))) {
+			HANDLE_EXCEPTION();
+		}
 	}
 
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -32552,7 +32556,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_CV_CONST_HAND
 	zval *variable_ptr;
 	uint32_t idx;
 
-	SAVE_OPLINE();
 	varname = EX_CONSTANT(opline->op2);
 
 	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
@@ -32593,9 +32596,30 @@ check_indirect:
 	}
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-	zend_assign_to_variable_reference(variable_ptr, value);
 
-	CHECK_EXCEPTION();
+	if (UNEXPECTED(!Z_ISREF_P(value))) {
+		ZVAL_NEW_REF(value, value);
+	}
+	if (EXPECTED(variable_ptr != value)) {
+		zend_reference *ref;
+
+		ref = Z_REF_P(value);
+		GC_REFCOUNT(ref)++;
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+			if (!Z_DELREF_P(variable_ptr)) {
+				SAVE_OPLINE();
+				zval_dtor_func_for_ptr(Z_COUNTED_P(variable_ptr));
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_NULL(variable_ptr);
+					HANDLE_EXCEPTION();
+				}
+			} else {
+				GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+			}
+		}
+		ZVAL_REF(variable_ptr, ref);
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
