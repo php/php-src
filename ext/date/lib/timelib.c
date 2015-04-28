@@ -117,26 +117,26 @@ timelib_tzinfo* timelib_tzinfo_ctor(char *name)
 timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 {
 	timelib_tzinfo *tmp = timelib_tzinfo_ctor(tz->name);
-	tmp->ttisgmtcnt = tz->ttisgmtcnt;
-	tmp->ttisstdcnt = tz->ttisstdcnt;
-	tmp->leapcnt = tz->leapcnt;
-	tmp->timecnt = tz->timecnt;
-	tmp->typecnt = tz->typecnt;
-	tmp->charcnt = tz->charcnt;
+	tmp->bit32.ttisgmtcnt = tz->bit32.ttisgmtcnt;
+	tmp->bit32.ttisstdcnt = tz->bit32.ttisstdcnt;
+	tmp->bit32.leapcnt = tz->bit32.leapcnt;
+	tmp->bit32.timecnt = tz->bit32.timecnt;
+	tmp->bit32.typecnt = tz->bit32.typecnt;
+	tmp->bit32.charcnt = tz->bit32.charcnt;
 
-	tmp->trans = (int32_t *) malloc(tz->timecnt * sizeof(int32_t));
-	tmp->trans_idx = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
-	memcpy(tmp->trans, tz->trans, tz->timecnt * sizeof(int32_t));
-	memcpy(tmp->trans_idx, tz->trans_idx, tz->timecnt * sizeof(unsigned char));
+	tmp->trans = (int32_t *) malloc(tz->bit32.timecnt * sizeof(int32_t));
+	tmp->trans_idx = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
+	memcpy(tmp->trans, tz->trans, tz->bit32.timecnt * sizeof(int32_t));
+	memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 
-	tmp->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
-	memcpy(tmp->type, tz->type, tz->typecnt * sizeof(struct ttinfo));
+	tmp->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
 
-	tmp->timezone_abbr = (char*) malloc(tz->charcnt);
-	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->charcnt);
+	tmp->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
+	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);
 
-	tmp->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
-	memcpy(tmp->leap_times, tz->leap_times, tz->leapcnt * sizeof(tlinfo));
+	tmp->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
+	memcpy(tmp->leap_times, tz->leap_times, tz->bit32.leapcnt * sizeof(tlinfo));
 
 	return tmp;
 }

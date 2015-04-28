@@ -77,20 +77,20 @@ static void read_header(const unsigned char **tzf, timelib_tzinfo *tz)
 	uint32_t buffer[6];
 
 	memcpy(&buffer, *tzf, sizeof(buffer));
-	tz->ttisgmtcnt = timelib_conv_int(buffer[0]);
-	tz->ttisstdcnt = timelib_conv_int(buffer[1]);
-	tz->leapcnt    = timelib_conv_int(buffer[2]);
-	tz->timecnt    = timelib_conv_int(buffer[3]);
-	tz->typecnt    = timelib_conv_int(buffer[4]);
-	tz->charcnt    = timelib_conv_int(buffer[5]);
+	tz->bit32.ttisgmtcnt = timelib_conv_int(buffer[0]);
+	tz->bit32.ttisstdcnt = timelib_conv_int(buffer[1]);
+	tz->bit32.leapcnt    = timelib_conv_int(buffer[2]);
+	tz->bit32.timecnt    = timelib_conv_int(buffer[3]);
+	tz->bit32.typecnt    = timelib_conv_int(buffer[4]);
+	tz->bit32.charcnt    = timelib_conv_int(buffer[5]);
 	*tzf += sizeof(buffer);
 }
 
-static void skip_transistions_64bit(const unsigned char **tzf, timelib_tzinfo *tz)
+static void skip_64bit_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 {
-	if (tz->timecnt) {
-		*tzf += (sizeof(int64_t) * (tz->timecnt + 1));
-		*tzf += (sizeof(unsigned char) * (tz->timecnt + 1));
+	if (tz->bit64.timecnt) {
+		*tzf += (sizeof(int64_t) * tz->bit64.timecnt);
+		*tzf += (sizeof(unsigned char) * tz->bit64.timecnt);
 	}
 }
 
@@ -100,42 +100,42 @@ static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 	uint32_t i;
 	unsigned char *cbuffer = NULL;
 
-	if (tz->timecnt) {
-		buffer = (int32_t*) malloc(tz->timecnt * sizeof(int32_t));
+	if (tz->bit32.timecnt) {
+		buffer = (int32_t*) malloc(tz->bit32.timecnt * sizeof(int32_t));
 		if (!buffer) {
 			return;
 		}
-		memcpy(buffer, *tzf, sizeof(int32_t) * tz->timecnt);
-		*tzf += (sizeof(int32_t) * tz->timecnt);
-		for (i = 0; i < tz->timecnt; i++) {
+		memcpy(buffer, *tzf, sizeof(int32_t) * tz->bit32.timecnt);
+		*tzf += (sizeof(int32_t) * tz->bit32.timecnt);
+		for (i = 0; i < tz->bit32.timecnt; i++) {
 			buffer[i] = timelib_conv_int(buffer[i]);
 		}
 
-		cbuffer = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
+		cbuffer = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
 		if (!cbuffer) {
 			free(buffer);
 			return;
 		}
-		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->timecnt);
-		*tzf += sizeof(unsigned char) * tz->timecnt;
+		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->bit32.timecnt);
+		*tzf += sizeof(unsigned char) * tz->bit32.timecnt;
 	}
 
 	tz->trans = buffer;
 	tz->trans_idx = cbuffer;
 }
 
-static void skip_types_64bit(const unsigned char **tzf, timelib_tzinfo *tz)
+static void skip_64bit_types(const unsigned char **tzf, timelib_tzinfo *tz)
 {
-	*tzf += sizeof(unsigned char) * 6 * tz->typecnt;
-	*tzf += sizeof(char) * tz->charcnt;
-	if (tz->leapcnt) {
-		*tzf += sizeof(int64_t) * tz->leapcnt * 2;
+	*tzf += sizeof(unsigned char) * 6 * tz->bit64.typecnt;
+	*tzf += sizeof(char) * tz->bit64.charcnt;
+	if (tz->bit64.leapcnt) {
+		*tzf += sizeof(int64_t) * tz->bit64.leapcnt * 2;
 	}
-	if (tz->ttisstdcnt) {
-		*tzf += sizeof(unsigned char) * tz->ttisstdcnt;
+	if (tz->bit64.ttisstdcnt) {
+		*tzf += sizeof(unsigned char) * tz->bit64.ttisstdcnt;
 	}
-	if (tz->ttisgmtcnt) {
-		*tzf += sizeof(unsigned char) * tz->ttisgmtcnt;
+	if (tz->bit64.ttisgmtcnt) {
+		*tzf += sizeof(unsigned char) * tz->bit64.ttisgmtcnt;
 	}
 }
 
@@ -145,20 +145,20 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	int32_t *leap_buffer;
 	unsigned int i, j;
 
-	buffer = (unsigned char*) malloc(tz->typecnt * sizeof(unsigned char) * 6);
+	buffer = (unsigned char*) malloc(tz->bit32.typecnt * sizeof(unsigned char) * 6);
 	if (!buffer) {
 		return;
 	}
-	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->typecnt);
-	*tzf += sizeof(unsigned char) * 6 * tz->typecnt;
+	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit32.typecnt);
+	*tzf += sizeof(unsigned char) * 6 * tz->bit32.typecnt;
 
-	tz->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
+	tz->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
 	if (!tz->type) {
 		free(buffer);
 		return;
 	}
 
-	for (i = 0; i < tz->typecnt; i++) {
+	for (i = 0; i < tz->bit32.typecnt; i++) {
 		j = i * 6;
 		tz->type[i].offset = (buffer[j] * 16777216) + (buffer[j + 1] * 65536) + (buffer[j + 2] * 256) + buffer[j + 3];
 		tz->type[i].isdst = buffer[j + 4];
@@ -166,56 +166,56 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	}
 	free(buffer);
 
-	tz->timezone_abbr = (char*) malloc(tz->charcnt);
+	tz->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
 	if (!tz->timezone_abbr) {
 		return;
 	}
-	memcpy(tz->timezone_abbr, *tzf, sizeof(char) * tz->charcnt);
-	*tzf += sizeof(char) * tz->charcnt;
+	memcpy(tz->timezone_abbr, *tzf, sizeof(char) * tz->bit32.charcnt);
+	*tzf += sizeof(char) * tz->bit32.charcnt;
 
-	if (tz->leapcnt) {
-		leap_buffer = (int32_t *) malloc(tz->leapcnt * 2 * sizeof(int32_t));
+	if (tz->bit32.leapcnt) {
+		leap_buffer = (int32_t *) malloc(tz->bit32.leapcnt * 2 * sizeof(int32_t));
 		if (!leap_buffer) {
 			return;
 		}
-		memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz->leapcnt * 2);
-		*tzf += sizeof(int32_t) * tz->leapcnt * 2;
+		memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz->bit32.leapcnt * 2);
+		*tzf += sizeof(int32_t) * tz->bit32.leapcnt * 2;
 
-		tz->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
+		tz->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
 		if (!tz->leap_times) {
 			free(leap_buffer);
 			return;
 		}
-		for (i = 0; i < tz->leapcnt; i++) {
+		for (i = 0; i < tz->bit32.leapcnt; i++) {
 			tz->leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);
 			tz->leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);
 		}
 		free(leap_buffer);
 	}
 
-	if (tz->ttisstdcnt) {
-		buffer = (unsigned char*) malloc(tz->ttisstdcnt * sizeof(unsigned char));
+	if (tz->bit32.ttisstdcnt) {
+		buffer = (unsigned char*) malloc(tz->bit32.ttisstdcnt * sizeof(unsigned char));
 		if (!buffer) {
 			return;
 		}
-		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisstdcnt);
-		*tzf += sizeof(unsigned char) * tz->ttisstdcnt;
+		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->bit32.ttisstdcnt);
+		*tzf += sizeof(unsigned char) * tz->bit32.ttisstdcnt;
 
-		for (i = 0; i < tz->ttisstdcnt; i++) {
+		for (i = 0; i < tz->bit32.ttisstdcnt; i++) {
 			tz->type[i].isstdcnt = buffer[i];
 		}
 		free(buffer);
 	}
 
-	if (tz->ttisgmtcnt) {
-		buffer = (unsigned char*) malloc(tz->ttisgmtcnt * sizeof(unsigned char));
+	if (tz->bit32.ttisgmtcnt) {
+		buffer = (unsigned char*) malloc(tz->bit32.ttisgmtcnt * sizeof(unsigned char));
 		if (!buffer) {
 			return;
 		}
-		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->ttisgmtcnt);
-		*tzf += sizeof(unsigned char) * tz->ttisgmtcnt;
+		memcpy(buffer, *tzf, sizeof(unsigned char) * tz->bit32.ttisgmtcnt);
+		*tzf += sizeof(unsigned char) * tz->bit32.ttisgmtcnt;
 
-		for (i = 0; i < tz->ttisgmtcnt; i++) {
+		for (i = 0; i < tz->bit32.ttisgmtcnt; i++) {
 			tz->type[i].isgmtcnt = buffer[i];
 		}
 		free(buffer);
@@ -261,12 +261,12 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
 	printf("BC:                %s\n",  tz->bc ? "" : "yes");
-	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->ttisgmtcnt);
-	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->ttisstdcnt);
-	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->leapcnt);
-	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->timecnt);
-	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->typecnt);
-	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->charcnt);
+	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisgmtcnt);
+	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisstdcnt);
+	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.leapcnt);
+	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.timecnt);
+	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.typecnt);
+	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.charcnt);
 
 	printf ("%8s (%12s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 		"", "", 0,
@@ -277,7 +277,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 		tz->type[0].isstdcnt,
 		tz->type[0].isgmtcnt
 		);
-	for (i = 0; i < tz->timecnt; i++) {
+	for (i = 0; i < tz->bit32.timecnt; i++) {
 		printf ("%08X (%12d) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 			tz->trans[i], tz->trans[i], tz->trans_idx[i],
 			(long int) tz->type[tz->trans_idx[i]].offset,
@@ -288,7 +288,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 			tz->type[tz->trans_idx[i]].isgmtcnt
 			);
 	}
-	for (i = 0; i < tz->leapcnt; i++) {
+	for (i = 0; i < tz->bit32.leapcnt; i++) {
 		printf ("%08X (%12ld) = %d\n",
 			tz->leap_times[i].trans,
 			(long) tz->leap_times[i].trans,
@@ -352,10 +352,23 @@ int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
 	return (seek_to_tz_position(&tzf, timezone, tzdb));
 }
 
-static void skip_2nd_header_and_data(const unsigned char **tzf, timelib_tzinfo *tz)
+static void skip_64bit_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
 {
-	*tzf += 20; /* skip 2nd header (preamble) */
-	*tzf += sizeof(int32_t) * 6; /* Counts */
+	*tzf += 20;
+}
+
+static void read_64bit_header(const unsigned char **tzf, timelib_tzinfo *tz)
+{
+	uint32_t buffer[6];
+
+	memcpy(&buffer, *tzf, sizeof(buffer));
+	tz->bit64.ttisgmtcnt = timelib_conv_int(buffer[0]);
+	tz->bit64.ttisstdcnt = timelib_conv_int(buffer[1]);
+	tz->bit64.leapcnt    = timelib_conv_int(buffer[2]);
+	tz->bit64.timecnt    = timelib_conv_int(buffer[3]);
+	tz->bit64.typecnt    = timelib_conv_int(buffer[4]);
+	tz->bit64.charcnt    = timelib_conv_int(buffer[5]);
+	*tzf += sizeof(buffer);
 }
 
 timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
@@ -372,9 +385,10 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
 		read_transistions(&tzf, tmp);
 		read_types(&tzf, tmp);
 		if (version == 2) {
-			skip_2nd_header_and_data(&tzf, tmp);
-			skip_transistions_64bit(&tzf, tmp);
-			skip_types_64bit(&tzf, tmp);
+			skip_64bit_preamble(&tzf, tmp);
+			read_64bit_header(&tzf, tmp);
+			skip_64bit_transistions(&tzf, tmp);
+			skip_64bit_types(&tzf, tmp);
 			skip_posix_string(&tzf, tmp);
 		}
 		read_location(&tzf, tmp);
@@ -391,9 +405,9 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 
 	/* If there is no transition time, we pick the first one, if that doesn't
 	 * exist we return NULL */
-	if (!tz->timecnt || !tz->trans) {
+	if (!tz->bit32.timecnt || !tz->trans) {
 		*transition_time = 0;
-		if (tz->typecnt == 1) {
+		if (tz->bit32.typecnt == 1) {
 			return &(tz->type[0]);
 		}
 		return NULL;
@@ -408,10 +422,10 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 
 		*transition_time = 0;
 		j = 0;
-		while (j < tz->timecnt && tz->type[j].isdst) {
+		while (j < tz->bit32.timecnt && tz->type[j].isdst) {
 			++j;
 		}
-		if (j == tz->timecnt) {
+		if (j == tz->bit32.timecnt) {
 			j = 0;
 		}
 		return &(tz->type[j]);
@@ -419,25 +433,25 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 
 	/* In all other cases we loop through the available transtion times to find
 	 * the correct entry */
-	for (i = 0; i < tz->timecnt; i++) {
+	for (i = 0; i < tz->bit32.timecnt; i++) {
 		if (ts < tz->trans[i]) {
 			*transition_time = tz->trans[i - 1];
 			return &(tz->type[tz->trans_idx[i - 1]]);
 		}
 	}
-	*transition_time = tz->trans[tz->timecnt - 1];
-	return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
+	*transition_time = tz->trans[tz->bit32.timecnt - 1];
+	return &(tz->type[tz->trans_idx[tz->bit32.timecnt - 1]]);
 }
 
 static tlinfo* fetch_leaptime_offset(timelib_tzinfo *tz, timelib_sll ts)
 {
 	int i;
 
-	if (!tz->leapcnt || !tz->leap_times) {
+	if (!tz->bit32.leapcnt || !tz->leap_times) {
 		return NULL;
 	}
 
-	for (i = tz->leapcnt - 1; i > 0; i--) {
+	for (i = tz->bit32.leapcnt - 1; i > 0; i--) {
 		if (ts > tz->leap_times[i].trans) {
 			return &(tz->leap_times[i]);
 		}
