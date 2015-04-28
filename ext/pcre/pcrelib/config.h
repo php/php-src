@@ -363,7 +363,9 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef SUPPORT_VALGRIND */
 
 /* Version number of package */
+#ifndef VERSION
 #define VERSION "8.36"
+#endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
@@ -374,3 +376,4 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
+
