@@ -42,7 +42,7 @@ $beta = function ($z) {
 };
 
 // Ensure argument passing works
-var_dump($beta->call($elePHPant, 3));
+var_dump($beta->call($foobar, 7));
 
 // Ensure ->call calls with scope of passed object
 class FooBar {
@@ -56,10 +56,12 @@ $foo = function () {
 $foo->call(new FooBar);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(0)
 int(0)
 int(3)
-int(7)
+
+Warning: Cannot bind closure to object of internal class stdClass in %s line %d
+NULL
 int(21)
 int(3)
