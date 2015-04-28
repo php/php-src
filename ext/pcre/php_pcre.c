@@ -1505,7 +1505,6 @@ static PHP_FUNCTION(preg_replace_callback_array)
 {
 	zval regex, zv, *replace, *subject, *pattern, *zcount = NULL;
 	zend_long limit = -1;
-	zend_ulong num_idx;
 	zend_string *str_idx;
 	zend_string *callback_name;
 	int replace_count = 0;
@@ -1526,7 +1525,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 #endif
 	
 	ZVAL_UNDEF(&zv);
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(pattern), num_idx, str_idx, replace) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pattern), str_idx, replace) {
 		if (str_idx) {
 			ZVAL_STR_COPY(&regex, str_idx);
 		} else {
