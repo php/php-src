@@ -38,8 +38,7 @@ ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
 static void _str_dtor(zval *zv)
 {
 	zend_string *str = Z_STR_P(zv);
-	GC_FLAGS(str) &= ~IS_STR_INTERNED;
-	GC_REFCOUNT(str) = 1;
+	pefree(str, GC_FLAGS(str) & IS_STR_PERSISTENT);
 }
 #endif
 
