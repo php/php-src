@@ -2215,11 +2215,40 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 #define ZEND_VM_INC_OPCODE() \
 	OPLINE++
 
-#define ZEND_VM_REPEATABLE_OPCODE \
-	do {
 
-#define ZEND_VM_REPEAT_OPCODE(_opcode) \
+#ifndef VM_SMART_OPCODES
+# define VM_SMART_OPCODES 1
+#endif
+
+#if VM_SMART_OPCODES
+# define ZEND_VM_REPEATABLE_OPCODE \
+	do {
+# define ZEND_VM_REPEAT_OPCODE(_opcode) \
 	} while (UNEXPECTED(OPLINE->opcode == _opcode))
+# define ZEND_VM_SMART_BRANCH(_result, _check) do { \
+		int __result; \
+		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+			__result = (_result); \
+		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+			__result = !(_result); \
+		} else { \
+			break; \
+		} \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			HANDLE_EXCEPTION(); \
+		} \
+		if (__result) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+#else
+# define ZEND_VM_REPEATABLE_OPCODE
+# define ZEND_VM_REPEAT_OPCODE(_opcode)
+# define ZEND_VM_SMART_BRANCH(_result, _check)
+#endif
 
 #ifdef __GNUC__
 # define ZEND_VM_GUARD(name) __asm__("#" #name)
