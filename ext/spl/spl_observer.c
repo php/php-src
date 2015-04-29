@@ -1017,7 +1017,6 @@ SPL_METHOD(MultipleIterator, attachIterator)
 
 	if (info != NULL) {
 		spl_SplObjectStorageElement *element;
-		zval                         compare_result;
 
 		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0);
@@ -1026,8 +1025,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 
 		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 		while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL) {
-			is_identical_function(&compare_result, info, &element->inf);
-			if (Z_TYPE(compare_result) == IS_TRUE) {
+			if (fast_is_identical_function(info, &element->inf)) {
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Key duplication error", 0);
 				return;
 			}

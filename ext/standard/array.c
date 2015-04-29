@@ -1263,11 +1263,9 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 #endif
 
 	if (strict) {
-		zval res;					/* comparison result */
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 			ZVAL_DEREF(entry);
-			fast_is_identical_function(&res, value, entry);
-			if (Z_TYPE(res) == IS_TRUE) {
+			if (fast_is_identical_function(value, entry)) {
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {
@@ -2876,7 +2874,6 @@ PHP_FUNCTION(array_keys)
 	zval *input,				/* Input array */
 	     *search_value = NULL,	/* Value to search for */
 	     *entry,				/* An entry in the input array */
-	       res,					/* Result of comparison */
 	       new_val;				/* New value */
 	zend_bool strict = 0;		/* do strict comparison */
 	zend_ulong num_idx;
@@ -2901,8 +2898,7 @@ PHP_FUNCTION(array_keys)
 
 		if (strict) {
 			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
-				fast_is_identical_function(&res, search_value, entry);
-				if (Z_TYPE(res) == IS_TRUE) {
+				if (fast_is_identical_function(search_value, entry)) {
 					if (str_idx) {
 						ZVAL_STR_COPY(&new_val, str_idx);
 					} else {

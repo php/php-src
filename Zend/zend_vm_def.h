@@ -263,15 +263,19 @@ ZEND_VM_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	int result;
 
 	SAVE_OPLINE();
-	fast_is_identical_function(EX_VAR(opline->result.var),
+	result = fast_is_identical_function(
 		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
 		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R));
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(Z_TYPE_INFO_P(EX_VAR(opline->result.var)) == IS_TRUE, 1);
-	CHECK_EXCEPTION();
+	ZEND_VM_SMART_BRANCH(result, (OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR));
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	if ((OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR)) {
+		CHECK_EXCEPTION();
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -279,16 +283,19 @@ ZEND_VM_HANDLER(16, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	int result;
 
 	SAVE_OPLINE();
-	fast_is_not_identical_function(result,
+	result = fast_is_not_identical_function(
 		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
 		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R));
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(Z_TYPE_INFO_P(EX_VAR(opline->result.var)) == IS_TRUE, 1);
-	CHECK_EXCEPTION();
+	ZEND_VM_SMART_BRANCH(result, (OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR));
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	if ((OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR)) {
+		CHECK_EXCEPTION();
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -6915,8 +6922,9 @@ ZEND_VM_C_LABEL(try_instanceof):
 	} else {
 		result = 0;
 	}
-	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 	FREE_OP1();
+	ZEND_VM_SMART_BRANCH(result, 1);
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
