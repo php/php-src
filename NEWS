@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.25
+?? ??? 2015, PHP 5.5.26
+
+
+
+14 May 2015, PHP 5.5.25
 
 - Core:
   . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
