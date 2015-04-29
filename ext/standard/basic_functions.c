@@ -4740,11 +4740,11 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_type) = 0;
 		PG(last_error_lineno) = 0;
 
-		free(PG(last_error_message));
+		efree(PG(last_error_message));
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {
-			free(PG(last_error_file));
+			efree(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
 	}
