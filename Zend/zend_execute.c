@@ -2224,7 +2224,9 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 # define ZEND_VM_REPEATABLE_OPCODE \
 	do {
 # define ZEND_VM_REPEAT_OPCODE(_opcode) \
-	} while (UNEXPECTED(OPLINE->opcode == _opcode))
+	} while (UNEXPECTED((++opline)->opcode == _opcode)); \
+	OPLINE = opline; \
+	ZEND_VM_CONTINUE()
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
 		int __result; \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
