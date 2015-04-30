@@ -397,7 +397,7 @@ them both to 0; an emulation function will be used. */
 #undef SUPPORT_GCOV
 
 /* Define to any value to enable support for Just-In-Time compiling. */
-#undef SUPPORT_JIT
+#define SUPPORT_JIT
 
 /* Define to any value to allow pcregrep to be linked with libbz2, so that it
    is able to handle .bz2 files. */
