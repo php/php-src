@@ -95,8 +95,10 @@ of sljitConfigInternal.h */
 /* Cannot allocate executable memory.
    Only for sljit_generate_code() */
 #define SLJIT_ERR_EX_ALLOC_FAILED	3
-/* return value for SLJIT_CONFIG_UNSUPPORTED empty architecture. */
+/* Return value for SLJIT_CONFIG_UNSUPPORTED placeholder architecture. */
 #define SLJIT_ERR_UNSUPPORTED		4
+/* An ivalid argument is passed to any SLJIT function. */
+#define SLJIT_ERR_BAD_ARGUMENT		5
 
 /* --------------------------------------------------------------------- */
 /*  Registers                                                            */
@@ -305,6 +307,7 @@ struct sljit_compiler {
 	struct sljit_jump *last_jump;
 	struct sljit_const *last_const;
 
+	void *allocator_data;
 	struct sljit_memory_fragment *buf;
 	struct sljit_memory_fragment *abuf;
 
@@ -359,7 +362,6 @@ struct sljit_compiler {
 #endif
 
 #if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
-	sljit_si locals_offset;
 	sljit_si cache_arg;
 	sljit_sw cache_argw;
 #endif
@@ -391,12 +393,15 @@ struct sljit_compiler {
 	FILE* verbose;
 #endif
 
-#if (defined SLJIT_DEBUG && SLJIT_DEBUG)
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS) \
+		|| (defined SLJIT_DEBUG && SLJIT_DEBUG)
 	/* Local size passed to the functions. */
 	sljit_si logical_local_size;
 #endif
 
-#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) || (defined SLJIT_DEBUG && SLJIT_DEBUG)
+#if (defined SLJIT_ARGUMENT_CHECKS && SLJIT_ARGUMENT_CHECKS) \
+		|| (defined SLJIT_DEBUG && SLJIT_DEBUG) \
+		|| (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
 	sljit_si skip_checks;
 #endif
 };
@@ -405,11 +410,16 @@ struct sljit_compiler {
 /*  Main functions                                                       */
 /* --------------------------------------------------------------------- */
 
-/* Creates an sljit compiler.
-   Returns NULL if failed. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void);
+/* Creates an sljit compiler. The allocator_data is required by some
+   custom memory managers. This pointer is passed to SLJIT_MALLOC
+   and SLJIT_FREE macros. Most allocators (including the default
+   one) ignores this value, and it is recommended to pass NULL
+   as a dummy value for allocator_data.
 
-/* Free everything except the compiled machine code. */
+   Returns NULL if failed. */
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data);
+
+/* Frees everything except the compiled machine code. */
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_compiler(struct sljit_compiler *compiler);
 
 /* Returns the current error code. If an error is occurred, future sljit
@@ -418,6 +428,14 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_compiler(struct sljit_compiler *compile
    call, it is enough to do it before the code is compiled. Removing
    these checks increases the performance of the compiling process. */
 static SLJIT_INLINE sljit_si sljit_get_compiler_error(struct sljit_compiler *compiler) { return compiler->error; }
+
+/* Sets the compiler error code to SLJIT_ERR_ALLOC_FAILED except
+   if an error was detected before. After the error code is set
+   the compiler behaves as if the allocation failure happened
+   during an sljit function call. This can greatly simplify error
+   checking, since only the compiler status needs to be checked
+   after the compilation. */
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_compiler_memory_error(struct sljit_compiler *compiler);
 
 /*
    Allocate a small amount of memory. The size must be <= 64 bytes on 32 bit,
@@ -461,8 +479,8 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
    sljit_emit_enter function emits the necessary instructions for
    setting up a new context for the executable code and moves function
    arguments to the saved registers. Furthermore the options argument
-   can be used to pass configuration options to the compiler. Currently
-   there are no options, so it must be set to 0.
+   can be used to pass configuration options to the compiler. The
+   available options are listed before sljit_emit_enter.
 
    The number of sljit_sw arguments passed to the generated function
    are specified in the "args" parameter. The number of arguments must
@@ -493,6 +511,11 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
          overwrites the previous context.
 */
 
+/* The absolute address returned by sljit_get_local_base with
+offset 0 is aligned to sljit_d. Otherwise it is aligned to sljit_uw. */
+#define SLJIT_DOUBLE_ALIGNMENT 0x00000001
+
+/* The local_size must be >= 0 and <= SLJIT_MAX_LOCAL_SIZE. */
 #define SLJIT_MAX_LOCAL_SIZE	65536
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler,
@@ -509,7 +532,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
    Note: every call of sljit_emit_enter and sljit_set_context overwrites
          the previous context. */
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler,
+SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_set_context(struct sljit_compiler *compiler,
 	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
 	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size);
 
@@ -674,23 +697,23 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fast_return(struct sljit_compiler *
 /* Flags: - (may destroy flags)
    Unsigned multiplication of SLJIT_R0 and SLJIT_R1.
    Result goes to SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_UMUL			(SLJIT_OP0_BASE + 2)
+#define SLJIT_LUMUL			(SLJIT_OP0_BASE + 2)
 /* Flags: - (may destroy flags)
    Signed multiplication of SLJIT_R0 and SLJIT_R1.
    Result goes to SLJIT_R1:SLJIT_R0 (high:low) word */
-#define SLJIT_SMUL			(SLJIT_OP0_BASE + 3)
+#define SLJIT_LSMUL			(SLJIT_OP0_BASE + 3)
 /* Flags: I - (may destroy flags)
    Unsigned divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed in SLJIT_R0 and the remainder goes to SLJIT_R1.
    Note: if SLJIT_R1 contains 0, the behaviour is undefined. */
-#define SLJIT_UDIV			(SLJIT_OP0_BASE + 4)
-#define SLJIT_IUDIV			(SLJIT_UDIV | SLJIT_INT_OP)
+#define SLJIT_LUDIV			(SLJIT_OP0_BASE + 4)
+#define SLJIT_ILUDIV			(SLJIT_LUDIV | SLJIT_INT_OP)
 /* Flags: I - (may destroy flags)
    Signed divide of the value in SLJIT_R0 by the value in SLJIT_R1.
    The result is placed in SLJIT_R0 and the remainder goes to SLJIT_R1.
    Note: if SLJIT_R1 contains 0, the behaviour is undefined. */
-#define SLJIT_SDIV			(SLJIT_OP0_BASE + 5)
-#define SLJIT_ISDIV			(SLJIT_SDIV | SLJIT_INT_OP)
+#define SLJIT_LSDIV			(SLJIT_OP0_BASE + 5)
+#define SLJIT_ILSDIV			(SLJIT_LSDIV | SLJIT_INT_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_op0(struct sljit_compiler *compiler, sljit_si op);
 
@@ -838,7 +861,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_get_register_index(sljit_si reg);
 
 /* The following function is a helper function for sljit_emit_op_custom.
    It returns with the real machine register index of any SLJIT_FLOAT register.
-   
+
    Note: the index is always an even number on ARM (except ARM-64), MIPS, and SPARC. */
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_get_float_register_index(sljit_si reg);
@@ -864,8 +887,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void);
 #define SLJIT_FOP1_BASE			128
 
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MOVD			(SLJIT_FOP1_BASE + 0)
-#define SLJIT_MOVS			(SLJIT_MOVD | SLJIT_SINGLE_OP)
+#define SLJIT_DMOV			(SLJIT_FOP1_BASE + 0)
+#define SLJIT_SMOV			(SLJIT_DMOV | SLJIT_SINGLE_OP)
 /* Convert opcodes: CONV[DST_TYPE].FROM[SRC_TYPE]
    SRC/DST TYPE can be: D - double, S - single, W - signed word, I - signed int
    Rounding mode when the destination is W or I: round towards zero. */
@@ -888,14 +911,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_is_fpu_available(void);
    Note: NaN check is always performed. If SLJIT_C_FLOAT_UNORDERED flag
          is set, the comparison result is unpredictable.
    Flags: SP | E | S (see SLJIT_C_FLOAT_*) */
-#define SLJIT_CMPD			(SLJIT_FOP1_BASE + 6)
-#define SLJIT_CMPS			(SLJIT_CMPD | SLJIT_SINGLE_OP)
+#define SLJIT_DCMP			(SLJIT_FOP1_BASE + 6)
+#define SLJIT_SCMP			(SLJIT_DCMP | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_NEGD			(SLJIT_FOP1_BASE + 7)
-#define SLJIT_NEGS			(SLJIT_NEGD | SLJIT_SINGLE_OP)
+#define SLJIT_DNEG			(SLJIT_FOP1_BASE + 7)
+#define SLJIT_SNEG			(SLJIT_DNEG | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_ABSD			(SLJIT_FOP1_BASE + 8)
-#define SLJIT_ABSS			(SLJIT_ABSD | SLJIT_SINGLE_OP)
+#define SLJIT_DABS			(SLJIT_FOP1_BASE + 8)
+#define SLJIT_SABS			(SLJIT_DABS | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
@@ -905,17 +928,17 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop1(struct sljit_compiler *compile
 #define SLJIT_FOP2_BASE			160
 
 /* Flags: SP - (never set any flags) */
-#define SLJIT_ADDD			(SLJIT_FOP2_BASE + 0)
-#define SLJIT_ADDS			(SLJIT_ADDD | SLJIT_SINGLE_OP)
+#define SLJIT_DADD			(SLJIT_FOP2_BASE + 0)
+#define SLJIT_SADD			(SLJIT_DADD | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_SUBD			(SLJIT_FOP2_BASE + 1)
-#define SLJIT_SUBS			(SLJIT_SUBD | SLJIT_SINGLE_OP)
+#define SLJIT_DSUB			(SLJIT_FOP2_BASE + 1)
+#define SLJIT_SSUB			(SLJIT_DSUB | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_MULD			(SLJIT_FOP2_BASE + 2)
-#define SLJIT_MULS			(SLJIT_MULD | SLJIT_SINGLE_OP)
+#define SLJIT_DMUL			(SLJIT_FOP2_BASE + 2)
+#define SLJIT_SMUL			(SLJIT_DMUL | SLJIT_SINGLE_OP)
 /* Flags: SP - (never set any flags) */
-#define SLJIT_DIVD			(SLJIT_FOP2_BASE + 3)
-#define SLJIT_DIVS			(SLJIT_DIVD | SLJIT_SINGLE_OP)
+#define SLJIT_DDIV			(SLJIT_FOP2_BASE + 3)
+#define SLJIT_SDIV			(SLJIT_DDIV | SLJIT_SINGLE_OP)
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compiler, sljit_si op,
 	sljit_si dst, sljit_sw dstw,
@@ -926,36 +949,64 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_fop2(struct sljit_compiler *compile
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compiler *compiler);
 
-/* Invert conditional instruction: xor (^) with 0x1 */
-#define SLJIT_C_EQUAL			0
-#define SLJIT_C_ZERO			0
-#define SLJIT_C_NOT_EQUAL		1
-#define SLJIT_C_NOT_ZERO		1
+/* Invert (negate) conditional type: xor (^) with 0x1 */
 
-#define SLJIT_C_LESS			2
-#define SLJIT_C_GREATER_EQUAL		3
-#define SLJIT_C_GREATER			4
-#define SLJIT_C_LESS_EQUAL		5
-#define SLJIT_C_SIG_LESS		6
-#define SLJIT_C_SIG_GREATER_EQUAL	7
-#define SLJIT_C_SIG_GREATER		8
-#define SLJIT_C_SIG_LESS_EQUAL		9
+/* Integer comparison types. */
+#define SLJIT_EQUAL			0
+#define SLJIT_I_EQUAL			(SLJIT_EQUAL | SLJIT_INT_OP)
+#define SLJIT_ZERO			0
+#define SLJIT_I_ZERO			(SLJIT_ZERO | SLJIT_INT_OP)
+#define SLJIT_NOT_EQUAL			1
+#define SLJIT_I_NOT_EQUAL		(SLJIT_NOT_EQUAL | SLJIT_INT_OP)
+#define SLJIT_NOT_ZERO			1
+#define SLJIT_I_NOT_ZERO		(SLJIT_NOT_ZERO | SLJIT_INT_OP)
 
-#define SLJIT_C_OVERFLOW		10
-#define SLJIT_C_NOT_OVERFLOW		11
+#define SLJIT_LESS			2
+#define SLJIT_I_LESS			(SLJIT_LESS | SLJIT_INT_OP)
+#define SLJIT_GREATER_EQUAL		3
+#define SLJIT_I_GREATER_EQUAL		(SLJIT_GREATER_EQUAL | SLJIT_INT_OP)
+#define SLJIT_GREATER			4
+#define SLJIT_I_GREATER			(SLJIT_GREATER | SLJIT_INT_OP)
+#define SLJIT_LESS_EQUAL		5
+#define SLJIT_I_LESS_EQUAL		(SLJIT_LESS_EQUAL | SLJIT_INT_OP)
+#define SLJIT_SIG_LESS			6
+#define SLJIT_I_SIG_LESS		(SLJIT_SIG_LESS | SLJIT_INT_OP)
+#define SLJIT_SIG_GREATER_EQUAL		7
+#define SLJIT_I_SIG_GREATER_EQUAL	(SLJIT_SIG_GREATER_EQUAL | SLJIT_INT_OP)
+#define SLJIT_SIG_GREATER		8
+#define SLJIT_I_SIG_GREATER		(SLJIT_SIG_GREATER | SLJIT_INT_OP)
+#define SLJIT_SIG_LESS_EQUAL		9
+#define SLJIT_I_SIG_LESS_EQUAL		(SLJIT_SIG_LESS_EQUAL | SLJIT_INT_OP)
 
-#define SLJIT_C_MUL_OVERFLOW		12
-#define SLJIT_C_MUL_NOT_OVERFLOW	13
+#define SLJIT_OVERFLOW			10
+#define SLJIT_I_OVERFLOW		(SLJIT_OVERFLOW | SLJIT_INT_OP)
+#define SLJIT_NOT_OVERFLOW		11
+#define SLJIT_I_NOT_OVERFLOW		(SLJIT_NOT_OVERFLOW | SLJIT_INT_OP)
 
-#define SLJIT_C_FLOAT_EQUAL		14
-#define SLJIT_C_FLOAT_NOT_EQUAL		15
-#define SLJIT_C_FLOAT_LESS		16
-#define SLJIT_C_FLOAT_GREATER_EQUAL	17
-#define SLJIT_C_FLOAT_GREATER		18
-#define SLJIT_C_FLOAT_LESS_EQUAL	19
-#define SLJIT_C_FLOAT_UNORDERED		20
-#define SLJIT_C_FLOAT_ORDERED		21
+#define SLJIT_MUL_OVERFLOW		12
+#define SLJIT_I_MUL_OVERFLOW		(SLJIT_MUL_OVERFLOW | SLJIT_INT_OP)
+#define SLJIT_MUL_NOT_OVERFLOW		13
+#define SLJIT_I_MUL_NOT_OVERFLOW	(SLJIT_MUL_NOT_OVERFLOW | SLJIT_INT_OP)
 
+/* Floating point comparison types. */
+#define SLJIT_D_EQUAL			14
+#define SLJIT_S_EQUAL			(SLJIT_D_EQUAL | SLJIT_SINGLE_OP)
+#define SLJIT_D_NOT_EQUAL		15
+#define SLJIT_S_NOT_EQUAL		(SLJIT_D_NOT_EQUAL | SLJIT_SINGLE_OP)
+#define SLJIT_D_LESS			16
+#define SLJIT_S_LESS			(SLJIT_D_LESS | SLJIT_SINGLE_OP)
+#define SLJIT_D_GREATER_EQUAL		17
+#define SLJIT_S_GREATER_EQUAL		(SLJIT_D_GREATER_EQUAL | SLJIT_SINGLE_OP)
+#define SLJIT_D_GREATER			18
+#define SLJIT_S_GREATER			(SLJIT_D_GREATER | SLJIT_SINGLE_OP)
+#define SLJIT_D_LESS_EQUAL		19
+#define SLJIT_S_LESS_EQUAL		(SLJIT_D_LESS_EQUAL | SLJIT_SINGLE_OP)
+#define SLJIT_D_UNORDERED		20
+#define SLJIT_S_UNORDERED		(SLJIT_D_UNORDERED | SLJIT_SINGLE_OP)
+#define SLJIT_D_ORDERED			21
+#define SLJIT_S_ORDERED			(SLJIT_D_ORDERED | SLJIT_SINGLE_OP)
+
+/* Unconditional jump types. */
 #define SLJIT_JUMP			22
 #define SLJIT_FAST_CALL			23
 #define SLJIT_CALL0			24
@@ -969,7 +1020,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 #define SLJIT_REWRITABLE_JUMP		0x1000
 
 /* Emit a jump instruction. The destination is not set, only the type of the jump.
-    type must be between SLJIT_C_EQUAL and SLJIT_CALL3
+    type must be between SLJIT_EQUAL and SLJIT_CALL3
     type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
    Flags: - (never set any flags) for both conditional and unconditional jumps.
    Flags: destroy all flags for calls. */
@@ -978,10 +1029,10 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 /* Basic arithmetic comparison. In most architectures it is implemented as
    an SLJIT_SUB operation (with SLJIT_UNUSED destination and setting
    appropriate flags) followed by a sljit_emit_jump. However some
-   architectures (i.e: MIPS) may employ special optimizations here. It is
-   suggested to use this comparison form when appropriate.
-    type must be between SLJIT_C_EQUAL and SLJIT_C_SIG_LESS_EQUAL
-    type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP or SLJIT_INT_OP
+   architectures (i.e: ARM64 or MIPS) may employ special optimizations here.
+   It is suggested to use this comparison form when appropriate.
+    type must be between SLJIT_EQUAL and SLJIT_I_SIG_LESS_EQUAL
+    type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
    Flags: destroy flags. */
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler *compiler, sljit_si type,
 	sljit_si src1, sljit_sw src1w,
@@ -992,11 +1043,11 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
    sljit_emit_jump. However some architectures (i.e: MIPS) may employ
    special optimizations here. It is suggested to use this comparison form
    when appropriate.
-    type must be between SLJIT_C_FLOAT_EQUAL and SLJIT_C_FLOAT_ORDERED
-    type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP and SLJIT_SINGLE_OP
+    type must be between SLJIT_D_EQUAL and SLJIT_S_ORDERED
+    type can be combined (or'ed) with SLJIT_REWRITABLE_JUMP
    Flags: destroy flags.
    Note: if either operand is NaN, the behaviour is undefined for
-         type <= SLJIT_C_FLOAT_LESS_EQUAL. */
+         types up to SLJIT_S_LESS_EQUAL. */
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_fcmp(struct sljit_compiler *compiler, sljit_si type,
 	sljit_si src1, sljit_sw src1w,
 	sljit_si src2, sljit_sw src2w);
@@ -1015,8 +1066,8 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_target(struct sljit_jump *jump, sljit_uw
 SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compiler, sljit_si type, sljit_si src, sljit_sw srcw);
 
 /* Perform the operation using the conditional flags as the second argument.
-   Type must always be between SLJIT_C_EQUAL and SLJIT_C_FLOAT_ORDERED. The
-   value represented by the type is 1, if the condition represented by the type
+   Type must always be between SLJIT_EQUAL and SLJIT_S_ORDERED. The value
+   represented by the type is 1, if the condition represented by the type
    is fulfilled, and 0 otherwise.
 
    If op == SLJIT_MOV, SLJIT_MOV_SI, SLJIT_MOV_UI:
@@ -1058,7 +1109,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_const(sljit_uw addr, sljit_sw new_consta
 /* --------------------------------------------------------------------- */
 
 #define SLJIT_MAJOR_VERSION	0
-#define SLJIT_MINOR_VERSION	92
+#define SLJIT_MINOR_VERSION	93
 
 /* Get the human readable name of the platform. Can be useful on platforms
    like ARM, where ARM and Thumb2 functions can be mixed, and
@@ -1104,10 +1155,11 @@ struct sljit_stack {
 };
 
 /* Returns NULL if unsuccessful.
-   Note: limit and max_limit contains the size for stack allocation
-   Note: the top field is initialized to base. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit);
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack* stack);
+   Note: limit and max_limit contains the size for stack allocation.
+   Note: the top field is initialized to base.
+   Note: see sljit_create_compiler for the explanation of allocator_data. */
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_stack* SLJIT_CALL sljit_allocate_stack(sljit_uw limit, sljit_uw max_limit, void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack *stack, void *allocator_data);
 
 /* Can be used to increase (allocate) or decrease (free) the memory area.
    Returns with a non-zero value if unsuccessful. If new_limit is greater than
@@ -1115,7 +1167,7 @@ SLJIT_API_FUNC_ATTRIBUTE void SLJIT_CALL sljit_free_stack(struct sljit_stack* st
    since the growth ratio can be added to the current limit, and sljit_stack_resize
    will do all the necessary checks. The fields of the stack are not changed if
    sljit_stack_resize fails. */
-SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack* stack, sljit_uw new_limit);
+SLJIT_API_FUNC_ATTRIBUTE sljit_sw SLJIT_CALL sljit_stack_resize(struct sljit_stack *stack, sljit_uw new_limit);
 
 #endif /* (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK) */
 

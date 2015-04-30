@@ -96,13 +96,19 @@
 #define SLJIT_EXECUTABLE_ALLOCATOR 1
 #endif
 
+/* Return with error when an invalid argument is passed. */
+#ifndef SLJIT_ARGUMENT_CHECKS
+/* Disabled by default */
+#define SLJIT_ARGUMENT_CHECKS 0
+#endif
+
 /* Debug checks (assertions, etc.). */
 #ifndef SLJIT_DEBUG
 /* Enabled by default */
 #define SLJIT_DEBUG 1
 #endif
 
-/* Verbose operations */
+/* Verbose operations. */
 #ifndef SLJIT_VERBOSE
 /* Enabled by default */
 #define SLJIT_VERBOSE 1

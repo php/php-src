@@ -2446,6 +2446,7 @@ typedef struct compile_data {
   BOOL had_pruneorskip;             /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;            /* Lookbehinds need later checking */
   BOOL dupnames;                    /* Duplicate names exist */
+  BOOL iscondassert;                /* Next assert is a condition */
   int  nltype;                      /* Newline type */
   int  nllen;                       /* Newline string length */
   pcre_uchar nl[4];                 /* Newline string when fixed length */
@@ -2458,6 +2459,13 @@ typedef struct branch_chain {
   struct branch_chain *outer;
   pcre_uchar *current_branch;
 } branch_chain;
+
+/* Structure for mutual recursion detection. */
+
+typedef struct recurse_check {
+  struct recurse_check *prev;
+  const pcre_uchar *group;
+} recurse_check;
 
 /* Structure for items in a linked list that represents an explicit recursive
 call within the pattern; used by pcre_exec(). */
