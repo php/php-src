@@ -1,7 +1,16 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
-The latest release of PCRE is always available in three alternative formats
+NOTE: This set of files relates to PCRE releases that use the original API,
+with library names libpcre, libpcre16, and libpcre32. January 2015 saw the
+first release of a new API, known as PCRE2, with release numbers starting at
+10.00 and library names libpcre2-8, libpcre2-16, and libpcre2-32. The old
+libraries (now called PCRE1) are still being maintained for bug fixes, but
+there will be no new development. New projects are advised to use the new PCRE2
+libraries.
+
+
+The latest release of PCRE1 is always available in three alternative formats
 from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
@@ -990,4 +999,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 24 October 2014
+Last updated: 10 February 2015
