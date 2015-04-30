@@ -775,6 +775,7 @@ ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
+zend_bool zend_is_simple_variable(zend_ast *ast);
 
 int zendlex(zend_parser_stack_elem *elem);
 

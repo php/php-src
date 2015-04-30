@@ -2055,6 +2055,12 @@ void zend_emit_final_return(zval *zv) /* {{{ */
 }
 /* }}} */
 
+zend_bool zend_is_simple_variable(zend_ast *ast) /* {{{ */
+{
+	return ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast->child[0])) == IS_STRING;
+}
+/* }}} */
+
 static inline zend_bool zend_is_variable(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_VAR || ast->kind == ZEND_AST_DIM
@@ -4583,28 +4589,49 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
+static inline void zend_compile_closure_use(zend_ast *var_ast) {
+	zend_string *name = zend_ast_get_str(var_ast);
+	zend_bool by_ref = var_ast->attr;
+	zval zv;
 
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *var_ast = list->child[i];
-		zend_string *name = zend_ast_get_str(var_ast);
+	if (zend_string_equals_literal(name, "this")) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+	}
+
+	ZVAL_NULL(&zv);
+	Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
+
+	zend_compile_static_var_common(var_ast, &zv, by_ref);
+}
+
+static void zend_compile_closure_search_use_variables(zend_ast* ast, HashTable *used) {
+	if (ast->kind == ZEND_AST_VAR) {
+		zend_ast *var_ast = ast->child[0];
 		zend_bool by_ref = var_ast->attr;
-		zval zv;
-
-		if (zend_string_equals_literal(name, "this")) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
+		if (!zend_hash_find(used, name)) {
+			/* We need a FETCH_W to silence any warnings, but a simple ASSIGN op to not have references */
+			var_ast->attr = 1;
+			zend_compile_closure_use(var_ast);
+			CG(active_op_array)->opcodes[CG(active_op_array)->last - 1].opcode = ZEND_ASSIGN;
+			var_ast->attr = by_ref;
+			zend_hash_add_empty_element(used, name);
 		}
-
-		ZVAL_NULL(&zv);
-		Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
-
-		zend_compile_static_var_common(var_ast, &zv, by_ref);
+	} else if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		uint32_t i;
+		for (i = 0; i < list->children; i++) {
+			zend_compile_closure_search_use_variables(list->child[i], used);
+		}
+	} else if (zend_ast_is_special(ast)) {
+		return;
+	} else {
+		uint32_t i, children = ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
+		for (i = 0; i < children; i++) {
+			zend_compile_closure_search_use_variables(ast->child[i], used);
+		}
 	}
 }
-/* }}} */
 
 void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_bool has_body) /* {{{ */
 {
@@ -4875,7 +4902,28 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_params(params_ast, return_type_ast);
 	if (uses_ast) {
-		zend_compile_closure_uses(uses_ast);
+		uint32_t i;
+		zend_ast_list *list = zend_ast_get_list(uses_ast);
+
+		if (list->children) {
+			for (i = 0; i < list->children; ++i) {
+				zend_compile_closure_use(list->child[i]);
+			}
+		} else {
+			/* we need to prevent double declarations of a variable, hence the HashTable to keep track of them */
+			HashTable used;
+			zend_ast_list *param_list = zend_ast_get_list(params_ast);
+			zend_hash_init(&used, param_list->children, a very long sigh..., NULL, 0);
+
+			for (i = 0; i < param_list->children; i++) {
+				zend_ast *param_ast = param_list->child[i];
+				zend_hash_add_empty_element(&used, Z_STR_P(zend_ast_get_zval(param_ast->child[1])));
+			}
+			zend_hash_str_add_empty_element(&used, "this", sizeof("this") - 1);
+
+			zend_compile_closure_search_use_variables(stmt_ast, &used);
+			zend_hash_destroy(&used);
+		}
 	}
 	zend_compile_stmt(stmt_ast);
 
