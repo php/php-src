@@ -1636,7 +1636,7 @@ zend.assertions = -1
 
 [mbstring]
 ; language for internal character representation.
-; This affects mb_send_mail() and mbstrig.detect_order.
+; This affects mb_send_mail() and mbstring.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
