@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 May 2015, PHP 5.6.9RC1
+30 Apr 2015, PHP 5.6.9RC1
 
 - Core:
   . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
