@@ -1004,6 +1004,7 @@ expr_without_variable:
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, 0, CG(zend_lineno), NULL,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      zend_ast_create_list(1, ZEND_AST_PARAM_LIST, zend_ast_create_ex(ZEND_AST_PARAM, 0, NULL, $1, NULL)), zend_ast_create_list(0, ZEND_AST_CLOSURE_USES), $3, NULL); }
+/* hack with expr is needed due to reduction when having e.g. ($var) ~> ...; parser can't decide whether to apply '(' expr ')' { $$ = $2; } with expr being T_VARIABLE or '(' T_VARIABLE ')' T_TILDED_ARROW ... because it doesn't lookahead here */
 	|	'(' expr ')' T_TILDED_ARROW short_closure_expr
 			{ if (!zend_is_simple_variable($2)) { zenderror("Cannot use an expression as parameter"); zend_ast_destroy($2); zend_ast_destroy($5); YYERROR; }
 			  $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, 0, CG(zend_lineno), NULL,

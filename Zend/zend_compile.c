@@ -109,7 +109,7 @@ static zend_string *zend_new_interned_string_safe(zend_string *str) /* {{{ */ {
 }
 /* }}} */
 
-static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigned char *lex_pos) /* {{{ */
+static zend_string *zend_build_runtime_definition_key(HashTable *table, zend_string *name, unsigned char *lex_pos) /* {{{ */
 {
 	zend_string *result;
 	char char_pos_buf[32];
@@ -117,8 +117,14 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 	zend_string *filename = CG(active_op_array)->filename;
 
 	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(1 + ZSTR_LEN(name) + ZSTR_LEN(filename) + char_pos_len, 0);
- 	sprintf(ZSTR_VAL(result), "%c%s%s%s", '\0', ZSTR_VAL(name), ZSTR_VAL(filename), char_pos_buf);
+	result = zend_string_alloc(2 + ZSTR_LEN(name) + ZSTR_LEN(filename) + char_pos_len, 0);
+ 	sprintf(ZSTR_VAL(result), "%c%s%s%s%c", '\0', ZSTR_VAL(name), ZSTR_VAL(filename), char_pos_buf, '\0');
+
+	while (zend_hash_find(table, result)) {
+		result->h++;
+		result->val[result->len - 1]++;
+	}
+
 	return zend_new_interned_string(result);
 }
 /* }}} */
@@ -4605,15 +4611,18 @@ static inline void zend_compile_closure_use(zend_ast *var_ast) {
 }
 
 static void zend_compile_closure_search_use_variables(zend_ast* ast, HashTable *used) {
+	if (!ast) {
+		return;
+	}
 	if (ast->kind == ZEND_AST_VAR) {
 		zend_ast *var_ast = ast->child[0];
 		zend_bool by_ref = var_ast->attr;
 		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
 		if (!zend_hash_find(used, name)) {
-			/* We need a FETCH_W to silence any warnings, but a simple ASSIGN op to not have references */
-			var_ast->attr = 1;
+			/* We need a FETCH_IS to silence any warnings, but a simple ASSIGN op to not have references */
+			var_ast->attr = 0;
 			zend_compile_closure_use(var_ast);
-			CG(active_op_array)->opcodes[CG(active_op_array)->last - 1].opcode = ZEND_ASSIGN;
+			CG(active_op_array)->opcodes[CG(active_op_array)->last - 2].opcode = ZEND_FETCH_IS;
 			var_ast->attr = by_ref;
 			zend_hash_add_empty_element(used, name);
 		}
@@ -4838,7 +4847,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 	}
 
 	{
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+		zend_string *key = zend_build_runtime_definition_key(CG(function_table), lcname, decl->lex_pos);
 
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
@@ -5320,7 +5329,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_DECLARE_CLASS;
 		}
 
-		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+		key = zend_build_runtime_definition_key(CG(class_table), lcname, decl->lex_pos);
 
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
