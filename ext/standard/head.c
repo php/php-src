@@ -86,7 +86,10 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 	int result;
 	zend_string *encoded_value = NULL;
 
-	if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+	if (!name_len) {
+		zend_error( E_WARNING, "Cookie names must not be empty" );
+		return FAILURE;
+	} else if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
 		zend_error( E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
 	}
