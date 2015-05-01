@@ -2784,6 +2784,8 @@ static ZIPARCHIVE_METHOD(getStream)
 	stream = php_stream_zip_open(obj->filename, filename->val, mode STREAMS_CC);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
