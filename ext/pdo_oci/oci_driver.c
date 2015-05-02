@@ -324,7 +324,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 }
 /* }}} */
 
-static long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -440,7 +440,7 @@ static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val) /* {{{ */
+static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -467,7 +467,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val) /* {{{
 }
 /* }}} */
 
-static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value)  /* {{{ */
+static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)  /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -481,10 +481,10 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 
 			if (OCIServerRelease(H->svc, H->err, infostr, (ub4)sizeof(infostr), (ub1)OCI_HTYPE_SVCCTX, &vernum))
 			{
-				ZVAL_STRING(return_value, "<<Unknown>>", 1);
+				ZVAL_STRING(return_value, "<<Unknown>>");
 			} else {
 				if (attr == PDO_ATTR_SERVER_INFO) {
-					ZVAL_STRING(return_value, (char *)infostr, 1);
+					ZVAL_STRING(return_value, (char *)infostr);
 				} else {
 					slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d",
 							 (int)((vernum>>24) & 0xFF),  /* version number */
@@ -493,7 +493,7 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 							 (int)((vernum>>8)  & 0x0F),  /* port release number */
 							 (int)((vernum>>0)  & 0xFF)); /* port update number */
 
-					ZVAL_STRING(return_value, verstr, 1);
+					ZVAL_STRING(return_value, verstr);
 				}
 			}
 			return TRUE;
@@ -508,10 +508,10 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 
 			OCIClientVersion(&major, &minor, &update, &patch, &port_update);
 			slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d", major, minor, update, patch, port_update);
-			ZVAL_STRING(return_value, verstr, 1);
+			ZVAL_STRING(return_value, verstr);
 #elif defined(PHP_PDO_OCI_CLIENT_VERSION)
 			/* Compile time client version */
-			ZVAL_STRING(return_value, PHP_PDO_OCI_CLIENT_VERSION, 1);
+			ZVAL_STRING(return_value, PHP_PDO_OCI_CLIENT_VERSION);
 #else
 			return FALSE;
 
