@@ -687,7 +687,7 @@ PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 
-PDO_API void free_statement(pdo_stmt_t *stmt);
+PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 
 
 #endif /* PHP_PDO_DRIVER_H */

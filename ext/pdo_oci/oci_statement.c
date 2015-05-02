@@ -652,7 +652,7 @@ static int oci_blob_close(php_stream *stream, int close_handle)
 		efree(self);
 	}
 
-	free_statement(stmt);
+	php_pdo_free_statement(stmt);
 	return 0;
 }
 

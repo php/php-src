@@ -2298,7 +2298,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->serialize = pdo_row_serialize;
 }
 
-PDO_API void free_statement(pdo_stmt_t *stmt)
+PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 {
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
@@ -2353,7 +2353,7 @@ PDO_API void free_statement(pdo_stmt_t *stmt)
 void pdo_dbstmt_free_storage(zend_object *std)
 {
 	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(std);
-	free_statement(stmt);
+	php_pdo_free_statement(stmt);
 }
 
 zend_object *pdo_dbstmt_new(zend_class_entry *ce)
