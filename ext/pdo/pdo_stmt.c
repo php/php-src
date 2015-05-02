@@ -2298,7 +2298,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->serialize = pdo_row_serialize;
 }
 
-static void free_statement(pdo_stmt_t *stmt)
+PDO_API void free_statement(pdo_stmt_t *stmt)
 {
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
