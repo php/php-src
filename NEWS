@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 14 Jun 2015, PHP 5.6.9
 
 - Core:
+  . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
+    in extension trait). (jbboehr at gmail dot com)
   . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
     (Laruence)
   . Fixed bug #69420 (Invalid read in zend_std_get_method). (Laruence)
