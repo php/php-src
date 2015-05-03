@@ -1099,7 +1099,7 @@ static void php_error_cb(PHP_ERROR_CB_FUNC_ARGS)
 
 	CALL_ERROR_HOOKS(E_HOOK_BAILOUT);
 
-	// hook_result == FAILURE means we must bail out
+	/* hook_result == FAILURE means we must bail out */
 	if (hook_result == FAILURE || !display) {
 		goto error_cb_end;
 	}
