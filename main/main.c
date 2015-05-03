@@ -974,7 +974,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
    extended error handling function */
 static void php_error_cb(PHP_ERROR_CB_FUNC_ARGS)
 {
-	char *buffer, *error_type_str;
+	char *buffer, *error_type_str = "";
 	int buffer_len, display;
 	zend_llist_position pos;
 	int (**hook)(ZEND_ERROR_CB_HOOK_ARGS);
