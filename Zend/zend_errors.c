@@ -150,14 +150,14 @@ ZEND_ERROR_CB_API zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS)
 /* }}} */
 
 /* {{{ zend_append_error_hook */
-ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS))
+ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS))
 {
 	zend_llist_add_element(&PG(error_hooks)[hook_part], (void *)&hook);
 }
 /* }}} */
 
 /* {{{ zend_prepend_error_hook */
-ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS))
+ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS))
 {
 	zend_llist_prepend_element(&PG(error_hooks)[hook_part], (void *)&hook);
 }
@@ -176,7 +176,7 @@ ZEND_API void zend_init_error_hooks(void)
 	int i;
 
 	for (i = 0; i < E_HOOK_LAST; ++i) {
-		zend_llist_init(&PG(error_hooks)[i], sizeof(void (*)(ZEND_ERROR_CB_HOOK_ARGS)), NULL, 1);
+		zend_llist_init(&PG(error_hooks)[i], sizeof(int (*)(ZEND_ERROR_CB_HOOK_ARGS)), NULL, 1);
 	}
 }
 /* }}} */
@@ -186,8 +186,7 @@ ZEND_API void zend_register_error_hooks(void)
 {
 	zend_append_error_hook(E_HOOK_DISPLAY, &zend_error_display_cb);
 	zend_append_error_hook(E_HOOK_LOG, &zend_error_log_cb);
-	// bail out functions have a slightly different signature, returning a zend_bool instead of void
-	zend_append_error_hook(E_HOOK_BAILOUT, (void (*)(ZEND_ERROR_CB_HOOK_ARGS))&zend_error_bailout_cb);
+	zend_append_error_hook(E_HOOK_BAILOUT, &zend_error_bailout_cb);
 }
 /* }}} */
 

@@ -62,8 +62,8 @@ BEGIN_EXTERN_C()
 ZEND_ERROR_CB_API zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS);
 ZEND_ERROR_CB_API zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS);
 ZEND_ERROR_CB_API zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS);
-ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
-ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, void (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
+ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
+ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
 ZEND_API void zend_clear_error_hook(zend_error_cb_hook_t hook_part);
 ZEND_API void zend_init_error_hooks(void);
 ZEND_API void zend_register_error_hooks(void);
