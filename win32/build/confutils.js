@@ -1937,6 +1937,14 @@ function generate_phpize()
 	CJ.WriteLine("var PHP_ZTS =" + '"' + PHP_ZTS + '"');
 	CJ.WriteLine("var PHP_DLL_LIB =" + '"' + get_define('PHPLIB') + '"');
 	CJ.WriteLine("var PHP_DLL =" + '"' + get_define('PHPDLL') + '"');
+
+	/* The corresponding configure options aren't enabled through phpize,
+		thus these dummy declarations are required. */
+	CJ.WriteLine("var PHP_ANALYZER =" + '"no"');
+	CJ.WriteLine("var PHP_PGO =" + '"no"');
+	CJ.WriteLine("var PHP_PGI =" + '"no"');
+	CJ.WriteLine("var PHP_ALL_SHARED =" + '"no"');
+
 	CJ.WriteBlankLines(1);
 	CJ.Close();
 }
