@@ -829,7 +829,7 @@ static int sxe_property_exists(zval *object, zval *member, int check_empty, void
 }
 /* }}} */
 
-/* {{{ sxe_property_exists()
+/* {{{ sxe_dimension_exists()
  */
 static int sxe_dimension_exists(zval *object, zval *member, int check_empty)
 {
