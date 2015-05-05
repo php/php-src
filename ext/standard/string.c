@@ -1082,18 +1082,22 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 	char *p1 = str->val;
 	char *endp = str->val + str->len;
 	char *p2 = (char *) php_memnstr(str->val, delim->val, delim->len, endp);
+	zval  tmp;
 
 	if (p2 == NULL) {
-		add_next_index_str(return_value, zend_string_copy(str));
+		ZVAL_STR_COPY(&tmp, str);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
 		do {
-			add_next_index_stringl(return_value, p1, p2 - p1);
+			ZVAL_STRINGL(&tmp, p1, p2 - p1);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			p1 = p2 + delim->len;
 			p2 = (char *) php_memnstr(p1, delim->val, delim->len, endp);
 		} while (p2 != NULL && --limit > 1);
 
 		if (p1 <= endp) {
-			add_next_index_stringl(return_value, p1, endp - p1);
+			ZVAL_STRINGL(&tmp, p1, endp - p1);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
 }
@@ -1107,6 +1111,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	char *p1 = str->val;
 	char *endp = str->val + str->len;
 	char *p2 = (char *) php_memnstr(str->val, delim->val, delim->len, endp);
+	zval  tmp;
 
 	if (p2 == NULL) {
 		/*
@@ -1131,8 +1136,8 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		to_return = limit + found;
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
 		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
-			add_next_index_stringl(return_value, positions[i],
-					(positions[i+1] - delim->len) - positions[i]);
+			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - delim->len) - positions[i]);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 		efree(positions);
 	}
@@ -1146,6 +1151,7 @@ PHP_FUNCTION(explode)
 {
 	zend_string *str, *delim;
 	zend_long limit = ZEND_LONG_MAX; /* No limit */
+	zval tmp;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &delim, &str, &limit) == FAILURE) {
@@ -1169,7 +1175,8 @@ PHP_FUNCTION(explode)
 
 	if (str->len == 0) {
 	  	if (limit >= 0) {
-			add_next_index_str(return_value, STR_EMPTY_ALLOC());
+			ZVAL_EMPTY_STRING(&tmp);
+			zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
 		}
 		return;
 	}
@@ -1179,7 +1186,8 @@ PHP_FUNCTION(explode)
 	} else if (limit < 0) {
 		php_explode_negative_limit(delim, str, return_value, limit);
 	} else {
-		add_index_stringl(return_value, 0, str->val, str->len);
+		ZVAL_STR_COPY(&tmp, str);
+		zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
 	}
 }
 /* }}} */
