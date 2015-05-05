@@ -6349,16 +6349,8 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
 			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
-				zval class_str_zv;
-				zend_ast *class_str_ast, *class_const_ast;
-
-				ZVAL_STRING(&class_str_zv, "class");
-				class_str_ast = zend_ast_create_zval(&class_str_zv);
-				class_const_ast = zend_ast_create(ZEND_AST_CLASS_CONST, name_ast, class_str_ast);
-
-				zend_compile_expr(result, class_const_ast);
-
-				zval_ptr_dtor(&class_str_zv);
+				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+				opline->extended_value = fetch_type;
 			} else {
 				result->op_type = IS_CONST;
 				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
@@ -6367,17 +6359,8 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
 			{
-				zval class_str_zv;
-				zend_ast *class_str_ast, *class_const_ast;
-
-				ZVAL_STRING(&class_str_zv, "class");
-				class_str_ast = zend_ast_create_zval(&class_str_zv);
-				class_const_ast = zend_ast_create(
-					ZEND_AST_CLASS_CONST, name_ast, class_str_ast);
-
-				zend_compile_expr(result, class_const_ast);
-
-				zval_ptr_dtor(&class_str_zv);
+				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+				opline->extended_value = fetch_type;
 			}
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
@@ -6518,6 +6501,8 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 {
+	zend_op *opline;
+
 	if (zend_try_ct_eval_magic_const(&result->u.constant, ast)) {
 		result->op_type = IS_CONST;
 		return;
@@ -6527,7 +6512,8 @@ void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 	            CG(active_class_entry) &&
 	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
-	zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+	opline->extended_value = ZEND_FETCH_CLASS_SELF;
 }
 /* }}} */
 
