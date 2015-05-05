@@ -86,17 +86,6 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 }
 /* }}} */
 
-#define APPEND_PREV_ELEMENT(__c, __v) \
-	if ((__c) == 1) { \
-		array_init(return_value); \
-		add_next_index_zval(return_value, __v); \
-	}
-
-#define APPEND_CUR_ELEMENT(__c, __v) \
-	if (++(__c) > 1) { \
-		add_next_index_zval(return_value, __v); \
-	}
-
 #define GET_NODE(__s, __n) { \
 	if ((__s)->node && (__s)->node->node) { \
 		__n = (__s)->node->node; \
