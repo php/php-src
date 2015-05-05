@@ -7301,9 +7301,11 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 
 	if (UNEXPECTED((Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC) ||
 				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(called_scope), NULL);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
+			EG(scope), EX(called_scope), NULL);
 	} else {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EX(This)) ? &EX(This) : NULL);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
+			EG(scope), EX(called_scope), Z_OBJ(EX(This)) ? &EX(This) : NULL);
 	}
 
 	CHECK_EXCEPTION();
