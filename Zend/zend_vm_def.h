@@ -7841,27 +7841,35 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 
 ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 {
+	uint32_t fetch_type;
 	USE_OPLINE
 
-	if (EG(scope) && EG(scope)->name) {
-		switch (opline->extended_value) {
-			case ZEND_FETCH_CLASS_SELF:
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->name);
-				break;
-			case ZEND_FETCH_CLASS_PARENT:
-				if (EG(scope)->parent) {
-					ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->parent->name);
-				} else {
-					ZVAL_EMPTY_STRING(EX_VAR(opline->result.var));
-				}
-				break;
-			case ZEND_FETCH_CLASS_STATIC:
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(called_scope)->name);
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
-	} else {
-		ZVAL_EMPTY_STRING(EX_VAR(opline->result.var));
+	SAVE_OPLINE();
+	fetch_type = opline->extended_value;
+
+	if (UNEXPECTED(EG(scope) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Cannot use \"%s\" when no class scope is active",
+			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+		HANDLE_EXCEPTION();
+	}
+
+	switch (fetch_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->name);
+			break;
+		case ZEND_FETCH_CLASS_PARENT:
+			if (UNEXPECTED(EG(scope)->parent == NULL)) {
+				zend_error(E_EXCEPTION | E_ERROR,
+					"Cannot use \"parent\" when current class scope has no parent");
+				HANDLE_EXCEPTION();
+			}
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->parent->name);
+			break;
+		case ZEND_FETCH_CLASS_STATIC:
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(called_scope)->name);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
