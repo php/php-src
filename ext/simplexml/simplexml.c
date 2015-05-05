@@ -2225,7 +2225,7 @@ PHP_FUNCTION(simplexml_load_file)
 		fptr_count = php_sxe_find_fptr_count(ce);
 	}
 	sxe = php_sxe_object_new(ce, fptr_count);
-	sxe->iter.nsprefix = ns_len ? (xmlChar)estrdup(ns) : NULL;
+	sxe->iter.nsprefix = ns_len ? (xmlChar*)estrdup(ns) : NULL;
 	sxe->iter.isprefix = isprefix;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL);
