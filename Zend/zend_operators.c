@@ -2624,6 +2624,8 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 	int digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
 	zend_uchar type;
+	zend_long tmp_lval = 0;
+	int neg = 0;
 
 	if (!length) {
 		return 0;
@@ -2641,7 +2643,10 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 	}
 	ptr = str;
 
-	if (*ptr == '-' || *ptr == '+') {
+	if (*ptr == '-') {
+		neg = 1;
+		ptr++;
+	} else if (*ptr == '+') {
 		ptr++;
 	}
 
@@ -2657,6 +2662,7 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
 check_digits:
 			if (ZEND_IS_DIGIT(*ptr)) {
+				tmp_lval = tmp_lval * 10 + (*ptr) - '0';
 				continue;
 			} else if (*ptr == '.' && dp_or_e < 1) {
 				goto process_double;
@@ -2723,7 +2729,10 @@ process_double:
 		}
 
 		if (lval) {
-			*lval = ZEND_STRTOL(str, NULL, 10);
+			if (neg) {
+				tmp_lval = -tmp_lval;
+			}
+			*lval = tmp_lval;
 		}
 
 		return IS_LONG;
