@@ -51,7 +51,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 
 #define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
 
-static php_sxe_object* php_sxe_object_new(zend_class_entry *ce);
+static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
 static zval *sxe_get_value(zval *z, zval *rv);
@@ -68,7 +68,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 {
 	php_sxe_object *subnode;
 
-	subnode = php_sxe_object_new(sxe->zo.ce);
+	subnode = php_sxe_object_new(sxe->zo.ce, sxe->fptr_count);
 	subnode->document = sxe->document;
 	subnode->document->refcount++;
 	subnode->iter.type = itertype;
@@ -1001,7 +1001,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 			xmlFree(contents);
 		}
 	} else {
-		subnode = php_sxe_object_new(sxe_ref->zo.ce);
+		subnode = php_sxe_object_new(sxe_ref->zo.ce, sxe_ref->fptr_count);
 		subnode->document = sxe_ref->document;
 		subnode->document->refcount++;
 		if (nsprefix && *nsprefix) {
@@ -1971,7 +1971,7 @@ sxe_object_clone(zval *object)
 	xmlNodePtr nodep = NULL;
 	xmlDocPtr docp = NULL;
 
-	clone = php_sxe_object_new(sxe->zo.ce);
+	clone = php_sxe_object_new(sxe->zo.ce, sxe->fptr_count);
 	clone->document = sxe->document;
 	if (clone->document) {
 		clone->document->refcount++;
@@ -2049,40 +2049,48 @@ static void sxe_object_free_storage(zend_object *object)
 }
 /* }}} */
 
-/* {{{ php_sxe_object_new()
+/* {{{ php_sxe_find_fptr_count()
  */
-static php_sxe_object* php_sxe_object_new(zend_class_entry *ce)
+static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 {
-	php_sxe_object *intern;
+	zend_function *fptr_count = NULL;
 	zend_class_entry *parent = ce;
 	int inherited = 0;
 
-	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(parent));
-
-	intern->iter.type = SXE_ITER_NONE;
-	intern->iter.nsprefix = NULL;
-	intern->iter.name = NULL;
-	intern->fptr_count = NULL;
-
-	zend_object_std_init(&intern->zo, ce);
-	object_properties_init(&intern->zo, ce);
-	intern->zo.handlers = &sxe_object_handlers;
 
 	while (parent) {
 		if (parent == sxe_class_entry) {
 			break;
 		}
-
 		parent = parent->parent;
 		inherited = 1;
 	}
 
-	if (inherited) {
-		intern->fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
-		if (intern->fptr_count->common.scope == parent) {
-			intern->fptr_count = NULL;
-		}
+	fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
+	if (fptr_count->common.scope == parent) {
+		fptr_count = NULL;
 	}
+
+	return fptr_count;
+}
+/* }}} */
+
+/* {{{ php_sxe_object_new()
+ */
+static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count)
+{
+	php_sxe_object *intern;
+
+	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(ce));
+
+	intern->iter.type = SXE_ITER_NONE;
+	intern->iter.nsprefix = NULL;
+	intern->iter.name = NULL;
+	intern->fptr_count = fptr_count;
+
+	zend_object_std_init(&intern->zo, ce);
+	object_properties_init(&intern->zo, ce);
+	intern->zo.handlers = &sxe_object_handlers;
 
 	return intern;
 }
@@ -2095,7 +2103,7 @@ sxe_object_new(zend_class_entry *ce)
 {
 	php_sxe_object    *intern;
 
-	intern = php_sxe_object_new(ce);
+	intern = php_sxe_object_new(ce, php_sxe_find_fptr_count(ce));
 	return &intern->zo;
 }
 /* }}} */
@@ -2112,6 +2120,7 @@ PHP_FUNCTION(simplexml_load_file)
 	size_t             ns_len = 0;
 	zend_long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
+	zend_function    *fptr_count;
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
@@ -2126,8 +2135,11 @@ PHP_FUNCTION(simplexml_load_file)
 
 	if (!ce) {
 		ce = sxe_class_entry;
+		fptr_count = NULL;
+	} else {
+		fptr_count = php_sxe_find_fptr_count(ce);
 	}
-	sxe = php_sxe_object_new(ce);
+	sxe = php_sxe_object_new(ce, fptr_count);
 	sxe->iter.nsprefix = ns_len ? xmlStrdup((xmlChar *)ns) : NULL;
 	sxe->iter.isprefix = isprefix;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
@@ -2149,6 +2161,7 @@ PHP_FUNCTION(simplexml_load_string)
 	size_t             ns_len = 0;
 	zend_long            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
+	zend_function    *fptr_count;
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
@@ -2163,8 +2176,11 @@ PHP_FUNCTION(simplexml_load_string)
 
 	if (!ce) {
 		ce = sxe_class_entry;
+		fptr_count = NULL;
+	} else {
+		fptr_count = php_sxe_find_fptr_count(ce);
 	}
-	sxe = php_sxe_object_new(ce);
+	sxe = php_sxe_object_new(ce, fptr_count);
 	sxe->iter.nsprefix = ns_len ? xmlStrdup((xmlChar *)ns) : NULL;
 	sxe->iter.isprefix = isprefix;
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp);
@@ -2391,6 +2407,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	php_libxml_node_object *object;
 	xmlNodePtr		nodep = NULL;
 	zend_class_entry *ce = sxe_class_entry;
+	zend_function    *fptr_count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
 		return;
@@ -2413,8 +2430,11 @@ PHP_FUNCTION(simplexml_import_dom)
 	if (nodep && nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
 			ce = sxe_class_entry;
+			fptr_count = NULL;
+		} else {
+			fptr_count = php_sxe_find_fptr_count(ce);
 		}
-		sxe = php_sxe_object_new(ce);
+		sxe = php_sxe_object_new(ce, fptr_count);
 		sxe->document = object->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc);
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, nodep, NULL);
