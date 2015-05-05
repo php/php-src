@@ -3828,6 +3828,23 @@ ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, const char
 }
 /* }}} */
 
+ZEND_API void zend_update_property_ex(zend_class_entry *scope, zval *object, zend_string *name, zval *value) /* {{{ */
+{
+	zval property;
+	zend_class_entry *old_scope = EG(scope);
+
+	EG(scope) = scope;
+
+	if (!Z_OBJ_HT_P(object)->write_property) {
+		zend_error_noreturn(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, Z_OBJCE_P(object)->name->val);
+	}
+	ZVAL_STR(&property, name);
+	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL);
+
+	EG(scope) = old_scope;
+}
+/* }}} */
+
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zval property;

@@ -233,6 +233,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+	char *str;
 
 	if(colno >= sqlite3_column_count(S->stmt)) {
 		/* error invalid column */
@@ -240,8 +241,8 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 		return 0;
 	}
 
-	stmt->columns[colno].name = estrdup(sqlite3_column_name(S->stmt, colno));
-	stmt->columns[colno].namelen = strlen(stmt->columns[colno].name);
+	str = sqlite3_column_name(S->stmt, colno);
+	stmt->columns[colno].name = zend_string_init(str, strlen(str), 0);
 	stmt->columns[colno].maxlen = 0xffffffff;
 	stmt->columns[colno].precision = 0;
 

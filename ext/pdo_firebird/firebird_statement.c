@@ -197,8 +197,8 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 					: (var->aliasname_length);
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
-	col->namelen = colname_len;
-	col->name = cp = emalloc(colname_len + 1);
+	col->name = zend_string_alloc(colname_len, 0);
+	cp = col->name->val;
 	if (colname_len > var->aliasname_length) {
 		memmove(cp, var->relname, var->relname_length);
 		cp += var->relname_length;
