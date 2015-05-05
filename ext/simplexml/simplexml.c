@@ -2136,17 +2136,21 @@ static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 {
 	zend_function *fptr_count = NULL;
 	zend_class_entry *parent = ce;
+	int inherited = 0;
 
 	while (parent) {
 		if (parent == sxe_class_entry) {
 			break;
 		}
 		parent = parent->parent;
+		inherited = 1;
 	}
 
-	fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
-	if (fptr_count->common.scope == parent) {
-		fptr_count = NULL;
+	if (inherited) {
+		fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
+		if (fptr_count->common.scope == parent) {
+			fptr_count = NULL;
+		}
 	}
 
 	return fptr_count;
