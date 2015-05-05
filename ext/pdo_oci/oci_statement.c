@@ -524,7 +524,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 			(param, OCI_DTYPE_PARAM, &colname, &namelen, OCI_ATTR_NAME, S->err));
 
 	col->precision = scale;
-	col->maxlen = data_size;
+	col->maxlen = (data_size + 1) * sizeof(utext);
 	col->namelen = namelen;
 	col->name = estrndup((char *)colname, namelen);
 
