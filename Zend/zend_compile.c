@@ -1318,12 +1318,42 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 }
 /* }}} */
 
+static inline zend_bool zend_is_scope_known() /* {{{ */
+{
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
+		/* Closures can be rebound to a different scope */
+		return 0;
+	}
+
+	if (!CG(active_class_entry)) {
+		/* Not being in a scope is a known scope */
+		return 1;
+	}
+
+	/* For traits self etc refers to the using class, not the trait itself */
+	return (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == 0;
+}
+/* }}} */
+
+static inline zend_bool class_name_refers_to_active_ce(zend_string *class_name, uint32_t fetch_type) /* {{{ */
+{
+	if (!CG(active_class_entry)) {
+		return 0;
+	}
+	if (fetch_type == ZEND_FETCH_CLASS_SELF && zend_is_scope_known()) {
+		return 1;
+	}
+	return fetch_type == ZEND_FETCH_CLASS_DEFAULT
+		&& zend_string_equals_ci(class_name, CG(active_class_entry)->name);
+}
+/* }}} */
+
 static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend_string *name) /* {{{ */
 {
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 	zval *c;
 
-	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_ci(class_name, CG(active_class_entry)->name)))) {
+	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
 		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
 		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name->val, class_name->len);
@@ -1623,9 +1653,9 @@ static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 }
 /* }}} */
 
-void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
+static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
-	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !CG(active_class_entry)) {
+	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !CG(active_class_entry) && zend_is_scope_known()) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
 			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
 			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
@@ -6348,12 +6378,12 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
-				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-				opline->extended_value = fetch_type;
-			} else {
+			if (CG(active_class_entry) && zend_is_scope_known()) {
 				result->op_type = IS_CONST;
 				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
+			} else {
+				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+				opline->extended_value = fetch_type;
 			}
 			break;
 		case ZEND_FETCH_CLASS_STATIC:

@@ -1,10 +1,12 @@
 --TEST--
-Return type of self is not allowed in closure
+Return type of self is allowed in closure
 
 --FILE--
 <?php
 
-$c = function(): self {};
+$c = function(): self { return $this; };
+var_dump($c->call(new stdClass));
 
---EXPECTF--
-Fatal error: Cannot use "self" when no class scope is active in %s on line 3
+--EXPECT--
+object(stdClass)#2 (0) {
+}

@@ -1,9 +1,14 @@
 --TEST--
-Return type of parent is not allowed in closure
+Return type of parent is allowed in closure
 --FILE--
 <?php
 
-$c = function(): parent {};
+class A {}
+class B extends A {}
+
+$c = function(parent $x): parent { return $x; };
+var_dump($c->bindTo(null, 'B')(new A));
 
 --EXPECTF--
-Fatal error: Cannot use "parent" when no class scope is active in %s on line 3
+object(A)#%d (0) {
+}
