@@ -397,12 +397,12 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		return NULL;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
 #endif
 
 	/* verify the number of args */
