@@ -1830,7 +1830,7 @@ static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type)
 }
 /* }}} */
 
-/* Variant of sxe_object_cast_ex that handles overwritten __toString() method */
+/*  {{{ Variant of sxe_object_cast_ex that handles overwritten __toString() method */
 static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
 {
 	if (type == IS_STRING
@@ -1841,6 +1841,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
 
 	return sxe_object_cast_ex(readobj, writeobj, type);
 }
+/* }}} */
 
 /* {{{ proto object SimpleXMLElement::__toString() U
    Returns the string content */
@@ -2055,15 +2056,12 @@ static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 {
 	zend_function *fptr_count = NULL;
 	zend_class_entry *parent = ce;
-	int inherited = 0;
-
 
 	while (parent) {
 		if (parent == sxe_class_entry) {
 			break;
 		}
 		parent = parent->parent;
-		inherited = 1;
 	}
 
 	fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
