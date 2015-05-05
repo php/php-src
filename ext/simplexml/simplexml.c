@@ -1041,6 +1041,97 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 }
 /* }}} */
 
+static int sxe_prop_is_empty(zval *object) /* {{{ */
+{
+	php_sxe_object  *sxe;
+	xmlNodePtr       node;
+	xmlAttrPtr       attr;
+	zval             iter_data;
+	int              test;
+	int              is_empty;
+
+	sxe = Z_SXEOBJ_P(object);
+
+	GET_NODE(sxe, node);
+	if (!node) {
+		return 1;
+	}
+
+	if (sxe->iter.type == SXE_ITER_ELEMENT) {
+		node = php_sxe_get_first_node(sxe, node);
+	}
+	if (!node || node->type != XML_ENTITY_DECL) {
+		attr = node ? (xmlAttrPtr)node->properties : NULL;
+		test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
+		while (attr) {
+			if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
+				return 0;
+			}
+			attr = attr->next;
+		}
+	}
+
+	GET_NODE(sxe, node);
+	node = php_sxe_get_first_node(sxe, node);
+	is_empty = 1;
+	ZVAL_UNDEF(&iter_data);
+	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
+		if (node->type == XML_ATTRIBUTE_NODE) {
+			return 0;
+		} else if (sxe->iter.type != SXE_ITER_CHILD) {
+			if (!node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last) {
+				node = node->children;
+			} else {
+				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
+				ZVAL_UNDEF(&sxe->iter.data);
+				node = php_sxe_reset_iterator(sxe, 0);
+			}
+		}
+
+		while (node) {
+			if (node->children != NULL || node->prev != NULL || node->next != NULL) {
+				SKIP_TEXT(node);
+			} else {
+				if (node->type == XML_TEXT_NODE) {
+					const xmlChar *cur = node->content;
+					if (*cur != 0) {
+						is_empty = 0;
+						break;
+					}
+					goto next_iter;
+				}
+			}
+
+			if (node->type == XML_ELEMENT_NODE && (! match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix))) {
+				goto next_iter;
+			}
+
+			if (!node->name) {
+				goto next_iter;
+			}
+
+			is_empty = 0;
+			break;
+next_iter:
+			if (!Z_ISUNDEF(iter_data)) {
+				node = php_sxe_iterator_fetch(sxe, node->next, 0);
+			} else {
+				node = node->next;
+			}
+		}
+	}
+
+	if (!Z_ISUNDEF(iter_data)) {
+		if (!Z_ISUNDEF(sxe->iter.data)) {
+			zval_ptr_dtor(&sxe->iter.data);
+		}
+		ZVAL_COPY_VALUE(&sxe->iter.data, &iter_data);
+	}
+
+	return is_empty;
+}
+/* }}} */
+
 static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 {
 	zval            value;
@@ -1784,16 +1875,16 @@ static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type)
 	xmlChar        *contents = NULL;
 	xmlNodePtr	    node;
 	int rv;
-	HashTable      *prop_hash;
 
 	sxe = Z_SXEOBJ_P(readobj);
 
 	if (type == _IS_BOOL) {
 		node = php_sxe_get_first_node(sxe, NULL);
-		prop_hash = sxe_get_prop_hash(readobj, 1);
-		ZVAL_BOOL(writeobj, node != NULL || zend_hash_num_elements(prop_hash) > 0);
-		zend_hash_destroy(prop_hash);
-		efree(prop_hash);
+		if (node) {
+			ZVAL_TRUE(writeobj);
+		} else {
+			ZVAL_BOOL(writeobj, !sxe_prop_is_empty(readobj));
+		}
 		return SUCCESS;
 	}
 
