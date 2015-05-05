@@ -1007,26 +1007,24 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 
 static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *value) /* {{{ */
 {
+	zend_string *key;
 	zval  *data_ptr;
 	zval  newptr;
 
-	if ((data_ptr = zend_hash_str_find(rv, name, namelen)) != NULL) {
+	key = zend_string_init(name, namelen, 0);
+	if ((data_ptr = zend_hash_find(rv, key)) != NULL) {
 		if (Z_TYPE_P(data_ptr) == IS_ARRAY) {
-			zend_hash_next_index_insert(Z_ARRVAL_P(data_ptr), value);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(data_ptr), value);
 		} else {
 			array_init(&newptr);
-
-			if (Z_REFCOUNTED_P(data_ptr)) {
-				Z_ADDREF_P(data_ptr);
-			}
-			zend_hash_next_index_insert(Z_ARRVAL(newptr), data_ptr);
-			zend_hash_next_index_insert(Z_ARRVAL(newptr), value);
-
-			zend_hash_str_update(rv, name, namelen, &newptr);
+			zend_hash_next_index_insert_new(Z_ARRVAL(newptr), data_ptr);
+			zend_hash_next_index_insert_new(Z_ARRVAL(newptr), value);
+			ZVAL_ARR(data_ptr, Z_ARR(newptr));
 		}
 	} else {
-		zend_hash_str_update(rv, name, namelen, value);
+		zend_hash_add_new(rv, key, value);
 	}
+	zend_string_release(key);
 }
 /* }}} */
 
@@ -1499,9 +1497,14 @@ SXE_METHOD(asXML)
 static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{{ */
 {
 	char *prefix = SXE_NS_PREFIX(ns);
-	if (zend_hash_str_exists(Z_ARRVAL_P(return_value), prefix, strlen(prefix)) == 0) {
-		add_assoc_string(return_value, prefix, (char*)ns->href);
+	zend_string *key = zend_string_init(prefix, strlen(prefix), 0);
+	zval zv;
+
+	if (!zend_hash_exists(Z_ARRVAL_P(return_value), key)) {
+		ZVAL_STRING(&zv, (char*)ns->href);
+		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
 	}
+	zend_string_release(key);
 }
 /* }}} */
 
