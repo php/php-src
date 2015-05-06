@@ -127,9 +127,15 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval **table, int *n) /* {{{ *
 	} else {
 		zend_object *zobj = Z_OBJ_P(object);
 
-		*table = zobj->properties_table;
-		*n = zobj->ce->default_properties_count;
-		return zobj->properties;
+		if (zobj->properties) {
+			*table = NULL;
+			*n = 0;
+			return zobj->properties;
+		} else {
+			*table = zobj->properties_table;
+			*n = zobj->ce->default_properties_count;
+			return NULL;
+		}
 	}
 }
 /* }}} */
