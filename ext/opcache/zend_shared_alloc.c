@@ -45,7 +45,6 @@
 /* True globals */
 /* old/new mapping. We can use true global even for ZTS because its usage
    is wrapped with exclusive lock anyway */
-static HashTable xlat_table;
 static const zend_shared_memory_handlers *g_shared_alloc_handler = NULL;
 static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
@@ -325,7 +324,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 {
 	void *old_p;
 
-	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
+	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
 		return 0;
 	}
@@ -337,7 +336,7 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source)
 {
 	void *old_p, *retval;
 
-	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
+	if ((old_p = zend_hash_index_find_ptr(&ZCG(xlat_table), (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
 		return old_p;
 	}
@@ -393,21 +392,10 @@ void zend_shared_alloc_lock(void)
 #endif
 
 	ZCG(locked) = 1;
-
-	/* Prepare translation table
-	 *
-	 * Make it persistent so that it uses malloc() and allocated blocks
-	 * won't be taken from space which is freed by efree in memdup.
-	 * Otherwise it leads to false matches in memdup check.
-	 */
-	zend_hash_init(&xlat_table, 128, NULL, NULL, 1);
 }
 
 void zend_shared_alloc_unlock(void)
 {
-	/* Destroy translation table */
-	zend_hash_destroy(&xlat_table);
-
 	ZCG(locked) = 0;
 
 #ifndef ZEND_WIN32
@@ -422,21 +410,39 @@ void zend_shared_alloc_unlock(void)
 #endif
 }
 
+void zend_shared_alloc_init_xlat_table(void)
+{
+
+	/* Prepare translation table
+	 *
+	 * Make it persistent so that it uses malloc() and allocated blocks
+	 * won't be taken from space which is freed by efree in memdup.
+	 * Otherwise it leads to false matches in memdup check.
+	 */
+	zend_hash_init(&ZCG(xlat_table), 128, NULL, NULL, 1);
+}
+
+void zend_shared_alloc_destroy_xlat_table(void)
+{
+	/* Destroy translation table */
+	zend_hash_destroy(&ZCG(xlat_table));
+}
+
 void zend_shared_alloc_clear_xlat_table(void)
 {
-	zend_hash_clean(&xlat_table);
+	zend_hash_clean(&ZCG(xlat_table));
 }
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
 {
-	zend_hash_index_update_ptr(&xlat_table, (zend_ulong)old, (void*)new);
+	zend_hash_index_update_ptr(&ZCG(xlat_table), (zend_ulong)old, (void*)new);
 }
 
 void *zend_shared_alloc_get_xlat_entry(const void *old)
 {
 	void *retval;
 
-	if ((retval = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)old)) == NULL) {
+	if ((retval = zend_hash_index_find_ptr(&ZCG(xlat_table), (zend_ulong)old)) == NULL) {
 		return NULL;
 	}
 	return retval;

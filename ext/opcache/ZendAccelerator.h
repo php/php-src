@@ -215,6 +215,11 @@ typedef struct _zend_accel_directives {
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	char          *file_cache;
+	zend_bool      file_cache_only;
+	zend_bool      file_cache_consistency_checks;
+#endif
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -238,6 +243,10 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	char                    system_id[32];
+#endif
+	HashTable               xlat_table;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	void                   *arena_mem;
@@ -302,6 +311,7 @@ extern char *zps_api_failure_reason;
 void accel_shutdown(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
+accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
 int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
 int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force);
 int  zend_accel_script_optimize(zend_persistent_script *persistent_script);

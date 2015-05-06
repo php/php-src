@@ -5,7 +5,14 @@ dnl
 PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
 [  --disable-opcache       Disable Zend OPcache support], yes)
 
+PHP_ARG_ENABLE(opcache-file, whether to enable file based caching (experimental),
+[  --enable-opcache-file   Enable file based caching], no)
+
 if test "$PHP_OPCACHE" != "no"; then
+
+  if test "$PHP_OPCACHE_FILE" == "yes"; then
+    AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
+  fi
 
   AC_CHECK_FUNC(mprotect,[
     AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
@@ -371,6 +378,7 @@ fi
 	zend_accelerator_module.c \
 	zend_persist.c \
 	zend_persist_calc.c \
+	zend_file_cache.c \
 	zend_shared_alloc.c \
 	zend_accelerator_util_funcs.c \
 	shared_alloc_shm.c \

@@ -241,6 +241,38 @@ static ZEND_INI_MH(OnEnable)
 	}
 }
 
+#ifdef HAVE_OPCACHE_FILE_CACHE
+
+#ifndef S_ISDIR
+# define S_ISDIR(mode) (((mode)&S_IFMT) == S_IFDIR)
+#endif
+
+static ZEND_INI_MH(OnUpdateFileCache)
+{
+	if (new_value) {
+		if (!new_value->len) {
+			new_value = NULL;
+		} else {
+			zend_stat_t buf;
+
+		    if (!IS_ABSOLUTE_PATH(new_value->val, new_value->len) ||
+			    zend_stat(new_value->val, &buf) != 0 ||
+			    !S_ISDIR(buf.st_mode) ||
+#ifndef ZEND_WIN32
+				access(new_value->val, R_OK | W_OK | X_OK) != 0) {
+#else
+				_access(new_value->val, 06) != 0) {
+#endif
+				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessable directory.\n");
+				new_value = NULL;
+			}
+		}
+	}
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	return SUCCESS;
+}
+#endif
+
 ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
@@ -275,6 +307,12 @@ ZEND_INI_BEGIN()
 
 #ifdef ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
+#endif
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
 
@@ -395,6 +433,25 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
 	}
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	if (!ZCG(accel_directives).file_cache_only) {
+		php_info_print_table_row(2, "SHM Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "SHM Cache", "Disabled");
+	}
+	if (ZCG(accel_directives).file_cache) {
+		php_info_print_table_row(2, "File Cache", "Enabled");
+	} else {
+		php_info_print_table_row(2, "File Cache", "Disabled");
+	}
+	if (ZCG(accel_directives).file_cache_only) {
+		if (!accel_startup_ok || zps_api_failure_reason) {
+			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
+		} else {
+			php_info_print_table_row(2, "Startup", "OK");
+		}
+	} else
+#endif
 	if (ZCG(enabled)) {
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
@@ -529,6 +586,17 @@ static ZEND_FUNCTION(opcache_get_status)
 
 	/* Trivia */
 	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && (ZCG(counted) || ZCSG(accelerator_enabled)));
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	if (ZCG(accel_directives).file_cache) {
+		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
+	}
+	if (ZCG(accel_directives).file_cache_only) {
+		add_assoc_bool(return_value, "file_cache_only", 1);
+		return;
+	}
+#endif
+
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 	add_assoc_bool(return_value, "restart_pending", ZCSG(restart_pending));
 	add_assoc_bool(return_value, "restart_in_progress", ZCSG(restart_in_progress));
@@ -629,6 +697,12 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
 	add_assoc_bool(&directives,   "opcache.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(&directives, 	 "opcache.optimization_level",     ZCG(accel_directives).optimization_level);
+
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
+	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);
+#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 

@@ -1,8 +1,14 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
+ARG_ENABLE("opcache-file", "whether to enable file based caching (experimental)", "no");
+
 var PHP_OPCACHE_PGO = false;
 
 if (PHP_OPCACHE != "no") {
+
+	if (PHP_OPCACHE_FILE == "yes") {
+		AC_DEFINE('HAVE_OPCACHE_FILE_CACHE', 1, 'Define to enable file based caching (experimental)');
+	}
 
 	EXTENSION('opcache', "\
 		ZendAccelerator.c \
@@ -13,6 +19,7 @@ if (PHP_OPCACHE != "no") {
 		zend_accelerator_util_funcs.c \
 		zend_persist.c \
 		zend_persist_calc.c \
+		zend_file_cache.c \
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
