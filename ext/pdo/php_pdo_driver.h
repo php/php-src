@@ -527,11 +527,10 @@ static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
 
 /* describes a column */
 struct pdo_column_data {
-	char *name;
+	zend_string *name;
 	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-	size_t namelen;
 
 	/* don't touch this unless your name is dbdo */
 	void *dbdo_data;

@@ -35,9 +35,10 @@
 	zend_error(E_EXCEPTION | E_ERROR, "Closure object cannot have properties")
 
 typedef struct _zend_closure {
-	zend_object    std;
-	zend_function  func;
-	zval           this_ptr;
+	zend_object       std;
+	zend_function     func;
+	zval              this_ptr;
+	zend_class_entry *called_scope;
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -129,7 +130,7 @@ ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
 	zend_closure *closure;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *called_scope;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
 		RETURN_NULL();
@@ -161,7 +162,13 @@ ZEND_METHOD(Closure, bind)
 		ce = closure->func.common.scope;
 	}
 
-	zend_create_closure(return_value, &closure->func, ce, newthis);
+	if (newthis) {
+		called_scope = Z_OBJCE_P(newthis);
+	} else {
+		called_scope = ce;
+	}
+
+	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
 }
 /* }}} */
 
@@ -296,7 +303,8 @@ static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(zobject);
 	zval result;
 
-	zend_create_closure(&result, &closure->func, closure->func.common.scope, &closure->this_ptr);
+	zend_create_closure(&result, &closure->func,
+		closure->func.common.scope, closure->called_scope, &closure->this_ptr);
 	return Z_OBJ(result);
 }
 /* }}} */
@@ -311,17 +319,14 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 
 	closure = (zend_closure *)Z_OBJ_P(obj);
 	*fptr_ptr = &closure->func;
+	*ce_ptr = closure->called_scope;
 
-	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-		if (obj_ptr) {
+	if (obj_ptr) {
+		if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 			*obj_ptr = Z_OBJ(closure->this_ptr);
-		}
-		*ce_ptr = Z_OBJCE(closure->this_ptr);
-	} else {
-		if (obj_ptr) {
+		} else {
 			*obj_ptr = NULL;
 		}
-		*ce_ptr = closure->func.common.scope;
 	}
 	return SUCCESS;
 }
@@ -457,7 +462,7 @@ void zend_register_closure_ce(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zval *this_ptr) /* {{{ */
+ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -512,6 +517,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	 * If the closure is unscoped, it has no bound object.
 	 * The the closure is scoped, it's either static or it's bound */
 	closure->func.common.scope = scope;
+	closure->called_scope = called_scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {

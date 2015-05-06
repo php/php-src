@@ -383,7 +383,7 @@ php_sprintf_getnumber(char *buffer, size_t *pos)
  *
  */
 static zend_string *
-php_formatted_print(int param_count, int use_array, int format_offset)
+php_formatted_print(zend_execute_data *execute_data, int use_array, int format_offset)
 {
 	zval *newargs = NULL;
 	zval *args, *z_format;
@@ -395,9 +395,15 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 	int always_sign;
 	size_t format_len;
 
-	if (zend_parse_parameters(param_count, "+", &args, &argc) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		return NULL;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_VARIADIC('+', args, argc)
+	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
+#endif
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset))
@@ -670,7 +676,7 @@ PHP_FUNCTION(user_sprintf)
 {
 	zend_string *result;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STR(result);
@@ -683,7 +689,7 @@ PHP_FUNCTION(vsprintf)
 {
 	zend_string *result;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STR(result);
@@ -697,7 +703,7 @@ PHP_FUNCTION(user_printf)
 	zend_string *result;
 	size_t rlen;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
@@ -713,7 +719,7 @@ PHP_FUNCTION(vprintf)
 	zend_string *result;
 	size_t rlen;
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
@@ -740,7 +746,7 @@ PHP_FUNCTION(fprintf)
 
 	php_stream_from_zval(stream, arg1);
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 1))==NULL) {
+	if ((result=php_formatted_print(execute_data, 0, 1))==NULL) {
 		RETURN_FALSE;
 	}
 
@@ -769,7 +775,7 @@ PHP_FUNCTION(vfprintf)
 
 	php_stream_from_zval(stream, arg1);
 
-	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 1))==NULL) {
+	if ((result=php_formatted_print(execute_data, 1, 1))==NULL) {
 		RETURN_FALSE;
 	}
 

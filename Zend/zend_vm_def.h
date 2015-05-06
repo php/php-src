@@ -5076,9 +5076,6 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce, value);
 			}
 			ZVAL_DUP(EX_VAR(opline->result.var), value);
-		} else if (Z_STRLEN_P(EX_CONSTANT(opline->op2)) == sizeof("class")-1 && memcmp(Z_STRVAL_P(EX_CONSTANT(opline->op2)), "class", sizeof("class") - 1) == 0) {
-			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 		}
@@ -7304,9 +7301,11 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 
 	if (UNEXPECTED((Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC) ||
 				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EX(called_scope), NULL);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
+			EG(scope), EX(called_scope), NULL);
 	} else {
-		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EX(This)) ? &EX(This) : NULL);
+		zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
+			EG(scope), EX(called_scope), Z_OBJ(EX(This)) ? &EX(This) : NULL);
 	}
 
 	CHECK_EXCEPTION();
@@ -7773,44 +7772,31 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zval *value;
-	int result;
+	int result = 0;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-	switch (opline->extended_value) {
-		case IS_NULL:
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_STRING:
-		case IS_ARRAY:
-			result = (Z_TYPE_P(value) == opline->extended_value);
-			break;
-		case _IS_BOOL:
-			result = (Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
-			break;
-		case IS_OBJECT:
-			if (Z_TYPE_P(value) == opline->extended_value) {
-				zend_class_entry *ce = Z_OBJCE_P(value);
-				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1
-						&& !memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1)) {
-					result = 0;
-				} else {
-					result = 1;
-				}
-			} else {
-				result = 0;
+	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+			zend_class_entry *ce = Z_OBJCE_P(value);
+
+			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
+			    EXPECTED(memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
+				result = 1;
 			}
-			break;
-		case IS_RESOURCE:
-			if (Z_TYPE_P(value) == opline->extended_value) {
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value));
-				result = (type_name != NULL);
-			} else {
-				result = 0;
+		} else if (UNEXPECTED(Z_TYPE_P(value) == IS_RESOURCE)) {
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(value));
+
+			if (EXPECTED(type_name != NULL)) {
+				result = 1;
 			}
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		} else {
+			result = 1;
+		}
+	} else if (UNEXPECTED(opline->extended_value == _IS_BOOL) &&
+			   EXPECTED(Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE)) {
+		result = 1;
 	}
 	FREE_OP1();
 	ZEND_VM_SMART_BRANCH(result, 1);
@@ -7857,12 +7843,35 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 
 ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 {
+	uint32_t fetch_type;
 	USE_OPLINE
 
-	if (EG(scope) && EG(scope)->name) {
-		ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->name);
-	} else {
-		ZVAL_EMPTY_STRING(EX_VAR(opline->result.var));
+	SAVE_OPLINE();
+	fetch_type = opline->extended_value;
+
+	if (UNEXPECTED(EG(scope) == NULL)) {
+		zend_error(E_EXCEPTION | E_ERROR, "Cannot use \"%s\" when no class scope is active",
+			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+		HANDLE_EXCEPTION();
+	}
+
+	switch (fetch_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->name);
+			break;
+		case ZEND_FETCH_CLASS_PARENT:
+			if (UNEXPECTED(EG(scope)->parent == NULL)) {
+				zend_error(E_EXCEPTION | E_ERROR,
+					"Cannot use \"parent\" when current class scope has no parent");
+				HANDLE_EXCEPTION();
+			}
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EG(scope)->parent->name);
+			break;
+		case ZEND_FETCH_CLASS_STATIC:
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(called_scope)->name);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	ZEND_VM_NEXT_OPCODE();
 }

@@ -594,8 +594,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	colsize = displaysize;
 
 	col->maxlen = S->cols[colno].datalen = colsize;
-	col->namelen = colnamelen;
-	col->name = estrdup(S->cols[colno].colname);
+	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
 	/* returning data as a string */
