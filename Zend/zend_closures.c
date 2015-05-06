@@ -513,17 +513,14 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	}
 
 	ZVAL_UNDEF(&closure->this_ptr);
-	/* Invariants:
-	 * If the closure is unscoped, it has no bound object.
-	 * The the closure is scoped, it's either static or it's bound */
+	/* Invariant:
+	 * If the closure is unscoped or static, it has no bound object. */
 	closure->func.common.scope = scope;
 	closure->called_scope = called_scope;
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
 			ZVAL_COPY(&closure->this_ptr, this_ptr);
-		} else {
-			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
 		}
 	}
 }
