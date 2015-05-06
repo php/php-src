@@ -46,7 +46,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 static int php_json_determine_array_type(zval *val) /* {{{ */
 {
 	int i;
-	HashTable *myht = HASH_OF(val);
+	HashTable *myht = Z_ARRVAL_P(val);
 
 	i = myht ? zend_hash_num_elements(myht) : 0;
 	if (i > 0) {
@@ -121,7 +121,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 	HashTable *myht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
-		myht = HASH_OF(val);
+		myht = Z_ARRVAL_P(val);
 		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : php_json_determine_array_type(val);
 	} else {
 		myht = Z_OBJPROP_P(val);
@@ -450,7 +450,7 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 	HashTable* myht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
-		myht = HASH_OF(val);
+		myht = Z_ARRVAL_P(val);
 	} else {
 		myht = Z_OBJPROP_P(val);
 	}
