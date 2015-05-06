@@ -1,6 +1,6 @@
 /*
   zip_file_get_comment.c -- get file comment
-  Copyright (C) 2006-2012 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
-
+ 
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,16 +32,14 @@
 */
 
 
-
 #include "zipint.h"
-
 
 /* lenp is 32 bit because converted comment can be longer than ZIP_UINT16_MAX */
 
 ZIP_EXTERN const char *
-zip_file_get_comment(struct zip *za, zip_uint64_t idx, zip_uint32_t *lenp, zip_flags_t flags)
+zip_file_get_comment(zip_t *za, zip_uint64_t idx, zip_uint32_t *lenp, zip_flags_t flags)
 {
-    struct zip_dirent *de;
+    zip_dirent_t *de;
     zip_uint32_t len;
     const zip_uint8_t *str;
 

@@ -1,6 +1,6 @@
 /*
   zip_stat_index.c -- get information about file by index
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
-
+ 
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,29 +32,27 @@
 */
 
 
-
 #include "zipint.h"
 
 
-
 ZIP_EXTERN int
-zip_stat_index(struct zip *za, zip_uint64_t index, zip_flags_t flags,
-	       struct zip_stat *st)
+zip_stat_index(zip_t *za, zip_uint64_t index, zip_flags_t flags,
+	       zip_stat_t *st)
 {
     const char *name;
-    struct zip_dirent *de;
+    zip_dirent_t *de;
 
     if ((de=_zip_get_dirent(za, index, flags, NULL)) == NULL)
 	return -1;
 
     if ((name=zip_get_name(za, index, flags)) == NULL)
 	return -1;
-
+    
 
     if ((flags & ZIP_FL_UNCHANGED) == 0
 	&& ZIP_ENTRY_DATA_CHANGED(za->entry+index)) {
 	if (zip_source_stat(za->entry[index].source, st) < 0) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
+	    zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
 	    return -1;
 	}
     }
@@ -83,6 +81,6 @@ zip_stat_index(struct zip *za, zip_uint64_t index, zip_flags_t flags,
     st->index = index;
     st->name = name;
     st->valid |= ZIP_STAT_INDEX|ZIP_STAT_NAME;
-
+    
     return 0;
 }
