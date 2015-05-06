@@ -129,9 +129,12 @@ int _zip_mkstemp(char *);
 #if defined(HAVE_FTELLO) && defined(HAVE_FSEEKO)
 #define ZIP_FSEEK_MAX ZIP_OFF_MAX
 #define ZIP_FSEEK_MIN ZIP_OFF_MIN
+#elif SIZEOF_LONG >= 8
+#define ZIP_FSEEK_MAX (zip_int64_t)ZIP_INT64_MAX
+#define ZIP_FSEEK_MIN (zip_int64_t)ZIP_INT64_MIN
 #else
-#define ZIP_FSEEK_MAX LONG_MAX
-#define ZIP_FSEEK_MIN LONG_MIN
+#define ZIP_FSEEK_MAX ZIP_INT32_MAX
+#define ZIP_FSEEK_MIN ZIP_INT32_MIN
 #endif
 
 #ifndef SIZE_MAX
