@@ -796,7 +796,7 @@ tail_call:
 			if (Z_TYPE_P(zv) != IS_UNDEF) {
 				count++;
 			}
-			if (p == end) return;
+			if (p == end) return count;
 		}
 		while (p != end) {
 			zv = &p->val;
