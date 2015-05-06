@@ -3160,7 +3160,7 @@ PHP_FUNCTION(curl_close)
 }
 /* }}} */
 
-/* {{{ _php_curl_close()
+/* {{{ _php_curl_close_ex()
    List destructor for curl handles */
 static void _php_curl_close_ex(php_curl *ch)
 {
