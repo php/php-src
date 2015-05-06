@@ -1182,7 +1182,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
-		if( fn->type == ZEND_INTERNAL_FUNCTION ) {
+		if (fn->type == ZEND_INTERNAL_FUNCTION) {
 			memcpy(&fn_copy, fn, sizeof(zend_internal_function));
 		} else {
 			fn_copy = *fn;
