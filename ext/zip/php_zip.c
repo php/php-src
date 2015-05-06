@@ -80,10 +80,10 @@ static int le_zip_entry;
 #define PHP_ZIP_SET_FILE_COMMENT(za, index, comment, comment_len) \
 	if (comment_len == 0) { \
 		/* Passing NULL remove the existing comment */ \
-		if (zip_set_file_comment(intern, index, NULL, 0) < 0) { \
+		if (zip_set_file_comment(za, index, NULL, 0) < 0) { \
 			RETURN_FALSE; \
 		} \
-	} else if (zip_set_file_comment(intern, index, comment, comment_len) < 0) { \
+	} else if (zip_set_file_comment(za, index, comment, comment_len) < 0) { \
 		RETURN_FALSE; \
 	} \
 	RETURN_TRUE;
@@ -1543,7 +1543,7 @@ static ZIPARCHIVE_METHOD(getStatusString)
 	RETVAL_STRINGL(error_string, len);
 #else
 	err = zip_get_error(intern);
-	RETVAL_STRING(zip_error_strerror(err), 1);
+	RETVAL_STRING(zip_error_strerror(err));
 	zip_error_fini(err);
 #endif
 }
@@ -2275,6 +2275,73 @@ static ZIPARCHIVE_METHOD(getCommentIndex)
 }
 /* }}} */
 
+/* {{{ proto bool ZipArchive::setCompressionName(string name, int comp_method[, int comp_flags])
+Set the compression of a file in zip, using its name */
+static ZIPARCHIVE_METHOD(setCompressionName)
+ {
+	struct zip *intern;
+	zval *this = getThis();
+	size_t name_len;
+	char *name;
+	zip_int64_t idx;
+	zend_long comp_method, comp_flags = 0;
+
+	if (!this) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, this);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l",
+			&name, &name_len, &comp_method, &comp_flags) == FAILURE) {
+		return;
+	}
+
+	if (name_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string as entry name");
+	}
+
+	idx = zip_name_locate(intern, name, 0);
+	if (idx < 0) {
+		RETURN_FALSE;
+	}
+
+	if (zip_set_file_compression(intern, (zip_uint64_t)idx,
+			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool ZipArchive::setCompressionIndex(int index, int comp_method[, int comp_flags])
+Set the compression of a file in zip, using its index */
+static ZIPARCHIVE_METHOD(setCompressionIndex)
+{
+	struct zip *intern;
+	zval *this = getThis();
+	zend_long index;
+	zend_long comp_method, comp_flags = 0;
+
+	if (!this) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, this);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l",
+			&index, &comp_method, &comp_flags) == FAILURE) {
+		return;
+	}
+
+	if (zip_set_file_compression(intern, (zip_uint64_t)index,
+			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto bool ZipArchive::deleteIndex(int index)
 Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
@@ -2870,6 +2937,18 @@ ZEND_END_ARG_INFO()
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_setcompname, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(0, compflags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_setcompindex, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(0, compflags)
+ZEND_END_ARG_INFO()
+
 /* {{{ ze_zip_object_class_functions */
 static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(open,					arginfo_ziparchive_open, ZEND_ACC_PUBLIC)
@@ -2907,6 +2986,8 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(setExternalAttributesIndex,	arginfo_ziparchive_setextattrindex, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(getExternalAttributesName,	arginfo_ziparchive_getextattrname, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(getExternalAttributesIndex,	arginfo_ziparchive_getextattrindex, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(setCompressionName,		arginfo_ziparchive_setcompname, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(setCompressionIndex,		arginfo_ziparchive_setcompindex, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
