@@ -186,15 +186,21 @@ PHP_NAMED_FUNCTION(zif_textdomain)
    Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_gettext)
 {
-	char *msgid, *msgstr;
-	size_t msgid_len;
+	char *msgstr;
+	zend_string *msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &msgid, &msgid_len) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &msgid) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(msgid)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
-	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
-	msgstr = gettext(msgid);
+	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid->len)
+	msgstr = gettext(msgid->val);
 
 	RETURN_STRING(msgstr);
 }
