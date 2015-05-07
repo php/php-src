@@ -41,8 +41,12 @@ $flushTypes = [
     'ZLIB_PARTIAL_FLUSH' => ZLIB_PARTIAL_FLUSH,
     'ZLIB_FULL_FLUSH' => ZLIB_FULL_FLUSH,
     'ZLIB_NO_FLUSH' => ZLIB_NO_FLUSH,
-    'ZLIB_BLOCK' => ZLIB_BLOCK,
 ];
+
+/* Z_BLOCK is only defined when built against zlib > 1.2.3 */
+if (defined(ZLIB_BLOCK)) {
+    $flushTypes['ZLIB_BLOCK'] = ZLIB_BLOCK;
+}
 
 foreach ($modes as $modeKey => $mode) {
     foreach ($flushSizes as $flushSize) {

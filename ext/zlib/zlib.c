@@ -46,6 +46,13 @@
 #undef gzseek
 #undef gztell
 
+/* Z_BLOCK was added in zlib 1.2.4 and stable distros (RHEL6, at least) still
+ * package zlib 1.2.3
+ */
+#ifdef Z_BLOCK
+#define HAVE_Z_BLOCK 1
+#endif
+
 int le_deflate;
 int le_inflate;
 
@@ -814,7 +821,9 @@ PHP_FUNCTION(inflate_add)
 		case Z_PARTIAL_FLUSH:
 		case Z_SYNC_FLUSH:
 		case Z_FULL_FLUSH:
+#ifdef HAVE_Z_BLOCK
 		case Z_BLOCK:
+#endif
 		case Z_FINISH:
 			break;
 
@@ -960,7 +969,9 @@ PHP_FUNCTION(deflate_add)
 		case Z_PARTIAL_FLUSH:
 		case Z_SYNC_FLUSH:
 		case Z_FULL_FLUSH:
+#ifdef HAVE_Z_BLOCK
 		case Z_BLOCK:
+#endif
 		case Z_FINISH:
 			break;
 
@@ -1268,7 +1279,9 @@ static PHP_MINIT_FUNCTION(zlib)
 	REGISTER_LONG_CONSTANT("ZLIB_PARTIAL_FLUSH", Z_PARTIAL_FLUSH, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_SYNC_FLUSH", Z_SYNC_FLUSH, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_FULL_FLUSH", Z_FULL_FLUSH, CONST_CS|CONST_PERSISTENT);
+#ifdef HAVE_Z_BLOCK
 	REGISTER_LONG_CONSTANT("ZLIB_BLOCK", Z_BLOCK, CONST_CS|CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("ZLIB_FINISH", Z_FINISH, CONST_CS|CONST_PERSISTENT);
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
