@@ -29,6 +29,11 @@
     (Laruence)
   . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
     _zend_hash_del_el). (Laruence)
+  . Fixed bug #65598 (Closure executed via static autoload incorrectly marked as
+    static). (Nikita)
+  . Fixed bug #66811 (Cannot access static::class in lambda, writen outside of a
+    class). (Nikita)
+  . Fixed bug #69568 (call a private function in closure failed). (Nikita)
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::call() method. (Andrea)
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
