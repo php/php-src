@@ -1654,13 +1654,15 @@ next_target_ex:
 				}
 			} else if (block->op2_to == block->ext_to) {
 				/* both goto the same one - it's JMP */
-				/* JMPZNZ(?,L,L) -> JMP(L) */
-				last_op->opcode = ZEND_JMP;
-				SET_UNUSED(last_op->op1);
-				SET_UNUSED(last_op->op2);
-				block->op1_to = block->op2_to;
-				block->op2_to = NULL;
-				block->ext_to = NULL;
+				if (!(last_op->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					/* JMPZNZ(?,L,L) -> JMP(L) */
+					last_op->opcode = ZEND_JMP;
+					SET_UNUSED(last_op->op1);
+					SET_UNUSED(last_op->op2);
+					block->op1_to = block->op2_to;
+					block->op2_to = NULL;
+					block->ext_to = NULL;
+				}
 			} else if (block->op2_to == next) {
 				/* jumping to next on Z - can follow to it and jump only on NZ */
 				/* JMPZNZ(X,L1,L2) L1: -> JMPNZ(X,L2) */
