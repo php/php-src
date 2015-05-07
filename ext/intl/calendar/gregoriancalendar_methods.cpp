@@ -57,7 +57,10 @@ static void _php_intlgregcal_constructor_body(
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: too many arguments", 0);
-		Z_OBJ_P(return_value) = NULL;
+		if (!is_constructor) {		
+			zval_dtor(return_value);
+			RETVAL_NULL();
+		}
 		return;
 	}
 	for (variant = ZEND_NUM_ARGS();
@@ -67,7 +70,10 @@ static void _php_intlgregcal_constructor_body(
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: no variant with 4 arguments "
 			"(excluding trailing NULLs)", 0);
-		Z_OBJ_P(return_value) = NULL;
+		if (!is_constructor) {		
+			zval_dtor(return_value);
+			RETVAL_NULL();
+		}
 		return;
 	}
 
@@ -77,7 +83,10 @@ static void _php_intlgregcal_constructor_body(
 				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: bad arguments", 0);
-			Z_OBJ_P(return_value) = NULL;
+			if (!is_constructor) {		
+				zval_dtor(return_value);
+				RETVAL_NULL();
+			}
 			return;
 		}
 	}
@@ -86,7 +95,10 @@ static void _php_intlgregcal_constructor_body(
 			&largs[5]) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: bad arguments", 0);
-		Z_OBJ_P(return_value) = NULL;
+		if (!is_constructor) {		
+			zval_dtor(return_value);
+			RETVAL_NULL();
+		}
 		return;
 	}
 
@@ -98,7 +110,13 @@ static void _php_intlgregcal_constructor_body(
 		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL,
 			"intlgregcal_create_instance");
 		if (tz == NULL) {
-			Z_OBJ_P(return_value) = NULL;
+			if (!EG(exception)) {
+				zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+			}
+			if (!is_constructor) {		
+				zval_dtor(return_value);
+				RETVAL_NULL();
+			}
 			return;
 		}
 		if (!locale) {
@@ -114,7 +132,10 @@ static void _php_intlgregcal_constructor_body(
 				delete gcal;
 			}
 			delete tz;
-			Z_OBJ_P(return_value) = NULL;
+			if (!is_constructor) {		
+				zval_dtor(return_value);
+				RETVAL_NULL();
+			}
 			return;
 		}
 	} else {
@@ -124,7 +145,10 @@ static void _php_intlgregcal_constructor_body(
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"intlgregcal_create_instance: at least one of the arguments"
 					" has an absolute value that is too large", 0);
-				Z_OBJ_P(return_value) = NULL;
+				if (!is_constructor) {		
+					zval_dtor(return_value);
+					RETVAL_NULL();
+				}
 				return;
 			}
 		}
@@ -146,7 +170,10 @@ static void _php_intlgregcal_constructor_body(
 			if (gcal) {
 				delete gcal;
 			}
-			Z_OBJ_P(return_value) = NULL;
+			if (!is_constructor) {		
+				zval_dtor(return_value);
+				RETVAL_NULL();
+			}
 			return;
 		}
 
@@ -163,7 +190,10 @@ static void _php_intlgregcal_constructor_body(
 				"from PHP's default timezone name (see date_default_timezone_get())",
 				0);
 			delete gcal;
-			Z_OBJ_P(return_value) = NULL;
+			if (!is_constructor) {		
+				zval_dtor(return_value);
+				RETVAL_NULL();
+			}
 			return;
 		}
 
@@ -177,18 +207,10 @@ static void _php_intlgregcal_constructor_body(
 
 U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 {
-	zval orig;
 	intl_error_reset(NULL);
 
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
-	ZVAL_COPY_VALUE(&orig, return_value);
-
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zval_dtor(&orig);
-		RETURN_NULL();
-	}
 }
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
@@ -198,11 +220,6 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
 	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
-	}
 	zend_restore_error_handling(&error_handling);
 }
 

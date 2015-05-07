@@ -42,7 +42,6 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_create_instance: bad arguments", 0);
-		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
 
@@ -72,7 +71,6 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			intl_error_set_custom_msg(NULL, msg, 1);
 			efree(msg);
 			delete rbbi;
-			Z_OBJ_P(return_value) = NULL;
 			return;
 		}
 	} else { // compiled
@@ -81,13 +79,11 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0);
-			Z_OBJ_P(return_value) = NULL;
 			return;
 		}
 #else
 		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
 			"compiled rules require ICU >= 4.8", 0);
-		Z_OBJ_P(return_value) = NULL;
 		return;
 #endif
 	}
@@ -102,11 +98,6 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = getThis();
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
-	}
 	zend_restore_error_handling(&error_handling);
 }
 
