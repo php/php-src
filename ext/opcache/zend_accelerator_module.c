@@ -394,10 +394,12 @@ void zend_accel_override_file_functions(void)
 {
 	zend_function *old_function;
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
+#ifdef HAVE_OPCACHE_FILE_CACHE
 		if (ZCG(accel_directives).file_cache_only) {
 			zend_accel_error(ACCEL_LOG_WARNING, "file_override_enabled has no effect when file_cache_only is set");
 			return;
 		}
+#endif
 		/* override file_exists */
 		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", sizeof("file_exists")-1)) != NULL) {
 			orig_file_exists = old_function->internal_function.handler;
