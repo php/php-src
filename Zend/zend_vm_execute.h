@@ -452,7 +452,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 		if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
-		if (call_info & ZEND_CALL_RELEASE_THIS) {
+		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			object = Z_OBJ(old_execute_data->This);
 #if 0
 			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
@@ -882,7 +882,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 	}
 
 fcall_end_change_scope:
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		object = Z_OBJ(call->This);
 #if 0
 		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
@@ -1950,7 +1950,7 @@ call_trampoline_end:
 
 	opline = EX(opline);
 
-	if (call_info & ZEND_CALL_RELEASE_THIS) {
+	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 		object = Z_OBJ(call->This);
 		OBJ_RELEASE(object);
 	}
@@ -5434,16 +5434,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -9074,16 +9081,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -10802,16 +10816,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zval_ptr_dtor_nogc(free_op2);
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -23658,16 +23679,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -26052,16 +26080,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -27568,16 +27603,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zval_ptr_dtor_nogc(free_op2);
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -31848,16 +31890,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -36908,16 +36957,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -39469,16 +39525,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zval_ptr_dtor_nogc(free_op2);
+
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-			zval_ptr_dtor_nogc(free_op2);
-
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -41613,16 +41676,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -43675,16 +43745,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -44725,16 +44802,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zval_ptr_dtor_nogc(free_op2);
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-			zval_ptr_dtor_nogc(free_op2);
-			zval_ptr_dtor_nogc(free_op1);
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);

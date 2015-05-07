@@ -2401,7 +2401,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
-		if (call_info & ZEND_CALL_RELEASE_THIS) {
+		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			object = Z_OBJ(old_execute_data->This);
 #if 0
 			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
@@ -2921,16 +2921,23 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 	}
 
 	if (OP1_TYPE != IS_UNUSED) {
-		ZVAL_DEREF(object);
-		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			if (UNEXPECTED(EG(exception) != NULL)) {
+		do {
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
+					object = Z_REFVAL_P(object);
+					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						break;
+					}
+				}
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				FREE_OP2();
+				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
-			FREE_OP2();
-			FREE_OP1();
-			HANDLE_EXCEPTION();
-		}
+		} while (0);
 	}
 
 	obj = Z_OBJ_P(object);
@@ -3760,7 +3767,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	}
 
 ZEND_VM_C_LABEL(fcall_end_change_scope):
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		object = Z_OBJ(call->This);
 #if 0
 		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
@@ -8004,7 +8011,7 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 
 	opline = EX(opline);
 
-	if (call_info & ZEND_CALL_RELEASE_THIS) {
+	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 		object = Z_OBJ(call->This);
 		OBJ_RELEASE(object);
 	}

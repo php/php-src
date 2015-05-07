@@ -180,7 +180,7 @@ static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, ze
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 
-	if (ZEND_USER_CODE(func->type)) {
+	if (EXPECTED(ZEND_USER_CODE(func->type))) {
 		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
 	}
 	return used_stack * sizeof(zval);
@@ -304,7 +304,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data);
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR(num, ce) \
-	((((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] == (void*)(ce)) ? \
+	(EXPECTED(((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] == (void*)(ce)) ? \
 		((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[1] : \
 		NULL)
 
@@ -322,7 +322,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data);
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR_EX(slot, ce) \
-	(((slot)[0] == (ce)) ? (slot)[1] : NULL)
+	(EXPECTED((slot)[0] == (ce)) ? (slot)[1] : NULL)
 
 #define CACHE_POLYMORPHIC_PTR_EX(slot, ce, ptr) do { \
 		(slot)[0] = (ce); \
