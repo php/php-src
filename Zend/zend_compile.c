@@ -1325,6 +1325,11 @@ static inline zend_bool zend_is_scope_known() /* {{{ */
 		return 0;
 	}
 
+	if (!CG(active_op_array)->function_name) {
+		/* A file/eval will be run in the including/eval'ing scope */
+		return 0;
+	}
+
 	if (!CG(active_class_entry)) {
 		/* Not being in a scope is a known scope */
 		return 1;
