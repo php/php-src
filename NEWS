@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
     in extension trait). (jbboehr at gmail dot com)
 
+- Opcache
+  . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
+    (Laruence, Dmitry)
+
 14 May 2015, PHP 5.5.25
 
 - Core:
