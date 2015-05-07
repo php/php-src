@@ -464,7 +464,7 @@ LoadModule php7_module modules/libphp7.so
        Or,  if we wanted to allow .php, .php2, .php3, .php4, .php5, .php7,
        and  .phtml files to be executed as PHP, but nothing else, we'd use
        this:
-<FilesMatch "\.ph(p[2-6]?|tml)$">
+<FilesMatch "\.ph(p[2-7]?|tml)$">
     SetHandler application/x-httpd-php
 </FilesMatch>
        And  to  allow  .phps files to be handled by the php source filter,
