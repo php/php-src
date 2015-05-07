@@ -43,8 +43,8 @@ $flushTypes = [
     'ZLIB_NO_FLUSH' => ZLIB_NO_FLUSH,
 ];
 
-/* Z_BLOCK is only defined when built against zlib > 1.2.3 */
-if (defined(ZLIB_BLOCK)) {
+/* Z_BLOCK is only available for deflate when built against zlib >= 1.2.4 */
+if (ZLIB_VERNUM >= 0x1240) {
     $flushTypes['ZLIB_BLOCK'] = ZLIB_BLOCK;
 }
 
