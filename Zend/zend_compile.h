@@ -454,6 +454,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
 #define ZEND_CALL_CLOSURE            (1 << 5)
+#define ZEND_CALL_RELEASE_THIS       (1 << 6)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)

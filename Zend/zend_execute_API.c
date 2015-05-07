@@ -825,12 +825,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (func->common.fn_flags & ZEND_ACC_STATIC) {
 		fci->object = NULL;
 	}
-	if (!fci->object) {
-		Z_OBJ(call->This) = NULL;
-	} else {
-		Z_OBJ(call->This) = fci->object;
-		GC_REFCOUNT(fci->object)++;
-	}
+	Z_OBJ(call->This) = fci->object;
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
@@ -868,7 +863,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		}
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
-		zend_vm_stack_free_call_frame(call);
 
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
@@ -899,7 +893,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		}
 
 		zend_vm_stack_free_args(call);
-		zend_vm_stack_free_call_frame(call);
 
 		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
 			zend_string_release(func->common.function_name);
@@ -912,11 +905,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		}
 	}
 
-	if (fci->object) {
-		OBJ_RELEASE(fci->object);
-	}
-
 	EG(scope) = orig_scope;
+	zend_vm_stack_free_call_frame(call);
+
 	if (EG(current_execute_data) == &dummy_execute_data) {
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
 	}

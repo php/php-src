@@ -2067,6 +2067,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	zend_execute_data *execute_data;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
+	uint32_t call_info;
 
 	EG(vm_stack) = zend_vm_stack_new_page(
 		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE(1)) ?
@@ -2076,8 +2077,12 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
 
+	call_info = ZEND_CALL_TOP_FUNCTION | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
+	if (Z_OBJ(call->This)) {
+		call_info |= ZEND_CALL_RELEASE_THIS;
+	}
 	execute_data = zend_vm_stack_push_call_frame(
-		ZEND_CALL_TOP_FUNCTION | (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE),
+		call_info,
 		(zend_function*)op_array,
 		num_args,
 		call->called_scope,
