@@ -76,7 +76,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 	/* If yield was used as a function argument there may be active
 	 * method calls those objects need to be freed */
 	while (execute_data->call) {
-		if (Z_OBJ(execute_data->call->This)) {
+		if (ZEND_CALL_INFO(execute_data->call) & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->call->This));
 		}
 		execute_data->call = execute_data->call->prev_execute_data;
