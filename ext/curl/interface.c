@@ -225,9 +225,8 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* 
 void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 {
 	php_stream *stream;
-	if (!ch || !ch->handlers) {
-		return;
-	}
+
+	ZEND_ASSERT(ch && ch->handlers);
 
 	if (!Z_ISUNDEF(ch->handlers->std_err)) {
 		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->std_err, NULL, php_file_le_stream(), php_file_le_pstream());
