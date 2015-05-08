@@ -50,9 +50,11 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Static method called!
 Static method called!
+
+Deprecated: Non-static method TestClass::instanceMethod() should not be called statically in %s on line %d
 Using $this when not in object context
 Call to undefined method TestClass::undefinedMethod()
 Class 'UndefinedClass' not found
