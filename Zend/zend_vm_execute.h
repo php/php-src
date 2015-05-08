@@ -5649,9 +5649,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 	SAVE_OPLINE();
 	function_name = EX_CONSTANT(opline->op2);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		if (error) {
-			efree(error);
-		}
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
@@ -5667,20 +5664,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 		if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
 			GC_REFCOUNT(object)++; /* For $this pointer */
-		} else if (func->common.scope &&
-		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED,
+		}
+		if (error) {
+			efree(error);
+			/* This is the only soft error is_callable() can generate */
+			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
-			} else {
-				zend_error(
-					E_EXCEPTION | E_ERROR,
-					"Non-static method %s::%s() cannot be called statically",
-					func->common.scope->name->val, func->common.function_name->val);
-
-				HANDLE_EXCEPTION();
-			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -9296,9 +9286,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		if (error) {
-			efree(error);
-		}
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
@@ -9314,20 +9301,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 		if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
 			GC_REFCOUNT(object)++; /* For $this pointer */
-		} else if (func->common.scope &&
-		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED,
+		}
+		if (error) {
+			efree(error);
+			/* This is the only soft error is_callable() can generate */
+			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
-			} else {
-				zend_error(
-					E_EXCEPTION | E_ERROR,
-					"Non-static method %s::%s() cannot be called statically",
-					func->common.scope->name->val, func->common.function_name->val);
-
-				HANDLE_EXCEPTION();
-			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -11032,9 +11012,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
-		if (error) {
-			efree(error);
-		}
 		func = fcc.function_handler;
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
@@ -11050,20 +11027,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 		if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
 			GC_REFCOUNT(object)++; /* For $this pointer */
-		} else if (func->common.scope &&
-		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED,
+		}
+		if (error) {
+			efree(error);
+			/* This is the only soft error is_callable() can generate */
+			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
-			} else {
-				zend_error(
-					E_EXCEPTION | E_ERROR,
-					"Non-static method %s::%s() cannot be called statically",
-					func->common.scope->name->val, func->common.function_name->val);
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
