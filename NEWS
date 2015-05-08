@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
     in extension trait). (jbboehr at gmail dot com)
 
+- Iconv:
+  . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
+
 - Opcache
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
