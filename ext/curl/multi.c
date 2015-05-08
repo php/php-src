@@ -369,8 +369,9 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
 			/* ptr is NULL means it already be freed */
 			if (Z_RES_P(pz_ch)->ptr) {
-				ch = (php_curl *) zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl);
-				_php_curl_verify_handlers(ch, 0);
+				if ((ch = (php_curl *) zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl))) {
+					_php_curl_verify_handlers(ch, 0);
+				}
 			}
 		}
 
