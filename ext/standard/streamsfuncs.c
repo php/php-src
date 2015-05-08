@@ -700,8 +700,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 
 	if (ret > 0) {
 		/* destroy old array and add new one */
-		zend_hash_destroy(Z_ARRVAL_P(stream_array));
-		efree(Z_ARR_P(stream_array));
+		zval_ptr_dtor(stream_array);
 		Z_ARR_P(stream_array) = Z_ARR(new_array);
 	} else {
 		zend_hash_destroy(Z_ARRVAL(new_array));
