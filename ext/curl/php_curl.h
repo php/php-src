@@ -121,40 +121,40 @@ void _php_curl_multi_close(zend_resource *);
 void _php_curl_share_close(zend_resource *);
 
 typedef struct {
-	zval       				func_name;
-	zend_fcall_info_cache 	fci_cache;
-	FILE            	   *fp;
-	smart_str       		buf;
-	int            		 	method;
+	zval                  func_name;
+	zend_fcall_info_cache fci_cache;
+	FILE                 *fp;
+	smart_str             buf;
+	int                   method;
 	zval					stream;
 } php_curl_write;
 
 typedef struct {
-	zval            		func_name;
-	zend_fcall_info_cache 	fci_cache;
-	FILE				   *fp;
-	zend_resource		   *res;
-	int             		method;
-	zval					stream;
+	zval                  func_name;
+	zend_fcall_info_cache fci_cache;
+	FILE                 *fp;
+	zend_resource        *res;
+	int                   method;
+	zval                  stream;
 } php_curl_read;
 
 typedef struct {
-	zval 					func_name;
-	zend_fcall_info_cache 	fci_cache;
-	int    	        		method;
+	zval                  func_name;
+	zend_fcall_info_cache fci_cache;
+	int                   method;
 } php_curl_progress, php_curl_fnmatch;
 
 typedef struct {
-	php_curl_write 		   *write;
-	php_curl_write 		   *write_header;
-	php_curl_read  		   *read;
+	php_curl_write    *write;
+	php_curl_write    *write_header;
+	php_curl_read     *read;
 #if CURLOPT_PASSWDFUNCTION != 0
-	zval            		passwd;
+	zval               passwd;
 #endif
-	zval            		std_err;
-	php_curl_progress 	   *progress;
+	zval               std_err;
+	php_curl_progress *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_fnmatch  	   *fnmatch;
+	php_curl_fnmatch  *fnmatch;
 #endif
 } php_curl_handlers;
 
@@ -174,22 +174,22 @@ struct _php_curl_free {
 };
 
 typedef struct {
-	struct _php_curl_error   err;
-	struct _php_curl_free    *to_free;
+	CURL                         *cp;
+	php_curl_handlers            *handlers;
+	zend_resource                *res;
+	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
-	CURL                    *cp;
-	php_curl_handlers       *handlers;
-	zend_resource           *res;
-	zend_bool                in_callback;
-	uint32_t				 clone;
+	struct _php_curl_error        err;
+	zend_bool                     in_callback;
+	uint32_t                      clone;
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	int    		still_running;
-	CURLM 	   *multi;
-	zend_llist	easyh;
+	int         still_running;
+	CURLM      *multi;
+	zend_llist  easyh;
 } php_curlm;
 
 typedef struct {
