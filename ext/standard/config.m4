@@ -593,6 +593,11 @@ dnl
 AC_CHECK_HEADERS([atomic.h])
 
 dnl
+dnl Check for arc4random on BSD systems
+dnl
+AC_CHECK_DECLS([arc4random_buf])
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
@@ -605,7 +610,8 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c password.c,,,
+                            filters.c proc_open.c streamsfuncs.c http.c password.c \
+                            random.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
