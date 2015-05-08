@@ -115,6 +115,7 @@ PHP_FUNCTION(curl_multi_setopt);
 PHP_FUNCTION(curl_pause);
 #endif
 PHP_FUNCTION(curl_file_create);
+PHP_FUNCTION(curl_buffer_file_create);
 
 
 void _php_curl_multi_close(zend_resource *);

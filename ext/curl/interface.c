@@ -426,6 +426,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_curlfile_create, 0, 0, 1)
 	ZEND_ARG_INFO(0, mimetype)
 	ZEND_ARG_INFO(0, postname)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_curlbufferfile_create, 0, 0, 2)
+	ZEND_ARG_INFO(0, buffer)
+	ZEND_ARG_INFO(0, postname)
+	ZEND_ARG_INFO(0, mimetype)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -470,6 +476,7 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
 	PHP_FE(curl_file_create,         arginfo_curlfile_create)
+	PHP_FE(curl_buffer_file_create,  arginfo_curlbufferfile_create)
 	PHP_FE_END
 };
 /* }}} */
@@ -2520,34 +2527,64 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						zval *prop, rv;
 						char *type = NULL, *filename = NULL;
 
+						prop = zend_read_property(curl_CURLFile_class, current, "mime", sizeof("mime")-1, 0, &rv);
+						if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
+							type = Z_STRVAL_P(prop);
+						}
+
+						prop = zend_read_property(curl_CURLFile_class, current, "postname", sizeof("postname")-1, 0, &rv);
+						if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
+							filename = Z_STRVAL_P(prop);
+						}
+
 						prop = zend_read_property(curl_CURLFile_class, current, "name", sizeof("name")-1, 0, &rv);
-						if (Z_TYPE_P(prop) != IS_STRING) {
-							php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", string_key->val);
+						if (zval_is_true(prop)) {
+								/* upload from "name" */
+							if (Z_TYPE_P(prop) != IS_STRING) {
+								php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", string_key->val);
+							} else {
+								postval = Z_STR_P(prop);
+
+								if (php_check_open_basedir(postval->val)) {
+									return 1;
+								}
+
+								form_error = curl_formadd(&first, &last,
+												CURLFORM_COPYNAME, string_key->val,
+												CURLFORM_NAMELENGTH, (zend_long)string_key->len,
+												CURLFORM_FILENAME, filename ? filename : postval->val,
+												CURLFORM_CONTENTTYPE, type ? type : "application/octet-stream",
+												CURLFORM_FILE, postval->val,
+												CURLFORM_END);
+
+								if (form_error != CURL_FORMADD_OK) {
+									/* Not nice to convert between enums but we only have place for one error type */
+									error = (CURLcode)form_error;
+								}
+							}
 						} else {
-							postval = Z_STR_P(prop);
+							/* upload from "buffer" */
+							prop = zend_read_property(curl_CURLFile_class, current, "buffer", sizeof("buffer")-1, 0, &rv);
+							if (Z_TYPE_P(prop) != IS_STRING) {
+								php_error_docref(NULL, E_WARNING, "Invalid buffer for key %s", string_key->val);
+							} else if(!filename) {
+								php_error_docref(NULL, E_WARNING, "Invalid post file name for key %s", string_key->val);
+							} else {
+								postval = Z_STR_P(prop);
 
-							if (php_check_open_basedir(postval->val)) {
-								return 1;
-							}
+								form_error = curl_formadd(&first, &last,
+												CURLFORM_COPYNAME, string_key->val,
+												CURLFORM_NAMELENGTH, (zend_long)string_key->len,
+												CURLFORM_BUFFER, filename,
+												CURLFORM_BUFFERPTR, postval->val,
+												CURLFORM_BUFFERLENGTH, (zend_long)postval->len,
+												CURLFORM_CONTENTTYPE, type ? type : "application/octet-stream",
+												CURLFORM_END);
 
-							prop = zend_read_property(curl_CURLFile_class, current, "mime", sizeof("mime")-1, 0, &rv);
-							if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
-								type = Z_STRVAL_P(prop);
-							}
-							prop = zend_read_property(curl_CURLFile_class, current, "postname", sizeof("postname")-1, 0, &rv);
-							if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
-								filename = Z_STRVAL_P(prop);
-							}
-							form_error = curl_formadd(&first, &last,
-											CURLFORM_COPYNAME, string_key->val,
-											CURLFORM_NAMELENGTH, string_key->len,
-											CURLFORM_FILENAME, filename ? filename : postval->val,
-											CURLFORM_CONTENTTYPE, type ? type : "application/octet-stream",
-											CURLFORM_FILE, postval->val,
-											CURLFORM_END);
-							if (form_error != CURL_FORMADD_OK) {
-								/* Not nice to convert between enums but we only have place for one error type */
-								error = (CURLcode)form_error;
+								if (form_error != CURL_FORMADD_OK) {
+									/* Not nice to convert between enums but we only have place for one error type */
+									error = (CURLcode)form_error;
+								}
 							}
 						}
 

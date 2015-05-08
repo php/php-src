@@ -37,8 +37,44 @@ var_dump($file->getFilename());
 curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
 var_dump(curl_exec($ch));
 
+$file = new CurlFile();
+$file->setMimeType('text/plain');
+$file->setFilename(__DIR__ . '/curl_testdata1.txt');
+var_dump($file->getMimeType());
+var_dump($file->getFilename());
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
+$file = new CurlFile();
+$file->name = true;
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
+$file = new CurlFile();
+$file->setPostFilename('foo.txt');
+$file->setBuffer("buf_\0_fer");
+var_dump($file->getPostFilename());
+var_dump($file->getBuffer());
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
+$file = new CurlFile();
+$file->setBuffer("buffer");
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
+$file = new CurlFile();
+$file->buffer = 123;
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
 $file = curl_file_create(__DIR__ . '/curl_testdata1.txt');
 $file->setPostFilename('foo.txt');
+var_dump($file->getPostFilename());
+curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+var_dump(curl_exec($ch));
+
+$file = curl_buffer_file_create("buffer", 'foo.txt');
 var_dump($file->getPostFilename());
 curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
 var_dump(curl_exec($ch));
@@ -68,6 +104,23 @@ string(%d) "foo.txt|text/plain"
 string(%d) "text/plain"
 string(%d) "%s/curl_testdata1.txt"
 string(%d) "curl_testdata1.txt|text/plain"
+string(%d) "text/plain"
+string(%d) "%s/curl_testdata1.txt"
+string(%d) "curl_testdata1.txt|text/plain"
+
+Warning: curl_setopt(): Invalid filename for key file in %s on line %d
+string(%d) ""
+string(%d) "foo.txt"
+string(%d) "buf_%s_fer"
+string(%d) "foo.txt|application/octet-stream"
+
+Warning: curl_setopt(): Invalid post file name for key file in %s on line %d
+string(%d) ""
+
+Warning: curl_setopt(): Invalid buffer for key file in %s on line %d
+string(%d) ""
+string(%d) "foo.txt"
+string(%d) "foo.txt|application/octet-stream"
 string(%d) "foo.txt"
 string(%d) "foo.txt|application/octet-stream"
 
