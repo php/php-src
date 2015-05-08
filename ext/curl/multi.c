@@ -235,7 +235,8 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	still_running = zval_get_long(z_still_running);
+	convert_to_long(z_still_running);
+	still_running = Z_LVAL_P(z_still_running);
 	result = curl_multi_perform(mh->multi, &still_running);
 	ZVAL_LONG(z_still_running, still_running);
 
