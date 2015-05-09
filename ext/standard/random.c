@@ -68,6 +68,8 @@ PHP_MSHUTDOWN_FUNCTION(random)
 #ifndef ZTS
 	random_globals_dtor(&random_globals);
 #endif
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -80,8 +82,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-#else
-#if HAVE_DECL_ARC4RANDOM_BUF
+#elif HAVE_DECL_ARC4RANDOM_BUF
 	arc4random_buf(bytes, size);
 #else
 	int    fd = RANDOM_G(fd);
@@ -90,11 +91,9 @@ static int php_random_bytes(void *bytes, size_t size)
 	if (fd < 0) {
 #if HAVE_DEV_ARANDOM
 		fd = open("/dev/arandom", O_RDONLY);
-#else
-#if HAVE_DEV_URANDOM
+#elif HAVE_DEV_URANDOM
 		fd = open("/dev/urandom", O_RDONLY);
-#endif // URANDOM
-#endif // ARANDOM
+#endif
 		if (fd < 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot open source device");
 			return FAILURE;
@@ -115,8 +114,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-#endif // !ARC4RANDOM_BUF
-#endif // !WIN32
+#endif
 
 	return SUCCESS;
 }
@@ -157,7 +155,6 @@ PHP_FUNCTION(random_int)
 {
 	zend_long min;
 	zend_long max;
-	zend_ulong limit;
 	zend_ulong umax;
 	zend_ulong result;
 
@@ -176,23 +173,23 @@ PHP_FUNCTION(random_int)
 		RETURN_FALSE;
 	}
 
-	// Special case where no modulus is required
+	/* Special case where no modulus is required */
 	if (umax == ZEND_ULONG_MAX) {
 		RETURN_LONG((zend_long)result);
 	}
 
-	// Increment the max so the range is inclusive of max
+	/* Increment the max so the range is inclusive of max */
 	umax++;
 
-	// Powers of two are not biased
+	/* Powers of two are not biased */
 	if ((umax & ~umax) != umax) {
-		// Ceiling under which ZEND_LONG_MAX % max == 0
-		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
+		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
+		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 	
-		// Discard numbers over the limit to avoid modulo bias
+		/* Discard numbers over the limit to avoid modulo bias */
 		while (result > limit) {
 			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-				return;
+				RETURN_FALSE;
 			}
 		}
 	}
