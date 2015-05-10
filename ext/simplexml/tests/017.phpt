@@ -75,6 +75,7 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
+
 Notice: Trying to get index of a non-array in %s on line 37
   child: 
 
