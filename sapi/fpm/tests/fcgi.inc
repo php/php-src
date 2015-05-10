@@ -534,16 +534,18 @@ class Client
         do {
             $resp = $this->readPacket();
 
-            if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
-                if ($resp['type'] == self::STDERR) {
-                    $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
+            if ($resp !== false) {
+                if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
+                    if ($resp['type'] == self::STDERR) {
+                        $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
+                    }
+                    $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
                 }
-                $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
-            }
-            if ($resp['type'] == self::END_REQUEST) {
-                $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
-                if ($resp['requestId'] == $requestId) { 
-                    break;
+                if ($resp['type'] == self::END_REQUEST) {
+                    $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
+                    if ($resp['requestId'] == $requestId) { 
+                        break;
+                    }
                 }
             }
             if (microtime(true) - $startTime >= ($timeoutMs * 1000)) {
