@@ -529,6 +529,24 @@ static php_iconv_err_t _php_iconv_appendc(smart_str *d, const char c, iconv_t cd
 }
 /* }}} */
 
+/* {{{ */
+#if ICONV_BROKEN_IGNORE
+static int _php_check_ignore(const char *charset)
+{
+  size_t clen = strlen(charset);
+  if (clen >= 9 && strcmp("//IGNORE", charset+clen-8) == 0) {
+    return 1;
+  }
+  if (clen >= 19 && strcmp("//IGNORE//TRANSLIT", charset+clen-18) == 0) {
+    return 1;
+  }
+  return 0;
+}
+#else
+#define _php_check_ignore(x) (0)
+#endif
+/* }}} */
+
 /* {{{ php_iconv_string()
  */
 PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
@@ -610,6 +628,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	char *out_p, *out_buf, *tmp_buf;
 	size_t bsz, result = 0;
 	php_iconv_err_t retval = PHP_ICONV_ERR_SUCCESS;
+	int ignore_ilseq = _php_check_ignore(out_charset);
 
 	*out = NULL;
 	*out_len = 0;
@@ -634,6 +653,17 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 		result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if (result == (size_t)(-1)) {
+			if (ignore_ilseq && errno == EILSEQ) {
+				if (in_left <= 1) {
+					result = 0;
+				} else {
+					errno = 0;
+					in_p++;
+					in_left--;
+					continue;
+				}
+			}
+
 			if (errno == E2BIG && in_left > 0) {
 				/* converted string is longer than out buffer */
 				bsz += in_len;

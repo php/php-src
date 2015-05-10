@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug #69472 (php_sys_readlink ignores misc errors from
        GetFinalPathNameByHandleA). (Jan Starke)
 
+- Iconv:
+  . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
+
 - ODBC:
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
     (Anatol)
