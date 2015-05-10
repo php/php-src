@@ -1264,14 +1264,19 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 			zend_error(E_ERROR, "String size overflow");
 		}
 
-		Z_STRVAL_P(result) = erealloc(Z_STRVAL_P(result), res_len+1);
+		Z_STRVAL_P(result) = safe_erealloc(Z_STRVAL_P(result), res_len, 1, 1);
 
 		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(result), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		Z_STRVAL_P(result)[res_len]=0;
 		Z_STRLEN_P(result) = res_len;
 	} else {
 		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-		char *buf = (char *) emalloc(length + 1);
+		char *buf;
+
+		if (Z_STRLEN_P(op1) < 0 || Z_STRLEN_P(op2) < 0 || (int) (Z_STRLEN_P(op1) + Z_STRLEN_P(op2)) < 0) {
+			zend_error(E_ERROR, "String size overflow");
+		}
+		buf = (char *) safe_emalloc(length, 1, 1);
 
 		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
 		memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
@@ -2067,7 +2072,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 			} else if (ret2!=IS_DOUBLE) {
 				if (oflow1) {
 					ZVAL_LONG(result, oflow1);
-					return; 
+					return;
 				}
 				dval2 = (double) lval2;
 			} else if (dval1 == dval2 && !zend_finite(dval1)) {

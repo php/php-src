@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -1443,7 +1443,7 @@ PHPAPI void php_basename(const char *s, size_t len, char *suffix, size_t sufflen
 					}
 #if defined(PHP_WIN32) || defined(NETWARE)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
-				   with the NTFS streams. This part ensures also, that no drive 
+				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */
 				} else if ((*c == ':' && (c - comp == 1))) {
 					if (state == 0) {
@@ -4949,6 +4949,10 @@ PHP_FUNCTION(str_repeat)
 
 	/* Initialize the result string */
 	result_len = input_len * mult;
+	if(result_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result is too big, maximum %d allowed", INT_MAX);
+		RETURN_EMPTY_STRING();
+	}
 	result = (char *)safe_emalloc(input_len, mult, 1);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
