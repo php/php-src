@@ -75,12 +75,23 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
+Notice: Trying to get index of a non-array in %s on line 37
   child: 
+
+Notice: Trying to get index of a non-array in %s on line 34
 person: 
 
 Notice: Trying to get property of non-object in %s017.php on line %d
+
+Notice: Trying to get index of a non-array in %s on line 37
+
+Notice: Trying to get index of a non-array in %s on line 37
   child: 
 
-Notice: Trying to get property of non-object in %s017.php on line %d
+Notice: Trying to get property of non-object in %s on line %d
+
+Notice: Trying to get index of a non-array in %s on line 37
+
+Notice: Trying to get index of a non-array in %s on line 37
   child: 
 ===DONE===
