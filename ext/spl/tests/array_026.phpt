@@ -9,6 +9,8 @@ var_dump($test, $test3['mmmmm']);
 ?>
 --EXPECTF--
 Notice: Undefined variable: test3 in %s%earray_026.php on line %d
+
+Notice: Trying to get index of a non-array in %s on line 5
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {

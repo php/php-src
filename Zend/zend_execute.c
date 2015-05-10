@@ -1640,6 +1640,7 @@ try_string_offset:
 		container = Z_REFVAL_P(container);
 		goto try_again;
 	} else {
+		zend_error(E_NOTICE, "Trying to get index of a non-array");
 		ZVAL_NULL(result);
 	}
 }

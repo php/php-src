@@ -28,6 +28,8 @@ Passing undefined by value
 
 Notice: Undefined variable: undef1 in %s on line 13
 
+Notice: Trying to get index of a non-array in %s on line 13
+
 Inside passbyVal call:
 NULL
 

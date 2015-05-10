@@ -13,6 +13,7 @@ var_dump($var1);
 echo "Done\n";
 ?>
 --EXPECTF--	
+Notice: Trying to get index of a non-array in %s on line 5
 NULL
 NULL
 Done

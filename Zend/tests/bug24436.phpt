@@ -17,8 +17,11 @@ class test {
 
 $test1 = new test();
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Trying to get index of a non-array in %s on line 4
 test1
+
+Notice: Trying to get index of a non-array in %s on line 5
 test2
 test1
 test2

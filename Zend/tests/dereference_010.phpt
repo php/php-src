@@ -21,7 +21,10 @@ var_dump(b()[1]);
 
 ?>
 --EXPECTF--
+Notice: Trying to get index of a non-array in %s on line 10
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 11
 NULL
 
 Fatal error: Cannot use object of type stdClass as array in %s on line %d

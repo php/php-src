@@ -25,13 +25,31 @@ var_dump($long[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--	
+
+Notice: Trying to get index of a non-array in %s on line 5
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 6
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 7
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 8
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 10
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 11
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 14
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 17
 NULL
+
+Notice: Trying to get index of a non-array in %s on line 20
 NULL
 Done

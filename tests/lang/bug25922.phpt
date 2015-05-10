@@ -20,4 +20,5 @@ test();
 ?>
 --EXPECT--
 Undefined variable: data
+Trying to get index of a non-array
 Undefined index here: ''
