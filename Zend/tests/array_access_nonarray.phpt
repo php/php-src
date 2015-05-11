@@ -26,20 +26,20 @@ foreach ($values as $type => $a) {
 --EXPECTF--
 --- null ---
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 13
+Notice: Trying to get index of a non-array in %s on line 13
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 15
+Notice: Trying to get index of a non-array in %s on line 15
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 NULL
 bool(false)
 bool(false)
@@ -47,20 +47,20 @@ bool(false)
 
 --- int ---
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 13
+Notice: Trying to get index of a non-array in %s on line 13
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 15
+Notice: Trying to get index of a non-array in %s on line 15
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 NULL
 bool(false)
 bool(false)
@@ -68,20 +68,20 @@ bool(false)
 
 --- float ---
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 13
+Notice: Trying to get index of a non-array in %s on line 13
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 15
+Notice: Trying to get index of a non-array in %s on line 15
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 NULL
 bool(false)
 bool(false)
@@ -89,20 +89,20 @@ bool(false)
 
 --- bool ---
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 13
+Notice: Trying to get index of a non-array in %s on line 13
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Trying to get index of a non-array in %s on line 14
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 15
+Notice: Trying to get index of a non-array in %s on line 15
 NULL
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 
-Notice: Trying to get index of a non-array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Notice: Trying to get index of a non-array in %s on line 16
 NULL
 bool(false)
 bool(false)
@@ -111,15 +111,15 @@ bool(false)
 --- string ---
 string(1) "h"
 
-Notice: Uninitialized string offset: 1 in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 14
+Notice: Uninitialized string offset: 1 in %s on line 14
 string(0) ""
 
-Warning: Illegal string offset 'foo' in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 15
+Warning: Illegal string offset 'foo' in %s on line 15
 string(1) "h"
 
-Warning: Illegal string offset 'foo' in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Warning: Illegal string offset 'foo' in %s on line 16
 
-Warning: Illegal string offset 'bar' in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 16
+Warning: Illegal string offset 'bar' in %s on line 16
 string(1) "h"
 bool(true)
 bool(true)
@@ -127,4 +127,4 @@ bool(true)
 
 --- object ---
 
-Fatal error: Cannot use object of type stdClass as array in /home/allen/src/php-src/Zend/tests/array_access_nonarray.php on line 13
+Fatal error: Cannot use object of type stdClass as array in %s on line 13

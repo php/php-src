@@ -27,21 +27,7 @@ var_dump(isset($GLOBALS[1]->$GLOBALS));
 bool(true)
 bool(true)
 bool(false)
-
-Notice: Trying to get index of a non-array in %s on line 12
-
-Notice: Trying to get index of a non-array in %s on line 12
-
-Notice: Trying to get index of a non-array in %s on line 12
 bool(false)
-
-Notice: Undefined variable: c in %s on line %d
-
-Notice: Undefined variable: d in %s on line %d
-
-Notice: Trying to get index of a non-array in %s on line 14
-
-Notice: Trying to get property of non-object in %s on line %d
 bool(false)
 bool(true)
 bool(false)
