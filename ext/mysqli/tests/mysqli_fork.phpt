@@ -111,6 +111,14 @@ if (!have_innodb($link))
 						continue;
 					$tmp = mysqli_fetch_assoc($pres);
 					mysqli_free_result($pres);
+
+					if (!is_array($tmp)) {
+						$tmp = array(
+							'msg_id' => null,
+							'msg' => null,
+						);
+					}
+
 					if ($tmp['msg_id'] == $msg_id)
 						/* no new message */
 						continue;
@@ -143,6 +151,14 @@ if (!have_innodb($link))
 				$wait_id = pcntl_waitpid($pid, $status, WNOHANG);
 				if ($pres = mysqli_query($plink, $sql)) {
 					$row = mysqli_fetch_assoc($pres);
+
+					if (!is_array($row)) {
+						$row = array(
+							'msg_id' => null,
+							'msg' => null,
+						);
+					}
+
 					if ($row['msg_id'] != $last_msg_id) {
 						$last_msg_id = $row['msg_id'];
 						switch ($row['msg']) {
