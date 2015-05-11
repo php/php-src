@@ -642,6 +642,12 @@ PHP_FUNCTION(unpack)
 				break;
 		}
 
+		if (size != 0 && size != -1 && size < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+
 		/* Do actual unpacking */
 		for (i = 0; i != arg; i++ ) {
 			/* Space for name + number, safe as namelen is ensured <= 200 */
