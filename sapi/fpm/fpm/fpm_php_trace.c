@@ -131,6 +131,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		execute_data = prev = l;
 
 		while (prev) {
+			zend_uchar *type;
 
 			if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, func), &l)) {
 				return -1;
@@ -142,12 +143,12 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 				break;
 			}
 
-			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) {
+			type = (zend_uchar *)&l;
+			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) { 
 				return -1;
 			}
 
-			/* zend_uchar? */
-			if (ZEND_USER_CODE(l)) {
+			if (ZEND_USER_CODE(*type)) {
 				if (0 > fpm_trace_get_long(function + offsetof(zend_op_array, filename), &l)) {
 					return -1;
 				}
