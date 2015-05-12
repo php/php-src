@@ -111,6 +111,13 @@ static int zend_file_cache_flock(int fd, int type)
 				(ptr) = zend_file_cache_serialize_interned((zend_string*)(ptr), info); \
 			} else { \
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
+				/* script->corrupted shows if the script in SHM or not */ \
+				if (EXPECTED(script->corrupted)) { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
+				} else { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				} \
 				(ptr) = (void*)((char*)(ptr) - (char*)script->mem); \
 			} \
 		} \
@@ -122,6 +129,13 @@ static int zend_file_cache_flock(int fd, int type)
 			} else { \
 				ZEND_ASSERT(IS_SERIALIZED(ptr)); \
 				(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
+				/* script->corrupted shows if the script in SHM or not */ \
+				if (EXPECTED(script->corrupted)) { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
+				} else { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				} \
 			} \
 		} \
 	} while (0)
@@ -376,6 +390,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_JMP:
 				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -649,7 +665,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	new_script->mem = NULL;
 }
 
-int zend_file_cache_script_store(zend_persistent_script *script)
+int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 {
 	size_t len;
 	int fd;
@@ -704,7 +720,9 @@ int zend_file_cache_script_store(zend_persistent_script *script)
 	ZCG(mem) = zend_string_alloc(4096 - (_STR_HEADER_SIZE + 1), 0);
 
 	zend_shared_alloc_init_xlat_table();
+	script->corrupted = in_shm; /* used to check if script restored to SHM or process memory */
 	zend_file_cache_serialize(script, &info, buf);
+	script->corrupted = 0;
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
@@ -893,6 +911,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_JMP:
 				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
