@@ -6,6 +6,7 @@
   . Refactor MIME type handling to use a hash table instead of linear search.
     (Adam)
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+  . Added support for SEARCH WebDav method. (Mats Lindh)
 
 - Core:
   . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
