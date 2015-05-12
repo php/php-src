@@ -24,10 +24,6 @@
     (Laruence)
   . Fixed bug #68933 (Invalid read of size 8 in zend_std_read_property).
     (Laruence, arjen at react dot com)
-  . Fixed bug #68868 (Segfault in clean_non_persistent_constants() in SugarCRM
-    6.5.20). (Laruence)
-  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
-    (Laruence)
   . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
     _zend_hash_del_el). (Laruence)
   . Fixed bug #65598 (Closure executed via static autoload incorrectly marked as
@@ -37,24 +33,17 @@
   . Fixed bug #69568 (call a private function in closure failed). (Nikita)
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::call() method. (Andrea)
-  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
   . Fixed bug #67959 (Segfault when calling phpversion('spl')). (Florian)
   . Implemented the RFC `Catchable "Call to a member function bar() on a
     non-object"`. (Timm)
   . Added options parameter for unserialize allowing to specify acceptable
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
-  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly
-    triggered). (Julien)
-  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
-  . Fixed bug #65576 (Constructor from trait conflicts with inherited
-    constructor). (dunglas at gmail dot com)
   . Fixed bug #63734 (Garbage collector can free zvals that are still
     referenced). (Dmitry)
   . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
     modifier. (Guilherme Blanco)
   . is_long() & is_integer() is now an alias of is_int(). (Kalle)
   . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
-  . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
   . Added ?? operator. (Andrea)
   . Added <=> operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
@@ -103,7 +92,7 @@
   . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
     RFC3339 Extended format which includes fraction of seconds (Mariano 
     Iglesias)
-	
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
@@ -137,6 +126,9 @@
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
+
+- LDAP
+  . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
@@ -208,6 +200,7 @@
     required_num_args). (Julien)
 
 - Standard:
+  . Fixed bug #69523 (Cookie name cannot be empty). (Christoph M. Becker)
   . Fixed bug #69325 (php_copy_file_ex does not pass the argument).
     (imbolk at gmail dot com)
   . Fixed bug #69299 (Regression in array_filter's $flag argument in PHP 7).
