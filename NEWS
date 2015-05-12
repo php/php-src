@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #69472 (php_sys_readlink ignores misc errors from
        GetFinalPathNameByHandleA). (Jan Starke)
+  . Fixed bug #69599 (Strange generator+exception+variadic crash). (Nikita)
 
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
