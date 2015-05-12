@@ -182,7 +182,7 @@ PHP_FUNCTION(random_int)
 	umax++;
 
 	/* Powers of two are not biased */
-	if ((umax & ~umax) != umax) {
+	if ((umax & (umax - 1)) != 0) {
 		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 	

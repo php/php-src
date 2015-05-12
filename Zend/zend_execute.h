@@ -153,24 +153,19 @@ ZEND_API void zend_vm_stack_init(void);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
-static zend_always_inline zval* zend_vm_stack_alloc(size_t size)
-{
-	char *top = (char*)EG(vm_stack_top);
-
-	if (UNEXPECTED(size > (size_t)(((char*)EG(vm_stack_end)) - top))) {
-		return (zval*)zend_vm_stack_extend(size);
-	}
-	EG(vm_stack_top) = (zval*)(top + size);
-	return (zval*)top;
-}
-
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
 {
-	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_alloc(used_stack);
+	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
 
+	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
+		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
+		ZEND_SET_CALL_INFO(call, call_info | ZEND_CALL_ALLOCATED);
+	} else {
+		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+		ZEND_SET_CALL_INFO(call, call_info);
+	}
 	call->func = func;
 	Z_OBJ(call->This) = object;
-	ZEND_SET_CALL_INFO(call, call_info);
 	ZEND_CALL_NUM_ARGS(call) = num_args;
 	call->called_scope = called_scope;
 	return call;
@@ -240,10 +235,11 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *call)
+static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_info, zend_execute_data *call)
 {
-	zend_vm_stack p = EG(vm_stack);
-	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(p) == (zval*)call)) {
+	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
+		zend_vm_stack p = EG(vm_stack);
+
 		zend_vm_stack prev = p->prev;
 
 		EG(vm_stack_top) = prev->top;
@@ -253,6 +249,11 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 	} else {
 		EG(vm_stack_top) = (zval*)call;
 	}
+}
+
+static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *call)
+{
+	zend_vm_stack_free_call_frame_ex(ZEND_CALL_INFO(call), call);
 }
 
 /* services */

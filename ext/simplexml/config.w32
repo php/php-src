@@ -4,8 +4,10 @@
 ARG_WITH("simplexml", "Simple XML support", "yes");
 
 if (PHP_SIMPLEXML == "yes") {
-	if(PHP_LIBXML == "yes"
-	&& ADD_EXTENSION_DEP('simplexml', 'libxml')) {
+	if(PHP_LIBXML == "yes" &&
+		ADD_EXTENSION_DEP('simplexml', 'libxml') &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_SIMPLEXML", PHP_PHP_BUILD + "\\include\\libxml2")
+	) {
 		EXTENSION("simplexml", "simplexml.c sxe.c");
 		AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
 		if (!PHP_SIMPLEXML_SHARED) {
