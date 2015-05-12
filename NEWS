@@ -9,6 +9,8 @@
   . Added support for SEARCH WebDav method. (Mats Lindh)
 
 - Core:
+  . Fixed bug #68475 (Add support for $callable() sytnax with 'Class::method').
+    (Julien, Aaron Piotrowski)
   . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
   . Fixed bug #69427 (Segfault on magic method __call of private method in 
     superclass). (Laruence)
