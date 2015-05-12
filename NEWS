@@ -238,5 +238,7 @@
   . Added ZipArchive::setCompressionName and ZipArchive::setCompressionIndex
     methods (Remi, Cedric Delmas)
   . Update bundled libzip to 1.0.1 (Remi, Anatol)
+  . Fixed bug #67161. (ZipArchive::getStream() returns NULL for certain file)
+    (Christoph M. Becker)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
