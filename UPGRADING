@@ -435,6 +435,7 @@ Standard library changes
     and also renamed zend_qsort to zend_sort.
   . Added stable sorting algo zend_insert_sort.
   . Removed dl() function on fpm-fcgi.
+  . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
 
 Other
 =====
