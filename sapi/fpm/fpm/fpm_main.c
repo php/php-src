@@ -1833,16 +1833,6 @@ consult the installation file that came with this distribution, or visit \n\
 				return FPM_EXIT_SOFTWARE;
 			}
 
-			/* check if request_method has been sent.
-			 * if not, it's certainly not an HTTP over fcgi request */
-			if (!SG(request_info).request_method) {
-				goto fastcgi_request_done;
-			}
-
-			if (fpm_status_handle_request()) {
-				goto fastcgi_request_done;
-			}
-
 			/* If path_translated is NULL, terminate here with a 404 */
 			if (!SG(request_info).path_translated) {
 				zend_try {
@@ -1851,6 +1841,16 @@ consult the installation file that came with this distribution, or visit \n\
 					PUTS("File not found.\n");
 				} zend_catch {
 				} zend_end_try();
+				goto fastcgi_request_done;
+			}
+
+			/* check if request_method has been sent.
+			 * if not, it's certainly not an HTTP over fcgi request */
+			if (!SG(request_info).request_method) {
+				goto fastcgi_request_done;
+			}
+
+			if (fpm_status_handle_request()) {
 				goto fastcgi_request_done;
 			}
 
