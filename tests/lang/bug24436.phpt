@@ -12,5 +12,4 @@ class test {
 $test1 = new test();
 ?>
 --EXPECTF--
-test1
-test2
+test1test2
