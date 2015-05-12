@@ -5,8 +5,9 @@ Return type of self is allowed in closure
 <?php
 
 $c = function(): self { return $this; };
-var_dump($c->call(new stdClass));
+class Bar { }
+var_dump($c->call(new Bar));
 
 --EXPECT--
-object(stdClass)#2 (0) {
+object(Bar)#2 (0) {
 }
