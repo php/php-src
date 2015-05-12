@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
     in extension trait). (jbboehr at gmail dot com)
+  . Fixed bug #66048 (temp. directory is cached during multiple requests).
+    (Julien)
 
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
