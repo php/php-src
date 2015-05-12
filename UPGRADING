@@ -522,7 +522,7 @@ Other
   . Added null coalesce operator (??).
     (RFC: https://wiki.php.net/rfc/isset_ternary)
   . Support for strings with length >= 2^31 bytes in 64 bit builds.
-  . Closure::call() method added.
+  . Closure::call() method added (works only with userland classes).
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
