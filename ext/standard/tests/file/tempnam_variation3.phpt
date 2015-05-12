@@ -17,9 +17,9 @@ echo "*** Testing tempnam() with obscure prefixes ***\n";
 $file_path = dirname(__FILE__)."/tempnamVar3";
 mkdir($file_path);
 
-/* An array of prefixes */ 
+/* An array of prefixes */
 $names_arr = array(
-  /* Invalid args */ 
+  /* Invalid args */
   -1,
   TRUE,
   FALSE,
@@ -30,7 +30,7 @@ $names_arr = array(
   array(),
 
   /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
+  "/no/such/file/dir",
   "php/php"
 
 );
@@ -48,10 +48,10 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "File permissions are => ";
     printf("%o", fileperms($file_name) );
     echo "\n";
-    
+
     echo "File created in => ";
     $file_dir = dirname($file_name);
-        
+
     if ($file_dir == sys_get_temp_dir()) {
        echo "temp dir\n";
     }
@@ -61,7 +61,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     else {
        echo "unknown location\n";
     }
-    
+
   }
   else {
     echo "-- File is not created --\n";
@@ -100,12 +100,14 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 6 --
-File name is => %s/%s
-File permissions are => 100600
-File created in => directory specified
+
+Warning: tempnam() expects parameter 2 to be a valid path, string given in %s on line %d
+-- File is not created --
+
+Warning: unlink(): %s in %s on line %d
 -- Iteration 7 --
 
-Warning: tempnam() expects parameter 2 to be string, array given in %s on line %d
+Warning: tempnam() expects parameter 2 to be a valid path, array given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): %s in %s on line %d

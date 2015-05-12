@@ -155,7 +155,7 @@ PHP_FUNCTION(pack)
 			}
 			else if (c >= '0' && c <= '9') {
 				arg = atoi(&format[i]);
-		  
+
 				while (format[i] >= '0' && format[i] <= '9' && i < formatlen) {
 					i++;
 				}
@@ -165,8 +165,8 @@ PHP_FUNCTION(pack)
 		/* Handle special arg '*' for all codes and check argv overflows */
 		switch ((int) code) {
 			/* Never uses any args */
-			case 'x': 
-			case 'X':	
+			case 'x':
+			case 'X':
 			case '@':
 				if (arg < 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: '*' ignored", code);
@@ -175,10 +175,10 @@ PHP_FUNCTION(pack)
 				break;
 
 			/* Always uses one arg */
-			case 'a': 
-			case 'A': 
-			case 'Z': 
-			case 'h': 
+			case 'a':
+			case 'A':
+			case 'Z':
+			case 'h':
 			case 'H':
 				if (currentarg >= num_args) {
 					efree(argv);
@@ -223,14 +223,14 @@ PHP_FUNCTION(pack)
 			case 'S': 
 			case 'i': 
 			case 'I':
-			case 'l': 
-			case 'L': 
-			case 'n': 
-			case 'N': 
-			case 'v': 
+			case 'l':
+			case 'L':
+			case 'n':
+			case 'N':
+			case 'v':
 			case 'V':
-			case 'f': 
-			case 'd': 
+			case 'f':
+			case 'd':
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
@@ -268,35 +268,35 @@ PHP_FUNCTION(pack)
 		int arg = formatargs[i];
 
 		switch ((int) code) {
-			case 'h': 
-			case 'H': 
+			case 'h':
+			case 'H':
 				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
 				break;
 
-			case 'a': 
+			case 'a':
 			case 'A':
 			case 'Z':
-			case 'c': 
+			case 'c':
 			case 'C':
 			case 'x':
 				INC_OUTPUTPOS(arg,1)		/* 8 bit per arg */
 				break;
 
-			case 's': 
-			case 'S': 
-			case 'n': 
+			case 's':
+			case 'S':
+			case 'n':
 			case 'v':
 				INC_OUTPUTPOS(arg,2)		/* 16 bit per arg */
 				break;
 
-			case 'i': 
+			case 'i':
 			case 'I':
 				INC_OUTPUTPOS(arg,sizeof(int))
 				break;
 
-			case 'l': 
-			case 'L': 
-			case 'N': 
+			case 'l':
+			case 'L':
+			case 'N':
 			case 'V':
 				INC_OUTPUTPOS(arg,4)		/* 32 bit per arg */
 				break;
@@ -348,8 +348,8 @@ PHP_FUNCTION(pack)
 		zval **val;
 
 		switch ((int) code) {
-			case 'a': 
-			case 'A': 
+			case 'a':
+			case 'A':
 			case 'Z': {
 				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
@@ -364,7 +364,7 @@ PHP_FUNCTION(pack)
 				break;
 			}
 
-			case 'h': 
+			case 'h':
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
@@ -410,7 +410,7 @@ PHP_FUNCTION(pack)
 				break;
 			}
 
-			case 'c': 
+			case 'c':
 			case 'C':
 				while (arg-- > 0) {
 					php_pack(argv[currentarg++], 1, byte_map, &output[outputpos]);
@@ -418,9 +418,9 @@ PHP_FUNCTION(pack)
 				}
 				break;
 
-			case 's': 
-			case 'S': 
-			case 'n': 
+			case 's':
+			case 'S':
+			case 'n':
 			case 'v': {
 				int *map = machine_endian_short_map;
 
@@ -437,17 +437,17 @@ PHP_FUNCTION(pack)
 				break;
 			}
 
-			case 'i': 
-			case 'I': 
+			case 'i':
+			case 'I':
 				while (arg-- > 0) {
 					php_pack(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
 
-			case 'l': 
-			case 'L': 
-			case 'N': 
+			case 'l':
+			case 'L':
+			case 'N':
 			case 'V': {
 				int *map = machine_endian_long_map;
 
@@ -562,7 +562,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
 
 /* unpack() is based on Perl's unpack(), but is modified a bit from there.
  * Rather than depending on error-prone ordered lists or syntactically
- * unpleasant pass-by-reference, we return an object with named parameters 
+ * unpleasant pass-by-reference, we return an object with named parameters
  * (like *_fetch_object()). Syntax is "f[repeat]name/...", where "f" is the
  * formatter char (like pack()), "[repeat]" is the optional repeater argument,
  * and "name" is the name of the variable to use.
@@ -635,7 +635,7 @@ PHP_FUNCTION(unpack)
 
 		switch ((int) type) {
 			/* Never use any input */
-			case 'X': 
+			case 'X':
 				size = -1;
 				break;
 
@@ -643,44 +643,44 @@ PHP_FUNCTION(unpack)
 				size = 0;
 				break;
 
-			case 'a': 
+			case 'a':
 			case 'A':
 			case 'Z':
 				size = arg;
 				arg = 1;
 				break;
 
-			case 'h': 
-			case 'H': 
+			case 'h':
+			case 'H':
 				size = (arg > 0) ? (arg + (arg % 2)) / 2 : arg;
 				arg = 1;
 				break;
 
 			/* Use 1 byte of input */
-			case 'c': 
+			case 'c':
 			case 'C':
 			case 'x':
 				size = 1;
 				break;
 
 			/* Use 2 bytes of input */
-			case 's': 
-			case 'S': 
-			case 'n': 
+			case 's':
+			case 'S':
+			case 'n':
 			case 'v':
 				size = 2;
 				break;
 
 			/* Use sizeof(int) bytes of input */
-			case 'i': 
+			case 'i':
 			case 'I':
 				size = sizeof(int);
 				break;
 
 			/* Use 4 bytes of input */
-			case 'l': 
-			case 'L': 
-			case 'N': 
+			case 'l':
+			case 'L':
+			case 'N':
 			case 'V':
 				size = 4;
 				break;
@@ -716,6 +716,12 @@ PHP_FUNCTION(unpack)
 				break;
 		}
 
+		if (size != 0 && size != -1 && size < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+
 		/* Do actual unpacking */
 		for (i = 0; i != arg; i++ ) {
 			/* Space for name + number, safe as namelen is ensured <= 200 */
@@ -731,7 +737,8 @@ PHP_FUNCTION(unpack)
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
-				inputpos = 0;
+				zval_dtor(return_value);
+				RETURN_FALSE;
 			}
 
 			if ((inputpos + size) <= inputlen) {
@@ -813,9 +820,9 @@ PHP_FUNCTION(unpack)
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {
 							len = size * 2;
-						} 
+						}
 
-						if (argb > 0) {	
+						if (len > 0 && argb > 0) {
 							len -= argb % 2;
 						}
 
@@ -845,7 +852,7 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 'c': 
+					case 'c':
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
 						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
@@ -853,9 +860,9 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 's': 
-					case 'S': 
-					case 'n': 
+					case 's':
+					case 'S':
+					case 'n':
 					case 'v': {
 						long v;
 						int issigned = 0;
@@ -874,7 +881,7 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 'i': 
+					case 'i':
 					case 'I': {
 						long v;
 						int issigned = 0;
@@ -888,9 +895,9 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-					case 'l': 
-					case 'L': 
-					case 'N': 
+					case 'l':
+					case 'L':
+					case 'N':
 					case 'V': {
 						int issigned = 0;
 						int *map = machine_endian_long_map;
@@ -913,7 +920,7 @@ PHP_FUNCTION(unpack)
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
 						if (sizeof(long) > 4) {
  							if (type == 'l') {
-								v = (signed int) v; 
+								v = (signed int) v;
 							} else {
 								v = (unsigned int) v;
 							}
