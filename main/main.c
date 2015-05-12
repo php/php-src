@@ -1868,7 +1868,7 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 7.5 free last error information */
+	/* 7.5 free last error information and temp dir */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1877,6 +1877,7 @@ void php_request_shutdown(void *dummy)
 		free(PG(last_error_file));
 		PG(last_error_file) = NULL;
 	}
+	php_shutdown_temporary_directory();
 
 	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
@@ -2475,7 +2476,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	php_output_shutdown();
-	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
 

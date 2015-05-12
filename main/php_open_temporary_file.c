@@ -181,7 +181,7 @@ static char* temporary_directory;
 PHPAPI void php_shutdown_temporary_directory(void)
 {
 	if (temporary_directory) {
-		free(temporary_directory);
+		efree(temporary_directory);
 		temporary_directory = NULL;
 	}
 }
@@ -202,10 +202,10 @@ PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 		if (sys_temp_dir) {
 			int len = strlen(sys_temp_dir);
 			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
-				temporary_directory = zend_strndup(sys_temp_dir, len - 1);
+				temporary_directory = estrndup(sys_temp_dir, len - 1);
 				return temporary_directory;
 			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
-				temporary_directory = zend_strndup(sys_temp_dir, len);
+				temporary_directory = estrndup(sys_temp_dir, len);
 				return temporary_directory;
 			}
 		}
@@ -222,9 +222,9 @@ PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 		DWORD len = GetTempPath(sizeof(sTemp),sTemp);
 		assert(0 < len);  /* should *never* fail! */
 		if (sTemp[len - 1] == DEFAULT_SLASH) {
-			temporary_directory = zend_strndup(sTemp, len - 1);
+			temporary_directory = estrndup(sTemp, len - 1);
 		} else {
-			temporary_directory = zend_strndup(sTemp, len);
+			temporary_directory = estrndup(sTemp, len);
 		}
 		return temporary_directory;
 	}
@@ -236,9 +236,9 @@ PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 			int len = strlen(s);
 
 			if (s[len - 1] == DEFAULT_SLASH) {
-				temporary_directory = zend_strndup(s, len - 1);
+				temporary_directory = estrndup(s, len - 1);
 			} else {
-				temporary_directory = zend_strndup(s, len);
+				temporary_directory = estrndup(s, len);
 			}
 
 			return temporary_directory;
@@ -247,12 +247,12 @@ PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 #ifdef P_tmpdir
 	/* Use the standard default temporary directory. */
 	if (P_tmpdir) {
-		temporary_directory = strdup(P_tmpdir);
+		temporary_directory = estrdup(P_tmpdir);
 		return temporary_directory;
 	}
 #endif
 	/* Shouldn't ever(!) end up here ... last ditch default. */
-	temporary_directory = strdup("/tmp");
+	temporary_directory = estrndup("/tmp", sizeof("/tmp"));
 	return temporary_directory;
 #endif
 }
