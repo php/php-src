@@ -22,8 +22,8 @@ PHP                                                                        NEWS
   . Upgraded pcrelib to 8.37.
 
 - Phar:
-  . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry filename
-    starts with null). (Stas)
+  . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry
+    filename starts with null). (Stas)
 
 16 Apr 2015 PHP 5.4.40
 
