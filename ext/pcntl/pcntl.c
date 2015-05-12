@@ -783,7 +783,7 @@ PHP_FUNCTION(pcntl_exec)
 	size_t path_len;
 	zend_ulong key_num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|aa", &path, &path_len, &args, &envs) == FAILURE) {
 		return;
 	}
 

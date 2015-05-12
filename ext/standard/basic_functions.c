@@ -5409,7 +5409,7 @@ PHP_FUNCTION(set_include_path)
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &new_value) == FAILURE) {
 		return;
 	}
 
