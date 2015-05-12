@@ -984,7 +984,7 @@ static void zend_mm_random(unsigned char *buf, size_t size) /* {{{ */
 	int has_context = 0;
 
 	if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
-		/* Could mean that the key container does not exist, let try 
+		/* Could mean that the key container does not exist, let try
 		   again by asking for a new one */
 		if (GetLastError() == NTE_BAD_KEYSET) {
 			if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
@@ -1348,7 +1348,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 	}
 	if (!silent) {
 		TSRMLS_FETCH();
-		
+
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
 		zend_debug_alloc_output("---------------------------------------\n");
 		zend_debug_alloc_output("%s(%d) : Block "PTR_FMT" status:\n" ZEND_FILE_LINE_RELAY_CC, ptr);
@@ -2175,7 +2175,7 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 #if ZEND_MM_CACHE
 	if (ZEND_MM_SMALL_SIZE(true_size)) {
 		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
-		
+
 		if (heap->cache[index] != NULL) {
 			zend_mm_free_block *best_fit;
 			zend_mm_free_block **cache;
@@ -2188,7 +2188,7 @@ static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_
 			heap->cache[index] = best_fit->prev_free_block;
 			ZEND_MM_CHECK_MAGIC(best_fit, MEM_BLOCK_CACHED);
 			ZEND_MM_SET_DEBUG_INFO(best_fit, size, 1, 0);
-	
+
 			ptr = ZEND_MM_DATA_OF(best_fit);
 
 #if ZEND_DEBUG || ZEND_MM_HEAP_PROTECTION
@@ -2470,7 +2470,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 	     : "%0"(res),
 	       "rm"(size),
 	       "rm"(offset));
-	
+
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
 		return 0;
@@ -2619,7 +2619,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int length;
+	size_t length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2627,13 +2627,13 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	length = strlen(s)+1;
-	p = (char *) _emalloc(length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	length = strlen(s);
+	p = (char *) _emalloc(safe_address(length, 1, 1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
-	memcpy(p, s, length);
+	memcpy(p, s, length+1);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
@@ -2647,7 +2647,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	p = (char *) _emalloc(length+1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	p = (char *) _emalloc(safe_address(length, 1, 1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
@@ -2668,7 +2668,7 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	p = (char *) malloc(length+1);
+	p = (char *) malloc(safe_address(length, 1, 1));
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
