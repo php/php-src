@@ -142,6 +142,8 @@ struct _php_core_globals {
 	char *last_error_file;
 	int  last_error_lineno;
 
+	char *php_sys_temp_dir;
+
 	char *disable_functions;
 	char *disable_classes;
 	zend_bool allow_url_include;
