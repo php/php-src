@@ -18,6 +18,11 @@ PHP                                                                        NEWS
 14 May 2015, PHP 5.5.25
 
 - Core:
+  . Fixed bug #69364 (PHP Multipart/form-data remote dos Vulnerability). (Stas)
+  . Fixed bug #69403 (str_repeat() sign mismatch based memory corruption). 
+    (Stas)
+  . Fixed bug #69418 (CVE-2006-7243 fix regressions in 5.4+). (Stas)
+  . Fixed bug #69522 (heap buffer overflow in unpack()). (Stas)
   . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
     (Laruence)
   . Fixed bug #69420 (Invalid read in zend_std_get_method). (Laruence)
@@ -31,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug #69472 (php_sys_readlink ignores misc errors from 
     GetFinalPathNameByHandleA). (Jan Starke)
 
+- FTP:
+  . Fixed bug #69545 (Integer overflow in ftp_genlist() resulting in heap
+    overflow). (Stas)
+
 - ODBC:
   . Fixed bug #69474 (ODBC: Query with same field name from two tables returns
     incorrect result). (Anatol)
@@ -40,6 +49,13 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
     (Daniel Lowrey)
+
+- PCNTL:
+  . Fixed bug #68598 (pcntl_exec() should not allow null char). (Stas)
+
+- Phar:
+  . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry filename
+    starts with null). (Stas)
 
 16 Apr 2015, PHP 5.5.24
 
