@@ -551,7 +551,7 @@ const zend_function_entry zend_funcs_serializable[] = {
 };
 /* }}} */
 
-#define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
+#define REGISTER_INTERFACE(class_name, class_name_str) \
 	{\
 		zend_class_entry ce;\
 		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
@@ -565,17 +565,17 @@ const zend_function_entry zend_funcs_serializable[] = {
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
-	REGISTER_ITERATOR_INTERFACE(traversable, Traversable);
+	REGISTER_INTERFACE(traversable, Traversable);
 
-	REGISTER_ITERATOR_INTERFACE(aggregate, IteratorAggregate);
+	REGISTER_INTERFACE(aggregate, IteratorAggregate);
 	REGISTER_ITERATOR_IMPLEMENT(aggregate, traversable);
 
-	REGISTER_ITERATOR_INTERFACE(iterator, Iterator);
+	REGISTER_INTERFACE(iterator, Iterator);
 	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
 
-	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
+	REGISTER_INTERFACE(arrayaccess, ArrayAccess);
 
-	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
+	REGISTER_INTERFACE(serializable, Serializable)
 }
 /* }}} */
 
