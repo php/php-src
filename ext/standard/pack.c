@@ -699,6 +699,12 @@ PHP_FUNCTION(unpack)
 				break;
 		}
 
+		if (size != 0 && size != -1 && size < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+
 		/* Do actual unpacking */
 		for (i = 0; i != arg; i++ ) {
 			/* Space for name + number, safe as namelen is ensured <= 200 */
@@ -714,7 +720,8 @@ PHP_FUNCTION(unpack)
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-				inputpos = 0;
+				zval_dtor(return_value);
+				RETURN_FALSE;
 			}
 
 			if ((inputpos + size) <= inputlen) {
@@ -798,7 +805,7 @@ PHP_FUNCTION(unpack)
 							len = size * 2;
 						}
 
-						if (argb > 0) {
+						if (len > 0 && argb > 0) {
 							len -= argb % 2;
 						}
 

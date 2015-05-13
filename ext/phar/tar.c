@@ -434,7 +434,7 @@ bail:
 			entry.filename_len = i;
 			entry.filename = pestrndup(hdr->name, i, myphar->is_persistent);
 
-			if (entry.filename[entry.filename_len - 1] == '/') {
+			if (i > 0 && entry.filename[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
 				entry.filename[entry.filename_len - 1] = '\0';
 				entry.filename_len--;

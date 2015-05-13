@@ -4740,11 +4740,11 @@ PHP_FUNCTION(error_clear_last)
 		PG(last_error_type) = 0;
 		PG(last_error_lineno) = 0;
 
-		efree(PG(last_error_message));
+		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
 
 		if (PG(last_error_file)) {
-			efree(PG(last_error_file));
+			free(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
 	}
@@ -5409,7 +5409,7 @@ PHP_FUNCTION(set_include_path)
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &new_value) == FAILURE) {
 		return;
 	}
 

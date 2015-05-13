@@ -2293,13 +2293,13 @@ ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	length = strlen(s)+1;
-	p = (char *) _emalloc(length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	length = strlen(s);
+	p = (char *) _emalloc(safe_address(length, 1, 1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
 	}
-	memcpy(p, s, length);
+	memcpy(p, s, length+1);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return p;
 }
@@ -2310,7 +2310,7 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	p = (char *) _emalloc(length+1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	p = (char *) _emalloc(safe_address(length, 1, 1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;
@@ -2328,7 +2328,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
-	p = (char *) malloc(length+1);
+	p = (char *) malloc(safe_address(length, 1, 1));
 	if (UNEXPECTED(p == NULL)) {
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return p;

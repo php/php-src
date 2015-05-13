@@ -806,7 +806,7 @@ PHP_FUNCTION(tempnam)
 	int fd;
 	zend_string *p;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
@@ -1353,7 +1353,7 @@ PHP_FUNCTION(rmdir)
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r", &dir, &dir_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
