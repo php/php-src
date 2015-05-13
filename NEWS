@@ -160,6 +160,8 @@
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
   . Added wifcontinued and wcontinued. (xilon-jul)
+  . Added rusage support to pcntl_wait() and pcntl_waitpid(). (Anton Stepanenko,
+    Tony)
 
 - PCRE:
   . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
