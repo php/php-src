@@ -1837,7 +1837,7 @@ consult the installation file that came with this distribution, or visit \n\
 			 * if not, it's certainly not an HTTP over fcgi request */
 			if (!SG(request_info).request_method) {
 				zend_try {
-					zlog(ZLOG_DEBUG, "CRIPT_FILENAME env not found in cgi env");
+					zlog(ZLOG_ERROR, "SCRIPT_FILENAME env not found in cgi env");
 					SG(sapi_headers).http_response_code = 404;
 					PUTS("method not found.\n");
 				} zend_catch {
