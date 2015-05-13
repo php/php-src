@@ -759,7 +759,7 @@ PHP_FUNCTION(unpack)
 							len = size * 2;
 						} 
 
-						if (argb > 0) {	
+						if (len > 0 && argb > 0) {	
 							len -= argb % 2;
 						}
 
