@@ -201,7 +201,7 @@ static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 
 void fpm_php_soft_quit() /* {{{ */
 {
-	fcgi_set_in_shutdown(1);
+	fcgi_terminate();
 }
 /* }}} */
 
