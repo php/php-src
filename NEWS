@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
 
+- MCrypt:
+  . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
 - Opcache
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
