@@ -406,10 +406,12 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
+					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					/* relative extended_value don't have to be changed */
 					break;
 			}
 # endif
@@ -927,10 +929,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
+					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					/* relative extended_value don't have to be changed */
 					break;
 			}
 # endif

@@ -518,10 +518,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_NEW:
 					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
-					case ZEND_FE_FETCH_R:
-					case ZEND_FE_FETCH_RW:
 					case ZEND_ASSERT_CHECK:
 						ZEND_OP2(opline).jmp_addr = &new_opcodes[ZEND_OP2(opline).jmp_addr - op_array->opcodes];
+						break;
+					case ZEND_FE_FETCH_R:
+					case ZEND_FE_FETCH_RW:
+						/* relative extended_value don't have to be changed */
 						break;
 				}
 			}

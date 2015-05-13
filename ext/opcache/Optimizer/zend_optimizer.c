@@ -515,10 +515,12 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
-			case ZEND_FE_FETCH_R:
-			case ZEND_FE_FETCH_RW:
 			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
+				break;
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 				break;
 		}
 		opline++;
@@ -558,10 +560,12 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
-			case ZEND_FE_FETCH_R:
-			case ZEND_FE_FETCH_RW:
 			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
+				break;
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
