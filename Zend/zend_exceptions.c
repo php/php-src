@@ -752,6 +752,7 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Exception", NULL);
 	default_exception_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
 	default_exception_ce->create_object = zend_default_exception_new;
+	zend_class_implements(default_exception_ce, 1, zend_ce_throwable);
 
 	/* A trick, to make visible private properties of BaseException */
 	ZEND_HASH_FOREACH_PTR(&default_exception_ce->properties_info, prop) {
