@@ -207,11 +207,11 @@ PHPAPI const char* php_get_temporary_directory(void)
 		DWORD len = GetTempPath(sizeof(sTemp),sTemp);
 		assert(0 < len);  /* should *never* fail! */
 		if (sTemp[len - 1] == DEFAULT_SLASH) {
-			temporary_directory = zend_strndup(sTemp, len - 1);
+			PG(php_sys_temp_dir) = zend_strndup(sTemp, len - 1);
 		} else {
-			temporary_directory = zend_strndup(sTemp, len);
+			PG(php_sys_temp_dir) = zend_strndup(sTemp, len);
 		}
-		return temporary_directory;
+		return PG(php_sys_temp_dir);
 	}
 #else
 	/* On Unix use the (usual) TMPDIR environment variable. */
