@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
 
+- MCrypt:
+  . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
 - ODBC:
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
     (Anatol)
