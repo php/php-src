@@ -221,6 +221,76 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size TSR
 }
 
 
+static int php_mail_detect_multiple_crlf(char *hdr) {
+	/* This function detects malformed multiple newlines also */
+	char *tmp = hdr;
+
+	/* Should not have any newlines at the beginning */
+	while (*hdr && (*hdr == '\n' || *hdr == '\r')) {
+		hdr++;
+	}
+	if (tmp != hdr) {
+		return 1;
+	}
+
+	while(*hdr) {
+		if (*hdr == '\r') {
+			if (*(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
+				/* Malformed or multiple newlines */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else if (*hdr == '\n') {
+			if (*(hdr+1) == '\r' || *(hdr+1) == '\n') {
+				/* Malformed or multiple newlines */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else {
+			hdr++;
+		}
+	}
+	return 0;
+}
+
+
+static int php_mail_detect_multiple_crlf(char *hdr) {
+	/* This function detects malformed multiple newlines also */
+	char *tmp = hdr;
+
+	/* Should not have any newlines at the beginning */
+	while (*hdr && (*hdr == '\n' || *hdr == '\r')) {
+		hdr++;
+	}
+	if (tmp != hdr) {
+		return 1;
+	}
+
+	while(*hdr) {
+		if (*hdr == '\r') {
+			if (*(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
+				/* Malformed or multiple newlines */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else if (*hdr == '\n') {
+			if (*(hdr+1) == '\r' || *(hdr+1) == '\n') {
+				/* Malformed or multiple newlines */
+				return 1;
+			} else {
+				hdr += 2;
+			}
+		} else {
+			hdr++;
+		}
+	}
+	return 0;
+}
+
+
 /* {{{ php_mail
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
@@ -279,6 +349,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s", php_getuid(TSRMLS_C), f);
 		}
 		efree(f);
+	}
+
+	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
+		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		MAIL_RET(0);
+	}
+
+	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
+		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		MAIL_RET(0);
 	}
 
 	if (!sendmail_path) {
