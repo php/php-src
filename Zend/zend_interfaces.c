@@ -28,6 +28,7 @@ ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
+ZEND_API zend_class_entry *zend_ce_throwable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
@@ -502,6 +503,13 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
+/* {{{ zend_implement_throwable */
+static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	return SUCCESS;
+}
+/* }}}*/
+
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -549,6 +557,8 @@ const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	ZEND_FE_END
 };
+
+const zend_function_entry *zend_funcs_throwable    = NULL;
 /* }}} */
 
 #define REGISTER_INTERFACE(class_name, class_name_str) \
@@ -576,6 +586,8 @@ ZEND_API void zend_register_interfaces(void)
 	REGISTER_INTERFACE(arrayaccess, ArrayAccess);
 
 	REGISTER_INTERFACE(serializable, Serializable)
+
+	REGISTER_INTERFACE(throwable, Throwable)
 }
 /* }}} */
 
