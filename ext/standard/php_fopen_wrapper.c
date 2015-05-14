@@ -21,15 +21,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "php.h"
 #include "php_globals.h"
 #include "php_standard.h"
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
+
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
+#ifdef PHP_WIN32
+#include "win32/winutil.h"
+#endif
 
 static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
@@ -283,11 +288,12 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDERR_FILENO);
 		}
-	} else if (!strncasecmp(path, "fd/", 3)) {
+	} else if (!strncasecmp(path, "fd/", 3) || !strncasecmp(path, "fdraw/", 6)) {
 		const char *start;
 		char       *end;
 		zend_long  fildes_ori;
 		int		   dtablesize;
+		int	       is_raw = !strncasecmp(path, "fdraw/", 6);
 
 		if (strcmp(sapi_module.name, "cli")) {
 			if (options & REPORT_ERRORS) {
@@ -303,11 +309,16 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 
-		start = &path[3];
+		if (is_raw) {
+			start = &path[6];
+		} else {
+			start = &path[3];
+		}
+
 		fildes_ori = ZEND_STRTOL(start, &end, 10);
 		if (end == start || *end != '\0') {
 			php_stream_wrapper_log_error(wrapper, options,
-				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
+				"php://fd%s/ stream must be specified in the form php://fd/<orig fd>", is_raw ? "raw" : "");
 			return NULL;
 		}
 
@@ -323,12 +334,29 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 
-		fd = dup((int)fildes_ori);
-		if (fd == -1) {
-			php_stream_wrapper_log_error(wrapper, options,
-				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
-				"[%d]: %s", fildes_ori, errno, strerror(errno));
-			return NULL;
+		if (is_raw) {
+			fd = fildes_ori;
+
+#if defined(PHP_WIN32)
+			if ((HANDLE)_get_osfhandle(fd) == INVALID_HANDLE_VALUE) {
+#elif HAVE_FCNTL_H
+			if (fcntl(fd, F_GETFD) == -1) {
+#else
+#warning "No API to check file descriptor for this operating system, php://fdraw/ will not work"
+			if (0) {
+#endif
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "File descriptor %ld invalid: "
+						"[%d]: %s", fildes_ori, errno, strerror(errno));
+				return NULL;
+			}
+		} else {
+			fd = dup((int)fildes_ori);
+			if (fd == -1) {
+				php_stream_wrapper_log_error(wrapper, options,
+						"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
+						"[%d]: %s", fildes_ori, errno, strerror(errno));
+				return NULL;
+			}
 		}
 	} else if (!strncasecmp(path, "filter/", 7)) {
 		/* Save time/memory when chain isn't specified */
