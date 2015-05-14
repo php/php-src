@@ -27,11 +27,13 @@ unlink($filename);
 ?>
 --EXPECTF--
 Create a file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -49,11 +51,13 @@ array(9) {
 }
 
 Change to file's directory and open with a relative path:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>

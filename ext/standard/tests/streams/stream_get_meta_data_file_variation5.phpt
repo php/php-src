@@ -32,11 +32,13 @@ unlink($filename);
 ?>
 --EXPECTF--
 Write some data to the file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -55,11 +57,13 @@ array(9) {
 
 
 Read entire file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>

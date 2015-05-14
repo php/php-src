@@ -17,9 +17,11 @@ echo "Done";
 
 ?>
 --EXPECT--
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "rb"
   ["unread_bytes"]=>

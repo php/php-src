@@ -28,11 +28,13 @@ unlink($filename);
 
 ?>
 --EXPECTF--
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>
@@ -48,11 +50,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -68,11 +72,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "w"
   ["unread_bytes"]=>
@@ -88,11 +94,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -108,11 +116,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "a"
   ["unread_bytes"]=>
@@ -128,11 +138,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "a+"
   ["unread_bytes"]=>
@@ -148,11 +160,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "x"
   ["unread_bytes"]=>
@@ -168,11 +182,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "x+"
   ["unread_bytes"]=>
@@ -188,11 +204,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "rb"
   ["unread_bytes"]=>
@@ -208,11 +226,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "rb+"
   ["unread_bytes"]=>
@@ -228,11 +248,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "wb"
   ["unread_bytes"]=>
@@ -248,11 +270,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "wb+"
   ["unread_bytes"]=>
@@ -268,11 +292,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "ab"
   ["unread_bytes"]=>
@@ -288,11 +314,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "ab+"
   ["unread_bytes"]=>
@@ -308,11 +336,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "xb"
   ["unread_bytes"]=>
@@ -328,11 +358,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "xb+"
   ["unread_bytes"]=>
@@ -348,11 +380,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "rt"
   ["unread_bytes"]=>
@@ -368,11 +402,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "rt+"
   ["unread_bytes"]=>
@@ -388,11 +424,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "wt"
   ["unread_bytes"]=>
@@ -408,11 +446,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "wt+"
   ["unread_bytes"]=>
@@ -428,11 +468,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "at"
   ["unread_bytes"]=>
@@ -448,11 +490,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "at+"
   ["unread_bytes"]=>
@@ -468,11 +512,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "xt"
   ["unread_bytes"]=>
@@ -488,11 +534,13 @@ array(9) {
   ["eof"]=>
   bool(false)
 }
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(3) "xt+"
   ["unread_bytes"]=>

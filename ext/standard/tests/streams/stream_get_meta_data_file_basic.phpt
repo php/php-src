@@ -11,11 +11,13 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(1) "r"
   ["unread_bytes"]=>

@@ -36,9 +36,11 @@ fclose($server);
 
 ?>
 --EXPECTF--
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -55,9 +57,11 @@ array(7) {
 
 
 Set a timeout on the client and attempt a read:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -74,9 +78,11 @@ array(7) {
 
 
 Write some data from the server:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -93,9 +99,11 @@ array(7) {
 
 
 Read some data from the client:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>

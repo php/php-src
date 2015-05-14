@@ -48,6 +48,8 @@ bool(true)
 
 ------ stream_cast not implemented: -------
 
+Warning: stream_get_meta_data(): test_wrapper_base::stream_cast is not implemented! in %s
+
 Warning: stream_select(): test_wrapper_base::stream_cast is not implemented! in %s
 
 Warning: stream_select(): cannot represent a stream of type user-space as a select()able descriptor in %s
@@ -75,6 +77,10 @@ bool(false)
 
 ------ return value is stream itself: -------
 
+Warning: stream_get_meta_data(): supplied argument is not a valid stream resource in %s
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast must return a stream resource in %s
+
 Warning: stream_select(): test_wrapper::stream_cast must not return itself in %s
 
 Warning: stream_select(): cannot represent a stream of type user-space as a select()able descriptor in %s
@@ -83,6 +89,8 @@ Warning: stream_select(): No stream arrays were passed in %s
 bool(false)
 
 ------ return value cannot be casted: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast must not return itself in %s
 
 Warning: stream_select(): test_wrapper_base::stream_cast is not implemented! in %s
 
