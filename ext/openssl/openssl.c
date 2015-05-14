@@ -814,14 +814,15 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
-void php_openssl_store_errors(void)
+static void php_openssl_store_errors(void)
 {
 		PHP_SSL_ERROR_QUEUE *err,*tmp;
 		char buf[512];
 		unsigned long val;
+
 		TSRMLS_FETCH();
 
-		// Retrieve error from openssl error queue
+		/* Retrieve error from openssl error queue */
 		val = ERR_get_error();
 		if (val) {
 			err = emalloc(sizeof(PHP_SSL_ERROR_QUEUE));
@@ -834,17 +835,17 @@ void php_openssl_store_errors(void)
 			return ;
 		}
 
-		//initialize error context if is null;
+		/* initialize error context if is null */;
 		if(OPENSSL_G(ssl_error_glogal_context)==NULL) {
 			OPENSSL_G(ssl_error_glogal_context) = emalloc(sizeof(PHP_SSL_ERROR_CONTEXT));
 			OPENSSL_G(ssl_error_glogal_context)->current=NULL;
 		}
 
-		//If error queue is empty, create the first
+		/* If error queue is empty, create the first */
 		if(OPENSSL_G(ssl_error_glogal_context)->current==NULL){
 			OPENSSL_G(ssl_error_glogal_context)->current=err;
 		}else{
-			//Else, append error to last element
+			/* Else, append error to last element */
 			tmp=OPENSSL_G(ssl_error_glogal_context)->current;
 			while(tmp->next!=NULL)
 			{
@@ -855,14 +856,16 @@ void php_openssl_store_errors(void)
 
 }
 
-void php_openssl_deinitialize_error_queue(void)
+static void php_openssl_deinitialize_error_queue(void)
 {
-	TSRMLS_FETCH();
 	PHP_SSL_ERROR_QUEUE *tmp;
-	/* deinitialize error queue*/
+
+	TSRMLS_FETCH();
+
+	/* deinitialize error queue */
 	if(OPENSSL_G(ssl_error_glogal_context) != NULL  ){
 
-		//Empty error
+		/* Empty error */
 		while(OPENSSL_G(ssl_error_glogal_context)->current!=NULL){
 			tmp=OPENSSL_G(ssl_error_glogal_context)->current;
 			OPENSSL_G(ssl_error_glogal_context)->current=tmp->next;
@@ -3212,7 +3215,7 @@ PHP_FUNCTION(openssl_pkey_new)
 				}
 				EVP_PKEY_free(pkey);
 			}
-		    php_openssl_store_errors();
+			php_openssl_store_errors();
 			RETURN_FALSE;
 		} else if (zend_hash_find(Z_ARRVAL_P(args), "dsa", sizeof("dsa"), (void**)&data) == SUCCESS &&
 		           Z_TYPE_PP(data) == IS_ARRAY) {
@@ -3237,7 +3240,7 @@ PHP_FUNCTION(openssl_pkey_new)
 				}
 				EVP_PKEY_free(pkey);
 			}
-		    php_openssl_store_errors();
+			php_openssl_store_errors();
 			RETURN_FALSE;
 		} else if (zend_hash_find(Z_ARRVAL_P(args), "dh", sizeof("dh"), (void**)&data) == SUCCESS &&
 		           Z_TYPE_PP(data) == IS_ARRAY) {
@@ -3261,7 +3264,7 @@ PHP_FUNCTION(openssl_pkey_new)
 				}
 				EVP_PKEY_free(pkey);
 			}
-		    php_openssl_store_errors();
+			php_openssl_store_errors();
 			RETURN_FALSE;
 		}
 	} 
@@ -4318,26 +4321,26 @@ PHP_FUNCTION(openssl_error_string)
 	    return;
 	}
 
-	// Return false if error queue is empty or not initialized
+	/* Return false if error queue is empty or not initialized */
 	if(OPENSSL_G(ssl_error_glogal_context) == NULL || OPENSSL_G(ssl_error_glogal_context)->current==NULL ){
 		RETURN_FALSE;
 	}
 
-	// Get first error
+	/* Get first error */
 	tmp=OPENSSL_G(ssl_error_glogal_context)->current;
 
-	//Store error msg
+	/* Store error msg */
 	err_str=emalloc(strlen(tmp->err_str)+1);
 	strcpy(err_str,tmp->err_str);
 
-	//Update references of the error queue
+	/* Update references of the error queue */
 	if(tmp->next!=NULL){
 		OPENSSL_G(ssl_error_glogal_context)->current=tmp->next;
 	}else{
 		OPENSSL_G(ssl_error_glogal_context)->current=NULL;
 	}
 
-	//Free memory of the current error
+	/* Free memory of the current error */
 	efree(tmp->err_str);
 	efree(tmp);
 	RETURN_STRING(err_str,0);
