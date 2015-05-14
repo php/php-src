@@ -4937,8 +4937,8 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
 			off = zend_hash_index_find(jmptable, Z_LVAL_P(expr));
 			if (off == NULL) {
-				zval *truth = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUTH;
-				off = Z_LVAL_P(expr) ? truth : zero;
+				zval *true_ = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUE;
+				off = Z_LVAL_P(expr) ? true_ : zero;
 			} else if (Z_LVAL_P(expr) == 0) {
 				zval *nully = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
 				zval *min_falsy = Z_LVAL_P(zero) > Z_LVAL_P(nully) ? nully : zero;

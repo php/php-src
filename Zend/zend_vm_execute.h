@@ -5948,8 +5948,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CONST_CONST_HANDLE
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
 			off = zend_hash_index_find(jmptable, Z_LVAL_P(expr));
 			if (off == NULL) {
-				zval *truth = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUTH;
-				off = Z_LVAL_P(expr) ? truth : zero;
+				zval *true_ = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUE;
+				off = Z_LVAL_P(expr) ? true_ : zero;
 			} else if (Z_LVAL_P(expr) == 0) {
 				zval *nully = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
 				zval *min_falsy = Z_LVAL_P(zero) > Z_LVAL_P(nully) ? nully : zero;
@@ -32396,8 +32396,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CV_CONST_HANDLER(Z
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
 			off = zend_hash_index_find(jmptable, Z_LVAL_P(expr));
 			if (off == NULL) {
-				zval *truth = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUTH;
-				off = Z_LVAL_P(expr) ? truth : zero;
+				zval *true_ = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUE;
+				off = Z_LVAL_P(expr) ? true_ : zero;
 			} else if (Z_LVAL_P(expr) == 0) {
 				zval *nully = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
 				zval *min_falsy = Z_LVAL_P(zero) > Z_LVAL_P(nully) ? nully : zero;
@@ -42307,8 +42307,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_TMPVAR_CONST_HANDL
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
 			off = zend_hash_index_find(jmptable, Z_LVAL_P(expr));
 			if (off == NULL) {
-				zval *truth = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUTH;
-				off = Z_LVAL_P(expr) ? truth : zero;
+				zval *true_ = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_TRUE;
+				off = Z_LVAL_P(expr) ? true_ : zero;
 			} else if (Z_LVAL_P(expr) == 0) {
 				zval *nully = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
 				zval *min_falsy = Z_LVAL_P(zero) > Z_LVAL_P(nully) ? nully : zero;
