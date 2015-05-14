@@ -757,10 +757,20 @@ PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 PHP_FUNCTION(inflate_init)
 {
 	z_stream *ctx;
-	zend_long encoding;
+	zend_long encoding, window = 15;
+	HashTable *options;
+	zval *option_buffer;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l", &encoding)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		return;
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		window = zval_get_long(option_buffer);
+	}
+	if (window < 8 || window > 15) {
+		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
+		RETURN_FALSE;
 	}
 
 	switch (encoding) {
@@ -772,11 +782,17 @@ PHP_FUNCTION(inflate_init)
 			php_error_docref(NULL, E_WARNING,
 				"encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
 			RETURN_FALSE;
-    }
+	}
 
 	ctx = ecalloc(1, sizeof(php_zlib_context));
 	ctx->zalloc = php_zlib_alloc;
 	ctx->zfree = php_zlib_free;
+
+	if (encoding < 0) {
+		encoding += 15 - window;
+	} else {
+		encoding &= window;
+	}
 
 	if (Z_OK == inflateInit2(ctx, encoding)) {
 		RETURN_RES(zend_register_resource(ctx, le_inflate));
@@ -839,34 +855,34 @@ PHP_FUNCTION(inflate_add)
 		buffer_used = out->len - ctx->avail_out;
 
 		switch (status) {
-		case Z_OK:
-			if (ctx->avail_out == 0) {
-				/* more output buffer space needed; realloc and try again */
-				out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
-				ctx->avail_out = CHUNK_SIZE;
-				ctx->next_out = (Bytef *) out->val + buffer_used;
-				break;
-			} else {
+			case Z_OK:
+				if (ctx->avail_out == 0) {
+					/* more output buffer space needed; realloc and try again */
+					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					ctx->avail_out = CHUNK_SIZE;
+					ctx->next_out = (Bytef *) out->val + buffer_used;
+					break;
+				} else {
+					goto complete;
+				}
+			case Z_STREAM_END:
+				inflateReset(ctx);
 				goto complete;
-			}
-		case Z_STREAM_END:
-			inflateReset(ctx);
-			goto complete;
-		case Z_BUF_ERROR:
-			if (flush_type == Z_FINISH && ctx->avail_out == 0) {
-				/* more output buffer space needed; realloc and try again */
-				out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
-				ctx->avail_out = CHUNK_SIZE;
-				ctx->next_out = (Bytef *) out->val + buffer_used;
-				break;
-			} else {
-				/* No more input data; we're finished */
-				goto complete;
-			}
-		default:
-			zend_string_release(out);
-			php_error_docref(NULL, E_WARNING, "%s", zError(status));
-			RETURN_FALSE;
+			case Z_BUF_ERROR:
+				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
+					/* more output buffer space needed; realloc and try again */
+					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					ctx->avail_out = CHUNK_SIZE;
+					ctx->next_out = (Bytef *) out->val + buffer_used;
+					break;
+				} else {
+					/* No more input data; we're finished */
+					goto complete;
+				}
+			default:
+				zend_string_release(out);
+				php_error_docref(NULL, E_WARNING, "%s", zError(status));
+				RETURN_FALSE;
 		}
 	} while (1);
 
@@ -883,7 +899,7 @@ PHP_FUNCTION(inflate_add)
 PHP_FUNCTION(deflate_init)
 {
 	z_stream *ctx;
-	zend_long encoding, level = -1, memory = 8;
+	zend_long encoding, level = -1, memory = 8, window = 15;
 	HashTable *options = 0;
 	zval *option_buffer;
 
@@ -891,7 +907,7 @@ PHP_FUNCTION(deflate_init)
 		return;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "level", sizeof("level")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("level"))) != NULL) {
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
@@ -899,11 +915,19 @@ PHP_FUNCTION(deflate_init)
 		RETURN_FALSE;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "memory", sizeof("memory")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("memory"))) != NULL) {
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
 		php_error_docref(NULL, E_WARNING, "compression memory level (%pd) must be within 1..9", memory);
+		RETURN_FALSE;
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
+		window = zval_get_long(option_buffer);
+	}
+	if (window < 8 || window > 15) {
+		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -923,6 +947,12 @@ PHP_FUNCTION(deflate_init)
 	ctx = ecalloc(1, sizeof(php_zlib_context));
 	ctx->zalloc = php_zlib_alloc;
 	ctx->zfree = php_zlib_free;
+
+	if (encoding < 0) {
+		encoding += 15 - window;
+	} else {
+		encoding &= window;
+	}
 
 	if (Z_OK == deflateInit2(ctx, level, Z_DEFLATED, encoding, memory, Z_DEFAULT_STRATEGY)) {
 		RETURN_RES(zend_register_resource(ctx, le_deflate));
