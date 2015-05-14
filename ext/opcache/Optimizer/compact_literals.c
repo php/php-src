@@ -381,10 +381,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
-						if (LITERAL_NUM_SLOTS(info[i].flags)) {
-							Z_CACHE_SLOT(op_array->literals[j]) = cache_slots;
-							cache_slots += LITERAL_NUM_SLOTS(info[i].flags);
-						}
 						j++;
 						n = LITERAL_NUM_RELATED(info[i].flags);
 						while (n > 1) {
