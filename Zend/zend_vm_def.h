@@ -3563,7 +3563,7 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = NULL;
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (RETURN_VALUE_USED(opline)) {
+			if (EXPECTED(RETURN_VALUE_USED(opline))) {
 				ret = EX_VAR(opline->result.var);
 				zend_generator_create_zval(call, &fbc->op_array, ret);
 				Z_VAR_FLAGS_P(ret) = 0;
@@ -3685,11 +3685,14 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		EG(scope) = fbc->common.scope;
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (RETURN_VALUE_USED(opline)) {
+			if (EXPECTED(RETURN_VALUE_USED(opline))) {
 				ret = EX_VAR(opline->result.var);
 				zend_generator_create_zval(call, &fbc->op_array, ret);
 				Z_VAR_FLAGS_P(ret) = 0;
 			} else {
+				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
+					OBJ_RELEASE((zend_object*)fbc->op_array.prototype);
+				}
 				zend_vm_stack_free_args(call);
 			}
 		} else {
