@@ -537,6 +537,9 @@ Other
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
     accessible through stream_get_meta_data() output.
 
+- Reflection
+  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
+
 ========================================
 3. Changes in SAPI modules
 ========================================

@@ -180,6 +180,7 @@
 
 - Reflection
   . Fixed inheritance chain of Reflector interface. (Tjerk)
+  . Added ReflectionGenerator class. (Bob)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
