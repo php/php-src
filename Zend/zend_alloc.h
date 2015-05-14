@@ -310,7 +310,7 @@ struct _zend_mm_storage {
 };
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
-ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_handlers *handlers, void *data, size_t data_size);
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
 
 /*
 

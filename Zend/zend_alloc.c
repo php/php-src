@@ -2499,7 +2499,7 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 	return zend_mm_init();
 }
 
-ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_handlers *handlers, void *data, size_t data_size)
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size)
 {
 #if ZEND_MM_STORAGE
 	zend_mm_storage tmp_storage, *storage;

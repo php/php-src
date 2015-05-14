@@ -29,13 +29,17 @@ static void zend_mm_mem_free(zend_mm_storage *storage, void *ptr, size_t size) {
 
 void phpdbg_set_sigsafe_mem(char *buffer) {
 	phpdbg_signal_safe_mem *mem = &PHPDBG_G(sigsafe_mem);
+	const zend_mm_handlers phpdbg_handlers = {
+		zend_mm_mem_alloc,
+		zend_mm_mem_free,
+		NULL,
+		NULL,
+	};
+
 	mem->mem = buffer;
 	mem->allocated = 0;
 
-	mem->storage.chunk_alloc = zend_mm_mem_alloc;
-	mem->storage.chunk_free = zend_mm_mem_free;
-
-	mem->heap = zend_mm_startup_ex(&mem->storage);
+	mem->heap = zend_mm_startup_ex(&phpdbg_handlers, NULL, 0);
 
 	mem->old_heap = zend_mm_set_heap(mem->heap);
 }
