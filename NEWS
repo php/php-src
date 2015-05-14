@@ -2,13 +2,22 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2015, PHP 5.6.10
 
-14 May 2015, PHP 5.6.9
-
 - Core:
   . Fixed bug #66048 (temp. directory is cached during multiple requests).
     (Julien)
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
     in extension trait). (jbboehr at gmail dot com)
+  . Fixed bug #69599 (Strange generator+exception+variadic crash). (Nikita)
+
+- Iconv:
+  . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
+
+- MCrypt:
+  . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
+14 May 2015, PHP 5.6.9
+
+- Core:
   . Fixed bug #69467 (Wrong checked for the interface by using Trait). 
     (Laruence)
   . Fixed bug #69420 (Invalid read in zend_std_get_method). (Laruence)
@@ -21,13 +30,15 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #69472 (php_sys_readlink ignores misc errors from
        GetFinalPathNameByHandleA). (Jan Starke)
-  . Fixed bug #69599 (Strange generator+exception+variadic crash). (Nikita)
+  . Fixed bug #69364 (PHP Multipart/form-data remote dos Vulnerability). (Stas)
+  . Fixed bug #69403 (str_repeat() sign mismatch based memory corruption).
+    (Stas)
+  . Fixed bug #69418 (CVE-2006-7243 fix regressions in 5.4+). (Stas)
+  . Fixed bug #69522 (heap buffer overflow in unpack()). (Stas)
 
-- Iconv:
-  . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
-
-- MCrypt:
-  . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+- FTP:
+  . Fixed bug #69545 (Integer overflow in ftp_genlist() resulting in heap
+    overflow). (Stas)
 
 - ODBC:
   . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
@@ -40,6 +51,16 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #69402 (Reading empty SSL stream hangs until timeout).
     (Daniel Lowrey)
+
+- PCNTL:
+  . Fixed bug #68598 (pcntl_exec() should not allow null char). (Stas)
+
+- PCRE
+  . Upgraded pcrelib to 8.37.
+
+- Phar:
+  . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry
+    filename starts with null). (Stas)
 
 16 Apr 2015, PHP 5.6.8
 
