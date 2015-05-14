@@ -1,3 +1,6 @@
+#ifndef PHP_WIN32_SIGNAL_H
+#define PHP_WIN32_SIGNAL_H
+
 #if _MSC_VER >= 1900
 #include <signal.h>
 #else
@@ -18,3 +21,5 @@
 #define SIGALRM 13
 #define	SIGVTALRM 26			/* virtual time alarm */
 #define	SIGPROF	27				/* profiling time alarm */
+
+#endif /* PHP_WIN32_SIGNAL_H */
