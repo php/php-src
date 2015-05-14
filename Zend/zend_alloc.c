@@ -770,7 +770,7 @@ static void *zend_mm_chunk_alloc(zend_mm_heap *heap, size_t size, size_t alignme
 {
 #if ZEND_MM_STORAGE
 	if (UNEXPECTED(heap->storage)) {
-		void *ptr = heap->storage->chunk_alloc(heap->storage, size, alignment);
+		void *ptr = heap->storage->handlers.chunk_alloc(heap->storage, size, alignment);
 		ZEND_ASSERT(((zend_uintptr_t)((char*)ptr + (alignment-1)) & (alignment-1)) == (zend_uintptr_t)ptr);
 		return ptr;
 	}
@@ -782,22 +782,48 @@ static void zend_mm_chunk_free(zend_mm_heap *heap, void *addr, size_t size)
 {
 #if ZEND_MM_STORAGE
 	if (UNEXPECTED(heap->storage)) {
-		heap->storage->chunk_free(heap->storage, addr, size);
+		heap->storage->handlers.chunk_free(heap->storage, addr, size);
 		return;
 	}
 #endif
 	zend_mm_munmap(addr, size);
 }
 
-static void zend_mm_chunk_truncate(zend_mm_heap *heap, void *addr, size_t old_size, size_t new_size)
+static int zend_mm_chunk_truncate(zend_mm_heap *heap, void *addr, size_t old_size, size_t new_size)
 {
 #if ZEND_MM_STORAGE
 	if (UNEXPECTED(heap->storage)) {
-		heap->storage->chunk_truncate(heap->storage, addr, old_size, new_size);
-		return;
+		if (heap->storage->handlers.chunk_truncate) {
+			return heap->storage->handlers.chunk_truncate(heap->storage, addr, old_size, new_size);
+		} else {
+			return 0;
+		}
 	}
 #endif
+#ifndef _WIN32
 	zend_mm_munmap((char*)addr + new_size, old_size - new_size);
+	return 1;
+#else
+	return 0;
+#endif
+}
+
+static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size, size_t new_size)
+{
+#if ZEND_MM_STORAGE
+	if (UNEXPECTED(heap->storage)) {
+		if (heap->storage->handlers.chunk_extend) {
+			return heap->storage->handlers.chunk_extend(heap->storage, addr, old_size, new_size);
+		} else {
+			return 0;
+		}
+	}
+#endif
+#ifndef _WIN32
+	return (zend_mm_mmap_fixed((char*)addr + old_size, new_size - old_size) != NULL);
+#else
+	return 0;
+#endif
 }
 
 static zend_always_inline void zend_mm_chunk_init(zend_mm_heap *heap, zend_mm_chunk *chunk)
@@ -1401,22 +1427,22 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 				zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #endif
 				return ptr;
-#ifndef _WIN32
 			} else if (new_size < old_size) {
 				/* unmup tail */
-				zend_mm_chunk_truncate(heap, ptr, old_size, new_size);
+				if (zend_mm_chunk_truncate(heap, ptr, old_size, new_size)) {
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
-				heap->real_size -= old_size - new_size;
+					heap->real_size -= old_size - new_size;
 #endif
 #if ZEND_MM_STAT
-				heap->size -= old_size - new_size;
+					heap->size -= old_size - new_size;
 #endif
 #if ZEND_DEBUG
-				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #else
-				zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+					zend_mm_change_huge_block_size(heap, ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #endif
-				return ptr;
+					return ptr;
+				}
 			} else /* if (new_size > old_size) */ {
 #if ZEND_MM_LIMIT
 				if (heap->real_size + (new_size - old_size) > heap->limit) {
@@ -1431,7 +1457,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 				}
 #endif
 				/* try to map tail right after this block */
-				if (zend_mm_mmap_fixed((char*)ptr + old_size, new_size - old_size)) {
+				if (zend_mm_chunk_extend(heap, ptr, old_size, new_size)) {
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
 					heap->real_size += new_size - old_size;
 #endif
@@ -1445,7 +1471,6 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #endif
 					return ptr;
 				}
-#endif
 			}
 		}
 	} else {
@@ -1980,17 +2005,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 			zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
 		}
 		/* free the first chunk */
-#if ZEND_MM_STORAGE
-		if (UNEXPECTED(heap->storage)) {
-			zend_mm_storage *storage = heap->storage;
-			zend_mm_chunk_free(heap, heap->main_chunk, ZEND_MM_CHUNK_SIZE);
-			storage->dtor(storage);
-		} else {
-			zend_mm_chunk_free(heap, heap->main_chunk, ZEND_MM_CHUNK_SIZE);
-		}
-#else
 		zend_mm_chunk_free(heap, heap->main_chunk, ZEND_MM_CHUNK_SIZE);
-#endif
 	} else {
 		zend_mm_heap old_heap;
 
@@ -2472,7 +2487,7 @@ ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap)
 {
-#if ZEND_MM_CUSTOM
+#if ZEND_MM_STORAGE
 	return heap->storage;
 #else
 	return NULL
@@ -2484,12 +2499,16 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 	return zend_mm_init();
 }
 
-ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_storage *storage)
+ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_handlers *handlers, void *data, size_t data_size)
 {
 #if ZEND_MM_STORAGE
-	zend_mm_chunk *chunk = (zend_mm_chunk*)storage->chunk_alloc(storage, ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
+	zend_mm_storage tmp_storage, *storage;
+	zend_mm_chunk *chunk;
 	zend_mm_heap *heap;
 
+	memcpy((zend_mm_handlers*)&tmp_storage.handlers, handlers, sizeof(zend_mm_handlers));
+	tmp_storage.data = data;
+	chunk = (zend_mm_chunk*)handlers->chunk_alloc(&tmp_storage, ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(chunk == NULL)) {
 #if ZEND_MM_ERROR
 #ifdef _WIN32
@@ -2530,8 +2549,26 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_storage *storage)
 #if ZEND_MM_CUSTOM
 	heap->use_custom_heap = 0;
 #endif
-	heap->storage = storage;
+	heap->storage = &tmp_storage;
 	heap->huge_list = NULL;
+	storage = _zend_mm_alloc(heap, sizeof(zend_mm_storage) + data_size ZEND_FILE_LINE_CC ZEND_FILE_LINE_CC);
+	if (!storage) {
+		handlers->chunk_free(&tmp_storage, chunk, ZEND_MM_CHUNK_SIZE);
+#if ZEND_MM_ERROR
+#ifdef _WIN32
+		stderr_last_error("Can't initialize heap");
+#else
+		fprintf(stderr, "\nCan't initialize heap: [%d] %s\n", errno, strerror(errno));
+#endif
+#endif
+		return NULL;
+	}
+	memcpy(storage, &tmp_storage, sizeof(zend_mm_storage));
+	if (data) {
+		storage->data = (void*)(((char*)storage + sizeof(zend_mm_storage)));
+		memcpy(storage->data, data, data_size);
+	}
+	heap->storage = storage;
 	return heap;
 #else
 	return NULL;

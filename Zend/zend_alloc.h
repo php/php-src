@@ -294,18 +294,108 @@ typedef struct _zend_mm_storage zend_mm_storage;
 
 typedef	void* (*zend_mm_chunk_alloc_t)(zend_mm_storage *storage, size_t size, size_t alignment);
 typedef void  (*zend_mm_chunk_free_t)(zend_mm_storage *storage, void *chunk, size_t size);
-typedef void  (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
-typedef void  (*zend_mm_storage_dtor_t)(zend_mm_storage *storage);
+typedef int   (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
+typedef int   (*zend_mm_chunk_extend_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
 
-struct _zend_mm_storage {
+typedef struct _zend_mm_handlers {
 	zend_mm_chunk_alloc_t       chunk_alloc;
 	zend_mm_chunk_free_t        chunk_free;
 	zend_mm_chunk_truncate_t    chunk_truncate;
-	zend_mm_storage_dtor_t      dtor;
+	zend_mm_chunk_extend_t      chunk_extend;
+} zend_mm_handlers;
+
+struct _zend_mm_storage {
+	const zend_mm_handlers handlers;
+	void *data;
 };
 
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
-ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_storage *storage);
+ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_handlers *handlers, void *data, size_t data_size);
+
+/*
+
+// The following example shows how to use zend_mm_heap API with custom storage
+
+static zend_mm_heap *apc_heap = NULL;
+static HashTable    *apc_ht = NULL;
+
+typedef struct _apc_data {
+	void     *mem;
+	uint32_t  free_pages;
+} apc_data;
+
+static void *apc_chunk_alloc(zend_mm_storage *storage, size_t size, size_t alignment)
+{
+	apc_data *data = (apc_data*)(storage->data);
+	size_t real_size = ((size + (ZEND_MM_CHUNK_SIZE-1)) & ~(ZEND_MM_CHUNK_SIZE-1));
+	uint32_t count = real_size / ZEND_MM_CHUNK_SIZE;
+	uint32_t first, last, i;
+
+	ZEND_ASSERT(alignment == ZEND_MM_CHUNK_SIZE);
+
+	for (first = 0; first < 32; first++) {
+		if (!(data->free_pages & (1 << first))) {
+			last = first;
+			do {
+				if (last - first == count - 1) {
+					for (i = first; i <= last; i++) {
+						data->free_pages |= (1 << i);
+					}
+					return (void *)(((char*)(data->mem)) + ZEND_MM_CHUNK_SIZE * (1 << first));
+				}
+				last++;
+			} while (last < 32 && !(data->free_pages & (1 << last)));
+			first = last;
+		}
+	}
+	return NULL;
+}
+
+static void apc_chunk_free(zend_mm_storage *storage, void *chunk, size_t size)
+{
+	apc_data *data = (apc_data*)(storage->data);
+	uint32_t i;
+
+	ZEND_ASSERT(((uintptr_t)chunk & (ZEND_MM_CHUNK_SIZE - 1)) == 0);
+
+	i = ((uintptr_t)chunk - (uintptr_t)(data->mem)) / ZEND_MM_CHUNK_SIZE;
+	while (1) {
+		data->free_pages &= ~(1 << i);
+		if (size <= ZEND_MM_CHUNK_SIZE) {
+			break;
+		}
+		size -= ZEND_MM_CHUNK_SIZE;
+	}
+}
+
+static void apc_init_heap(void)
+{
+	zend_mm_handlers apc_handlers = {
+		apc_chunk_alloc,
+		apc_chunk_free,
+		NULL,
+		NULL,
+	};
+	apc_data tmp_data;
+	zend_mm_heap *old_heap;
+
+	// Preallocate properly aligned SHM chunks (64MB)
+	tmp_data.mem = shm_memalign(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE * 32);
+	
+	// Initialize temporary storage data
+	tmp_data.free_pages = 0;
+
+	// Create heap
+	apc_heap = zend_mm_startup_ex(&apc_handlers, &tmp_data, sizeof(tmp_data));
+
+	// Allocate some data in the heap
+	old_heap = zend_mm_set_heap(apc_heap);
+	ALLOC_HASHTABLE(apc_ht);
+	zend_hash_init(apc_ht, 64, NULL, ZVAL_PTR_DTOR, 0);
+	zend_mm_set_heap(old_heap);
+}
+ 
+*/
 
 END_EXTERN_C()
 
