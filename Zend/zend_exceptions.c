@@ -922,7 +922,6 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 
 		zend_string_release(file);
 		zend_string_release(message);
-		OBJ_RELEASE(ex);
 	} else if (instanceof_function(ce_exception, base_exception_ce)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -969,6 +968,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}
+
+	OBJ_RELEASE(ex);
 }
 /* }}} */
 
