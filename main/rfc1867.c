@@ -420,8 +420,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 
 	/* get lines of text, or CRLF_CRLF */
 
-	while( (line = get_line(self)) && line[0] != '\0' )
-	{
+	while ((line = get_line(self)) && line[0] != '\0') {
 		/* add header to table */
 		char *value = NULL;
 
@@ -435,7 +434,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 
 		if (value) {
-			if(buf_value.c && key) {
+			if (buf_value.c && key) {
 				/* new entry, add the old one to the list */
 				smart_string_0(&buf_value);
 				entry.key = key;
@@ -446,7 +445,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 			}
 
 			*value = '\0';
-			do { value++; } while(isspace(*value));
+			do { value++; } while (isspace(*value));
 
 			key = estrdup(line);
 			smart_string_appends(&buf_value, value);
@@ -457,7 +456,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 	}
 
-	if(buf_value.c && key) {
+	if (buf_value.c && key) {
 		/* add the last one to the list */
 		smart_string_0(&buf_value);
 		entry.key = key;
