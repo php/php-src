@@ -775,6 +775,8 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 			zend_string **end, **ptr = strings - 1;
 
 			ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+				int i;
+
 				*++ptr = zval_get_string(cur);
 				if (!*ptr || (*ptr)->len == 0) {
 					if (*ptr) {
@@ -786,6 +788,16 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 					efree(strings);
 					php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
 					return 0;
+				}
+				for (i = 0; i < (*ptr)->len; i++) {
+					if ((*ptr)->val[i] == 0) {
+						do {
+							efree(ptr);
+						} while (--ptr >= strings);
+						efree(strings);
+						php_error_docref(NULL, E_WARNING, "dictionary entries must not contain a NULL-byte");
+						return 0;
+					}
 				}
 
 				*dictlen += (*ptr)->len + 1;
@@ -950,7 +962,7 @@ PHP_FUNCTION(inflate_add)
 							php_ctx->inflateDict = NULL;
 							break;
 						case Z_DATA_ERROR:
-							php_error_docref(NULL, E_WARNING, "dictionary does match expected dictionary (incorrect adler32 hash)");
+							php_error_docref(NULL, E_WARNING, "dictionary does not match expected dictionary (incorrect adler32 hash)");
 							efree(php_ctx->inflateDict);
 							zend_string_release(out);
 							php_ctx->inflateDict = NULL;

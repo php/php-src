@@ -21,5 +21,5 @@ var_dump(inflate_add($r, $a, ZLIB_FINISH));
 string(%d) "%s"
 string(6) "abdcde"
 
-Warning: inflate_add(): dictionary does match expected dictionary (incorrect adler32 hash) in %s on line %d
+Warning: inflate_add(): dictionary does not match expected dictionary (incorrect adler32 hash) in %s on line %d
 bool(false)
