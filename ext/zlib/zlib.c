@@ -982,7 +982,7 @@ PHP_FUNCTION(inflate_add)
 PHP_FUNCTION(deflate_init)
 {
 	z_stream *ctx;
-	zend_long encoding, level = -1, memory = 8, window = 15;
+	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
 	HashTable *options = 0;
@@ -1012,11 +1012,24 @@ PHP_FUNCTION(deflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (%pd) must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
-	/* @TODO: in the future we may add "strategy" option */
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("strategy"))) != NULL) {
+		strategy = zval_get_long(option_buffer);
+	}
+	switch (strategy) {
+		case Z_FILTERED:
+		case Z_HUFFMAN_ONLY:
+		case Z_RLE:
+		case Z_FIXED:
+		case Z_DEFAULT_STRATEGY:
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "strategy must be one of ZLIB_FILTERED, ZLIB_HUFFMAN_ONLY, ZLIB_RLE, ZLIB_FIXED or ZLIB_DEFAULT_STRATEGY", strategy);
+			RETURN_FALSE;
+	}
 
 	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
 		RETURN_FALSE;
@@ -1043,7 +1056,7 @@ PHP_FUNCTION(deflate_init)
 		encoding &= window;
 	}
 
-	if (Z_OK == deflateInit2(ctx, level, Z_DEFLATED, encoding, memory, Z_DEFAULT_STRATEGY)) {
+	if (Z_OK == deflateInit2(ctx, level, Z_DEFLATED, encoding, memory, strategy)) {
 		if (dict) {
 			int success = deflateSetDictionary(ctx, (Bytef *) dict, dictlen);
 			ZEND_ASSERT(success == Z_OK);
@@ -1400,6 +1413,12 @@ static PHP_MINIT_FUNCTION(zlib)
 	REGISTER_LONG_CONSTANT("ZLIB_FULL_FLUSH", Z_FULL_FLUSH, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_BLOCK", Z_BLOCK, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_FINISH", Z_FINISH, CONST_CS|CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("ZLIB_FILTERED", Z_FILTERED, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_HUFFMAN_ONLY", Z_HUFFMAN_ONLY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_RLE", Z_RLE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_FIXED", Z_FIXED, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_DEFAULT_STRATEGY", Z_DEFAULT_STRATEGY, CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_STRING_CONSTANT("ZLIB_VERSION", ZLIB_VERSION, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_VERNUM", ZLIB_VERNUM, CONST_CS|CONST_PERSISTENT);
