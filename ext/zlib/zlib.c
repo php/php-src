@@ -76,6 +76,9 @@ void deflate_rsrc_dtor(zend_resource *res)
 void inflate_rsrc_dtor(zend_resource *res)
 {
 	z_stream *ctx = zend_fetch_resource(res, NULL, le_inflate);
+	if (((php_zlib_context *) ctx)->inflateDict) {
+		efree(((php_zlib_context *) ctx)->inflateDict);
+	}
 	inflateEnd(ctx);
 	efree(ctx);
 }
@@ -752,12 +755,66 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
+static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
+	zval *option_buffer;
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
+		HashTable *dictionary;
+
+		ZVAL_DEREF(option_buffer);
+		if (Z_TYPE_P(option_buffer) != IS_ARRAY) {
+			php_error_docref(NULL, E_WARNING, "dictionary must be of type array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
+			return 0;
+		}
+		dictionary = Z_ARR_P(option_buffer);
+
+		if (zend_hash_num_elements(dictionary) > 0) {
+			char *dictptr;
+			zval *cur;
+			zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
+			zend_string **end, **ptr = strings - 1;
+
+			ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+				*++ptr = zval_get_string(cur);
+				if (!*ptr || (*ptr)->len == 0) {
+					if (*ptr) {
+						efree(*ptr);
+					}
+					while (--ptr >= strings) {
+						efree(ptr);
+					}
+					efree(strings);
+					php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
+					return 0;
+				}
+
+				*dictlen += (*ptr)->len + 1;
+			} ZEND_HASH_FOREACH_END();
+
+			dictptr = *dict = emalloc(*dictlen);
+			ptr = strings;
+			end = strings + zend_hash_num_elements(dictionary);
+			do {
+				memcpy(dictptr, *ptr, (*ptr)->len);
+				dictptr += (*ptr)->len;
+				*dictptr++ = 0;
+				zend_string_release(*ptr);
+			} while (++ptr != end);
+			efree(strings);
+		}
+	}
+
+	return 1;
+}
+
 /* {{{ proto resource inflate_init(int encoding)
    Initialize an incremental inflate context with the specified encoding */
 PHP_FUNCTION(inflate_init)
 {
 	z_stream *ctx;
 	zend_long encoding, window = 15;
+	char *dict = NULL;
+	size_t dictlen = 0;
 	HashTable *options;
 	zval *option_buffer;
 
@@ -773,20 +830,25 @@ PHP_FUNCTION(inflate_init)
 		RETURN_FALSE;
 	}
 
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_FALSE;
+	}
+
 	switch (encoding) {
 		case PHP_ZLIB_ENCODING_RAW:
 		case PHP_ZLIB_ENCODING_GZIP:
 		case PHP_ZLIB_ENCODING_DEFLATE:
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING,
-				"encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
+			php_error_docref(NULL, E_WARNING, "encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE");
 			RETURN_FALSE;
 	}
 
 	ctx = ecalloc(1, sizeof(php_zlib_context));
 	ctx->zalloc = php_zlib_alloc;
 	ctx->zfree = php_zlib_free;
+	((php_zlib_context *) ctx)->inflateDict = dict;
+	((php_zlib_context *) ctx)->inflateDictlen = dictlen;
 
 	if (encoding < 0) {
 		encoding += 15 - window;
@@ -879,6 +941,27 @@ PHP_FUNCTION(inflate_add)
 					/* No more input data; we're finished */
 					goto complete;
 				}
+			case Z_NEED_DICT:
+				if (((php_zlib_context *) ctx)->inflateDict) {
+					php_zlib_context *php_ctx = (php_zlib_context *) ctx;
+					switch (inflateSetDictionary(ctx, (Bytef *) php_ctx->inflateDict, php_ctx->inflateDictlen)) {
+						case Z_OK:
+							efree(php_ctx->inflateDict);
+							php_ctx->inflateDict = NULL;
+							break;
+						case Z_DATA_ERROR:
+							php_error_docref(NULL, E_WARNING, "dictionary does match expected dictionary (incorrect adler32 hash)");
+							efree(php_ctx->inflateDict);
+							zend_string_release(out);
+							php_ctx->inflateDict = NULL;
+							RETURN_FALSE;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+					break;
+				} else {
+					php_error_docref(NULL, E_WARNING, "inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
+					RETURN_FALSE;
+				}
 			default:
 				zend_string_release(out);
 				php_error_docref(NULL, E_WARNING, "%s", zError(status));
@@ -900,6 +983,8 @@ PHP_FUNCTION(deflate_init)
 {
 	z_stream *ctx;
 	zend_long encoding, level = -1, memory = 8, window = 15;
+	char *dict = NULL;
+	size_t dictlen = 0;
 	HashTable *options = 0;
 	zval *option_buffer;
 
@@ -931,7 +1016,11 @@ PHP_FUNCTION(deflate_init)
 		RETURN_FALSE;
 	}
 
-	/* @TODO: in the future we may add "strategy" and "dictionary" options */
+	/* @TODO: in the future we may add "strategy" option */
+
+	if (!zlib_create_dictionary_string(options, &dict, &dictlen)) {
+		RETURN_FALSE;
+	}
 
 	switch (encoding) {
 		case PHP_ZLIB_ENCODING_RAW:
@@ -955,6 +1044,12 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (Z_OK == deflateInit2(ctx, level, Z_DEFLATED, encoding, memory, Z_DEFAULT_STRATEGY)) {
+		if (dict) {
+			int success = deflateSetDictionary(ctx, (Bytef *) dict, dictlen);
+			ZEND_ASSERT(success == Z_OK);
+			efree(dict);
+		}
+
 		RETURN_RES(zend_register_resource(ctx, le_deflate));
 	} else {
 		efree(ctx);
