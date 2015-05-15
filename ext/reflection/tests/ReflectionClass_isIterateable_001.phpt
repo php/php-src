@@ -86,4 +86,7 @@ NULL
 
 Test static invocation:
 
-Fatal error: Non-static method ReflectionClass::isIterateable() cannot be called statically in %s on line 43
+Fatal error: Uncaught exception 'EngineException' with message 'Non-static method ReflectionClass::isIterateable() cannot be called statically' in %s:43
+Stack trace:
+#0 {main}
+  thrown in %s on line 43

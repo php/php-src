@@ -9,4 +9,8 @@ function f($a=namespace\bar) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Undefined constant 'Foo\bar' in %sbug43344_7.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'Foo\bar'' in %sbug43344_7.php:%d
+Stack trace:
+#0 %s(%d): Foo\f()
+#1 {main}
+  thrown in %sbug43344_7.php on line %d

@@ -11,5 +11,8 @@ function foo() {
 --EXPECTF--
 ok
 
-Fatal error: Call to undefined method Exception::bar() in %sns_038.php on line 7
+Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined method Exception::bar()' in %sns_038.php:7
+Stack trace:
+#0 {main}
+  thrown in %sns_038.php on line 7
 

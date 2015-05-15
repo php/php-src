@@ -9,4 +9,7 @@ new Foo;
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Class 'Foo' not found in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Class 'Foo' not found' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

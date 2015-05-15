@@ -19,5 +19,8 @@ Deprecated: Non-static method foo::bar() should not be called statically in %sbu
 ok
 bool(false)
 
-Fatal error: Non-static method BaseException::getMessage() cannot be called statically in %sbug47857.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Non-static method BaseException::getMessage() cannot be called statically' in %sbug47857.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sbug47857.php on line %d
 

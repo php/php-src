@@ -21,4 +21,7 @@ unset($obj);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Call to private Derived::__destruct() from context '' in %sdestructor_visibility_001.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to private Derived::__destruct() from context ''' in %sdestructor_visibility_001.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sdestructor_visibility_001.php on line %d

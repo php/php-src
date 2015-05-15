@@ -29,4 +29,7 @@ bool(false)
 Warning: IntlTimeZone::getCanonicalID(): intltz_get_canonical_id: could not convert time zone id to UTF-16 in %s on line %d
 bool(false)
 
-Fatal error: Cannot pass parameter 2 by reference in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot pass parameter 2 by reference' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -16,4 +16,7 @@ echo $wrongClassname::foo()."\n";
 --EXPECTF--
 foo
 
-Fatal error: Class 'B' not found in %s043.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Class 'B' not found' in %s043.php:%d
+Stack trace:
+#0 {main}
+  thrown in %s043.php on line %d

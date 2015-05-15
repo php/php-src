@@ -5,4 +5,7 @@ Bug #33318 (throw 1; results in Invalid opcode 108/1/8)
 throw 1;
 ?>
 --EXPECTF--
-Fatal error: Can only throw objects in %sbug33318.php on line 2
+Fatal error: Uncaught exception 'EngineException' with message 'Can only throw objects' in %sbug33318.php:2
+Stack trace:
+#0 {main}
+  thrown in %sbug33318.php on line 2

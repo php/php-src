@@ -93,4 +93,7 @@ array(1) {
 
 Warning: PDO::prepare(): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'unknown_column' in 'field list' in %s on line %d
 
-Fatal error: Call to a member function execute() on boolean in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to a member function execute() on boolean' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

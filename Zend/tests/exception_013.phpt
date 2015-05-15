@@ -33,4 +33,7 @@ Exception: Cannot access private property C::$p in %sexception_013.php on line 1
 
 Exception: Attempt to unset static property C::$a in %sexception_013.php on line 19
 
-Fatal error: Access to undeclared static property: C::$a in %sexception_013.php on line 24
+Fatal error: Uncaught exception 'EngineException' with message 'Access to undeclared static property: C::$a' in %sexception_013.php:24
+Stack trace:
+#0 {main}
+  thrown in %sexception_013.php on line 24

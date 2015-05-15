@@ -13,4 +13,7 @@ new $a;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot instantiate abstract class foo in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot instantiate abstract class foo' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -15,4 +15,7 @@ $obj = new test;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to private test::__construct() from invalid context in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to private test::__construct() from invalid context' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

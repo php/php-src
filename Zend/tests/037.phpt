@@ -16,4 +16,7 @@ var_dump($x::$x);
 --EXPECTF--
 int(1)
 
-Fatal error: Access to undeclared static property: Closure::$x in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Access to undeclared static property: Closure::$x' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
