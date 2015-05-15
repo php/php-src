@@ -2977,19 +2977,20 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	int num_keys = 0;
 	size_t minlen = 128*1024;
 	size_t maxlen = 0;
-	HashTable str_hash, num_hash;
+	HashTable str_hash;
 	zval *entry, tmp, dummy;
 	char *key;
 	smart_str result = {0};
 	zend_ulong bitset[256/sizeof(zend_ulong)];
+	zend_ulong *num_bitset;
 
 	/* we will collect all possible key lengths */
 	ZVAL_NULL(&dummy);
-	zend_hash_init(&num_hash, 8, NULL, NULL, 0);
+	num_bitset = ecalloc((slen + (sizeof(zend_ulong)-1)) / sizeof(zend_ulong), sizeof(zend_ulong));
 	memset(bitset, 0, sizeof(bitset));
 
 	/* check if original array has numeric keys */
-	ZEND_HASH_FOREACH_KEY(pats, num_key, str_key) {
+	ZEND_HASH_FOREACH_STR_KEY(pats, str_key) {
 		if (UNEXPECTED(!str_key)) {
 			num_keys = 1;
 		} else {
@@ -3007,12 +3008,12 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 				minlen = len;
 			}
 			/* remember possible key length */
-			zend_hash_index_add(&num_hash, len, &dummy);
+			num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
 			bitset[((unsigned char)str_key->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)str_key->val[0]) % sizeof(zend_ulong));
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (num_keys) {
+	if (UNEXPECTED(num_keys)) {
 		/* we have to rebuild HashTable with numeric keys */
 		zend_hash_init(&str_hash, zend_hash_num_elements(pats), NULL, NULL, 0);
 		ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
@@ -3033,7 +3034,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 					minlen = len;
 				}
 				/* remember possible key length */
-				zend_hash_index_add(&num_hash, len, &dummy);
+				num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
 				bitset[((unsigned char)str_key->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)str_key->val[0]) % sizeof(zend_ulong));
 			} else {
 				len = str_key->len;
@@ -3055,22 +3056,20 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 		if (pats == &str_hash) {
 			zend_hash_destroy(&str_hash);
 		}
-		zend_hash_destroy(&num_hash);
-		RETURN_STRINGL(str, slen);
+		efree(num_bitset);
+		RETURN_STR_COPY(input);
 	}
-	/* select smart or simple algorithm */
-	// TODO: tune the condition ???
-	len = zend_hash_num_elements(&num_hash);
-	if ((maxlen - (minlen - 1) - len > 0) &&
-		/* smart algorithm, sort key lengths first */
-		zend_hash_sort(&num_hash, php_strtr_key_compare, 0) == SUCCESS) {
 
-		old_pos = pos = 0;
-		while (pos <= slen - minlen) {
-			key = str + pos;
-			ZEND_HASH_FOREACH_NUM_KEY(&num_hash, len) {
-				if (len > slen - pos) continue;
-				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
+	old_pos = pos = 0;
+	while (pos <= slen - minlen) {
+		key = str + pos;
+		if (bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) {
+			len = maxlen;
+			if (len > slen - pos) {
+				len = slen - pos;
+			}
+			while (len >= minlen) {
+				if (num_bitset[len / sizeof(zend_ulong)] & Z_UL(1) << (len % sizeof(zend_ulong)) == 0) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *s = zval_get_string(entry);
@@ -3081,33 +3080,12 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 					zend_string_release(s);
 					break;
 				}
-			} ZEND_HASH_FOREACH_END();
-			pos++;
-		}
-	} else {
-		/* use simple algorithm */
-		old_pos = pos = 0;
-		while (pos <= slen - minlen) {
-			if (maxlen > slen - pos) {
-				maxlen = slen - pos;
+				len--;
 			}
-			key = str + pos;
-			for (len = maxlen; len >= minlen; len--) {
-				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
-				entry = zend_hash_str_find(pats, key, len);
-				if (entry != NULL) {
-					zend_string *s = zval_get_string(entry);
-					smart_str_appendl(&result, str + old_pos, pos - old_pos);
-					smart_str_append(&result, s);
-					old_pos = pos + len;
-					pos = old_pos - 1;
-					zend_string_release(s);
-					break;
-				}
-			}
-			pos++;
 		}
+		pos++;
 	}
+
 	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
 		smart_str_0(&result);
@@ -3120,7 +3098,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	if (pats == &str_hash) {
 		zend_hash_destroy(&str_hash);
 	}
-	zend_hash_destroy(&num_hash);
+	efree(num_bitset);
 }
 /* }}} */
 
