@@ -9,7 +9,7 @@ var_dump($ext->getClasses());
 ?>
 ==DONE==
 --EXPECT--
-array(12) {
+array(13) {
   ["ReflectionException"]=>
   object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -35,38 +35,43 @@ array(12) {
     ["name"]=>
     string(18) "ReflectionFunction"
   }
-  ["ReflectionParameter"]=>
+  ["ReflectionGenerator"]=>
   object(ReflectionClass)#7 (1) {
+    ["name"]=>
+    string(19) "ReflectionGenerator"
+  }
+  ["ReflectionParameter"]=>
+  object(ReflectionClass)#8 (1) {
     ["name"]=>
     string(19) "ReflectionParameter"
   }
   ["ReflectionMethod"]=>
-  object(ReflectionClass)#8 (1) {
+  object(ReflectionClass)#9 (1) {
     ["name"]=>
     string(16) "ReflectionMethod"
   }
   ["ReflectionClass"]=>
-  object(ReflectionClass)#9 (1) {
+  object(ReflectionClass)#10 (1) {
     ["name"]=>
     string(15) "ReflectionClass"
   }
   ["ReflectionObject"]=>
-  object(ReflectionClass)#10 (1) {
+  object(ReflectionClass)#11 (1) {
     ["name"]=>
     string(16) "ReflectionObject"
   }
   ["ReflectionProperty"]=>
-  object(ReflectionClass)#11 (1) {
+  object(ReflectionClass)#12 (1) {
     ["name"]=>
     string(18) "ReflectionProperty"
   }
   ["ReflectionExtension"]=>
-  object(ReflectionClass)#12 (1) {
+  object(ReflectionClass)#13 (1) {
     ["name"]=>
     string(19) "ReflectionExtension"
   }
   ["ReflectionZendExtension"]=>
-  object(ReflectionClass)#13 (1) {
+  object(ReflectionClass)#14 (1) {
     ["name"]=>
     string(23) "ReflectionZendExtension"
   }
