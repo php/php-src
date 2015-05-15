@@ -827,7 +827,7 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding, window = 15;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options;
+	HashTable *options = NULL;
 	zval *option_buffer;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
@@ -865,7 +865,7 @@ PHP_FUNCTION(inflate_init)
 	if (encoding < 0) {
 		encoding += 15 - window;
 	} else {
-		encoding &= window;
+		encoding -= 15 - window;
 	}
 
 	if (Z_OK == inflateInit2(ctx, encoding)) {
@@ -997,7 +997,7 @@ PHP_FUNCTION(deflate_init)
 	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options = 0;
+	HashTable *options = NULL;
 	zval *option_buffer;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(deflate_init)
 	if (encoding < 0) {
 		encoding += 15 - window;
 	} else {
-		encoding &= window;
+		encoding -= 15 - window;
 	}
 
 	if (Z_OK == deflateInit2(ctx, level, Z_DEFLATED, encoding, memory, strategy)) {
