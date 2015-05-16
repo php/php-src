@@ -4,7 +4,7 @@ Constant Expressions with unsupported operands 002
 <?php
 try {
 	require("constant_expressions_exceptions.inc");
-} catch (EngineException $e) {
+} catch (EngineError $e) {
 	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 ?>

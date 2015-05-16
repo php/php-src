@@ -16,17 +16,17 @@ snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 try {
 	var_dump(new SNMP(SNMP::VERSION_1, $hostname));
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {
 	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {
 	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print $e->getMessage() . "\n";
 }
 try {

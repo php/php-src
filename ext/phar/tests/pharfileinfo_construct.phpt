@@ -19,7 +19,7 @@ unlink($fname);
 
 try {
 $a = new PharFileInfo(array());
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 echo $e->getMessage() . "\n";
 }
 

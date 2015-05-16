@@ -28,13 +28,13 @@ $rootNode->appendChild($rootNode);
 object(DOMException)#%d (%d) {
   ["message":protected]=>
   string(23) "Hierarchy Request Error"
-  ["string":"BaseException":private]=>
+  ["string":"Throwable":private]=>
   string(0) ""
   ["file":protected]=>
   string(%d) "%sdom003.php"
   ["line":protected]=>
   int(8)
-  ["trace":"BaseException":private]=>
+  ["trace":"Throwable":private]=>
   array(1) {
     [0]=>
     array(6) {
@@ -55,7 +55,7 @@ object(DOMException)#%d (%d) {
       }
     }
   }
-  ["previous":"BaseException":private]=>
+  ["previous":"Throwable":private]=>
   NULL
   ["code"]=>
   int(3)

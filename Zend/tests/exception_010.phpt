@@ -15,16 +15,16 @@ $x->getcode(1);
 
 ?>
 --EXPECTF--
-Warning: BaseException::getTraceAsString() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getTraceAsString() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::__toString() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::__toString() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::getTrace() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getTrace() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::getLine() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getLine() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::getFile() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getFile() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::getMessage() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getMessage() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: BaseException::getCode() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Throwable::getCode() expects exactly 0 parameters, 1 given in %s on line %d

@@ -12,7 +12,7 @@ class foo {
 try {
 	$a = 'foo::';
 	$a();
-} catch (EngineException $e) {
+} catch (EngineError $e) {
 	echo $e->getMessage();
 }
 

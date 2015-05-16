@@ -36,7 +36,7 @@ $callback(...$args);
 $callback = 'TestClass::undefinedMethod';
 try {
     $callback();
-} catch (EngineException $e) {
+} catch (EngineError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -44,7 +44,7 @@ try {
 $callback = 'UndefinedClass::testMethod';
 try {
     $callback();
-} catch (EngineException $e) {
+} catch (EngineError $e) {
     echo $e->getMessage() . "\n";
 }
 ?>

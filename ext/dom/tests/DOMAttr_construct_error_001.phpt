@@ -9,7 +9,7 @@ Josh Sweeney <jsweeney@alt-invest.net>
 <?php
 try {
     $attr = new DOMAttr();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
