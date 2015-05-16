@@ -28,6 +28,7 @@ ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
+ZEND_API zend_class_entry *zend_ce_throwable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
@@ -502,6 +503,19 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
+/* {{{ zend_implement_traversable */
+static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	if (instanceof_function(class_type, zend_exception_get_default()) || instanceof_function(class_type, zend_get_error())) {
+		return SUCCESS;
+	}
+	zend_error_noreturn(E_CORE_ERROR, "Class %s cannot implement interface %s, extend Exception instead",
+		class_type->name->val,
+		interface->name->val);
+	return FAILURE;
+}
+/* }}} */
+
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -551,6 +565,8 @@ const zend_function_entry zend_funcs_serializable[] = {
 };
 /* }}} */
 
+const zend_function_entry *zend_funcs_throwable  = NULL;
+
 #define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
 	{\
 		zend_class_entry ce;\
@@ -575,7 +591,9 @@ ZEND_API void zend_register_interfaces(void)
 
 	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
 
-	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
+	REGISTER_ITERATOR_INTERFACE(serializable, Serializable);
+
+	REGISTER_ITERATOR_INTERFACE(throwable, Throwable);
 }
 /* }}} */
 
