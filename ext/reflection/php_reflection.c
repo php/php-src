@@ -1743,7 +1743,7 @@ ZEND_METHOD(reflection_function, isInternal)
 /* }}} */
 
 /* {{{ proto public bool ReflectionFunction::isUserDefined()
-   Returns whether this is an user-defined function */
+   Returns whether this is a user-defined function */
 ZEND_METHOD(reflection_function, isUserDefined)
 {
 	reflection_object *intern;

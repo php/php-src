@@ -559,9 +559,9 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 
 	if (func->type != ZEND_USER_FUNCTION) {
 		if (new_break->class_name == NULL) {
-			phpdbg_error("breakpoint", "type=\"internalfunction\" function=\"%s\"", "%s is not an user defined function, no oplines exist", new_break->func_name);
+			phpdbg_error("breakpoint", "type=\"internalfunction\" function=\"%s\"", "%s is not a user defined function, no oplines exist", new_break->func_name);
 		} else {
-			phpdbg_error("breakpoint", "type=\"internalfunction\" method=\"%s::%s\"", "%s::%s is not an user defined method, no oplines exist", new_break->class_name, new_break->func_name);
+			phpdbg_error("breakpoint", "type=\"internalfunction\" method=\"%s::%s\"", "%s::%s is not a user defined method, no oplines exist", new_break->class_name, new_break->func_name);
 		}
 		return 2;
 	}
