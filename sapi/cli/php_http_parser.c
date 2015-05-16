@@ -91,6 +91,7 @@ static const char *method_strings[] =
   , "MOVE"
   , "PROPFIND"
   , "PROPPATCH"
+  , "SEARCH"
   , "UNLOCK"
   , "REPORT"
   , "MKACTIVITY"
@@ -588,7 +589,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
-          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; break;
+          case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
           case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
           default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
@@ -596,7 +597,6 @@ size_t php_http_parser_execute (php_http_parser *parser,
         state = s_req_method;
         break;
       }
-
       case s_req_method:
       {
         const char *matcher;
@@ -630,6 +630,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
           parser->method = PHP_HTTP_PUT;
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'A') {
           parser->method = PHP_HTTP_PATCH;
+        } else if (index == 1 && parser->method == PHP_HTTP_SUBSCRIBE && ch == 'E') {
+          parser->method = PHP_HTTP_SEARCH;
         } else if (index == 2 && parser->method == PHP_HTTP_UNLOCK && ch == 'S') {
           parser->method = PHP_HTTP_UNSUBSCRIBE;
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {

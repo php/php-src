@@ -908,7 +908,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	EG(exception) = NULL;
-	if (ce_exception == parse_exception_ce || ce_exception == engine_exception_ce || ce_exception == type_exception_ce) {
+	if (ce_exception == parse_exception_ce || ce_exception == type_exception_ce) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
@@ -922,7 +922,6 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 
 		zend_string_release(file);
 		zend_string_release(message);
-		OBJ_RELEASE(ex);
 	} else if (instanceof_function(ce_exception, base_exception_ce)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -969,6 +968,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}
+
+	OBJ_RELEASE(ex);
 }
 /* }}} */
 

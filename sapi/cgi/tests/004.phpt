@@ -36,7 +36,10 @@ echo "Done\n";
 --EXPECTF--	
 string(%d) "
 <br />
-<b>Fatal error</b>:  Cannot access private property test::$pri in <b>%s004.test.php</b> on line <b>8</b><br />
+<b>Fatal error</b>:  Uncaught exception 'EngineException' with message 'Cannot access private property test::$pri' in %s004.test.php:8
+Stack trace:
+#0 {main}
+  thrown in <b>%s004.test.php</b> on line <b>8</b><br />
 "
 string(25) "No input file specified.
 "

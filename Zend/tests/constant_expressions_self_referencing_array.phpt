@@ -9,5 +9,8 @@ class A {
 var_dump(A::FOO);
 ?>
 --EXPECTF--
-Fatal error: Cannot declare self-referencing constant 'self::FOO' in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot declare self-referencing constant 'self::FOO'' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
 

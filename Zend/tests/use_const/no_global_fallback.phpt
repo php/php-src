@@ -10,4 +10,7 @@ var_dump(baz);
 
 ?>
 --EXPECTF--
-Fatal error: Undefined constant 'foo\bar\baz' in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'foo\bar\baz'' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

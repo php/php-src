@@ -39,4 +39,8 @@ test3
 test4
 test5
 
-Fatal error: Call to undefined method C::test6() in %sbug42937.php on line 21
+Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined method C::test6()' in %sbug42937.php:21
+Stack trace:
+#0 %s(%d): B->test()
+#1 {main}
+  thrown in %sbug42937.php on line 21

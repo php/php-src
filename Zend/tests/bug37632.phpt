@@ -132,4 +132,8 @@ B2::doTest
 C2::test
 B4::doTest
 
-Fatal error: Call to protected C4::__construct() from context 'B4' in %sbug37632.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to protected C4::__construct() from context 'B4'' in %sbug37632.php:%d
+Stack trace:
+#0 %s(%d): B4::doTest()
+#1 {main}
+  thrown in %sbug37632.php on line %d

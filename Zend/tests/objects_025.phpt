@@ -43,4 +43,7 @@ static - ok
 non-static - ok
 static - ok
 
-Fatal error: Method name must be a string in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Method name must be a string' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

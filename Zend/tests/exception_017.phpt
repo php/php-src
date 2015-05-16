@@ -33,4 +33,7 @@ Exception: Cannot call abstract method C::foo() in %sexception_017.php on line %
 Exception: Argument 1 passed to foo() must be callable, string given, called in %sexception_017.php on line %d
 Exception: Cannot call abstract method C::foo()
 
-Fatal error: Cannot call abstract method C::foo() in %sexception_017.php on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot call abstract method C::foo()' in %sexception_017.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sexception_017.php on line %d

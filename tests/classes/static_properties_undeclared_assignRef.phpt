@@ -7,4 +7,7 @@ $a = 'foo';
 C::$p =& $a;
 ?>
 --EXPECTF--
-Fatal error: Access to undeclared static property: C::$p in %s on line 4
+Fatal error: Uncaught exception 'EngineException' with message 'Access to undeclared static property: C::$p' in %s:4
+Stack trace:
+#0 {main}
+  thrown in %s on line 4

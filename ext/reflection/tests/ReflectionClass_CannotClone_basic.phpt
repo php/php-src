@@ -12,4 +12,7 @@ if (!extension_loaded('reflection)) print 'skip';
 $rc = new ReflectionClass("stdClass");
 $rc2 = clone($rc);
 --EXPECTF--
-Fatal error: Trying to clone an uncloneable object of class ReflectionClass in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Trying to clone an uncloneable object of class ReflectionClass' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

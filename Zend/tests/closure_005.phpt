@@ -71,4 +71,8 @@ echo "Done\n";
 7
 Destroyed
 
-Fatal error: Using $this when not in object context in %sclosure_005.php on line 28
+Fatal error: Uncaught exception 'EngineException' with message 'Using $this when not in object context' in %sclosure_005.php:28
+Stack trace:
+#0 %s(%d): A::{closure}()
+#1 {main}
+  thrown in %sclosure_005.php on line 28

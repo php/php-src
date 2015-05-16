@@ -17,4 +17,10 @@ foreach (testGenerator() as $i);
 
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function foo() in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined function foo()' in %s:%d
+Stack trace:
+#0 [internal function]: autoload('SyntaxError')
+#1 %s(%d): spl_autoload_call('SyntaxError')
+#2 %s(%d): testGenerator()
+#3 {main}
+  thrown in %s on line %d

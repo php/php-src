@@ -1394,6 +1394,25 @@ static zval *php_get_configuration_directive_for_zend(zend_string *name)
 }
 /* }}} */
 
+/* {{{ php_free_request_globals
+ */
+static void php_free_request_globals(void)
+{
+	if (PG(last_error_message)) {
+		free(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
+	if (PG(php_sys_temp_dir)) {
+		efree(PG(php_sys_temp_dir));
+		PG(php_sys_temp_dir) = NULL;
+	}
+}
+/* }}} */
+
 /* {{{ php_message_handler_for_zend
  */
 static void php_message_handler_for_zend(zend_long message, const void *data)
@@ -1792,15 +1811,8 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 8. free last error information */
-	if (PG(last_error_message)) {
-		free(PG(last_error_message));
-		PG(last_error_message) = NULL;
-	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-		PG(last_error_file) = NULL;
-	}
+	/* 8. free request-bound globals */
+	php_free_request_globals();
 
 	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate();
@@ -2350,7 +2362,6 @@ void php_module_shutdown(void)
 #endif
 
 	php_output_shutdown();
-	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
 

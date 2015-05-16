@@ -17,4 +17,7 @@ $a = clone $c->b[1];
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use object of type foo as array in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot use object of type foo as array' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

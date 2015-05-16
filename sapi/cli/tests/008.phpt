@@ -36,7 +36,10 @@ echo "Done\n";
 --EXPECTF--	
 string(%d) "
 
-Fatal error: Cannot access private property test::$pri in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot access private property test::$pri' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
 "
 string(33) "Could not open input file: wrong
 "

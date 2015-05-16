@@ -10,4 +10,7 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Using $this when not in object context in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Using $this when not in object context' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

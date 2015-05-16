@@ -403,6 +403,9 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory);
 	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory);
 
+	MCG(fd[RANDOM]) = -1;
+	MCG(fd[URANDOM]) = -1;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -411,6 +414,14 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
 	php_stream_filter_unregister_factory("mcrypt.*");
 	php_stream_filter_unregister_factory("mdecrypt.*");
+
+	if (MCG(fd[RANDOM]) > 0) {
+		close(MCG(fd[RANDOM]));
+	}
+
+	if (MCG(fd[URANDOM]) > 0) {
+		close(MCG(fd[URANDOM]));
+	}
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -1337,24 +1348,27 @@ PHP_FUNCTION(mcrypt_create_iv)
 		}
 		n = (int)size;
 #else
-		int    fd;
+		int    *fd = &MCG(fd[source]);
 		size_t read_bytes = 0;
 
-		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
-		if (fd < 0) {
-			efree(iv);
-			php_error_docref(NULL, E_WARNING, "Cannot open source device");
-			RETURN_FALSE;
+		if (*fd < 0) {
+			*fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
+			if (*fd < 0) {
+				efree(iv);
+				php_error_docref(NULL, E_WARNING, "Cannot open source device");
+				RETURN_FALSE;
+			}
 		}
+
 		while (read_bytes < size) {
-			n = read(fd, iv + read_bytes, size - read_bytes);
+			n = read(*fd, iv + read_bytes, size - read_bytes);
 			if (n < 0) {
 				break;
 			}
 			read_bytes += n;
 		}
 		n = read_bytes;
-		close(fd);
+
 		if (n < size) {
 			efree(iv);
 			php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");

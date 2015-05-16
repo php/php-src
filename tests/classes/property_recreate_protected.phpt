@@ -50,4 +50,7 @@ object(D)#%d (1) {
 
 Unset a protected property, and attempt to recreate it outside of scope (expected failure):
 
-Fatal error: Cannot access protected property %s::$p in %s on line 32
+Fatal error: Uncaught exception 'EngineException' with message 'Cannot access protected property %s::$p' in %s:32
+Stack trace:
+#0 {main}
+  thrown in %s on line 32

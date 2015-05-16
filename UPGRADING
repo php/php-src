@@ -435,6 +435,7 @@ Standard library changes
     and also renamed zend_qsort to zend_sort.
   . Added stable sorting algo zend_insert_sort.
   . Removed dl() function on fpm-fcgi.
+  . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
 
 Other
 =====
@@ -521,7 +522,7 @@ Other
   . Added null coalesce operator (??).
     (RFC: https://wiki.php.net/rfc/isset_ternary)
   . Support for strings with length >= 2^31 bytes in 64 bit builds.
-  . Closure::call() method added.
+  . Closure::call() method added (works only with userland classes).
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
@@ -535,6 +536,9 @@ Other
     streams to negotiate alternative protocols using the ALPN TLS extension when
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
     accessible through stream_get_meta_data() output.
+
+- Reflection
+  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
 
 ========================================
 3. Changes in SAPI modules

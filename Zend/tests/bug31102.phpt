@@ -45,4 +45,8 @@ __autoload(Test2,2)
 Caught: __autoload
 __autoload(Test3,3)
 
-Fatal error: Class 'Test3' not found in %sbug31102.php(%d) : eval()'d code on line 1
+Fatal error: Uncaught exception 'EngineException' with message 'Class 'Test3' not found' in %sbug31102.php(%d) : eval()'d code:1
+Stack trace:
+#0 %s(%d): eval()
+#1 {main}
+  thrown in %sbug31102.php(%d) : eval()'d code on line 1

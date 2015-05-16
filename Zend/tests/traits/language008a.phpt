@@ -20,4 +20,7 @@ $o->sayHello();
 
 ?>
 --EXPECTF--	
-Fatal error: Call to protected method MyClass::sayHello() from context '' in %s on line %d
+Fatal error: Uncaught exception 'EngineException' with message 'Call to protected method MyClass::sayHello() from context ''' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

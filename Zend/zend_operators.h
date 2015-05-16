@@ -848,6 +848,8 @@ static zend_always_inline int fast_is_identical_function(zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;
+	} else if (Z_TYPE_P(op1) <= IS_TRUE) {
+		return 1;
 	}
 	return zend_is_identical(op1, op2);
 }
@@ -856,6 +858,8 @@ static zend_always_inline int fast_is_not_identical_function(zval *op1, zval *op
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 1;
+	} else if (Z_TYPE_P(op1) <= IS_TRUE) {
+		return 0;
 	}
 	return !zend_is_identical(op1, op2);
 }

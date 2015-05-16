@@ -187,11 +187,11 @@ void php_json_parser_object_init(php_json_parser *parser, zval *object)
 
 void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
 {
-	if (Z_TYPE_P(object) == IS_ARRAY/*parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY*/) {
+	/* if JSON_OBJECT_AS_ARRAY is set */
+	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
 	} else {
 		zval zkey;
-		/* ZEND_ASSERT(Z_TYPE_P(object) == IS_OBJECT); */
 		if (key->len == 0) {
 			zend_string_release(key);
 			key = zend_string_init("_empty_", sizeof("_empty_") - 1, 0);

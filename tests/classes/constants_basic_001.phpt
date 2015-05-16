@@ -86,4 +86,7 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: Undefined class constant 'c19' in %s on line 53
+Fatal error: Uncaught exception 'EngineException' with message 'Undefined class constant 'c19'' in %s:53
+Stack trace:
+#0 {main}
+  thrown in %s on line 53
