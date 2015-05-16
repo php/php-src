@@ -14,7 +14,7 @@ $test->method();
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Uncaught exception 'EngineException' with message 'Non-static method ArrayIterator::current() cannot be called statically' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Non-static method ArrayIterator::current() cannot be called statically' in %s:%d
 Stack trace:
 #0 %s(%d): test->method()
 #1 {main}

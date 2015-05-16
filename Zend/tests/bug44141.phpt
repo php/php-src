@@ -22,7 +22,7 @@ class Y extends X
 $y = Y::cheat(5);
 echo $y->x, PHP_EOL;
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to private X::__construct() from context 'Y'' in %sbug44141.php:15
+Fatal error: Uncaught exception 'Error' with message 'Call to private X::__construct() from context 'Y'' in %sbug44141.php:15
 Stack trace:
 #0 %s(%d): Y::cheat(5)
 #1 {main}

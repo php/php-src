@@ -15,11 +15,11 @@ $c->y =& $ref;
 
 --> Access non-visible static prop like instance prop:
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access protected property C::$y' in %s:8
+Fatal error: Uncaught exception 'Error' with message 'Cannot access protected property C::$y' in %s:8
 Stack trace:
 #0 {main}
 
-Next exception 'EngineException' with message 'Cannot access protected property C::$y' in %s:8
+Next exception 'Error' with message 'Cannot access protected property C::$y' in %s:8
 Stack trace:
 #0 {main}
   thrown in %s on line 8

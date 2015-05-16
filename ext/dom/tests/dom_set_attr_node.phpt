@@ -40,13 +40,13 @@ ob_start();
 object(DOMException)#%d (7) {
   ["message":protected]=>
   string(20) "Wrong Document Error"
-  ["string":"BaseException":private]=>
+  ["string":"Exception":private]=>
   string(0) ""
   ["file":protected]=>
   string(%d) "%sdom_set_attr_node.php"
   ["line":protected]=>
   int(%d)
-  ["trace":"BaseException":private]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
@@ -67,7 +67,7 @@ object(DOMException)#%d (7) {
       }
     }
   }
-  ["previous":"BaseException":private]=>
+  ["previous":"Exception":private]=>
   NULL
   ["code"]=>
   int(4)

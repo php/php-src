@@ -17,7 +17,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to protected test::__clone() from context ''' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Call to protected test::__clone() from context ''' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

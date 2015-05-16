@@ -17,7 +17,7 @@ var_dump(isset($obj->a));
 bool(false)
 bool(false)
 
-Fatal error: Uncaught exception 'EngineException' with message 'Closure object cannot have properties' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Closure object cannot have properties' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

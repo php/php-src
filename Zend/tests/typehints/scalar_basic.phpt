@@ -51,7 +51,7 @@ foreach ($functions as $type => $function) {
         var_dump($value);
         try {
             var_dump($function($value));
-        } catch (\TypeException $e) {
+        } catch (\TypeError $e) {
             echo "*** Caught " . $e->getMessage() . PHP_EOL;
         }
     }

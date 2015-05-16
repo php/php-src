@@ -7,7 +7,7 @@ $x = parent::class;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use "parent" when no class scope is active' in %s:3
+Fatal error: Uncaught exception 'Error' with message 'Cannot use "parent" when no class scope is active' in %s:3
 Stack trace:
 #0 {main}
   thrown in %s on line 3

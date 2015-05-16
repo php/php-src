@@ -7,7 +7,7 @@ throw 1;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Can only throw objects' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Can only throw objects' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

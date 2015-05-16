@@ -6,7 +6,7 @@ $a = clone(null);
 array_push($a->b, $c);
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message '__clone method called on non-object' in %sbug42817.php:2
+Fatal error: Uncaught exception 'Error' with message '__clone method called on non-object' in %sbug42817.php:2
 Stack trace:
 #0 {main}
   thrown in %sbug42817.php on line 2

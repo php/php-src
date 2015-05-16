@@ -101,7 +101,7 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (false !== ($obj = @mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
 			printf("[011] Should have failed\n");
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 

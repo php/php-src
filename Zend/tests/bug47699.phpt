@@ -15,7 +15,7 @@ new X();
 ?>
 --EXPECTF--
 BB
-Fatal error: Uncaught exception 'EngineException' with message 'Class 'X' not found' in %sbug47699.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Class 'X' not found' in %sbug47699.php:%d
 Stack trace:
 #0 {main}
   thrown in %sbug47699.php on line %d

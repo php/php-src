@@ -19,7 +19,7 @@ echo "Done\n";
 string(6) "string"
 int(1)
 
-Fatal error: Uncaught exception 'EngineException' with message 'Undefined class constant 'val3'' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Undefined class constant 'val3'' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

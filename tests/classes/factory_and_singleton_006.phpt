@@ -16,7 +16,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to private test::__destruct() from context ''' in %sfactory_and_singleton_006.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Call to private test::__destruct() from context ''' in %sfactory_and_singleton_006.php:%d
 Stack trace:
 #0 {main}
   thrown in %sfactory_and_singleton_006.php on line %d

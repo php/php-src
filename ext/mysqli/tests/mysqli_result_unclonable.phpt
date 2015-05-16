@@ -21,7 +21,7 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Trying to clone an uncloneable object of class mysqli_result' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Trying to clone an uncloneable object of class mysqli_result' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

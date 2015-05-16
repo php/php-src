@@ -45,7 +45,7 @@ $args = array(
 
 try {
 	$fmt = new NumberFormatter();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 	$fmt = null;
 }
@@ -66,7 +66,7 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-TypeException: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
+TypeError: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
@@ -80,7 +80,7 @@ IntlException: Constructor failed in %sformatter_fail.php on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-TypeException: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+TypeError: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: NumberFormatter::create() expects parameter 1 to be string, array given in %s on line %d

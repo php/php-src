@@ -8,7 +8,7 @@ $a->$x = "string('')";
 var_dump($a);
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access empty property' in %sbug29015.php:4
+Fatal error: Uncaught exception 'Error' with message 'Cannot access empty property' in %sbug29015.php:4
 Stack trace:
 #0 {main}
   thrown in %sbug29015.php on line 4

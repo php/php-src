@@ -76,7 +76,7 @@ NULL
 
 Notice: Undefined offset: 3 in %s on line %d
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to a member function bar() on null' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Call to a member function bar() on null' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

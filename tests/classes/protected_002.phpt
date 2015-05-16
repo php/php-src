@@ -32,7 +32,7 @@ echo "Done\n"; // shouldn't be displayed
 Call pass::show()
 Call fail::show()
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to protected method pass::show() from context 'fail'' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Call to protected method pass::show() from context 'fail'' in %s:%d
 Stack trace:
 #0 %s(%d): fail::show()
 #1 {main}

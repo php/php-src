@@ -9,7 +9,7 @@ function f($a=array(namespace\bar=>0)) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'bar'' in %sbug43344_13.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Undefined constant 'bar'' in %sbug43344_13.php:%d
 Stack trace:
 #0 %s(%d): f()
 #1 {main}

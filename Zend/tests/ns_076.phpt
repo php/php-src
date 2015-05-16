@@ -22,7 +22,7 @@ array(1) {
   %s(7) "unknown"
 }
 
-Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'unknown'' in %sns_076.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Undefined constant 'unknown'' in %sns_076.php:%d
 Stack trace:
 #0 {main}
   thrown in %sns_076.php on line %d

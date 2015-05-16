@@ -37,7 +37,7 @@ myAttribute
 HELLO Attribute
 DOMAttr
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined method DOMAttr::testit()' in %s:25
+Fatal error: Uncaught exception 'Error' with message 'Call to undefined method DOMAttr::testit()' in %s:25
 Stack trace:
 #0 {main}
   thrown in %s on line 25

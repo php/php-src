@@ -36,7 +36,7 @@ Warning: get_called_class() called from outside a class in %s on line %d
 
 Deprecated: Non-static method D::m() should not be called statically in %s on line %d
 
-Fatal error: Uncaught exception 'EngineException' with message 'Using $this when not in object context' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Using $this when not in object context' in %s:%d
 Stack trace:
 #0 %s(%d): D::m()
 #1 {main}

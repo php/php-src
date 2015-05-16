@@ -9,7 +9,7 @@ echo "Should not get here!\n";
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to a member function method() on null' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Call to a member function method() on null' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d 

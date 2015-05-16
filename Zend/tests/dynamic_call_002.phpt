@@ -9,7 +9,7 @@ $a::$a();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Function name must be a string' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Function name must be a string' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

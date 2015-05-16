@@ -9,7 +9,7 @@ $rc = new ReflectionClass('foo');
 $rc->newInstance();
 
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot instantiate trait foo' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Cannot instantiate trait foo' in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstance()
 #1 {main}

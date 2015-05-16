@@ -47,7 +47,7 @@ $args = array(
 
 try {
 	$fmt = new MessageFormatter();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 	$fmt = null;
 }
@@ -58,7 +58,7 @@ $fmt = MessageFormatter::create();
 err($fmt);
 try {
 	$fmt = new MessageFormatter('en');
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 	$fmt = null;
 }
@@ -79,7 +79,7 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-TypeException: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
+TypeError: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
@@ -88,7 +88,7 @@ Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
 Warning: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-TypeException: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
+TypeError: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
@@ -107,7 +107,7 @@ IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-TypeException: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+TypeError: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d

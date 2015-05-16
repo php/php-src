@@ -299,7 +299,7 @@ Array
     [1] => 1
 )
 
-Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'foo\foo\unknown'' in %sbug42819.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Undefined constant 'foo\foo\unknown'' in %sbug42819.php:%d
 Stack trace:
 #0 %s(%d): foo\oops()
 #1 {main}

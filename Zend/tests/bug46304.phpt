@@ -62,7 +62,7 @@ value6
 value6
 value6
 
-Fatal error: Uncaught exception 'EngineException' with message 'Undefined constant 'NS1\ns2\coNSt1'' in %sbug46304.php:%d
+Fatal error: Uncaught exception 'Error' with message 'Undefined constant 'NS1\ns2\coNSt1'' in %sbug46304.php:%d
 Stack trace:
 #0 {main}
   thrown in %sbug46304.php on line %d

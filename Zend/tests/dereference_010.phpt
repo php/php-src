@@ -24,7 +24,7 @@ var_dump(b()[1]);
 NULL
 NULL
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use object of type stdClass as array' in %s:%d
+Fatal error: Uncaught exception 'Error' with message 'Cannot use object of type stdClass as array' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
