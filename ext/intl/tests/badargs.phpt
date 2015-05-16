@@ -18,7 +18,7 @@ foreach($funcs as $func) {
 			$res = $func($arg);
 		} catch (Exception $e) {
 			continue;
-		} catch (EngineException $e) {
+		} catch (EngineError $e) {
 			continue;
 		}
         if($res != false) {

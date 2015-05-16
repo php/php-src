@@ -4,7 +4,7 @@ SPL SplTempFileObject constructor sets correct defaults when pass 0 arguments
 <?php
 try {
     new SplTempFileObject('invalid');
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>

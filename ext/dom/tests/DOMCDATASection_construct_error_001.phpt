@@ -9,7 +9,7 @@ Nic Rosental nicrosental@gmail.com
 <?php
 	try {
 	    $section = new DOMCDataSection();
-	} catch (TypeException $e) {
+	} catch (TypeError $e) {
 	    echo $e->getMessage();
 	}
 ?>

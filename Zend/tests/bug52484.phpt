@@ -16,7 +16,7 @@ unset($a->$prop);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access empty property' in %s:%d
+Fatal error: Uncaught exception 'EngineError' with message 'Cannot access empty property' in %s:%d
 Stack trace:
 #0 %s(%d): A->__unset('')
 #1 {main}

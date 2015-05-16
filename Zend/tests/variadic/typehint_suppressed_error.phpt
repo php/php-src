@@ -9,7 +9,7 @@ function test(array... $args) {
 
 try {
 	test([0], [1], 2);
-} catch(EngineException $e) {
+} catch(EngineError $e) {
 	var_dump($e->getMessage());
 }
 
