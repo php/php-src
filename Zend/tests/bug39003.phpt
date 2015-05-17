@@ -23,6 +23,6 @@ echo "Done\n";
 --EXPECTF--	
 Fatal error: Uncaught TypeException: Argument 1 passed to test() must be an instance of OtherClassName, instance of ClassName given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): test()
+#0 %s(%d): test(Object(ClassName))
 #1 {main}
   thrown in %s on line %d

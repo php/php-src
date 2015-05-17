@@ -39,6 +39,6 @@ ok
 
 Fatal error: Uncaught TypeException: Argument 1 passed to foo\test5() must be an instance of bar, instance of foo\bar given, called in %sbug42802.php on line %d and defined in %sbug42802.php:%d
 Stack trace:
-#0 %s(%d): foo\test5()
+#0 %s(%d): foo\test5(Object(foo\bar))
 #1 {main}
   thrown in %sbug42802.php on line %d

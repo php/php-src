@@ -15,7 +15,7 @@ function_declared_in_weak_mode(1.0);
 --EXPECTF--
 Fatal error: Uncaught TypeException: Argument 1 passed to function_declared_in_weak_mode() must be of the type integer, float given, called in %sstrict_call_weak_explicit.php on line 10 and defined in %sstrict_call_weak_explicit_2.inc:5
 Stack trace:
-#0 %s(%d): function_declared_in_weak_mode()
+#0 %s(%d): function_declared_in_weak_mode(1)
 #1 {main}
   thrown in %sstrict_call_weak_explicit_2.inc on line 5
 
