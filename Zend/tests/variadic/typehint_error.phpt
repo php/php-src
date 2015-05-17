@@ -33,4 +33,8 @@ array(3) {
   }
 }
 
-Fatal error: Argument 3 passed to test() must be of the type array, integer given, called in %s on line %d
+Fatal error: Uncaught TypeException: Argument 3 passed to test() must be of the type array, integer given, called in %s:%d
+Stack trace:
+#0 %s(%d): test(Array, Array)
+#1 {main}
+  thrown in %s on line %d

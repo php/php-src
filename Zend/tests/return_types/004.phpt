@@ -10,4 +10,8 @@ function test1() : array {
 test1();
 
 --EXPECTF--
-Fatal error: Return value of test1() must be of the type array, string returned in %s on line %d
+Fatal error: Uncaught TypeException: Return value of test1() must be of the type array, string returned in %s:%d
+Stack trace:
+#0 %s(%d): test1()
+#1 {main}
+  thrown in %s on line %d

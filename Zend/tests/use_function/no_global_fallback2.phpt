@@ -15,7 +15,7 @@ namespace foo {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Call to undefined function bar\test()' in %s:%d
+Fatal error: Uncaught EngineException: Call to undefined function bar\test() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

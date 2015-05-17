@@ -16,7 +16,7 @@ $a->$prop = 2;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Cannot access empty property' in %s:%d
+Fatal error: Uncaught EngineException: Cannot access empty property in %s:%d
 Stack trace:
 #0 %s(%d): A->__set('', 2)
 #1 {main}

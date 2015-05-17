@@ -38,7 +38,7 @@ $o = new B;
 $o->bar();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' in %sbug45805.php:%d
+Fatal error: Uncaught RuntimeException in %sbug45805.php:%d
 Stack trace:
 #0 %sbug45805.php(%d): PHPUnit_Util_ErrorHandler::handleError(8, 'Only variables ...', '%s', %d, Array)
 #1 [internal function]: B->foo()

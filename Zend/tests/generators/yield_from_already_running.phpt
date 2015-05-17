@@ -11,7 +11,7 @@ function gen() {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Impossible to yield from the Generator being currently run' in %s:%d
+Fatal error: Uncaught EngineException: Impossible to yield from the Generator being currently run in %s:%d
 Stack trace:
 #0 [internal function]: gen()
 #1 %s(%d): Generator->send(Object(Generator))

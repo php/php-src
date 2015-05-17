@@ -9,7 +9,7 @@ function foo($a = array(namespace\unknown => unknown))
 
 foo();
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Undefined constant 'unknown'' in %sns_077_%d.php:%d
+Fatal error: Uncaught EngineException: Undefined constant 'unknown' in %sns_077_%d.php:%d
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}

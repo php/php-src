@@ -11,7 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 new IntlBreakIterator();
 --EXPECTF--
 
-Fatal error: Uncaught exception 'Error' with message 'Call to private IntlBreakIterator::__construct() from invalid context' in %s:%d
+Fatal error: Uncaught EngineException: Call to private IntlBreakIterator::__construct() from invalid context in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

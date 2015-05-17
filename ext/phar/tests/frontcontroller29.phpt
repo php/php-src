@@ -13,7 +13,7 @@ files/frontcontroller8.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Call to undefined function oopsie_daisy()' in phar://%sfatalerror.phps:1
+Fatal error: Uncaught EngineException: Call to undefined function oopsie_daisy() in phar://%sfatalerror.phps:1
 Stack trace:
 #0 [internal function]: unknown()
 #1 %s(%d): Phar::webPhar('whatever', 'index.php', '404.php', Array)

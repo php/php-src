@@ -17,7 +17,7 @@ $obj = new B();
 $obj->go();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Access to undeclared static property: A::$this' in %s:%d
+Fatal error: Uncaught EngineException: Access to undeclared static property: A::$this in %s:%d
 Stack trace:
 #0 %s(%d): B->go()
 #1 {main}

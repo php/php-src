@@ -22,7 +22,7 @@ class Two extends One {}
 new Two();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'AssertionException' with message '[Message]: MyExpectations' in %sexpect_011.php:%d
+Fatal error: Uncaught AssertionException: [Message]: MyExpectations in %sexpect_011.php:%d
 Stack trace:
 #0 %sexpect_011.php(%d): assert(false, '[Message]: MyEx...')
 #1 %sexpect_011.php(%d): One->__construct()

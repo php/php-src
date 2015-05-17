@@ -25,7 +25,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 base
 
-Fatal error: Uncaught exception 'Error' with message 'Cannot instantiate abstract class base' in %s:%d
+Fatal error: Uncaught EngineException: Cannot instantiate abstract class base in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

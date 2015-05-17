@@ -11,7 +11,7 @@ Notice: Undefined variable: x in %s on line %d
 
 Warning: simplexml_load_string() expects parameter 3 to be integer, float given in %s on line %d
 
-Fatal error: Uncaught exception 'Error' with message 'Call to a member function xpath() on null' in %s:%d
+Fatal error: Uncaught EngineException: Call to a member function xpath() on null in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

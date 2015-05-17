@@ -23,7 +23,7 @@ new foo;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Access to undeclared static property: bar::$f' in %s:%d
+Fatal error: Uncaught EngineException: Access to undeclared static property: bar::$f in %s:%d
 Stack trace:
 #0 %s(%d): foo->__construct()
 #1 {main}

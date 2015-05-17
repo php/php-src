@@ -11,18 +11,18 @@ function foo(callable $x) {
 
 try {
 	C::foo();
-} catch (Error $e) {
+} catch (EngineException $e) {
 	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 try {
 	foo("C::foo");
-} catch (Error $e) {
+} catch (EngineException $e) {
 	echo "\n";
 	do {
 		echo "Exception: " . $e->getMessage() . "\n";
 		$e = $e->getPrevious();
-	} while ($e instanceof Error);
+	} while ($e instanceof EngineException);
 }
 
 C::foo();
@@ -33,7 +33,7 @@ Exception: Cannot call abstract method C::foo() in %sexception_017.php on line %
 Exception: Argument 1 passed to foo() must be callable, string given, called in %sexception_017.php on line %d
 Exception: Cannot call abstract method C::foo()
 
-Fatal error: Uncaught exception 'Error' with message 'Cannot call abstract method C::foo()' in %sexception_017.php:%d
+Fatal error: Uncaught EngineException: Cannot call abstract method C::foo() in %sexception_017.php:%d
 Stack trace:
 #0 {main}
   thrown in %sexception_017.php on line %d

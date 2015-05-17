@@ -36,7 +36,7 @@ A Object
 
 Notice: Indirect modification of overloaded property A::$whatever has no effect in %sbug32660.php on line 23
 
-Fatal error: Uncaught exception 'Error' with message 'Cannot assign by reference to overloaded object' in %sbug32660.php:23
+Fatal error: Uncaught EngineException: Cannot assign by reference to overloaded object in %sbug32660.php:23
 Stack trace:
 #0 {main}
   thrown in %sbug32660.php on line 23

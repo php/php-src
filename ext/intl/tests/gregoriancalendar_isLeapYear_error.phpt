@@ -45,4 +45,8 @@ Warning: intlgregcal_is_leap_year() expects exactly 2 parameters, 1 given in %s 
 Warning: intlgregcal_is_leap_year(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Argument 1 passed to intlgregcal_is_leap_year() must be an instance of IntlGregorianCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeException: Argument 1 passed to intlgregcal_is_leap_year() must be an instance of IntlGregorianCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlgregcal_is_leap_year(1, 2)
+#1 {main}
+  thrown in %s on line %d

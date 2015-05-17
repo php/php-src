@@ -10,7 +10,7 @@ $x = new $a;
 echo "BUG\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Class '../BUG' not found' in %sautoload_021.php:6
+Fatal error: Uncaught EngineException: Class '../BUG' not found in %sautoload_021.php:6
 Stack trace:
 #0 {main}
   thrown in %sautoload_021.php on line 6

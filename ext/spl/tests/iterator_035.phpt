@@ -14,7 +14,7 @@ echo "Done\n";
 --EXPECTF--	
 Notice: Indirect modification of overloaded element of ArrayIterator has no effect in %s on line %d
 
-Fatal error: Uncaught exception 'Error' with message 'Cannot assign by reference to overloaded object' in %s:%d
+Fatal error: Uncaught EngineException: Cannot assign by reference to overloaded object in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

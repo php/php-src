@@ -7,7 +7,7 @@ new Generator;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'The "Generator" class is reserved for internal use and cannot be manually instantiated' in %s:%d
+Fatal error: Uncaught EngineException: The "Generator" class is reserved for internal use and cannot be manually instantiated in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -36,7 +36,7 @@ class Bar {
 $foo = new Foo();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Access to undeclared static property: Bar::$instance' in %sbug68652.php:%d
+Fatal error: Uncaught EngineException: Access to undeclared static property: Bar::$instance in %sbug68652.php:%d
 Stack trace:
 #0 %s(%d): Bar::getInstance()
 #1 [internal function]: Foo->__destruct()

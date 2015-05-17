@@ -68,7 +68,7 @@ Internal class - XMLWriter
 bool(false)
 bool(false)
 
-Fatal error: Uncaught exception 'Error' with message 'Trying to clone an uncloneable object of class XMLWriter' in %s:%d
+Fatal error: Uncaught EngineException: Trying to clone an uncloneable object of class XMLWriter in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

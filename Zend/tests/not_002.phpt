@@ -8,7 +8,7 @@ $b = array(1,2);
 
 try {
 	var_dump(~$b);
-} catch (Error $e) {
+} catch (EngineException $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -20,7 +20,7 @@ echo "Done\n";
 --EXPECTF--	
 Exception: Unsupported operand types
 
-Fatal error: Uncaught exception 'Error' with message 'Unsupported operand types' in %s:%d
+Fatal error: Uncaught EngineException: Unsupported operand types in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

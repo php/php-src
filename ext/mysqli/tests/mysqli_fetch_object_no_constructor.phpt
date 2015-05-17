@@ -62,7 +62,7 @@ Exception: Class mysqli_fetch_object_test does not have a constructor hence you 
 
 Fatal error with PHP (but no exception!):
 
-Fatal error: Uncaught exception 'Error' with message 'Call to undefined method mysqli_fetch_object_test::mysqli_fetch_object_test()' in %s:%d
+Fatal error: Uncaught EngineException: Call to undefined method mysqli_fetch_object_test::mysqli_fetch_object_test() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

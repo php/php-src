@@ -36,7 +36,7 @@ echo "Done\n";
 --EXPECTF--	
 string(%d) "
 <br />
-<b>Fatal error</b>:  Uncaught exception 'Error' with message 'Cannot access private property test::$pri' in %s004.test.php:8
+<b>Fatal error</b>:  Uncaught EngineException: Cannot access private property test::$pri in %s004.test.php:8
 Stack trace:
 #0 {main}
   thrown in <b>%s004.test.php</b> on line <b>8</b><br />

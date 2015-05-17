@@ -16,7 +16,7 @@ var_dump($a->$prop);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Cannot access empty property' in %s:%d
+Fatal error: Uncaught EngineException: Cannot access empty property in %s:%d
 Stack trace:
 #0 %s(%d): A->__get('')
 #1 {main}

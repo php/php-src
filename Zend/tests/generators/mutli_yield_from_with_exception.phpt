@@ -33,7 +33,7 @@ do {
 Generator 0
 int(1)
 Caught exception!
-exception 'Exception' in %s:%d
+Exception in %s:%d
 Stack trace:
 #0 %s(%d): from()
 #1 [internal function]: gen(Object(Generator))
@@ -41,7 +41,7 @@ Stack trace:
 #3 {main}
 Generator 1
 
-Fatal error: Uncaught exception 'ClosedGeneratorException' with message 'Generator yielded from aborted, no return value available' in %s:%d
+Fatal error: Uncaught ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator))
 #1 %s(%d): Generator->current()

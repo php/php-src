@@ -8,7 +8,7 @@ $fn([0, 1]->prop);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Error' with message 'Cannot use temporary expression in write context' in %s:%d
+Fatal error: Uncaught EngineException: Cannot use temporary expression in write context in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
