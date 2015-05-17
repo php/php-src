@@ -652,6 +652,12 @@ ZEND_METHOD(exception, __toString)
 			ZVAL_UNDEF(&trace);
 		}
 
+		if (Z_OBJCE_P(exception) == type_exception_ce && strstr(message->val, ", called in ")) {
+			zend_string *real_message = zend_strpprintf(0, "%s and defined", message->val);
+			zend_string_release(message);
+			message = real_message;
+		}
+
 		if (message->len > 0) {
 			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT
 					"\nStack trace:\n%s%s%s",
@@ -908,17 +914,13 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	EG(exception) = NULL;
-	if (ce_exception == parse_exception_ce || ce_exception == type_exception_ce) {
+	if (ce_exception == parse_exception_ce) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		if (ce_exception == type_exception_ce && strstr(message->val, ", called in ")) {
-			zend_error_helper(code, file->val, line, "%s and defined", message->val);
-		} else {
-			zend_error_helper(code, file->val, line, "%s", message->val);
-		}
+		zend_error_helper(code, file->val, line, "%s", message->val);
 
 		zend_string_release(file);
 		zend_string_release(message);

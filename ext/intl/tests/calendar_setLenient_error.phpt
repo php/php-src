@@ -41,4 +41,8 @@ Warning: intlcal_set_lenient() expects parameter 2 to be boolean, array given in
 Warning: intlcal_set_lenient(): intlcal_set_lenient: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Argument 1 passed to intlcal_set_lenient() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Uncaught TypeException: Argument 1 passed to intlcal_set_lenient() must be an instance of IntlCalendar, integer given in %s:%d
+Stack trace:
+#0 %s(%d): intlcal_set_lenient(1, false)
+#1 {main}
+  thrown in %s on line %d

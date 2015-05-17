@@ -15,4 +15,8 @@ $qux = new qux();
 $qux->foo();
 
 --EXPECTF--
-Fatal error: Return value of qux::foo() must be an instance of foo, instance of qux returned in %s on line %d
+Fatal error: Uncaught TypeException: Return value of qux::foo() must be an instance of foo, instance of qux returned in %s:%d
+Stack trace:
+#0 %s(%d): qux->foo()
+#1 {main}
+  thrown in %s on line %d

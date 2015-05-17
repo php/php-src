@@ -20,4 +20,8 @@ Warning: IntlTimeZone::getDSTSavings() expects exactly 0 parameters, 1 given in 
 Warning: IntlTimeZone::getDSTSavings(): intltz_get_dst_savings: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Argument 1 passed to intltz_get_dst_savings() must be an instance of IntlTimeZone, null given in %s on line %d
+Fatal error: Uncaught TypeException: Argument 1 passed to intltz_get_dst_savings() must be an instance of IntlTimeZone, null given in %s:%d
+Stack trace:
+#0 %s(%d): intltz_get_dst_savings(NULL)
+#1 {main}
+  thrown in %s on line %d
