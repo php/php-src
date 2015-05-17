@@ -13,7 +13,7 @@ $o = new Foo;
 $o->a($o);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeException: Argument 1 passed to Foo::a() must be an instance of NonExisting, instance of Foo given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to Foo::a() must be an instance of NonExisting, instance of Foo given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): Foo->a()
 #1 {main}

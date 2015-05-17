@@ -110,7 +110,7 @@ object(Test)#%d (3) {
 }
 ===FAIL===
 
-Fatal error: Uncaught EngineException: Cannot access protected property Fail::$id in %spdo_025.php:%d
+Fatal error: Uncaught Error: Cannot access protected property Fail::$id in %spdo_025.php:%d
 Stack trace:
 #0 {main}
   thrown in %spdo_025.php on line %d

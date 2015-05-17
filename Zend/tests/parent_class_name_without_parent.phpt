@@ -17,7 +17,7 @@ class C {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Cannot use "parent" when current class scope has no parent in %s:5
+Fatal error: Uncaught Error: Cannot use "parent" when current class scope has no parent in %s:5
 Stack trace:
 #0 %s(%d): C->f()
 #1 {main}

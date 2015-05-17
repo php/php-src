@@ -8,19 +8,19 @@ class C {
 
 try {
 	var_dump(C::$a);
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 try {
 	var_dump(C::$p);
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 try {
 	unset(C::$a);
-} catch (EngineException $e) {
+} catch (Error $e) {
 	echo "\nException: " . $e->getMessage() . " in " , $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
@@ -33,7 +33,7 @@ Exception: Cannot access private property C::$p in %sexception_013.php on line 1
 
 Exception: Attempt to unset static property C::$a in %sexception_013.php on line 19
 
-Fatal error: Uncaught EngineException: Access to undeclared static property: C::$a in %sexception_013.php:24
+Fatal error: Uncaught Error: Access to undeclared static property: C::$a in %sexception_013.php:24
 Stack trace:
 #0 {main}
   thrown in %sexception_013.php on line 24
