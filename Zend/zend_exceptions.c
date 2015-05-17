@@ -38,13 +38,9 @@ static zend_class_entry *type_error_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
-ZEND_API zend_class_entry *zend_get_exception_base(zval *object)
+static zend_class_entry *zend_get_exception_base(zval *object)
 {
-	if (instanceof_function(Z_OBJCE_P(object), error_ce)) {
-		return error_ce;
-	}
-	
-	return default_exception_ce;
+	return instanceof_function(Z_OBJCE_P(object), default_exception_ce) ? default_exception_ce : error_ce;
 }
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous)

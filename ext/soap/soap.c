@@ -1499,7 +1499,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 	} else if (instanceof_function(Z_OBJCE(exception_object), zend_get_error())) {
 		if (service->send_errors) {
 			zval rv;
-			zend_string *msg = zval_get_string(zend_read_property(zend_get_exception_base(&exception_object), &exception_object, "message", sizeof("message")-1, 0, &rv));
+			zend_string *msg = zval_get_string(zend_read_property(zend_get_error(), &exception_object, "message", sizeof("message")-1, 0, &rv));
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", msg->val, NULL, NULL);
 			zend_string_release(msg);
 		} else {
@@ -2602,7 +2602,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 				zval exception_object;
 
 				ZVAL_OBJ(&exception_object, EG(exception));
-				msg = zval_get_string(zend_read_property(zend_get_exception_base(&exception_object), &exception_object, "message", sizeof("message")-1, 0, &rv));
+				msg = zval_get_string(zend_read_property(zend_get_error(), &exception_object, "message", sizeof("message")-1, 0, &rv));
 				/* change class */
 				EG(exception)->ce = soap_fault_class_entry;
 				set_soap_fault(&exception_object, NULL, "Client", msg->val, NULL, NULL, NULL);
