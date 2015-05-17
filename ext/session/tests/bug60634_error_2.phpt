@@ -45,9 +45,8 @@ echo "um, hi\n";
 --EXPECTF--
 write: goodbye cruel world
 
-Fatal error: Uncaught exception 'Exception' in %s
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 [internal function]: write('%s', '')
 #1 %s(%d): session_write_close()
 #2 {main}
-  thrown in %s on line %d

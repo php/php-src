@@ -12,8 +12,7 @@ $fragment->appendXML('<bait>crankbait</bait>');
 $document->appendChild($fragment);
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'DOMException' with message 'No Modification Allowed Error' in %s:%d
+DOMException: No Modification Allowed Error in %s on line %d
 Stack trace:
 #0 %s(%d): DOMDocumentFragment->appendXML('<bait>crankbait...')
 #1 {main}
-  thrown in %s on line %d

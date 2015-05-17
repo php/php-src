@@ -21,8 +21,7 @@ var_dump($fileInfo->getOwner());
 ?>
 
 --EXPECTF--
-Fatal error: Uncaught exception 'RuntimeException' with message 'SplFileInfo::getOwner(): stat failed for not_existing' in %s
+RuntimeException: SplFileInfo::getOwner(): stat failed for not_existing in %s on line %d
 Stack trace:
 #0 %s: SplFileInfo->getOwner()
 #1 {main}
-  thrown in %s on line %d

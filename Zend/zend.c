@@ -53,7 +53,7 @@ ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
-ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+ZEND_API zend_error_cb_type zend_error_cb;
 size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
@@ -1009,6 +1009,37 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+static const char *zend_get_error_type_str(int type) /* {{{ */
+{
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			return "Fatal error";
+		case E_RECOVERABLE_ERROR:
+			return "Catchable fatal error";
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			return "Warning";
+		case E_PARSE:
+			return "Parse error";
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			return "Notice";
+		case E_STRICT:
+			return "Strict Standards";
+		case E_DEPRECATED:
+		case E_USER_DEPRECATED:
+			return "Deprecated";
+		default:
+			return "Unknown error";
+	}
+}
+/* }}} */
+
 #define SAVE_STACK(stack) do { \
 		if (CG(stack).top) { \
 			memcpy(&stack, &CG(stack), sizeof(zend_stack)); \
@@ -1041,6 +1072,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zval params[5];
 	zval retval;
 	const char *error_filename;
+	const char *error_type_str;
 	uint error_lineno = 0;
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
@@ -1164,11 +1196,13 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	va_start(args, format);
 #endif
 
+	error_type_str = zend_get_error_type_str(type);
+
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
 		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(type, error_filename, error_lineno, format, args);
+		zend_error_cb(type, error_type_str, error_filename, error_lineno, "", format, args);
 	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
@@ -1177,7 +1211,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
-			zend_error_cb(type, error_filename, error_lineno, format, args);
+			zend_error_cb(type, error_type_str, error_filename, error_lineno, "", format, args);
 			break;
 		default:
 			/* Handle the error in user space */
@@ -1239,13 +1273,14 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
+						zend_error_cb(type, error_type_str,
+							error_filename, error_lineno, "", format, args);
 					}
 					zval_ptr_dtor(&retval);
 				}
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
+				zend_error_cb(type, error_type_str, error_filename, error_lineno, "", format, args);
 			}
 
 			if (in_compilation) {

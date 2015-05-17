@@ -20,8 +20,7 @@ echo "Done\n";
 --EXPECTF--	
 string(12) "test thrown!"
 
-Fatal error: Uncaught exception 'Exception' in %sexception_handler_002.php:7
+Exception: (empty message) in %sexception_handler_002.php on line 7
 Stack trace:
 #0 [internal function]: foo(Object(test))
 #1 {main}
-  thrown in %sexception_handler_002.php on line %d

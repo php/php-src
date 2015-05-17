@@ -9,7 +9,6 @@ throw $e;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d

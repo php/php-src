@@ -15,10 +15,9 @@ class Foo implements IteratorAggregate
 var_dump(iterator_to_array(new Foo));
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %s
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 %s: Foo->bar()
 #1 [internal function]: Foo->getIterator()
 #2 %s: iterator_to_array(Object(Foo))
 #3 {main}
-  thrown in %s on line %d

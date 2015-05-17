@@ -23,10 +23,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 %s(%d): Element->ThrowException()
 #1 [internal function]: Element::CallBack(Object(Element))
 #2 %s(%d): array_map(Array, Array)
 #3 {main}
-  thrown in %s on line %d

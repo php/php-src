@@ -23,8 +23,7 @@ catch(Exception $e){
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught exception 'Exception' in %s
+Exception: (empty message) in %s on line %d
 Stack trace:
 #0 %s(%d): C->generate(0)
 #1 {main}
-  thrown in %s

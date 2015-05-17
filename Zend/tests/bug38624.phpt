@@ -26,9 +26,8 @@ $impl = new impl();
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Uncaught exception 'Exception' with message 'doesn't work' in %s:%d
+Exception: doesn't work in %s on line %d
 Stack trace:
 #0 %s(%d): impl->__get('counter')
 #1 %s(%d): impl->__construct()
 #2 {main}
-  thrown in %s on line %d

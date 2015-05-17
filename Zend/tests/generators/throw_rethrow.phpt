@@ -25,10 +25,9 @@ Stack trace:
 #0 {main}
 
 
-Fatal error: Uncaught exception 'LogicException' with message 'new throw' in %s:%d
+LogicException: new throw in %s on line %d
 Stack trace:
 #0 [internal function]: gen()
 #1 %s(%d): Generator->throw(Object(RuntimeException))
 #2 {main}
-  thrown in %s on line %d
 

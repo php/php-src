@@ -189,8 +189,13 @@ struct _zend_class_entry {
 	} info;
 };
 
+typedef void (*zend_error_cb_type)(int type, const char *type_str,
+	const char *error_filename, const uint error_lineno,
+	const char *additional_info, const char *format, va_list args)
+	ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+
 typedef struct _zend_utility_functions {
-	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+	zend_error_cb_type error_function;
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	size_t (*write_function)(const char *str, size_t str_length);
 	FILE *(*fopen_function)(const char *filename, zend_string **opened_path);
@@ -276,7 +281,7 @@ extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_p
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
-extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+extern ZEND_API zend_error_cb_type zend_error_cb;
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 extern size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);

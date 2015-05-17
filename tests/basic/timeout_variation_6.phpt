@@ -22,8 +22,7 @@ f($t);
 never reached here
 --EXPECTF--
 call
-Fatal error: Uncaught exception 'Exception' with message 'exception before timeout' in %s:%d
+Exception: exception before timeout in %s on line %d
 Stack trace:
 #0 %s(%d): f(%d)
 #1 {main}
-  thrown in %s on line %d

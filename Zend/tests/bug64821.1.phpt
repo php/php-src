@@ -16,7 +16,6 @@ throw new a;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'a' in %s:0
+a: (empty message) in %s on line 0
 Stack trace:
 #0 {main}
-  thrown in %s on line %d

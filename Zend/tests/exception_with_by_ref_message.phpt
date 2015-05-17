@@ -15,7 +15,6 @@ throw new MyException($msg);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'MyException' with message 'Message' in %s:%d
+MyException: Message in %s on line %d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d
