@@ -715,6 +715,10 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -1146,6 +1150,10 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -1244,6 +1252,10 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;

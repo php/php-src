@@ -1065,7 +1065,7 @@ read_cdata(FILE *in)
 
             if (*e == '/') {
                 /*
-                 * Move the the denominator of the fraction.
+                 * Move the denominator of the fraction.
                  */
                 if (neg)
                   number[wnum] *= -1;

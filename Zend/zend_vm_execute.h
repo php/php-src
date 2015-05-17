@@ -16366,6 +16366,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -16795,6 +16799,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -16892,6 +16900,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -19608,6 +19620,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -20037,6 +20053,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -20134,6 +20154,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -21338,6 +21362,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -21769,6 +21797,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -21867,6 +21899,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -22954,6 +22990,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -23345,6 +23385,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -23442,6 +23486,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -25355,6 +25403,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -25746,6 +25798,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -25843,6 +25899,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -26873,6 +26933,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -27265,6 +27329,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -27363,6 +27431,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -30607,6 +30679,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -31036,6 +31112,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -31133,6 +31213,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -35839,6 +35923,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -36268,6 +36356,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -36365,6 +36457,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -38492,6 +38588,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 			Z_ADDREF(obj);
 			if (Z_OBJ_HT(obj)->read_property &&
 				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
@@ -38923,6 +39023,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
@@ -39021,6 +39125,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 				ZVAL_OBJ(&obj, Z_OBJ_P(object));
 				Z_ADDREF(obj);
 				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
+				if (UNEXPECTED(EG(exception))) {
+					OBJ_RELEASE(Z_OBJ(obj));
+					break;
+				}
 
 				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 					zval rv2;
