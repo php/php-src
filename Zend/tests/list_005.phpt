@@ -44,7 +44,7 @@ NULL
 NULL
 ----
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use object of type stdClass as array' in %s:%d
+Fatal error: Uncaught EngineException: Cannot use object of type stdClass as array in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

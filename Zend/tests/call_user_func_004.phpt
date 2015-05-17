@@ -15,7 +15,7 @@ call_user_func(array('foo', 'teste'));
 --EXPECTF--
 Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
 
-Fatal error: Uncaught exception 'EngineException' with message 'Using $this when not in object context' in %s:%d
+Fatal error: Uncaught EngineException: Using $this when not in object context in %s:%d
 Stack trace:
 #0 %s(%d): foo::teste()
 #1 {main}

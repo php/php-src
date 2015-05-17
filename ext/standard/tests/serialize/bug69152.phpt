@@ -9,7 +9,7 @@ $x->test();
 
 ?>
 --EXPECTF--
-exception 'Exception' in %s:%d
+Exception in %s:%d
 Stack trace:
 #0 {main}
 

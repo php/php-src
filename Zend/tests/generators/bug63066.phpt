@@ -13,7 +13,7 @@ foreach(gen(new stdClass()) as $value)
 --EXPECTF--
 foo
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined method stdClass::fatalError()' in %sbug63066.php:5
+Fatal error: Uncaught EngineException: Call to undefined method stdClass::fatalError() in %sbug63066.php:5
 Stack trace:
 #0 %s(%d): gen(Object(stdClass))
 #1 {main}

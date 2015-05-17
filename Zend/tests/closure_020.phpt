@@ -40,7 +40,7 @@ object(foo)#%d (2) {
 bool(true)
 bool(true)
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access private property foo::$test' in %s:%d
+Fatal error: Uncaught EngineException: Cannot access private property foo::$test in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

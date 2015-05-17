@@ -34,7 +34,7 @@ this is a protected method.
 this is a private method.
 foo
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to protected method test::isProtected() from context ''' in %s:%d
+Fatal error: Uncaught EngineException: Call to protected method test::isProtected() from context '' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

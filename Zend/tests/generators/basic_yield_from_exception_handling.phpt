@@ -32,27 +32,27 @@ var_dump($gen->valid());
 --EXPECTF--
 int(0)
 catch in gen()
-exception 'Exception' with message '0' in %s:%d
+Exception: 0 in %s:%d
 Stack trace:
 #0 {main}
 int(1)
 catch in from()
-exception 'Exception' with message '1' in %s:%d
+Exception: 1 in %s:%d
 Stack trace:
 #0 {main}
 int(2)
 catch in gen()
-exception 'Exception' with message '2' in %s:%d
+Exception: 2 in %s:%d
 Stack trace:
 #0 {main}
 int(3)
 catch in from()
-exception 'Exception' with message '3' in %s:%d
+Exception: 3 in %s:%d
 Stack trace:
 #0 {main}
 int(4)
 catch in {main}
-exception 'Exception' with message '4' in %s:%d
+Exception: 4 in %s:%d
 Stack trace:
 #0 {main}
 bool(false)

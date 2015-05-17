@@ -43,7 +43,7 @@ session_start();
 --EXPECTF--
 write: goodbye cruel world
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined function undefined_function()' in %s:%d
+Fatal error: Uncaught EngineException: Call to undefined function undefined_function() in %s:%d
 Stack trace:
 #0 [internal function]: write(%s, '')
 #1 {main}

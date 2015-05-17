@@ -6,7 +6,7 @@ namespace test\ns1;
 
 echo get_class(new Exception()),"\n";
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Class 'test\ns1\Exception' not found' in %sns_004.php:%d
+Fatal error: Uncaught EngineException: Class 'test\ns1\Exception' not found in %sns_004.php:%d
 Stack trace:
 #0 {main}
   thrown in %sns_004.php on line %d

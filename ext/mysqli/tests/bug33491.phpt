@@ -26,7 +26,7 @@ $DB->query_single('SELECT DATE()');
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to a member function fetch_row() on boolean' in %sbug33491.php:%d
+Fatal error: Uncaught EngineException: Call to a member function fetch_row() on boolean in %sbug33491.php:%d
 Stack trace:
 #0 %s(%d): DB->query_single('SELECT DATE()')
 #1 {main}

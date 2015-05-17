@@ -26,7 +26,7 @@ Exception: Unsupported operand types
 
 Notice: Object of class stdClass could not be converted to int in %s on line %d
 
-Fatal error: Uncaught exception 'EngineException' with message 'Unsupported operand types' in %s:%d
+Fatal error: Uncaught EngineException: Unsupported operand types in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

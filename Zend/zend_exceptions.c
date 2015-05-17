@@ -653,13 +653,13 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (message->len > 0) {
-			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:" ZEND_LONG_FMT
+			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT
 					"\nStack trace:\n%s%s%s",
 					Z_OBJCE_P(exception)->name->val, message->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		} else {
-			str = zend_strpprintf(0, "exception '%s' in %s:" ZEND_LONG_FMT
+			str = zend_strpprintf(0, "%s in %s:" ZEND_LONG_FMT
 					"\nStack trace:\n%s%s%s",
 					Z_OBJCE_P(exception)->name->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",

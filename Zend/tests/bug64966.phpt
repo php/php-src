@@ -21,7 +21,7 @@ $a = new A();
 $a->b();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %sbug64966.php:6
+Fatal error: Uncaught Exception in %sbug64966.php:6
 Stack trace:
 #0 %sbug64966.php(13): test('iterator_apply')
 #1 %sbug64966.php(18): A->b()

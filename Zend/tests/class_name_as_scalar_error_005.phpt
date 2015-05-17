@@ -7,7 +7,7 @@ $x = static::class;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use "static" when no class scope is active' in %s:3
+Fatal error: Uncaught EngineException: Cannot use "static" when no class scope is active in %s:3
 Stack trace:
 #0 {main}
   thrown in %s on line 3

@@ -12,7 +12,7 @@ require_once dirname(__FILE__) .'/skipif.inc';
 DOMDocument::saveHTML(true);
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Non-static method DOMDocument::saveHTML() cannot be called statically' in %s:%d
+Fatal error: Uncaught EngineException: Non-static method DOMDocument::saveHTML() cannot be called statically in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

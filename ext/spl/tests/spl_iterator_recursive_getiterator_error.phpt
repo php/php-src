@@ -13,7 +13,7 @@ function p ($i) {
 }
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'An iterator cannot be used with foreach by reference' in %s:%d
+Fatal error: Uncaught EngineException: An iterator cannot be used with foreach by reference in %s:%d
 Stack trace:
 #0 %s(%d): p(Object(IteratorIterator))
 #1 {main}

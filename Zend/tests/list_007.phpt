@@ -9,7 +9,7 @@ var_dump($x, $y);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use object of type Closure as array' in %slist_007.php:3
+Fatal error: Uncaught EngineException: Cannot use object of type Closure as array in %slist_007.php:3
 Stack trace:
 #0 {main}
   thrown in %slist_007.php on line 3

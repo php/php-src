@@ -9,7 +9,7 @@ tidyNode::__construct()
 new tidyNode;
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to private tidyNode::__construct() from invalid context' in %s:%d
+Fatal error: Uncaught EngineException: Call to private tidyNode::__construct() from invalid context in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

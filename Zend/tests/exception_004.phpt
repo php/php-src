@@ -15,7 +15,7 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Exceptions must be valid objects derived from the Exception base class' in %s:%d
+Fatal error: Uncaught EngineException: Exceptions must be valid objects derived from the Exception base class in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

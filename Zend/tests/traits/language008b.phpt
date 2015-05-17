@@ -27,7 +27,7 @@ $o->sayHelloWorld();
 ?>
 --EXPECTF--	
 Hello World!Hello World!
-Fatal error: Uncaught exception 'EngineException' with message 'Call to private method MyClass::sayHelloWorld() from context ''' in %s:%d
+Fatal error: Uncaught EngineException: Call to private method MyClass::sayHelloWorld() from context '' in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

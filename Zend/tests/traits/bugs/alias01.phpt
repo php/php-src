@@ -23,7 +23,7 @@ T:m1
 T:m1
 T:m2
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined method C1::a2()' in %s:%d
+Fatal error: Uncaught EngineException: Call to undefined method C1::a2() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -10,7 +10,7 @@ var_dump(baz());
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Call to undefined function foo\bar\baz()' in %s:%d
+Fatal error: Uncaught EngineException: Call to undefined function foo\bar\baz() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

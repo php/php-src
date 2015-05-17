@@ -45,7 +45,7 @@ $bar = new Bar();
 $bar->test();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Access to undeclared static property: Stat::$requests' in %sbug64720.php:12
+Fatal error: Uncaught EngineException: Access to undeclared static property: Stat::$requests in %sbug64720.php:12
 Stack trace:
 #0 [internal function]: Stat->__destruct()
 #1 {main}

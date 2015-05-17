@@ -9,7 +9,7 @@ throw new a();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot instantiate interface a' in %s:%d
+Fatal error: Uncaught EngineException: Cannot instantiate interface a in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

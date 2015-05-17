@@ -38,7 +38,7 @@ NULL
 ===CHILD===
 string(4) "Base"
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access private property ChildClass::$private_child' in %sbug29674.php:%d
+Fatal error: Uncaught EngineException: Cannot access private property ChildClass::$private_child in %sbug29674.php:%d
 Stack trace:
 #0 %s(%d): BaseClass->printVars()
 #1 {main}

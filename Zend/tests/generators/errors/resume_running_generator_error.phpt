@@ -21,7 +21,7 @@ $gen->next();
 --EXPECTF--
 Exception: Cannot resume an already running generator
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot resume an already running generator' in %s:%d
+Fatal error: Uncaught EngineException: Cannot resume an already running generator in %s:%d
 Stack trace:
 #0 %s(%d): Generator->next()
 #1 [internal function]: gen()

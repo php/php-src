@@ -8,7 +8,7 @@ $foo[3]->bar[1] = "bang";
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot use string offset as an object' in %sbug41919.php:%d
+Fatal error: Uncaught EngineException: Cannot use string offset as an object in %sbug41919.php:%d
 Stack trace:
 #0 {main}
   thrown in %sbug41919.php on line %d

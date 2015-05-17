@@ -78,7 +78,7 @@ object(C)#%d (1) {
 
 Unset a private property, and attempt to recreate at global scope (expecting failure):
 
-Fatal error: Uncaught exception 'EngineException' with message 'Cannot access private property C::$p' in %s:46
+Fatal error: Uncaught EngineException: Cannot access private property C::$p in %s:46
 Stack trace:
 #0 {main}
   thrown in %s on line 46
