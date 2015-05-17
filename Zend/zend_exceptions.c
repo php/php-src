@@ -767,10 +767,11 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	default_exception_ce = zend_register_internal_class_ex(&ce, NULL);
 	default_exception_ce->create_object = zend_default_exception_new;
+	zend_class_implements(default_exception_ce, 1, zend_ce_throwable);
+
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
-	zend_class_implements(default_exception_ce, 1, zend_ce_throwable);
-	
+
 	zend_declare_property_string(default_exception_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(default_exception_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
 	zend_declare_property_long(default_exception_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
@@ -787,10 +788,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
 	error_ce = zend_register_internal_class_ex(&ce, NULL);
 	error_ce->create_object = zend_default_exception_new;
-	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	default_exception_handlers.clone_obj = NULL;
 	zend_class_implements(error_ce, 1, zend_ce_throwable);
-	
+
 	zend_declare_property_string(error_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(error_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
 	zend_declare_property_long(error_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
