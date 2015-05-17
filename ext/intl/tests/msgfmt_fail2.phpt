@@ -22,7 +22,7 @@ function crt($t, $l, $s) {
 		case $t == "O":
 			try {
 				return new MessageFormatter($l, $s);
-			} catch (BaseException $e) {
+			} catch (Throwable $e) {
 				print_exception($e);
 				return null;
 			}
