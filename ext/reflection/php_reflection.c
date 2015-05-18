@@ -2157,7 +2157,7 @@ ZEND_METHOD(reflection_generator, getTrace)
 	zend_generator *root_generator;
 	zend_execute_data *ex_backup = EG(current_execute_data);
 	zend_execute_data *ex = generator->execute_data;
-	zend_execute_data *root_prev, *cur_prev;
+	zend_execute_data *root_prev = NULL, *cur_prev;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &options) == FAILURE) {
 		return;

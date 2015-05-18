@@ -165,6 +165,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	zend_object *object;
 	zval trace;
 	zend_class_entry *base_ce;
+	zend_string *filename;
 
 	Z_OBJ(obj) = object = zend_objects_new(class_type);
 	Z_OBJ_HT(obj) = &default_exception_handlers;
@@ -180,11 +181,11 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	
 	base_ce = zend_get_exception_base(&obj);
 
-	if (EXPECTED(class_type != parse_error_ce)) {
+	if (EXPECTED(class_type != parse_error_ce || !(filename = zend_get_compiled_filename()))) {
 		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename());
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno());
 	} else {
-		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, zend_get_compiled_filename()->val);
+		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, filename->val);
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_compiled_lineno());
 	}
 	zend_update_property(base_ce, &obj, "trace", sizeof("trace")-1, &trace);
@@ -921,7 +922,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		zend_error_helper(code, file->val, line, "%s", message->val);
+		zend_error_helper(code? code : E_ERROR, file->val, line, "%s", message->val);
 
 		zend_string_release(file);
 		zend_string_release(message);

@@ -432,6 +432,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 	EX(prev_execute_data) = EG(current_execute_data);
 	i_init_execute_data(execute_data, op_array, return_value);
 	zend_execute_ex(execute_data);
+	zend_vm_stack_free_call_frame(execute_data);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
@@ -529,7 +530,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
 		}
-		zend_vm_stack_free_call_frame_ex(call_info, execute_data);
 
 		ZEND_VM_RETURN();
 	}
@@ -3855,6 +3855,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		} else {
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
+			zend_vm_stack_free_call_frame(call);
 		}
 
 		destroy_op_array(new_op_array);
@@ -29437,6 +29438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		} else {
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
+			zend_vm_stack_free_call_frame(call);
 		}
 
 		destroy_op_array(new_op_array);
@@ -40927,6 +40929,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		} else {
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
+			zend_vm_stack_free_call_frame(call);
 		}
 
 		destroy_op_array(new_op_array);
