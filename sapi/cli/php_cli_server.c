@@ -2185,6 +2185,9 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 	if (!is_static_file) {
 		if (SUCCESS == php_cli_server_dispatch_script(server, client TSRMLS_CC)
 				|| SUCCESS != php_cli_server_send_error_page(server, client, 500 TSRMLS_CC)) {
+			if (SG(sapi_headers).http_response_code == 304) {
+				SG(sapi_headers).send_default_content_type = 0;
+			}
 			php_cli_server_request_shutdown(server, client TSRMLS_CC);
 			return SUCCESS;
 		}
