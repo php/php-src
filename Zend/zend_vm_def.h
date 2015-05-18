@@ -2490,7 +2490,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
 		}
-		zend_vm_stack_free_call_frame_ex(call_info, execute_data);
 
 		ZEND_VM_RETURN();
 	}
@@ -5514,6 +5513,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 		} else {
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
+			zend_vm_stack_free_call_frame(call);
 		}
 
 		destroy_op_array(new_op_array);
