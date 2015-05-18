@@ -509,7 +509,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 	if (instanceof_function(class_type, zend_exception_get_default()) || instanceof_function(class_type, zend_get_error())) {
 		return SUCCESS;
 	}
-	zend_error_noreturn(E_CORE_ERROR, "Class %s cannot implement interface %s, extend Exception instead",
+	zend_error_noreturn(E_CORE_ERROR, "Class %s cannot implement interface %s, extend Exception or Error instead",
 		class_type->name->val,
 		interface->name->val);
 	return FAILURE;
@@ -565,7 +565,17 @@ const zend_function_entry zend_funcs_serializable[] = {
 };
 /* }}} */
 
-const zend_function_entry *zend_funcs_throwable  = NULL;
+const zend_function_entry zend_funcs_throwable[] = {
+	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
+	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getLine,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getTrace,         NULL)
+	ZEND_ABSTRACT_ME(throwable, getPrevious,      NULL)
+	ZEND_ABSTRACT_ME(throwable, getTraceAsString, NULL)
+	ZEND_ABSTRACT_ME(throwable, __toString,       NULL)
+	ZEND_FE_END
+};
 
 #define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
 	{\
