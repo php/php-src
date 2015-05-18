@@ -1,9 +1,8 @@
 --TEST--
-collator_get_sort_key() icu >= 55.1
+collator_get_sort_key() icu >= 54.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '55.1') >=  0) die('skip for ICU < 55.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '55.1') < 0) die('skip for ICU >= 55.1'); ?>
 --FILE--
 <?php
 
@@ -64,9 +63,9 @@ key: 292b2f01070107
 source: aaa
 key: 29292901070107
 source: аа
-key: 5e060601060106
+key: 60060601060106
 source: а
-key: 5e0601050105
+key: 600601050105
 source: z
 key: 5b01050105
 source: 
@@ -74,7 +73,7 @@ key: 0101
 source: 
 key: 0101
 source: 3
-key: 1a01050105
+key: 1801050105
 source: y
 key: 5901050105
 source: i
@@ -82,18 +81,18 @@ key: 3901050105
 source: k
 key: 3d01050105
 source: абг
-key: 2806101401070107
+key: 26060c1001070107
 source: абв
-key: 2806101201070107
+key: 26060c0e01070107
 source: жжж
-key: 2830303001070107
+key: 2626262601070107
 source: эюя
-key: 28ccd0d401070107
+key: 26b4b6ba01070107
 source: абг
-key: 5e06101401070107
+key: 60060c1001070107
 source: абв
-key: 5e06101201070107
+key: 60060c0e01070107
 source: жжж
-key: 5e30303001070107
+key: 6026262601070107
 source: эюя
-key: 5eccd0d401070107
+key: 60b4b6ba01070107
