@@ -1010,7 +1010,8 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 			Z_PARAM_PROLOGUE(separate); \
 			zend_parse_arg_zval_deref(_arg, &dest, check_null); \
 		} else { \
-			if (UNEXPECTED(++_i >_num_args)) break; \
+			++_i; \
+			if (_optional && UNEXPECTED(_i >_num_args)) break; \
 			_real_arg++; \
 			zend_parse_arg_zval(_real_arg, &dest, check_null); \
 		}
