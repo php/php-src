@@ -25,6 +25,10 @@
 #include "php.h"
 
 #if DBA_DB3
+#ifdef DBA_IS_MODERN
+#undef off_t
+#undef ssize_t
+#endif
 #include "php_db3.h"
 #include <sys/stat.h>
 
@@ -35,7 +39,11 @@
 #include <db.h>
 #endif
 
-static void php_dba_db3_errcall_fcn(const char *errpfx, char *msg)
+static void php_dba_db3_errcall_fcn(
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3))
+	const DB_ENV *dbenv,
+#endif
+	const char *errpfx, const char *msg)
 {
 
 	php_error_docref(NULL, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
@@ -90,7 +98,12 @@ DBA_OPEN_FUNC(db3)
 
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
 	    dbp->set_errcall(dbp, php_dba_db3_errcall_fcn);
-	    if ((err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
+		if(
+#if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1))
+			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
+#else
+			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
+#endif
 			dba_db3_data *data;
 
 			data = pemalloc(sizeof(*data), info->flags&DBA_PERSISTENT);
