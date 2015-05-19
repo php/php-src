@@ -78,6 +78,8 @@
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
   . Implemented the RFC `Generator Delegation`. (Bob)
   . Implemented the RFC ` Anonymous Class Support`. (Joe, Nikita, Dmitry)
+  . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
+    (Jan Starke, Anatol)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
