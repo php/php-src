@@ -25,10 +25,6 @@
 #include "php.h"
 
 #if DBA_DB3
-#ifdef DBA_IS_MODERN
-#undef off_t
-#undef ssize_t
-#endif
 #include "php_db3.h"
 #include <sys/stat.h>
 
