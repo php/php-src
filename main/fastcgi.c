@@ -36,15 +36,15 @@
 
 #include <windows.h>
 
-	typedef unsigned int in_addr_t;
+typedef unsigned int in_addr_t;
 
-	struct sockaddr_un {
-		short   sun_family;
-		char    sun_path[MAXPATHLEN];
-	};
+struct sockaddr_un {
+	short   sun_family;
+	char    sun_path[MAXPATHLEN];
+};
 
-	static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
-	static int is_impersonate = 0;
+static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
+static int is_impersonate = 0;
 
 #define FCGI_LOCK(fd) \
 	if (fcgi_accept_mutex != INVALID_HANDLE_VALUE) { \
