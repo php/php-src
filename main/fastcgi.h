@@ -49,6 +49,12 @@ typedef enum _fcgi_role {
 	FCGI_FILTER		= 3
 } fcgi_role;
 
+typedef enum _fcgi_code {
+	FCGI_NOTICE,
+	FCGI_WARNING,
+	FCGI_ERROR,
+} fcgi_code;
+
 typedef enum _fcgi_request_type {
 	FCGI_BEGIN_REQUEST		=  1, /* [in]                              */
 	FCGI_ABORT_REQUEST		=  2, /* [in]  (not supported)             */
@@ -110,6 +116,8 @@ typedef struct _fcgi_end_request_rec {
 
 typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
+typedef void (*fcgi_logger)(int type, const char *format, ...);
+
 typedef struct _fcgi_request fcgi_request;
 
 int fcgi_init(void);
@@ -122,6 +130,7 @@ fcgi_request* fcgi_init_request(int listen_socket);
 void fcgi_destroy_request(fcgi_request *req);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
+void fcgi_set_logger(fcgi_logger logger);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);

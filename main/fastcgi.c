@@ -32,6 +32,8 @@
 #define MAXFQDNLEN 255
 #endif
 
+static fcgi_logger flog;
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -407,6 +409,10 @@ void fcgi_terminate(void)
 	in_shutdown = 1;
 }
 
+void fcgi_set_logger(fcgi_logger logger) {
+	flog = logger;
+}
+
 int fcgi_init(void)
 {
 	if (!is_initialized) {
@@ -626,10 +632,10 @@ int fcgi_listen(const char *path, int backlog)
 					hep = gethostbyname(host);
 				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
-					fprintf(stderr, "Cannot resolve host name '%s'!\n", host);
+					flog(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
 					return -1;
 				} else if (hep->h_addr_list[1]) {
-					fprintf(stderr, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
+					flog(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
 					return -1;
 				}
 				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
@@ -666,7 +672,7 @@ int fcgi_listen(const char *path, int backlog)
 		int path_len = strlen(path);
 
 		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
-			fprintf(stderr, "Listening socket's path name is too long.\n");
+			flog(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}
 
@@ -689,7 +695,7 @@ int fcgi_listen(const char *path, int backlog)
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
 
-		fprintf(stderr, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
+		flog(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
 		return -1;
 	}
 
@@ -719,7 +725,7 @@ int fcgi_listen(const char *path, int backlog)
 				}
 				allowed_clients[n] = inet_addr(cur);
 				if (allowed_clients[n] == INADDR_NONE) {
-					fprintf(stderr, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS\n", cur);
+					flog(FCGI_ERROR, "Wrong IP address '%s' in FCGI_WEB_SERVER_ADDRS\n", cur);
 				}
 				n++;
 				cur = end;
@@ -1229,7 +1235,7 @@ int fcgi_accept_request(fcgi_request *req)
 									n++;
 								}
 								if (!allowed) {
-									fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
+									flog(FCGI_ERROR, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
 									closesocket(req->fd);
 									req->fd = -1;
 									continue;
@@ -1287,7 +1293,7 @@ int fcgi_accept_request(fcgi_request *req)
 						}
 						fcgi_close(req, 1, 0);
 					} else {
-						fprintf(stderr, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
+						flog(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
 						fcgi_close(req, 1, 0);
 					}
 #endif

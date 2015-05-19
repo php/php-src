@@ -219,6 +219,14 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
+static void fcgi_log(int type, const char *format, ...) {
+	va_list ap;
+
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
 static int print_module_info(zval *element)
 {
 	zend_module_entry *module = Z_PTR_P(element);
@@ -1928,6 +1936,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
+	fcgi_set_logger(fcgi_log);
 	if (bindpath) {
 		int backlog = 128;
 		if (getenv("PHP_FCGI_BACKLOG")) {
