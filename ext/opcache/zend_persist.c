@@ -342,6 +342,7 @@ static void zend_persist_zval_static(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
 			} else {
 				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
 				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
