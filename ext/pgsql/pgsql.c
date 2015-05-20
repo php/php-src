@@ -5103,7 +5103,11 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 
 	src = estrdup(table_name);
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
-	
+	if (!tmp_name) {
+		efree(src);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The table name must be specified");
+		return FAILURE;
+	}
 	if (!tmp_name2 || !*tmp_name2) {
 		/* Default schema */
 		tmp_name2 = tmp_name;
@@ -6111,7 +6115,8 @@ static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt T
 
 static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const char *table)
 {
-	char *table_copy, *escaped, *token, *tmp;
+	char *table_copy, *escaped, *tmp;
+	const char *token;
 	size_t len;
 
 	/* schame.table should be "schame"."table" */
