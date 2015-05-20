@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
 
+- Postgres:
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+
 14 May 2015, PHP 5.6.9
 
 - Core:
