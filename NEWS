@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.42
 
+- Postgres:
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+
 14 May 2015 PHP 5.4.41
 
 - Core: 
