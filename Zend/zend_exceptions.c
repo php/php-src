@@ -125,7 +125,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 
 	if (!EG(current_execute_data)->func ||
 	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
-	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
+	    EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;
 	}
