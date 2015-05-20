@@ -1,5 +1,11 @@
 --TEST--
 Bug #69628: GLOB_BRACE with multiple brackets within the braces fails
+--SKIPIF--
+<?php
+if (!defined('GLOB_BRACE')) {
+    die('skip this test requires GLOB_BRACE support');
+}
+?>
 --FILE--
 <?php
 
