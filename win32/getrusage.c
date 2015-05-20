@@ -73,3 +73,4 @@ PHPAPI int getrusage(int who, struct rusage *usage)
 		return -1;
 	}
 }
+

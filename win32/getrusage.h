@@ -70,6 +70,9 @@ struct rusage
 	/* Integral max resident set size */
 	zend_long ru_maxrss;
 
+	/* Page faults */
+	zend_long ru_majflt;
+#if 0
 	/* Integral shared text memory size */
 	zend_long ru_ixrss;
 
@@ -81,9 +84,6 @@ struct rusage
 
 	/* Page reclaims */
 	zend_long ru_minflt;
-
-	/* Page faults */
-	zend_long ru_majflt;
 
 	/* Swaps */
 	zend_long ru_nswap;
@@ -108,8 +108,10 @@ struct rusage
 
 	/* Involuntary context switches */
 	zend_long ru_nivcsw;
+#endif
 };
 
 PHPAPI int getrusage(int who, struct rusage *usage);
 
 #endif
+
