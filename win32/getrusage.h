@@ -19,10 +19,11 @@
 #ifndef HAVE_GETRUSAGE_H
 # define HAVE_GETRUSAGE_H
 
-/* Note, 
+/*
+ * Note
  * 
  * RUSAGE_CHILDREN is not implemented, and the RUSAGE_THREAD will 
- * instead be used instead.
+ * therefore instead be used instead to emulate the behavior.
  */
 
 # define RUSAGE_SELF		0
@@ -67,46 +68,46 @@ struct rusage
 	struct timeval ru_stime;
 
 	/* Integral max resident set size */
-	long ru_maxrss;
+	zend_long ru_maxrss;
 
 	/* Integral shared text memory size */
-	long ru_ixrss;
+	zend_long ru_ixrss;
 
 	/* Integral unshared data size */
-	long ru_idrss;
+	zend_long ru_idrss;
 
 	/* Integral unshared stack size */
-	long ru_isrss;
+	zend_long ru_isrss;
 
 	/* Page reclaims */
-	long ru_minflt;
+	zend_long ru_minflt;
 
 	/* Page faults */
-	long ru_majflt;
+	zend_long ru_majflt;
 
 	/* Swaps */
-	long ru_nswap;
+	zend_long ru_nswap;
 
 	/* Block input operations */
-	long ru_inblock;
+	zend_long ru_inblock;
 
 	/* Block output operations */
-	long ru_oublock;
+	zend_long ru_oublock;
 
 	/* Messages sent */
-	long ru_msgsnd;
+	zend_long ru_msgsnd;
 
 	/* Messages received */
-	long ru_msgrcv;
+	zend_long ru_msgrcv;
 
 	/* Signals received */
-	long ru_nsignals;
+	zend_long ru_nsignals;
 
 	/* Voluntary context switches */
-	long ru_nvcsw;
+	zend_long ru_nvcsw;
 
 	/* Involuntary context switches */
-	long ru_nivcsw;
+	zend_long ru_nivcsw;
 };
 
 PHPAPI int getrusage(int who, struct rusage *usage);
