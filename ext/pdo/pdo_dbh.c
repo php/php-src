@@ -1364,6 +1364,14 @@ static int dbh_compare(zval *object1, zval *object2)
 	return -1;
 }
 
+static HashTable *dbh_get_gc(zval *object, zval **gc_data, int *gc_count)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(object);
+	*gc_data = &dbh->def_stmt_ctor_args;
+	*gc_count = 1;
+	return zend_std_get_properties(object);
+}
+
 static zend_object_handlers pdo_dbh_object_handlers;
 static void pdo_dbh_free_storage(zend_object *std);
 
@@ -1381,6 +1389,7 @@ void pdo_dbh_init(void)
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
+	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (zend_long)PDO_PARAM_NULL);
