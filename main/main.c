@@ -1028,6 +1028,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			case E_USER_NOTICE:
 				/* notices are no errors and are not treated as such like E_WARNINGS */
 				break;
+			case E_DEBUG:
+			case E_USER_DEBUG:
+				/* debug is debug, it is not exception */
+				break;
 			default:
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
@@ -1074,6 +1078,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
+				break;
+			case E_DEBUG:
+			case E_USER_DEBUG:
+				error_type_str = "Debug";
 				break;
 			default:
 				error_type_str = "Unknown error";

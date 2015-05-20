@@ -1649,6 +1649,7 @@ ZEND_FUNCTION(trigger_error)
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
 		case E_USER_DEPRECATED:
+		case E_USER_DEBUG:
 			break;
 		default:
 			zend_error(E_WARNING, "Invalid error type specified");
