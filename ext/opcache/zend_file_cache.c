@@ -113,8 +113,6 @@ static int zend_file_cache_flock(int fd, int type)
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
 				/* script->corrupted shows if the script in SHM or not */ \
 				if (EXPECTED(script->corrupted)) { \
-					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
-				} else { \
 					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
 					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
 				} \
@@ -125,12 +123,12 @@ static int zend_file_cache_flock(int fd, int type)
 #define UNSERIALIZE_STR(ptr) do { \
 		if (ptr) { \
 			if (IS_SERIALIZED_INTERNED(ptr)) { \
-				(ptr) = (void*)zend_file_cache_unserialize_interned((zend_string*)(ptr), script->corrupted); \
+				(ptr) = (void*)zend_file_cache_unserialize_interned((zend_string*)(ptr), !script->corrupted); \
 			} else { \
 				ZEND_ASSERT(IS_SERIALIZED(ptr)); \
 				(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
 				/* script->corrupted shows if the script in SHM or not */ \
-				if (EXPECTED(script->corrupted)) { \
+				if (EXPECTED(!script->corrupted)) { \
 					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
 				} else { \
 					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
@@ -722,9 +720,13 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	ZCG(mem) = zend_string_alloc(4096 - (_STR_HEADER_SIZE + 1), 0);
 
 	zend_shared_alloc_init_xlat_table();
-	script->corrupted = in_shm; /* used to check if script restored to SHM or process memory */
+	if (!in_shm) {
+		script->corrupted = 1; /* used to check if script restored to SHM or process memory */
+	}
 	zend_file_cache_serialize(script, &info, buf);
-	script->corrupted = 0;
+	if (!in_shm) {
+		script->corrupted = 0;
+	}
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
@@ -1307,7 +1309,7 @@ use_process_mem:
 
 	ZCG(mem) = ((char*)mem + info.mem_size);
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
-	script->corrupted = cache_it; /* used to check if script restored to SHM or process memory */
+	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
 	zend_file_cache_unserialize(script, buf);
 	script->corrupted = 0;
 
