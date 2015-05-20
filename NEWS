@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
 
+- Postgres:
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+
 - Opcache
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
