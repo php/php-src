@@ -3924,15 +3924,14 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {

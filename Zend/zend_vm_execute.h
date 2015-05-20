@@ -3252,15 +3252,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_HANDLER(ZEND
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (IS_CONST == IS_VAR || IS_CONST == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {
@@ -11642,15 +11641,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_O
 	if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {
@@ -14814,15 +14812,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_O
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (IS_VAR == IS_VAR || IS_VAR == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {
@@ -28723,15 +28720,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OP
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (IS_CV == IS_VAR || IS_CV == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {
