@@ -1,10 +1,7 @@
 --TEST--
 Test getrusage() function : error conditions - incorrect number of args
 --SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == "WIN" )
-  die("skip.. Do not run on Windows");
-?>
+<?php if (!function_exists("getrusage")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  :  array getrusage  ([ int $who  ] )

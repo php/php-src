@@ -78,6 +78,8 @@
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
   . Implemented the RFC `Generator Delegation`. (Bob)
   . Implemented the RFC ` Anonymous Class Support`. (Joe, Nikita, Dmitry)
+  . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
+    (Jan Starke, Anatol)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
@@ -117,7 +119,7 @@
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - FTP:
-  . Fixed bug #69082 FTPS support on Windows
+  . Fixed bug #69082 (FTPS support on Windows). (Anatol) 
 
 - Intl:
   . Removed deprecated aliases datefmt_set_timezone_id() and
@@ -221,6 +223,7 @@
     (Daniel Lowrey)
   . Added preg_replace_callback_array function. (Wei Dai)
   . Deprecated salt option to password_hash. (Anthony) 
+  . Added Windows support for getrusage(). (Kalle)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).

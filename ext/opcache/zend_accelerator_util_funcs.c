@@ -124,11 +124,12 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
+	zend_hash_extend(dst, dst->nNumUsed + src->nNumUsed, 0);
 	ZEND_HASH_REVERSE_FOREACH_BUCKET(src, p) {
 		zend_function *function = Z_PTR(p->val);
 
 		if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-			zend_hash_add_new_ptr(dst, p->key, function);
+			_zend_hash_append_ptr(dst, p->key, function);
 			zend_hash_del_bucket(src, p);
 		} else {
 			break;
@@ -636,23 +637,25 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 {
 	zend_function *function1, *function2;
-	uint idx;
-	Bucket *p;
+	Bucket *p, *end;
 	zval *t;
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
+	p = source->arData;
+	end = p + source->nNumUsed;
+	for (; p != end; p++) {
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_add(target, p->key, &p->val);
-		if (UNEXPECTED(t == NULL)) {
-			if (p->key->len > 0 && p->key->val[0] == 0) {
+		t = zend_hash_find(target, p->key);
+		if (UNEXPECTED(t != NULL)) {
+			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
 				/* Mangled key */
 				t = zend_hash_update(target, p->key, &p->val);
 			} else {
-				t = zend_hash_find(target, p->key);
 				goto failure;
 			}
+		} else {
+			_zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
 		}
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
@@ -678,25 +681,26 @@ failure:
 static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable *source)
 {
 	zend_function *function1, *function2;
-	uint idx;
-	Bucket *p;
+	Bucket *p, *end;
 	zval *t;
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
+	p = source->arData;
+	end = p + source->nNumUsed;
+	for (; p != end; p++) {
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_add(target, p->key, &p->val);
-		if (UNEXPECTED(t == NULL)) {
-			if (p->key->len > 0 && p->key->val[0] == 0) {
+		t = zend_hash_find(target, p->key);
+		if (UNEXPECTED(t != NULL)) {
+			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
 				/* Mangled key */
-				t = zend_hash_update(target, p->key, &p->val);
+				zend_hash_update_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
 			} else {
-				t = zend_hash_find(target, p->key);
 				goto failure;
 			}
+		} else {
+			_zend_hash_append_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
 		}
-		Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
 	return;
@@ -721,26 +725,28 @@ failure:
 static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
 {
 	zend_class_entry *ce1;
-	uint idx;
-	Bucket *p;
+	Bucket *p, *end;
 	zval *t;
 
-	for (idx = 0; idx < source->nNumUsed; idx++) {
-		p = source->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
+	p = source->arData;
+	end = p + source->nNumUsed;
+	for (; p != end; p++) {
+		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_add(target, p->key, &p->val);
-		if (UNEXPECTED(t == NULL)) {
-			if (p->key->len > 0 && p->key->val[0] == 0) {
+		t = zend_hash_find(target, p->key);
+		if (UNEXPECTED(t != NULL)) {
+			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
 				/* Mangled key - ignore and wait for runtime */
 				continue;
-			} else if (!ZCG(accel_directives).ignore_dups) {
-				t = zend_hash_find(target, p->key);
+			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				goto failure;
 			}
-		}
-		if (pCopyConstructor) {
-			pCopyConstructor(&Z_PTR_P(t));
+		} else {
+			t = _zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
+			if (pCopyConstructor) {
+				pCopyConstructor(&Z_PTR_P(t));
+			}
 		}
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
