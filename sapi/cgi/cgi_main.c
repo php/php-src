@@ -2431,7 +2431,7 @@ consult the installation file that came with this distribution, or visit \n\
 				file_handle.filename = SG(request_info).path_translated;
 				file_handle.handle.fp = NULL;
 			} else {
-				file_handle.filename = "-";
+				file_handle.filename = "php://stdin";
 				file_handle.type = ZEND_HANDLE_FP;
 				file_handle.handle.fp = stdin;
 			}

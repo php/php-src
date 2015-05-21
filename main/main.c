@@ -2483,7 +2483,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
  		if (primary_file->filename &&
- 		    (primary_file->filename[0] != '-' || primary_file->filename[1] != 0) &&
+ 		    strcmp("php://stdin", primary_file->filename) &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {

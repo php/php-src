@@ -24,7 +24,7 @@ echo "Done\n";
 PHP %d.%d.%d%s(cli) (built: %s)%s
 Array
 (
-    [0] => -
+    [0] => php://stdin
     [1] => foo
     [2] => bar
     [3] => baz
