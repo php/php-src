@@ -42,22 +42,3 @@ TSRM_API char *tsrm_strtok_r(char *s, const char *delim, char **last)
 	}
 	return token;
 }
-
-#if 0
-
-main()
-{
-	char foo[] = "/foo/bar//\\barbara";
-	char *last;
-	char *token;
-
-	token = tsrm_strtok_r(foo, "/\\", &last);
-	while (token) {
-		printf ("Token = '%s'\n", token);
-		token = tsrm_strtok_r(NULL, "/\\", &last);
-	}
-
-	return 0;
-}
-
-#endif

@@ -32,9 +32,6 @@ struct fpm_worker_pool_s {
 	int running_children;
 	int idle_spawn_rate;
 	int warn_max_children;
-#if 0
-	int warn_lq;
-#endif
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 	char **limit_extensions;

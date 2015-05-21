@@ -1659,9 +1659,7 @@ long lsqrt (long n)
 /* s and e are integers modulo 360 (degrees), with 0 degrees
    being the rightmost extreme and degrees changing clockwise.
    cx and cy are the center in pixels; w and h are the horizontal
-   and vertical diameter in pixels. Nice interface, but slow.
-   See gd_arc_f_buggy.c for a better version that doesn't
-   seem to be bug-free yet. */
+   and vertical diameter in pixels. Nice interface, but slow. */
 
 void gdImageArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int color)
 {
@@ -2831,13 +2829,6 @@ int gdImageCompare (gdImagePtr im1, gdImagePtr im2)
 				cmpStatus |= GD_CMP_COLOR + GD_CMP_IMAGE;
 				break;
 			}
-#if 0
-			/* Soon we'll add alpha channel to palettes */
-			if (gdImageAlpha(im1, p1) != gdImageAlpha(im2, p2)) {
-				cmpStatus |= GD_CMP_COLOR + GD_CMP_IMAGE;
-				break;
-			}
-#endif
 		}
 		if (cmpStatus & GD_CMP_COLOR) {
 			break;

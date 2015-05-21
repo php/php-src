@@ -604,10 +604,6 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		numVars = 0;
 	}
 
-#if 0
-	zend_printf("<br>in sscanf_internal : <br> string is \"%s\", format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
-					string, format, numVars, varStart);
-#endif
 	/*
 	 * Check for errors in the format string.
 	 */

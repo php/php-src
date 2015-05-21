@@ -377,11 +377,6 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 
 	*h = EOS;
 
-#if 0
-	if (h == (char *)eb)
-		return what;
-#endif
-
 	if (((char *) patbuf)[0] == EOS) {
 		/*
 		 * handle a plain ~ or ~/ by expanding $HOME

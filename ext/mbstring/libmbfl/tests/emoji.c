@@ -78,23 +78,6 @@ int main(int argc, char **argv)
 	mbfl_string_init_set(&result, no_language, to_encoding);
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 
-#if 0
-	for (i = 0; i < result.len; i+= 2) {
-		if (result.val[i] >= 0xD8 && result.val[i] < 0xE0) { // Surrogate pair
-			int h = (result.val[i] & 0x07)<<8 | result.val[i+1];
-			int l = (result.val[i+2] & 0x03)<<8 | result.val[i+3];
-			int c = (h<<(2+8)) | l;
-			printf("U+%x\n",c+0x10000);
-			i+=2;
-		} else {
-			printf("U+%x\n",(result.val[i] << 8) | result.val[i+1]);
-		}
-	}
-	hexdump(&result);
-#endif
-
-
-#if 1
 	convd2 = mbfl_buffer_converter_new(to_encoding, from_encoding, 0);
 	mbfl_memory_device_init(&dev2, 0, 4096);
 	mbfl_string_init_set(&string, no_language, to_encoding);
@@ -108,7 +91,6 @@ int main(int argc, char **argv)
 	ret = mbfl_buffer_converter_feed_result(convd2, &string, &result);
 	hexdump(&result);
 	mbfl_buffer_converter_delete(convd2);
-#endif
 	mbfl_string_clear(&result);
 	mbfl_string_clear(&string);
 

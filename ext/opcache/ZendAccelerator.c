@@ -2308,10 +2308,6 @@ static int accelerator_remove_cb(zend_extension *element1, zend_extension *eleme
 
 	if (!strcmp(element1->name, ACCELERATOR_PRODUCT_NAME )) {
 		element1->startup = NULL;
-#if 0
-		/* We have to call shutdown callback it to free TS resources */
-		element1->shutdown = NULL;
-#endif
 		element1->activate = NULL;
 		element1->deactivate = NULL;
 		element1->op_array_handler = NULL;

@@ -74,9 +74,6 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 		crop->height = src->sy - crop->y;
 	}
 
-#if 0
-printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x, crop->y, crop->width, crop->height);
-#endif
 	y = crop->y;
 	if (src->trueColor) {
 		unsigned int dst_y = 0;

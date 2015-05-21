@@ -391,16 +391,10 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 			buffer.data = buffer.aptr;
 			Z->avail_out = buffer.free = buffer.size - buffer.used;
 			Z->next_out = (Bytef *) buffer.data + buffer.used;
-#if 0
-			fprintf(stderr, "\n%3d: %3d PRIOR: size=%7lu,\tfree=%7lu,\tused=%7lu,\tavail_in=%7lu,\tavail_out=%7lu\n", round, status, buffer.size, buffer.free, buffer.used, Z->avail_in, Z->avail_out);
-#endif
 			status = inflate(Z, Z_NO_FLUSH);
 
 			buffer.used += buffer.free - Z->avail_out;
 			buffer.free = Z->avail_out;
-#if 0
-			fprintf(stderr, "%3d: %3d AFTER: size=%7lu,\tfree=%7lu,\tused=%7lu,\tavail_in=%7lu,\tavail_out=%7lu\n", round, status, buffer.size, buffer.free, buffer.used, Z->avail_in, Z->avail_out);
-#endif
 			buffer.size += (buffer.size >> 3) + 1;
 		}
 	} while ((Z_BUF_ERROR == status || (Z_OK == status && Z->avail_in)) && ++round < 100);

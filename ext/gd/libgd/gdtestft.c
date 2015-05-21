@@ -43,11 +43,7 @@ main (int argc, char *argv[])
 
   double sz = 40.;
 
-#if 0
-  double angle = 0.;
-#else
   double angle = DEG2RAD (-90);
-#endif
 
 #ifdef JISX0208
   char *f = "/usr/openwin/lib/locale/ja/X11/fonts/TT/HG-MinchoL.ttf";	/* UNICODE */
@@ -67,12 +63,8 @@ main (int argc, char *argv[])
   /* create an image just big enough for the string */
   x = MAXX (brect) - MINX (brect) + 6;
   y = MAXY (brect) - MINY (brect) + 6;
-#if 0
-  im = gdImageCreate (500, 500);
-#else
   /* gd 2.0: true color images can use freetype too */
   im = gdImageCreateTrueColor (x, y);
-#endif
 
   /* Background color. gd 2.0: fill the image with it; truecolor
      images have a black background otherwise. */

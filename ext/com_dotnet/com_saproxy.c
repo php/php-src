@@ -276,18 +276,6 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 	}
 }
 
-#if 0
-static void saproxy_object_set(zval **property, zval *value)
-{
-}
-
-static zval *saproxy_object_get(zval *property)
-{
-	/* Not yet implemented in the engine */
-	return NULL;
-}
-#endif
-
 static int saproxy_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
 {
 	/* no properties */

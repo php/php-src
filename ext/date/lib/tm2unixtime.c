@@ -453,26 +453,3 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse_uptodate = 1;
 	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = 0;
 }
-
-#if 0
-int main(void)
-{
-	timelib_sll res;
-	timelib_time time;
-
-	time = timelib_strtotime("10 Feb 2005 06:07:03 PM CET"); /* 1108055223 */
-	printf ("%04d-%02d-%02d %02d:%02d:%02d.%-5d %+04d %1d",
-		time.y, time.m, time.d, time.h, time.i, time.s, time.f, time.z, time.dst);
-	if (time.have_relative) {
-		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS",
-			time.relative.y, time.relative.m, time.relative.d, time.relative.h, time.relative.i, time.relative.s);
-	}
-	if (time.have_weekday_relative) {
-		printf (" / %d", time.relative.weekday);
-	}
-	res = time2unixtime(&time);
-	printf("%Ld\n", res);
-
-	return 0;
-}
-#endif

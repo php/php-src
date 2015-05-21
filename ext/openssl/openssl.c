@@ -4909,11 +4909,6 @@ PHP_FUNCTION(openssl_seal)
 		goto clean_exit;
 	}
 
-#if 0
-	/* Need this if allow ciphers that require initialization vector */
-	ivlen = EVP_CIPHER_CTX_iv_length(&ctx);
-	iv = ivlen ? emalloc(ivlen + 1) : NULL;
-#endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
 	EVP_CIPHER_CTX_cleanup(&ctx);
@@ -4941,17 +4936,6 @@ PHP_FUNCTION(openssl_seal)
 			efree(eks[i]);
 			eks[i] = NULL;
 		}
-#if 0
-		/* If allow ciphers that need IV, we need this */
-		zval_dtor(*ivec);
-		if (ivlen) {
-			iv[ivlen] = '\0';
-			ZVAL_STRINGL(*ivec, iv, ivlen);
-			efree(iv);
-		} else {
-			ZVAL_EMPTY_STRING(*ivec);
-		}
-#endif
 	} else {
 		efree(buf);
 	}

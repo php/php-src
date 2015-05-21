@@ -399,39 +399,6 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	php_stream_xport_param param;
 	int ret = 0;
 	int recvd_len = 0;
-#if 0
-	int oob;
-
-	if (flags == 0 && addr == NULL) {
-		return php_stream_read(stream, buf, buflen);
-	}
-
-	if (stream->readfilters.head) {
-		php_error_docref(NULL, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
-		return -1;
-	}
-
-	oob = (flags & STREAM_OOB) == STREAM_OOB;
-
-	if (!oob && addr == NULL) {
-		/* must be peeking at regular data; copy content from the buffer
-		 * first, then adjust the pointer/len before handing off to the
-		 * stream */
-		recvd_len = stream->writepos - stream->readpos;
-		if (recvd_len > buflen) {
-			recvd_len = buflen;
-		}
-		if (recvd_len) {
-			memcpy(buf, stream->readbuf, recvd_len);
-			buf += recvd_len;
-			buflen -= recvd_len;
-		}
-		/* if we filled their buffer, return */
-		if (buflen == 0) {
-			return recvd_len;
-		}
-	}
-#endif
 
 	/* otherwise, we are going to bypass the buffer */
 
@@ -467,12 +434,6 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	php_stream_xport_param param;
 	int ret = 0;
 	int oob;
-
-#if 0
-	if (flags == 0 && addr == NULL) {
-		return php_stream_write(stream, buf, buflen);
-	}
-#endif
 
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 

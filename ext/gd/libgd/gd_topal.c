@@ -1949,48 +1949,6 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
     {
       pass2_no_dither (oim, nim, cquantize);
     }
-#if 0				/* 2.0.12; we no longer attempt full alpha in palettes */
-  if (cquantize->transparentIsPresent)
-    {
-      int mt = -1;
-      int mtIndex = -1;
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] > mt)
-	    {
-	      mtIndex = i;
-	      mt = im->alpha[i];
-	    }
-	}
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] == mt)
-	    {
-	      im->alpha[i] = gdAlphaTransparent;
-	    }
-	}
-    }
-  if (cquantize->opaqueIsPresent)
-    {
-      int mo = 128;
-      int moIndex = -1;
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] < mo)
-	    {
-	      moIndex = i;
-	      mo = im->alpha[i];
-	    }
-	}
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] == mo)
-	    {
-	      im->alpha[i] = gdAlphaOpaque;
-	    }
-	}
-    }
-#endif
 
   /* If we had a 'transparent' color, increment the color count so it's
    * officially in the palette and convert the transparent variable to point to

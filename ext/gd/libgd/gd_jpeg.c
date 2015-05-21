@@ -403,9 +403,6 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 	 * After all, we're not really supposed to rework JPEGs and
 	 * write them out again anyway. Lossy compression, remember?
 	 */
-#if 0
-  gdImageInterlace (im, cinfo.progressive_mode != 0);
-#endif
 
 	if (cinfo.out_color_space == JCS_RGB) {
 		if (cinfo.output_components != 3) {
@@ -688,10 +685,6 @@ void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 
 void term_source (j_decompress_ptr cinfo)
 {
-#if 0
-	* never used */
-	my_src_ptr src = (my_src_ptr) cinfo->src;
-#endif
 }
 
 

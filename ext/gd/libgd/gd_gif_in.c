@@ -48,28 +48,6 @@ static int set_verbose(void)
 
 #define LM_to_uint(a,b)                        (((b)<<8)|(a))
 
-/* We may eventually want to use this information, but def it out for now */
-#if 0
-static struct {
-	unsigned int    Width;
-	unsigned int    Height;
-	unsigned char   ColorMap[3][MAXCOLORMAPSIZE];
-	unsigned int    BitPixel;
-	unsigned int    ColorResolution;
-	unsigned int    Background;
-	unsigned int    AspectRatio;
-} GifScreen;
-#endif
-
-#if 0
-static struct {
-	int     transparent;
-	int     delayTime;
-	int     inputFlag;
-	int     disposal;
-} Gif89 = { -1, -1, -1, 0 };
-#endif
-
 #define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
 
 #define CSD_BUF_SIZE 280
@@ -127,11 +105,6 @@ gdImagePtr gdImageCreateFromGif(FILE *fdFile) /* {{{ */
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 {
 	int BitPixel;
-#if 0
-	int ColorResolution;
-	int Background;
-	int AspectRatio;
-#endif
 	int Transparent = (-1);
 	unsigned char   buf[16];
 	unsigned char   c;
@@ -168,11 +141,6 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	}
 
 	BitPixel        = 2<<(buf[4]&0x07);
-#if 0
-	ColorResolution = (int) (((buf[4]&0x70)>>3)+1);
-	Background      = buf[5];
-	AspectRatio     = buf[6];
-#endif
 	screen_width = imw = LM_to_uint(buf[0],buf[1]);
 	screen_height = imh = LM_to_uint(buf[2],buf[3]);
 
@@ -305,11 +273,6 @@ DoExtension(gdIOCtx *fd, int label, int *Transparent, int *ZeroDataBlockP)
 		case 0xf9:              /* Graphic Control Extension */
 			memset(buf, 0, 4); /* initialize a few bytes in the case the next function fails */
                (void) GetDataBlock(fd, (unsigned char*) buf, ZeroDataBlockP);
-#if 0
-			Gif89.disposal    = (buf[0] >> 2) & 0x7;
-			Gif89.inputFlag   = (buf[0] >> 1) & 0x1;
-			Gif89.delayTime   = LM_to_uint(buf[1],buf[2]);
-#endif
 			if ((buf[0] & 0x1) != 0)
 				*Transparent = buf[3];
 
