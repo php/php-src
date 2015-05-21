@@ -759,60 +759,87 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
-		HashTable *dictionary;
-
 		ZVAL_DEREF(option_buffer);
-		if (Z_TYPE_P(option_buffer) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "dictionary must be of type array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
-			return 0;
-		}
-		dictionary = Z_ARR_P(option_buffer);
-
-		if (zend_hash_num_elements(dictionary) > 0) {
-			char *dictptr;
-			zval *cur;
-			zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
-			zend_string **end, **ptr = strings - 1;
-
-			ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+		switch (Z_TYPE_P(option_buffer)) {
+			case IS_STRING: {
+				zend_string *str = Z_STR_P(option_buffer);
 				int i;
+				zend_bool last_null = 1;
 
-				*++ptr = zval_get_string(cur);
-				if (!*ptr || (*ptr)->len == 0) {
-					if (*ptr) {
-						efree(*ptr);
+				for (i = 0; i < str->len; i++) {
+					if (str->val[i]) {
+						last_null = 0;
+					} else {
+						if (last_null) {
+							php_error_docref(NULL, E_WARNING, "dictionary string must not contain empty entries (two consecutive NULL-bytes or one at the very beginning)");
+							return 0;
+						}
+						last_null = 1;
 					}
-					while (--ptr >= strings) {
-						efree(ptr);
-					}
+				}
+				if (!last_null) {
+					php_error_docref(NULL, E_WARNING, "dictionary string must be NULL-byte terminated (each dictionary entry has to be NULL-terminated)");
+				}
+
+				*dict = emalloc(str->len);
+				memcpy(*dict, str->val, str->len);
+				*dictlen = str->len;
+			} break;
+
+			case IS_ARRAY: {
+				HashTable *dictionary = Z_ARR_P(option_buffer);
+
+				if (zend_hash_num_elements(dictionary) > 0) {
+					char *dictptr;
+					zval *cur;
+					zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
+					zend_string **end, **ptr = strings - 1;
+
+					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+						int i;
+
+						*++ptr = zval_get_string(cur);
+						if (!*ptr || (*ptr)->len == 0) {
+							if (*ptr) {
+								efree(*ptr);
+							}
+							while (--ptr >= strings) {
+								efree(ptr);
+							}
+							efree(strings);
+							php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
+							return 0;
+						}
+						for (i = 0; i < (*ptr)->len; i++) {
+							if ((*ptr)->val[i] == 0) {
+								do {
+									efree(ptr);
+								} while (--ptr >= strings);
+								efree(strings);
+								php_error_docref(NULL, E_WARNING, "dictionary entries must not contain a NULL-byte");
+								return 0;
+							}
+						}
+
+						*dictlen += (*ptr)->len + 1;
+					} ZEND_HASH_FOREACH_END();
+
+					dictptr = *dict = emalloc(*dictlen);
+					ptr = strings;
+					end = strings + zend_hash_num_elements(dictionary);
+					do {
+						memcpy(dictptr, (*ptr)->val, (*ptr)->len);
+						dictptr += (*ptr)->len;
+						*dictptr++ = 0;
+						zend_string_release(*ptr);
+					} while (++ptr != end);
 					efree(strings);
-					php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
-					return 0;
 				}
-				for (i = 0; i < (*ptr)->len; i++) {
-					if ((*ptr)->val[i] == 0) {
-						do {
-							efree(ptr);
-						} while (--ptr >= strings);
-						efree(strings);
-						php_error_docref(NULL, E_WARNING, "dictionary entries must not contain a NULL-byte");
-						return 0;
-					}
-				}
+			} break;
 
-				*dictlen += (*ptr)->len + 1;
-			} ZEND_HASH_FOREACH_END();
-
-			dictptr = *dict = emalloc(*dictlen);
-			ptr = strings;
-			end = strings + zend_hash_num_elements(dictionary);
-			do {
-				memcpy(dictptr, *ptr, (*ptr)->len);
-				dictptr += (*ptr)->len;
-				*dictptr++ = 0;
-				zend_string_release(*ptr);
-			} while (++ptr != end);
-			efree(strings);
+			default:
+				php_error_docref(NULL, E_WARNING, "dictionary must be of type zero-terminated string or array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
+				return 0;
 		}
 	}
 
