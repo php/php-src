@@ -7940,6 +7940,7 @@ ZEND_VM_HANDLER(41, ZEND_FUNC_EXISTS, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_function *fbc;
+	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CONST) {
@@ -7960,31 +7961,25 @@ ZEND_VM_HANDLER(41, ZEND_FUNC_EXISTS, CONST|TMP|VAR|CV, ANY)
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				break;
 		}
-	} else do {
-		zend_free_op free_op1;
+
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
 		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		zend_string *name, *lcname;
 
 ZEND_VM_C_LABEL(try_func_ex):
 		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
 			name = Z_STR_P(value);
-		} else {
-			if (OP1_TYPE & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
-				value = Z_REFVAL_P(value);
-				ZEND_VM_C_GOTO(try_func_ex);
-			}
-			if (Z_TYPE_P(value) < IS_STRING) {
-				if (Z_COPYABLE_P(value) && Z_REFCOUNT_P(value) > 1) {
-					Z_DELREF_P(value);
-					zval_copy_ctor_func(value);
-				}
-				convert_to_string(value);
-				name = Z_STR_P(value);
-			} else if (Z_TYPE_P(value) != IS_OBJECT || parse_arg_object_to_str(value, &name, IS_STRING) != SUCCESS) {
-				zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
-				ZVAL_NULL(EX_VAR(opline->result.var));
-				break;
-			}
+		} else if (OP1_TYPE & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			ZEND_VM_C_GOTO(try_func_ex);
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
 		}
 
 		if (name->val[0] == '\\') {
@@ -7997,12 +7992,13 @@ ZEND_VM_C_LABEL(try_func_ex):
 
 		fbc = zend_hash_find_ptr(EG(function_table), lcname);
 		zend_string_release(lcname);
+		zend_string_release(name);
 
 		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
-
-		FREE_OP1();
-		CHECK_EXCEPTION();
 	} while (0);
+
+	FREE_OP1();
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 

@@ -4470,6 +4470,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_CONST_HANDLER
 	USE_OPLINE
 	zend_function *fbc;
 
+
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CONST) {
 		switch ((uintptr_t) CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
@@ -4489,31 +4490,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_CONST_HANDLER
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				break;
 		}
-	} else do {
 
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
 		zval *value = EX_CONSTANT(opline->op1);
 		zend_string *name, *lcname;
 
 try_func_ex:
 		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
 			name = Z_STR_P(value);
-		} else {
-			if (IS_CONST & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
-				value = Z_REFVAL_P(value);
-				goto try_func_ex;
-			}
-			if (Z_TYPE_P(value) < IS_STRING) {
-				if (Z_COPYABLE_P(value) && Z_REFCOUNT_P(value) > 1) {
-					Z_DELREF_P(value);
-					zval_copy_ctor_func(value);
-				}
-				convert_to_string(value);
-				name = Z_STR_P(value);
-			} else if (Z_TYPE_P(value) != IS_OBJECT || parse_arg_object_to_str(value, &name, IS_STRING) != SUCCESS) {
-				zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
-				ZVAL_NULL(EX_VAR(opline->result.var));
-				break;
-			}
+		} else if (IS_CONST & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			goto try_func_ex;
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
 		}
 
 		if (name->val[0] == '\\') {
@@ -4526,11 +4521,12 @@ try_func_ex:
 
 		fbc = zend_hash_find_ptr(EG(function_table), lcname);
 		zend_string_release(lcname);
+		zend_string_release(name);
 
 		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
-
-		CHECK_EXCEPTION();
 	} while (0);
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -12565,6 +12561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_TMP_HANDLER(Z
 {
 	USE_OPLINE
 	zend_function *fbc;
+	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	if (IS_TMP_VAR == IS_CONST) {
@@ -12585,31 +12582,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_TMP_HANDLER(Z
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				break;
 		}
-	} else do {
-		zend_free_op free_op1;
+
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
 		zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 		zend_string *name, *lcname;
 
 try_func_ex:
 		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
 			name = Z_STR_P(value);
-		} else {
-			if (IS_TMP_VAR & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
-				value = Z_REFVAL_P(value);
-				goto try_func_ex;
-			}
-			if (Z_TYPE_P(value) < IS_STRING) {
-				if (Z_COPYABLE_P(value) && Z_REFCOUNT_P(value) > 1) {
-					Z_DELREF_P(value);
-					zval_copy_ctor_func(value);
-				}
-				convert_to_string(value);
-				name = Z_STR_P(value);
-			} else if (Z_TYPE_P(value) != IS_OBJECT || parse_arg_object_to_str(value, &name, IS_STRING) != SUCCESS) {
-				zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
-				ZVAL_NULL(EX_VAR(opline->result.var));
-				break;
-			}
+		} else if (IS_TMP_VAR & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			goto try_func_ex;
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
 		}
 
 		if (name->val[0] == '\\') {
@@ -12622,12 +12613,13 @@ try_func_ex:
 
 		fbc = zend_hash_find_ptr(EG(function_table), lcname);
 		zend_string_release(lcname);
+		zend_string_release(name);
 
 		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
-
-		zval_ptr_dtor_nogc(free_op1);
-		CHECK_EXCEPTION();
 	} while (0);
+
+	zval_ptr_dtor_nogc(free_op1);
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -16405,6 +16397,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_VAR_HANDLER(Z
 {
 	USE_OPLINE
 	zend_function *fbc;
+	zend_free_op free_op1;
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CONST) {
@@ -16425,31 +16418,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_VAR_HANDLER(Z
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				break;
 		}
-	} else do {
-		zend_free_op free_op1;
+
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
 		zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
 		zend_string *name, *lcname;
 
 try_func_ex:
 		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
 			name = Z_STR_P(value);
-		} else {
-			if (IS_VAR & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
-				value = Z_REFVAL_P(value);
-				goto try_func_ex;
-			}
-			if (Z_TYPE_P(value) < IS_STRING) {
-				if (Z_COPYABLE_P(value) && Z_REFCOUNT_P(value) > 1) {
-					Z_DELREF_P(value);
-					zval_copy_ctor_func(value);
-				}
-				convert_to_string(value);
-				name = Z_STR_P(value);
-			} else if (Z_TYPE_P(value) != IS_OBJECT || parse_arg_object_to_str(value, &name, IS_STRING) != SUCCESS) {
-				zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
-				ZVAL_NULL(EX_VAR(opline->result.var));
-				break;
-			}
+		} else if (IS_VAR & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			goto try_func_ex;
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
 		}
 
 		if (name->val[0] == '\\') {
@@ -16462,12 +16449,13 @@ try_func_ex:
 
 		fbc = zend_hash_find_ptr(EG(function_table), lcname);
 		zend_string_release(lcname);
+		zend_string_release(name);
 
 		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
-
-		zval_ptr_dtor_nogc(free_op1);
-		CHECK_EXCEPTION();
 	} while (0);
+
+	zval_ptr_dtor_nogc(free_op1);
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -30239,6 +30227,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_CV_HANDLER(ZE
 	USE_OPLINE
 	zend_function *fbc;
 
+
 	SAVE_OPLINE();
 	if (IS_CV == IS_CONST) {
 		switch ((uintptr_t) CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
@@ -30258,31 +30247,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_EXISTS_SPEC_CV_HANDLER(ZE
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				break;
 		}
-	} else do {
 
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
 		zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
 		zend_string *name, *lcname;
 
 try_func_ex:
 		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
 			name = Z_STR_P(value);
-		} else {
-			if (IS_CV & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
-				value = Z_REFVAL_P(value);
-				goto try_func_ex;
-			}
-			if (Z_TYPE_P(value) < IS_STRING) {
-				if (Z_COPYABLE_P(value) && Z_REFCOUNT_P(value) > 1) {
-					Z_DELREF_P(value);
-					zval_copy_ctor_func(value);
-				}
-				convert_to_string(value);
-				name = Z_STR_P(value);
-			} else if (Z_TYPE_P(value) != IS_OBJECT || parse_arg_object_to_str(value, &name, IS_STRING) != SUCCESS) {
-				zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
-				ZVAL_NULL(EX_VAR(opline->result.var));
-				break;
-			}
+		} else if (IS_CV & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			goto try_func_ex;
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
 		}
 
 		if (name->val[0] == '\\') {
@@ -30295,11 +30278,12 @@ try_func_ex:
 
 		fbc = zend_hash_find_ptr(EG(function_table), lcname);
 		zend_string_release(lcname);
+		zend_string_release(name);
 
 		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
-
-		CHECK_EXCEPTION();
 	} while (0);
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 

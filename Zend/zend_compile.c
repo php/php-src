@@ -2869,9 +2869,8 @@ void zend_compile_func_in_ns(uint32_t op_list[3], zend_string *name, zend_ast_li
 	znode func_ex, name_node;
 	zend_op *opline;
 
-	++GC_REFCOUNT(name);
 	name_node.op_type = IS_CONST;
-	ZVAL_NEW_STR(&name_node.u.constant, name);
+	ZVAL_STR_COPY(&name_node.u.constant, name);
 
 	opline = zend_emit_op_tmp(&func_ex, ZEND_FUNC_EXISTS, &name_node, NULL);
 	zend_alloc_cache_slot(opline->op1.constant);
@@ -3219,7 +3218,7 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 
 int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, zend_string *original_name) /* {{{ */
 {
-	if (fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
+	if (fbc && fbc->internal_function.handler == ZEND_FN(display_disabled_function)) {
 		return FAILURE;
 	}
 
