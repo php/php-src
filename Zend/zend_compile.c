@@ -3940,7 +3940,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		znode cond_node;
 
 		if (!cond_ast) {
-			continue;	
+			continue;
 		}
 
 		zend_compile_expr(&cond_node, cond_ast);
