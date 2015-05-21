@@ -71,7 +71,7 @@ const char *zend_vm_opcodes_map[173] = {
 	"ZEND_JMPZ_EX",
 	"ZEND_JMPNZ_EX",
 	"ZEND_CASE",
-	NULL,
+	"ZEND_SWITCH",
 	"ZEND_BRK",
 	"ZEND_CONT",
 	"ZEND_BOOL",
