@@ -3996,12 +3996,16 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		zend_hash_init(jmp_array, cases->children * 2, sigh, ZVAL_PTR_DTOR, 0);
 
 #define SWITCH_TARGET_OFFSET(off) ((CG(active_op_array)->opcodes[off].opcode == ZEND_JMP ? CG(active_op_array)->opcodes[off].op1 : CG(active_op_array)->opcodes[off].op2).opline_num)
+#define SET_MAGIC_TARGET(_target, _val) do { \
+		if ((_target) == 0x7fffffff) { \
+			(_target) = (_val); \
+		} \
+	} while (0)
 
 		ZVAL_LONG(&off, SWITCH_TARGET_OFFSET(opnum_default_jmp));
 		truth = real_true = nully = zero = long_zero = 0x7fffffff;
 
-		i = cases->children;
-		while (i--) {
+		for (i = 0; i < cases->children; i++) {
 			zend_ast *cond_ast = cases->child[i]->child[0];
 			zend_op *case_op = CG(active_op_array)->opcodes + jmpnz_opnums[i] - 1;
 
@@ -4015,41 +4019,41 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 							double dval;
 							zend_hash_add(jmp_array, Z_STR_P(zv), &off);
 							if (is_numeric_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv), &lval, &dval, 1) != IS_DOUBLE) {
-								zend_hash_index_update(jmp_array, lval, &off);
+								zend_hash_index_add(jmp_array, lval, &off);
 							} else if (dval == (double) (zend_long) dval) {
 								lval = (zend_long) dval;
-								zend_hash_index_update(jmp_array, lval, &off);
+								zend_hash_index_add(jmp_array, lval, &off);
 							}
 							if (Z_STRLEN_P(zv) == 1 && *Z_STRVAL_P(zv) == '0') {
-								zero = Z_LVAL(off);
+								SET_MAGIC_TARGET(zero, Z_LVAL(off));
 							} else {
-								truth = Z_LVAL(off);
+								SET_MAGIC_TARGET(truth, Z_LVAL(off));
 							}
 							break;
 						}
 						/* fallthrough */
 
 					case IS_FALSE:
-						zero = Z_LVAL(off);
+						SET_MAGIC_TARGET(zero, Z_LVAL(off));
 						/* fallthrough */
 					case IS_NULL:
-						nully = Z_LVAL(off);
+						SET_MAGIC_TARGET(nully, Z_LVAL(off));
 						break;
 
 					case IS_LONG:
-						zend_hash_index_update(jmp_array, Z_LVAL_P(zv), &off);
+						zend_hash_index_add(jmp_array, Z_LVAL_P(zv), &off);
 						if (Z_LVAL_P(zv)) {
-							truth = Z_LVAL(off);
+							SET_MAGIC_TARGET(truth, Z_LVAL(off));
 						} else {
-							long_zero = Z_LVAL(off);
-							zero = Z_LVAL(off);
-							nully = Z_LVAL(off);
+							SET_MAGIC_TARGET(long_zero, Z_LVAL(off));
+							SET_MAGIC_TARGET(zero, Z_LVAL(off));
+							SET_MAGIC_TARGET(nully, Z_LVAL(off));
 						}
 						break;
 
 					case IS_TRUE:
-						truth = Z_LVAL(off);
-						real_true = Z_LVAL(off);
+						SET_MAGIC_TARGET(truth, Z_LVAL(off));
+						SET_MAGIC_TARGET(real_true, Z_LVAL(off));
 						break;
 				}
 			}
