@@ -221,7 +221,9 @@
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
     (Daniel Lowrey)
   . Added preg_replace_callback_array function. (Wei Dai)
-  . Deprecated salt option to password_hash. (Anthony) 
+  . Deprecated salt option to password_hash. (Anthony)
+  . Fixed bug #69686 (password_verify reports back error on PHP7 will null
+    string). (Anthony)
   . Added Windows support for getrusage(). (Kalle)
 
 - Streams:
