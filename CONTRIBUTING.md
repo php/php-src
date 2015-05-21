@@ -51,11 +51,23 @@ Please note that the section on submitting pull requests is outdated: in
 addition to the process listed there, you can also
 [submit pull requests](#pull-requests).
 
+## Writing documentation
+
+There are two ways to contribute to the PHP manual. You can edit the manual and
+send patches anonymously via [the online editor](https://edit.php.net/), or you
+can check the XML source out from Subversion and edit that and build it
+[per the instructions on the documentation site](http://doc.php.net/tutorial/).
+Patches created that way should be sent to the
+[documentation mailing list](mailto:phpdoc@lists.php.net).
+
 ## Getting help
 
 If you are having trouble contributing to PHP, or just want to talk to a human
 about what you're working on, you can contact us via the
-[internals mailing list](mailto:internals@lists.php.net).
+[internals mailing list](mailto:internals@lists.php.net), or the
+[documentation mailing list](mailto:phpdoc@lists.php.net) for documentation
+issues.
 
 Although not a formal channel, you can also find a number of core developers on
-the #php.pecl channel on [EFnet](http://www.efnet.org/).
+the #php.pecl channel on [EFnet](http://www.efnet.org/). Similarly, many
+documentation writers can be found on #php.doc.
