@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
 
+- Phar:
+  . Fixed bug #69680 (phar symlink in binary directory broken).
+    (Matteo Bernardini, Remi)
+
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
 
