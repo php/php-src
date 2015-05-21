@@ -293,17 +293,19 @@ globexp2(ptr, pattern, pglob, rv)
 	}
 
 	for (i = 0, pl = pm = ptr; pm <= pe; pm++) {
+		const Char *pb;
+
 		switch (*pm) {
 		case LBRACKET:
 			/* Ignore everything between [] */
-			for (pl = pm++; *pm != RBRACKET && *pm != EOS; pm++)
+			for (pb = pm++; *pm != RBRACKET && *pm != EOS; pm++)
 				;
 			if (*pm == EOS) {
 				/*
 				 * We could not find a matching RBRACKET.
 				 * Ignore and just look for RBRACE
 				 */
-				pm = pl;
+				pm = pb;
 			}
 			break;
 
