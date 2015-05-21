@@ -1325,14 +1325,10 @@ static inline zend_bool zend_is_scope_known() /* {{{ */
 		return 0;
 	}
 
-	if (!CG(active_op_array)->function_name) {
-		/* A file/eval will be run in the including/eval'ing scope */
-		return 0;
-	}
-
 	if (!CG(active_class_entry)) {
-		/* Not being in a scope is a known scope */
-		return 1;
+		/* The scope is known if we're in a free function (no scope), but not if we're in
+		 * a file/eval (which inherits including/eval'ing scope). */
+		return CG(active_op_array)->function_name != NULL;
 	}
 
 	/* For traits self etc refers to the using class, not the trait itself */
