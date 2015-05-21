@@ -25,6 +25,7 @@ foo("0");
 foo(1.2);
 foo(true);
 foo(false);
+foo(null);
 
 print "\n";
 
@@ -55,6 +56,7 @@ cdef
 bcdef
 cdef
 cdef
+abcdef
 abcdef
 
 abcd
