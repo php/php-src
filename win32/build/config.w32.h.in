@@ -181,3 +181,5 @@
 
 #define HAVE_HUGE_VAL_INF 1
 
+#define HAVE_GETRUSAGE
+

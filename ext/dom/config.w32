@@ -4,7 +4,10 @@
 ARG_WITH("dom", "DOM support", "yes");
 
 if (PHP_DOM == "yes") {
-	if (PHP_LIBXML == "yes" && ADD_EXTENSION_DEP('dom', 'libxml')) {
+	if (PHP_LIBXML == "yes" &&
+		ADD_EXTENSION_DEP('dom', 'libxml') &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
+	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c domerrorhandler.c \
 			domstringlist.c domexception.c namelist.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \

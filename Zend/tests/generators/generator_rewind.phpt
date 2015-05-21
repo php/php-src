@@ -49,12 +49,12 @@ $gen->rewind();
 before yield
 after yield
 
-exception 'Exception' with message 'Cannot rewind a generator that was already run' in %s:%d
+Exception: Cannot rewind a generator that was already run in %s:%d
 Stack trace:
 #0 %s(%d): Generator->rewind()
 #1 {main}
 
-exception 'Exception' with message 'Cannot traverse an already closed generator' in %s:%d
+Exception: Cannot traverse an already closed generator in %s:%d
 Stack trace:
 #0 {main}
 

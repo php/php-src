@@ -20,7 +20,7 @@ foo();
 ?>
 --EXPECTF--
 1234
-Fatal error: Uncaught exception 'Exception' with message 'ex' %s
+Fatal error: Uncaught Exception: ex %s
 Stack trace:
 #0 %stry_finally_003.php(%d): foo()
 #1 {main}

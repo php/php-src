@@ -10,4 +10,8 @@ function foo(): DateTime {
 foo();
 
 --EXPECTF--
-Fatal error: Return value of foo() must be an instance of DateTime, null returned in %s on line %d
+Fatal error: Uncaught TypeException: Return value of foo() must be an instance of DateTime, null returned in %s:%d
+Stack trace:
+#0 %s(%d): foo()
+#1 {main}
+  thrown in %s on line %d

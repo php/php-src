@@ -47,6 +47,8 @@ typedef struct _php_zlib_buffer {
 
 typedef struct _php_zlib_context {
 	z_stream Z;
+	char *inflateDict;
+	size_t inflateDictlen;
 	php_zlib_buffer buffer;
 } php_zlib_context;
 
@@ -57,7 +59,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
 	zend_long output_compression_default;
-    zend_bool handler_registered;
+	zend_bool handler_registered;
 	int compression_coding;
 ZEND_END_MODULE_GLOBALS(zlib);
 

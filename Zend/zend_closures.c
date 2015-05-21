@@ -80,6 +80,7 @@ ZEND_METHOD(Closure, call)
 	zval *my_params;
 	int my_param_count = 0;
 	zend_function my_function;
+	zend_object *newobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
 		return;
@@ -102,6 +103,14 @@ ZEND_METHOD(Closure, call)
 		}
 	}
 
+	newobj = Z_OBJ_P(newthis);
+
+	if (newobj->ce != closure->func.common.scope && newobj->ce->type == ZEND_INTERNAL_CLASS) {
+		/* rebinding to internal class is not allowed */
+		zend_error(E_WARNING, "Cannot bind closure to object of internal class %s", newobj->ce->name->val);
+		return;
+	}
+
 	/* This should never happen as closures will always be callable */
 	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL) != SUCCESS) {
 		ZEND_ASSERT(0);
@@ -110,7 +119,7 @@ ZEND_METHOD(Closure, call)
 	fci.retval = &closure_result;
 	fci.params = my_params;
 	fci.param_count = my_param_count;
-	fci.object = fci_cache.object = Z_OBJ_P(newthis);
+	fci.object = fci_cache.object = newobj;
 	fci_cache.initialized = 1;
 
 	my_function = *fci_cache.function_handler;
@@ -157,6 +166,11 @@ ZEND_METHOD(Closure, bind)
 				RETURN_NULL();
 			}
 			zend_string_release(class_name);
+		}
+		if(ce && ce != closure->func.common.scope && ce->type == ZEND_INTERNAL_CLASS) {
+			/* rebinding to internal class is not allowed */
+			zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s", ce->name->val);
+			return;
 		}
 	} else { /* scope argument not given; do not change the scope by default */
 		ce = closure->func.common.scope;

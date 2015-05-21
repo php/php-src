@@ -10,4 +10,7 @@ new abc;
 
 ?>
 --EXPECTF--
-Fatal error: Cannot instantiate trait abc in %s on line %d
+Fatal error: Uncaught EngineException: Cannot instantiate trait abc in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

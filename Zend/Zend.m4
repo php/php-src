@@ -401,13 +401,14 @@ if test -r "/dev/urandom" && test -c "/dev/urandom"; then
   AC_MSG_RESULT(yes) 
 else 
   AC_MSG_RESULT(no) 
-  AC_MSG_CHECKING(whether /dev/arandom exists) 
-  if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
-    AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
-    AC_MSG_RESULT(yes) 
-  else 
-    AC_MSG_RESULT(no) 
-  fi 
+fi
+
+AC_MSG_CHECKING(whether /dev/arandom exists) 
+if test -r "/dev/arandom" && test -c "/dev/arandom"; then 
+  AC_DEFINE([HAVE_DEV_ARANDOM], 1, [Define if the target system has /dev/arandom device])
+  AC_MSG_RESULT(yes) 
+else 
+  AC_MSG_RESULT(no) 
 fi 
 
 AC_ARG_ENABLE(gcc-global-regs,

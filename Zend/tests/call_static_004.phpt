@@ -18,4 +18,7 @@ foo::$a();
 --EXPECTF--
 string(3) "AaA"
 
-Fatal error: Function name must be a string in %s on line %d
+Fatal error: Uncaught EngineException: Function name must be a string in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -1905,6 +1905,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
+/* {{{ random.c */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_random_bytes, 0, 0, 0)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 0)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, max)
+ZEND_END_ARG_INFO()
+/* }}} */
 /* {{{ sha1.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
@@ -2828,6 +2838,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 
+	PHP_FE(random_bytes,													arginfo_random_bytes)
+	PHP_FE(random_int,													arginfo_random_int)
+
 #if HAVE_GETSERVBYNAME
 	PHP_FE(getservbyname,													arginfo_getservbyname)
 #endif
@@ -3658,6 +3671,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
+	BASIC_MINIT_SUBMODULE(random)
+
 	return SUCCESS;
 }
 /* }}} */
@@ -3695,6 +3710,8 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if HAVE_CRYPT
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 #endif
+
+	BASIC_MSHUTDOWN_SUBMODULE(random)
 
 	zend_hash_destroy(&basic_submodules);
 	return SUCCESS;
@@ -4127,7 +4144,7 @@ PHP_FUNCTION(putenv)
 		Obviously the CRT version will be useful more often. But
 		generally, doing both brings us on the safe track at least
 		in NTS build. */
-	&& _putenv(pe.putenv_string) == 0
+	&& _putenv_s(pe.key, value ? value : "") == 0
 # endif
 	) { /* success */
 # endif
@@ -5392,7 +5409,7 @@ PHP_FUNCTION(set_include_path)
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &new_value) == FAILURE) {
 		return;
 	}
 

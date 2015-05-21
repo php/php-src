@@ -17,4 +17,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Call to protected test::__clone() from context '' %sfactory_and_singleton_007.php on line %d
+Fatal error: Uncaught EngineException: Call to protected test::__clone() from context '' in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

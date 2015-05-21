@@ -27,7 +27,7 @@ count($heap);// refers to MyHeap->count() method
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'Cause count to fail' in %s
+Fatal error: Uncaught Exception: Cause count to fail in %s
 Stack trace:
 #0 [internal function]: MyHeap->count()
 #1 %s count(Object(MyHeap))

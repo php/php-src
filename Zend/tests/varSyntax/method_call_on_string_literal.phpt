@@ -5,4 +5,7 @@ Method call on string literal
 "string"->length();
 ?>
 --EXPECTF--
-Fatal error: Call to a member function length() on string in %s on line %d
+Fatal error: Uncaught EngineException: Call to a member function length() on string in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

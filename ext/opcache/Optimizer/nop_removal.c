@@ -95,8 +95,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_NEW:
@@ -104,6 +102,10 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_COALESCE:
 				case ZEND_ASSERT_CHECK:
 					ZEND_OP2(opline).opline_num -= shiftlist[ZEND_OP2(opline).opline_num];
+					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					opline->extended_value -= shiftlist[opline->extended_value];
 					break;
 				case ZEND_JMPZNZ:
 					ZEND_OP2(opline).opline_num -= shiftlist[ZEND_OP2(opline).opline_num];

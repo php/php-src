@@ -1,7 +1,8 @@
 --TEST--
-collator_get_sort_key() icu >= 54.1
+collator_get_sort_key() icu >= 55.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '55.1') >=  0) die('skip for ICU < 55.1'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
 --FILE--
 <?php

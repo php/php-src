@@ -11,4 +11,8 @@ function get_config(): array {
 get_config();
 
 --EXPECTF--
-Fatal error: Return value of get_config() must be of the type array, integer returned in %s on line %d
+Fatal error: Uncaught TypeException: Return value of get_config() must be of the type array, integer returned in %s:%d
+Stack trace:
+#0 %s(%d): get_config()
+#1 {main}
+  thrown in %s on line %d

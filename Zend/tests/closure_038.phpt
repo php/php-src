@@ -55,4 +55,13 @@ Testing with scope as string
 int(23)
 int(24)
 
-Fatal error: Cannot access private property B::$x in %s on line %d
+Fatal error: Uncaught EngineException: Cannot access private property B::$x in %s:%d
+Stack trace:
+#0 %s(%d): Closure->{closure}()
+#1 {main}
+
+Next EngineException: Cannot access private property B::$x in %s:%d
+Stack trace:
+#0 %s(%d): Closure->{closure}()
+#1 {main}
+  thrown in %s on line %d

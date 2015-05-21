@@ -62,7 +62,7 @@ int(11)
 int(12)
 int(13)
 int(14)
-exception 'Exception' in %s:%d
+Exception in %s:%d
 Stack trace:
 #0 %s(%d): from(5)
 #1 %s(%d): gen(Object(Generator), 1)
@@ -70,7 +70,7 @@ Stack trace:
 #3 [internal function]: gen(Object(Generator), 3)
 #4 %s(%d): Generator->next()
 #5 {main}
-exception 'ClosedGeneratorException' with message 'Generator yielded from aborted, no return value available' in %s:%d
+ClosedGeneratorException: Generator yielded from aborted, no return value available in %s:%d
 Stack trace:
 #0 [internal function]: gen(Object(Generator), 1)
 #1 %s(%d): Generator->current()

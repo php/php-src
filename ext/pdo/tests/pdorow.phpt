@@ -9,7 +9,7 @@ new PDORow;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'PDOException' with message 'You may not create a PDORow manually' in %spdorow.php:3
+Fatal error: Uncaught PDOException: You may not create a PDORow manually in %spdorow.php:3
 Stack trace:
 #0 %spdorow.php(3): PDORow->__construct()
 #1 {main}

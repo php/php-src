@@ -76,4 +76,7 @@ NULL
 
 Notice: Undefined offset: 3 in %s on line %d
 
-Fatal error: Call to a member function bar() on null in %s on line %d
+Fatal error: Uncaught EngineException: Call to a member function bar() on null in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

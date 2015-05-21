@@ -179,8 +179,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				break;
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
-				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				START_BLOCK_OP(opno + 2);
+				START_BLOCK_OP(opline->extended_value);
+				START_BLOCK_OP(opno + 1);
 				break;
 		}
 		opno++;
@@ -303,6 +303,11 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 					cur_block->ext_to = &blocks[opline->extended_value];
 					cur_block->follow_to = &blocks[opno];
 					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					cur_block->ext_to = &blocks[opline->extended_value];
+					cur_block->follow_to = &blocks[opno];
+					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
@@ -312,8 +317,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
@@ -1774,15 +1777,19 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 		while (opline<end) {
 			T_USAGE(opline->op1);
-			T_USAGE(opline->op2);
+			if (opline->op2_type & (IS_VAR | IS_TMP_VAR)) {
+				if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
+					/* these opcode use the op2 as result */
+					defined_here[VAR_NUM(ZEND_OP2(opline).var)] = 1;
+				} else {
+					T_USAGE(opline->op2);
+				}
+			}
 
 			if (RESULT_USED(opline)) {
 				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
-				    (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT ||
-				     opline->opcode == ZEND_RECV_VARIADIC ||
-					(opline->opcode == ZEND_OP_DATA && ZEND_RESULT_TYPE(opline) == IS_TMP_VAR) ||
-					opline->opcode == ZEND_ADD_ARRAY_ELEMENT)) {
-					/* these opcodes use the result as argument */
+					opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
+					/* these opcode use the result as argument */
 					used_ext[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
 				}
 				defined_here[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
@@ -1856,10 +1863,7 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 				}
 			}
 
-			if (opline->opcode == ZEND_RECV ||
-                opline->opcode == ZEND_RECV_INIT ||
-                opline->opcode == ZEND_RECV_VARIADIC ||
-                opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
+			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
 				}

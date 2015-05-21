@@ -36,4 +36,7 @@ Warning: PDO::prepare(): SQLSTATE[HY093]: Invalid parameter number: mixed named 
 
 Warning: PDO::prepare(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d
 
-Fatal error: Call to a member function execute() on boolean in %s on line %d
+Fatal error: Uncaught EngineException: Call to a member function execute() on boolean in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

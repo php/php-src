@@ -33,4 +33,7 @@ $data['element'] = &$test;
 
 Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in %sarray_access_012.php on line 24
 
-Fatal error: Cannot assign by reference to overloaded object in %sarray_access_012.php on line 24
+Fatal error: Uncaught EngineException: Cannot assign by reference to overloaded object in %sarray_access_012.php:24
+Stack trace:
+#0 {main}
+  thrown in %sarray_access_012.php on line 24
