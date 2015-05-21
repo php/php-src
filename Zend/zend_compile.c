@@ -193,7 +193,8 @@ static const builtin_type_info builtin_types[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
-static zend_always_inline const builtin_type_info* zend_find_builtin_type(const zend_string *name) /* {{{ */
+
+static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend_string *name) /* {{{ */
 {
 	const builtin_type_info *info = &builtin_types[0];
 
@@ -201,23 +202,11 @@ static zend_always_inline const builtin_type_info* zend_find_builtin_type(const 
 		if (name->len == info->name_len
 			&& zend_binary_strcasecmp(name->val, name->len, info->name, info->name_len) == 0
 		) {
-			return info;
+			return info->type;
 		}
 	}
 
-	return NULL;
-}
-/* }}} */
-
-static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend_string *const_name) /* {{{ */
-{
-	const builtin_type_info *info = zend_find_builtin_type(const_name);
-
-	if (info) {
-		return info->type;
-	} else {
-		return 0;
-	}
+	return 0;
 }
 /* }}} */
 
