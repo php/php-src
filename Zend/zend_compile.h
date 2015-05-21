@@ -188,7 +188,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_SWITCH_OFF_FALSE 3
 #define ZEND_SWITCH_OFF_NULL 4
 #define ZEND_SWITCH_OFF_ZERO 5
-#define ZEND_SWITCH_OFF_MODES 5
+#define ZEND_SWITCH_OFF_DEFAULT 6
+#define ZEND_SWITCH_OFF_MODES 6
 
 #if SIZEOF_ZEND_LONG == 8
 # ifdef _WIN32

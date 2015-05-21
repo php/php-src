@@ -4866,7 +4866,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
 }
 
-ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
+ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV|VAR, CONST)
 {
 	USE_OPLINE
 	zval *expr, *off;
@@ -4905,7 +4905,7 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 				} else if (new_off && Z_LVAL_P(new_off) < Z_LVAL_P(off)) {
 					off = new_off;
 				}
-				/* "" and "0" are falsy strings (matching null and false), everything else is true */
+				/* "" and "0" are falsy strings (matching false), "" is a nully string (matching null and false), everything else is true */
 				if (Z_STRLEN_P(expr) == 1 && *Z_STRVAL_P(expr) == '0') {
 					zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_FALSE;
 					if (off == NULL || Z_LVAL_P(zero) < Z_LVAL_P(off)) {
@@ -4922,16 +4922,16 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 			}
 			/* else fallthrough */
 
-		case IS_NULL:
-			off = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
-			break;
-
 		case IS_FALSE: {
 			zval *nully = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
 			off = Z_LVAL_P(zero) > Z_LVAL_P(nully) ? nully : zero;
 			break;
 		}
+
+		case IS_NULL:
+			off = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_NULL;
+			break;
 
 		case IS_LONG: {
 			zval *zero = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_ZERO;
@@ -4960,6 +4960,11 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 	}
 
 	CHECK_EXCEPTION();
+
+	if (UNEXPECTED(Z_LVAL_P(off) == 0x7fffffff)) {
+		off = EX_CONSTANT(opline->op2) + ZEND_SWITCH_OFF_DEFAULT;
+	}
+
 	ZEND_VM_JMP(execute_data->func->op_array.opcodes + Z_LVAL_P(off));
 }
 

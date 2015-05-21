@@ -3998,7 +3998,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 #define SWITCH_TARGET_OFFSET(off) ((CG(active_op_array)->opcodes[off].opcode == ZEND_JMP ? CG(active_op_array)->opcodes[off].op1 : CG(active_op_array)->opcodes[off].op2).opline_num)
 
 		ZVAL_LONG(&off, SWITCH_TARGET_OFFSET(opnum_default_jmp));
-		truth = real_true = nully = zero = long_zero = SWITCH_TARGET_OFFSET(opnum_default_jmp);
+		truth = real_true = nully = zero = long_zero = 0x7fffffff;
 
 		i = cases->children;
 		while (i--) {
@@ -4059,11 +4059,13 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		zend_add_literal(CG(active_op_array), &off);
 		Z_LVAL(off) = real_true;
 		zend_add_literal(CG(active_op_array), &off);
-		Z_LVAL(off) = nully;
-		zend_add_literal(CG(active_op_array), &off);
 		Z_LVAL(off) = zero;
 		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = nully;
+		zend_add_literal(CG(active_op_array), &off);
 		Z_LVAL(off) = long_zero;
+		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = SWITCH_TARGET_OFFSET(opnum_default_jmp);
 		zend_add_literal(CG(active_op_array), &off);
 	}
 
