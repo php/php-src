@@ -480,6 +480,13 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						info[j] = info[i];
 					}
 					j++;
+					n = LITERAL_NUM_RELATED(info[i].flags);
+					while (n > 1) {
+						i++;
+						if (i != j) op_array->literals[j] = op_array->literals[i];
+						j++;
+						n--;
+					}
 					break;
 			}
 		}
