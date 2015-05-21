@@ -179,13 +179,13 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 }
 /* }}} */
 
-typedef struct _scalar_typehint_info {
+typedef struct _builtin_type_info {
 	const char* name;
 	const size_t name_len;
 	const zend_uchar type;
-} scalar_typehint_info;
+} builtin_type_info;
 
-static const scalar_typehint_info scalar_typehints[] = {
+static const builtin_type_info builtin_types[] = {
 	{"int", sizeof("int") - 1, IS_LONG},
 	{"float", sizeof("float") - 1, IS_DOUBLE},
 	{"string", sizeof("string") - 1, IS_STRING},
@@ -193,9 +193,9 @@ static const scalar_typehint_info scalar_typehints[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
-static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(const zend_string *name) /* {{{ */
+static zend_always_inline const builtin_type_info* zend_find_builtin_type(const zend_string *name) /* {{{ */
 {
-	const scalar_typehint_info *info = &scalar_typehints[0];
+	const builtin_type_info *info = &builtin_types[0];
 
 	for (; info->name; ++info) {
 		if (name->len == info->name_len
@@ -209,9 +209,9 @@ static zend_always_inline const scalar_typehint_info* zend_find_scalar_typehint(
 }
 /* }}} */
 
-static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const zend_string *const_name) /* {{{ */
+static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend_string *const_name) /* {{{ */
 {
-	const scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
+	const builtin_type_info *info = zend_find_builtin_type(const_name);
 
 	if (info) {
 		return info->type;
@@ -4213,7 +4213,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			arg_infos->type_hint = return_type_ast->attr;
 		} else {
 			zend_string *class_name = zend_ast_get_str(return_type_ast);
-			zend_uchar type = zend_lookup_scalar_typehint_by_name(class_name);
+			zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
 			if (type != 0) {
 				arg_infos->type_hint = type;
@@ -4341,7 +4341,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 				zend_string *class_name = zend_ast_get_str(type_ast);
 				zend_uchar type;
 
-				type = zend_lookup_scalar_typehint_by_name(class_name);
+				type = zend_lookup_builtin_type_by_name(class_name);
 				if (type != 0) {
 					arg_info->type_hint = type;
 				} else {
