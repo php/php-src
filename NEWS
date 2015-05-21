@@ -200,7 +200,6 @@
     nor curruption state). (Julien)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
-  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
 - Sqlite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
