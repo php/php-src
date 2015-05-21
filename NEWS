@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     in extension trait). (jbboehr at gmail dot com)
   . Fixed bug #66048 (temp. directory is cached during multiple requests).
     (Julien)
+  . Fixed bug #69628 (complex GLOB_BRACE fails on Windows).
+    (Christoph M. Becker)
 
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
