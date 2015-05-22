@@ -58,6 +58,8 @@ PHP                                                                        NEWS
     overflow). (CVE-2015-4022) (Stas)
 
 - ODBC:
+  . Fixed bug #69354 (Incorrect use of SQLColAttributes with ODBC 3.0).
+    (Anatol)
   . Fixed bug #69474 (ODBC: Query with same field name from two tables returns
     incorrect result). (Anatol)
   . Fixed bug #69381 (out of memory with sage odbc driver). (Frederic Marchall,
