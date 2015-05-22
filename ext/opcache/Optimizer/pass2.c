@@ -186,16 +186,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_CONT:
 				{
 				    zend_brk_cont_element *jmp_to;
-					int array_offset;
-					int nest_levels;
+					int array_offset = ZEND_OP1(opline).num;
+					int nest_levels = ZEND_OP2(opline).num;
 					int dont_optimize = 0;
 
-					ZEND_ASSERT(ZEND_OP2_TYPE(opline) == IS_CONST);
-					ZEND_ASSERT(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG);
-
-					nest_levels = Z_LVAL(ZEND_OP2_LITERAL(opline));
-
-					array_offset = ZEND_OP1(opline).opline_num;
 					while (1) {
 						if (array_offset == -1) {
 							dont_optimize = 1; /* don't optimize this bogus break/continue, let the executor shout */

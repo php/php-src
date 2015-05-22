@@ -3528,26 +3528,27 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 {
 	zend_ast *depth_ast = ast->child[0];
 
-	znode depth_node;
 	zend_op *opline;
+	int depth;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_BREAK || ast->kind == ZEND_AST_CONTINUE);
 
 	if (depth_ast) {
+		zval *depth_zv;
 		if (depth_ast->kind != ZEND_AST_ZVAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand "
 				"is no longer supported", ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
 
-		zend_compile_expr(&depth_node, depth_ast);
-
-		if (Z_TYPE(depth_node.u.constant) != IS_LONG || Z_LVAL(depth_node.u.constant) < 1) {
+		depth_zv = zend_ast_get_zval(depth_ast);
+		if (Z_TYPE_P(depth_zv) != IS_LONG || Z_LVAL_P(depth_zv) < 1) {
 			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers",
 				ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 		}
+
+		depth = Z_LVAL_P(depth_zv);
 	} else {
-		depth_node.op_type = IS_CONST;
-		ZVAL_LONG(&depth_node.u.constant, 1);
+		depth = 1;
 	}
 
 	if (CG(context).current_brk_cont == -1) {
@@ -3555,20 +3556,20 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
 		int array_offset = CG(context).current_brk_cont;
-		zend_long nest_level = Z_LVAL(depth_node.u.constant);
+		zend_long nest_level = depth;
 
 		do {
 			if (array_offset == -1) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
 					ast->kind == ZEND_AST_BREAK ? "break" : "continue",
-					Z_LVAL(depth_node.u.constant), (Z_LVAL(depth_node.u.constant) == 1) ? "" : "s");
+					depth, depth == 1 ? "" : "s");
 			}
 			array_offset = CG(active_op_array)->brk_cont_array[array_offset].parent;
 		} while (--nest_level > 0);
 	}
-	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT,
-		NULL, &depth_node);
-	opline->op1.opline_num = CG(context).current_brk_cont;
+	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
+	opline->op1.num = CG(context).current_brk_cont;
+	opline->op2.num = depth;
 }
 /* }}} */
 

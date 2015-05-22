@@ -4816,24 +4816,24 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
+ZEND_VM_HANDLER(50, ZEND_BRK, ANY, ANY)
 {
 	USE_OPLINE
 	zend_brk_cont_element *el;
 
 	SAVE_OPLINE();
-	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->op1.opline_num,
+	el = zend_brk_cont(opline->op2.num, opline->op1.num,
 	                   &EX(func)->op_array, execute_data);
 	ZEND_VM_JMP(EX(func)->op_array.opcodes + el->brk);
 }
 
-ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
+ZEND_VM_HANDLER(51, ZEND_CONT, ANY, ANY)
 {
 	USE_OPLINE
 	zend_brk_cont_element *el;
 
 	SAVE_OPLINE();
-	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->op1.opline_num,
+	el = zend_brk_cont(opline->op2.num, opline->op1.num,
 	                   &EX(func)->op_array, execute_data);
 	ZEND_VM_JMP(EX(func)->op_array.opcodes + el->cont);
 }

@@ -682,11 +682,11 @@ static void zend_resolve_finally_calls(zend_op_array *op_array)
 			case ZEND_BRK:
 			case ZEND_CONT:
 			{
-				int nest_levels, array_offset;
+				int nest_levels = opline->op2.num;
+				int array_offset = opline->op1.num;
 				zend_brk_cont_element *jmp_to;
 
-				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant]);
-				if ((array_offset = opline->op1.opline_num) != -1) {
+				if (array_offset != -1) {
 					do {
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						if (nest_levels > 1) {
