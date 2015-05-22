@@ -14,7 +14,7 @@ $r = new Phar($fname, 0);
 
 ==DONE==
 --EXPECTF--
-UnexpectedValueException: phar error: corrupted central directory entry, no magic signature in zip-based phar "%s%ebug69441.phar" in %s%ebug69441.php:%d
+UnexpectedValueException: phar error: corrupted central directory entry, no magic signature in zip-based phar "%sbug69441.phar" in %sbug69441.php:%d
 Stack trace:
 #0 %s%ebug69441.php(%d): Phar->__construct('%s', 0)
 #1 {main}
