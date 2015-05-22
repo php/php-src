@@ -2146,7 +2146,6 @@ static inline void zend_accel_fast_del_bucket(HashTable *ht, uint32_t idx, Bucke
 	uint32_t nIndex = p->h | ht->nTableMask;
 	uint32_t i = HT_HASH(ht, nIndex);
 
-	ht->nNumUsed--;
 	ht->nNumOfElements--;
 	if (idx != i) {
 		Bucket *prev = HT_HASH_TO_BUCKET(ht, i);
@@ -2267,6 +2266,9 @@ static void zend_accel_fast_shutdown(void)
 			zend_accel_fast_del_bucket(EG(zend_constants), HT_IDX_TO_HASH(_idx-1), _p);
 		}
 	} ZEND_HASH_FOREACH_END();
+	EG(function_table)->nNumUsed = EG(function_table)->nNumOfElements;
+	EG(class_table)->nNumUsed = EG(class_table)->nNumOfElements;
+	EG(zend_constants)->nNumUsed = EG(zend_constants)->nNumOfElements;
 
 	CG(unclean_shutdown) = 1;
 }

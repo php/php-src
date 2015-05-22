@@ -143,6 +143,8 @@
   . Removed mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb(), mcrypt_ofb(). (Nikita)
 
 - Opcache:
+  . Fixed bug #69688 (segfault with eval and opcache fast shutdown).
+    (Laruence)
   . Added experimental (disabled by default) file based opcode cache.
     (Dmitry, Laruence, Anatol)
   . Fixed bug with try blocks being removed when extended_info opcode
