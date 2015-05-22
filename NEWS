@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
 
+- PCRE:
+  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
+
 - Phar:
   . Fixed bug #69680 (phar symlink in binary directory broken).
     (Matteo Bernardini, Remi)
