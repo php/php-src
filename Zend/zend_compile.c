@@ -572,30 +572,37 @@ void zend_stop_lexing(void) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
-static inline void zend_begin_loop(void) /* {{{ */
+static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
-	int parent;
+	int parent = CG(context).current_brk_cont;
 
-	parent = CG(context).current_brk_cont;
 	CG(context).current_brk_cont = CG(active_op_array)->last_brk_cont;
 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
-	brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	brk_cont_element->parent = parent;
+
+	if (loop_var) {
+		zend_stack_push(&CG(loop_var_stack), loop_var);
+		brk_cont_element->start = get_next_op_number(CG(active_op_array));
+	} else {
+		/* The start field is used to free temporary variables in case of exceptions.
+		 * We won't try to free something of we don't have loop variable.  */
+		brk_cont_element->start = -1;
+	}
 }
 /* }}} */
 
-static inline void zend_end_loop(int cont_addr, int has_loop_var) /* {{{ */
+static inline void zend_end_loop(int cont_addr) /* {{{ */
 {
-	if (!has_loop_var) {
-		/* The start fileld is used to free temporary variables in case of exceptions.
-		 * We won't try to free something of we don't have loop variable.
-		 */
-		CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont].start = -1;
+	zend_brk_cont_element *brk_cont_element
+		= &CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont];
+	brk_cont_element->cont = cont_addr;
+	brk_cont_element->brk = get_next_op_number(CG(active_op_array));
+	CG(context).current_brk_cont = brk_cont_element->parent;
+
+	if (brk_cont_element->start >= 0) {
+		zend_stack_del_top(&CG(loop_var_stack));
 	}
-	CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont].cont = cont_addr;
-	CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont].brk = get_next_op_number(CG(active_op_array));
-	CG(context).current_brk_cont = CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont].parent;
 }
 /* }}} */
 
@@ -3606,7 +3613,7 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop();
+	zend_begin_loop(NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3617,7 +3624,7 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
 
-	zend_end_loop(opnum_cond, 0);
+	zend_end_loop(opnum_cond);
 }
 /* }}} */
 
@@ -3629,7 +3636,7 @@ void zend_compile_do_while(zend_ast *ast) /* {{{ */
 	znode cond_node;
 	uint32_t opnum_start, opnum_cond;
 
-	zend_begin_loop();
+	zend_begin_loop(NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3639,7 +3646,7 @@ void zend_compile_do_while(zend_ast *ast) /* {{{ */
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
 
-	zend_end_loop(opnum_cond, 0);
+	zend_end_loop(opnum_cond);
 }
 /* }}} */
 
@@ -3680,7 +3687,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop();
+	zend_begin_loop(NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3695,7 +3702,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
-	zend_end_loop(opnum_loop, 0);
+	zend_end_loop(opnum_loop);
 }
 /* }}} */
 
@@ -3739,9 +3746,6 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opnum_reset = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
-	reset_node.flag = 1; /* generate FE_FREE */
-	zend_stack_push(&CG(loop_var_stack), &reset_node);
-
 	opnum_fetch = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
@@ -3765,7 +3769,8 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		zend_emit_assign_znode(key_ast, &key_node);
 	}
 
-	zend_begin_loop();
+	reset_node.flag = 1; /* generate FE_FREE */
+	zend_begin_loop(&reset_node);
 
 	zend_compile_stmt(stmt_ast);
 
@@ -3777,10 +3782,9 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opline = &CG(active_op_array)->opcodes[opnum_fetch];
 	opline->extended_value = get_next_op_number(CG(active_op_array));
 
-	zend_end_loop(opnum_fetch, 1);
+	zend_end_loop(opnum_fetch);
 
 	generate_free_loop_var(&reset_node);
-	zend_stack_del_top(&CG(loop_var_stack));
 }
 /* }}} */
 
@@ -3841,10 +3845,8 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	expr_node.flag = 0;
-	zend_stack_push(&CG(loop_var_stack), &expr_node);
-
-	zend_begin_loop();
+	expr_node.flag = 0; /* Generate normal FREE */
+	zend_begin_loop(&expr_node);
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
@@ -3903,16 +3905,14 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		zend_update_jump_target_to_next(opnum_default_jmp);
 	}
 
-	zend_end_loop(get_next_op_number(CG(active_op_array)), 1);
+	zend_end_loop(get_next_op_number(CG(active_op_array)));
 
 	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
-		zend_emit_op(NULL, ZEND_FREE,
-			&expr_node, NULL);
+		zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_dtor(&expr_node.u.constant);
 	}
 
-	zend_stack_del_top(&CG(loop_var_stack));
 	efree(jmpnz_opnums);
 }
 /* }}} */
