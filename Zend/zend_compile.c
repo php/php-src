@@ -3557,6 +3557,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	} else {
 		int array_offset = CG(context).current_brk_cont;
 		zend_long nest_level = depth;
+		znode *loop_var = zend_stack_top(&CG(loop_var_stack));
 
 		do {
 			if (array_offset == -1) {
@@ -3564,6 +3565,12 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 					ast->kind == ZEND_AST_BREAK ? "break" : "continue",
 					depth, depth == 1 ? "" : "s");
 			}
+
+			if (nest_level > 1 && CG(active_op_array)->brk_cont_array[array_offset].start >= 0) {
+				generate_free_loop_var(loop_var);
+				loop_var--;
+			}
+
 			array_offset = CG(active_op_array)->brk_cont_array[array_offset].parent;
 		} while (--nest_level > 0);
 	}
