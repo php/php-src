@@ -949,6 +949,11 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
+/* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_BRK 254
+#define ZEND_CONT 255
+
+
 END_EXTERN_C()
 
 #define ZEND_CLONE_FUNC_NAME		"__clone"
