@@ -183,16 +183,6 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_ZEND_LONG == 8
-# ifdef _WIN32
-#  define THIS_HASHVAL 6385726429Ui64
-# else
-#  define THIS_HASHVAL 6385726429ULL
-# endif
-#else
-#define THIS_HASHVAL 2090759133UL
-#endif
-
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
