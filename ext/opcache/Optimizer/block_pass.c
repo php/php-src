@@ -123,6 +123,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
+			case ZEND_SWITCH:
 			case ZEND_BRK:
 			case ZEND_CONT:
 			case ZEND_GOTO:

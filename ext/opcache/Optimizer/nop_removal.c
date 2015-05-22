@@ -114,6 +114,18 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				case ZEND_CATCH:
 					opline->extended_value -= shiftlist[opline->extended_value];
 					break;
+				case ZEND_SWITCH: {
+					zval *zv;
+					ZEND_HASH_FOREACH_VAL(Z_ARRVAL(op_array->literals[ZEND_OP2(opline).constant]), zv) {
+						Z_LVAL_P(zv) -= shiftlist[Z_LVAL_P(zv)];
+					} ZEND_HASH_FOREACH_END();
+					
+					for (j = 1; j <= ZEND_SWITCH_OFF_MODES; j++) {
+						zval *literal = op_array->literals + ZEND_OP2(opline).constant + j;
+						Z_LVAL_P(literal) -= shiftlist[Z_LVAL_P(literal)];
+					}
+					break;
+				}
 			}
 		}
 
