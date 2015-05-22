@@ -3448,17 +3448,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 
 static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 {
-	uint32_t opnum_start, opnum_end, i;
-
-	opnum_start = get_next_op_number(CG(active_op_array));
-
 	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
-
-	opnum_end = get_next_op_number(CG(active_op_array));
-
-	for (i = opnum_start; i < opnum_end; ++i) {
-		CG(active_op_array)->opcodes[i].extended_value |= EXT_TYPE_FREE_ON_RETURN;
-	}
 }
 /* }}} */
 

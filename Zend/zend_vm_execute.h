@@ -1615,17 +1615,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 				zend_op *brk_opline = &EX(func)->op_array.opcodes[EX(func)->op_array.brk_cont_array[i].brk];
 
 				if (brk_opline->opcode == ZEND_FREE) {
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-					}
+					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 				} else if (brk_opline->opcode == ZEND_FE_FREE) {
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval *var = EX_VAR(brk_opline->op1.var);
-						if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-							zend_hash_iterator_del(Z_FE_ITER_P(var));
-						}
-						zval_ptr_dtor_nogc(var);
+					zval *var = EX_VAR(brk_opline->op1.var);
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
+					zval_ptr_dtor_nogc(var);
 				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
 					/* restore previous error_reporting value */
 					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
@@ -2376,7 +2372,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONT_SPEC_CONST_HANDLER(ZEND_O
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *brk_opline;
 	USE_OPLINE
 	zend_brk_cont_element *el;
 
@@ -2384,14 +2379,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_O
 	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->extended_value,
  	                   &EX(func)->op_array, execute_data);
 
-	brk_opline = EX(func)->op_array.opcodes + el->brk;
+	if (el->start >= 0) {
+		zend_op *brk_opline = EX(func)->op_array.opcodes + el->brk;
 
-	if (brk_opline->opcode == ZEND_FREE) {
-		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+		if (brk_opline->opcode == ZEND_FREE) {
 			zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-		}
-	} else if (brk_opline->opcode == ZEND_FE_FREE) {
-		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+		} else if (brk_opline->opcode == ZEND_FE_FREE) {
 			zval *var = EX_VAR(brk_opline->op1.var);
 			if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 				zend_hash_iterator_del(Z_FE_ITER_P(var));
