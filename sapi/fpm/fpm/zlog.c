@@ -98,20 +98,17 @@ int zlog_set_level(int new_value) /* {{{ */
 }
 /* }}} */
 
-void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */
+void vzlog(const char *function, int line, int flags, const char *fmt, va_list args) /* {{{ */
 {
 	struct timeval tv;
 	char buf[MAX_LINE_LENGTH];
 	const size_t buf_size = MAX_LINE_LENGTH;
-	va_list args;
 	size_t len = 0;
 	int truncated = 0;
 	int saved_errno;
 
 	if (external_logger) {
-		va_start(args, fmt);
 		len = vsnprintf(buf, buf_size, fmt, args);
-		va_end(args);
 		if (len >= buf_size) {
 			memcpy(buf + buf_size - sizeof("..."), "...", sizeof("...") - 1);
 			len = buf_size - 1;
@@ -157,9 +154,7 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	}
 
 	if (!truncated) {
-		va_start(args, fmt);
 		len += vsnprintf(buf + len, buf_size - len, fmt, args);
-		va_end(args);
 		if (len >= buf_size) {
 			truncated = 1;
 		}
@@ -197,3 +192,10 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 }
 /* }}} */
 
+void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */ {
+	va_list args;
+	va_start(args, fmt);
+	vzlog(function, line, flags, fmt, args);
+	va_end(args);
+}
+/* }}} */

@@ -678,8 +678,7 @@ if test "$PHP_FPM" != "no"; then
   
   PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm"
  
-  PHP_FPM_FILES="fpm/fastcgi.c \
-    fpm/fpm.c \
+  PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
     fpm/fpm_cleanup.c \
     fpm/fpm_clock.c \
