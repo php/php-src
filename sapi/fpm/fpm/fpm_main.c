@@ -457,7 +457,11 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 # define STDIN_FILENO 0
 #endif
 
+#ifndef HAVE_ATTRIBUTE_WEAK
 static void fpm_fcgi_log(int type, const char *fmt, ...) /* {{{ */
+#else
+void fcgi_log(int type, const char *fmt, ...)
+#endif
 {
 	va_list args;
 	va_start(args, fmt);
@@ -1586,7 +1590,10 @@ int main(int argc, char *argv[])
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;
 
+#ifndef HAVE_ATTRIBUTE_WEAK
 	fcgi_set_logger(fpm_fcgi_log);
+#endif
+
 	fcgi_init();
 
 #ifdef PHP_WIN32

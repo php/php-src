@@ -219,6 +219,7 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
+#ifndef HAVE_ATTRIBUTE_WEAK
 static void fcgi_log(int type, const char *format, ...) {
 	va_list ap;
 
@@ -226,6 +227,7 @@ static void fcgi_log(int type, const char *format, ...) {
 	vfprintf(stderr, format, ap);
 	va_end(ap);
 }
+#endif
 
 static int print_module_info(zval *element)
 {
@@ -1936,7 +1938,10 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
+#ifndef HAVE_ATTRIBUTE_WEAK
 	fcgi_set_logger(fcgi_log);
+#endif
+
 	if (bindpath) {
 		int backlog = 128;
 		if (getenv("PHP_FCGI_BACKLOG")) {

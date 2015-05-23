@@ -133,7 +133,9 @@ static int is_impersonate = 0;
 #include "fastcgi.h"
 
 /* maybe it's better to use weak name instead */
-static fcgi_logger logger;
+#ifndef HAVE_ATTRIBUTE_WEAK
+static fcgi_logger fcgi_log;
+#endif
 
 typedef union _sa_t {
 	struct sockaddr     sa;
@@ -360,9 +362,19 @@ void fcgi_terminate(void)
 	in_shutdown = 1;
 }
 
+#ifndef HAVE_ATTRIBUTE_WEAK
 void fcgi_set_logger(fcgi_logger lg) {
-	logger = lg;
+	fcgi_log = lg;
 }
+#else
+void __attribute__((weak)) fcgi_log(int type, const char *format, ...) {
+	va_list ap;
+
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+#endif
 
 int fcgi_init(void)
 {
@@ -583,10 +595,10 @@ int fcgi_listen(const char *path, int backlog)
 					hep = gethostbyname(host);
 				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
-					logger(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
+					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
 					return -1;
 				} else if (hep->h_addr_list[1]) {
-					logger(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
+					fcgi_log(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
 					return -1;
 				}
 				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
@@ -623,7 +635,7 @@ int fcgi_listen(const char *path, int backlog)
 		int path_len = strlen(path);
 
 		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
-			logger(FCGI_ERROR, "Listening socket's path name is too long.\n");
+			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}
 
@@ -646,7 +658,7 @@ int fcgi_listen(const char *path, int backlog)
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
 	    listen(listen_socket, backlog) < 0) {
 
-		logger(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
+		fcgi_log(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
 		return -1;
 	}
 
@@ -683,14 +695,14 @@ int fcgi_listen(const char *path, int backlog)
 					n++;
 #endif
 				} else {
-					logger(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
+					fcgi_log(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
 				}
 				cur = end;
 			}
 			allowed_clients[n].sa.sa_family = 0;
 			free(ip);
 			if (!n) {
-				logger(FCGI_ERROR, "There are no allowed addresses");
+				fcgi_log(FCGI_ERROR, "There are no allowed addresses");
 				/* don't clear allowed_clients as it will create an "open for all" security issue */
 			}
 		}
@@ -743,14 +755,14 @@ void fcgi_set_allowed_clients(char *ip)
 				n++;
 #endif
 			} else {
-				logger(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
+				fcgi_log(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
 			}
 			cur = end;
 		}
 		allowed_clients[n].sa.sa_family = 0;
 		free(ip);
 		if (!n) {
-			logger(FCGI_ERROR, "There are no allowed addresses");
+			fcgi_log(FCGI_ERROR, "There are no allowed addresses");
 			/* don't clear allowed_clients as it will create an "open for all" security issue */
 		}
 	}
@@ -1222,7 +1234,7 @@ static int fcgi_is_allowed() {
 	}
 #endif
 
-	logger(FCGI_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
+	fcgi_log(FCGI_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
 	return 0;
 }
 
@@ -1337,7 +1349,7 @@ int fcgi_accept_request(fcgi_request *req)
 						}
 						fcgi_close(req, 1, 0);
 					} else {
-						logger(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
+						fcgi_log(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
 						fcgi_close(req, 1, 0);
 					}
 #endif

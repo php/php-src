@@ -118,8 +118,6 @@ typedef struct _fcgi_end_request_rec {
 
 typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
-typedef void (*fcgi_logger)(int type, const char *fmt, ...);
-
 #define FCGI_HASH_TABLE_SIZE 128
 #define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
 #define FCGI_HASH_SEG_SIZE   4096
@@ -200,9 +198,13 @@ fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
 void fcgi_set_allowed_clients(char *ip);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
-void fcgi_set_logger(fcgi_logger lg);
 const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
+
+#ifndef HAVE_ATTRIBUTE_WEAK
+typedef void (*fcgi_logger)(int type, const char *fmt, ...);
+void fcgi_set_logger(fcgi_logger lg);
+#endif
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
