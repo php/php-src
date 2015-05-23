@@ -39,9 +39,9 @@ array(5) {
   [0]=>
   string(3) "_c_"
   [1]=>
-  string(0) ""
+  NULL
   [2]=>
-  string(0) ""
+  NULL
   [3]=>
   string(1) "c"
   ["MARK"]=>
@@ -65,42 +65,42 @@ array(6) {
     [0]=>
     string(1) "a"
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
-    string(0) ""
+    NULL
   }
   [2]=>
   array(4) {
     [0]=>
-    string(0) ""
+    NULL
     [1]=>
     string(1) "b"
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
-    string(0) ""
+    NULL
   }
   [3]=>
   array(4) {
     [0]=>
-    string(0) ""
+    NULL
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
     string(1) "c"
     [3]=>
-    string(0) ""
+    NULL
   }
   [4]=>
   array(4) {
     [0]=>
-    string(0) ""
+    NULL
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
     string(1) "d"
   }
@@ -128,7 +128,7 @@ array(4) {
     [0]=>
     string(3) "_b_"
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
     string(1) "b"
   }
@@ -137,9 +137,9 @@ array(4) {
     [0]=>
     string(3) "_c_"
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
     string(1) "c"
     ["MARK"]=>
@@ -150,11 +150,11 @@ array(4) {
     [0]=>
     string(3) "_d_"
     [1]=>
-    string(0) ""
+    NULL
     [2]=>
-    string(0) ""
+    NULL
     [3]=>
-    string(0) ""
+    NULL
     [4]=>
     string(1) "d"
   }
