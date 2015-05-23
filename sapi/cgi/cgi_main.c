@@ -2101,6 +2101,7 @@ consult the installation file that came with this distribution, or visit \n\
 					break;
 				case 'h':
 				case '?':
+					fcgi_destroy_request(&request);
 					fcgi_shutdown();
 					no_headers = 1;
 					SG(headers_sent) = 1;
@@ -2532,6 +2533,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
+		fcgi_destroy_request(&request);
 		fcgi_shutdown();
 
 		if (cgi_sapi_module.php_ini_path_override) {

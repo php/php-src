@@ -195,6 +195,7 @@ int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
 fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
+void fcgi_destroy_request(fcgi_request *req);
 void fcgi_set_allowed_clients(char *ip);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);

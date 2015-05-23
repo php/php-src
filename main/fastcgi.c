@@ -794,8 +794,15 @@ fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 #ifdef _WIN32
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
 #endif
+	fcgi_hash_init(&req->env);
 
 	return req;
+}
+
+void fcgi_destroy_request(fcgi_request *req) {
+	if (req->env.buckets) {
+		fcgi_hash_destroy(&req->env);
+	}
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
@@ -935,7 +942,6 @@ static int fcgi_read_request(fcgi_request *req)
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	fcgi_hash_init(&req->env);
 	req->has_env = 1;
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
@@ -1144,7 +1150,6 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 {
 	if (destroy && req->has_env) {
 		fcgi_hash_clean(&req->env);
-		fcgi_hash_destroy(&req->env);
 		req->has_env = 0;
 	}
 

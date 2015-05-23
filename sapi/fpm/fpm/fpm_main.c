@@ -1972,6 +1972,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
+		fcgi_destroy_request(&request);
 		fcgi_shutdown();
 
 		if (cgi_sapi_module.php_ini_path_override) {
