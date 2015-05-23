@@ -347,12 +347,12 @@ static void fcgi_setup_signals(void)
 }
 #endif
 
-void fcgi_set_in_shutdown(int new_value)
+FCGI_API void fcgi_set_in_shutdown(int new_value)
 {
 	in_shutdown = new_value;
 }
 
-int fcgi_in_shutdown(void)
+FCGI_API int fcgi_in_shutdown(void)
 {
 	return in_shutdown;
 }
@@ -376,7 +376,7 @@ void __attribute__((weak)) fcgi_log(int type, const char *format, ...) {
 }
 #endif
 
-int fcgi_init(void)
+FCGI_API int fcgi_init(void)
 {
 	if (!is_initialized) {
 #ifndef _WIN32
@@ -723,7 +723,7 @@ FCGI_API int fcgi_listen(const char *path, int backlog)
 	return listen_socket;
 }
 
-void fcgi_set_allowed_clients(char *ip)
+FCGI_API void fcgi_set_allowed_clients(char *ip)
 {
 	char *cur, *end;
 	int n;
@@ -1146,7 +1146,7 @@ FCGI_API int fcgi_read(fcgi_request *req, char *str, int len)
 	return n;
 }
 
-void fcgi_close(fcgi_request *req, int force, int destroy)
+FCGI_API void fcgi_close(fcgi_request *req, int force, int destroy)
 {
 	if (destroy && req->has_env) {
 		fcgi_hash_clean(&req->env);
@@ -1199,7 +1199,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 	}
 }
 
-int fcgi_is_closed(fcgi_request *req)
+FCGI_API int fcgi_is_closed(fcgi_request *req)
 {
 	return (req->fd < 0);
 }
@@ -1609,19 +1609,19 @@ FCGI_API void fcgi_impersonate(void)
 }
 #endif
 
-void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
+FCGI_API void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 
-void fcgi_free_mgmt_var_cb(zval *zv)
+FCGI_API void fcgi_free_mgmt_var_cb(zval *zv)
 {
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+FCGI_API const char *fcgi_get_last_client_ip()
 {
 	static char str[INET6_ADDRSTRLEN];
 

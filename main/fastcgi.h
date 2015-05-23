@@ -196,21 +196,21 @@ struct _fcgi_request {
 	fcgi_hash      env;
 };
 
-int fcgi_init(void);
+FCGI_API int fcgi_init(void);
 FCGI_API void fcgi_shutdown(void);
 FCGI_API int fcgi_is_fastcgi(void);
-int fcgi_is_closed(fcgi_request *req);
-void fcgi_close(fcgi_request *req, int force, int destroy);
-int fcgi_in_shutdown(void);
+FCGI_API int fcgi_is_closed(fcgi_request *req);
+FCGI_API void fcgi_close(fcgi_request *req, int force, int destroy);
+FCGI_API int fcgi_in_shutdown(void);
 FCGI_API void fcgi_terminate(void);
 FCGI_API int fcgi_listen(const char *path, int backlog);
 FCGI_API fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
 FCGI_API void fcgi_destroy_request(fcgi_request *req);
-void fcgi_set_allowed_clients(char *ip);
+FCGI_API void fcgi_set_allowed_clients(char *ip);
 FCGI_API int fcgi_accept_request(fcgi_request *req);
 FCGI_API int fcgi_finish_request(fcgi_request *req, int force_close);
-const char *fcgi_get_last_client_ip();
-void fcgi_set_in_shutdown(int new_value);
+FCGI_API const char *fcgi_get_last_client_ip();
+FCGI_API void fcgi_set_in_shutdown(int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 typedef void (*fcgi_logger)(int type, const char *fmt, ...);
@@ -232,8 +232,8 @@ FCGI_API int fcgi_flush(fcgi_request *req, int close);
 FCGI_API void fcgi_impersonate(void);
 #endif
 
-void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(zval *zv);
+FCGI_API void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
+FCGI_API void fcgi_free_mgmt_var_cb(zval *zv);
 
 /*
  * Local variables:
