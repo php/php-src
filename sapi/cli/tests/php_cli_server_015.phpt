@@ -46,4 +46,8 @@ X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 
 <br />
-<b>Fatal error</b>:  Call to undefined function non_exists_function() in <b>%ssyntax_error.php</b> on line <b>%s</b><br />
+<b>Fatal error</b>:  Uncaught EngineException: Call to undefined function non_exists_function() in %ssyntax_error.php:%d
+Stack trace:
+#0 %sindex.php(%d): require()
+#1 {main}
+  thrown in <b>%ssyntax_error.php</b> on line <b>%d</b><br />

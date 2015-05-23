@@ -13,4 +13,8 @@ var_dump(int_val());
 
 ?>
 --EXPECTF--
-Fatal error: Argument 1 passed to int_val() must be of the type integer, string given, called in %s on line %d and defined in %s on line %d
+Fatal error: Uncaught TypeException: Argument 1 passed to int_val() must be of the type integer, string given, called in %s on line %d and defined in %s:%d
+Stack trace:
+#0 %s(%d): int_val()
+#1 {main}
+  thrown in %s on line %d

@@ -104,11 +104,11 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 
-		if (!execute_data->symbol_table) {
-			zend_free_compiled_variables(execute_data);
-		} else {
+		if (execute_data->symbol_table) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
 		}
+		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
+		zend_free_compiled_variables(execute_data);
 
 		if (Z_OBJ(execute_data->This)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));

@@ -10,4 +10,7 @@ $a::$b();
 
 ?>
 --EXPECTF--
-Fatal error: Function name must be a string in %s on line %d
+Fatal error: Uncaught EngineException: Function name must be a string in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

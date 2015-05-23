@@ -14,4 +14,7 @@ $s[] = "D";
 --EXPECTF--
 Exception: [] operator not supported for strings in %sexception_015.php on line %d
 
-Fatal error: [] operator not supported for strings in %sexception_015.php on line %d
+Fatal error: Uncaught EngineException: [] operator not supported for strings in %sexception_015.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sexception_015.php on line %d

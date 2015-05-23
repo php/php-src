@@ -527,17 +527,18 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execu
 
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
 {
+	zend_reference *ref;
+
 	if (EXPECTED(!Z_ISREF_P(value_ptr))) {
 		ZVAL_NEW_REF(value_ptr, value_ptr);
+	} else if (UNEXPECTED(variable_ptr == value_ptr)) {
+		return;
 	}
-	if (EXPECTED(variable_ptr != value_ptr)) {
-		zend_reference *ref;
 
-		ref = Z_REF_P(value_ptr);
-		GC_REFCOUNT(ref)++;
-		zval_ptr_dtor(variable_ptr);
-		ZVAL_REF(variable_ptr, ref);
-	}
+	ref = Z_REF_P(value_ptr);
+	GC_REFCOUNT(ref)++;
+	zval_ptr_dtor(variable_ptr);
+	ZVAL_REF(variable_ptr, ref);
 }
 
 /* this should modify object only if it's empty */
@@ -592,7 +593,6 @@ ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, c
 	const char *fname = zf->common.function_name->val;
 	const char *fsep;
 	const char *fclass;
-	zval old_arg;
 
 	if (zf->common.scope) {
 		fsep =  "::";
@@ -603,21 +603,12 @@ ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, c
 	}
 
 	if (zf->common.type == ZEND_USER_FUNCTION) {
-		if (arg) {
-			ZVAL_COPY_VALUE(&old_arg, arg);
-			ZVAL_UNDEF(arg);
-		}
-
 		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d",
 					arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind,
 					ptr->func->op_array.filename->val, ptr->opline->lineno);
 		} else {
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
-		}
-
-		if (arg) {
-			ZVAL_COPY_VALUE(arg, &old_arg);
 		}
 	} else {
 		zend_type_error("Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
@@ -2077,7 +2068,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
 
-	call_info = ZEND_CALL_TOP_FUNCTION | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
+	call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_ALLOCATED | (ZEND_CALL_INFO(call) & (ZEND_CALL_CLOSURE|ZEND_CALL_RELEASE_THIS));
 	if (Z_OBJ(call->This)) {
 		call_info |= ZEND_CALL_RELEASE_THIS;
 	}

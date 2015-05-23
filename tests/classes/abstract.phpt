@@ -27,4 +27,8 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call to function show()
 
-Fatal error: Cannot call abstract method fail::show() in %s on line %d
+Fatal error: Uncaught EngineException: Cannot call abstract method fail::show() in %s:%d
+Stack trace:
+#0 %s(%d): pass->error()
+#1 {main}
+  thrown in %s on line %d

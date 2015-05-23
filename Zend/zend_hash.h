@@ -877,7 +877,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
 
-static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
+static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
@@ -896,9 +896,10 @@ static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
+	return &p->val;
 }
 
-static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
+static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
@@ -917,6 +918,7 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
+	return &p->val;
 }
 
 static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string *key, zval *ptr)

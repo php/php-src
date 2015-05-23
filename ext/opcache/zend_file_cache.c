@@ -111,6 +111,11 @@ static int zend_file_cache_flock(int fd, int type)
 				(ptr) = zend_file_cache_serialize_interned((zend_string*)(ptr), info); \
 			} else { \
 				ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
+				/* script->corrupted shows if the script in SHM or not */ \
+				if (EXPECTED(script->corrupted)) { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				} \
 				(ptr) = (void*)((char*)(ptr) - (char*)script->mem); \
 			} \
 		} \
@@ -118,10 +123,17 @@ static int zend_file_cache_flock(int fd, int type)
 #define UNSERIALIZE_STR(ptr) do { \
 		if (ptr) { \
 			if (IS_SERIALIZED_INTERNED(ptr)) { \
-				(ptr) = (void*)zend_file_cache_unserialize_interned((zend_string*)(ptr), script->corrupted); \
+				(ptr) = (void*)zend_file_cache_unserialize_interned((zend_string*)(ptr), !script->corrupted); \
 			} else { \
 				ZEND_ASSERT(IS_SERIALIZED(ptr)); \
 				(ptr) = (void*)((char*)buf + (size_t)(ptr)); \
+				/* script->corrupted shows if the script in SHM or not */ \
+				if (EXPECTED(!script->corrupted)) { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED | IS_STR_PERMANENT; \
+				} else { \
+					GC_FLAGS(ptr) |= IS_STR_INTERNED; \
+					GC_FLAGS(ptr) &= ~IS_STR_PERMANENT; \
+				} \
 			} \
 		} \
 	} while (0)
@@ -376,6 +388,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_JMP:
 				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -390,10 +404,12 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
+					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					/* relative extended_value don't have to be changed */
 					break;
 			}
 # endif
@@ -649,7 +665,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	new_script->mem = NULL;
 }
 
-int zend_file_cache_script_store(zend_persistent_script *script)
+int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 {
 	size_t len;
 	int fd;
@@ -704,7 +720,13 @@ int zend_file_cache_script_store(zend_persistent_script *script)
 	ZCG(mem) = zend_string_alloc(4096 - (_STR_HEADER_SIZE + 1), 0);
 
 	zend_shared_alloc_init_xlat_table();
+	if (!in_shm) {
+		script->corrupted = 1; /* used to check if script restored to SHM or process memory */
+	}
 	zend_file_cache_serialize(script, &info, buf);
+	if (!in_shm) {
+		script->corrupted = 0;
+	}
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
@@ -893,6 +915,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_JMP:
 				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
 				case ZEND_JMPZNZ:
@@ -907,10 +931,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_NEW:
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
+					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					/* relative extended_value don't have to be changed */
 					break;
 			}
 # endif
@@ -1283,7 +1309,7 @@ use_process_mem:
 
 	ZCG(mem) = ((char*)mem + info.mem_size);
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
-	script->corrupted = cache_it; /* used to check if script restored to SHM or process memory */
+	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
 	zend_file_cache_unserialize(script, buf);
 	script->corrupted = 0;
 

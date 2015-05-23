@@ -13,7 +13,7 @@ var_dump(inflate_init(42));
 ?>
 --EXPECTF--
 
-Warning: inflate_init() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: inflate_init() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: inflate_init(): encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d

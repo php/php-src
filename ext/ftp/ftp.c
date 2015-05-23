@@ -1784,8 +1784,8 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	databuf_t	*data = NULL;
 	char		*ptr;
 	int		ch, lastch;
-	int		size, rcvd;
-	int		lines;
+	size_t		size, rcvd;
+	size_t		lines;
 	char		**ret = NULL;
 	char		**entry;
 	char		*text;
@@ -1827,7 +1827,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	lines = 0;
 	lastch = 0;
 	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1) {
+		if (rcvd == -1 || rcvd > ((size_t)(-1))-size) {
 			goto bail;
 		}
 

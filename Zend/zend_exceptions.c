@@ -125,7 +125,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 
 	if (!EG(current_execute_data)->func ||
 	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
-	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
+	    EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;
 	}
@@ -158,6 +158,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	zval obj;
 	zend_object *object;
 	zval trace;
+	zend_string *filename;
 
 	Z_OBJ(obj) = object = zend_objects_new(class_type);
 	Z_OBJ_HT(obj) = &default_exception_handlers;
@@ -171,11 +172,11 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	}
 	Z_SET_REFCOUNT(trace, 0);
 
-	if (EXPECTED(class_type != parse_exception_ce)) {
+	if (EXPECTED(class_type != parse_exception_ce || !(filename = zend_get_compiled_filename()))) {
 		zend_update_property_string(base_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename());
 		zend_update_property_long(base_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno());
 	} else {
-		zend_update_property_string(base_exception_ce, &obj, "file", sizeof("file")-1, zend_get_compiled_filename()->val);
+		zend_update_property_string(base_exception_ce, &obj, "file", sizeof("file")-1, filename->val);
 		zend_update_property_long(base_exception_ce, &obj, "line", sizeof("line")-1, zend_get_compiled_lineno());
 	}
 	zend_update_property(base_exception_ce, &obj, "trace", sizeof("trace")-1, &trace);
@@ -652,14 +653,20 @@ ZEND_METHOD(exception, __toString)
 			ZVAL_UNDEF(&trace);
 		}
 
+		if (Z_OBJCE_P(exception) == type_exception_ce && strstr(message->val, ", called in ")) {
+			zend_string *real_message = zend_strpprintf(0, "%s and defined", message->val);
+			zend_string_release(message);
+			message = real_message;
+		}
+
 		if (message->len > 0) {
-			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:" ZEND_LONG_FMT
+			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT
 					"\nStack trace:\n%s%s%s",
 					Z_OBJCE_P(exception)->name->val, message->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		} else {
-			str = zend_strpprintf(0, "exception '%s' in %s:" ZEND_LONG_FMT
+			str = zend_strpprintf(0, "%s in %s:" ZEND_LONG_FMT
 					"\nStack trace:\n%s%s%s",
 					Z_OBJCE_P(exception)->name->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
@@ -908,21 +915,16 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	EG(exception) = NULL;
-	if (ce_exception == parse_exception_ce || ce_exception == engine_exception_ce || ce_exception == type_exception_ce) {
+	if (ce_exception == parse_exception_ce) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		if (ce_exception == type_exception_ce && strstr(message->val, ", called in ")) {
-			zend_error_helper(code, file->val, line, "%s and defined", message->val);
-		} else {
-			zend_error_helper(code, file->val, line, "%s", message->val);
-		}
+		zend_error_helper(code? code : E_ERROR, file->val, line, "%s", message->val);
 
 		zend_string_release(file);
 		zend_string_release(message);
-		OBJ_RELEASE(ex);
 	} else if (instanceof_function(ce_exception, base_exception_ce)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -969,6 +971,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}
+
+	OBJ_RELEASE(ex);
 }
 /* }}} */
 

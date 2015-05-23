@@ -164,7 +164,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			dst++;
 		} while (src != end);
 	}
-	if (old_object->properties) {
+	if (old_object->properties &&
+	    EXPECTED(zend_hash_num_elements(old_object->properties))) {
 		zval *prop, new_prop;
 		zend_ulong num_key;
 		zend_string *key;
@@ -172,6 +173,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		if (!new_object->properties) {
 			ALLOC_HASHTABLE(new_object->properties);
 			zend_hash_init(new_object->properties, zend_hash_num_elements(old_object->properties), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_real_init(new_object->properties, 0);
+		} else {
+			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
@@ -181,8 +185,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
-			if (key) {
-				zend_hash_add_new(new_object->properties, key, &new_prop);
+			if (EXPECTED(key)) {
+				_zend_hash_append(new_object->properties, key, &new_prop);
 			} else {
 				zend_hash_index_add_new(new_object->properties, num_key, &new_prop);
 			}

@@ -52,52 +52,52 @@ for ($i = 0; $i < 10; $i++)
 ?>
 ===DONE===
 --EXPECTF--
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-exception 'Exception' with message 'Test exception.' in %s:%d
+Exception: Test exception. in %s:%d
 Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))

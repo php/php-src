@@ -13,7 +13,6 @@ typedef struct {
 	zend_bool allocated;
 	zend_mm_heap *heap;
 	zend_mm_heap *old_heap;
-	zend_mm_storage storage;
 } phpdbg_signal_safe_mem;
 
 #include "phpdbg.h"

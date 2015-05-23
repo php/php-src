@@ -1325,14 +1325,10 @@ static inline zend_bool zend_is_scope_known() /* {{{ */
 		return 0;
 	}
 
-	if (!CG(active_op_array)->function_name) {
-		/* A file/eval will be run in the including/eval'ing scope */
-		return 0;
-	}
-
 	if (!CG(active_class_entry)) {
-		/* Not being in a scope is a known scope */
-		return 1;
+		/* The scope is known if we're in a free function (no scope), but not if we're in
+		 * a file/eval (which inherits including/eval'ing scope). */
+		return CG(active_op_array)->function_name != NULL;
 	}
 
 	/* For traits self etc refers to the using class, not the trait itself */
@@ -3757,24 +3753,25 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_stack_push(&CG(loop_var_stack), &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&value_node, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
-	if (key_ast) {
-		opline->extended_value = 1;
-	}
+	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
-	opline = zend_emit_op(NULL, ZEND_OP_DATA, NULL, NULL);
-
-	if (key_ast) {
-		zend_make_tmp_result(&key_node, opline);
-	}
-
-	if (by_ref) {
-		zend_emit_assign_ref_znode(value_ast, &value_node);
+	if (value_ast->kind == ZEND_AST_VAR &&
+	    zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
+		SET_NODE(opline->op2, &value_node);
 	} else {
-		zend_emit_assign_znode(value_ast, &value_node);
+		opline->op2_type = IS_VAR;
+		opline->op2.var = get_temporary_variable(CG(active_op_array));
+		GET_NODE(&value_node, opline->op2);
+		if (by_ref) {
+			zend_emit_assign_ref_znode(value_ast, &value_node);
+		} else {
+			zend_emit_assign_znode(value_ast, &value_node);
+		}
 	}
 
 	if (key_ast) {
+		opline = &CG(active_op_array)->opcodes[opnum_fetch];
+		zend_make_tmp_result(&key_node, opline);
 		zend_emit_assign_znode(key_ast, &key_node);
 	}
 
@@ -3788,7 +3785,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 
 	opline = &CG(active_op_array)->opcodes[opnum_fetch];
-	opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+	opline->extended_value = get_next_op_number(CG(active_op_array));
 
 	zend_end_loop(opnum_fetch, 1);
 

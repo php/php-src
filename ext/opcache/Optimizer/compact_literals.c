@@ -301,13 +301,14 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 #if DEBUG_COMPACT_LITERALS
 		{
 			int i, use_copy;
-			fprintf(stderr, "File %s func %s\n", op_array->filename,
-					op_array->function_name? op_array->function_name : "main");
+			fprintf(stderr, "File %s func %s\n", op_array->filename->val,
+					op_array->function_name ? op_array->function_name->val : "main");
 			fprintf(stderr, "Literlas table size %d\n", op_array->last_literal);
 
 			for (i = 0; i < op_array->last_literal; i++) {
-				zval zv = op_array->literals[i].constant;
-				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
+				zval zv;
+				ZVAL_COPY_VALUE(&zv, op_array->literals + i);
+				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);
@@ -487,8 +488,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			fprintf(stderr, "Optimized literlas table size %d\n", op_array->last_literal);
 
 			for (i = 0; i < op_array->last_literal; i++) {
-				zval zv = op_array->literals[i].constant;
-				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv);
+				zval zv;
+				ZVAL_COPY_VALUE(&zv, op_array->literals + i);
+				use_copy = zend_make_printable_zval(op_array->literals + i, &zv);
 				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);

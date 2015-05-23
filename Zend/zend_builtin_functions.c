@@ -1105,8 +1105,10 @@ ZEND_FUNCTION(get_class_vars)
 		RETURN_FALSE;
 	} else {
 		array_init(return_value);
-		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-			return;
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				return;
+			}
 		}
 		add_class_vars(ce, 0, return_value);
 		add_class_vars(ce, 1, return_value);

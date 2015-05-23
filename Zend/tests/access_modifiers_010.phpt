@@ -28,4 +28,9 @@ new c;
 
 ?>
 --EXPECTF--
-Fatal error: Call to private method d::test2() from context 'a' in %s on line %d
+Fatal error: Uncaught EngineException: Call to private method d::test2() from context 'a' in %s:%d
+Stack trace:
+#0 %s(%d): a->test()
+#1 %s(%d): c->__construct()
+#2 {main}
+  thrown in %s on line %d

@@ -25,6 +25,7 @@
 #endif
 #ifdef PHP_WIN32
 #include "win32/time.h"
+#include "win32/getrusage.h"
 #elif defined(NETWARE)
 #include <sys/timeval.h>
 #include <sys/time.h>
@@ -129,9 +130,14 @@ PHP_FUNCTION(getrusage)
 	}
 
 	array_init(return_value);
+
 #define PHP_RUSAGE_PARA(a) \
 		add_assoc_long(return_value, #a, usg.a)
-#if !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
+
+#ifdef PHP_WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
+	PHP_RUSAGE_PARA(ru_majflt);
+	PHP_RUSAGE_PARA(ru_maxrss);
+#elif !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct*/
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);
 	PHP_RUSAGE_PARA(ru_msgsnd);
@@ -150,6 +156,7 @@ PHP_FUNCTION(getrusage)
 	PHP_RUSAGE_PARA(ru_utime.tv_sec);
 	PHP_RUSAGE_PARA(ru_stime.tv_usec);
 	PHP_RUSAGE_PARA(ru_stime.tv_sec);
+
 #undef PHP_RUSAGE_PARA
 }
 #endif /* HAVE_GETRUSAGE */

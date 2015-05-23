@@ -327,9 +327,16 @@ PHP_FUNCTION(ceil)
 {
 	zval *value;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
@@ -347,9 +354,16 @@ PHP_FUNCTION(floor)
 {
 	zval *value;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {

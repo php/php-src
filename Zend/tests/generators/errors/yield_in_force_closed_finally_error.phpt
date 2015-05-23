@@ -26,4 +26,8 @@ unset($gen);
 before yield
 before yield in finally
 
-Fatal error: Cannot yield from finally in a force-closed generator in %s on line %d
+Fatal error: Uncaught EngineException: Cannot yield from finally in a force-closed generator in %s:%d
+Stack trace:
+#0 %s(%d): gen()
+#1 {main}
+  thrown in %s on line %d

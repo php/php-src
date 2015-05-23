@@ -6,4 +6,7 @@ $a = clone(null);
 array_push($a->b, $c);
 ?>
 --EXPECTF--
-Fatal error: __clone method called on non-object in %sbug42817.php on line 2
+Fatal error: Uncaught EngineException: __clone method called on non-object in %sbug42817.php:2
+Stack trace:
+#0 {main}
+  thrown in %sbug42817.php on line 2

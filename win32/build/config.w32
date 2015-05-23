@@ -160,7 +160,7 @@ ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c 
 ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("win32", "glob.c readdir.c \
-	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c");
+	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c getrusage.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 

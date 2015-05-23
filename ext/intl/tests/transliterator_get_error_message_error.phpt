@@ -21,4 +21,8 @@ Warning: Transliterator::getErrorMessage() expects exactly 0 parameters, 1 given
 Warning: Transliterator::getErrorMessage(): transliterator_get_error_message: unable to parse input params in %s on line %d
 
 
-Fatal error: Argument 1 passed to transliterator_get_error_message() must be an instance of Transliterator, array given in %s on line %d
+Fatal error: Uncaught TypeException: Argument 1 passed to transliterator_get_error_message() must be an instance of Transliterator, array given in %s:%d
+Stack trace:
+#0 %s(%d): transliterator_get_error_message(Array)
+#1 {main}
+  thrown in %s on line %d

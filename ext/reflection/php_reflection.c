@@ -39,7 +39,9 @@
 #include "zend_ini.h"
 #include "zend_interfaces.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 #include "zend_extensions.h"
+#include "zend_builtin_functions.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
@@ -55,6 +57,7 @@ PHPAPI zend_class_entry *reflection_exception_ptr;
 PHPAPI zend_class_entry *reflection_ptr;
 PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 PHPAPI zend_class_entry *reflection_function_ptr;
+PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
@@ -201,6 +204,7 @@ typedef struct _parameter_reference {
 typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
+	REF_TYPE_GENERATOR,
 	REF_TYPE_PARAMETER,
 	REF_TYPE_PROPERTY,
 	REF_TYPE_DYNAMIC_PROPERTY
@@ -313,6 +317,8 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			prop_reference = (property_reference*)intern->ptr;
 			zend_string_release(prop_reference->prop.name);
 			efree(intern->ptr);
+			break;
+		case REF_TYPE_GENERATOR:
 			break;
 		case REF_TYPE_OTHER:
 			break;
@@ -1737,7 +1743,7 @@ ZEND_METHOD(reflection_function, isInternal)
 /* }}} */
 
 /* {{{ proto public bool ReflectionFunction::isUserDefined()
-   Returns whether this is an user-defined function */
+   Returns whether this is a user-defined function */
 ZEND_METHOD(reflection_function, isUserDefined)
 {
 	reflection_object *intern;
@@ -2107,6 +2113,174 @@ ZEND_METHOD(reflection_function, getExtensionName)
 	}
 }
 /* }}} */
+
+/* {{{ proto public void ReflectionGenerator::__construct(Generator) */
+ZEND_METHOD(reflection_generator, __construct)
+{
+	zval *generator, *object;
+	reflection_object *intern;
+	zend_execute_data *ex;
+
+	object = getThis();
+	intern = Z_REFLECTION_P(object);
+	if (intern == NULL) {
+		return;
+	}
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
+		return;
+	}
+
+	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
+	if (!ex) {
+		zend_throw_exception(NULL, "Cannot create ReflectionGenerator based on a terminated Generator", 0);
+		return;
+	}
+
+	intern->ref_type = REF_TYPE_GENERATOR;
+	ZVAL_COPY(&intern->obj, generator);
+	intern->ce = zend_ce_generator;
+}
+/* }}} */
+
+#define REFLECTION_CHECK_VALID_GENERATOR(ex) \
+	if (!ex) { \
+		zend_throw_exception(NULL, "Cannot fetch information from a terminated Generator", 0); \
+		return; \
+	}
+
+/* {{{ proto public array ReflectionGenerator::getTrace($options = DEBUG_BACKTRACE_PROVIDE_OBJECT) */
+ZEND_METHOD(reflection_generator, getTrace)
+{
+	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_generator *root_generator;
+	zend_execute_data *ex_backup = EG(current_execute_data);
+	zend_execute_data *ex = generator->execute_data;
+	zend_execute_data *root_prev = NULL, *cur_prev;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &options) == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	root_generator = zend_generator_get_current(generator);
+
+	cur_prev = generator->execute_data->prev_execute_data;
+	if (generator == root_generator) {
+		generator->execute_data->prev_execute_data = NULL;
+	} else {
+		root_prev = root_generator->execute_data->prev_execute_data;
+		generator->execute_fake.prev_execute_data = NULL;
+		root_generator->execute_data->prev_execute_data = &generator->execute_fake;
+	}
+
+	EG(current_execute_data) = root_generator->execute_data;
+	zend_fetch_debug_backtrace(return_value, 0, options, 0);
+	EG(current_execute_data) = ex_backup;
+
+	root_generator->execute_data->prev_execute_data = root_prev;
+	generator->execute_data->prev_execute_data = cur_prev;
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionGenerator::getExecutingLine() */
+ZEND_METHOD(reflection_generator, getExecutingLine)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	ZVAL_LONG(return_value, ex->opline->lineno);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionGenerator::getExecutingFile() */
+ZEND_METHOD(reflection_generator, getExecutingFile)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	ZVAL_STR_COPY(return_value, ex->func->op_array.filename);
+}
+/* }}} */
+
+/* {{{ proto public ReflectionFunctionAbstract ReflectionGenerator::getFunction() */
+ZEND_METHOD(reflection_generator, getFunction)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	if (ex->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+		zval closure;
+		ZVAL_OBJ(&closure, (zend_object *) ex->func->common.prototype);
+		reflection_function_factory(ex->func, &closure, return_value);
+	} else if (ex->func->op_array.scope) {
+		reflection_method_factory(ex->func->op_array.scope, ex->func, NULL, return_value);
+	} else {
+		reflection_function_factory(ex->func, NULL, return_value);
+	}
+}
+/* }}} */
+
+/* {{{ proto public object ReflectionGenerator::getThis() */
+ZEND_METHOD(reflection_generator, getThis)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	if (Z_OBJ(ex->This)) {
+		ZVAL_COPY(return_value, &ex->This);
+	} else {
+		ZVAL_NULL(return_value);
+	}
+}
+/* }}} */
+
+/* {{{ proto public Generator ReflectionGenerator::getExecutingGenerator() */
+ZEND_METHOD(reflection_generator, getExecutingGenerator)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(getThis())->obj);
+	zend_execute_data *ex = generator->execute_data;
+	zend_generator *current;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	REFLECTION_CHECK_VALID_GENERATOR(ex)
+
+	current = zend_generator_get_current(generator);
+	++GC_REFCOUNT(current);
+
+	ZVAL_OBJ(return_value, (zend_object *) current);
+}
+/* }}} */
+
 
 /* {{{ proto public static mixed ReflectionParameter::export(mixed function, mixed parameter [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
@@ -5824,6 +5998,25 @@ static const zend_function_entry reflection_function_functions[] = {
 	PHP_FE_END
 };
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_generator___construct, 0)
+	ZEND_ARG_INFO(0, generator)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_generator_trace, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry reflection_generator_functions[] = {
+	ZEND_ME(reflection_generator, __construct, arginfo_reflection_generator___construct, 0)
+	ZEND_ME(reflection_generator, getExecutingLine, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_generator, getExecutingFile, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_generator, getTrace, arginfo_reflection_generator_trace, 0)
+	ZEND_ME(reflection_generator, getFunction, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_generator, getThis, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_generator, getExecutingGenerator, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_method_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_INFO(0, name)
@@ -6203,6 +6396,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionGenerator", reflection_generator_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_generator_ptr = zend_register_internal_class(&_reflection_entry);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;

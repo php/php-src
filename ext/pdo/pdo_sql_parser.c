@@ -506,7 +506,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	if (stmt->named_rewrite_template) {
 		/* magic/hack.
-		 * We we pretend that the query was positional even if
+		 * We pretend that the query was positional even if
 		 * it was named so that we fall into the
 		 * named rewrite case below.  Not too pretty,
 		 * but it works. */
@@ -523,7 +523,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	}
 
 	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
-		/* extra bit of validation for instances when same params are bound more then once */
+		/* extra bit of validation for instances when same params are bound more than once */
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
 			for (plc = placeholders; plc; plc = plc->next) {

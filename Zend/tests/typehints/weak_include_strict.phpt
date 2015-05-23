@@ -11,4 +11,9 @@ require 'weak_include_strict_2.inc';
 // calls within that file should stay strict, despite being included by weak file
 ?>
 --EXPECTF--
-Fatal error: Argument 1 passed to takes_int() must be of the type integer, float given, called in %sweak_include_strict_2.inc on line 9 and defined in %sweak_include_strict_2.inc on line 5
+Fatal error: Uncaught TypeException: Argument 1 passed to takes_int() must be of the type integer, float given, called in %sweak_include_strict_2.inc on line 9 and defined in %sweak_include_strict_2.inc:5
+Stack trace:
+#0 %s(%d): takes_int(1)
+#1 %s(%d): require('%s')
+#2 {main}
+  thrown in %sweak_include_strict_2.inc on line 5

@@ -8,4 +8,8 @@ function f($a=namespace\bar) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Undefined constant 'bar' in %sbug43344_11.php on line %d
+Fatal error: Uncaught EngineException: Undefined constant 'bar' in %sbug43344_11.php:%d
+Stack trace:
+#0 %s(%d): f()
+#1 {main}
+  thrown in %sbug43344_11.php on line %d

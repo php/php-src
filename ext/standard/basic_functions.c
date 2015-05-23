@@ -4144,7 +4144,7 @@ PHP_FUNCTION(putenv)
 		Obviously the CRT version will be useful more often. But
 		generally, doing both brings us on the safe track at least
 		in NTS build. */
-	&& _putenv(pe.putenv_string) == 0
+	&& _putenv_s(pe.key, value ? value : "") == 0
 # endif
 	) { /* success */
 # endif
@@ -5409,7 +5409,7 @@ PHP_FUNCTION(set_include_path)
 	char *old_value;
 	zend_string *key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &new_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &new_value) == FAILURE) {
 		return;
 	}
 

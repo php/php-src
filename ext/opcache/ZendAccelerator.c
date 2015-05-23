@@ -1199,7 +1199,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
-	zend_file_cache_script_store(new_persistent_script);
+	zend_file_cache_script_store(new_persistent_script, 0);
 
 	*from_shared_memory = 1;
 	return new_persistent_script;
@@ -1320,7 +1320,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (ZCG(accel_directives).file_cache) {
 		SHM_PROTECT();
-		zend_file_cache_script_store(new_persistent_script);
+		zend_file_cache_script_store(new_persistent_script, 1);
 		SHM_UNPROTECT();
 	}
 #endif
@@ -1967,26 +1967,22 @@ static void zend_reset_cache_vars(void)
 	ZCSG(force_restart_time) = 0;
 }
 
-#ifndef ZTS
 static void accel_reset_pcre_cache(void)
 {
 	Bucket *p;
 
 	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
-		if (IS_ACCEL_INTERNED(p->key)) {
+		if (IS_INTERNED(p->key)) {
 			p->key = NULL;
 			zend_hash_del_bucket(&PCRE_G(pcre_cache), p);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-#endif
 
 static void accel_activate(void)
 {
-#ifndef ZTS
 	zend_bool reset_pcre = 0;
-#endif
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
@@ -2069,10 +2065,8 @@ static void accel_activate(void)
 				}
 				accel_restart_leave();
 			}
-#ifndef ZTS
 		} else {
 			reset_pcre = 1;
-#endif
 		}
 		zend_shared_alloc_unlock();
 	}
@@ -2086,11 +2080,9 @@ static void accel_activate(void)
 		/* Reset in-process realpath cache */
 		realpath_cache_clean();
 
-#ifndef ZTS
 		accel_reset_pcre_cache();
 	} else if (reset_pcre) {
 		accel_reset_pcre_cache();
-#endif
 	}
 }
 
@@ -2154,7 +2146,6 @@ static inline void zend_accel_fast_del_bucket(HashTable *ht, uint32_t idx, Bucke
 	uint32_t nIndex = p->h | ht->nTableMask;
 	uint32_t i = HT_HASH(ht, nIndex);
 
-	ht->nNumUsed--;
 	ht->nNumOfElements--;
 	if (idx != i) {
 		Bucket *prev = HT_HASH_TO_BUCKET(ht, i);
@@ -2275,6 +2266,9 @@ static void zend_accel_fast_shutdown(void)
 			zend_accel_fast_del_bucket(EG(zend_constants), HT_IDX_TO_HASH(_idx-1), _p);
 		}
 	} ZEND_HASH_FOREACH_END();
+	EG(function_table)->nNumUsed = EG(function_table)->nNumOfElements;
+	EG(class_table)->nNumUsed = EG(class_table)->nNumOfElements;
+	EG(zend_constants)->nNumUsed = EG(zend_constants)->nNumOfElements;
 
 	CG(unclean_shutdown) = 1;
 }
@@ -2673,10 +2667,10 @@ void accel_shutdown(void)
 		zend_hash_clean(CG(function_table));
 		zend_hash_clean(CG(class_table));
 		zend_hash_clean(EG(zend_constants));
-
-		accel_reset_pcre_cache();
 #endif
 	}
+
+	accel_reset_pcre_cache();
 
 	zend_new_interned_string = orig_new_interned_string;
 	zend_interned_strings_snapshot = orig_interned_strings_snapshot;

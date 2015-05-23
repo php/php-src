@@ -33,6 +33,7 @@
 #include "php_variables.h"
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/php_smart_string.h"
 
 #if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
@@ -408,8 +409,9 @@ static int find_boundary(multipart_buffer *self, char *boundary)
 static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 {
 	char *line;
-	mime_header_entry prev_entry = {0}, entry;
-	int prev_len, cur_len;
+	mime_header_entry entry = {0};
+	smart_string buf_value = {0};
+	char *key = NULL;
 
 	/* didn't find boundary, abort */
 	if (!find_boundary(self, self->boundary)) {
@@ -418,10 +420,8 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 
 	/* get lines of text, or CRLF_CRLF */
 
-	while( (line = get_line(self)) && line[0] != '\0' )
-	{
+	while ((line = get_line(self)) && line[0] != '\0') {
 		/* add header to table */
-		char *key = line;
 		char *value = NULL;
 
 		if (php_rfc1867_encoding_translation()) {
@@ -434,31 +434,34 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 
 		if (value) {
-			*value = 0;
-			do { value++; } while(isspace(*value));
+			if (buf_value.c && key) {
+				/* new entry, add the old one to the list */
+				smart_string_0(&buf_value);
+				entry.key = key;
+				entry.value = buf_value.c;
+				zend_llist_add_element(header, &entry);
+				buf_value.c = NULL;
+				key = NULL;
+			}
 
-			entry.value = estrdup(value);
-			entry.key = estrdup(key);
+			*value = '\0';
+			do { value++; } while (isspace(*value));
 
-		} else if (zend_llist_count(header)) { /* If no ':' on the line, add to previous line */
-
-			prev_len = (int)strlen(prev_entry.value);
-			cur_len = (int)strlen(line);
-
-			entry.value = emalloc(prev_len + cur_len + 1);
-			memcpy(entry.value, prev_entry.value, prev_len);
-			memcpy(entry.value + prev_len, line, cur_len);
-			entry.value[cur_len + prev_len] = '\0';
-
-			entry.key = estrdup(prev_entry.key);
-
-			zend_llist_remove_tail(header);
+			key = estrdup(line);
+			smart_string_appends(&buf_value, value);
+		} else if (buf_value.c) { /* If no ':' on the line, add to previous line */
+			smart_string_appends(&buf_value, line);
 		} else {
 			continue;
 		}
+	}
 
+	if (buf_value.c && key) {
+		/* add the last one to the list */
+		smart_string_0(&buf_value);
+		entry.key = key;
+		entry.value = buf_value.c;
 		zend_llist_add_element(header, &entry);
-		prev_entry = entry;
 	}
 
 	return 1;

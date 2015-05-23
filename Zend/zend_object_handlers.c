@@ -1256,8 +1256,10 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		goto undeclared_property;
 	}
 
-	if (UNEXPECTED(zend_update_class_constants(ce)) != SUCCESS) {
-		return NULL;
+	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (UNEXPECTED(zend_update_class_constants(ce)) != SUCCESS) {
+			return NULL;
+		}
 	}
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 

@@ -64,4 +64,7 @@ Foo\Bar\fiz
 Foo\Bar\biz
 Foo\Bar\buz
 
-Fatal error: Call to undefined function Foo\Bar\A() in %sns_092.php on line 45
+Fatal error: Uncaught EngineException: Call to undefined function Foo\Bar\A() in %sns_092.php:45
+Stack trace:
+#0 {main}
+  thrown in %sns_092.php on line 45
