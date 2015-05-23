@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #69599 (Strange generator+exception+variadic crash). (Nikita)
   . Fixed bug #69628 (complex GLOB_BRACE fails on Windows).
     (Christoph M. Becker)
+  . Fixed POST data processing slowdown due to small input buffer size
+    on Windows. (Jorge Oliveira, Anatol)
 
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
