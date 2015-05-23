@@ -310,6 +310,11 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof 
 	return SUCCESS;
 }
 
+#ifdef PHP_WIN32
+#define SAPI_POST_HANDLER_BUFSIZ 16384
+#else
+# define SAPI_POST_HANDLER_BUFSIZ BUFSIZ
+#endif
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
 	zval *arr = (zval *) arg;
@@ -320,8 +325,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 		memset(&post_data, 0, sizeof(post_data));
 
 		while (!php_stream_eof(s)) {
-			char buf[BUFSIZ] = {0};
-			size_t len = php_stream_read(s, buf, BUFSIZ);
+			char buf[SAPI_POST_HANDLER_BUFSIZ] = {0};
+			size_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
 
 			if (len && len != (size_t) -1) {
 				smart_str_appendl(&post_data.str, buf, len);
@@ -334,7 +339,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 				}
 			}
 
-			if (len != BUFSIZ){
+			if (len != SAPI_POST_HANDLER_BUFSIZ){
 				break;
 			}
 		}
@@ -345,6 +350,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 		}
 	}
 }
+#undef SAPI_POST_HANDLER_BUFSIZ
 
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter)
 {
