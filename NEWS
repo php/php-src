@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed POST data processing slowdown due to small input buffer size
     on Windows. (Jorge Oliveira, Anatol)
 
+- GD:
+  . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
+
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
 
