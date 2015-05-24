@@ -347,23 +347,23 @@ static void fcgi_setup_signals(void)
 }
 #endif
 
-void fcgi_set_in_shutdown(int new_value)
+FCGI_API void fcgi_set_in_shutdown(int new_value)
 {
 	in_shutdown = new_value;
 }
 
-int fcgi_in_shutdown(void)
+FCGI_API int fcgi_in_shutdown(void)
 {
 	return in_shutdown;
 }
 
-void fcgi_terminate(void)
+FCGI_API void fcgi_terminate(void)
 {
 	in_shutdown = 1;
 }
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-void fcgi_set_logger(fcgi_logger lg) {
+FCGI_API void fcgi_set_logger(fcgi_logger lg) {
 	fcgi_log = lg;
 }
 #else
@@ -376,7 +376,7 @@ void __attribute__((weak)) fcgi_log(int type, const char *format, ...) {
 }
 #endif
 
-int fcgi_init(void)
+FCGI_API int fcgi_init(void)
 {
 	if (!is_initialized) {
 #ifndef _WIN32
@@ -442,7 +442,7 @@ int fcgi_init(void)
 }
 
 
-int fcgi_is_fastcgi(void)
+FCGI_API int fcgi_is_fastcgi(void)
 {
 	if (!is_initialized) {
 		return fcgi_init();
@@ -451,7 +451,7 @@ int fcgi_is_fastcgi(void)
 	}
 }
 
-void fcgi_shutdown(void)
+FCGI_API void fcgi_shutdown(void)
 {
 	if (is_initialized) {
 		zend_hash_destroy(&fcgi_mgmt_vars);
@@ -543,7 +543,7 @@ static int is_port_number(const char *bindpath)
 	return 1;
 }
 
-int fcgi_listen(const char *path, int backlog)
+FCGI_API int fcgi_listen(const char *path, int backlog)
 {
 	char     *s;
 	int       tcp = 0;
@@ -723,7 +723,7 @@ int fcgi_listen(const char *path, int backlog)
 	return listen_socket;
 }
 
-void fcgi_set_allowed_clients(char *ip)
+FCGI_API void fcgi_set_allowed_clients(char *ip)
 {
 	char *cur, *end;
 	int n;
@@ -768,7 +768,7 @@ void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
-fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
+FCGI_API fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 {
 	memset(req, 0, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
@@ -799,7 +799,7 @@ fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 	return req;
 }
 
-void fcgi_destroy_request(fcgi_request *req) {
+FCGI_API void fcgi_destroy_request(fcgi_request *req) {
 	if (req->env.buckets) {
 		fcgi_hash_destroy(&req->env);
 	}
@@ -1093,7 +1093,7 @@ static int fcgi_read_request(fcgi_request *req)
 	return 1;
 }
 
-int fcgi_read(fcgi_request *req, char *str, int len)
+FCGI_API int fcgi_read(fcgi_request *req, char *str, int len)
 {
 	int ret, n, rest;
 	fcgi_header hdr;
@@ -1146,7 +1146,7 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 	return n;
 }
 
-void fcgi_close(fcgi_request *req, int force, int destroy)
+FCGI_API void fcgi_close(fcgi_request *req, int force, int destroy)
 {
 	if (destroy && req->has_env) {
 		fcgi_hash_clean(&req->env);
@@ -1199,7 +1199,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 	}
 }
 
-int fcgi_is_closed(fcgi_request *req)
+FCGI_API int fcgi_is_closed(fcgi_request *req)
 {
 	return (req->fd < 0);
 }
@@ -1243,7 +1243,7 @@ static int fcgi_is_allowed() {
 	return 0;
 }
 
-int fcgi_accept_request(fcgi_request *req)
+FCGI_API int fcgi_accept_request(fcgi_request *req)
 {
 #ifdef _WIN32
 	HANDLE pipe;
@@ -1399,7 +1399,7 @@ static inline void close_packet(fcgi_request *req)
 	}
 }
 
-int fcgi_flush(fcgi_request *req, int close)
+FCGI_API int fcgi_flush(fcgi_request *req, int close)
 {
 	int len;
 
@@ -1429,7 +1429,7 @@ int fcgi_flush(fcgi_request *req, int close)
 	return 1;
 }
 
-int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
+FCGI_API int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
 {
 	int limit, rest;
 
@@ -1541,7 +1541,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	return len;
 }
 
-int fcgi_finish_request(fcgi_request *req, int force_close)
+FCGI_API int fcgi_finish_request(fcgi_request *req, int force_close)
 {
 	int ret = 1;
 
@@ -1555,7 +1555,7 @@ int fcgi_finish_request(fcgi_request *req, int force_close)
 	return ret;
 }
 
-char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
+FCGI_API char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 {
 	unsigned int val_len;
 
@@ -1564,14 +1564,14 @@ char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 	return fcgi_hash_get(&req->env, FCGI_HASH_FUNC(var, var_len), (char*)var, var_len, &val_len);
 }
 
-char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value)
+FCGI_API char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value)
 {
 	unsigned int val_len;
 
 	return fcgi_hash_get(&req->env, hash_value, (char*)var, var_len, &val_len);
 }
 
-char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
+FCGI_API char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 {
 	if (!req) return NULL;
 	if (val == NULL) {
@@ -1582,7 +1582,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 	}
 }
 
-char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val)
+FCGI_API char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val)
 {
 	if (val == NULL) {
 		fcgi_hash_del(&req->env, hash_value, var, var_len);
@@ -1592,13 +1592,13 @@ char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int 
 	}
 }
 
-void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array)
+FCGI_API void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array)
 {
 	fcgi_hash_apply(&req->env, func, array);
 }
 
 #ifdef _WIN32
-void fcgi_impersonate(void)
+FCGI_API void fcgi_impersonate(void)
 {
 	char *os_name;
 
@@ -1609,19 +1609,19 @@ void fcgi_impersonate(void)
 }
 #endif
 
-void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
+FCGI_API void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 
-void fcgi_free_mgmt_var_cb(zval *zv)
+FCGI_API void fcgi_free_mgmt_var_cb(zval *zv)
 {
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+FCGI_API const char *fcgi_get_last_client_ip()
 {
 	static char str[INET6_ADDRSTRLEN];
 

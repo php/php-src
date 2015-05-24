@@ -43,6 +43,16 @@
 #define FCGI_PUTENV(request, name, value) \
 	fcgi_quick_putenv(request, name, sizeof(name)-1, FCGI_HASH_FUNC(name, sizeof(name)-1), value)
 
+#ifdef PHP_WIN32
+# ifdef FCGI_EXPORTS
+#  define FCGI_API __declspec(dllexport)
+# else
+#  define FCGI_API __declspec(dllimport)
+# endif
+#else
+# define FCGI_API
+#endif
+
 typedef enum _fcgi_role {
 	FCGI_RESPONDER	= 1,
 	FCGI_AUTHORIZER	= 2,
@@ -186,44 +196,44 @@ struct _fcgi_request {
 	fcgi_hash      env;
 };
 
-int fcgi_init(void);
-void fcgi_shutdown(void);
-int fcgi_is_fastcgi(void);
-int fcgi_is_closed(fcgi_request *req);
-void fcgi_close(fcgi_request *req, int force, int destroy);
-int fcgi_in_shutdown(void);
-void fcgi_terminate(void);
-int fcgi_listen(const char *path, int backlog);
-fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
-void fcgi_destroy_request(fcgi_request *req);
-void fcgi_set_allowed_clients(char *ip);
-int fcgi_accept_request(fcgi_request *req);
-int fcgi_finish_request(fcgi_request *req, int force_close);
-const char *fcgi_get_last_client_ip();
-void fcgi_set_in_shutdown(int new_value);
+FCGI_API int fcgi_init(void);
+FCGI_API void fcgi_shutdown(void);
+FCGI_API int fcgi_is_fastcgi(void);
+FCGI_API int fcgi_is_closed(fcgi_request *req);
+FCGI_API void fcgi_close(fcgi_request *req, int force, int destroy);
+FCGI_API int fcgi_in_shutdown(void);
+FCGI_API void fcgi_terminate(void);
+FCGI_API int fcgi_listen(const char *path, int backlog);
+FCGI_API fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
+FCGI_API void fcgi_destroy_request(fcgi_request *req);
+FCGI_API void fcgi_set_allowed_clients(char *ip);
+FCGI_API int fcgi_accept_request(fcgi_request *req);
+FCGI_API int fcgi_finish_request(fcgi_request *req, int force_close);
+FCGI_API const char *fcgi_get_last_client_ip();
+FCGI_API void fcgi_set_in_shutdown(int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 typedef void (*fcgi_logger)(int type, const char *fmt, ...);
-void fcgi_set_logger(fcgi_logger lg);
+FCGI_API void fcgi_set_logger(fcgi_logger lg);
 #endif
 
-char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
-char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
-char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
-char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
-void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
+FCGI_API char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
+FCGI_API char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
+FCGI_API char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
+FCGI_API char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
+FCGI_API void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 
-int fcgi_read(fcgi_request *req, char *str, int len);
+FCGI_API int fcgi_read(fcgi_request *req, char *str, int len);
 
-int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
-int fcgi_flush(fcgi_request *req, int close);
+FCGI_API int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
+FCGI_API int fcgi_flush(fcgi_request *req, int close);
 
 #ifdef PHP_WIN32
-void fcgi_impersonate(void);
+FCGI_API void fcgi_impersonate(void);
 #endif
 
-void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(zval *zv);
+FCGI_API void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
+FCGI_API void fcgi_free_mgmt_var_cb(zval *zv);
 
 /*
  * Local variables:
