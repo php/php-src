@@ -1455,18 +1455,7 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 }
 /* }}} */
 
-void zend_init_list(void *result, void *item) /* {{{ */
-{
-	void** list = emalloc(sizeof(void*) * 2);
-
-	list[0] = item;
-	list[1] = NULL;
-
-	*(void**)result = list;
-}
-/* }}} */
-
-void zend_add_to_list(void *result, void *item) /* {{{ */
+static void zend_add_to_list(void *result, void *item) /* {{{ */
 {
 	void** list = *(void**)result;
 	size_t n = 0;

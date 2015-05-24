@@ -701,10 +701,6 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
 
-/* Functions for a null terminated pointer list, used for traits parsing and compilation */
-void zend_init_list(void *result, void *item);
-void zend_add_to_list(void *result, void *item);
-
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);
 void zend_do_extended_fcall_end(void);
