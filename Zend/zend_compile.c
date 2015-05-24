@@ -102,19 +102,12 @@ static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigne
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t filename_len, char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	zend_string *filename = CG(active_op_array)->filename;
 
-	const char *filename;
-	if (CG(active_op_array)->filename) {
-		filename = CG(active_op_array)->filename->val;
-		filename_len = CG(active_op_array)->filename->len;
-	} else {
-		filename = "-";
-		filename_len = sizeof("-") - 1;
-	}
 	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(1 + name->len + filename_len + char_pos_len, 0);
- 	sprintf(result->val, "%c%s%s%s", '\0', name->val, filename, char_pos_buf);
+	result = zend_string_alloc(1 + name->len + filename->len + char_pos_len, 0);
+ 	sprintf(result->val, "%c%s%s%s", '\0', name->val, filename->val, char_pos_buf);
 	return zend_new_interned_string(result);
 }
 /* }}} */
@@ -4981,19 +4974,12 @@ static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{
 {
 	zend_string *result;
 	char char_pos_buf[32];
-	size_t filename_len, char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	size_t char_pos_len = zend_sprintf(char_pos_buf, "%p", lex_pos);
+	zend_string *filename = CG(active_op_array)->filename;
 
-	const char *filename;
-	if (CG(active_op_array)->filename) {
-		filename = CG(active_op_array)->filename->val;
-		filename_len = CG(active_op_array)->filename->len;
-	} else {
-		filename = "-";
-		filename_len = sizeof("-") - 1;
-	}
 	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(sizeof("class@anonymous") + filename_len + char_pos_len, 0);
-	sprintf(result->val, "class@anonymous%c%s%s", '\0', filename, char_pos_buf);
+	result = zend_string_alloc(sizeof("class@anonymous") + filename->len + char_pos_len, 0);
+	sprintf(result->val, "class@anonymous%c%s%s", '\0', filename->val, char_pos_buf);
 	return zend_new_interned_string(result);
 }
 /* }}} */
