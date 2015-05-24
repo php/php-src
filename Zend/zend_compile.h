@@ -183,16 +183,6 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_ZEND_LONG == 8
-# ifdef _WIN32
-#  define THIS_HASHVAL 6385726429Ui64
-# else
-#  define THIS_HASHVAL 6385726429ULL
-# endif
-#else
-#define THIS_HASHVAL 2090759133UL
-#endif
-
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
@@ -884,8 +874,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define EXT_TYPE_FREE_ON_RETURN		(1<<2)
-
 #define ZEND_MEMBER_FUNC_CALL	1<<0
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
@@ -960,6 +948,11 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_BRK 254
+#define ZEND_CONT 255
+
 
 END_EXTERN_C()
 

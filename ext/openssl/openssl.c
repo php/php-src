@@ -5253,7 +5253,7 @@ PHP_FUNCTION(openssl_encrypt)
 /* }}} */
 
 /* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = '']])
-   Takes raw or base64 encoded string and dectupt it using given method and key */
+   Takes raw or base64 encoded string and decrypts it using given method and key */
 PHP_FUNCTION(openssl_decrypt)
 {
 	zend_long options = 0;

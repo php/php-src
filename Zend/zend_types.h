@@ -802,7 +802,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-#if SIZEOF_ZEND_LONG == 4
+#if SIZEOF_SIZE_T == 4
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
 	do {												\
 		uint32_t _w2 = v->value.ww.w2;					\
@@ -810,14 +810,14 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		z->value.ww.w2 = _w2;							\
 		Z_TYPE_INFO_P(z) = t;							\
 	} while (0)
-#elif SIZEOF_ZEND_LONG == 8
+#elif SIZEOF_SIZE_T == 8
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
 	do {												\
 		Z_COUNTED_P(z) = gc;							\
 		Z_TYPE_INFO_P(z) = t;							\
 	} while (0)
 #else
-# error "Unknbown SIZEOF_ZEND_LONG"
+# error "Unknown SIZEOF_SIZE_T"
 #endif
 
 #define ZVAL_COPY_VALUE(z, v)							\

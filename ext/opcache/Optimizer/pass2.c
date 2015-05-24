@@ -181,59 +181,6 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					opline->opcode = ZEND_JMP;
 				}
 				break;
-
-			case ZEND_BRK:
-			case ZEND_CONT:
-				{
-				    zend_brk_cont_element *jmp_to;
-					int array_offset;
-					int nest_levels;
-					int dont_optimize = 0;
-
-					ZEND_ASSERT(ZEND_OP2_TYPE(opline) == IS_CONST);
-					ZEND_ASSERT(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG);
-
-					nest_levels = Z_LVAL(ZEND_OP2_LITERAL(opline));
-
-					array_offset = ZEND_OP1(opline).opline_num;
-					while (1) {
-						if (array_offset == -1) {
-							dont_optimize = 1; /* don't optimize this bogus break/continue, let the executor shout */
-							break;
-						}
-						jmp_to = &op_array->brk_cont_array[array_offset];
-						array_offset = jmp_to->parent;
-						if (--nest_levels > 0) {
-							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FE_FREE ||
-							    op_array->opcodes[jmp_to->brk].opcode == ZEND_END_SILENCE) {
-								dont_optimize = 1;
-								break;
-							}
-						} else {
-							break;
-						}
-					}
-
-					if (dont_optimize) {
-						break;
-					}
-
-					/* optimize - convert to a JMP */
-					switch (opline->opcode) {
-						case ZEND_BRK:
-							MAKE_NOP(opline);
-							ZEND_OP1(opline).opline_num = jmp_to->brk;
-							break;
-						case ZEND_CONT:
-							MAKE_NOP(opline);
-							ZEND_OP1(opline).opline_num = jmp_to->cont;
-							break;
-					}
-					opline->opcode = ZEND_JMP;
-					/* MAKE_NOP() already set op1 and op2 to IS_UNUSED */
-				}
-				break;
 		}
 		opline++;
 	}
