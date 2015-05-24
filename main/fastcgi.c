@@ -1239,7 +1239,6 @@ static int fcgi_is_allowed() {
 	}
 #endif
 
-	fcgi_log(FCGI_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
 	return 0;
 }
 
@@ -1296,6 +1295,7 @@ FCGI_API int fcgi_accept_request(fcgi_request *req)
 
 					client_sa = sa;
 					if (req->fd >= 0 && !fcgi_is_allowed()) {
+						fcgi_log(FCGI_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
 						closesocket(req->fd);
 						req->fd = -1;
 						continue;
