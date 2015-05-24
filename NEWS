@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #69628 (complex GLOB_BRACE fails on Windows).
     (Christoph M. Becker)
 
+- GD:
+  . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
+
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
 
