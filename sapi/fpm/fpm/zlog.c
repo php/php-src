@@ -108,7 +108,10 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 	int saved_errno;
 
 	if (external_logger) {
-		len = vsnprintf(buf, buf_size, fmt, args);
+		va_list ap;
+		va_copy(ap, args);
+		len = vsnprintf(buf, buf_size, fmt, ap);
+		va_end(ap);
 		if (len >= buf_size) {
 			memcpy(buf + buf_size - sizeof("..."), "...", sizeof("...") - 1);
 			len = buf_size - 1;
