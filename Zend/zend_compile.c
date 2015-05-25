@@ -2164,14 +2164,6 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	znode name_node;
 	zend_op *opline;
 
-	/* there is a chance someone is accessing $this */
-	if (ast->kind != ZEND_AST_ZVAL
-		&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
-	) {
-		zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
-		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
-	}
-
 	zend_compile_expr(&name_node, name_ast);
 	if (name_node.op_type == IS_CONST) {
 		convert_to_string(&name_node.u.constant);
@@ -2183,10 +2175,18 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
 	}
 
-	opline->extended_value = ZEND_FETCH_LOCAL;
-	if (name_node.op_type == IS_CONST) {
-		if (zend_is_auto_global(Z_STR(name_node.u.constant))) {
-			opline->extended_value = ZEND_FETCH_GLOBAL;
+	if (name_node.op_type == IS_CONST && 
+	    zend_is_auto_global(Z_STR(name_node.u.constant))) {
+
+		opline->extended_value = ZEND_FETCH_GLOBAL;
+	} else {
+		opline->extended_value = ZEND_FETCH_LOCAL;
+		/* there is a chance someone is accessing $this */
+		if (ast->kind != ZEND_AST_ZVAL
+			&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
+		) {
+			zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
+			CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key);
 		}
 	}
 
