@@ -243,10 +243,6 @@ static ZEND_INI_MH(OnEnable)
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 
-#ifndef S_ISDIR
-# define S_ISDIR(mode) (((mode)&S_IFMT) == S_IFDIR)
-#endif
-
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
