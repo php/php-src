@@ -5648,7 +5648,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -9286,7 +9286,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -11012,7 +11012,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -23941,7 +23941,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -26355,7 +26355,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -27891,7 +27891,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -32191,7 +32191,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -37273,7 +37273,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -39854,7 +39854,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -42007,7 +42007,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -44077,7 +44077,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -45135,7 +45135,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		/* CV may be changed inderectly (e.g. when it's a reference) */
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
