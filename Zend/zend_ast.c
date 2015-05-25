@@ -1149,9 +1149,6 @@ simple_list:
 		case ZEND_AST_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			break;
-		case ZEND_AST_RESOLVE_CLASS_NAME:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			APPEND_STR("::class");
 		case ZEND_AST_UNPACK:
 			smart_str_appends(str, "...");
 			ast = ast->child[0];

@@ -21,14 +21,6 @@
 
 /* $Id$ */
 
-/*
- * LALR shift/reduce conflicts and how they are resolved:
- *
- * - 2 shift/reduce conflicts due to the dangling elseif/else ambiguity. Solved by shift.
- *
- */
-
-
 #include "zend_compile.h"
 #include "zend.h"
 #include "zend_list.h"
@@ -246,7 +238,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <ast> variable_class_name dereferencable_scalar class_name_scalar constant dereferencable
+%type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
@@ -279,7 +271,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE
-//	| T_CLASS
+	| T_CLASS
 ;
 
 semi_reserved:
@@ -1058,7 +1050,6 @@ scalar:
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }
-	|	class_name_scalar	{ $$ = $1; }
 	|	constant			{ $$ = $1; }
 ;
 
@@ -1260,11 +1251,6 @@ isset_variables:
 
 isset_variable:
 		expr { $$ = zend_ast_create(ZEND_AST_ISSET, $1); }
-;
-
-class_name_scalar:
-	class_name T_PAAMAYIM_NEKUDOTAYIM T_CLASS
-		{ $$ = zend_ast_create(ZEND_AST_RESOLVE_CLASS_NAME, $1); }
 ;
 
 %%

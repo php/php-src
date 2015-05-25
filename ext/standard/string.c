@@ -1200,69 +1200,49 @@ PHP_FUNCTION(explode)
  */
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 {
-	zval          *tmp;
-	smart_str      implstr = {0};
-	int            numelems, i = 0;
-	zend_string *str;
+	zval         *tmp;
+	int           numelems;
+	zend_string  *str;
+	char         *cptr;
+	size_t        len = 0;
+	zend_string **strings, **strptr;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
 	if (numelems == 0) {
 		RETURN_EMPTY_STRING();
+	} else if (numelems == 1) {
+		/* loop to search the first not undefined element... */
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+			RETURN_STR(zval_get_string(tmp));
+		} ZEND_HASH_FOREACH_END();
 	}
+
+	strings = emalloc(sizeof(zend_string *) * numelems);
+	strptr = strings - 1;
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
-again:
-		switch (Z_TYPE_P(tmp)) {
-			case IS_STRING:
-				smart_str_append(&implstr, Z_STR_P(tmp));
-				break;
-
-			case IS_LONG:
-				smart_str_append_long(&implstr, Z_LVAL_P(tmp));
-				break;
-
-			case IS_TRUE:
-				smart_str_appendl(&implstr, "1", sizeof("1")-1);
-				break;
-
-			case IS_NULL:
-			case IS_FALSE:
-				break;
-
-			case IS_DOUBLE: {
-				char *stmp;
-				size_t str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
-				smart_str_appendl(&implstr, stmp, str_len);
-				efree(stmp);
-				break;
-			}
-
-			case IS_REFERENCE:
-				tmp = Z_REFVAL_P(tmp);
-				goto again;
-
-			default:
-				str = zval_get_string(tmp);
-				smart_str_append(&implstr, str);
-				zend_string_release(str);
-				break;
-
-		}
-
-		if (++i != numelems) {
-			smart_str_append(&implstr, delim);
-		}
+		*++strptr = zval_get_string(tmp);
+		len += (*strptr)->len;
 	} ZEND_HASH_FOREACH_END();
 
-	smart_str_0(&implstr);
+	str = zend_string_alloc(len + (numelems - 1) * delim->len, 0);
+	cptr = str->val + str->len;
+	*cptr = 0;
 
-	if (implstr.s) {
-		RETURN_NEW_STR(implstr.s);
-	} else {
-		smart_str_free(&implstr);
-		RETURN_EMPTY_STRING();
-	}
+	do {
+		cptr -= (*strptr)->len;
+		memcpy(cptr, (*strptr)->val, (*strptr)->len);
+		zend_string_release(*strptr);
+
+		cptr -= delim->len;
+		memcpy(cptr, delim->val, delim->len);
+	} while (--strptr > strings);
+	memcpy(str->val, (*strptr)->val, (*strptr)->len);
+	zend_string_release(*strptr);
+
+	efree(strings);
+	RETURN_NEW_STR(str);
 }
 /* }}} */
 

@@ -8,5 +8,6 @@ class Obj
     const CLASS = 'class';
 }
 
+?>
 --EXPECTF--
-Parse error: syntax error, unexpected 'CLASS' (T_CLASS) in %s on line 5
+Fatal error: A class constant must not be called 'class'; it is reserved for class name fetching in %s on line %d
