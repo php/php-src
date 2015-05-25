@@ -52,7 +52,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 8 /* 6 because traits */
+%expect 0
 
 %code requires {
 }
@@ -88,6 +88,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right T_POW
 %right '['
 %nonassoc T_NEW T_CLONE
+%left "if_without_else"
 %left T_ELSEIF
 %left T_ELSE
 %left T_ENDIF
@@ -260,7 +261,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> identifier
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
-%type <num> method_modifiers trait_modifiers non_empty_member_modifiers member_modifier
+%type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type
 
 %type <str> backup_doc_comment
@@ -271,15 +272,19 @@ start:
 	top_statement_list	{ CG(ast) = $1; }
 ;
 
-semi_reserved:
+reserved_non_modifiers:
 	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
 	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
 //	| T_CLASS
+;
+
+semi_reserved:
+	  reserved_non_modifiers
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ;
 
 identifier:
@@ -583,7 +588,7 @@ if_stmt_without_else:
 ;
 
 if_stmt:
-		if_stmt_without_else { $$ = $1; }
+		if_stmt_without_else %prec "if_without_else" { $$ = $1; }
 	|	if_stmt_without_else T_ELSE statement
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_IF_ELEM, NULL, $3)); }
 ;
@@ -730,9 +735,13 @@ trait_precedence:
 ;
 
 trait_alias:
-		trait_method_reference T_AS trait_modifiers identifier
+		trait_method_reference T_AS T_STRING
+			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, 0, $1, $3); }
+	|	trait_method_reference T_AS reserved_non_modifiers
+			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, 0, $1, zend_ast_create_zval(&zv)); }
+	|	trait_method_reference T_AS member_modifier identifier
 			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }
-	|	trait_method_reference T_AS member_modifier
+	|	trait_method_reference T_AS member_modifier %prec '+'
 			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, NULL); }
 ;
 
@@ -745,11 +754,6 @@ trait_method_reference:
 absolute_trait_method_reference:
 	name T_PAAMAYIM_NEKUDOTAYIM identifier
 		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
-;
-
-trait_modifiers:
-		/* empty */		{ $$ = 0; }
-	|	member_modifier	{ $$ = $1; }
 ;
 
 method_body:
