@@ -68,6 +68,7 @@ class Obj
     function static(){ echo __METHOD__, PHP_EOL; }
     function abstract(){ echo __METHOD__, PHP_EOL; }
     function final(){ echo __METHOD__, PHP_EOL; }
+    function class(){ echo __METHOD__, PHP_EOL; }
 }
 
 $obj = new Obj;
@@ -135,6 +136,7 @@ $obj->private();
 $obj->static();
 $obj->abstract();
 $obj->final();
+$obj->class();
 
 echo "\nDone\n";
 
@@ -202,5 +204,6 @@ Obj::private
 Obj::static
 Obj::abstract
 Obj::final
+Obj::class
 
 Done

@@ -78,7 +78,7 @@
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
   . Implemented the RFC `Generator Delegation`. (Bob)
   . Implemented the RFC `Anonymous Class Support`. (Joe, Nikita, Dmitry)
-  . Implemented the RFC `Context Sensitive Lexer`. (Marc Almada)
+  . Implemented the RFC `Context Sensitive Lexer`. (Marcio Almada)
   . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
     (Jan Starke, Anatol)
 
