@@ -1223,9 +1223,17 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
 		if (Z_TYPE_P(tmp) == IS_LONG) {
+			double val = Z_LVAL_P(tmp);
 			*++strptr = NULL;
 			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
-			len += (int) log10(Z_LVAL_P(tmp) < 0 ? -100 * ((double) Z_LVAL_P(tmp) - 0.001) : 10 * ((double) Z_LVAL_P(tmp) + 0.01));
+			if (val < 0) {
+				val = -10 * val;
+			}
+			if (val < 10) {
+				len++;
+			} else {
+				len += (int) log10(10 * (double) val);
+			}
 		} else {
 			*++strptr = zval_get_string(tmp);
 			len += (*strptr)->len;
