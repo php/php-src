@@ -30,7 +30,6 @@
 #include "zend_interfaces.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
-#include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 
 #define SET_NODE(target, src) do { \
@@ -557,7 +556,10 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		op.constant = zend_add_literal(CG(active_op_array), &_c); \
 	} while (0)
 
-void zend_stop_lexing(void) {
+void zend_stop_lexing(void)
+{
+	if(LANG_SCNG(on_event)) LANG_SCNG(on_event)(ON_STOP, END, 0);
+
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
