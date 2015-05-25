@@ -89,14 +89,6 @@ cwd_state main_cwd_state; /* True global */
 #include <direct.h>
 #endif
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
-#endif
-
 #ifdef TSRM_WIN32
 #include <tchar.h>
 #define tsrm_strtok_r(a,b,c) _tcstok((a),(b))
