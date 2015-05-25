@@ -54,10 +54,6 @@
 # endif
 #endif
 
-#ifndef S_IFLNK
-# define S_IFLNK 0120000
-#endif
-
 #ifdef NETWARE
 #include <fsio.h>
 #endif
