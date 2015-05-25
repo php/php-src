@@ -62,6 +62,12 @@ class Obj
     function die(){ echo __METHOD__, PHP_EOL; }
     function self(){ echo __METHOD__, PHP_EOL; }
     function parent(){ echo __METHOD__, PHP_EOL; }
+    function public(){ echo __METHOD__, PHP_EOL; }
+    function protected(){ echo __METHOD__, PHP_EOL; }
+    function private(){ echo __METHOD__, PHP_EOL; }
+    function static(){ echo __METHOD__, PHP_EOL; }
+    function abstract(){ echo __METHOD__, PHP_EOL; }
+    function final(){ echo __METHOD__, PHP_EOL; }
 }
 
 $obj = new Obj;
@@ -123,6 +129,12 @@ $obj->catch();
 $obj->die();
 $obj->self();
 $obj->parent();
+$obj->public();
+$obj->protected();
+$obj->private();
+$obj->static();
+$obj->abstract();
+$obj->final();
 
 echo "\nDone\n";
 
@@ -184,5 +196,11 @@ Obj::catch
 Obj::die
 Obj::self
 Obj::parent
+Obj::public
+Obj::protected
+Obj::private
+Obj::static
+Obj::abstract
+Obj::final
 
 Done

@@ -63,6 +63,12 @@ class Obj
     const DIE = 'die';
     const SELF = 'self';
     const PARENT = 'parent';
+    const PUBLIC = 'public';
+    const PROTECTED = 'protected';
+    const PRIVATE = 'private';
+    const STATIC = 'static';
+    const ABSTRACT = 'abstract';
+    const FINAL = 'final';
 }
 
 echo Obj::EMPTY, PHP_EOL;
@@ -123,6 +129,12 @@ echo Obj::CATCH, PHP_EOL;
 echo Obj::DIE, PHP_EOL;
 echo Obj::SELF, PHP_EOL;
 echo Obj::PARENT, PHP_EOL;
+echo Obj::PUBLIC, PHP_EOL;
+echo Obj::PROTECTED, PHP_EOL;
+echo Obj::PRIVATE, PHP_EOL;
+echo Obj::STATIC, PHP_EOL;
+echo Obj::ABSTRACT, PHP_EOL;
+echo Obj::FINAL, PHP_EOL;
 
 echo "\nDone\n";
 
@@ -185,5 +197,11 @@ catch
 die
 self
 parent
+public
+protected
+private
+static
+abstract
+final
 
 Done
