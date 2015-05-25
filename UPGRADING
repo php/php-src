@@ -530,6 +530,8 @@ Other
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
   . Added the yield from operator for delegating Generators like coroutines.
     (RFC: https://wiki.php.net/rfc/generator-delegation)
+  . Reserved keywords can now be used in various new contexts.
+    (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server

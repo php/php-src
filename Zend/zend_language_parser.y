@@ -52,7 +52,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 2
+%expect 8 /* 6 because traits */
 
 %code requires {
 }
@@ -278,8 +278,8 @@ semi_reserved:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE
-	// | T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
-	// | T_CLASS
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+//	| T_CLASS
 ;
 
 identifier:
