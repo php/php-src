@@ -58,7 +58,7 @@ L6: T_STRING continue
 ;
 L7: T_STRING X
 L7: T_DOUBLE_COLON ::
-L7: T_CLASS class
+L7: T_STRING class
 ;
 L9: T_CLASS class
 L9: T_STRING X
