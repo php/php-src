@@ -768,6 +768,10 @@ FCGI_API void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
+static void fcgi_hook_dummy() {
+	return;
+}
+
 FCGI_API fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 {
 	memset(req, 0, sizeof(fcgi_request));
@@ -790,19 +794,21 @@ FCGI_API fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 
 	*/
 	req->out_pos = req->out_buf;
+	req->hook.on_accept = fcgi_hook_dummy;
+	req->hook.on_read = fcgi_hook_dummy;
+	req->hook.on_close = fcgi_hook_dummy;
 
 #ifdef _WIN32
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
 #endif
+
 	fcgi_hash_init(&req->env);
 
 	return req;
 }
 
 FCGI_API void fcgi_destroy_request(fcgi_request *req) {
-	if (req->env.buckets) {
-		fcgi_hash_destroy(&req->env);
-	}
+	fcgi_hash_destroy(&req->env);
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
@@ -1193,9 +1199,7 @@ FCGI_API void fcgi_close(fcgi_request *req, int force, int destroy)
 #endif
 		req->fd = -1;
 
-		if (req->hook.on_close) {
-			req->hook.on_close();
-		}
+		req->hook.on_close();
 	}
 }
 
@@ -1285,9 +1289,7 @@ FCGI_API int fcgi_accept_request(fcgi_request *req)
 					sa_t sa;
 					socklen_t len = sizeof(sa);
 
-					if (req->hook.on_accept) {
-						req->hook.on_accept();
-					}
+					req->hook.on_accept();
 
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
@@ -1318,9 +1320,7 @@ FCGI_API int fcgi_accept_request(fcgi_request *req)
 					struct pollfd fds;
 					int ret;
 
-					if (req->hook.on_read) {
-						req->hook.on_read();
-					}
+					req->hook.on_read();
 
 					fds.fd = req->fd;
 					fds.events = POLLIN;
@@ -1334,9 +1334,7 @@ FCGI_API int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
-					if (req->hook.on_read) {
-						req->hook.on_read();
-					}
+					req->hook.on_read();
 
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};

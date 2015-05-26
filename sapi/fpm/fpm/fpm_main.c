@@ -1863,7 +1863,7 @@ consult the installation file that came with this distribution, or visit \n\
 	fpm_init_request(&request, fcgi_fd);
 
 	zend_first_try {
-		while (fcgi_accept_request(&request) >= 0) {
+		while (EXPECTED(fcgi_accept_request(&request) >= 0)) {
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info();
@@ -1873,7 +1873,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* request startup only after we've done all we can to
 			 *            get path_translated */
-			if (php_request_startup() == FAILURE) {
+			if (UNEXPECTED(php_request_startup() == FAILURE)) {
 				fcgi_finish_request(&request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown();
@@ -1882,16 +1882,16 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* check if request_method has been sent.
 			 * if not, it's certainly not an HTTP over fcgi request */
-			if (!SG(request_info).request_method) {
+			if (UNEXPECTED(!SG(request_info).request_method)) {
 				goto fastcgi_request_done;
 			}
 
-			if (fpm_status_handle_request()) {
+			if (UNEXPECTED(fpm_status_handle_request())) {
 				goto fastcgi_request_done;
 			}
 
 			/* If path_translated is NULL, terminate here with a 404 */
-			if (!SG(request_info).path_translated) {
+			if (UNEXPECTED(!SG(request_info).path_translated)) {
 				zend_try {
 					zlog(ZLOG_DEBUG, "Primary script unknown");
 					SG(sapi_headers).http_response_code = 404;
@@ -1901,7 +1901,7 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
-			if (fpm_php_limit_extensions(SG(request_info).path_translated)) {
+			if (UNEXPECTED(fpm_php_limit_extensions(SG(request_info).path_translated))) {
 				SG(sapi_headers).http_response_code = 403;
 				PUTS("Access denied.\n");
 				goto fastcgi_request_done;
@@ -1914,7 +1914,7 @@ consult the installation file that came with this distribution, or visit \n\
 			primary_script = estrdup(SG(request_info).path_translated);
 
 			/* path_translated exists, we can continue ! */
-			if (php_fopen_primary_script(&file_handle) == FAILURE) {
+			if (UNEXPECTED(php_fopen_primary_script(&file_handle) == FAILURE)) {
 				zend_try {
 					zlog(ZLOG_ERROR, "Unable to open primary script: %s (%s)", primary_script, strerror(errno));
 					if (errno == EACCES) {
@@ -1938,16 +1938,16 @@ consult the installation file that came with this distribution, or visit \n\
 			php_execute_script(&file_handle);
 
 fastcgi_request_done:
-			if (primary_script) {
+			if (EXPECTED(primary_script)) {
 				efree(primary_script);
 			}
 
-			if (request_body_fd != -1) {
+			if (UNEXPECTED(request_body_fd != -1)) {
 				close(request_body_fd);
 			}
 			request_body_fd = -2;
 
-			if (EG(exit_status) == 255) {
+			if (UNEXPECTED(EG(exit_status) == 255)) {
 				if (CGIG(error_header) && *CGIG(error_header)) {
 					sapi_header_line ctr = {0};
 
@@ -1966,7 +1966,7 @@ fastcgi_request_done:
 			php_request_shutdown((void *) 0);
 
 			requests++;
-			if (max_requests && (requests == max_requests)) {
+			if (UNEXPECTED(max_requests && (requests == max_requests))) {
 				fcgi_finish_request(&request, 1);
 				break;
 			}

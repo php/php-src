@@ -181,16 +181,16 @@ struct _fcgi_request {
 	int            nodelay;
 #endif
 	int            closed;
-
-	fcgi_req_hook  hook;
-
 	int            in_len;
 	int            in_pad;
 
 	fcgi_header   *out_hdr;
+
 	unsigned char *out_pos;
 	unsigned char  out_buf[1024*8];
 	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
+
+	fcgi_req_hook  hook;
 
 	int            has_env;
 	fcgi_hash      env;
