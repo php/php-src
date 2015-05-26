@@ -1300,6 +1300,7 @@ PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
 PHP_SUBST(PHP_EXECUTABLE)
 
+PHP_SUBST(PHP_FASTCGI_OBJS)
 PHP_SUBST(PHP_SAPI_OBJS)
 PHP_SUBST(PHP_BINARY_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
@@ -1464,7 +1465,9 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
-       output.c getopt.c fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+       output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+
+PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
