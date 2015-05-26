@@ -1066,7 +1066,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			return 0;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-			if (!node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last) {
+			if (sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
