@@ -30,6 +30,7 @@
 #include "zend_interfaces.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
+#include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 
 #define SET_NODE(target, src) do { \
