@@ -74,20 +74,19 @@
 
 #elif defined(__powerpc64__) && defined(__GNUC__)
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {  \
-   long __tmpvar;                          \
-   __asm__("li 14, 0\n\t"                          \
-       "mtxer 14\n\t"                                          \
-       "mulldo. %0, %2,%3\n\t"                 \
-       "xor %1, %1, %1\n\t"                    \
-       "bns+ 0f\n\t"                       \
-        "li %1, 1\n\t"                     \
-        "0:\n"                         \
-           : "=r"(__tmpvar),"=r"(usedval)          \
-           : "r"(a), "r"(b)                \
-           : "r14", "cc");                 \
-   if (usedval) (dval) = (double) (a) * (double) (b);      \
-   else (lval) = __tmpvar;                     \
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __low, __high;						\
+	__asm__("mulld %0,%2,%3\n\t"					\
+		"mulhd %1,%2,%3\n"					\
+		: "=&r"(__low), "=&r"(__high)				\
+		: "r"(a), "r"(b));					\
+	if ((__low >> 63) != __high) {					\
+		(dval) = (double) (a) * (double) (b);			\
+		(usedval) = 1;						\
+	} else {							\
+		(lval) = __low;						\
+		(usedval) = 0;						\
+	}								\
 } while (0)
 
 #elif SIZEOF_ZEND_LONG == 4
