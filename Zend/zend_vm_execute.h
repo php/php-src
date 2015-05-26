@@ -559,13 +559,12 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			EX_T(opline->result.var).var.ptr = NULL;
 		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
+		temp_variable *ret = &EX_T(opline->result.var);
 		EX(original_return_value) = EG(return_value_ptr_ptr);
 		EG(active_symbol_table) = NULL;
 		EG(active_op_array) = &fbc->op_array;
 		EG(return_value_ptr_ptr) = NULL;
 		if (RETURN_VALUE_USED(opline)) {
-			temp_variable *ret = &EX_T(opline->result.var);
-
 			ret->var.ptr = NULL;
 			EG(return_value_ptr_ptr) = &ret->var.ptr;
 			ret->var.ptr_ptr = &ret->var.ptr;
@@ -574,7 +573,8 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 		if (UNEXPECTED((EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			if (RETURN_VALUE_USED(opline)) {
-				EX_T(opline->result.var).var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
+				ret->var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
+				ret->var.fcall_returned_reference = 0;
 			}
 		} else if (EXPECTED(zend_execute_ex == execute_ex)) {
 			if (EXPECTED(EG(exception) == NULL)) {
@@ -6494,7 +6494,6 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 {
 	USE_OPLINE
 	zend_function *op_array;
-	int closure_is_static, closure_is_being_defined_inside_static_context;
 
 	SAVE_OPLINE();
 
@@ -6503,9 +6502,9 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	closure_is_static = op_array->common.fn_flags & ZEND_ACC_STATIC;
-	closure_is_being_defined_inside_static_context = EX(prev_execute_data) && EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC;
-	if (closure_is_static || closure_is_being_defined_inside_static_context) {
+	if (UNEXPECTED((op_array->common.fn_flags & ZEND_ACC_STATIC) ||
+			(EX(prev_execute_data) &&
+			 EX(prev_execute_data)->function_state.function->common.fn_flags & ZEND_ACC_STATIC))) {
 		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(called_scope), NULL TSRMLS_CC);
 	} else {
 		zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array,  EG(scope), EG(This) TSRMLS_CC);

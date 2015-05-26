@@ -59,7 +59,7 @@ PHP_FUNCTION(readlink)
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 

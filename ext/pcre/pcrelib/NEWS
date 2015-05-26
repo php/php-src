@@ -1,6 +1,32 @@
 News about PCRE releases
 ------------------------
 
+Release 8.37 28-April-2015
+--------------------------
+
+This is bug-fix release. Note that this library (now called PCRE1) is now being
+maintained for bug fixes only. New projects are advised to use the new PCRE2
+libraries.
+
+
+Release 8.36 26-September-2014
+------------------------------
+
+This is primarily a bug-fix release. However, in addition, the Unicode data
+tables have been updated to Unicode 7.0.0.
+
+
+Release 8.35 04-April-2014
+--------------------------
+
+There have been performance improvements for classes containing non-ASCII
+characters and the "auto-possessification" feature has been extended. Other
+minor improvements have been implemented and bugs fixed. There is a new callout
+feature to enable applications to do detailed stack checks at compile time, to
+avoid running out of stack for deeply nested parentheses. The JIT compiler has
+been extended with experimental support for ARM-64, MIPS-64, and PPC-LE.
+
+
 Release 8.34 15-December-2013
 -----------------------------
 

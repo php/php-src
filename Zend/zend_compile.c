@@ -3912,7 +3912,8 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			}
 			zend_hash_quick_update(*overriden, arKey, nKeyLength, h, fn, sizeof(zend_function), (void**)&fn);
 			return;
-		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
+				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
 			if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 				zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
@@ -3961,7 +3962,7 @@ static int zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce TSRML
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
-		if (fn->op_array.static_variables) {
+		if (fn->type == ZEND_USER_FUNCTION && fn->op_array.static_variables) {
 			ce->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
 	}

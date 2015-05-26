@@ -213,12 +213,14 @@ Getting the stable release announced
 
  c. ``$PHP_X_MD5`` array and update all the md5 sums
 
- d. set ``$PHP_X_RC`` to false!
+ d. ``$PHP_X_SHA256`` array and update all the SHA256 sums
 
- e. Make sure there are no outdated "notes" or edited "date" keys in the
+ e. set ``$PHP_X_RC`` to false!
+
+ f. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
- f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
+ g. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
 3. Create the release file (releases/x_y_z.php)
    Usually we use the same content as for point 6, but included in php template
@@ -267,6 +269,9 @@ to upgrade.
 9. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 http://news.php.net/php.internals/17222.
+Please make sure that the mail to php-announce@ is its own completely seperate email.
+This is to make sure that repiles to the announcement on php-general@ or internals@
+will not accidentally hit the php-announce@ mailinglist.
 
 Re-releasing the same version (or -pl)
 --------------------------------------
@@ -283,7 +288,9 @@ Re-releasing the same version (or -pl)
 
  d. ``$PHP_X_MD5`` array and update all the md5 sums
 
- e. Make sure there are no outdated "notes" or edited "date" keys in the
+ e. ``$PHP_X_SHA256`` array and update all the SHA256 sums
+
+ f. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
 3. Add a short notice to phpweb stating that there is a new release, and
@@ -300,3 +307,6 @@ to upgrade.
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 the news entry.
+Please make sure that the mail to php-announce@ is its own completely seperate email.
+This is to make sure that repiles to the announcement on php-general@ or internals@
+will not accidentally hit the php-announce@ mailinglist.

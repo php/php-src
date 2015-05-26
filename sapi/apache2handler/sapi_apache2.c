@@ -688,6 +688,7 @@ zend_first_try {
 } zend_end_try();
 		}
 		apr_brigade_cleanup(brigade);
+		apr_pool_cleanup_run(r->pool, (void *)&SG(server_context), php_server_context_cleanup);
 	} else {
 		ctx->r = parent_req;
 	}

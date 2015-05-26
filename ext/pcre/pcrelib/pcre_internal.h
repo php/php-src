@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2013 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -229,10 +229,14 @@ stdint.h is available, include it; it may define INT64_MAX. Systems that do not
 have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
 by "configure". */
 
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
+#else
 #if defined HAVE_STDINT_H
 #include <stdint.h>
 #elif defined HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 #endif
 
 #if defined INT64_MAX || defined int64_t
@@ -316,8 +320,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) <= NLBLOCK->PSEND - NLBLOCK->nllen && \
-     RAWUCHARTEST(p) == NLBLOCK->nl[0] && \
-     (NLBLOCK->nllen == 1 || RAWUCHARTEST(p+1) == NLBLOCK->nl[1])       \
+     UCHAR21TEST(p) == NLBLOCK->nl[0] && \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p+1) == NLBLOCK->nl[1])       \
     ) \
   )
 
@@ -330,8 +334,8 @@ start/end of string field names are. */
        &(NLBLOCK->nllen), utf)) \
     : \
     ((p) >= NLBLOCK->PSSTART + NLBLOCK->nllen && \
-     RAWUCHARTEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
-     (NLBLOCK->nllen == 1 || RAWUCHARTEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
+     UCHAR21TEST(p - NLBLOCK->nllen) == NLBLOCK->nl[0] &&              \
+     (NLBLOCK->nllen == 1 || UCHAR21TEST(p - NLBLOCK->nllen + 1) == NLBLOCK->nl[1]) \
     ) \
   )
 
@@ -582,12 +586,27 @@ changed in future to be a fixed number of bytes or to depend on LINK_SIZE. */
 #define MAX_MARK ((1u << 8) - 1)
 #endif
 
+/* There is a proposed future special "UTF-21" mode, in which only the lowest
+21 bits of a 32-bit character are interpreted as UTF, with the remaining 11
+high-order bits available to the application for other uses. In preparation for
+the future implementation of this mode, there are macros that load a data item
+and, if in this special mode, mask it to 21 bits. These macros all have names
+starting with UCHAR21. In all other modes, including the normal 32-bit
+library, the macros all have the same simple definitions. When the new mode is
+implemented, it is expected that these definitions will be varied appropriately
+using #ifdef when compiling the library that supports the special mode. */
+
+#define UCHAR21(eptr)        (*(eptr))
+#define UCHAR21TEST(eptr)    (*(eptr))
+#define UCHAR21INC(eptr)     (*(eptr)++)
+#define UCHAR21INCTEST(eptr) (*(eptr)++)
+
 /* When UTF encoding is being used, a character is no longer just a single
-byte. The macros for character handling generate simple sequences when used in
-character-mode, and more complicated ones for UTF characters. GETCHARLENTEST
-and other macros are not used when UTF is not supported, so they are not
-defined. To make sure they can never even appear when UTF support is omitted,
-we don't even define them. */
+byte in 8-bit mode or a single short in 16-bit mode. The macros for character
+handling generate simple sequences when used in the basic mode, and more
+complicated ones for UTF characters. GETCHARLENTEST and other macros are not
+used when UTF is not supported. To make sure they can never even appear when
+UTF support is omitted, we don't even define them. */
 
 #ifndef SUPPORT_UTF
 
@@ -600,10 +619,6 @@ we don't even define them. */
 #define GETCHARINC(c, eptr) c = *eptr++;
 #define GETCHARINCTEST(c, eptr) c = *eptr++;
 #define GETCHARLEN(c, eptr, len) c = *eptr;
-#define RAWUCHAR(eptr) (*(eptr))
-#define RAWUCHARINC(eptr) (*(eptr)++)
-#define RAWUCHARTEST(eptr) (*(eptr))
-#define RAWUCHARINCTEST(eptr) (*(eptr)++)
 /* #define GETCHARLENTEST(c, eptr, len) */
 /* #define BACKCHAR(eptr) */
 /* #define FORWARDCHAR(eptr) */
@@ -776,30 +791,6 @@ do not know if we are in UTF-8 mode. */
   c = *eptr; \
   if (utf && c >= 0xc0) GETUTF8LEN(c, eptr, len);
 
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
-
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-8 mode - we don't put a test within the macro
 because almost all calls are already within a block of UTF-8 only code. */
@@ -895,30 +886,6 @@ we do not know if we are in UTF-16 mode. */
   c = *eptr; \
   if (utf && (c & 0xfc00) == 0xd800) GETUTF16LEN(c, eptr, len);
 
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
-
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-16 mode - we don't put a test within the
 macro because almost all calls are already within a block of UTF-16 only
@@ -979,30 +946,6 @@ This is called when we do not know if we are in UTF-32 mode. */
 
 #define GETCHARLENTEST(c, eptr, len) \
   GETCHARTEST(c, eptr)
-
-/* Returns the next uchar, not advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHAR(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, advancing the pointer. This is called when
-we know we are in UTF mode. */
-
-#define RAWUCHARINC(eptr) \
-  (*((eptr)++))
-
-/* Returns the next uchar, testing for UTF mode, and not advancing the
-pointer. */
-
-#define RAWUCHARTEST(eptr) \
-  (*(eptr))
-
-/* Returns the next uchar, testing for UTF mode, advancing the
-pointer. */
-
-#define RAWUCHARINCTEST(eptr) \
-  (*((eptr)++))
 
 /* If the pointer is not at the start of a character, move it back until
 it is. This is called only in UTF-32 mode - we don't put a test within the
@@ -1874,8 +1817,9 @@ table. */
 /* Flag bits and data types for the extended class (OP_XCLASS) for classes that
 contain characters with values greater than 255. */
 
-#define XCL_NOT    0x01    /* Flag: this is a negative class */
-#define XCL_MAP    0x02    /* Flag: a 32-byte map is present */
+#define XCL_NOT       0x01    /* Flag: this is a negative class */
+#define XCL_MAP       0x02    /* Flag: a 32-byte map is present */
+#define XCL_HASPROP   0x04    /* Flag: property checks are present. */
 
 #define XCL_END       0    /* Marks end of individual items */
 #define XCL_SINGLE    1    /* Single item (one multibyte char) follows */
@@ -2341,7 +2285,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
        ERR60, ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69,
        ERR70, ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79,
-       ERR80, ERR81, ERR82, ERR83, ERR84, ERRCOUNT };
+       ERR80, ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERRCOUNT };
 
 /* JIT compiling modes. The function list is indexed by them. */
 
@@ -2506,6 +2450,7 @@ typedef struct compile_data {
   BOOL had_pruneorskip;             /* (*PRUNE) or (*SKIP) encountered */
   BOOL check_lookbehind;            /* Lookbehinds need later checking */
   BOOL dupnames;                    /* Duplicate names exist */
+  BOOL iscondassert;                /* Next assert is a condition */
   int  nltype;                      /* Newline type */
   int  nllen;                       /* Newline string length */
   pcre_uchar nl[4];                 /* Newline string when fixed length */
@@ -2518,6 +2463,13 @@ typedef struct branch_chain {
   struct branch_chain *outer;
   pcre_uchar *current_branch;
 } branch_chain;
+
+/* Structure for mutual recursion detection. */
+
+typedef struct recurse_check {
+  struct recurse_check *prev;
+  const pcre_uchar *group;
+} recurse_check;
 
 /* Structure for items in a linked list that represents an explicit recursive
 call within the pattern; used by pcre_exec(). */

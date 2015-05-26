@@ -22,9 +22,9 @@ if (!mkdir($file_path)) {
 
 $file_path = realpath($file_path);
 
-/* An array of prefixes */ 
+/* An array of prefixes */
 $names_arr = array(
-	/* Valid args (casting)*/ 
+	/* Valid args (casting)*/
 	-1,
 	TRUE,
 	FALSE,
@@ -32,17 +32,17 @@ $names_arr = array(
 	"",
 	" ",
 	"\0",
-	/* Invalid args */ 
+	/* Invalid args */
 	array(),
 
-	/* Valid args*/ 
+	/* Valid args*/
 	/* prefix with path separator of a non existing directory*/
-	"/no/such/file/dir", 
+	"/no/such/file/dir",
 	"php/php"
 );
 
 $res_arr = array(
-	/* Invalid args */ 
+	/* Invalid args */
 	true,
 	true,
 	true,
@@ -53,7 +53,7 @@ $res_arr = array(
 	false,
 
 	/* prefix with path separator of a non existing directory*/
-	true, 
+	true,
 	true
 );
 
@@ -72,7 +72,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 		} else {
 			echo "Failed, not created in the correct directory " . realpath($file_dir) . ' vs ' . $file_path ."\n";
 		}
-		
+
 		if (!is_writable($file_name)) {
 			printf("%o\n", fileperms($file_name) );
 
@@ -105,7 +105,7 @@ Failed, not created in the correct directory %s vs %s
 OK
 -- Iteration 7 --
 
-Warning: tempnam() expects parameter 2 to be string, array given in %s\ext\standard\tests\file\tempnam_variation3-win32.php on line %d
+Warning: tempnam() expects parameter 2 to be a valid path, array given in %s\ext\standard\tests\file\tempnam_variation3-win32.php on line %d
 OK
 -- Iteration 8 --
 OK

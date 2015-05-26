@@ -1417,7 +1417,7 @@ PHP_FUNCTION(imageloadfont)
 	gdFontPtr font;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &file, &file_name) == FAILURE) {
 		return;
 	}
 
@@ -2354,7 +2354,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	long ignore_warning;
 
 	if (image_type == PHP_GDIMG_TYPE_GD2PART) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
 			return;
 		}
 		if (width < 1 || height < 1) {
@@ -2362,7 +2362,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &file, &file_len) == FAILURE) {
 			return;
 		}
 	}
@@ -4031,7 +4031,7 @@ PHP_FUNCTION(imagepsencodefont)
 	char *enc, **enc_vector;
 	int enc_len, *f_ind;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &fnt, &enc, &enc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &fnt, &enc, &enc_len) == FAILURE) {
 		return;
 	}
 

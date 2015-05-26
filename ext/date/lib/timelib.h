@@ -80,8 +80,8 @@ long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
 void timelib_strtointerval(char *s, int len, 
-                           timelib_time **begin, timelib_time **end, 
-						   timelib_rel_time **period, int *recurrences, 
+                           timelib_time **begin, timelib_time **end,
+						   timelib_rel_time **period, int *recurrences,
 						   struct timelib_error_container **errors);
 
 

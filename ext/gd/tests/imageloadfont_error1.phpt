@@ -3,7 +3,7 @@ Testing that imageloadfont() breaks on non-string first parameter
 --CREDITS--
 Neveo Harrison <neveoo [at] gmail [dot] com> #testfest #tek11
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
@@ -11,5 +11,5 @@ Neveo Harrison <neveoo [at] gmail [dot] com> #testfest #tek11
 var_dump( imageloadfont(array()) );
 ?>
 --EXPECTF--
-Warning: imageloadfont() expects parameter 1 to be string, array given in %s on line %d
+Warning: imageloadfont() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
