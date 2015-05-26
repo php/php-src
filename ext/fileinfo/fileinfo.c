@@ -39,10 +39,6 @@
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
 
-#ifndef _S_IFDIR
-# define _S_IFDIR		S_IFDIR
-#endif
-
 /* {{{ macros and type definitions */
 typedef struct _php_fileinfo {
 	zend_long options;

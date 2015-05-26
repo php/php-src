@@ -245,7 +245,6 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
 {
 	char *ksep, *vsep, *val;
 	size_t klen, vlen;
-	/* FIXME: string-size_t */
 	size_t new_vlen;
 
 	if (var->ptr >= var->end) {
