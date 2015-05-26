@@ -1889,11 +1889,11 @@ consult the installation file that came with this distribution, or visit \n\
 
 	zend_first_try {
 		while (fcgi_accept_request(&request) >= 0) {
+			char *primary_script = NULL;
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
 			CG(interactive) = 0;
-			char *primary_script = NULL;
 
 			fpm_request_info();
 
