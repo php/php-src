@@ -556,36 +556,6 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc");
-#elif defined(__GNUC__) && defined(__powerpc64__)
-	__asm__(
-		"ld 14, 0(%1)\n\t"
-		"ld 15, 0(%2)\n\t"
-		"li 16, 0 \n\t"
-		"mtxer 16\n\t"
-		"addo. 14, 14, 15\n\t"
-		"bso- 0f\n\t"
-		"std 14, 0(%0)\n\t"
-		"li 14, %3\n\t"
-		"stw 14, %c5(%0)\n\t"
-		"b 1f\n"
-		"0:\n\t"
-		"lfd 0, 0(%1)\n\t"
-		"lfd 1, 0(%2)\n\t"
-		"fcfid 0, 0\n\t"
-		"fcfid 1, 1\n\t"
-		"fadd 0, 0, 1\n\t"
-		"li 14, %4\n\t"
-		"stw 14, %c5(%0)\n\t"
-		"stfd 0, 0(%0)\n"
-		"1:"
-		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
-		  "n"(IS_LONG),
-		  "n"(IS_DOUBLE),
-		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "r14","r15","r16","fr0","fr1","cc");
 #else
 	/*
 	 * 'result' may alias with op1 or op2, so we need to
@@ -680,36 +650,6 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc");
-#elif defined(__GNUC__) && defined(__powerpc64__)
-	__asm__(
-		"ld 14, 0(%1)\n\t"
-		"ld 15, 0(%2)\n\t"
-		"li 16, 0\n\t"
-		"mtxer 16\n\t"
-		"subo. 14, 14, 15\n\t"
-		"bso- 0f\n\t"
-		"std 14, 0(%0)\n\t"
-		"li 14, %3\n\t"
-		"stw 14, %c5(%0)\n\t"
-		"b 1f\n"
-		"0:\n\t"
-		"lfd 0, 0(%1)\n\t"
-		"lfd 1, 0(%2)\n\t"
-		"fcfid 0, 0\n\t"
-		"fcfid 1, 1\n\t"
-		"fsub 0, 0, 1\n\t"
-		"li 14, %4\n\t"
-		"stw 14, %c5(%0)\n\t"
-		"stfd 0, 0(%0)\n"
-		"1:"
-		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
-		  "n"(IS_LONG),
-		  "n"(IS_DOUBLE),
-		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "r14","r15","r16","fr0","fr1","cc");
 #else
 	ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
