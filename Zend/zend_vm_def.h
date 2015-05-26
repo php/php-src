@@ -3909,6 +3909,9 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
+		if (EG(exception)) {
+			FREE_OP1();
+		}
 #endif
 	}
 	CHECK_EXCEPTION();
