@@ -1435,10 +1435,10 @@ CC=$old_CC
 PHP_CONFIGURE_PART(Generating files)
 
 CXXFLAGS_CLEAN=$CXXFLAGS
-CFLAGS_CLEAN=$CFLAGS
+CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
 CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
 INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
-CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
+CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS)"
 
 if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
   pharcmd=pharcmd
