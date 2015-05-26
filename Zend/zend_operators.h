@@ -460,33 +460,6 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc");
-#elif defined(__GNUC__) && defined(__powerpc64__)
-	 __asm__(
-		"ld 14, 0(%0)\n\t"
-		"li 15, 1\n\t"
-		"li 16, 0\n\t"
-		"mtxer 16\n\t"
-		"addo. 14, 14, 15\n\t"
-		"std 14, 0(%0)\n\t"
-		"bns+  0f\n\t"
-		"xor 14, 14, 14\n\t"
-		"lis 15, 0x43e00000@h\n\t"
-		"ori 15, 15, 0x43e00000@l\n\t"
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-		"stw 14, 0(%0)\n\t"
-		"stw 15, 0x4(%0)\n\t"
-#else
-		"stw 14, 0x4(%0)\n\t"
-		"stw 15, 0(%0)\n\t"
-#endif
-		"li 14, %1\n\t"
-		"stw 14, %c2(%0)\n"
-		"0:"
-		:
-		: "r"(&op1->value),
-		  "n"(IS_DOUBLE),
-		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "r14", "r15", "r16", "cc");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 		/* switch to double */
@@ -525,33 +498,6 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc");
-#elif defined(__GNUC__) && defined(__powerpc64__)
-	__asm__(
-		"ld 14, 0(%0)\n\t"
-		"li 15, 1\n\t"
-		"li 16, 0\n\t"
-		"mtxer 16\n\t"
-		"subo. 14, 14, 15\n\t"
-		"std 14, 0(%0)\n\t"
-		"bns+  0f\n\t"
-		"xor 14, 14, 14\n\t"
-		"lis 15, 0xc3e00000@h\n\t"
-		"ori 15, 15, 0xc3e00000@l\n\t"
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-		"stw 14, 0(%0)\n\t"
-		"stw 15, 0x4(%0)\n\t"
-#else
-		"stw 14, 0x4(%0)\n\t"
-		"stw 15, 0(%0)\n\t"
-#endif
-		"li 14, %1\n\t"
-		"stw 14, %c2(%0)\n"
-		"0:"
-		:
-		: "r"(&op1->value),
-		  "n"(IS_DOUBLE),
-		  "n"(ZVAL_OFFSETOF_TYPE)
-		: "r14", "r15", "r16", "cc");
 #else
 	if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 		/* switch to double */
