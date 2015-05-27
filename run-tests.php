@@ -1751,7 +1751,6 @@ TEST $file
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
-		file_put_contents("/tmp/post", $post);
 		$content_length = strlen($post);
 		save_text($tmp_post, $post);
 
