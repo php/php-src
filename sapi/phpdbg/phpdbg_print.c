@@ -282,12 +282,13 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 }
 
 void phpdbg_print_opcodes_method(const char *class, const char *function) {
-	zend_class_entry *ce = zend_hash_str_find_ptr(EG(class_table), class, strlen(class));
+	zend_class_entry *ce;
 	zend_function *func;
 
-	if (!ce) {
+	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
 		return;
 	}
+
 	if (ce->type != ZEND_USER_CLASS) {
 		phpdbg_out("function name: %s::%s (internal)\n", class, function);
 		return;
@@ -348,7 +349,6 @@ void phpdbg_print_opcodes_class(const char *class) {
 PHPDBG_API void phpdbg_print_opcodes(char *function)
 {
 	char *method_name;
-
 	strtok(function, ":");
 
 	if (function == NULL) {
@@ -376,7 +376,7 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 		} ZEND_HASH_FOREACH_END();
 	} else if ((method_name = strtok(NULL, ":")) == NULL) {
 		phpdbg_print_opcodes_function(function, strlen(function));
-	} else if (++method_name == NULL || ++method_name == NULL) {
+	} else if ((method_name + 1) == NULL) {
 		phpdbg_print_opcodes_class(function);
 	} else {
 		phpdbg_print_opcodes_method(function, method_name);

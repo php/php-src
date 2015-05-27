@@ -80,7 +80,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right T_POW
 %right '['
 %nonassoc T_NEW T_CLONE
-%left "if_without_else"
+%left T_NOELSE
 %left T_ELSEIF
 %left T_ELSE
 %left T_ENDIF
@@ -579,7 +579,7 @@ if_stmt_without_else:
 ;
 
 if_stmt:
-		if_stmt_without_else %prec "if_without_else" { $$ = $1; }
+		if_stmt_without_else %prec T_NOELSE { $$ = $1; }
 	|	if_stmt_without_else T_ELSE statement
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_IF_ELEM, NULL, $3)); }
 ;
