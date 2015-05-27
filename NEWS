@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.26
+28 May 2015, PHP 5.5.26RC1
 
 - Core:
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
