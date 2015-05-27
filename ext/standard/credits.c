@@ -97,7 +97,7 @@ PHPAPI void php_print_credits(int flag) /* {{{ */
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "PHP Documentation");
 		CREDIT_LINE("Authors", "Mehdi Achour, Friedhelm Betz, Antony Dovgal, Nuno Lopes, Hannes Magnusson, Georg Richter, Damien Seguy, Jakub Vrana, Adam Harvey, Peter Cowburn");
-		CREDIT_LINE("Editor", "Philip Olson");
+		CREDIT_LINE("Editor", "Peter Cowburn");
 		CREDIT_LINE("User Note Maintainers", "Daniel P. Brown, Thiago Henrique Pojda");
 		CREDIT_LINE("Other Contributors", "Previously active authors, editors and other contributors are listed in the manual.");
 		php_info_print_table_end();
