@@ -523,6 +523,7 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len) /* {{{ */
 }
 /* }}} */
 
+#if 0
 static char *_sapi_cgibin_putenv(char *name, char *value) /* {{{ */
 {
 	int name_len;
@@ -536,6 +537,7 @@ static char *_sapi_cgibin_putenv(char *name, char *value) /* {{{ */
 	return fcgi_putenv(request, name, name_len, value);
 }
 /* }}} */
+#endif
 
 static char *sapi_cgi_read_cookies(void) /* {{{ */
 {
