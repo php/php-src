@@ -1842,10 +1842,22 @@ consult the installation file that came with this distribution, or visit \n\
 			/* check if request_method has been sent.
 			 * if not, it's certainly not an HTTP over fcgi request */
 			if (!SG(request_info).request_method) {
+				zend_try {
+					zlog(ZLOG_ERROR, "SCRIPT_FILENAME env not found in cgi env");
+					SG(sapi_headers).http_response_code = 404;
+					PUTS("method not found.\n");
+				} zend_catch {
+				} zend_end_try();
 				goto fastcgi_request_done;
 			}
 
 			if (fpm_status_handle_request()) {
+				goto fastcgi_request_done;
+			}
+
+			if (fpm_php_limit_extensions(SG(request_info).path_translated)) {
+				SG(sapi_headers).http_response_code = 403;
+				PUTS("Access denied.\n");
 				goto fastcgi_request_done;
 			}
 
@@ -1857,12 +1869,6 @@ consult the installation file that came with this distribution, or visit \n\
 					PUTS("File not found.\n");
 				} zend_catch {
 				} zend_end_try();
-				goto fastcgi_request_done;
-			}
-
-			if (fpm_php_limit_extensions(SG(request_info).path_translated)) {
-				SG(sapi_headers).http_response_code = 403;
-				PUTS("Access denied.\n");
 				goto fastcgi_request_done;
 			}
 
