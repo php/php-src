@@ -185,7 +185,7 @@ PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
 	}
 
 	ret = read(sock, ptr, len);
-	if (ret == (size_t)-1 && errno == EINTR) {
+	if (ret == -1 && errno == EINTR) {
 		/* Read was interrupted, retry once */
 		ret = read(sock, ptr, len);
 	}
