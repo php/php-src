@@ -678,7 +678,7 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 	__asm {
 		bsr eax, _size
 	}
-#elif defined(__GNUC__) && (defined(__arm__) ||  defined(__aarch64__))
+#elif defined(__GNUC__) && (defined(__arm__) || defined(__aarch64__) || defined(__powerpc__))
 	return (8 * SIZEOF_SIZE_T - 1) - __builtin_clzl(_size);
 #else
 	unsigned int n = 0;
@@ -706,7 +706,7 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 	__asm {
 		bsf eax, _size
    }
-#elif defined(__GNUC__) && (defined(__arm__) || defined(__aarch64__))
+#elif defined(__GNUC__) && (defined(__arm__) || defined(__aarch64__) || defined(__powerpc__))
 	return __builtin_ctzl(_size);
 #else
 	static const int offset[16] = {4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0};

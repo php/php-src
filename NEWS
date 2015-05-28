@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.26
 
@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (Julien)
   . Fixed bug #69628 (complex GLOB_BRACE fails on Windows).
     (Christoph M. Becker)
+  . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
+    (dja at axtens dot net, Kalle)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
