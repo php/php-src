@@ -936,6 +936,17 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
+/* XXX check whether some manifest was originally supplied, otherwise keep using the default. */
+function generate_version_info_manifest(makefiletarget)
+{
+	var manifest_name = makefiletarget + ".manifest";
+
+	MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": win32\\build\\default.manifest");
+	MFO.WriteLine("\t@copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest");
+
+	return manifest_name;
+}
+
 /* Emits rule to generate version info for a SAPI
  * or extension.  Returns the name of the .res file
  * that will be generated */
@@ -1086,13 +1097,15 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 
 	/* generate a .res file containing version information */
 	resname = generate_version_info_resource(makefiletarget, sapiname, configure_module_dirname, true);
+
+	manifest_name = generate_version_info_manifest(makefiletarget);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
 	MFO.WriteLine("\t@echo SAPI " + sapiname_for_printing + " build complete");
 	if (MODE_PHPIZE) {
-		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 	} else {
-		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname  + " $(BUILD_DIR)\\" + manifest_name);
 	}
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
@@ -1303,6 +1316,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
 		var ld = '@"$(LINK)"';
+		var manifest_name = generate_version_info_manifest(dllname);
 
 		ldflags = "";
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
@@ -1322,10 +1336,10 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
 		MFO.WriteBlankLines(1);
 		if (MODE_PHPIZE) {
-			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
-			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
 		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
