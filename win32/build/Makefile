@@ -192,6 +192,7 @@ build-devel: build-headers build-lib
 	@copy win32\build\Makefile.phpize $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\phpize.bat $(BUILD_DIR_DEV)\ /y >nul
 	@copy win32\build\template.rc $(BUILD_DIR_DEV)\build\ /y >nul
+	@copy win32\build\default.manifest $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy $(BUILD_DIR)\devel\config.phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
