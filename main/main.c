@@ -2143,7 +2143,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* Standard three-way comparison/ordering enumeration
-	 * Matches compare_function() (internal), strcmp(), <=> etc.
+	 * Matches <=>
 	 */
 	REGISTER_MAIN_LONG_CONSTANT("CMP_LT", -1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("CMP_EQ", 0, CONST_PERSISTENT | CONST_CS);
