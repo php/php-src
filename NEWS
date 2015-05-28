@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jun 2015, PHP 5.6.10
+?? Jul 2015, PHP 5.6.11
+
+11 Jun 2015, PHP 5.6.10
 
 - Core:
   . Fixed bug #66048 (temp. directory is cached during multiple requests).
