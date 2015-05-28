@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2015, PHP 5.6.11
 
@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (Christoph M. Becker)
   . Fixed POST data processing slowdown due to small input buffer size
     on Windows. (Jorge Oliveira, Anatol)
+  . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
+    (dja at axtens dot net, Kalle)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
