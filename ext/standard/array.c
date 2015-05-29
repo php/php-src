@@ -3061,6 +3061,7 @@ PHP_FUNCTION(array_column)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_VAL(arr_hash, data) {
+		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) != IS_ARRAY) {
 			/* Skip elemens which are not sub-arrays */
 			continue;

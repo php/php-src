@@ -209,6 +209,8 @@
     required_num_args). (Julien)
 
 - Standard:
+  . Fixed bug #69723 (Passing parameters by reference and array_column).
+    (Laruence)
   . Fixed bug #69523 (Cookie name cannot be empty). (Christoph M. Becker)
   . Fixed bug #69325 (php_copy_file_ex does not pass the argument).
     (imbolk at gmail dot com)
