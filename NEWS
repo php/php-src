@@ -33,6 +33,10 @@
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
 
+- SimpleXML:
+  . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
+    node name). (Christoph Michael Becker)
+
 14 May 2015, PHP 5.6.9
 
 - Core:
