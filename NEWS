@@ -35,6 +35,10 @@
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
 
+- SimpleXML:
+  . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
+    node name). (Christoph Michael Becker)
+
 14 May 2015, PHP 5.5.25
 
 - Core:
