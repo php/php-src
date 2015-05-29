@@ -645,6 +645,23 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
   . ZLIB_BLOCK
   . ZLIB_FINISH
 
+- GD
+  . T1Lib support removed, thrus lifting the optional dependency on T1Lib, the 
+    following is therefore not available anymore:
+
+    Functions:
+      - imagepsbbox()
+      - imagepsencodefont()
+      - imagepsextendedfont()
+      - imagepsfreefont()
+      - imagepsloadfont()
+      - imagepsslantfont()
+      - imagepstext()
+
+    Resources:
+      - 'gd PS font'
+      - 'gd PS encoding'
+
 ========================================
 11. Changes to INI File Handling
 ========================================

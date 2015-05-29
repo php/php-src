@@ -70,9 +70,6 @@ extern zend_module_entry gd_module_entry;
 /* gd.c functions */
 PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);
-#if HAVE_LIBT1
-PHP_MSHUTDOWN_FUNCTION(gd);
-#endif
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 PHP_RSHUTDOWN_FUNCTION(gd);
 #endif

@@ -107,6 +107,7 @@
 
 - GD:
   . Made fontFetch's path parser thread-safe. (Sara)
+  . Removed T1Lib support. (Kalle)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
