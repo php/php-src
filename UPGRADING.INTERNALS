@@ -2,6 +2,7 @@ $Id$
 
 PHP 7.0 INTERNALS UPGRADE NOTES
 
+0. Wiki Examples
 1. Internal API changes
   e. New data types
   f. zend_parse_parameters() specs
@@ -21,6 +22,14 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 2. Build system changes
   a. Unix build system changes
   b. Windows build system changes
+
+
+================
+0. Wiki Examples
+================
+
+The wiki contains multiple examples and further explainations of the internal
+changes. See: https://wiki.php.net/phpng-upgrading
 
 
 ========================
@@ -196,10 +205,10 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      zend_fetch_resource_ex. More details can be found in Zend/zend_list.c.
 
   t. Optimized strings concatenation.
-     ZEND_ADD_STRING/VAR/CHAR are replaced with ZEND_ROPE_INTI, ZEND_ROPE_ADD,
+     ZEND_ADD_STRING/VAR/CHAR are replaced with ZEND_ROPE_INIT, ZEND_ROPE_ADD,
      ZEND_ROPE_END.
      Instead of reallocation and copying string on each ZEND_ADD_STRING/VAR/CAHR,
-     collect all the strings and then alloca te and construct the resulting string once.
+     collect all the strings and then allocate and construct the resulting string once.
 
 
 ========================
