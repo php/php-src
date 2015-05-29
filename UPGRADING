@@ -661,6 +661,7 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 - Core
   . Support for native 64 bit integers in 64 bit builds.
   . Support for large files in 64 bit builds.
+  . Support for getrusage()
 
 - ftp
   . The ftp extension is always shipped shared
