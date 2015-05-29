@@ -727,6 +727,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
 	zend_set_default_compile_time_values();
+#ifdef ZEND_WIN32
+	zend_get_windows_version_info(&EG(windows_version_info));
+#endif
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -798,9 +801,6 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
-#ifdef ZEND_WIN32
-	zend_get_windows_version_info(&EG(windows_version_info));
-#endif
 	virtual_cwd_deactivate();
 #endif
 }
