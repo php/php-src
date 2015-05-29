@@ -577,6 +577,10 @@ Other
     acceptable classes: 
     unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
 
+- proc_open():
+  The maximum number of pipes used by proc_open() was previously limited by
+  hardcoded value of 16. This limit is now removed and the number of pipes is
+  effectively limited by the amount of memory available to PHP.
 
 ========================================
 6. New Functions

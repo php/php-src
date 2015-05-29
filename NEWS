@@ -231,6 +231,7 @@
   . Fixed bug #69686 (password_verify reports back error on PHP7 will null
     string). (Anthony)
   . Added Windows support for getrusage(). (Kalle)
+  . Removed hardcoded limit on number of pipes in proc_open(). (Tony)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).
