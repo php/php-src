@@ -915,14 +915,14 @@ PHPAPI PHP_FUNCTION(freopen)
 	zval *arg1;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "psr", &filename, &filename_len, &mode, &mode_len, &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "psr", &filename, &filename_len, &mode, &mode_len, &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (stream->wrapper != &php_plain_files_wrapper && stream->wrapper != &php_stream_php_wrapper) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid file", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, "%pd is not a valid file", stream->res->handle);
 		RETURN_FALSE;
 	}
 

@@ -1523,7 +1523,7 @@ stream_skip:
 /* }}} */
 
 /* {{{ php_stream_freopen */
-PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream STREAMS_DC TSRMLS_DC)
+PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream STREAMS_DC)
 {
 	int open_flags;
 	char *realpath = NULL;
@@ -1532,16 +1532,16 @@ PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream ST
 	int fileno = ((php_stdio_stream_data *)stream->abstract)->fd;
 
 	if (!filename || !*filename) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot be empty");
+		php_error_docref(NULL, E_WARNING, "Filename cannot be empty");
 		return 0;
 	}
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "`%s' is not a valid mode for freopen", mode);
+		php_error_docref(NULL, E_WARNING, "`%s' is not a valid mode for freopen", mode);
 		return 0;
 	}
 
-	if ((realpath = expand_filepath(filename, NULL TSRMLS_CC)) == NULL) {
+	if ((realpath = expand_filepath(filename, NULL)) == NULL) {
 		return 0;
 	}
 
@@ -1554,13 +1554,13 @@ PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream ST
 	efree(realpath);
 
 	if (fd == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		return 0;
 	}
 
 	if (dup2(fd, fileno) == -1) {
 		close(fd);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		return 0;
 	}
 	close(fd);
