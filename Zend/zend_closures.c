@@ -148,10 +148,12 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 {
 	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
+	const zend_uint keep_flags = ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC;
 
 	invoke->common = closure->func.common;
 	invoke->type = ZEND_INTERNAL_FUNCTION;
-	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
+	invoke->internal_function.fn_flags =
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
