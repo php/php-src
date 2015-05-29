@@ -203,6 +203,8 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 {
 	zend_closure *closure = (zend_closure *)object;
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
+	const uint32_t keep_flags =
+		ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_VARIADIC | ZEND_ACC_HAS_RETURN_TYPE;
 
 	invoke->common = closure->func.common;
 	/* We return ZEND_INTERNAL_FUNCTION, but arg_info representation is the
@@ -210,7 +212,8 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	 * This is not a problem, because ZEND_ACC_HAS_TYPE_HINTS is never set,
 	 * and we won't check arguments on internal function */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
-	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
+	invoke->internal_function.fn_flags =
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
