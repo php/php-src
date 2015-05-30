@@ -69,6 +69,14 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 #include <crypt.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 int main(void)
 {
 #if HAVE_CRYPT
@@ -94,6 +102,14 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 #include <crypt.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 int main(void)
 {
 #if HAVE_CRYPT
@@ -117,6 +133,14 @@ AC_TRY_RUN([
 
 #if HAVE_CRYPT_H
 #include <crypt.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
 #endif
 
 int main(void)
@@ -153,6 +177,14 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 int main(void)
 {
 #if HAVE_CRYPT
@@ -184,6 +216,14 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 int main(void)
 {
 #if HAVE_CRYPT
@@ -212,6 +252,14 @@ AC_TRY_RUN([
 
 #if HAVE_CRYPT_H
 #include <crypt.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
 #endif
 
 int main(void)
