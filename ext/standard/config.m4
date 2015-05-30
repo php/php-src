@@ -69,9 +69,10 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-    exit (strcmp((char *)crypt("rasmuslerdorf","rl"),"rl.3StKT.4T8M"));
+	exit(strcmp((char *)crypt("rasmuslerdorf","rl"),"rl.3StKT.4T8M"));
 #else
 	exit(0);
 #endif
@@ -93,11 +94,12 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-  exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
+	exit(strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
 #else
-  exit(0);
+	exit(0);
 #endif
 }],[
   ac_cv_crypt_ext_des=yes
@@ -117,18 +119,19 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[15], answer[40];
+	char salt[15], answer[40];
 
-    salt[0]='$'; salt[1]='1'; salt[2]='$'; 
-    salt[3]='r'; salt[4]='a'; salt[5]='s';
-    salt[6]='m'; salt[7]='u'; salt[8]='s';
-    salt[9]='l'; salt[10]='e'; salt[11]='$';
-    salt[12]='\0';
-    strcpy(answer,salt);
-    strcat(answer,"rISCgZzpwk3UhDidwXvin0");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+	salt[0]='$'; salt[1]='1'; salt[2]='$';
+	salt[3]='r'; salt[4]='a'; salt[5]='s';
+	salt[6]='m'; salt[7]='u'; salt[8]='s';
+	salt[9]='l'; salt[10]='e'; salt[11]='$';
+	salt[12]='\0';
+	strcpy(answer, salt);
+	strcat(answer, "rISCgZzpwk3UhDidwXvin0");
+	exit(strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
@@ -150,15 +153,16 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[30], answer[70];
-    
-    salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
-    strcat(salt,"rasmuslerd............");
-    strcpy(answer,salt);
-    strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+	char salt[30], answer[70];
+
+	salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
+	strcat(salt, "rasmuslerd............");
+	strcpy(answer, salt);
+	strcpy(&answer[29], "nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
+	exit(strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
@@ -180,14 +184,15 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[21], answer[21+86];
+	char salt[21], answer[21+86];
 
-    strcpy(salt,"\$6\$rasmuslerdorf\$");
-    strcpy(answer, salt);
-    strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+	strcpy(salt, "\$6\$rasmuslerdorf\$");
+	strcpy(answer, salt);
+	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
+	exit(strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
@@ -209,15 +214,15 @@ AC_TRY_RUN([
 #include <crypt.h>
 #endif
 
-main() {
+int main(void)
+{
 #if HAVE_CRYPT
-    char salt[21], answer[21+43];
+	char salt[21], answer[21+43];
 
-    strcpy(salt,"\$5\$rasmuslerdorf\$");
-    strcpy(answer, salt);
-    strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
-
+	strcpy(salt, "\$5\$rasmuslerdorf\$");
+	strcpy(answer, salt);
+	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
+	exit(strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
