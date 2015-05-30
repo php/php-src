@@ -85,7 +85,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, "rl.3StKT.4T8M"));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_des=yes
@@ -121,7 +121,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, "_J9..rasmBYk8r9AiWNc"));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_ext_des=yes
@@ -167,7 +167,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_md5=yes
@@ -210,7 +210,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_blowfish=yes
@@ -252,7 +252,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_sha512=yes
@@ -294,7 +294,7 @@ int main(void)
 		exit(1);
 	exit(strcmp(p, answer));
 #else
-	exit(0);
+	exit(1);
 #endif
 }],[
   ac_cv_crypt_sha256=yes
