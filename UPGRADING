@@ -617,6 +617,7 @@ Other
 - sapi/continuity
 - sapi/isapi
 - sapi/milter
+- sapi/nsapi
 - sapi/phttpd
 - sapi/pi3web
 - sapi/roxen
@@ -626,6 +627,9 @@ Other
 - ext/mssql
 - ext/sybase_ct
 For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+
+NOTE NSAPI was not voted in the RFC, however it was removed afterwards. It turned
+out, that the corresponding SDK isn't available anymore.
 
 ========================================
 9. Other Changes to Extensions
