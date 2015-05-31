@@ -239,7 +239,8 @@ changes. See: https://wiki.php.net/phpng-upgrading
        which suppresses the most frequent false positive warnings
 
      - the --with-mp option will by default utilize all the available cores. It's
-       enabled by default and can be disabled with the special "disable" keyword.
+       enabled by default for release builds and can be disabled with the special
+       "disable" keyword.
 
 ========================
 3. Module changes
