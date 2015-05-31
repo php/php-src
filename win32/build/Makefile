@@ -89,6 +89,7 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
+	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest
 	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP5_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
@@ -115,7 +116,7 @@ clean: clean-sapi
 	@cd $(BUILD_DIR)
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	@cd "$(PHP_SRC_DIR)"
-	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
+	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.manifest $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
 clean-pecl:
@@ -196,6 +197,7 @@ build-devel: build-headers build-lib
 	@copy win32\build\Makefile.phpize $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\phpize.bat $(BUILD_DIR_DEV)\ /y >nul
 	@copy win32\build\template.rc $(BUILD_DIR_DEV)\build\ /y >nul
+	@copy win32\build\default.manifest $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy $(BUILD_DIR)\devel\config.phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\phpize.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy $(BUILD_DIR)\devel\ext_deps.js $(BUILD_DIR_DEV)\script\ /y >nul
