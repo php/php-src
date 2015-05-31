@@ -320,6 +320,17 @@ char* php_get_windows_name()
 	}
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
+
+		if (osvi.dwMajorVersion == 10) {
+			if( osvi.dwMinorVersion == 0 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION ) {
+					major = "Windows 10";
+				} else {
+					major = "Windows Server 2016";
+				}
+			}
+		}
+
 		if (osvi.dwMajorVersion == 6) {
 			if( osvi.dwMinorVersion == 0 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION ) {
@@ -366,6 +377,12 @@ char* php_get_windows_name()
 						major = "Windows Server 2012";
 					}
 				} 
+			} else if (osvi.dwMinorVersion == 3) {
+				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					major = "Windows 8.1";
+				} else {
+					major = "Windows Server 2012 R2";
+				}
 			} else {
 				major = "Unknown Windows version";
 			}
