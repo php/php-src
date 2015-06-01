@@ -28,7 +28,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 0. Wiki Examples
 ================
 
-The wiki contains multiple examples and further explainations of the internal
+The wiki contains multiple examples and further explanations of the internal
 changes. See: https://wiki.php.net/phpng-upgrading
 
 
@@ -178,7 +178,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
      before any globals was accessed.
 
      Porting an extension or SAPI is usually as easy as removing all the TSRMLS_*
-     ocurrences and integrating the macros mentioned above. However if tsrm_ls
+     occurrences and integrating the macros mentioned above. However if tsrm_ls
      is used explicitly, its usage can be considered obsolete in most cases.
      Additionally, if an extension triggers its own threads, TSRMLS_CACHE shouldn't
      be passed to that threads directly.
@@ -260,7 +260,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
       Do not access PS(id) directly, but use this handler and it's parameter.
     - PS_UPDATE_TIMESTAMP() defines timestamp updating handler. This handler
       must update session data timestamp for GC if it is needed. e.g. Memcache
-      updates timestap on read, so it does not need to update timestamp. Return
+      updates timestamp on read, so it does not need to update timestamp. Return
       SUCCESS simply for this case.
     - PS_CREATE_SID() should check session ID collision. Return NULL for failure.
     - More documentation can be found in ext/session/mod_files.c as comments.
