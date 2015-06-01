@@ -29,10 +29,11 @@ typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTi
 
 static MyGetSystemTimeAsFileTime timefunc = NULL;
 
+#ifdef PHP_EXPORTS
 static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 {
 	MyGetSystemTimeAsFileTime timefunc = NULL;
-	HMODULE hMod = LoadLibrary("kernel32.dll");
+	HMODULE hMod = GetModuleHandle("kernel32.dll");
 
 	if (hMod) {
 		/* Max possible resolution <1us, win8/server2012 */
@@ -47,15 +48,20 @@ static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 	return timefunc;
 }
 
+BOOL php_win32_init_gettimeofday(void)
+{
+	timefunc = get_time_func();
+
+	return (NULL != timefunc);
+}
+#endif
+
 static zend_always_inline int getfilesystemtime(struct timeval *tv)
 {
 	FILETIME ft;
 	unsigned __int64 ff = 0;
 	ULARGE_INTEGER fft;
 
-	if (!timefunc) {
-		timefunc = get_time_func();
-	}
 	timefunc(&ft);
 
         /*
