@@ -1448,8 +1448,8 @@ static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *
 {
     zval *retval;
 
-try_again:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+try_array:
 		SEPARATE_ARRAY(container);
 fetch_from_array:
 		if (dim == NULL) {
@@ -1462,7 +1462,14 @@ fetch_from_array:
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
 		}
 		ZVAL_INDIRECT(result, retval);
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		return;
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		container = Z_REFVAL_P(container);
+		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			goto try_array;
+		}
+	}
+	if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
 			zval_ptr_dtor_nogc(container);
 convert_to_array:
@@ -1524,9 +1531,6 @@ convert_to_array:
 			/* for read-mode only */
 			ZVAL_NULL(result);
 		}
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
-		container = Z_REFVAL_P(container);
-		goto try_again;
 	} else {
 		if (type == BP_VAR_UNSET) {
 			zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
@@ -1557,11 +1561,18 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 {
 	zval *retval;
 
-try_again:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+try_array:
 		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type);
 		ZVAL_COPY(result, retval);
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		return;
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		container = Z_REFVAL_P(container);
+		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			goto try_array;
+		}
+	}
+	if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
 
 try_string_offset:
@@ -1627,9 +1638,6 @@ try_string_offset:
 				ZVAL_NULL(result);
 			}
 		}
-	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
-		container = Z_REFVAL_P(container);
-		goto try_again;
 	} else {
 		ZVAL_NULL(result);
 	}
