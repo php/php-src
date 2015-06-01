@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.42
 
+- Core:
+  . Imroved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
+    heap overflow). (Max Spelsberg)
+
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
 
