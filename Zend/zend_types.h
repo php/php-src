@@ -229,13 +229,13 @@ struct _zend_array {
 	HT_HASH_EX((ht)->arData, idx)
 
 #define HT_HASH_SIZE(ht) \
-	((-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
+	(((size_t)(uint32_t)-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
 #define HT_DATA_SIZE(ht) \
-	((ht)->nTableSize * sizeof(Bucket))
+	((size_t)(ht)->nTableSize * sizeof(Bucket))
 #define HT_SIZE(ht) \
 	(HT_HASH_SIZE(ht) + HT_DATA_SIZE(ht))
 #define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + ((ht)->nNumUsed * sizeof(Bucket)))
+	(HT_HASH_SIZE(ht) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
 #define HT_HASH_RESET(ht) \
 	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht))
 #define HT_HASH_RESET_PACKED(ht) do { \
