@@ -11,6 +11,8 @@
     (Christoph M. Becker)
   . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
     (dja at axtens dot net, Kalle)
+  . Fixed bug #69732 (can induce segmentation fault with basic php code).
+    (Dmitry)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)

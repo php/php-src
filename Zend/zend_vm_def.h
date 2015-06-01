@@ -1762,7 +1762,9 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 		}
 	}
 
-	FREE_OP1_VAR_PTR();
+	if (OP1_TYPE == IS_VAR && OP1_FREE) {
+		zval_ptr_dtor(&value);
+	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
  	FREE_OP2_IF_VAR();
