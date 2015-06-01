@@ -15692,7 +15692,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER
 		}
 	}
 
-	if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
+	if (IS_VAR == IS_VAR && (free_op1.var != NULL)) {
+		zval_ptr_dtor_nogc(&value);
+	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
 
@@ -18043,7 +18045,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 		}
 	}
 
-	if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
+	if (IS_VAR == IS_VAR && (free_op1.var != NULL)) {
+		zval_ptr_dtor_nogc(&value);
+	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
 
@@ -20303,7 +20307,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 		}
 	}
 
-	if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
+	if (IS_VAR == IS_VAR && (free_op1.var != NULL)) {
+		zval_ptr_dtor_nogc(&value);
+	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
  	zval_ptr_dtor_nogc(&free_op2.var);
@@ -23772,7 +23778,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 		}
 	}
 
-	if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);};
+	if (IS_VAR == IS_VAR && (free_op1.var != NULL)) {
+		zval_ptr_dtor_nogc(&value);
+	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
 
@@ -33211,6 +33219,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		}
 	}
 
+	if (IS_CV == IS_VAR && 0) {
+		zval_ptr_dtor_nogc(&value);
+	}
+
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	CHECK_EXCEPTION();
@@ -35329,6 +35341,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			PZVAL_LOCK(value);
 			EX_T(opline->result.var).var.ptr = value;
 		}
+	}
+
+	if (IS_CV == IS_VAR && 0) {
+		zval_ptr_dtor_nogc(&value);
 	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
@@ -37450,6 +37466,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			PZVAL_LOCK(value);
 			EX_T(opline->result.var).var.ptr = value;
 		}
+	}
+
+	if (IS_CV == IS_VAR && 0) {
+		zval_ptr_dtor_nogc(&value);
 	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
@@ -40630,6 +40650,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			PZVAL_LOCK(value);
 			EX_T(opline->result.var).var.ptr = value;
 		}
+	}
+
+	if (IS_CV == IS_VAR && 0) {
+		zval_ptr_dtor_nogc(&value);
 	}
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
