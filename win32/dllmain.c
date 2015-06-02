@@ -40,6 +40,10 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	{
 		case DLL_PROCESS_ATTACH:
 			ret = ret && php_win32_init_gettimeofday();
+			if (!ret) {
+				fprintf(stderr, "gettimeofday() initialization failed");
+				return ret;
+			}
 			break;
 #if 0 /* prepared */
 		case DLL_PROCESS_DETACH:
