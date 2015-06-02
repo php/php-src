@@ -890,11 +890,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define SEPARATE_ARRAY(zv) do {							\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNT_P(_zv) > 1) {					\
+		zend_array *_arr = Z_ARR_P(_zv);				\
+		if (GC_REFCOUNT(_arr) > 1) {					\
 			if (!Z_IMMUTABLE_P(_zv)) {					\
-				Z_DELREF_P(_zv);						\
+				GC_REFCOUNT(_arr)--;					\
 			}											\
-			zval_copy_ctor_func(_zv);					\
+			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
 		}												\
 	} while (0)
 
