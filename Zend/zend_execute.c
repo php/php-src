@@ -2693,7 +2693,7 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		int __result; \
+		zend_ulong __result; \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			__result = (_result); \
 		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
