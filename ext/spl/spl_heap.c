@@ -249,9 +249,10 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, spl_ptr_heap_element elem, v
 	heap->ctor(elem TSRMLS_CC);
 
 	/* sifting up */
-	for(i = heap->count++; i > 0 && heap->cmp(heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
+	for(i = heap->count; i > 0 && heap->cmp(heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
 		heap->elements[i] = heap->elements[(i-1)/2];
 	}
+	heap->count++;
 
 	if (EG(exception)) {
 		/* exception thrown during comparison */
