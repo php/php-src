@@ -41,6 +41,10 @@
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
     node name). (Christoph Michael Becker)
 
+- SPL:
+  . Fixed bug #69737 (Segfault when SplMinHeap::compare produces fatal error).
+    (Stas)
+
 14 May 2015, PHP 5.5.25
 
 - Core:
