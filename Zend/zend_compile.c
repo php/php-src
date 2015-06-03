@@ -7140,8 +7140,12 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_ast *name_ast = ast->child[1];
 			zend_string *resolved_name;
 
-			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, name_ast, 1)) {
-				break;
+			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, name_ast, 0)) {
+				if (Z_TYPE(result) == IS_NULL) {
+					return;
+				} else {
+					break;
+				}
 			}
 
 			zend_eval_const_expr(&class_ast);
