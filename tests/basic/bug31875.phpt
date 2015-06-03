@@ -6,7 +6,18 @@ Willian Gustavo Veiga <contact@willianveiga.com>
 disable_functions=dl
 --FILE--
 <?php
-var_dump(in_array('dl', get_defined_functions()));
+$disabled_function = 'dl';
+
+$functions = get_defined_functions();
+var_dump(in_array($disabled_function, $functions['internal']));
+
+$functions = get_defined_functions(false);
+var_dump(in_array($disabled_function, $functions['internal']));
+
+$functions = get_defined_functions(true);
+var_dump(in_array($disabled_function, $functions['internal']));
 ?>
 --EXPECTF--
+bool(true)
+bool(true)
 bool(false)
