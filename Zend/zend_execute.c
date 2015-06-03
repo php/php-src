@@ -1236,6 +1236,133 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	}
 }
 
+static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
+{
+	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+		zval rv, obj;
+		zval *z;
+		zval z_copy;
+
+		ZVAL_OBJ(&obj, Z_OBJ_P(object));
+		Z_ADDREF(obj);
+		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(Z_OBJ(obj));
+			return;
+		}
+
+		if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+			zval rv2;
+			zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+			ZVAL_COPY_VALUE(z, value);
+		}
+		ZVAL_COPY(result, z);
+		ZVAL_DUP(&z_copy, z);
+		if (inc) {
+			increment_function(&z_copy);
+		} else {
+			decrement_function(&z_copy);
+		}
+		if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
+		OBJ_RELEASE(Z_OBJ(obj));
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
+	} else {
+		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+		ZVAL_NULL(result);
+	}
+}
+
+static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
+{
+	zval rv;
+
+	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+		zval *z, obj;
+				
+		ZVAL_OBJ(&obj, Z_OBJ_P(object));
+		Z_ADDREF(obj);
+		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(Z_OBJ(obj));
+			return;
+		}
+
+		if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+			zval rv2;
+			zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+			ZVAL_COPY_VALUE(z, value);
+		}
+		ZVAL_DEREF(z);
+		SEPARATE_ZVAL_NOREF(z);
+		if (inc) {
+			increment_function(z);
+		} else {
+			decrement_function(z);
+		}
+		if (UNEXPECTED(result)) {
+			ZVAL_COPY(result, z);
+		}
+		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+		OBJ_RELEASE(Z_OBJ(obj));
+		zval_ptr_dtor(z);
+	} else {
+		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+		if (UNEXPECTED(result)) {
+			ZVAL_NULL(result);
+		}
+	}
+}
+
+static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op, zval *result)
+{
+	zval *z;
+	zval rv, obj;
+	zval *zptr;
+
+	ZVAL_OBJ(&obj, Z_OBJ_P(object));
+	Z_ADDREF(obj);
+	if (Z_OBJ_HT(obj)->read_property &&
+		(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv)) != NULL) {
+		if (UNEXPECTED(EG(exception))) {
+			OBJ_RELEASE(Z_OBJ(obj));
+			return;
+		}
+		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+			zval rv2;
+			zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
+
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+			ZVAL_COPY_VALUE(z, value);
+		}
+		zptr = z;
+		ZVAL_DEREF(z);
+		SEPARATE_ZVAL_NOREF(z);
+		binary_op(z, z, value);
+		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+		if (UNEXPECTED(result)) {
+			ZVAL_COPY(result, z);
+		}
+		zval_ptr_dtor(zptr);
+	} else {
+		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		if (UNEXPECTED(result)) {
+			ZVAL_NULL(result);
+		}
+	}
+	OBJ_RELEASE(Z_OBJ(obj));
+}
+
 /* Utility Functions for Extensions */
 static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array)
 {
