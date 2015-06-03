@@ -2106,7 +2106,8 @@ ZEND_VM_C_LABEL(try_fetch_list):
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	} else if (OP1_TYPE != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
 		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
@@ -2118,7 +2119,7 @@ ZEND_VM_C_LABEL(try_fetch_list):
 		} else {
 			ZVAL_NULL(result);
 		}
-	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
 		container = Z_REFVAL_P(container);
 		ZEND_VM_C_GOTO(try_fetch_list);
 	} else {
@@ -2923,7 +2924,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 
 	if (OP1_TYPE != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -6564,7 +6565,8 @@ ZEND_VM_C_LABEL(num_index_prop):
 			ZEND_VM_C_GOTO(isset_dim_obj_array);
 		}
 	}
-	if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (OP1_TYPE == IS_UNUSED ||
+	    (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -7872,7 +7874,7 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||

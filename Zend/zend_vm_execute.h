@@ -4389,7 +4389,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(
 	SAVE_OPLINE();
 	value = EX_CONSTANT(opline->op1);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
@@ -5533,7 +5533,8 @@ try_fetch_list:
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	} else if (IS_CONST != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
 		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
@@ -5545,7 +5546,7 @@ try_fetch_list:
 		} else {
 			ZVAL_NULL(result);
 		}
-	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+	} else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
 		container = Z_REFVAL_P(container);
 		goto try_fetch_list;
 	} else {
@@ -5658,7 +5659,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CONST == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -6488,7 +6489,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CONST == IS_UNUSED ||
+	    (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -9382,7 +9384,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CONST == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -9970,7 +9972,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CONST == IS_UNUSED ||
+	    (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -11178,7 +11181,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 
 	if (IS_CONST != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CONST == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CONST & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -11717,7 +11720,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CONST == IS_UNUSED ||
+	    (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -12664,7 +12668,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZE
 	SAVE_OPLINE();
 	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (IS_TMP_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
@@ -16441,7 +16445,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZE
 	SAVE_OPLINE();
 	value = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (IS_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
@@ -23844,7 +23848,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_UNUSED == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -24269,7 +24273,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_UNUSED == IS_UNUSED ||
+	    (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -26204,7 +26209,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_UNUSED == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -26520,7 +26525,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_UNUSED == IS_UNUSED ||
+	    (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -27670,7 +27676,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 
 	if (IS_UNUSED != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_UNUSED == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_UNUSED & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -27988,7 +27994,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_UNUSED == IS_UNUSED ||
+	    (IS_UNUSED != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -29813,7 +29820,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEN
 	SAVE_OPLINE();
 	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
@@ -31669,7 +31676,8 @@ try_fetch_list:
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	} else if (IS_CV != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
 		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
@@ -31681,7 +31689,7 @@ try_fetch_list:
 		} else {
 			ZVAL_NULL(result);
 		}
-	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
 		container = Z_REFVAL_P(container);
 		goto try_fetch_list;
 	} else {
@@ -31965,7 +31973,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 
 	if (IS_CV != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -32635,7 +32643,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CV == IS_UNUSED ||
+	    (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -37051,7 +37060,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 
 	if (IS_CV != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -37537,7 +37546,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CV == IS_UNUSED ||
+	    (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -39628,7 +39638,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 
 	if (IS_CV != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (IS_CV == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((IS_CV & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -40116,7 +40126,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if (IS_CV == IS_UNUSED ||
+	    (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -41724,7 +41735,8 @@ try_fetch_list:
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
 		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
@@ -41736,7 +41748,7 @@ try_fetch_list:
 		} else {
 			ZVAL_NULL(result);
 		}
-	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
 		container = Z_REFVAL_P(container);
 		goto try_fetch_list;
 	} else {
@@ -41849,7 +41861,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -42252,7 +42264,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED ||
+	    ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -43988,7 +44001,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -44206,7 +44219,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED ||
+	    ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
@@ -45115,7 +45129,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
@@ -45334,7 +45348,8 @@ num_index_prop:
 			goto isset_dim_obj_array;
 		}
 	}
-	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED ||
+	    ((IS_TMP_VAR|IS_VAR) != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
 				((opline->extended_value & ZEND_ISSET) == 0) ^
