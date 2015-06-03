@@ -4659,12 +4659,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CONST_HANDLE
 {
 	USE_OPLINE
 
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		EX_CONSTANT(opline->op2));
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = EX_CONSTANT(opline->op2);
 
+	do {
+		if ((IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -5533,16 +5574,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CONST_H
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -8545,12 +8608,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
+	do {
+		if ((IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -9194,16 +9298,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -10316,12 +10442,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		EX_CONSTANT(opline->op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	op1 = EX_CONSTANT(opline->op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
+	do {
+		if ((IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    ((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -10927,16 +11094,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -30317,12 +30506,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 {
 	USE_OPLINE
 
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		EX_CONSTANT(opline->op2));
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = EX_CONSTANT(opline->op2);
 
+	do {
+		if ((IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -32168,16 +32398,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -35573,12 +35825,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 {
 	USE_OPLINE
 
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
+	do {
+		if ((IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -37261,16 +37554,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -38286,12 +38601,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	op1 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
+	do {
+		if ((IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    ((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+
+	} while (0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -39849,16 +40205,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
@@ -41333,12 +41711,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		EX_CONSTANT(opline->op2));
-	zval_ptr_dtor_nogc(free_op1);
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = EX_CONSTANT(opline->op2);
+
+	do {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if (IS_CONST != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+		zval_ptr_dtor_nogc(free_op1);
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -42008,16 +42427,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CONST != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CONST == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CONST != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -43636,12 +44077,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
-	zval_ptr_dtor_nogc(free_op1);
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+	do {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if (IS_CV != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+		zval_ptr_dtor_nogc(free_op1);
+	} while (0);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -44085,16 +44567,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (IS_CV != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (IS_CV == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (IS_CV != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (IS_CV != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 	zval_ptr_dtor_nogc(free_op1);
 
 	CHECK_EXCEPTION();
@@ -44700,12 +45204,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
-		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
-	zval_ptr_dtor_nogc(free_op1);
+	op1 = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+	op2 = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+
+	do {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    ((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+					zval_ptr_dtor_nogc(free_op1);
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+//				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+		zval_ptr_dtor_nogc(free_op1);
+	} while (0);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -45150,16 +45695,38 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 	} else {
 		op2_str = zval_get_string(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	CHECK_EXCEPTION();
