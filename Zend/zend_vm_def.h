@@ -280,7 +280,6 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;

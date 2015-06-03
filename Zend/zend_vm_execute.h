@@ -4691,7 +4691,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CONST_HANDLE
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -8640,7 +8639,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -10474,7 +10472,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -30538,7 +30535,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -35857,7 +35853,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -38633,7 +38628,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -41743,7 +41737,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -44109,7 +44102,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
@@ -45236,7 +45228,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-//				memcpy(str->val, op1_str->val, op1_str->len);
 				memcpy(str->val + len, op2_str->val, op2_str->len+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
