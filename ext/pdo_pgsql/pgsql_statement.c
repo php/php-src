@@ -220,7 +220,7 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && !stmt->column_count) {
+	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
 		stmt->column_count = (int) PQnfields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
@@ -614,6 +614,12 @@ done:
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+
+	if (S->cols != NULL){
+		efree(S->cols);
+		S->cols = NULL;
+	}
 	return 1;
 }
 
