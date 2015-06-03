@@ -3090,11 +3090,16 @@ PHP_FUNCTION(array_column)
 	array_init(return_value);
 	ZEND_HASH_FOREACH_VAL(arr_hash, data) {
 		ZVAL_DEREF(data);
-		if (Z_TYPE_P(data) != IS_ARRAY) {
+		if (Z_TYPE_P(data) == IS_OBJECT) {
+			if (zcolumn) {
+				/* properties are always string based */
+				convert_to_string_ex(zcolumn);
+			}
+		} else if (Z_TYPE_P(data) != IS_ARRAY) {
 			/* Skip elemens which are not sub-arrays */
 			continue;
 		}
-		ht = Z_ARRVAL_P(data);
+		ht = HASH_OF(data);
 
 		if (!zcolumn) {
 			/* NULL column ID means use entire subarray as data */
@@ -3112,10 +3117,16 @@ PHP_FUNCTION(array_column)
 		/* Failure will leave zkeyval alone which will land us on the final else block below
 		 * which is to append the value as next_index
 		 */
-		if (zkey && (Z_TYPE_P(zkey) == IS_STRING)) {
-			zkeyval = zend_hash_find(ht, Z_STR_P(zkey));
-		} else if (zkey && (Z_TYPE_P(zkey) == IS_LONG)) {
-			zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
+		if (zkey) {
+			if (Z_TYPE_P(data) == IS_OBJECT) {
+				/* properties are always string based */
+				convert_to_string_ex(zkey);
+			}
+			if (Z_TYPE_P(zkey) == IS_STRING) {
+				zkeyval = zend_hash_find(ht, Z_STR_P(zkey));
+			} else if (Z_TYPE_P(zkey) == IS_LONG) {
+				zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
+			}
 		}
 
 		Z_TRY_ADDREF_P(zcolval);
