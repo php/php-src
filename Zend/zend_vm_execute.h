@@ -6468,8 +6468,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -6489,42 +6488,42 @@ num_index_prop:
 	}
 	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CONST & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -6571,10 +6570,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -9949,8 +9947,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -9970,42 +9967,42 @@ num_index_prop:
 	}
 	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CV & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -10052,10 +10049,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -11695,8 +11691,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -11716,42 +11711,42 @@ num_index_prop:
 	}
 	if (IS_CONST == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -11798,10 +11793,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CO
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -24536,8 +24530,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -24557,42 +24550,42 @@ num_index_prop:
 	}
 	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CONST & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -24639,10 +24632,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -26864,8 +26856,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -26885,42 +26876,42 @@ num_index_prop:
 	}
 	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CV & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -26967,10 +26958,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -28409,8 +28399,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -28430,42 +28419,42 @@ num_index_prop:
 	}
 	if (IS_UNUSED == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -28512,10 +28501,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -33129,8 +33117,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -33150,42 +33137,42 @@ num_index_prop:
 	}
 	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CONST & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -33232,10 +33219,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -38100,8 +38086,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -38121,42 +38106,42 @@ num_index_prop:
 	}
 	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CV & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -38203,10 +38188,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 
@@ -40752,8 +40736,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -40773,42 +40756,42 @@ num_index_prop:
 	}
 	if (IS_CV == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -40855,10 +40838,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -42888,8 +42870,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -42909,42 +42890,42 @@ num_index_prop:
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CONST & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -42991,10 +42972,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -44842,8 +44822,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -44863,42 +44842,42 @@ num_index_prop:
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if (IS_CV & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -44945,10 +44924,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -45970,8 +45948,7 @@ num_index_prop:
 					goto isset_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
+					goto isset_not_found;
 			}
 		}
 
@@ -45991,42 +45968,42 @@ num_index_prop:
 	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+isset_str_offset:
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				goto isset_not_found;
+			}
+		} else {
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				goto isset_str_offset;
 			}
-		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			goto isset_not_found;
 		}
 	} else {
+isset_not_found:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
@@ -46073,10 +46050,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 isset_no_object:
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
