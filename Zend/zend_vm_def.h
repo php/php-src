@@ -2258,7 +2258,6 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 		HANDLE_EXCEPTION();
 	}
 
-ZEND_VM_C_LABEL(try_assign_dim):
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 ZEND_VM_C_LABEL(try_assign_dim_array):
 		if (OP2_TYPE == IS_UNUSED) {
@@ -2286,53 +2285,58 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 		}
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
-		zend_free_op free_op2;
-		zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
-		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
-		FREE_OP2();
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			if (OP2_TYPE == IS_UNUSED) {
-				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
-				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-				FREE_OP1_VAR_PTR();
-				HANDLE_EXCEPTION();
-			} else {
-				zend_long offset;
-
-				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-				FREE_OP2();
-				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-				FREE_OP(free_op_data1);
-			}
-		} else {
-			zval_ptr_dtor_nogc(object_ptr);
-ZEND_VM_C_LABEL(assign_dim_convert_to_array):
-			ZVAL_NEW_ARR(object_ptr);
-			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
-			ZEND_VM_C_GOTO(try_assign_dim_array);
-		}
-	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
-		object_ptr = Z_REFVAL_P(object_ptr);
-		ZEND_VM_C_GOTO(try_assign_dim);
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
-			ZEND_VM_C_GOTO(assign_dim_clean);
-		}
-		ZEND_VM_C_GOTO(assign_dim_convert_to_array);
 	} else {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		if (EXPECTED(Z_ISREF_P(object_ptr))) {
+			object_ptr = Z_REFVAL_P(object_ptr);
+			if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
+				ZEND_VM_C_GOTO(try_assign_dim_array);
+			}
+		}
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
+			zend_free_op free_op2;
+			zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
+			zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
+			FREE_OP2();
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+				if (OP2_TYPE == IS_UNUSED) {
+					zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+					FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+					FREE_OP1_VAR_PTR();
+					HANDLE_EXCEPTION();
+				} else {
+					zend_long offset;
+
+					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+					offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+					FREE_OP2();
+					value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+					zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+					FREE_OP(free_op_data1);
+				}
+			} else {
+				zval_ptr_dtor_nogc(object_ptr);
+ZEND_VM_C_LABEL(assign_dim_convert_to_array):
+				ZVAL_NEW_ARR(object_ptr);
+				zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+				ZEND_VM_C_GOTO(try_assign_dim_array);
+			}
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+				ZEND_VM_C_GOTO(assign_dim_clean);
+			}
+			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
+		} else {
+			zend_error(E_WARNING, "Cannot use a scalar value as an array");
 ZEND_VM_C_LABEL(assign_dim_clean):
-		dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		FREE_OP2();
-		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		FREE_OP(free_op_data1);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			FREE_OP2();
+			value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			FREE_OP(free_op_data1);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 		}
 	}
  	FREE_OP1_VAR_PTR();
