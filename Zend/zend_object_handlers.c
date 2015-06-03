@@ -265,15 +265,14 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 
 static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
 {
-	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PUBLIC:
-			return 1;
-		case ZEND_ACC_PROTECTED:
-			return zend_check_protected(property_info->ce, EG(scope));
-		case ZEND_ACC_PRIVATE:
-			return (ce == EG(scope) || property_info->ce == EG(scope));
+	if (property_info->flags & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
+		return (ce == EG(scope) || property_info->ce == EG(scope));
+	} else {
+		ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+		return zend_check_protected(property_info->ce, EG(scope));
 	}
-	return 0;
 }
 /* }}} */
 
