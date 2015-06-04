@@ -3098,7 +3098,6 @@ PHP_FUNCTION(array_column)
 	zval *zcolumn = NULL, *zkey = NULL, *data;
 	HashTable *arr_hash;
 	zval *zcolval = NULL, *zkeyval = NULL, rvc, rvk;
-	HashTable *ht;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hz!|z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
 		return;
@@ -3137,6 +3136,12 @@ PHP_FUNCTION(array_column)
 			zend_string_release(key);
 		} else {
 			add_next_index_zval(return_value, zcolval);
+		}
+		if (zcolval == &rvc) {
+			zval_ptr_dtor(&rvc);
+		}
+		if (zkeyval == &rvk) {
+			zval_ptr_dtor(&rvk);
 		}
 	} ZEND_HASH_FOREACH_END();
 }

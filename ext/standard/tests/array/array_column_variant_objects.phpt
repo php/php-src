@@ -29,12 +29,12 @@ class Something
 {
 	public function __isset($name)
 	{
-		return $name == 'id';
+		return $name == 'first_name';
 	}
 
 	public function __get($name)
 	{
-		return "something";
+		return new User(4, 'Jack', 'Sparrow');
 	}
 }
 
@@ -118,24 +118,31 @@ array(3) {
 }
 *** Testing array_column() : object property fetching (string property names) ***
 -- first_name column from recordset --
-array(3) {
+array(4) {
   [0]=>
   string(4) "John"
   [1]=>
   string(5) "Sally"
   [2]=>
   string(4) "Jane"
+  [3]=>
+  object(User)#8 (3) {
+    ["id"]=>
+    int(4)
+    ["first_name"]=>
+    string(4) "Jack"
+    ["last_name"]=>
+    string(7) "Sparrow"
+  }
 }
 -- id column from recordset --
-array(4) {
+array(3) {
   [0]=>
   int(1)
   [1]=>
   int(2)
   [2]=>
   int(3)
-  [3]=>
-  string(9) "something"
 }
 -- last_name column from recordset, keyed by value from id column --
 array(3) {
