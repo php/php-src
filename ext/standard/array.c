@@ -3092,26 +3092,33 @@ PHP_FUNCTION(array_column)
 		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) == IS_OBJECT) {
 			if (zcolumn) {
+				zval rv;
 				/* properties are always string based */
 				convert_to_string_ex(zcolumn);
+				zcolval = zend_read_property(Z_OBJCE_P(data), data, Z_STRVAL_P(zcolumn), Z_STRLEN_P(zcolumn), 1, &rv);
+				if (Z_TYPE_P(zcolval) == IS_NULL) {
+					continue;
+				}
 			}
-		} else if (Z_TYPE_P(data) != IS_ARRAY) {
-			/* Skip elemens which are not sub-arrays */
+		} else if (Z_TYPE_P(data) == IS_ARRAY) {
+			ht = Z_ARRVAL_P(data);
+			if (zcolumn) {
+				if (Z_TYPE_P(zcolumn) == IS_STRING && 
+					(zcolval = zend_hash_find(ht, Z_STR_P(zcolumn))) == NULL) {
+					continue;
+				} else if (Z_TYPE_P(zcolumn) == IS_LONG && 
+					(zcolval = zend_hash_index_find(ht, Z_LVAL_P(zcolumn))) == NULL) {
+					continue;
+				}
+			}
+		} else {
+			/* not an array or object */
 			continue;
 		}
-		ht = HASH_OF(data);
 
 		if (!zcolumn) {
 			/* NULL column ID means use entire subarray as data */
 			zcolval = data;
-
-			/* Otherwise, skip if the value doesn't exist in our subarray */
-		} else if ((Z_TYPE_P(zcolumn) == IS_STRING) &&
-		    ((zcolval = zend_hash_find(ht, Z_STR_P(zcolumn))) == NULL)) {
-			continue;
-		} else if ((Z_TYPE_P(zcolumn) == IS_LONG) &&
-		    ((zcolval = zend_hash_index_find(ht, Z_LVAL_P(zcolumn))) == NULL)) {
-			continue;
 		}
 
 		/* Failure will leave zkeyval alone which will land us on the final else block below
@@ -3119,13 +3126,16 @@ PHP_FUNCTION(array_column)
 		 */
 		if (zkey) {
 			if (Z_TYPE_P(data) == IS_OBJECT) {
+				zval rv;
 				/* properties are always string based */
 				convert_to_string_ex(zkey);
-			}
-			if (Z_TYPE_P(zkey) == IS_STRING) {
-				zkeyval = zend_hash_find_ind(ht, Z_STR_P(zkey));
-			} else if (Z_TYPE_P(zkey) == IS_LONG) {
-				zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
+				zkeyval = zend_read_property(Z_OBJCE_P(data), data, Z_STRVAL_P(zkey), Z_STRLEN_P(zkey), 1, &rv);
+			} else {
+				if (Z_TYPE_P(zkey) == IS_STRING) {
+					zkeyval = zend_hash_find_ind(ht, Z_STR_P(zkey));
+				} else if (Z_TYPE_P(zkey) == IS_LONG) {
+					zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
+				}
 			}
 		}
 
