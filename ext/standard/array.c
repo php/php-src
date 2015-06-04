@@ -3123,7 +3123,7 @@ PHP_FUNCTION(array_column)
 				convert_to_string_ex(zkey);
 			}
 			if (Z_TYPE_P(zkey) == IS_STRING) {
-				zkeyval = zend_hash_find(ht, Z_STR_P(zkey));
+				zkeyval = zend_hash_find_ind(ht, Z_STR_P(zkey));
 			} else if (Z_TYPE_P(zkey) == IS_LONG) {
 				zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
 			}
