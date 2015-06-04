@@ -1047,12 +1047,60 @@ ZEND_VM_HANDLER(31, ZEND_ASSIGN_BW_OR, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV)
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED && OP2_TYPE != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_W);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			FREE_OP1();
+			FREE_OP2();
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_or_function);
+
+#if !defined(ZEND_VM_SPEC) || (OP2_TYPE != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, bitwise_or_function);
 	}
-#else
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_or_function);
 #endif
 }
 
@@ -1067,12 +1115,60 @@ ZEND_VM_HANDLER(32, ZEND_ASSIGN_BW_AND, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV)
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED && OP2_TYPE != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_W);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			FREE_OP1();
+			FREE_OP2();
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_and_function);
+
+#if !defined(ZEND_VM_SPEC) || (OP2_TYPE != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, bitwise_and_function);
 	}
-#else
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_and_function);
 #endif
 }
 
@@ -1087,12 +1183,60 @@ ZEND_VM_HANDLER(33, ZEND_ASSIGN_BW_XOR, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV)
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED && OP2_TYPE != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_W);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			FREE_OP1();
+			FREE_OP2();
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_xor_function);
+
+#if !defined(ZEND_VM_SPEC) || (OP2_TYPE != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, bitwise_xor_function);
 	}
-#else
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_dim_helper, binary_op, bitwise_xor_function);
 #endif
 }
 
