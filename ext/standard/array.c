@@ -3068,16 +3068,15 @@ zend_bool array_column_param_helper(zval *param,
 }
 /* }}} */
 
-static inline zval *array_column_fetch_prop(zval *data, zval *name)
+static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 {
 	zval *prop = NULL;
 
 	if (Z_TYPE_P(data) == IS_OBJECT) {
 		zend_string *key = zval_get_string(name);
-		zval rv;
 
-		if (!Z_OBJ_HANDLER_P(data, has_property) || Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)) {
-			prop = zend_read_property(Z_OBJCE_P(data), data, key->val, key->len, 1, &rv);
+		if (!Z_OBJ_HANDLER_P(data, has_property) || Z_OBJ_HANDLER_P(data, has_property)(data, name, 1, NULL)) {
+			prop = zend_read_property(Z_OBJCE_P(data), data, key->val, key->len, 1, rv);
 		}
 		zend_string_release(key);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
@@ -3098,7 +3097,7 @@ PHP_FUNCTION(array_column)
 {
 	zval *zcolumn = NULL, *zkey = NULL, *data;
 	HashTable *arr_hash;
-	zval *zcolval = NULL, *zkeyval = NULL;
+	zval *zcolval = NULL, *zkeyval = NULL, rvc, rvk;
 	HashTable *ht;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hz!|z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
@@ -3116,7 +3115,7 @@ PHP_FUNCTION(array_column)
 
 		if (!zcolumn) {
 			zcolval = data;
-		} else if ((zcolval = array_column_fetch_prop(data, zcolumn)) == NULL) {
+		} else if ((zcolval = array_column_fetch_prop(data, zcolumn, &rvc)) == NULL) {
 			continue;
 		}
 
@@ -3124,7 +3123,7 @@ PHP_FUNCTION(array_column)
 		 * which is to append the value as next_index
 		 */
 		if (zkey) {
-			zkeyval = array_column_fetch_prop(data, zkey);
+			zkeyval = array_column_fetch_prop(data, zkey, &rvk);
 		}
 
 		Z_TRY_ADDREF_P(zcolval);

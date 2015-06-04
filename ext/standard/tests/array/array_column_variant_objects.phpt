@@ -25,6 +25,19 @@ function newUser($id, $first_name, $last_name)
     return $o;
 }
 
+class Something
+{
+	public function __isset($name)
+	{
+		return $name == 'id';
+	}
+
+	public function __get($name)
+	{
+		return "something";
+	}
+}
+
 $records = array(
     newUser(1, 'John', 'Doe'),
     newUser(2, 'Sally', 'Smith'),
@@ -32,6 +45,7 @@ $records = array(
     new User(1, 'John', 'Doe'),
     new User(2, 'Sally', 'Smith'),
     new User(3, 'Jane', 'Jones'),
+	new Something,
 );
 
 echo "*** Testing array_column() : object property fetching (numeric property names) ***\n";
@@ -113,13 +127,15 @@ array(3) {
   string(4) "Jane"
 }
 -- id column from recordset --
-array(3) {
+array(4) {
   [0]=>
   int(1)
   [1]=>
   int(2)
   [2]=>
   int(3)
+  [3]=>
+  string(9) "something"
 }
 -- last_name column from recordset, keyed by value from id column --
 array(3) {
