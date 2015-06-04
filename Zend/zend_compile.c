@@ -5722,6 +5722,15 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 				}
 			}
 		}
+		if (opcode == ZEND_CONCAT) {
+			/* convert constant operands to strings at compile-time */
+			if (left_node.op_type == IS_CONST) {
+				convert_to_string(&left_node.u.constant);
+			}
+			if (right_node.op_type == IS_CONST) {
+				convert_to_string(&right_node.u.constant);
+			}
+		}
 		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
 	} while (0);
 }
