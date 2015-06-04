@@ -3068,6 +3068,29 @@ zend_bool array_column_param_helper(zval *param,
 }
 /* }}} */
 
+static inline zval *array_column_fetch_prop(zval *data, zval *name)
+{
+	zval *prop = NULL;
+
+	if (Z_TYPE_P(data) == IS_OBJECT) {
+		zend_string *key = zval_get_string(name);
+		zval rv;
+
+		if (!Z_OBJ_HANDLER_P(data, has_property) || Z_OBJ_HANDLER_P(data, has_property)(data, name, 2, NULL)) {
+			prop = zend_read_property(Z_OBJCE_P(data), data, key->val, key->len, 1, &rv);
+		}
+		zend_string_release(key);
+	} else if (Z_TYPE_P(data) == IS_ARRAY) {
+		if (Z_TYPE_P(name) == IS_STRING) {
+			prop = zend_hash_find(Z_ARRVAL_P(data), Z_STR_P(name));
+		} else if (Z_TYPE_P(name) == IS_LONG) {
+			prop = zend_hash_index_find(Z_ARRVAL_P(data), Z_LVAL_P(name));
+		}
+	}
+
+	return prop;
+}
+
 /* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
@@ -3090,53 +3113,18 @@ PHP_FUNCTION(array_column)
 	array_init(return_value);
 	ZEND_HASH_FOREACH_VAL(arr_hash, data) {
 		ZVAL_DEREF(data);
-		if (Z_TYPE_P(data) == IS_OBJECT) {
-			if (zcolumn) {
-				zval rv;
-				/* properties are always string based */
-				convert_to_string_ex(zcolumn);
-				zcolval = zend_read_property(Z_OBJCE_P(data), data, Z_STRVAL_P(zcolumn), Z_STRLEN_P(zcolumn), 1, &rv);
-				if (Z_TYPE_P(zcolval) == IS_NULL) {
-					continue;
-				}
-			}
-		} else if (Z_TYPE_P(data) == IS_ARRAY) {
-			ht = Z_ARRVAL_P(data);
-			if (zcolumn) {
-				if (Z_TYPE_P(zcolumn) == IS_STRING && 
-					(zcolval = zend_hash_find(ht, Z_STR_P(zcolumn))) == NULL) {
-					continue;
-				} else if (Z_TYPE_P(zcolumn) == IS_LONG && 
-					(zcolval = zend_hash_index_find(ht, Z_LVAL_P(zcolumn))) == NULL) {
-					continue;
-				}
-			}
-		} else {
-			/* not an array or object */
-			continue;
-		}
 
 		if (!zcolumn) {
-			/* NULL column ID means use entire subarray as data */
 			zcolval = data;
+		} else if ((zcolval = array_column_fetch_prop(data, zcolumn)) == NULL) {
+			continue;
 		}
 
 		/* Failure will leave zkeyval alone which will land us on the final else block below
 		 * which is to append the value as next_index
 		 */
 		if (zkey) {
-			if (Z_TYPE_P(data) == IS_OBJECT) {
-				zval rv;
-				/* properties are always string based */
-				convert_to_string_ex(zkey);
-				zkeyval = zend_read_property(Z_OBJCE_P(data), data, Z_STRVAL_P(zkey), Z_STRLEN_P(zkey), 1, &rv);
-			} else {
-				if (Z_TYPE_P(zkey) == IS_STRING) {
-					zkeyval = zend_hash_find_ind(ht, Z_STR_P(zkey));
-				} else if (Z_TYPE_P(zkey) == IS_LONG) {
-					zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
-				}
-			}
+			zkeyval = array_column_fetch_prop(data, zkey);
 		}
 
 		Z_TRY_ADDREF_P(zcolval);
