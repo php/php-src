@@ -17469,7 +17469,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -19110,7 +19110,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -20640,7 +20640,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -22293,7 +22293,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_VAR == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -31649,7 +31649,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -34385,7 +34385,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -36644,7 +36644,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;
@@ -39292,7 +39292,7 @@ assign_dim_convert_to_array:
 				goto try_assign_dim_array;
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (IS_CV == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				goto assign_dim_clean;
 			}
 			goto assign_dim_convert_to_array;

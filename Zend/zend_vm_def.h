@@ -2229,7 +2229,7 @@ ZEND_VM_C_LABEL(assign_dim_convert_to_array):
 				ZEND_VM_C_GOTO(try_assign_dim_array);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
 				ZEND_VM_C_GOTO(assign_dim_clean);
 			}
 			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
