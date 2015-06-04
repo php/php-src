@@ -16,34 +16,34 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: fastcgi.c 287777 2009-08-26 19:17:32Z pajoye $ */
+/* $Id$ */
 
 #include "php.h"
-#include "fastcgi.h"
+#include "php_network.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <limits.h>
 
-#include <php_config.h>
-#include "fpm.h"
-#include "fpm_request.h"
-#include "zlog.h"
+#ifndef MAXFQDNLEN
+#define MAXFQDNLEN 255
+#endif
 
 #ifdef _WIN32
 
 #include <windows.h>
 
-	struct sockaddr_un {
-		short   sun_family;
-		char    sun_path[MAXPATHLEN];
-	};
+typedef unsigned int in_addr_t;
 
-	static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
-	static int is_impersonate = 0;
+struct sockaddr_un {
+	short   sun_family;
+	char    sun_path[MAXPATHLEN];
+};
+
+static HANDLE fcgi_accept_mutex = INVALID_HANDLE_VALUE;
+static int is_impersonate = 0;
 
 #define FCGI_LOCK(fd) \
 	if (fcgi_accept_mutex != INVALID_HANDLE_VALUE) { \
@@ -71,11 +71,10 @@
 # include <sys/socket.h>
 # include <sys/un.h>
 # include <netinet/in.h>
+# include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
-
-# define closesocket(s) close(s)
 
 # if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
@@ -131,6 +130,13 @@
 
 #endif
 
+#include "fastcgi.h"
+
+/* maybe it's better to use weak name instead */
+#ifndef HAVE_ATTRIBUTE_WEAK
+static fcgi_logger fcgi_log;
+#endif
+
 typedef union _sa_t {
 	struct sockaddr     sa;
 	struct sockaddr_un  sa_unix;
@@ -141,47 +147,12 @@ typedef union _sa_t {
 static HashTable fcgi_mgmt_vars;
 
 static int is_initialized = 0;
+static int is_fastcgi = 0;
 static int in_shutdown = 0;
 static sa_t *allowed_clients = NULL;
-
 static sa_t client_sa;
 
 /* hash table */
-
-#define FCGI_HASH_TABLE_SIZE 128
-#define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
-#define FCGI_HASH_SEG_SIZE   4096
-
-typedef struct _fcgi_hash_bucket {
-	unsigned int              hash_value;
-	unsigned int              var_len;
-	char                     *var;
-	unsigned int              val_len;
-	char                     *val;
-	struct _fcgi_hash_bucket *next;
-	struct _fcgi_hash_bucket *list_next;
-} fcgi_hash_bucket;
-
-typedef struct _fcgi_hash_buckets {
-	unsigned int	           idx;
-	struct _fcgi_hash_buckets *next;
-	struct _fcgi_hash_bucket   data[FCGI_HASH_TABLE_SIZE];
-} fcgi_hash_buckets;
-
-typedef struct _fcgi_data_seg {
-	char                  *pos;
-	char                  *end;
-	struct _fcgi_data_seg *next;
-	char                   data[1];
-} fcgi_data_seg;
-
-typedef struct _fcgi_hash {
-	fcgi_hash_bucket  *hash_table[FCGI_HASH_TABLE_SIZE];
-	fcgi_hash_bucket  *list;
-	fcgi_hash_buckets *buckets;
-	fcgi_data_seg     *data;
-} fcgi_hash;
-
 static void fcgi_hash_init(fcgi_hash *h)
 {
 	memset(h->hash_table, 0, sizeof(h->hash_table));
@@ -341,31 +312,6 @@ static void fcgi_hash_apply(fcgi_hash *h, fcgi_apply_func func, void *arg)
 	}
 }
 
-struct _fcgi_request {
-	int            listen_socket;
-#ifdef _WIN32
-	int            tcp;
-#endif
-	int            fd;
-	int            id;
-	int            keep;
-#ifdef TCP_NODELAY
-	int            nodelay;
-#endif
-	int            closed;
-
-	int            in_len;
-	int            in_pad;
-
-	fcgi_header   *out_hdr;
-	unsigned char *out_pos;
-	unsigned char  out_buf[1024*8];
-	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
-
-	int            has_env;
-	fcgi_hash      env;
-};
-
 #ifdef _WIN32
 
 static DWORD WINAPI fcgi_shutdown_thread(LPVOID arg)
@@ -401,6 +347,11 @@ static void fcgi_setup_signals(void)
 }
 #endif
 
+void fcgi_set_in_shutdown(int new_value)
+{
+	in_shutdown = new_value;
+}
+
 int fcgi_in_shutdown(void)
 {
 	return in_shutdown;
@@ -411,11 +362,29 @@ void fcgi_terminate(void)
 	in_shutdown = 1;
 }
 
+#ifndef HAVE_ATTRIBUTE_WEAK
+void fcgi_set_logger(fcgi_logger lg) {
+	fcgi_log = lg;
+}
+#else
+void __attribute__((weak)) fcgi_log(int type, const char *format, ...) {
+	va_list ap;
+
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+#endif
+
 int fcgi_init(void)
 {
 	if (!is_initialized) {
+#ifndef _WIN32
+		sa_t sa;
+		socklen_t len = sizeof(sa);
+#endif
 		zend_hash_init(&fcgi_mgmt_vars, 8, NULL, fcgi_free_mgmt_var_cb, 1);
-		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS") - 1, "0", sizeof("0")-1);
+		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
 
 		is_initialized = 1;
 #ifdef _WIN32
@@ -428,7 +397,9 @@ int fcgi_init(void)
 			return 0;
 		}
 # endif
-		{
+		if ((GetStdHandle(STD_OUTPUT_HANDLE) == INVALID_HANDLE_VALUE) &&
+		    (GetStdHandle(STD_ERROR_HANDLE)  == INVALID_HANDLE_VALUE) &&
+		    (GetStdHandle(STD_INPUT_HANDLE)  != INVALID_HANDLE_VALUE)) {
 			char *str;
 			DWORD pipe_mode = PIPE_READMODE_BYTE | PIPE_WAIT;
 			HANDLE pipe = GetStdHandle(STD_INPUT_HANDLE);
@@ -437,7 +408,11 @@ int fcgi_init(void)
 
 			str = getenv("_FCGI_SHUTDOWN_EVENT_");
 			if (str != NULL) {
-				HANDLE shutdown_event = (HANDLE) atoi(str);
+				zend_long ev;
+				HANDLE shutdown_event;
+
+				ZEND_ATOL(ev, str);
+				shutdown_event = (HANDLE) ev;
 				if (!CreateThread(NULL, 0, fcgi_shutdown_thread,
 				                  shutdown_event, 0, NULL)) {
 					return -1;
@@ -445,21 +420,35 @@ int fcgi_init(void)
 			}
 			str = getenv("_FCGI_MUTEX_");
 			if (str != NULL) {
-				fcgi_accept_mutex = (HANDLE) atoi(str);
+				zend_long mt;
+				ZEND_ATOL(mt, str);
+				fcgi_accept_mutex = (HANDLE) mt;
 			}
-			return 1;
+			return is_fastcgi = 1;
+		} else {
+			return is_fastcgi = 0;
 		}
 #else
-		fcgi_setup_signals();
-		return 1;
+		errno = 0;
+		if (getpeername(0, (struct sockaddr *)&sa, &len) != 0 && errno == ENOTCONN) {
+			fcgi_setup_signals();
+			return is_fastcgi = 1;
+		} else {
+			return is_fastcgi = 0;
+		}
 #endif
 	}
-	return 1;
+	return is_fastcgi;
 }
 
-void fcgi_set_in_shutdown(int new_value)
+
+int fcgi_is_fastcgi(void)
 {
-	in_shutdown = new_value;
+	if (!is_initialized) {
+		return fcgi_init();
+	} else {
+		return is_fastcgi;
+	}
 }
 
 void fcgi_shutdown(void)
@@ -467,9 +456,271 @@ void fcgi_shutdown(void)
 	if (is_initialized) {
 		zend_hash_destroy(&fcgi_mgmt_vars);
 	}
+	is_fastcgi = 0;
 	if (allowed_clients) {
 		free(allowed_clients);
 	}
+}
+
+#ifdef _WIN32
+/* Do some black magic with the NT security API.
+ * We prepare a DACL (Discretionary Access Control List) so that
+ * we, the creator, are allowed all access, while "Everyone Else"
+ * is only allowed to read and write to the pipe.
+ * This avoids security issues on shared hosts where a luser messes
+ * with the lower-level pipe settings and screws up the FastCGI service.
+ */
+static PACL prepare_named_pipe_acl(PSECURITY_DESCRIPTOR sd, LPSECURITY_ATTRIBUTES sa)
+{
+	DWORD req_acl_size;
+	char everyone_buf[32], owner_buf[32];
+	PSID sid_everyone, sid_owner;
+	SID_IDENTIFIER_AUTHORITY
+		siaWorld = SECURITY_WORLD_SID_AUTHORITY,
+		siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
+	PACL acl;
+
+	sid_everyone = (PSID)&everyone_buf;
+	sid_owner = (PSID)&owner_buf;
+
+	req_acl_size = sizeof(ACL) +
+		(2 * ((sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD)) + GetSidLengthRequired(1)));
+
+	acl = malloc(req_acl_size);
+
+	if (acl == NULL) {
+		return NULL;
+	}
+
+	if (!InitializeSid(sid_everyone, &siaWorld, 1)) {
+		goto out_fail;
+	}
+	*GetSidSubAuthority(sid_everyone, 0) = SECURITY_WORLD_RID;
+
+	if (!InitializeSid(sid_owner, &siaCreator, 1)) {
+		goto out_fail;
+	}
+	*GetSidSubAuthority(sid_owner, 0) = SECURITY_CREATOR_OWNER_RID;
+
+	if (!InitializeAcl(acl, req_acl_size, ACL_REVISION)) {
+		goto out_fail;
+	}
+
+	if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_GENERIC_READ | FILE_GENERIC_WRITE, sid_everyone)) {
+		goto out_fail;
+	}
+
+	if (!AddAccessAllowedAce(acl, ACL_REVISION, FILE_ALL_ACCESS, sid_owner)) {
+		goto out_fail;
+	}
+
+	if (!InitializeSecurityDescriptor(sd, SECURITY_DESCRIPTOR_REVISION)) {
+		goto out_fail;
+	}
+
+	if (!SetSecurityDescriptorDacl(sd, TRUE, acl, FALSE)) {
+		goto out_fail;
+	}
+
+	sa->lpSecurityDescriptor = sd;
+
+	return acl;
+
+out_fail:
+	free(acl);
+	return NULL;
+}
+#endif
+
+static int is_port_number(const char *bindpath)
+{
+	while (*bindpath) {
+		if (*bindpath < '0' || *bindpath > '9') {
+			return 0;
+		}
+		bindpath++;
+	}
+	return 1;
+}
+
+int fcgi_listen(const char *path, int backlog)
+{
+	char     *s;
+	int       tcp = 0;
+	char      host[MAXPATHLEN];
+	short     port = 0;
+	int       listen_socket;
+	sa_t      sa;
+	socklen_t sock_len;
+#ifdef SO_REUSEADDR
+# ifdef _WIN32
+	BOOL reuse = 1;
+# else
+	int reuse = 1;
+# endif
+#endif
+
+	if ((s = strchr(path, ':'))) {
+		port = atoi(s+1);
+		if (port != 0 && (s-path) < MAXPATHLEN) {
+			strncpy(host, path, s-path);
+			host[s-path] = '\0';
+			tcp = 1;
+		}
+	} else if (is_port_number(path)) {
+		port = atoi(path);
+		if (port != 0) {
+			host[0] = '\0';
+			tcp = 1;
+		}
+	}
+
+	/* Prepare socket address */
+	if (tcp) {
+		memset(&sa.sa_inet, 0, sizeof(sa.sa_inet));
+		sa.sa_inet.sin_family = AF_INET;
+		sa.sa_inet.sin_port = htons(port);
+		sock_len = sizeof(sa.sa_inet);
+
+		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
+			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
+		} else {
+			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
+			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
+				struct hostent *hep;
+
+				if(strlen(host) > MAXFQDNLEN) {
+					hep = NULL;
+				} else {
+					hep = gethostbyname(host);
+				}
+				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
+					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
+					return -1;
+				} else if (hep->h_addr_list[1]) {
+					fcgi_log(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
+					return -1;
+				}
+				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
+			}
+		}
+	} else {
+#ifdef _WIN32
+		SECURITY_DESCRIPTOR  sd;
+		SECURITY_ATTRIBUTES  saw;
+		PACL                 acl;
+		HANDLE namedPipe;
+
+		memset(&sa, 0, sizeof(saw));
+		saw.nLength = sizeof(saw);
+		saw.bInheritHandle = FALSE;
+		acl = prepare_named_pipe_acl(&sd, &saw);
+
+		namedPipe = CreateNamedPipe(path,
+			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE,
+			PIPE_UNLIMITED_INSTANCES,
+			8192, 8192, 0, &saw);
+		if (namedPipe == INVALID_HANDLE_VALUE) {
+			return -1;
+		}
+		listen_socket = _open_osfhandle((intptr_t)namedPipe, 0);
+		if (!is_initialized) {
+			fcgi_init();
+		}
+		is_fastcgi = 1;
+		return listen_socket;
+
+#else
+		int path_len = strlen(path);
+
+		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
+			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
+			return -1;
+		}
+
+		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
+		sa.sa_unix.sun_family = AF_UNIX;
+		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
+		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
+#ifdef HAVE_SOCKADDR_UN_SUN_LEN
+		sa.sa_unix.sun_len = sock_len;
+#endif
+		unlink(path);
+#endif
+	}
+
+	/* Create, bind socket and start listen on it */
+	if ((listen_socket = socket(sa.sa.sa_family, SOCK_STREAM, 0)) < 0 ||
+#ifdef SO_REUSEADDR
+	    setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) < 0 ||
+#endif
+	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
+	    listen(listen_socket, backlog) < 0) {
+
+		fcgi_log(FCGI_ERROR, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
+		return -1;
+	}
+
+	if (!tcp) {
+		chmod(path, 0777);
+	} else {
+		char *ip = getenv("FCGI_WEB_SERVER_ADDRS");
+		char *cur, *end;
+		int n;
+
+		if (ip) {
+			ip = strdup(ip);
+			cur = ip;
+			n = 0;
+			while (*cur) {
+				if (*cur == ',') n++;
+				cur++;
+			}
+			allowed_clients = malloc(sizeof(sa_t) * (n+2));
+			n = 0;
+			cur = ip;
+			while (cur) {
+				end = strchr(cur, ',');
+				if (end) {
+					*end = 0;
+					end++;
+				}
+				if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
+					allowed_clients[n].sa.sa_family = AF_INET;
+					n++;
+#ifdef HAVE_IPV6
+				} else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
+					allowed_clients[n].sa.sa_family = AF_INET6;
+					n++;
+#endif
+				} else {
+					fcgi_log(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
+				}
+				cur = end;
+			}
+			allowed_clients[n].sa.sa_family = 0;
+			free(ip);
+			if (!n) {
+				fcgi_log(FCGI_ERROR, "There are no allowed addresses");
+				/* don't clear allowed_clients as it will create an "open for all" security issue */
+			}
+		}
+	}
+
+	if (!is_initialized) {
+		fcgi_init();
+	}
+	is_fastcgi = 1;
+
+#ifdef _WIN32
+	if (tcp) {
+		listen_socket = _open_osfhandle((intptr_t)listen_socket, 0);
+	}
+#else
+	fcgi_setup_signals();
+#endif
+	return listen_socket;
 }
 
 void fcgi_set_allowed_clients(char *ip)
@@ -498,42 +749,57 @@ void fcgi_set_allowed_clients(char *ip)
 			if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
 				allowed_clients[n].sa.sa_family = AF_INET;
 				n++;
+#ifdef HAVE_IPV6
 			} else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
 				allowed_clients[n].sa.sa_family = AF_INET6;
 				n++;
+#endif
 			} else {
-				zlog(ZLOG_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
+				fcgi_log(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
 			}
 			cur = end;
 		}
 		allowed_clients[n].sa.sa_family = 0;
 		free(ip);
 		if (!n) {
-			zlog(ZLOG_ERROR, "There are no allowed addresses for this pool");
+			fcgi_log(FCGI_ERROR, "There are no allowed addresses");
 			/* don't clear allowed_clients as it will create an "open for all" security issue */
 		}
 	}
 }
 
-fcgi_request *fcgi_init_request(int listen_socket)
+static void fcgi_hook_dummy() {
+	return;
+}
+
+fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 {
-	fcgi_request *req = (fcgi_request*)calloc(1, sizeof(fcgi_request));
+	memset(req, 0, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
 	req->fd = -1;
 	req->id = -1;
 
+	/*
 	req->in_len = 0;
 	req->in_pad = 0;
 
 	req->out_hdr = NULL;
-	req->out_pos = req->out_buf;
-
-#ifdef _WIN32
-	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
-#endif
 
 #ifdef TCP_NODELAY
 	req->nodelay = 0;
+#endif
+
+	req->env = NULL;
+	req->has_env = 0;
+
+	*/
+	req->out_pos = req->out_buf;
+	req->hook.on_accept = fcgi_hook_dummy;
+	req->hook.on_read = fcgi_hook_dummy;
+	req->hook.on_close = fcgi_hook_dummy;
+
+#ifdef _WIN32
+	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
 #endif
 
 	fcgi_hash_init(&req->env);
@@ -541,10 +807,8 @@ fcgi_request *fcgi_init_request(int listen_socket)
 	return req;
 }
 
-void fcgi_destroy_request(fcgi_request *req)
-{
+void fcgi_destroy_request(fcgi_request *req) {
 	fcgi_hash_destroy(&req->env);
-	free(req);
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
@@ -553,12 +817,21 @@ static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t coun
 	size_t n = 0;
 
 	do {
+#ifdef _WIN32
+		size_t tmp;
+#endif
 		errno = 0;
 #ifdef _WIN32
+		tmp = count - n;
+
 		if (!req->tcp) {
-			ret = write(req->fd, ((char*)buf)+n, count-n);
+			unsigned int out_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+
+			ret = write(req->fd, ((char*)buf)+n, out_len);
 		} else {
-			ret = send(req->fd, ((char*)buf)+n, count-n, 0);
+			int out_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
+
+			ret = send(req->fd, ((char*)buf)+n, out_len, 0);
 			if (ret <= 0) {
 				errno = WSAGetLastError();
 			}
@@ -581,12 +854,21 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 	size_t n = 0;
 
 	do {
+#ifdef _WIN32
+		size_t tmp;
+#endif
 		errno = 0;
 #ifdef _WIN32
+		tmp = count - n;
+
 		if (!req->tcp) {
-			ret = read(req->fd, ((char*)buf)+n, count-n);
+			unsigned int in_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+
+			ret = read(req->fd, ((char*)buf)+n, in_len);
 		} else {
-			ret = recv(req->fd, ((char*)buf)+n, count-n, 0);
+			int in_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
+
+			ret = recv(req->fd, ((char*)buf)+n, in_len, 0);
 			if (ret <= 0) {
 				errno = WSAGetLastError();
 			}
@@ -625,8 +907,7 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 
 static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
-	int name_len = 0;
-	int val_len = 0;
+	unsigned int name_len, val_len;
 
 	while (p < end) {
 		name_len = *p++;
@@ -646,29 +927,14 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= (*p++ << 8);
 			val_len |= *p++;
 		}
-		if (UNEXPECTED(name_len > (INT_MAX - val_len)) || /* would the addition overflow? */
-		    UNEXPECTED(name_len + val_len > end - p)) {   /* would we exceed the buffer? */
+		if (UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
 			/* Malformated request */
-			return 0;
-		}
-
-		/*
-		 * get the effective length of the name in case it's not a valid string
-		 * don't do this on the value because it can be binary data
-		 */
-		if (UNEXPECTED(memchr(p, 0, name_len) != NULL)) {
-			/* Malicious request */
 			return 0;
 		}
 		fcgi_hash_set(&req->env, FCGI_HASH_FUNC(p, name_len), (char*)p, name_len, (char*)p + name_len, val_len);
 		p += name_len + val_len;
 	}
 	return 1;
-}
-
-static void fcgi_free_var(zval *zv)
-{
-	efree(Z_PTR_P(zv));
 }
 
 static int fcgi_read_request(fcgi_request *req)
@@ -819,9 +1085,9 @@ static int fcgi_read_request(fcgi_request *req)
 			p += zlen;
 			q = q->list_next;
 		}
-		len = p - buf - sizeof(fcgi_header);
+		len = (int)(p - buf - sizeof(fcgi_header));
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
-		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
+		if (safe_write(req, buf, sizeof(fcgi_header) + len) != (ssize_t)sizeof(fcgi_header)+len) {
 			req->keep = 0;
 			return 0;
 		}
@@ -857,9 +1123,9 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 		}
 
 		if (req->in_len >= rest) {
-			ret = safe_read(req, str, rest);
+			ret = (int)safe_read(req, str, rest);
 		} else {
-			ret = safe_read(req, str, req->in_len);
+			ret = (int)safe_read(req, str, req->in_len);
 		}
 		if (ret < 0) {
 			req->keep = 0;
@@ -910,19 +1176,21 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 			DisconnectNamedPipe(pipe);
 		} else {
 			if (!force) {
-				char buf[8];
+				fcgi_header buf;
 
 				shutdown(req->fd, 1);
-				while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+				/* read the last FCGI_STDIN header (it may be omitted) */
+				recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 			}
 			closesocket(req->fd);
 		}
 #else
 		if (!force) {
-			char buf[8];
+			fcgi_header buf;
 
 			shutdown(req->fd, 1);
-			while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
+			/* read the last FCGI_STDIN header (it may be omitted) */
+			recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 		}
 		close(req->fd);
 #endif
@@ -930,7 +1198,8 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 		req->nodelay = 0;
 #endif
 		req->fd = -1;
-		fpm_request_finished();
+
+		req->hook.on_close();
 	}
 }
 
@@ -949,15 +1218,16 @@ static int fcgi_is_allowed() {
 		return 1;
 	}
 	if (client_sa.sa.sa_family == AF_INET) {
-		for (i=0 ; allowed_clients[i].sa.sa_family ; i++) {
+		for (i = 0; allowed_clients[i].sa.sa_family ; i++) {
 			if (allowed_clients[i].sa.sa_family == AF_INET
 				&& !memcmp(&client_sa.sa_inet.sin_addr, &allowed_clients[i].sa_inet.sin_addr, 4)) {
 				return 1;
 			}
 		}
 	}
+#ifdef HAVE_IPV6
 	if (client_sa.sa.sa_family == AF_INET6) {
-		for (i=0 ; allowed_clients[i].sa.sa_family ; i++) {
+		for (i = 0; allowed_clients[i].sa.sa_family ; i++) {
 			if (allowed_clients[i].sa.sa_family == AF_INET6
 				&& !memcmp(&client_sa.sa_inet6.sin6_addr, &allowed_clients[i].sa_inet6.sin6_addr, 12)) {
 				return 1;
@@ -971,8 +1241,8 @@ static int fcgi_is_allowed() {
 #endif
 		}
 	}
+#endif
 
-	zlog(ZLOG_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
 	return 0;
 }
 
@@ -1019,7 +1289,7 @@ int fcgi_accept_request(fcgi_request *req)
 					sa_t sa;
 					socklen_t len = sizeof(sa);
 
-					fpm_request_accepting();
+					req->hook.on_accept();
 
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
@@ -1027,6 +1297,7 @@ int fcgi_accept_request(fcgi_request *req)
 
 					client_sa = sa;
 					if (req->fd >= 0 && !fcgi_is_allowed()) {
+						fcgi_log(FCGI_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
 						closesocket(req->fd);
 						req->fd = -1;
 						continue;
@@ -1049,7 +1320,7 @@ int fcgi_accept_request(fcgi_request *req)
 					struct pollfd fds;
 					int ret;
 
-					fpm_request_reading_headers();
+					req->hook.on_read();
 
 					fds.fd = req->fd;
 					fds.events = POLLIN;
@@ -1063,7 +1334,7 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
-					fpm_request_reading_headers();
+					req->hook.on_read();
 
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};
@@ -1081,7 +1352,7 @@ int fcgi_accept_request(fcgi_request *req)
 						}
 						fcgi_close(req, 1, 0);
 					} else {
-						zlog(ZLOG_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
+						fcgi_log(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
 						fcgi_close(req, 1, 0);
 					}
 #endif
@@ -1119,7 +1390,7 @@ static inline fcgi_header* open_packet(fcgi_request *req, fcgi_request_type type
 static inline void close_packet(fcgi_request *req)
 {
 	if (req->out_hdr) {
-		int len = req->out_pos - ((unsigned char*)req->out_hdr + sizeof(fcgi_header));
+		int len = (int)(req->out_pos - ((unsigned char*)req->out_hdr + sizeof(fcgi_header)));
 
 		req->out_pos += fcgi_make_header(req->out_hdr, (fcgi_request_type)req->out_hdr->type, req->id, len);
 		req->out_hdr = NULL;
@@ -1132,7 +1403,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	close_packet(req);
 
-	len = req->out_pos - req->out_buf;
+	len = (int)(req->out_pos - req->out_buf);
 
 	if (close) {
 		fcgi_end_request_rec *rec = (fcgi_end_request_rec*)(req->out_pos);
@@ -1156,7 +1427,7 @@ int fcgi_flush(fcgi_request *req, int close)
 	return 1;
 }
 
-ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
+int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len)
 {
 	int limit, rest;
 
@@ -1167,9 +1438,38 @@ ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, i
 	if (req->out_hdr && req->out_hdr->type != type) {
 		close_packet(req);
 	}
+#if 0
+	/* Unoptimized, but clear version */
+	rest = len;
+	while (rest > 0) {
+		limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
 
+		if (!req->out_hdr) {
+			if (limit < sizeof(fcgi_header)) {
+				if (!fcgi_flush(req, 0)) {
+					return -1;
+				}
+			}
+			open_packet(req, type);
+		}
+		limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
+		if (rest < limit) {
+			memcpy(req->out_pos, str, rest);
+			req->out_pos += rest;
+			return len;
+		} else {
+			memcpy(req->out_pos, str, limit);
+			req->out_pos += limit;
+			rest -= limit;
+			str += limit;
+			if (!fcgi_flush(req, 0)) {
+				return -1;
+			}
+		}
+	}
+#else
 	/* Optimized version */
-	limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
+	limit = (int)(sizeof(req->out_buf) - (req->out_pos - req->out_buf));
 	if (!req->out_hdr) {
 		limit -= sizeof(fcgi_header);
 		if (limit < 0) limit = 0;
@@ -1235,7 +1535,7 @@ ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, i
 			req->out_pos += rest;
 		}
 	}
-
+#endif
 	return len;
 }
 
@@ -1295,6 +1595,18 @@ void fcgi_loadenv(fcgi_request *req, fcgi_apply_func func, zval *array)
 	fcgi_hash_apply(&req->env, func, array);
 }
 
+#ifdef _WIN32
+void fcgi_impersonate(void)
+{
+	char *os_name;
+
+	os_name = getenv("OS");
+	if (os_name && stricmp(os_name, "Windows_NT") == 0) {
+		is_impersonate = 1;
+	}
+}
+#endif
+
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
@@ -1304,10 +1616,10 @@ void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, s
 
 void fcgi_free_mgmt_var_cb(zval *zv)
 {
-	zend_string_free(Z_STR_P(zv));
+	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip() /* {{{ */
+const char *fcgi_get_last_client_ip()
 {
 	static char str[INET6_ADDRSTRLEN];
 
@@ -1315,6 +1627,7 @@ const char *fcgi_get_last_client_ip() /* {{{ */
 	if (client_sa.sa.sa_family == AF_INET) {
 		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet.sin_addr, str, INET6_ADDRSTRLEN);
 	}
+#ifdef HAVE_IPV6
 #ifdef IN6_IS_ADDR_V4MAPPED
 	/* Ipv4-Mapped-Ipv6 */
 	if (client_sa.sa.sa_family == AF_INET6
@@ -1326,10 +1639,11 @@ const char *fcgi_get_last_client_ip() /* {{{ */
 	if (client_sa.sa.sa_family == AF_INET6) {
 		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
 	}
+#endif
 	/* Unix socket */
 	return NULL;
 }
-/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

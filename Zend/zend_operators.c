@@ -1249,11 +1249,20 @@ try_again:
 		case IS_STRING: {
 			size_t i;
 
-			ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(op1), 0));
-			for (i = 0; i < Z_STRLEN_P(op1); i++) {
-				Z_STRVAL_P(result)[i] = ~Z_STRVAL_P(op1)[i];
+			if (Z_STRLEN_P(op1) == 1) {
+				zend_uchar not = (zend_uchar) ~*Z_STRVAL_P(op1);
+				if (CG(one_char_string)[not]) {
+					ZVAL_INTERNED_STR(result, CG(one_char_string)[not]);
+				} else {
+					ZVAL_NEW_STR(result, zend_string_init((char *) &not, 1, 0));
+				}
+			} else {
+				ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(op1), 0));
+				for (i = 0; i < Z_STRLEN_P(op1); i++) {
+					Z_STRVAL_P(result)[i] = ~Z_STRVAL_P(op1)[i];
+				}
+				Z_STRVAL_P(result)[i] = 0;
 			}
-			Z_STRVAL_P(result)[i] = 0;
 			return SUCCESS;
 		}
 		case IS_REFERENCE:
@@ -1280,12 +1289,21 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
-	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
+	if (Z_TYPE_P(op1) == IS_STRING && EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
 		zval *longer, *shorter;
 		zend_string *str;
 		size_t i;
 
-		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
+		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
+			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
+				zend_uchar or = (zend_uchar) (*Z_STRVAL_P(op1) | *Z_STRVAL_P(op2));
+				if (CG(one_char_string)[or]) {
+					ZVAL_INTERNED_STR(result, CG(one_char_string)[or]);
+				} else {
+					ZVAL_NEW_STR(result, zend_string_init((char *) &or, 1, 0));
+				}
+				return SUCCESS;
+			}
 			longer = op1;
 			shorter = op2;
 		} else {
@@ -1343,7 +1361,16 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 		zend_string *str;
 		size_t i;
 
-		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
+		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
+			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
+				zend_uchar and = (zend_uchar) (*Z_STRVAL_P(op1) & *Z_STRVAL_P(op2));
+				if (CG(one_char_string)[and]) {
+					ZVAL_INTERNED_STR(result, CG(one_char_string)[and]);
+				} else {
+					ZVAL_NEW_STR(result, zend_string_init((char *) &and, 1, 0));
+				}
+				return SUCCESS;
+			}
 			longer = op1;
 			shorter = op2;
 		} else {
@@ -1401,7 +1428,16 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 		zend_string *str;
 		size_t i;
 
-		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
+		if (EXPECTED(Z_STRLEN_P(op1) >= Z_STRLEN_P(op2))) {
+			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
+				zend_uchar xor = (zend_uchar) (*Z_STRVAL_P(op1) ^ *Z_STRVAL_P(op2));
+				if (CG(one_char_string)[xor]) {
+					ZVAL_INTERNED_STR(result, CG(one_char_string)[xor]);
+				} else {
+					ZVAL_NEW_STR(result, zend_string_init((char *) &xor, 1, 0));
+				}
+				return SUCCESS;
+			}
 			longer = op1;
 			shorter = op2;
 		} else {

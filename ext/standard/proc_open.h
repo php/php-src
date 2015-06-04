@@ -25,8 +25,6 @@ typedef int php_file_descriptor_t;
 typedef pid_t php_process_id_t;
 #endif
 
-#define PHP_PROC_OPEN_MAX_DESCRIPTORS	16
-
 /* Environment block under win32 is a NUL terminated sequence of NUL terminated
  * name=value strings.
  * Under unix, it is an argv style array.
@@ -44,7 +42,7 @@ struct php_process_handle {
 	HANDLE childHandle;
 #endif
 	int npipes;
-	zend_resource *pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	zend_resource **pipes;
 	char *command;
 	int is_persistent;
 	php_process_env_t env;

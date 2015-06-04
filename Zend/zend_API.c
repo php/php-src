@@ -3665,18 +3665,13 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 				break;
 		}
 	}
-	switch (access_type & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PRIVATE: {
-				property_info->name = zend_mangle_property_name(ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
-			}
-			break;
-		case ZEND_ACC_PROTECTED: {
-				property_info->name = zend_mangle_property_name("*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
-			}
-			break;
-		case ZEND_ACC_PUBLIC:
-			property_info->name = zend_string_copy(name);
-			break;
+	if (access_type & ZEND_ACC_PUBLIC) {
+		property_info->name = zend_string_copy(name);
+	} else if (access_type & ZEND_ACC_PRIVATE) {
+		property_info->name = zend_mangle_property_name(ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
+	} else {
+		ZEND_ASSERT(access_type & ZEND_ACC_PROTECTED);
+		property_info->name = zend_mangle_property_name("*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 	}
 
 	property_info->name = zend_new_interned_string(property_info->name);

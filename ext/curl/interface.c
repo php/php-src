@@ -2562,9 +2562,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					 * use since curl needs a long not an int. */
 					form_error = curl_formadd(&first, &last,
 										 CURLFORM_COPYNAME, string_key->val,
-										 CURLFORM_NAMELENGTH, (zend_long)string_key->len,
+										 CURLFORM_NAMELENGTH, string_key->len,
 										 CURLFORM_COPYCONTENTS, postval->val,
-										 CURLFORM_CONTENTSLENGTH, (zend_long)Z_STRLEN_P(current),
+										 CURLFORM_CONTENTSLENGTH, postval->len,
 										 CURLFORM_END);
 
 					if (form_error != CURL_FORMADD_OK) {

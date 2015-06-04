@@ -35,9 +35,6 @@ PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 PHP_ARG_WITH(freetype-dir, for FreeType 2,
 [  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix], no, no)
 
-PHP_ARG_WITH(t1lib, for T1lib support,
-[  --with-t1lib[=DIR]        GD: Include T1lib support. T1lib version >= 5.0.0 required], no, no)
-
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
 [  --enable-gd-native-ttf  GD: Enable TrueType string function], no, no)
 
@@ -209,30 +206,6 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
   fi
 ])
 
-AC_DEFUN([PHP_GD_T1LIB],[
-  if test "$PHP_T1LIB" != "no"; then
-
-    for i in $PHP_T1LIB /usr/local /usr; do
-      test -f "$i/include/t1lib.h" && GD_T1_DIR=$i && break
-    done
-
-    if test -z "$GD_T1_DIR"; then
-      AC_MSG_ERROR([Your t1lib distribution is not installed correctly. Please reinstall it.])
-    fi
-
-    PHP_CHECK_LIBRARY(t1, T1_StrError,
-    [
-      AC_DEFINE(HAVE_LIBT1,1,[ ])
-      PHP_ADD_INCLUDE($GD_T1_DIR/include)
-      PHP_ADD_LIBRARY_WITH_PATH(t1, $GD_T1_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libt1.(a|so). Please check config.log for more information.])
-    ],[
-      -L$GD_T1_DIR/$PHP_LIBDIR
-    ])
-  fi
-])
-
 AC_DEFUN([PHP_GD_TTSTR],[
   if test "$PHP_GD_NATIVE_TTF" = "yes"; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
@@ -274,7 +247,6 @@ dnl Various checks for GD features
   PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
-  PHP_GD_T1LIB
   PHP_GD_JISX0208
 fi
 
@@ -343,7 +315,6 @@ dnl Various checks for GD features
   PHP_GD_PNG
   PHP_GD_XPM
   PHP_GD_FREETYPE2
-  PHP_GD_T1LIB
 
 dnl Header path
   for i in include/gd include gd ""; do

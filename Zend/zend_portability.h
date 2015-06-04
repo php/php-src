@@ -240,6 +240,7 @@ char *alloca();
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
+# define HAVE_ATTRIBUTE_WEAK
 #endif
 
 #if ZEND_DEBUG

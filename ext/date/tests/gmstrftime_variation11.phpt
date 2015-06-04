@@ -1,5 +1,5 @@
 --TEST--
-Test gmstrftime() function : usage variation - Checking month related formats which are not supported on Windows. 
+Test gmstrftime() function : usage variation - Checking month related formats which was not supported on Windows before VC14. 
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
@@ -32,6 +32,6 @@ var_dump( gmstrftime($format, $timestamp) );
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with  Abbreviated month name format %h --
-bool(false)
-bool(false)
+string(%d) "%s"
+string(3) "Aug"
 ===DONE===

@@ -397,7 +397,7 @@ PHP_FUNCTION(stream_get_contents)
 {
 	php_stream	*stream;
 	zval		*zsrc;
-	zend_long		maxlen		= PHP_STREAM_COPY_ALL,
+	zend_long		maxlen		= (ssize_t) PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
 	zend_string *contents;
 

@@ -6,14 +6,14 @@
 #################################################
 #[User Class: test (3 methods)]
 #L%d-%d test::testMethod() %s - 0x%s + 1 ops
-# L%d    #0     RETURN                  null                 <unused>             <unused>
+# L%d    #0     RETURN                  null
 #L%d-%d test::testPrivateMethod() %s - 0x%s + 1 ops
-# L%d    #0     RETURN                  null                 <unused>             <unused>
+# L%d    #0     RETURN                  null
 #L%d-%d test::testProtectedMethod() %s - 0x%s + 1 ops
-# L%d    #0     RETURN                  null                 <unused>             <unused>
+# L%d    #0     RETURN                  null
 #[User Method testMethod (1 ops)]
 #L%d-%d test::testMethod() %s - 0x%s + 1 ops
-# L%d    #0     RETURN                  null                 <unused>             <unused>
+# L%d    #0     RETURN                  null
 #################################################
 <:
 class test {

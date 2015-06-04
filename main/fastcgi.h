@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: fastcgi.h 272370 2008-12-31 11:15:49Z sebastian $ */
+/* $Id$ */
 
 /* FastCGI protocol */
 
@@ -48,6 +48,14 @@ typedef enum _fcgi_role {
 	FCGI_AUTHORIZER	= 2,
 	FCGI_FILTER		= 3
 } fcgi_role;
+
+enum {
+	FCGI_DEBUG		= 1,
+	FCGI_NOTICE		= 2,
+	FCGI_WARNING	= 3,
+	FCGI_ERROR		= 4,
+	FCGI_ALERT		= 5,
+};
 
 typedef enum _fcgi_request_type {
 	FCGI_BEGIN_REQUEST		=  1, /* [in]                              */
@@ -93,12 +101,12 @@ typedef struct _fcgi_begin_request_rec {
 } fcgi_begin_request_rec;
 
 typedef struct _fcgi_end_request {
-	unsigned char appStatusB3;
-	unsigned char appStatusB2;
-	unsigned char appStatusB1;
-	unsigned char appStatusB0;
-	unsigned char protocolStatus;
-	unsigned char reserved[3];
+    unsigned char appStatusB3;
+    unsigned char appStatusB2;
+    unsigned char appStatusB1;
+    unsigned char appStatusB0;
+    unsigned char protocolStatus;
+    unsigned char reserved[3];
 } fcgi_end_request;
 
 typedef struct _fcgi_end_request_rec {
@@ -110,20 +118,94 @@ typedef struct _fcgi_end_request_rec {
 
 typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
-typedef struct _fcgi_request fcgi_request;
+#define FCGI_HASH_TABLE_SIZE 128
+#define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
+#define FCGI_HASH_SEG_SIZE   4096
+
+typedef struct _fcgi_hash_bucket {
+	unsigned int              hash_value;
+	unsigned int              var_len;
+	char                     *var;
+	unsigned int              val_len;
+	char                     *val;
+	struct _fcgi_hash_bucket *next;
+	struct _fcgi_hash_bucket *list_next;
+} fcgi_hash_bucket;
+
+typedef struct _fcgi_hash_buckets {
+	unsigned int	           idx;
+	struct _fcgi_hash_buckets *next;
+	struct _fcgi_hash_bucket   data[FCGI_HASH_TABLE_SIZE];
+} fcgi_hash_buckets;
+
+typedef struct _fcgi_data_seg {
+	char                  *pos;
+	char                  *end;
+	struct _fcgi_data_seg *next;
+	char                   data[1];
+} fcgi_data_seg;
+
+typedef struct _fcgi_hash {
+	fcgi_hash_bucket  *hash_table[FCGI_HASH_TABLE_SIZE];
+	fcgi_hash_bucket  *list;
+	fcgi_hash_buckets *buckets;
+	fcgi_data_seg     *data;
+} fcgi_hash;
+
+typedef struct _fcgi_request 	fcgi_request;
+typedef struct _fcgi_req_hook 	fcgi_req_hook;
+
+struct _fcgi_req_hook {
+	void(*on_accept)();
+	void(*on_read)();
+	void(*on_close)();
+};
+
+struct _fcgi_request {
+	int            listen_socket;
+	int            tcp;
+	int            fd;
+	int            id;
+	int            keep;
+#ifdef TCP_NODELAY
+	int            nodelay;
+#endif
+	int            closed;
+	int            in_len;
+	int            in_pad;
+
+	fcgi_header   *out_hdr;
+
+	unsigned char *out_pos;
+	unsigned char  out_buf[1024*8];
+	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
+
+	fcgi_req_hook  hook;
+
+	int            has_env;
+	fcgi_hash      env;
+};
 
 int fcgi_init(void);
 void fcgi_shutdown(void);
+int fcgi_is_fastcgi(void);
+int fcgi_is_closed(fcgi_request *req);
+void fcgi_close(fcgi_request *req, int force, int destroy);
 int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
-fcgi_request* fcgi_init_request(int listen_socket);
+int fcgi_listen(const char *path, int backlog);
+fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
 void fcgi_destroy_request(fcgi_request *req);
+void fcgi_set_allowed_clients(char *ip);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
+const char *fcgi_get_last_client_ip();
+void fcgi_set_in_shutdown(int new_value);
 
-void fcgi_set_allowed_clients(char *);
-void fcgi_close(fcgi_request *req, int force, int destroy);
-int fcgi_is_closed(fcgi_request *req);
+#ifndef HAVE_ATTRIBUTE_WEAK
+typedef void (*fcgi_logger)(int type, const char *fmt, ...);
+void fcgi_set_logger(fcgi_logger lg);
+#endif
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
@@ -133,13 +215,15 @@ void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 
 int fcgi_read(fcgi_request *req, char *str, int len);
 
-ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
+int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
 int fcgi_flush(fcgi_request *req, int close);
 
-void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(zval *ptr);
+#ifdef PHP_WIN32
+void fcgi_impersonate(void);
+#endif
 
-const char *fcgi_get_last_client_ip();
+void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
+void fcgi_free_mgmt_var_cb(zval *zv);
 
 /*
  * Local variables:

@@ -384,7 +384,7 @@ int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry
 		efree(str_name);
 	}
 
-	return ce ? SUCCESS : FAILURE;
+	return *ce ? SUCCESS : FAILURE;
 }
 
 char *phpdbg_get_property_key(char *key) {

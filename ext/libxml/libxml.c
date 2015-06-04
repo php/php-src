@@ -1341,7 +1341,7 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 }
 /* }}} */
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	return xmlDllMain(hinstDLL, fdwReason, lpvReserved);

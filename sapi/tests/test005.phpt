@@ -22,6 +22,6 @@ END;
     echo "HELLO";
 ?>
 --EXPECTHEADERS--
-Status: 404
+Status: 404 Not Found
 --EXPECT--
 No input file specified.

@@ -71,12 +71,6 @@
 #  define ARG_MAX 14500
 # endif
 #endif
-#ifndef S_ISDIR
-#define S_ISDIR(m) (((m) & _S_IFDIR) == _S_IFDIR)
-#endif
-#ifndef S_ISLNK
-#define S_ISLNK(m) (0)
-#endif
 #endif
 
 #include "php.h"
