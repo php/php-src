@@ -889,6 +889,10 @@ PHP_MSHUTDOWN_FUNCTION(date)
 		timelib_error_container_dtor(DATEG(last_errors));
 	}
 
+#ifndef ZTS
+	DATEG(default_timezone) = NULL;
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
