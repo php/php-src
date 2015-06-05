@@ -13,6 +13,8 @@
     (dja at axtens dot net, Kalle)
   . Fixed bug #69732 (can induce segmentation fault with basic php code).
     (Dmitry)
+  . Fixed #69642 (Windows 10 reported as Windows 8).
+    (Christian Wenz, Anatol Belski)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
