@@ -9,6 +9,8 @@
   . Added support for SEARCH WebDav method. (Mats Lindh)
 
 - Core:
+  . Fixed bug #69758 (Item added to array not being removed by array_pop/shift
+    ). (Laruence)
   . Fixed bug #68475 (Add support for $callable() sytnax with 'Class::method').
     (Julien, Aaron Piotrowski)
   . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
