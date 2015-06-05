@@ -2,6 +2,10 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2015, PHP 5.6.11
 
+- Core:
+  . Fixed #69642 (Windows 10 reported as Windows 8).
+    (Christian Wenz, Anatol Belski)
+
 - SPL:
   . Fixed bug #69737 (Segfault when SplMinHeap::compare produces fatal error).
     (Stas)
