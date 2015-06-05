@@ -71,7 +71,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 #define HASH_PROTECT_RECURSION(ht)														\
 	if ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION) {									\
-		if (((ht)->u.flags & 0xff00) >= (3 << 8)) {												\
+		if (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >= (3 << 8)) {												\
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");\
 		}																				\
 		ZEND_HASH_INC_APPLY_COUNT(ht);													\

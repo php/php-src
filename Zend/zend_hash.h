@@ -845,8 +845,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_APPLY_PROTECTION(ht) \
 	((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION)
 
-#define ZEND_HASH_APPLY_SHIFT 8
-#define ZEND_HASH_GET_APPLY_COUNT(ht) ((ht)->u.flags >> ZEND_HASH_APPLY_SHIFT)
+#define ZEND_HASH_APPLY_SHIFT         8
+#define ZEND_HASH_APPLY_COUNT_MASK    0xff00
+#define ZEND_HASH_GET_APPLY_COUNT(ht) (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >> ZEND_HASH_APPLY_SHIFT)
 #define ZEND_HASH_INC_APPLY_COUNT(ht) ((ht)->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
 #define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
 
