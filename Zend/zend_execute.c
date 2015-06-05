@@ -57,6 +57,7 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
 #define get_zval_ptr_ptr_undef(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
 #define get_obj_zval_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr(op_type, node, ex, should_free, type)
+#define get_obj_zval_ptr_undef(op_type, node, ex, should_free, type) _get_obj_zval_ptr_undef(op_type, node, ex, should_free, type)
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type)
 
 /* Prototypes */
@@ -514,6 +515,15 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_execute_dat
 		return &EX(This);
 	}
 	return get_zval_ptr(op_type, op, execute_data, should_free, type);
+}
+
+static inline zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, zend_execute_data *execute_data, zend_free_op *should_free, int type)
+{
+	if (op_type == IS_UNUSED) {
+		*should_free = NULL;
+		return &EX(This);
+	}
+	return get_zval_ptr_undef(op_type, op, execute_data, should_free, type);
 }
 
 static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execute_data *execute_data, zend_free_op *should_free, int type)
