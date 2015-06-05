@@ -589,6 +589,15 @@ static zend_always_inline void *zend_hash_index_add_ptr(HashTable *ht, zend_ulon
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_index_add_new_ptr(HashTable *ht, zend_ulong h, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_index_add_new(ht, h, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_ulong h, void *pData)
 {
 	zval tmp, *zv;
