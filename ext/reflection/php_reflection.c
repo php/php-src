@@ -2630,6 +2630,34 @@ ZEND_METHOD(reflection_parameter, getClass)
 }
 /* }}} */
 
+/* {{{ proto public string ReflectionParameter::getClassName()
+   Returns this parameters's class name or null if this there is none */
+ZEND_METHOD(reflection_parameter, getClassName)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (param->arg_info->class_name) {
+		const char *class_name;
+		size_t class_name_len;
+
+		if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+			class_name = ((zend_internal_arg_info*)param->arg_info)->class_name;
+			class_name_len = strlen(class_name);
+
+			RETURN_STRINGL(class_name, class_name_len);
+		} else {
+			ZVAL_STR_COPY(return_value, param->arg_info->class_name);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::isArray()
    Returns whether parameter MUST be an array */
 ZEND_METHOD(reflection_parameter, isArray)
@@ -6281,6 +6309,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringFunction, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getClassName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
