@@ -3045,10 +3045,11 @@ PHP_FUNCTION(imagegammacorrect)
 			for (x = 0; x < gdImageSX(im); x++)	{
 				c = gdImageGetPixel(im, x, y);
 				gdImageSetPixel(im, x, y,
-					gdTrueColor(
+					gdTrueColorAlpha(
 						(int) ((pow((pow((gdTrueColorGetRed(c)   / 255.0), input)), 1.0 / output) * 255) + .5),
 						(int) ((pow((pow((gdTrueColorGetGreen(c) / 255.0), input)), 1.0 / output) * 255) + .5),
-						(int) ((pow((pow((gdTrueColorGetBlue(c)  / 255.0), input)), 1.0 / output) * 255) + .5)
+						(int) ((pow((pow((gdTrueColorGetBlue(c)  / 255.0), input)), 1.0 / output) * 255) + .5),
+						gdTrueColorGetAlpha(c)
 					)
 				);
 			}
