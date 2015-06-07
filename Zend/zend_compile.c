@@ -4373,8 +4373,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
 					} else if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
+						char *type_name = zend_ast_get_str(type_ast)->val;
+
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a %s type hint can only be %s or NULL", arg_info->class_name->val, arg_info->class_name->val);
+							"with a %s type hint can only be %s or NULL", type_name, type_name);
 					}
 				}
 			}
