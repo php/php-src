@@ -461,6 +461,10 @@ Other
     IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
     IntlDateFormatter::setTimeZone() instead.
 
+- libxml:
+  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
+    and adds suppport for line numbers >16-bit in the error reporting.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().

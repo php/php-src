@@ -145,6 +145,10 @@
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- libxml:
+  . Fixed handling of big lines in error messages with libxml >= 2.9.0.
+    (Christoph M. Becker)
+
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
   . Removed mcrypt_generic_end() alias. (Nikita)
