@@ -225,9 +225,12 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 	char *tmp = hdr;
 
+	if (!hdr) {
+		return 0;
+	}
+
 	/* Should not have any newlines at the beginning. */
 	while(*hdr) {
-		hdr++;
 		if (*hdr == ' ') {
 			continue;
 		}
@@ -238,6 +241,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 			/* Reject anything suspicious. */
 			return 1;
 		}
+		hdr++;
 	}
 
 	while(*hdr) {

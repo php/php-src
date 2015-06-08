@@ -56,6 +56,26 @@ echo @file_get_contents($outFile);
 
 //===============================================================================
 // Invalid header
+$additional_headers = "\nHEAD1: a\nHEAD2: b\n";
+@unlink($outFile);
+
+echo "-- Invalid Header - preceeding newline--\n";
+// Calling mail() with all additional headers
+var_dump( mail($to, $subject, $message, $additional_headers) );
+echo @file_get_contents($outFile);
+@unlink($outFile);
+
+// Invalid header
+$additional_headers = "\rHEAD1: a\nHEAD2: b\r";
+@unlink($outFile);
+
+echo "-- Invalid Header - preceeding newline--\n";
+// Calling mail() with all additional headers
+var_dump( mail($to, $subject, $message, $additional_headers) );
+echo @file_get_contents($outFile);
+@unlink($outFile);
+
+// Invalid header
 $additional_headers = "\r\nHEAD1: a\r\nHEAD2: b\r\n";
 @unlink($outFile);
 
@@ -177,6 +197,28 @@ var_dump( mail($to, $subject, $message, $additional_headers) );
 echo @file_get_contents($outFile);
 @unlink($outFile);
 
+// Invalid header
+// Invalid, but PHP_FUNCTION(mail) trims newlines
+$additional_headers = "HEAD1: a\r\nHEAD2: b\n";
+@unlink($outFile);
+
+echo "-- Invalid Header - trailing newlines --\n";
+// Calling mail() with all additional headers
+var_dump( mail($to, $subject, $message, $additional_headers) );
+echo @file_get_contents($outFile);
+@unlink($outFile);
+
+// Invalid header
+// Invalid, but PHP_FUNCTION(mail) trims newlines
+$additional_headers = "HEAD1: a\r\nHEAD2: b\r";
+@unlink($outFile);
+
+echo "-- Invalid Header - trailing newlines --\n";
+// Calling mail() with all additional headers
+var_dump( mail($to, $subject, $message, $additional_headers) );
+echo @file_get_contents($outFile);
+@unlink($outFile);
+
 ?>
 ===DONE===
 --EXPECTF--
@@ -220,7 +262,11 @@ bool(false)
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
--- Invalid Header - multiple newlines in the middle --
+-- Invalid Header - preceeding newline--
+
+Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
+bool(false)
+-- Invalid Header - preceeding newline--
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
@@ -244,6 +290,26 @@ bool(false)
 
 Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
 bool(false)
+-- Invalid Header - multiple newlines in the middle --
+
+Warning: mail(): Multiple or malformed newlines found in additional_header in %s/mail_basic6.php on line %d
+bool(false)
+-- Invalid Header - trailing newlines --
+bool(true)
+To: user@example.com
+Subject: Test Subject
+HEAD1: a
+HEAD2: b
+
+A Message
+-- Invalid Header - trailing newlines --
+bool(true)
+To: user@example.com
+Subject: Test Subject
+HEAD1: a
+HEAD2: b
+
+A Message
 -- Invalid Header - trailing newlines --
 bool(true)
 To: user@example.com
