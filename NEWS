@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
 
+- Sqlite3:
+  . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
+    CVE-2015-3416) (Kaplan)
+
 14 May 2015 PHP 5.4.41
 
 - Core: 
