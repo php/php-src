@@ -48,6 +48,10 @@
     (Stas)
   . Fixed bug #67805 (SplFileObject setMaxLineLength). (Willian Gustavo Veiga).
 
+- Sqlite3:
+  . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
+    CVE-2015-3416) (Kaplan)
+
 14 May 2015, PHP 5.5.25
 
 - Core:
