@@ -223,25 +223,16 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size TSR
 
 static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
-	char *tmp = hdr;
+	size_t len;
 
-	if (!hdr) {
+	if (!hdr || !(len = strlen(hdr))) {
 		return 0;
 	}
 
 	/* Should not have any newlines at the beginning. */
-	while(*hdr) {
-		if (*hdr == ' ') {
-			continue;
-		}
-		if (isprint(*hdr)) {
-			break;
-		}
-		if (iscntrl(*hdr)) {
-			/* Reject anything suspicious. */
-			return 1;
-		}
-		hdr++;
+	/* RFC 2822 2.2. Header Fields */
+	if (*hdr < 33 || *hdr > 126 || *hdr == ':') {
+		return 1;
 	}
 
 	while(*hdr) {
@@ -265,18 +256,8 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 	}
 
 	/* Should not have any newlines at the end. */
-	while(*hdr && hdr != tmp) {
-		hdr--;
-		if (*hdr == ' ' || *hdr == '\t') {
-			continue;
-		}
-		if (isprint(*hdr)) {
-			break;
-		}
-		if (iscntrl(*hdr)) {
-			/* Reject anything suspicious. */
-			return 1;
-		}
+	if(*(hdr+len-1) == '\n' || *(hdr+len-1) == '\r') {
+		return 1;
 	}
 
 	return 0;
