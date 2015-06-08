@@ -727,7 +727,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 	}
 #endif
 
-	if ((force || !req->keep) && req->fd >= 0) {
+	if (req->fd >= 0) {
 #ifdef _WIN32
 		if (!req->tcp) {
 			HANDLE pipe = (HANDLE)_get_osfhandle(req->fd);
@@ -737,7 +737,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 			}
 			DisconnectNamedPipe(pipe);
 		} else {
-			if (!force) {
+			if (!force || req->keep) {
 				char buf[8];
 
 				shutdown(req->fd, 1);
