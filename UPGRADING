@@ -540,7 +540,12 @@ Other
     accessible through stream_get_meta_data() output.
 
 - Reflection
-  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
+  . Added a ReflectionGenerator class (yield from Traces, current file/line,
+    etc.)
+  . Added a ReflectionType class to better support the new return type and
+    scalar type declarations features. The new ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType() methods both return an
+    instance of ReflectionType.
 
 ========================================
 3. Changes in SAPI modules
