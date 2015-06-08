@@ -12,32 +12,34 @@ PHP                                                                        NEWS
 14 May 2015 PHP 5.4.41
 
 - Core: 
-  . Fixed bug #69364 (PHP Multipart/form-data remote dos Vulnerability). (Stas)
+  . Fixed bug #69364 (PHP Multipart/form-data remote dos Vulnerability).
+    (CVE-2015-4024) (Stas)
   . Fixed bug #69403 (str_repeat() sign mismatch based memory corruption). 
     (Stas)
-  . Fixed bug #69418 (CVE-2006-7243 fix regressions in 5.4+). (Stas)
+  . Fixed bug #69418 (CVE-2006-7243 fix regressions in 5.4+). (CVE-2015-4025)
+    (Stas)
   . Fixed bug #69522 (heap buffer overflow in unpack()). (Stas)
   
 - FTP:
   . Fixed bug #69545 (Integer overflow in ftp_genlist() resulting in heap
-    overflow). (Stas)
+    overflow). (CVE-2015-4022) (Stas)
 
 - PCNTL:
   . Fixed bug #68598 (pcntl_exec() should not allow null char). (CVE-2015-4026)
     (Stas)
 
 - PCRE
-  . Upgraded pcrelib to 8.37.
+  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
 
 - Phar:
   . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry
-    filename starts with null). (Stas)
+    filename starts with null). (CVE-2015-4021) (Stas)
 
 16 Apr 2015 PHP 5.4.40
 
 - Apache2handler:
   . Fixed bug #69218 (potential remote code execution with apache 2.4
-    apache2handler). (Gerrit Venema)
+    apache2handler). (CVE-2015-3330) (Gerrit Venema)
 
 - Core:
   . Additional fix for bug #69152 (Type confusion vulnerability in
@@ -59,13 +61,16 @@ PHP                                                                        NEWS
     segfault). (Anatol Belski)
 
 - GD:
-  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Remi)
+  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (CVE-2014-9709)
+    (Remi)
 
 - Phar:
-  . Fixed bug #68901 (use after free). (bugreports at internot dot info)
-  . Fixed bug #69324 (Buffer Over-read in unserialize when parsing Phar). (Stas)
+  . Fixed bug #68901 (use after free). (CVE-2015-2301) (bugreports at internot
+    dot info)
+  . Fixed bug #69324 (Buffer Over-read in unserialize when parsing Phar).
+    (CVE-2015-2783) (Stas)
   . Fixed bug #69441 (Buffer Overflow when parsing tar/zip/phar in
-    phar_set_inode). (Stas)
+    phar_set_inode). (CVE-2015-3329) (Stas)
 
 - Postgres:
   . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
@@ -84,7 +89,8 @@ PHP                                                                        NEWS
     (CVE-2015-2787). (Stas)
   . Fixed bug #69134 (Per Directory Values overrides PHP_INI_SYSTEM
     configuration options). (Anatol Belski)
-  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (Stas)
+  . Fixed bug #69207 (move_uploaded_file allows nulls in path). (CVE-2015-2348)
+    (Stas)
 
 - Ereg:
   . Fixed bug #69248 (heap overflow vulnerability in regcomp.c) (CVE-2015-2305).
