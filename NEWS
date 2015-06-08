@@ -193,6 +193,8 @@
 - Reflection
   . Fixed inheritance chain of Reflector interface. (Tjerk)
   . Added ReflectionGenerator class. (Bob)
+  . Added reflection support for return types and type declarations. (Sara,
+    Matteo)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)

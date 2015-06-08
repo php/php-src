@@ -45,10 +45,10 @@ array(14) {
     ["name"]=>
     string(19) "ReflectionParameter"
   }
-  ["ReflectionTypeAnnotation"]=>
+  ["ReflectionType"]=>
   object(ReflectionClass)#9 (1) {
     ["name"]=>
-    string(24) "ReflectionTypeAnnotation"
+    string(14) "ReflectionType"
   }
   ["ReflectionMethod"]=>
   object(ReflectionClass)#10 (1) {
