@@ -46,6 +46,7 @@
 - SPL:
   . Fixed bug #69737 (Segfault when SplMinHeap::compare produces fatal error).
     (Stas)
+  . Fixed bug #67805 (SplFileObject setMaxLineLength). (Willian Gustavo Veiga).
 
 14 May 2015, PHP 5.5.25
 
