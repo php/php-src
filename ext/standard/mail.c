@@ -222,28 +222,35 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size TSR
 
 
 static int php_mail_detect_multiple_crlf(char *hdr) {
-	/* This function detects malformed multiple newlines also */
+	/* This function detects multiple/malformed multiple newlines. */
 	char *tmp = hdr;
 
-	/* Should not have any newlines at the beginning */
-	while (*hdr && (*hdr == '\n' || *hdr == '\r')) {
+	/* Should not have any newlines at the beginning. */
+	while(*hdr) {
 		hdr++;
-	}
-	if (tmp != hdr) {
-		return 1;
+		if (*hdr == ' ') {
+			continue;
+		}
+		if (isprint(*hdr)) {
+			break;
+		}
+		if (iscntrl(*hdr)) {
+			/* Reject anything suspicious. */
+			return 1;
+		}
 	}
 
 	while(*hdr) {
 		if (*hdr == '\r') {
 			if (*(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
-				/* Malformed or multiple newlines */
+				/* Malformed or multiple newlines. */
 				return 1;
 			} else {
 				hdr += 2;
 			}
 		} else if (*hdr == '\n') {
 			if (*(hdr+1) == '\r' || *(hdr+1) == '\n') {
-				/* Malformed or multiple newlines */
+				/* Malformed or multiple newlines. */
 				return 1;
 			} else {
 				hdr += 2;
@@ -252,6 +259,22 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 			hdr++;
 		}
 	}
+
+	/* Should not have any newlines at the end. */
+	while(*hdr && hdr != tmp) {
+		hdr--;
+		if (*hdr == ' ' || *hdr == '\t') {
+			continue;
+		}
+		if (isprint(*hdr)) {
+			break;
+		}
+		if (iscntrl(*hdr)) {
+			/* Reject anything suspicious. */
+			return 1;
+		}
+	}
+
 	return 0;
 }
 
@@ -301,6 +324,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		efree(tmp);
 	}
+
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename(TSRMLS_C);
 		char *f;
@@ -317,7 +341,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
-		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Multiple or malformed newlines found in additional_header");
 		MAIL_RET(0);
 	}
 
