@@ -1967,7 +1967,7 @@ fastcgi_request_done:
 
 			requests++;
 			if (max_requests && (requests == max_requests)) {
-				fcgi_finish_request(&request, 1);
+				fcgi_finish_request(&request, 0);
 				break;
 			}
 			/* end of fastcgi loop */
