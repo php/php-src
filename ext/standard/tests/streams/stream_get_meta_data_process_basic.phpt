@@ -16,7 +16,7 @@ pclose($handle);
 echo "Done";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["stream_type"]=>
   string(5) "STDIO"
