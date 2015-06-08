@@ -23,7 +23,8 @@ PHP                                                                        NEWS
     overflow). (Stas)
 
 - PCNTL:
-  . Fixed bug #68598 (pcntl_exec() should not allow null char). (Stas)
+  . Fixed bug #68598 (pcntl_exec() should not allow null char). (CVE-2015-4026)
+    (Stas)
 
 - PCRE
   . Upgraded pcrelib to 8.37.
