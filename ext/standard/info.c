@@ -404,10 +404,25 @@ char* php_get_windows_name()
 					sub = "Enterprise Edition";
 					break;
 				case PRODUCT_BUSINESS:
-					sub = "Business Edition";
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Professional Edition";
+					} else {
+						sub = "Business Edition";
+					}
+					break;
+				case PRODUCT_BUSINESS_N:
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Professional N Edition";
+					} else {
+						sub = "Business N Edition";
+					}
 					break;
 				case PRODUCT_STARTER:
-					sub = "Starter Edition";
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Starter N Edition";
+					} else {
+					    sub = "Starter Edition";
+					}
 					break;
 				case PRODUCT_CLUSTER_SERVER:
 					sub = "Cluster Server Edition";
