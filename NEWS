@@ -5,6 +5,12 @@ PHP                                                                        NEWS
 - Core:
   . Imroved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
     heap overflow). (Max Spelsberg)
+  . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
+    (Anatol Belski)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
+
+- Litespeed SAPI:
+  . Fixed bug #68812 (Unchecked return value). (George Wang)
 
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)

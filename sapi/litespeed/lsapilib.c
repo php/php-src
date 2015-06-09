@@ -3131,10 +3131,20 @@ static int lsapi_initSuEXEC()
     if ( !s_defaultUid || !s_defaultGid )
     {
         pw = getpwnam( "nobody" );
-        if ( !s_defaultUid )
-            s_defaultUid = pw->pw_uid;
-        if ( !s_defaultGid )
-            s_defaultGid = pw->pw_gid;
+        if ( pw )
+        {
+            if ( !s_defaultUid )
+                s_defaultUid = pw->pw_uid;
+            if ( !s_defaultGid )
+                s_defaultGid = pw->pw_gid;
+        }
+        else
+        {
+            if ( !s_defaultUid )
+                s_defaultUid = 10000;
+            if ( !s_defaultGid )
+                s_defaultGid = 10000;
+        }
     }
     return 0;
 }
