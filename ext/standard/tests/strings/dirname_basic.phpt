@@ -1,5 +1,5 @@
 --TEST--
-Test dirname() function : basic funtionality
+Test dirname() function : basic functionality
 --FILE--
 <?php
 /* Prototype: string dirname ( string $path );

@@ -28,7 +28,7 @@ Features
 AsynchDNS => Yes
 CharConv => No
 Debug => No
-GSS-Negotiate => Yes
+GSS-Negotiate => No
 IDN => Yes
 IPv6 => Yes
 krb4 => No

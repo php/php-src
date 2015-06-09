@@ -47,14 +47,14 @@ array(1) {
   string(3) "foo"
 }
 
-Warning: PDOStatement::execute(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '--'' at line 1 in %s on line %d
+Warning: PDOStatement::execute(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '--'' at line 1 in %s on line %d
 array(3) {
   [0]=>
   string(5) "42000"
   [1]=>
   int(1064)
   [2]=>
-  string(149) "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '--'' at line 1"
+  string(149) "You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '--'' at line 1"
 }
 array(1) {
   ["f1"]=>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) 1998-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define PHP_ZENDOPCACHE_VERSION "7.0.4-dev"
+#define PHP_ZENDOPCACHE_VERSION "7.0.6-dev"
 #define ACCELERATOR_VERSION PHP_ZENDOPCACHE_VERSION
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
@@ -297,7 +297,6 @@ typedef struct _zend_accel_shared_globals {
     unsigned long   restart_in;
 #endif
 	zend_bool       restart_in_progress;
-    time_t          revalidate_at;
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	/* Interned Strings Support */
 	char           *interned_strings_start;

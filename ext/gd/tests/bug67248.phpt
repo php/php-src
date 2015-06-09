@@ -2,7 +2,7 @@
 Bug #67248 (imageaffinematrixget missing check of parameters)
 --SKIPIF--
 <?php
-        if(!extension_loaded('gd')){ die('skip gd extension not available')}
+        if(!extension_loaded('gd')){ die('skip gd extension not available'); }
         if(!function_exists('imageaffinematrixget')) die('skip imageaffinematrixget() not available');
 ?>
 --FILE--

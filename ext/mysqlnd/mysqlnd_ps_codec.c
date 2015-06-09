@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2014 The PHP Group                                |
+  | Copyright (c) 2006-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 #define MYSQLND_SILENT
 
@@ -174,12 +175,20 @@ ps_fetch_int64(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_l
 static void
 ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	float value;
+	float fval;
+	double dval;
 	DBG_ENTER("ps_fetch_float");
-	float4get(value, *row);
-	ZVAL_DOUBLE(zv, value);
+	float4get(fval, *row);
 	(*row)+= 4;
-	DBG_INF_FMT("value=%f", value);
+	DBG_INF_FMT("value=%f", fval);
+
+#ifndef NOT_FIXED_DEC
+# define NOT_FIXED_DEC 31
+#endif
+
+	dval = mysql_float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : field->decimals);
+
+	ZVAL_DOUBLE(zv, dval);
 	DBG_VOID_RETURN;
 }
 /* }}} */

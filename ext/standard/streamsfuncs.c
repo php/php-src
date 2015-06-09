@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -407,7 +407,7 @@ PHP_FUNCTION(stream_get_contents)
 	zval		*zsrc;
 	long		maxlen		= PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
-	int			len;
+	long		len;
 	char		*contents	= NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &desiredpos) == FAILURE) {
@@ -439,6 +439,10 @@ PHP_FUNCTION(stream_get_contents)
 	len = php_stream_copy_to_mem(stream, &contents, maxlen, 0);
 
 	if (contents) {
+		if (len > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %ld to %d bytes", len, INT_MAX);
+			len = INT_MAX;
+		}
 		RETVAL_STRINGL(contents, len, 0);
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -1545,7 +1549,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 	char *filename, *resolved_path;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

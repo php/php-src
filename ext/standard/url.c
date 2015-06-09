@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -192,6 +192,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			port = strtol(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
+				if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
+				    s += 2;
+				}
 			} else {
 				STR_FREE(ret->scheme);
 				efree(ret);
@@ -201,12 +204,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
-		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+		} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 			s += 2;
 		} else {
 			goto just_path;
 		}
-	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 		s += 2;
 	} else {
 		just_path:
@@ -240,16 +243,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
-			if ((pp-s) > 0) {
-				ret->user = estrndup(s, (pp-s));
-				php_replace_controlchars_ex(ret->user, (pp - s));
-			}	
+			ret->user = estrndup(s, (pp-s));
+			php_replace_controlchars_ex(ret->user, (pp - s));
 		
 			pp++;
-			if (p-pp > 0) {
-				ret->pass = estrndup(pp, (p-pp));
-				php_replace_controlchars_ex(ret->pass, (p-pp));
-			}	
+			ret->pass = estrndup(pp, (p-pp));
+			php_replace_controlchars_ex(ret->pass, (p-pp));
 		} else {
 			ret->user = estrndup(s, (p-s));
 			php_replace_controlchars_ex(ret->user, (p-s));
@@ -266,7 +265,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		p = s;
 	} else {
 		/* memrchr is a GNU specific extension
-		   Emulate for wide compatability */
+		   Emulate for wide compatibility */
 		for(p = e; p >= s && *p != ':'; p--);
 	}
 

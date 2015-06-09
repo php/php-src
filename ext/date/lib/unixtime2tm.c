@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ void timelib_update_from_sse(timelib_time *tm)
 	signed int dst = tm->dst;
 
 	sse = tm->sse;
-	
+
 	switch (tm->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET: {
@@ -152,11 +152,11 @@ void timelib_update_from_sse(timelib_time *tm)
 
 		case TIMELIB_ZONETYPE_ID: {
 			timelib_time_offset *gmt_offset;
-			
+
 			gmt_offset = timelib_get_time_zone_info(tm->sse, tm->tz_info);
 			timelib_unixtime2gmt(tm, tm->sse + gmt_offset->offset);
 			timelib_time_offset_dtor(gmt_offset);
-			
+
 			goto cleanup;
 		}
 
@@ -182,7 +182,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int z = tm->z;
 			signed int dst = tm->dst;
-			
+
 			timelib_unixtime2gmt(tm, ts - (tm->z * 60) + (tm->dst * 3600));
 
 			tm->z = z;
@@ -195,7 +195,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 			timelib_unixtime2gmt(tm, ts + gmt_offset->offset);
 
 			/* we need to reset the sse here as unixtime2gmt modifies it */
-			tm->sse = ts; 
+			tm->sse = ts;
 			tm->dst = gmt_offset->is_dst;
 			tm->z = gmt_offset->offset;
 			tm->tz_info = tz;

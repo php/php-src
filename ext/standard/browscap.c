@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,7 +91,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 
 	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 5, persistent);
 
-	t[j++] = '\xA7'; /* section sign */
+	t[j++] = '~';
 	t[j++] = '^';
 
 	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
@@ -119,9 +119,9 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 				t[j++] = '\\';
 				t[j] = ')';
 				break;
-			case '\xA7':
+			case '~':
 				t[j++] = '\\';
-				t[j] = '\xA7';
+				t[j] = '~';
 				break;
 			default:
 				t[j] = Z_STRVAL_P(pattern)[i];
@@ -130,7 +130,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	}
 
 	t[j++] = '$';
-	t[j++] = '\xA7';
+	t[j++] = '~';
 
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;

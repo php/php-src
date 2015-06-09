@@ -10,6 +10,6 @@ define('PHPT_DATETIME_SHOW', PHPT_DATETIME_SHOW_ADD);
 require 'DateTime_data-massive.inc';
 
 ?>
---EXPECT--
-test_massive_positive: ADD: -333333-01-01 16:18:02 EST + P+666666Y0M0DT0H0M0S = **333333-01-01 16:18:02 EST**
-test_massive_negative: ADD: 333333-01-01 16:18:02 EST + P-666666Y0M0DT0H0M0S = **-333333-01-01 16:18:02 EST**
+--EXPECTF--
+test_massive_positive: ADD: -333333-01-01 16:18:02 %s + P+666666Y0M0DT0H0M0S = **333333-01-01 16:18:02 %s**
+test_massive_negative: ADD: 333333-01-01 16:18:02 %s + P-666666Y0M0DT0H0M0S = **-333333-01-01 16:18:02 %s**

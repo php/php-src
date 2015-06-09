@@ -112,141 +112,141 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, integer given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, integer given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, integer given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, integer given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- float 10.5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, double given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, double given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, double given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, double given in %s on line %d
 bool(false)
 
 -- empty array --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, array given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, array given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, array given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, array given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, null given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- lowercase null --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, null given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- lowercase true --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, boolean given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, boolean given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, boolean given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, boolean given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- empty string DQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, object given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, object given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, null given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- unset var --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, null given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- resource --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, resource given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, resource given in %s on line %d
 bool(false)
 ===DONE===

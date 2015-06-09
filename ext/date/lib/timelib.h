@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,9 @@
 #define TIMELIB_SPECIAL_WEEKDAY                   0x01
 #define TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH      0x02
 #define TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH 0x03
+
+#define TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH        0x01
+#define TIMELIB_SPECIAL_LAST_DAY_OF_MONTH         0x02
 
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
@@ -77,8 +80,8 @@ long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
 void timelib_strtointerval(char *s, int len, 
-                           timelib_time **begin, timelib_time **end, 
-						   timelib_rel_time **period, int *recurrences, 
+                           timelib_time **begin, timelib_time **end,
+						   timelib_rel_time **period, int *recurrences,
 						   struct timelib_error_container **errors);
 
 

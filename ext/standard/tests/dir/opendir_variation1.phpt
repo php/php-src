@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
+ * Description: Open a directory and return a dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -30,7 +30,7 @@ unset ($unset_var);
 
 // get a class
 class classA {
-	
+
 	var $path;
 	function __construct($path) {
 		$this->path = $path;
@@ -73,7 +73,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -83,7 +83,7 @@ $inputs = array(
 /*19*/ "$path",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA($path),
 
@@ -194,7 +194,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: opendir() expects parameter 1 to be string, array given in %s on line %d
+Warning: opendir() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -219,6 +219,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: opendir() expects parameter 1 to be string, resource given in %s on line %d
+Warning: opendir() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 ===DONE===

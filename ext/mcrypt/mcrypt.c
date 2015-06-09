@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -415,7 +415,13 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ 
 	}
 }
 /* }}} */
-    
+
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND
+} iv_source;
+
 static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
@@ -473,6 +479,9 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
 	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
 
+	MCG(fd[RANDOM]) = -1;
+	MCG(fd[URANDOM]) = -1;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -481,6 +490,14 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
 	php_stream_filter_unregister_factory("mcrypt.*" TSRMLS_CC);
 	php_stream_filter_unregister_factory("mdecrypt.*" TSRMLS_CC);
+
+	if (MCG(fd[RANDOM]) > 0) {
+		close(MCG(fd[RANDOM]));
+	}
+
+	if (MCG(fd[URANDOM]) > 0) {
+		close(MCG(fd[URANDOM]));
+	}
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -535,12 +552,6 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
-
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND
-} iv_source;
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory)
    Opens the module of the algorithm and the mode to be used */
@@ -619,8 +630,11 @@ PHP_FUNCTION(mcrypt_generic_init)
 
 	if (iv_len != iv_size) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iv size incorrect; supplied length: %d, needed: %d", iv_len, iv_size);
+		if (iv_len > iv_size) {
+			iv_len = iv_size;
+		}
 	}
-	memcpy(iv_s, iv, iv_size);
+	memcpy(iv_s, iv, iv_len);
 
 	mcrypt_generic_deinit(pm->td);
 	result = mcrypt_generic_init(pm->td, key_s, key_size, iv_s);
@@ -641,8 +655,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
 				break;
 		}
+	} else {
+		pm->init = 1;
 	}
-	pm->init = 1;
 	RETVAL_LONG(result);
 
 	efree(iv_s);
@@ -1399,24 +1414,27 @@ PHP_FUNCTION(mcrypt_create_iv)
 		}
 		n = size;
 #else
-		int    fd;
+		int    *fd = &MCG(fd[source]);
 		size_t read_bytes = 0;
 
-		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
-		if (fd < 0) {
-			efree(iv);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device");
-			RETURN_FALSE;
+		if (*fd < 0) {
+			*fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
+			if (*fd < 0) {
+				efree(iv);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device");
+				RETURN_FALSE;
+			}
 		}
+
 		while (read_bytes < size) {
-			n = read(fd, iv + read_bytes, size - read_bytes);
+			n = read(*fd, iv + read_bytes, size - read_bytes);
 			if (n < 0) {
 				break;
 			}
 			read_bytes += n;
 		}
 		n = read_bytes;
-		close(fd);
+
 		if (n < size) {
 			efree(iv);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");

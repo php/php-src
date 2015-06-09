@@ -1,7 +1,5 @@
 --TEST--
 Bug #63336 (invalid E_NOTICE error occur)
---XFAIL--
-Bug is not fixed yet
 --FILE--
 <?php
 error_reporting(E_ALL | E_NOTICE );
@@ -18,7 +16,7 @@ class Child extends Base {
     public function bar($var, $more=self::DUMMY) { return true; }
 }
 ?>
---EXPECT--
-Strict Standards: Declaration of Child::foo() should be compatible with Base::foo($var = '123', $more = NULL) in %sbug63336.php on line %d
+--EXPECTF--
+Strict Standards: Declaration of Child::foo() should be compatible with Base::foo($var = TEST, $more = NULL) in %sbug63336.php on line %d
 
-Strict Standards: Declaration of Child::bar() should be compatible with Base::bar($var, $more = 'XXX') in %sbug63336.php on line %d
+Strict Standards: Declaration of Child::bar() should be compatible with Base::bar($more = self::DUMMY) in %sbug63336.php on line %d

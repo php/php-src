@@ -62,18 +62,18 @@ mysqli_close($link);
 --EXPECT--
 array(7) {
   [0]=>
-  float(3.14159274101)
+  float(3.14159)
   [1]=>
-  float(-9.99999997475E-7)
+  float(-1.0E-6)
   [2]=>
   float(0)
   [3]=>
-  float(999999995904)
+  float(1.0E+12)
   [4]=>
-  float(0.564642488956)
+  float(0.564642)
   [5]=>
   float(1)
   [6]=>
-  float(8.88888914608E+14)
+  float(8.88889E+14)
 }
 done!

@@ -61,9 +61,16 @@
  *	Number of matches in the current invocation of glob.
  */
 #ifdef PHP_WIN32
-#define _POSIX_
-#include <limits.h>
-#undef _POSIX_
+#if _MSC_VER < 1800
+# define _POSIX_
+# include <limits.h>
+# undef _POSIX_
+#else
+/* Visual Studio 2013 removed all the _POSIX_ defines, but we depend on some */
+# ifndef ARG_MAX
+#  define ARG_MAX 14500
+# endif
+#endif
 #ifndef S_ISDIR
 #define S_ISDIR(m) (((m) & _S_IFDIR) == _S_IFDIR)
 #endif
@@ -286,17 +293,19 @@ globexp2(ptr, pattern, pglob, rv)
 	}
 
 	for (i = 0, pl = pm = ptr; pm <= pe; pm++) {
+		const Char *pb;
+
 		switch (*pm) {
 		case LBRACKET:
 			/* Ignore everything between [] */
-			for (pl = pm++; *pm != RBRACKET && *pm != EOS; pm++)
+			for (pb = pm++; *pm != RBRACKET && *pm != EOS; pm++)
 				;
 			if (*pm == EOS) {
 				/*
 				 * We could not find a matching RBRACKET.
 				 * Ignore and just look for RBRACE
 				 */
-				pm = pl;
+				pm = pb;
 			}
 			break;
 

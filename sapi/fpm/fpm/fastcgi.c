@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,8 +36,6 @@
 #ifdef _WIN32
 
 #include <windows.h>
-
-	typedef unsigned int in_addr_t;
 
 	struct sockaddr_un {
 		short   sun_family;
@@ -137,13 +135,14 @@ typedef union _sa_t {
 	struct sockaddr     sa;
 	struct sockaddr_un  sa_unix;
 	struct sockaddr_in  sa_inet;
+	struct sockaddr_in6 sa_inet6;
 } sa_t;
 
 static HashTable fcgi_mgmt_vars;
 
 static int is_initialized = 0;
 static int in_shutdown = 0;
-static in_addr_t *allowed_clients = NULL;
+static sa_t *allowed_clients = NULL;
 
 static sa_t client_sa;
 
@@ -257,7 +256,7 @@ void fcgi_set_allowed_clients(char *ip)
 			cur++;
 		}
 		if (allowed_clients) free(allowed_clients);
-		allowed_clients = malloc(sizeof(in_addr_t) * (n+2));
+		allowed_clients = malloc(sizeof(sa_t) * (n+2));
 		n = 0;
 		cur = ip;
 		while (cur) {
@@ -266,15 +265,23 @@ void fcgi_set_allowed_clients(char *ip)
 				*end = 0;
 				end++;
 			}
-			allowed_clients[n] = inet_addr(cur);
-			if (allowed_clients[n] == INADDR_NONE) {
+			if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
+				allowed_clients[n].sa.sa_family = AF_INET;
+				n++;
+			} else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
+				allowed_clients[n].sa.sa_family = AF_INET6;
+				n++;
+			} else {
 				zlog(ZLOG_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
 			}
-			n++;
 			cur = end;
 		}
-		allowed_clients[n] = INADDR_NONE;
+		allowed_clients[n].sa.sa_family = 0;
 		free(ip);
+		if (!n) {
+			zlog(ZLOG_ERROR, "There are no allowed addresses for this pool");
+			/* don't clear allowed_clients as it will create an "open for all" security issue */
+		}
 	}
 }
 
@@ -759,6 +766,43 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 	}
 }
 
+static int fcgi_is_allowed() {
+	int i;
+
+	if (client_sa.sa.sa_family == AF_UNIX) {
+		return 1;
+	}
+	if (!allowed_clients) {
+		return 1;
+	}
+	if (client_sa.sa.sa_family == AF_INET) {
+		for (i=0 ; allowed_clients[i].sa.sa_family ; i++) {
+			if (allowed_clients[i].sa.sa_family == AF_INET
+				&& !memcmp(&client_sa.sa_inet.sin_addr, &allowed_clients[i].sa_inet.sin_addr, 4)) {
+				return 1;
+			}
+		}
+	}
+	if (client_sa.sa.sa_family == AF_INET6) {
+		for (i=0 ; allowed_clients[i].sa.sa_family ; i++) {
+			if (allowed_clients[i].sa.sa_family == AF_INET6
+				&& !memcmp(&client_sa.sa_inet6.sin6_addr, &allowed_clients[i].sa_inet6.sin6_addr, 12)) {
+				return 1;
+			}
+#ifdef IN6_IS_ADDR_V4MAPPED
+			if (allowed_clients[i].sa.sa_family == AF_INET
+			    && IN6_IS_ADDR_V4MAPPED(&client_sa.sa_inet6.sin6_addr)
+				&& !memcmp(((char *)&client_sa.sa_inet6.sin6_addr)+12, &allowed_clients[i].sa_inet.sin_addr, 4)) {
+				return 1;
+			}
+#endif
+		}
+	}
+
+	zlog(ZLOG_ERROR, "Connection disallowed: IP address '%s' has been dropped.", fcgi_get_last_client_ip());
+	return 0;
+}
+
 int fcgi_accept_request(fcgi_request *req)
 {
 #ifdef _WIN32
@@ -809,23 +853,10 @@ int fcgi_accept_request(fcgi_request *req)
 					FCGI_UNLOCK(req->listen_socket);
 
 					client_sa = sa;
-					if (sa.sa.sa_family == AF_INET && req->fd >= 0 && allowed_clients) {
-						int n = 0;
-						int allowed = 0;
-
-						while (allowed_clients[n] != INADDR_NONE) {
-							if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
-								allowed = 1;
-								break;
-							}
-							n++;
-						}
-						if (!allowed) {
-							zlog(ZLOG_ERROR, "Connection disallowed: IP address '%s' has been dropped.", inet_ntoa(sa.sa_inet.sin_addr));
-							closesocket(req->fd);
-							req->fd = -1;
-							continue;
-						}
+					if (req->fd >= 0 && !fcgi_is_allowed()) {
+						closesocket(req->fd);
+						req->fd = -1;
+						continue;
 					}
 				}
 
@@ -944,6 +975,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	if (safe_write(req, req->out_buf, len) != len) {
 		req->keep = 0;
+		req->out_pos = req->out_buf;
 		return 0;
 	}
 
@@ -1094,12 +1126,27 @@ void fcgi_free_mgmt_var_cb(void * ptr)
 	pefree(*var, 1);
 }
 
-char *fcgi_get_last_client_ip() /* {{{ */
+const char *fcgi_get_last_client_ip() /* {{{ */
 {
-	if (client_sa.sa.sa_family == AF_UNIX) {
-		return NULL;
+	static char str[INET6_ADDRSTRLEN];
+
+	/* Ipv4 */
+	if (client_sa.sa.sa_family == AF_INET) {
+		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet.sin_addr, str, INET6_ADDRSTRLEN);
 	}
-	return inet_ntoa(client_sa.sa_inet.sin_addr);
+#ifdef IN6_IS_ADDR_V4MAPPED
+	/* Ipv4-Mapped-Ipv6 */
+	if (client_sa.sa.sa_family == AF_INET6
+		&& IN6_IS_ADDR_V4MAPPED(&client_sa.sa_inet6.sin6_addr)) {
+		return inet_ntop(AF_INET, ((char *)&client_sa.sa_inet6.sin6_addr)+12, str, INET6_ADDRSTRLEN);
+	}
+#endif
+	/* Ipv6 */
+	if (client_sa.sa.sa_family == AF_INET6) {
+		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
+	}
+	/* Unix socket */
+	return NULL;
 }
 /* }}} */
 /*

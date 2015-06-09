@@ -21,5 +21,5 @@ $test = new CachingIterator($arrayIterator, 3); // this throws an exception
 ?>
 ===DONE===
 --EXPECTF--
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 ===DONE===

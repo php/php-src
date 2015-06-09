@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -36,14 +36,16 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
 	zval **login, **password;
 
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS &&
+	    Z_TYPE_PP(login) == IS_STRING) {
 		unsigned char* buf;
 		int len;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
 		smart_str_appendc(&auth, ':');
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password"), (void **)&password) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password"), (void **)&password) == SUCCESS &&
+		    Z_TYPE_PP(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 		}
 		smart_str_0(&auth);
@@ -64,14 +66,16 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 	zval **login, **password;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
-			!zend_hash_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"))) {
+	    Z_TYPE_PP(login) == IS_STRING &&
+	    !zend_hash_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"))) {
 		unsigned char* buf;
 		int len;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
 		smart_str_appendc(&auth, ':');
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS &&
+		    Z_TYPE_PP(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 		}
 		smart_str_0(&auth);
@@ -571,6 +575,7 @@ try_again:
 		}
 		if (!http_1_1 ||
 			(zend_hash_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive"), (void **)&tmp) == SUCCESS &&
+			 (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) &&
 			 Z_LVAL_PP(tmp) == 0)) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
@@ -804,7 +809,8 @@ try_again:
 		}
 
 		/* Send cookies along with request */
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS &&
+		    Z_TYPE_PP(cookies) == IS_ARRAY) {
 			zval **data;
 			char *key;
 			int i, n;
@@ -847,7 +853,7 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-		    Z_LVAL_PP(trace) > 0) {
+		    (Z_TYPE_PP(trace) == IS_BOOL || Z_TYPE_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
 			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.c, soap_headers.len, 1);
 		}
 		smart_str_appendl(&soap_headers, request, request_size);
@@ -892,7 +898,7 @@ try_again:
 		}
 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-		    Z_LVAL_PP(trace) > 0) {
+		    (Z_TYPE_PP(trace) == IS_BOOL || Z_TYPE_PP(trace) == IS_LONG) && Z_LVAL_PP(trace) != 0) {
 			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
 		}
 
@@ -941,7 +947,8 @@ try_again:
 		char *eqpos, *sempos;
 		zval **cookies;
 
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE ||
+		    Z_TYPE_PP(cookies) != IS_ARRAY) {
 			zval *tmp_cookies;
 			MAKE_STD_ZVAL(tmp_cookies);
 			array_init(tmp_cookies);

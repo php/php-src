@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -10,7 +10,7 @@
    | http://www.php.net/license/3_01.txt                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you 6 copy immediately.               |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Sterling Hughes <sterling@php.net>                           |
    +----------------------------------------------------------------------+
@@ -168,6 +168,11 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static int php_curl_option_str(php_curl *ch, long option, const char *str, const int len, zend_bool make_copy TSRMLS_DC)
 {
 	CURLcode error = CURLE_OK;
+
+	if (strlen(str) != len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Curl option contains invalid characters (\\0)");
+		return FAILURE;
+	}
 
 #if LIBCURL_VERSION_NUM >= 0x071100
 	if (make_copy) {
@@ -840,6 +845,11 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS4);
 	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5);
 
+#if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
+	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS4A);
+	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5_HOSTNAME);
+#endif
+
 	/* Curl Share constants */
 	REGISTER_CURL_CONSTANT(CURLSHOPT_NONE);
 	REGISTER_CURL_CONSTANT(CURLSHOPT_SHARE);
@@ -848,6 +858,9 @@ PHP_MINIT_FUNCTION(curl)
 	/* Curl Http Version constants (CURLOPT_HTTP_VERSION) */
 	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_1_0);
 	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_1_1);
+#if LIBCURL_VERSION_NUM >= 0x072100 /* 7.33.0 */
+	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_2_0);
+#endif
 	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_NONE);
 
 	/* Curl Lock constants */
@@ -877,6 +890,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_VERSION_KERBEROS4);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_LIBZ);
 	REGISTER_CURL_CONSTANT(CURL_VERSION_SSL);
+#if LIBCURL_VERSION_NUM >= 0x072100 /* 7.33.0 */
+	REGISTER_CURL_CONSTANT(CURL_VERSION_HTTP2);
+#endif
 
 #if LIBCURL_VERSION_NUM >= 0x070a06 /* Available since 7.10.6 */
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPAUTH);
@@ -1197,6 +1213,12 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLSSLOPT_ALLOW_BEAST);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_0);
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_1);
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_2);
+#endif
+
 #if CURLOPT_FTPASCII != 0
 	REGISTER_CURL_CONSTANT(CURLOPT_FTPASCII);
 #endif
@@ -1229,7 +1251,7 @@ PHP_MINIT_FUNCTION(curl)
 	gcry_control(GCRYCTL_SET_THREAD_CBS, &php_curl_gnutls_tsl);
 #endif
 
-	if (curl_global_init(CURL_GLOBAL_SSL) != CURLE_OK) {
+	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
 		return FAILURE;
 	}
 
@@ -1332,6 +1354,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1397,6 +1420,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1475,6 +1499,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -1552,6 +1577,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				length = CURL_READFUNC_ABORT;
 #endif
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
 					length = MIN((int) (size * nmemb), Z_STRLEN_P(retval_ptr));
 					memcpy(data, Z_STRVAL_P(retval_ptr), length);
@@ -1626,6 +1652,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
+				_php_curl_verify_handlers(ch, 1 TSRMLS_CC);
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
@@ -2829,6 +2856,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
 			}
+			break;
 
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 		case CURLOPT_FNMATCH_FUNCTION:

@@ -1,7 +1,16 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
-The latest release of PCRE is always available in three alternative formats
+NOTE: This set of files relates to PCRE releases that use the original API,
+with library names libpcre, libpcre16, and libpcre32. January 2015 saw the
+first release of a new API, known as PCRE2, with release numbers starting at
+10.00 and library names libpcre2-8, libpcre2-16, and libpcre2-32. The old
+libraries (now called PCRE1) are still being maintained for bug fixes, but
+there will be no new development. New projects are advised to use the new PCRE2
+libraries.
+
+
+The latest release of PCRE1 is always available in three alternative formats
 from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
@@ -45,14 +54,16 @@ the 16-bit library, which processes strings of 16-bit values, and one for the
 32-bit library, which processes strings of 32-bit values. The distribution also
 includes a set of C++ wrapper functions (see the pcrecpp man page for details),
 courtesy of Google Inc., which can be used to call the 8-bit PCRE library from
-C++.
+C++. Other C++ wrappers have been created from time to time. See, for example:
+https://github.com/YasserAsmi/regexp, which aims to be simple and similar in
+style to the C API.
 
-In addition, there is a set of C wrapper functions (again, just for the 8-bit
-library) that are based on the POSIX regular expression API (see the pcreposix
-man page). These end up in the library called libpcreposix. Note that this just
-provides a POSIX calling interface to PCRE; the regular expressions themselves
-still follow Perl syntax and semantics. The POSIX API is restricted, and does
-not give full access to all of PCRE's facilities.
+The distribution also contains a set of C wrapper functions (again, just for
+the 8-bit library) that are based on the POSIX regular expression API (see the
+pcreposix man page). These end up in the library called libpcreposix. Note that
+this just provides a POSIX calling interface to PCRE; the regular expressions
+themselves still follow Perl syntax and semantics. The POSIX API is restricted,
+and does not give full access to all of PCRE's facilities.
 
 The header file for the POSIX-style functions is called pcreposix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
@@ -85,11 +96,12 @@ documentation is supplied in two other forms:
   1. There are files called doc/pcre.txt, doc/pcregrep.txt, and
      doc/pcretest.txt in the source distribution. The first of these is a
      concatenation of the text forms of all the section 3 man pages except
-     those that summarize individual functions. The other two are the text
-     forms of the section 1 man pages for the pcregrep and pcretest commands.
-     These text forms are provided for ease of scanning with text editors or
-     similar tools. They are installed in <prefix>/share/doc/pcre, where
-     <prefix> is the installation prefix (defaulting to /usr/local).
+     the listing of pcredemo.c and those that summarize individual functions.
+     The other two are the text forms of the section 1 man pages for the
+     pcregrep and pcretest commands. These text forms are provided for ease of
+     scanning with text editors or similar tools. They are installed in
+     <prefix>/share/doc/pcre, where <prefix> is the installation prefix
+     (defaulting to /usr/local).
 
   2. A set of files containing all the documentation in HTML form, hyperlinked
      in various ways, and rooted in a file called index.html, is distributed in
@@ -372,12 +384,12 @@ library. They are also documented in the pcrebuild man page.
 
   Of course, the relevant libraries must be installed on your system.
 
-. The default size of internal buffer used by pcregrep can be set by, for
-  example:
+. The default size (in bytes) of the internal buffer used by pcregrep can be
+  set by, for example:
 
-  --with-pcregrep-bufsize=50K
+  --with-pcregrep-bufsize=51200
 
-  The default value is 20K.
+  The value must be a plain integer. The default is 20480.
 
 . It is possible to compile pcretest so that it links with the libreadline
   or libedit libraries, by specifying, respectively,
@@ -987,4 +999,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 05 November 2013
+Last updated: 10 February 2015

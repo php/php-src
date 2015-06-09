@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,9 +23,21 @@
 static int m_table_common[13] = { -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 static int m_table_leap[13] =   { -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 
+static timelib_sll positive_mod(timelib_sll x, timelib_sll y)
+{
+	timelib_sll tmp;
+
+	tmp = x % y;
+	if (tmp < 0) {
+		tmp += y;
+	}
+
+	return tmp;
+}
+
 static timelib_sll century_value(timelib_sll j)
 {
-	return 6 - (j % 4) * 2;
+	return 6 - positive_mod(j, 4) * 2;
 }
 
 static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_sll d, int iso)
@@ -36,9 +48,9 @@ static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_
 	 * Julian calendar. We just return the 'wrong' day of week to be
 	 * consistent. */
 	c1 = century_value(y / 100);
-	y1 = (y % 100);
+	y1 = positive_mod(y, 100);
 	m1 = timelib_is_leap(y) ? m_table_leap[m] : m_table_common[m];
-	dow = (c1 + y1 + m1 + (y1 / 4) + d) % 7;
+	dow = positive_mod((c1 + y1 + m1 + (y1 / 4) + d), 7);
 	if (iso) {
 		if (dow == 0) {
 			dow = 7;
@@ -124,7 +136,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d)
 {
 	timelib_sll dow, day;
-	
+
 	/* Figure out the dayofweek for y-1-1 */
 	dow = timelib_day_of_week(y, 1, 1);
 	/* then use that to figure out the offset for day 1 of week 1 */

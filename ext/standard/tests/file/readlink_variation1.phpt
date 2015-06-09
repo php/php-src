@@ -65,7 +65,7 @@ bool(false)
 Warning: readlink(): %s in %s on line %d
 bool(false)
 
-Warning: readlink() expects parameter 1 to be string, resource given in %s on line %d
+Warning: readlink() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 
 Warning: readlink(): %s in %s on line %d

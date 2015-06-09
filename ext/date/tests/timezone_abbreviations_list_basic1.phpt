@@ -29,7 +29,7 @@ string(5) "array"
 int(%d)
 
 -- Format a sample entry --
-array(4) {
+array(11) {
   [0]=>
   array(3) {
     ["dst"]=>
@@ -42,11 +42,11 @@ array(4) {
   [1]=>
   array(3) {
     ["dst"]=>
-    bool(true)
+    bool(false)
     ["offset"]=>
-    int(-14400)
+    int(34200)
     ["timezone_id"]=>
-    string(16) "America/Eirunepe"
+    string(18) "Australia/Adelaide"
   }
   [2]=>
   array(3) {
@@ -55,7 +55,7 @@ array(4) {
     ["offset"]=>
     int(-14400)
     ["timezone_id"]=>
-    string(18) "America/Rio_Branco"
+    string(16) "America/Eirunepe"
   }
   [3]=>
   array(3) {
@@ -64,7 +64,70 @@ array(4) {
     ["offset"]=>
     int(-14400)
     ["timezone_id"]=>
+    string(18) "America/Rio_Branco"
+  }
+  [4]=>
+  array(3) {
+    ["dst"]=>
+    bool(true)
+    ["offset"]=>
+    int(-14400)
+    ["timezone_id"]=>
     string(11) "Brazil/Acre"
+  }
+  [5]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(13) "Asia/Jayapura"
+  }
+  [6]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(21) "Australia/Broken_Hill"
+  }
+  [7]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(16) "Australia/Darwin"
+  }
+  [8]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(15) "Australia/North"
+  }
+  [9]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(15) "Australia/South"
+  }
+  [10]=>
+  array(3) {
+    ["dst"]=>
+    bool(false)
+    ["offset"]=>
+    int(34200)
+    ["timezone_id"]=>
+    string(20) "Australia/Yancowinna"
   }
 }
 ===DONE===

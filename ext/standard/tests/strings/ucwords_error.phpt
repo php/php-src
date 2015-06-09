@@ -18,7 +18,7 @@ echo "\n-- Testing ucwords() function with more than expected no. of arguments -
 $str = 'string_val';
 $extra_arg = 10;
 
-var_dump( ucwords($str, $extra_arg) );
+var_dump( ucwords($str, $extra_arg, $extra_arg) );
 
 // check if there were any changes made to $str
 var_dump($str);
@@ -30,12 +30,12 @@ echo "Done\n";
 
 -- Testing ucwords() function with Zero arguments --
 
-Warning: ucwords() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: ucwords() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing ucwords() function with more than expected no. of arguments --
 
-Warning: ucwords() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: ucwords() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 string(10) "string_val"
 Done

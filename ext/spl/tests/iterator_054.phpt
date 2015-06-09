@@ -42,8 +42,6 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-
-Notice: Array to string conversion in %siterator_054.php on line %d
 int(7)
 array(2) {
   [0]=>

@@ -7,7 +7,7 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('echo done, "\n";', TRUE);
+php_cli_server_start('echo done, "\n";', null);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;

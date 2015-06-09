@@ -199,7 +199,6 @@ mysqli_close($link);
 	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
 		printf("[008] %s [%d] %s\n", $column_def,
 			mysqli_errno($link), mysqli_error($link));
-		continue;
 	}
 
 	$column_def = array('col1 CHAR(1)', 'col2 CHAR(2)','INDEX idx_col1_col2(col1, col2)');
@@ -220,7 +219,6 @@ mysqli_close($link);
 		while ($field = mysqli_fetch_field($res)) {
 			if (!isset($expected_flags[$field->name])) {
 				printf("[010] Found unexpected field '%s'\n", $field->name);
-				continue;
 			}
 			list($missing_flags, $unexpected_flags, $flags_found) = checkFlags($field->flags, $expected_flags[$field->name], $flags);
 			if ($unexpected_flags)

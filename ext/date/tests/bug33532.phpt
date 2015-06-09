@@ -39,5 +39,5 @@ datestr  10:00:00 AM July 1 2005 UTC
 
 Setting TZ
 input    10:00:00 AM July 1 2005
-strftime 10:00:00 AM July 1 2005 EST +1000
-datestr  10:00:00 AM July 1 2005 EST
+strftime 10:00:00 AM July 1 2005 AEST +1000
+datestr  10:00:00 AM July 1 2005 AEST

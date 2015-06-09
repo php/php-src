@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -754,9 +754,6 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
-			if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-				zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
-			}
 			Z_ADDREF_P(new_zval);
 			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 			    property_info->offset >= 0) {
@@ -775,6 +772,12 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type
 					rebuild_object_properties(zobj);
 				}
 				zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
+			}
+
+			/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
+			 * being overwritten in an error handler. */
+			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+				zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
 			}
 		} else {
 			/* we do have getter - fail and let it try again with usual get/set */

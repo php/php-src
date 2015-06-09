@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(28) "-12345-02-15 08:34:10.000000"
+  string(28) "-12345-02-11 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(27) "-0010-02-19 08:34:10.000000"
+  string(27) "-0010-02-14 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

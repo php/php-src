@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1066,8 +1066,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (!module_initialized || PG(log_errors)) {
 			char *log_buffer;
 #ifdef PHP_WIN32
-			if ((type == E_CORE_ERROR || type == E_CORE_WARNING) && PG(display_startup_errors)) {
-				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
+			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
+				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
 			}
 #endif
 			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
@@ -1087,7 +1087,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						size_t len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
-						efree(buf);
+						str_efree(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
@@ -1243,6 +1243,10 @@ PHPAPI char *php_get_current_user(TSRMLS_D)
 		}
 		pwbuf = emalloc(pwbuflen);
 		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+			efree(pwbuf);
+			return "";
+		}
+		if (retpwptr == NULL) {
 			efree(pwbuf);
 			return "";
 		}
@@ -1794,7 +1798,7 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 7.5 free last error information */
+	/* 7.5 free last error information and temp dir */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1803,6 +1807,7 @@ void php_request_shutdown(void *dummy)
 		free(PG(last_error_file));
 		PG(last_error_file) = NULL;
 	}
+	php_shutdown_temporary_directory();
 
 	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
@@ -2399,7 +2404,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	php_output_shutdown();
-	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
 
@@ -2503,8 +2507,23 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 #endif
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
-		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 
+		/*
+		   If cli primary file has shabang line and there is a prepend file,
+		   the `start_lineno` will be used by prepend file but not primary file,
+		   save it and restore after prepend file been executed.
+		 */
+		if (CG(start_lineno) && prepend_file_p) {
+			int orig_start_lineno = CG(start_lineno);
+
+			CG(start_lineno) = 0;
+			if (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p) == SUCCESS) {
+				CG(start_lineno) = orig_start_lineno;
+				retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 2, primary_file, append_file_p) == SUCCESS);
+			}
+		} else {
+			retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		}
 	} zend_end_try();
 
 #if HAVE_BROKEN_GETCWD

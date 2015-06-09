@@ -8,11 +8,11 @@
  * and crypt(3) interfaces added, but optimizations specific to password
  * cracking removed.
  *
- * Written by Solar Designer <solar at openwall.com> in 1998-2011.
+ * Written by Solar Designer <solar at openwall.com> in 1998-2015.
  * No copyright is claimed, and the software is hereby placed in the public
  * domain. In case this attempt to disclaim copyright and place the software
  * in the public domain is deemed null and void, then the software is
- * Copyright (c) 1998-2011 Solar Designer and it is hereby released to the
+ * Copyright (c) 1998-2015 Solar Designer and it is hereby released to the
  * general public under the following terms:
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,12 @@
  * you place this code and any modifications you make under a license
  * of your choice.
  *
- * This implementation is mostly compatible with OpenBSD's bcrypt.c (prefix
- * "$2a$") by Niels Provos <provos at citi.umich.edu>, and uses some of his
- * ideas. The password hashing algorithm was designed by David Mazieres
- * <dm at lcs.mit.edu>. For more information on the level of compatibility,
- * please refer to the comments in BF_set_key() below and to the crypt(3)
- * man page included in the crypt_blowfish tarball.
+ * This implementation is fully compatible with OpenBSD's bcrypt.c for prefix
+ * "$2b$", originally by Niels Provos <provos at citi.umich.edu>, and it uses
+ * some of his ideas. The password hashing algorithm was designed by David
+ * Mazieres <dm at lcs.mit.edu>. For information on the level of
+ * compatibility for bcrypt hash prefixes other than "$2b$", please refer to
+ * the comments in BF_set_key() below and to the included crypt(3) man page.
  *
  * There's a paper on the algorithm that explains its design decisions:
  *
@@ -583,6 +583,7 @@ static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
  * Valid combinations of settings are:
  *
  * Prefix "$2a$": bug = 0, safety = 0x10000
+ * Prefix "$2b$": bug = 0, safety = 0
  * Prefix "$2x$": bug = 1, safety = 0
  * Prefix "$2y$": bug = 0, safety = 0
  */
@@ -646,6 +647,10 @@ static void BF_set_key(const char *key, BF_key expanded, BF_key initial,
 	initial[0] ^= sign;
 }
 
+static const unsigned char flags_by_subtype[26] =
+	{2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0};
+
 static char *BF_crypt(const char *key, const char *setting,
 	char *output, int size,
 	BF_word min)
@@ -653,9 +658,6 @@ static char *BF_crypt(const char *key, const char *setting,
 #if BF_ASM
 	extern void _BF_body_r(BF_ctx *ctx);
 #endif
-	static const unsigned char flags_by_subtype[26] =
-		{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0};
 	struct {
 		BF_ctx ctx;
 		BF_key expanded_key;
@@ -821,9 +823,10 @@ char *php_crypt_blowfish_rn(const char *key, const char *setting,
 {
 	const char *test_key = "8b \xd0\xc1\xd2\xcf\xcc\xd8";
 	const char *test_setting = "$2a$00$abcdefghijklmnopqrstuu";
-	static const char * const test_hash[2] =
-		{"VUrPmXD6q/nVSSp7pNDhCR9071IfIRe\0\x55", /* $2x$ */
-		"i1D709vfamulimlGcq0qq3UvuUasvEa\0\x55"}; /* $2a$, $2y$ */
+	static const char * const test_hashes[2] =
+		{"i1D709vfamulimlGcq0qq3UvuUasvEa\0\x55", /* 'a', 'b', 'y' */
+		"VUrPmXD6q/nVSSp7pNDhCR9071IfIRe\0\x55"}; /* 'x' */
+	const char *test_hash = test_hashes[0];
 	char *retval;
 	const char *p;
 	int save_errno, ok;
@@ -845,17 +848,19 @@ char *php_crypt_blowfish_rn(const char *key, const char *setting,
  * detected by the self-test.
  */
 	memcpy(buf.s, test_setting, sizeof(buf.s));
-	if (retval)
+	if (retval) {
+		unsigned int flags = flags_by_subtype[
+		    (unsigned int)(unsigned char)setting[2] - 'a'];
+		test_hash = test_hashes[flags & 1];
 		buf.s[2] = setting[2];
+	}
 	memset(buf.o, 0x55, sizeof(buf.o));
 	buf.o[sizeof(buf.o) - 1] = 0;
 	p = BF_crypt(test_key, buf.s, buf.o, sizeof(buf.o) - (1 + 1), 1);
 
 	ok = (p == buf.o &&
 	    !memcmp(p, buf.s, 7 + 22) &&
-	    !memcmp(p + (7 + 22),
-	    test_hash[(unsigned int)(unsigned char)buf.s[2] & 1],
-	    31 + 1 + 1 + 1));
+	    !memcmp(p + (7 + 22), test_hash, 31 + 1 + 1 + 1));
 
 	{
 		const char *k = "\xff\xa3" "34" "\xff\xff\xff\xa3" "345";
@@ -885,7 +890,7 @@ char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
 	if (size < 16 || output_size < 7 + 22 + 1 ||
 	    (count && (count < 4 || count > 31)) ||
 	    prefix[0] != '$' || prefix[1] != '2' ||
-	    (prefix[2] != 'a' && prefix[2] != 'y')) {
+	    (prefix[2] != 'a' && prefix[2] != 'b' && prefix[2] != 'y')) {
 		if (output_size > 0) output[0] = '\0';
 		__set_errno((output_size < 7 + 22 + 1) ? ERANGE : EINVAL);
 		return NULL;

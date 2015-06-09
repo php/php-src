@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -106,7 +106,7 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 	timelib_sll days_this_month;
 	timelib_sll last_month, last_year;
 	timelib_sll days_last_month;
-	
+
 	/* can jump an entire leap year period quickly */
 	if (*d >= DAYS_PER_LYEAR_PERIOD || *d <= -DAYS_PER_LYEAR_PERIOD) {
 		*y += YEARS_PER_LYEAR_PERIOD * (*d / DAYS_PER_LYEAR_PERIOD);
@@ -205,15 +205,17 @@ static void do_adjust_relative(timelib_time* time)
 		time->m += time->relative.m;
 		time->y += time->relative.y;
 	}
+
 	switch (time->relative.first_last_day_of) {
-		case 1: /* first */
+		case TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH: /* first */
 			time->d = 1;
 			break;
-		case 2: /* last */
+		case TIMELIB_SPECIAL_LAST_DAY_OF_MONTH: /* last */
 			time->d = 0;
 			time->m++;
 			break;
 	}
+
 	timelib_do_normalize(time);
 }
 
@@ -295,6 +297,15 @@ static void do_adjust_special_early(timelib_time* time)
 				time->relative.m = 0;
 				break;
 		}
+	}
+	switch (time->relative.first_last_day_of) {
+		case TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH: /* first */
+			time->d = 1;
+			break;
+		case TIMELIB_SPECIAL_LAST_DAY_OF_MONTH: /* last */
+			time->d = 0;
+			time->m++;
+			break;
 	}
 	timelib_do_normalize(time);
 }
@@ -385,7 +396,7 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 				timelib_time_offset *before, *after;
 				timelib_sll          tmp;
 				int                  in_transistion;
-				
+
 				tz->is_localtime = 1;
 				before = timelib_get_time_zone_info(tz->sse, tzi);
 				after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
@@ -395,7 +406,7 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 					((tz->sse - after->offset) >= (after->transistion_time + (before->offset - after->offset))) &&
 					((tz->sse - after->offset) < after->transistion_time)
 				);
-				
+
 				if ((before->offset != after->offset) && !in_transistion) {
 					tmp = -after->offset;
 				} else {
@@ -453,7 +464,7 @@ int main(void)
 	printf ("%04d-%02d-%02d %02d:%02d:%02d.%-5d %+04d %1d",
 		time.y, time.m, time.d, time.h, time.i, time.s, time.f, time.z, time.dst);
 	if (time.have_relative) {
-		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS", 
+		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS",
 			time.relative.y, time.relative.m, time.relative.d, time.relative.h, time.relative.i, time.relative.s);
 	}
 	if (time.have_weekday_relative) {

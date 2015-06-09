@@ -1,9 +1,8 @@
-
 /*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +17,7 @@
 */
 
 /*
-Copyright (c) 2007, Lite Speed Technologies Inc.
+Copyright (c) 2002-2015, Lite Speed Technologies Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,7 +47,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
-
 
 
 #ifndef  _LSAPILIB_H_
@@ -118,7 +116,8 @@ typedef struct lsapi_request
     char            * m_pRequestMethod;
     int               m_totalLen;
     int               m_reqState;
-    int               m_reqBodyRead;
+    off_t             m_reqBodyLen;
+    off_t             m_reqBodyRead;
     int               m_bufProcessed;
     int               m_bufRead;
     
@@ -126,6 +125,7 @@ typedef struct lsapi_request
     
     struct lsapi_resp_header          m_respHeader;
     short                             m_respHeaderLen[LSAPI_MAX_RESP_HEADERS];
+    void            * m_pAppData;
 
 }LSAPI_Request;
 
@@ -170,22 +170,30 @@ int LSAPI_ForeachSpecialEnv_r( LSAPI_Request * pReq,
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name );
             
 
-int LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, int len );
+ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t len );
 
 int LSAPI_ReqBodyGetChar_r( LSAPI_Request * pReq );
 
-int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, int bufLen, int *getLF );
+int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen, int *getLF );
 
 
 int LSAPI_FinalizeRespHeaders_r( LSAPI_Request * pReq );
 
-int LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, int len );
+ssize_t LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, size_t len );
 
-int LSAPI_Write_Stderr_r( LSAPI_Request * pReq, const char * pBuf, int len );
+ssize_t LSAPI_sendfile_r( LSAPI_Request * pReq, int fdIn, off_t* off, size_t size );
+
+ssize_t LSAPI_Write_Stderr_r( LSAPI_Request * pReq, const char * pBuf, size_t len );
 
 int LSAPI_Flush_r( LSAPI_Request * pReq );
 
-int LSAPI_AppendRespHeader_r( LSAPI_Request * pHeader, char * pBuf, int len );
+int LSAPI_AppendRespHeader_r( LSAPI_Request * pReq, const char * pBuf, int len );
+
+int LSAPI_AppendRespHeader2_r( LSAPI_Request * pReq, const char * pHeaderName, 
+                              const char * pHeaderValue );
+
+int LSAPI_ErrResponse_r( LSAPI_Request * pReq, int code, const char ** pRespHeaders,
+                         const char * pBody, int bodyLen );
 
 static inline int LSAPI_SetRespStatus_r( LSAPI_Request * pReq, int code )
 {
@@ -193,6 +201,21 @@ static inline int LSAPI_SetRespStatus_r( LSAPI_Request * pReq, int code )
         return -1;
     pReq->m_respHeader.m_respInfo.m_status = code;
     return 0;
+}
+
+static inline int LSAPI_SetAppData_r( LSAPI_Request * pReq, void * data )
+{
+    if ( !pReq )
+        return -1;
+    pReq->m_pAppData = data;
+    return 0;
+}
+
+static inline void * LSAPI_GetAppData_r( LSAPI_Request * pReq )
+{
+    if ( !pReq )
+        return NULL;
+    return pReq->m_pAppData;
 }
 
 static inline char * LSAPI_GetQueryString_r( LSAPI_Request * pReq )
@@ -228,19 +251,20 @@ static inline char * LSAPI_GetRequestMethod_r( LSAPI_Request * pReq)
 
 
 
-static inline int  LSAPI_GetReqBodyLen_r( LSAPI_Request * pReq )
+static inline off_t LSAPI_GetReqBodyLen_r( LSAPI_Request * pReq )
 {
     if ( pReq )
-        return pReq->m_pHeader->m_reqBodyLen;
+        return pReq->m_reqBodyLen;
     return -1;
 }
 
-static inline int LSAPI_GetReqBodyRemain_r( LSAPI_Request * pReq )
+static inline off_t LSAPI_GetReqBodyRemain_r( LSAPI_Request * pReq )
 {
     if ( pReq )
-        return pReq->m_pHeader->m_reqBodyLen - pReq->m_reqBodyRead;
+        return pReq->m_reqBodyLen - pReq->m_reqBodyRead;
     return -1;
 }
+
 
 
 int LSAPI_Is_Listen(void);
@@ -282,13 +306,13 @@ static inline char * LSAPI_GetScriptName()
 static inline char * LSAPI_GetRequestMethod()
 {   return LSAPI_GetRequestMethod_r( &g_req );              }
 
-static inline int LSAPI_GetReqBodyLen()
+static inline off_t LSAPI_GetReqBodyLen()
 {   return LSAPI_GetReqBodyLen_r( &g_req );                 }
 
-static inline int LSAPI_GetReqBodyRemain()
+static inline off_t LSAPI_GetReqBodyRemain()
 {   return LSAPI_GetReqBodyRemain_r( &g_req );                 }
 
-static inline int LSAPI_ReadReqBody( char * pBuf, int len )
+static inline ssize_t LSAPI_ReadReqBody( char * pBuf, size_t len )
 {   return LSAPI_ReadReqBody_r( &g_req, pBuf, len );        }
 
 static inline int LSAPI_ReqBodyGetChar()
@@ -302,10 +326,15 @@ static inline int LSAPI_ReqBodyGetLine( char * pBuf, int len, int *getLF )
 static inline int LSAPI_FinalizeRespHeaders(void)
 {   return LSAPI_FinalizeRespHeaders_r( &g_req );           }
 
-static inline int LSAPI_Write( const char * pBuf, int len )
+static inline ssize_t LSAPI_Write( const char * pBuf, ssize_t len )
 {   return LSAPI_Write_r( &g_req, pBuf, len );              }
 
-static inline int LSAPI_Write_Stderr( const char * pBuf, int len )
+static inline ssize_t LSAPI_sendfile( int fdIn, off_t* off, size_t size )
+{
+    return LSAPI_sendfile_r(&g_req, fdIn, off, size );          
+}
+
+static inline ssize_t LSAPI_Write_Stderr( const char * pBuf, ssize_t len )
 {   return LSAPI_Write_Stderr_r( &g_req, pBuf, len );       }
 
 static inline int LSAPI_Flush()
@@ -316,6 +345,9 @@ static inline int LSAPI_AppendRespHeader( char * pBuf, int len )
 
 static inline int LSAPI_SetRespStatus( int code )
 {   return LSAPI_SetRespStatus_r( &g_req, code );           }
+
+static inline int LSAPI_ErrResponse( int code, const char ** pRespHeaders, const char * pBody, int bodyLen )
+{   return LSAPI_ErrResponse_r( &g_req, code, pRespHeaders, pBody, bodyLen );   }
 
 int LSAPI_IsRunning(void);
 
@@ -341,7 +373,13 @@ void LSAPI_Set_Server_Max_Idle_Secs( int serverMaxIdle );
 
 void LSAPI_Set_Max_Process_Time( int secs );
 
-void LSAPI_Init_Env_Parameters( fn_select_t fp );
+int LSAPI_Init_Env_Parameters( fn_select_t fp );
+
+void LSAPI_Set_Slow_Req_Msecs( int msecs );
+
+int  LSAPI_Get_Slow_Req_Msecs( );
+
+int LSAPI_is_suEXEC_Daemon();
 
 #if defined (c_plusplus) || defined (__cplusplus)
 }

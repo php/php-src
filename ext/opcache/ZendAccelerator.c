@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) 1998-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -573,7 +573,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 	ZCSG(force_restart_time) = 0;
 	while (mem_usage_check->l_pid > 0) {
 		while (tries--) {
-			zend_accel_error(ACCEL_LOG_INFO, "Killed locker %d", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_ERROR, "Killed locker %d", mem_usage_check->l_pid);
 			if (kill(mem_usage_check->l_pid, SIGKILL)) {
 				break;
 			}
@@ -586,7 +586,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 			usleep(10000);
 		}
 		if (!tries) {
-			zend_accel_error(ACCEL_LOG_INFO, "Can't kill %d after 20 tries!", mem_usage_check->l_pid);
+			zend_accel_error(ACCEL_LOG_ERROR, "Can't kill %d after 20 tries!", mem_usage_check->l_pid);
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
 		}
 
@@ -881,12 +881,12 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
 {
 	if (ZCG(accel_directives).revalidate_freq &&
-	    (persistent_script->dynamic_members.revalidate >= ZCSG(revalidate_at))) {
+	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
 		return SUCCESS;
 	} else if (do_validate_timestamps(persistent_script, file_handle TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	} else {
-		persistent_script->dynamic_members.revalidate = ZCSG(revalidate_at);
+		persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
 		return SUCCESS;
 	}
 }
@@ -1323,23 +1323,6 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		return NULL;
 	}
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	if (file_handle->type == ZEND_HANDLE_STREAM &&
-	    (!strstr(file_handle->filename, ".phar") ||
-	     strstr(file_handle->filename, "://"))) {
-		char *buf;
-		size_t size;
-
-		/* Stream callbacks needs to be called in context of original
-		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
-		 */
-		if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
-			*op_array_p = NULL;
-			return NULL;
-		}
-	}
-#endif
-
 	if (ZCG(accel_directives).validate_timestamps ||
 	    ZCG(accel_directives).file_update_protection ||
 	    ZCG(accel_directives).max_file_size > 0) {
@@ -1449,7 +1432,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 * otherwise we have a race-condition.
 		 */
 		new_persistent_script->timestamp = timestamp;
-		new_persistent_script->dynamic_members.revalidate = ZCSG(revalidate_at);
+		new_persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
 	}
 
 	if (file_handle->opened_path) {
@@ -2155,13 +2138,6 @@ static void accel_activate(void)
 		zend_accel_error(ACCEL_LOG_WARNING, "Internal functions count changed - was %d, now %d", ZCG(internal_functions_count), zend_hash_num_elements(&ZCG(function_table)));
 	}
 
-	if (ZCG(accel_directives).validate_timestamps) {
-		time_t now = ZCG(request_time);
-		if (now > ZCSG(revalidate_at) + (time_t)ZCG(accel_directives).revalidate_freq) {
-			ZCSG(revalidate_at) = now;
-		}
-	}
-
 	ZCG(cwd) = NULL;
 
 	SHM_PROTECT();
@@ -2622,10 +2598,6 @@ static int accel_startup(zend_extension *extension)
 	zend_resolve_path = persistent_zend_resolve_path;
 #endif
 
-	if (ZCG(accel_directives).validate_timestamps) {
-		ZCSG(revalidate_at) = zend_accel_get_time() + ZCG(accel_directives).revalidate_freq;
-	}
-
 	/* Override chdir() function */
 	if (zend_hash_find(CG(function_table), "chdir", sizeof("chdir"), (void**)&func) == SUCCESS &&
 	    func->type == ZEND_INTERNAL_FUNCTION) {
@@ -2817,7 +2789,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_VERSION,					/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2014",				/* copyright */
+	"Copyright (c) 1999-2015",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

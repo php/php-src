@@ -132,4 +132,6 @@ is required for these tests. --/
 
 /abc(d|e)(*THEN)x(123(*THEN)4|567(b|q)(*THEN)xx)/B
 
+/(((a\2)|(a*)\g<-1>))*a?/B
+
 /-- End of testinput11 --/

@@ -7,7 +7,7 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('<?php ?>', true);
+php_cli_server_start('<?php ?>', null);
 
 /*
  * If a Mime Type is added in php_cli_server.c, add it to this array and update

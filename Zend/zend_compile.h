@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -635,7 +635,7 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_DC);
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
-void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use(znode *name, znode *new_name TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
@@ -666,6 +666,8 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC);
 ZEND_API void zend_cleanup_internal_classes(TSRMLS_D);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
+ZEND_API int clean_non_persistent_function_full(zend_function *function TSRMLS_DC);
+ZEND_API int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void zend_function_dtor(zend_function *function);
@@ -842,6 +844,9 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
+
+#define ZEND_FAST_CALL_FROM_CATCH	1
+#define ZEND_FAST_CALL_FROM_FINALLY	2
 
 END_EXTERN_C()
 

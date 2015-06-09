@@ -8,7 +8,7 @@ if (PHP_FILEINFO != 'no') {
 			cdf.c cdf_time.c compress.c \
 			encoding.c fsmagic.c funcs.c \
 			is_tar.c magic.c print.c \
-			readcdf.c readelf.c softmagic.c";
+			readcdf.c softmagic.c";
 
 	if (VCVERS < 1500) {
 		ADD_FLAG('CFLAGS', '/Zm1000');

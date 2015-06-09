@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -147,8 +147,6 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 	GC_BENCH_INC(zval_possible_root);
 
 	if (GC_ZVAL_GET_COLOR(zv) != GC_PURPLE) {
-		GC_ZVAL_SET_PURPLE(zv);
-
 		if (!GC_ZVAL_ADDRESS(zv)) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
@@ -159,7 +157,6 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 				GC_G(first_unused)++;
 			} else {
 				if (!GC_G(gc_enabled)) {
-					GC_ZVAL_SET_BLACK(zv);
 					return;
 				}
 				zv->refcount__gc++;
@@ -169,10 +166,10 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 				if (!newRoot) {
 					return;
 				}
-				GC_ZVAL_SET_PURPLE(zv);
 				GC_G(unused) = newRoot->prev;
 			}
 
+			GC_ZVAL_SET_PURPLE(zv);
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
 			GC_G(roots).next->prev = newRoot;
@@ -203,7 +200,6 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 
 	obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zv)].bucket.obj;
 	if (GC_GET_COLOR(obj->buffered) != GC_PURPLE) {
-		GC_SET_PURPLE(obj->buffered);
 		if (!GC_ADDRESS(obj->buffered)) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
@@ -214,7 +210,6 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 				GC_G(first_unused)++;
 			} else {
 				if (!GC_G(gc_enabled)) {
-					GC_ZVAL_SET_BLACK(zv);
 					return;
 				}
 				zv->refcount__gc++;
@@ -225,10 +220,10 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 					return;
 				}
 				obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zv)].bucket.obj;
-				GC_SET_PURPLE(obj->buffered);
 				GC_G(unused) = newRoot->prev;
 			}
 
+			GC_SET_PURPLE(obj->buffered);
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
 			GC_G(roots).next->prev = newRoot;

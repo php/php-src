@@ -916,6 +916,21 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
+function generate_version_info_manifest(makefiletarget)
+{
+	var manifest_name = makefiletarget + ".manifest";
+
+	if (MODE_PHPIZE) {
+		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": " + PHP_DIR + "\\build\\default.manifest");
+		MFO.WriteLine("\t@copy " + PHP_DIR + "\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest");
+	} else {
+		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": win32\\build\\default.manifest");
+		MFO.WriteLine("\t@copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest");
+	}
+
+	return manifest_name;
+}
+
 /* emits rule to generate version info for a SAPI
  * or extension.  Returns the name of the .res file
  * that will be generated */
@@ -1022,6 +1037,11 @@ function is_pgo_desired(mod)
 {
 	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
 
+	/* XXX enable PGO in phpize mode */
+	if (MODE_PHPIZE) {
+		return false;
+	}
+
 	/* don't disable if there's no mention of the varname */
 	if (eval("typeof " + varname + " == 'undefined'")) {
 		return true;
@@ -1062,12 +1082,14 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	/* generate a .res file containing version information */
 	resname = generate_version_info_resource(makefiletarget, sapiname, configure_module_dirname, true);
 	
+	manifest_name = generate_version_info_manifest(makefiletarget);
+
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
 	MFO.WriteLine("\t@echo SAPI " + sapiname_for_printing + " build complete");
 	if (MODE_PHPIZE) {
-		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 	} else {
-		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 	}
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
@@ -1163,11 +1185,6 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	var dep_present = false;
 	var dep_shared = false;
 
-	if (MODE_PHPIZE) {
-		ext_deps_js = file_get_contents(PHP_DIR + "\\script\\ext_deps.js");
-		eval(ext_deps_js);
-	}
-
 	try {
 		dep_present = eval("PHP_" + DEP);
 
@@ -1201,9 +1218,14 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
 
-		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
 		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
-		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+		if (MODE_PHPIZE) {
+			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR_DEV)\\lib");
+			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR_DEV)\\lib\\php_" + dependson + ".lib");
+		} else {
+			ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
+			ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+		}
 
 	} else {
 
@@ -1277,6 +1299,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
 		var ld = "@$(CC)";
+		var manifest_name = generate_version_info_manifest(dllname);
 
 		ldflags = "";
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
@@ -1296,10 +1319,10 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
 		MFO.WriteBlankLines(1);
 		if (MODE_PHPIZE) {
-			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
-			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /link /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
 		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
@@ -1353,6 +1376,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		extension_module_ptrs += '\tphpext_' + extname + '_ptr,\r\n';
 	
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
+	}
+	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
@@ -1506,14 +1532,14 @@ function output_as_table(header, ar_out)
 {
 	var l = header.length;
 	var cols = 80;
-	var fixedlenght = "";
+	var fixedlength = "";
 	var t = 0;
 	var i,j,k,m;
 	var out = "| ";
 	var min = new Array(l);
 	var max = new Array(l);
 
-	if (l != ar_out[0].length) {
+	if (!!ar_out[0] && l != ar_out[0].length) {
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
@@ -1651,6 +1677,9 @@ function generate_files()
 		generate_internal_functions();
 		generate_config_h();
 		generate_phpize();
+	} else {
+		generate_config_pickle_h();
+		generate_ext_pickle();
 	}
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
@@ -1661,6 +1690,140 @@ function generate_files()
 	} else {
 		STDOUT.WriteLine("Type 'nmake' to build PHP");
 	}
+}
+
+function generate_ext_pickle()
+{
+	var content;
+	var DEPS = null;
+	var dest;
+	var deps_lines = new Array();
+
+	var build_var_name = function(name) {
+		return "PHP_" + name.toUpperCase();
+	}
+
+	STDOUT.WriteLine("Generating pickle deps");
+	dest = PHP_DIR + "/script/";
+
+	if (!FSO.FolderExists(dest)) {
+		FSO.CreateFolder(dest);
+	}
+
+	if (FSO.FileExists(dest + "/ext_pickle.js")) {
+		DEPS = FSO.OpenTextFile(dest + "/ext_pickle.js", 1);
+
+		while (!DEPS.AtEndOfStream) {
+			var ln = DEPS.ReadLine();
+			var found = false;
+
+			for (var i in extensions_enabled) {
+				var reg0 = new RegExp(build_var_name(extensions_enabled[i][0]) + "\s*=.+", "g");
+				var reg1 = new RegExp(build_var_name(extensions_enabled[i][0]) + "_SHARED" + "\s*=.+", "g");
+
+				if (ln.match(reg1) || ln.match(reg0)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				deps_lines.push(ln);
+			}
+		}
+	}
+
+	for (var i in extensions_enabled) {
+		deps_lines.push(build_var_name(extensions_enabled[i][0]) + "=true;");
+		deps_lines.push(build_var_name(extensions_enabled[i][0]) + "_SHARED=" + (extensions_enabled[i][1] == 'shared' ? 'true' : 'false') + ";");
+	}
+
+	if (!!DEPS) {
+		DEPS.Close();
+		DEPS = null;
+	}
+
+	/* Replace the ext_pickle.js with the new content */
+	DEPS = FSO.CreateTextFile(dest + "/ext_pickle.js", true);
+
+	for (var j in deps_lines) {
+		DEPS.WriteLine(deps_lines[j]);
+	}
+
+	DEPS.Close();
+}
+
+function generate_config_pickle_h()
+{
+	var outfile = null;
+	var lines = new Array();
+	var keys = (new VBArray(configure_hdr.Keys())).toArray();
+	dest = PHP_DIR + "/include/main";
+
+	var ignore_key = function(key) {
+		var ignores = [ "CONFIGURE_COMMAND", "PHP_COMPILER_ID", "COMPILER", "ARCHITECTURE", "HAVE_STRNLEN", "PHP_DIR" ];
+
+		for (var k in ignores) {
+			if (ignores[k] == key) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+	STDOUT.WriteLine("Generating main/config.pickle.h");
+
+	if (FSO.FileExists(dest + "/config.pickle.h")) {
+		outfile = FSO.OpenTextFile(dest + "/config.pickle.h", 1);
+
+		while (!outfile.AtEndOfStream) {
+			var found = false;
+			var ln = outfile.ReadLine();
+
+			for (var i in keys) {
+				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*", "g");
+
+				if (ln.match(reg)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				lines.push(ln);
+			}
+		}
+	}
+
+	for (var i in keys) {
+		var item = configure_hdr.Item(keys[i]);
+
+		if (ignore_key(keys[i])) {
+			continue;
+		}
+
+		/* XXX fix comment handling */
+		/*if (!lines[j].match(/^#define.+/g)) {
+			continue;
+		}*/
+
+		lines.push("#define " + keys[i] + " " + item[0]);
+	}
+
+	if (outfile) {
+		outfile.Close();
+		outfile = null;
+	}
+
+	outfile = FSO.CreateTextFile(dest + "/config.pickle.h", true);
+
+	for (var k in lines) {
+		outfile.WriteLine(lines[k]);
+	}
+
+	outfile.Close();
 }
 
 function generate_config_h()
@@ -1736,6 +1899,7 @@ function generate_phpize()
 
 	var MF = FSO.CreateTextFile(dest + "/phpize.js", true);
 	var DEPS = FSO.CreateTextFile(dest + "/ext_deps.js", true);
+	
 	prefix = get_define("PHP_PREFIX");
 	prefix = prefix.replace(new RegExp("/", "g"), "\\");
 	prefix = prefix.replace(new RegExp("\\\\", "g"), "\\\\");
@@ -1815,13 +1979,39 @@ function generate_makefile()
 		}
 	}
 	MF.WriteLine("	@for %D in ($(INSTALL_HEADERS_DIR)) do @copy %D*.h $(BUILD_DIR_DEV)\\include\\%D /y >nul");
+	if (MODE_PHPIZE) {
+		MF.WriteBlankLines(1);
+		MF.WriteLine("build-bins:");
+		for (var i in extensions_enabled) {
+			var lib = "php_" + extensions_enabled[i][0] + ".lib";
+			var dll = "php_" + extensions_enabled[i][0] + ".dll";
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			MF.WriteLine("  @if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX) >nul");
+			MF.WriteLine("	@copy $(BUILD_DIR)\\" + dll + " $(PHP_PREFIX)");
+		}
+	} else {
+		MF.WriteBlankLines(1);
+		MF.WriteLine("build-ext-libs:");
+		MF.WriteLine("	@if not exist $(BUILD_DIR_DEV)\\lib mkdir $(BUILD_DIR_DEV)\\lib >nul");
+		for (var i in extensions_enabled) {
+			var lib;
+
+			lib = "php_" + extensions_enabled[i][0] + "*.lib";
+
+			if ('shared' == extensions_enabled[i][1]) {
+				MF.WriteLine("	@if exist $(BUILD_DIR)\\" + lib + " copy $(BUILD_DIR)\\" + lib + " $(BUILD_DIR_DEV)\\lib");
+			}
+		}
+	}
 	TF.Close();
 
 	MF.WriteBlankLines(2);
 
 	MFO.Close();
 	TF = FSO.OpenTextFile("Makefile.objects", 1);
-	MF.Write(TF.ReadAll());
+	if (!TF.AtEndOfStream) {
+		MF.Write(TF.ReadAll());
+	}
 	TF.Close();
 
 	MF.Close();	

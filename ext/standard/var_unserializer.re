@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "php.h"
 #include "ext/standard/php_var.h"
 #include "php_incomplete_class.h"
+#include "Zend/zend_interfaces.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1024
@@ -58,7 +59,13 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = (*var_hashx)->last_dtor;
+	var_entries *var_hash;
+
+	if (!var_hashx || !*var_hashx) {
+		return;
+	}
+
+	var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
@@ -317,8 +324,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 		if (!php_var_unserialize(&data, p, max, var_hash TSRMLS_CC)) {
 			zval_dtor(key);
 			FREE_ZVAL(key);
-			zval_dtor(data);
-			FREE_ZVAL(data);
+			zval_ptr_dtor(&data);
 			return 0;
 		}
 
@@ -340,9 +346,13 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 		} else {
 			/* object properties should include no integers */
 			convert_to_string(key);
+			if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
+				var_push_dtor(var_hash, old_data);
+			}
 			zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data,
 					sizeof data, NULL);
 		}
+		var_push_dtor(var_hash, &data);
 		
 		zval_dtor(key);
 		FREE_ZVAL(key);
@@ -375,7 +385,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 
-	if (datalen < 0 || (*p) + datalen >= max) {
+	if (datalen < 0 || (max - (*p)) <= datalen) {
 		zend_error(E_WARNING, "Insufficient data for unserializing - %ld required, %ld present", datalen, (long)(max - (*p)));
 		return 0;
 	}
@@ -404,7 +414,7 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	Serializable interface have eventually an inconsistent behavior at this place when
 	unserialized from a manipulated string. Additionaly the interal classes can possibly
 	crash PHP so they're still disabled here. */
-	if (ce->serialize == NULL || ZEND_INTERNAL_CLASS != ce->type) {
+	if (ce->serialize == NULL || ce->unserialize == zend_user_unserialize || (ZEND_INTERNAL_CLASS != ce->type && ce->create_object == NULL)) {
 		object_init_ex(*rval, ce);
 	} else {
 		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string

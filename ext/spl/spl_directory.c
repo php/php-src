@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -202,18 +202,21 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 {
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
-	if (!intern->file_name) {
-		switch (intern->type) {
+	switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+			if (!intern->file_name) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
+			}
 			break;
 		case SPL_FS_DIR:
+			if (intern->file_name) {
+				efree(intern->file_name);
+			}
 			intern->file_name_len = spprintf(&intern->file_name, 0, "%s%c%s",
 			                                 spl_filesystem_object_get_path(intern, NULL TSRMLS_CC),
 			                                 slash, intern->u.dir.entry.d_name);
 			break;
-		}
 	}
 } /* }}} */
 
@@ -1523,29 +1526,25 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
-	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
-		RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);
-	} else {
-		MAKE_STD_ZVAL(zflags);
-		MAKE_STD_ZVAL(zpath);
-		ZVAL_LONG(zflags, intern->flags);
-		ZVAL_STRINGL(zpath, intern->file_name, intern->file_name_len, 1);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, zpath, zflags TSRMLS_CC);
-		zval_ptr_dtor(&zpath);
-		zval_ptr_dtor(&zflags);
-		
-		subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
-		if (subdir) {
-			if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-				subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
-			} else {
-				subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
-				subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
-			}
-			subdir->info_class = intern->info_class;
-			subdir->file_class = intern->file_class;
-			subdir->oth = intern->oth;
+	MAKE_STD_ZVAL(zflags);
+	MAKE_STD_ZVAL(zpath);
+	ZVAL_LONG(zflags, intern->flags);
+	ZVAL_STRINGL(zpath, intern->file_name, intern->file_name_len, 1);
+	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, zpath, zflags TSRMLS_CC);
+	zval_ptr_dtor(&zpath);
+	zval_ptr_dtor(&zflags);
+
+	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
+	if (subdir) {
+		if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
+			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
+		} else {
+			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
 		}
+		subdir->info_class = intern->info_class;
+		subdir->file_class = intern->file_class;
+		subdir->oth = intern->oth;
 	}
 }
 /* }}} */
@@ -1911,6 +1910,9 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 			}
 			return SUCCESS;
 		}
+	} else if (type == IS_BOOL) {
+		ZVAL_BOOL(writeobj, 1);
+		return SUCCESS;
 	}
 	if (readobj == writeobj) {
 		zval_dtor(readobj);
@@ -2066,7 +2068,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 
 	if (intern->u.file.max_line_len > 0) {
 		buf = safe_emalloc((intern->u.file.max_line_len + 1), sizeof(char), 0);
-		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len, &line_len) == NULL) {
+		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len + 1, &line_len) == NULL) {
 			efree(buf);
 			buf = NULL;
 		} else {
@@ -2616,19 +2618,26 @@ SPL_METHOD(SplFileObject, fgetcsv)
 }
 /* }}} */
 
-/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure]])
+/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure [, string escape]]])
    Output a field array as a CSV line */
 SPL_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL;
-	int d_len = 0, e_len = 0, ret;
+	char *delim = NULL, *enclo = NULL, *esc = NULL;
+	int d_len = 0, e_len = 0, esc_len = 0, ret;
 	zval *fields = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|ss", &fields, &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|sss", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
+		case 4:
+			if (esc_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+				RETURN_FALSE;
+			}
+			escape = esc[0];
+			/* no break */
 		case 3:
 			if (e_len != 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
@@ -2946,6 +2955,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fputcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, fields)
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
+	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 

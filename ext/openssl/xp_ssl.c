@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,9 @@
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
 int php_openssl_get_x509_list_id(void);
+static struct timeval subtract_timeval( struct timeval a, struct timeval b );
+static int compare_timeval( struct timeval a, struct timeval b );
+static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC);
 
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
@@ -171,69 +174,165 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	return retry;
 }
 
+static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	return php_openssl_sockop_io(1, stream, buf, count TSRMLS_CC);
+}
 
 static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	int didwrite;
-	
-	if (sslsock->ssl_active) {
-		int retry = 1;
-
-		do {
-			didwrite = SSL_write(sslsock->ssl_handle, buf, count);
-
-			if (didwrite <= 0) {
-				retry = handle_ssl_error(stream, didwrite, 0 TSRMLS_CC);
-			} else {
-				break;
-			}
-		} while(retry);
-
-		if (didwrite > 0) {
-			php_stream_notify_progress_increment(stream->context, didwrite, 0);
-		}
-	} else {
-		didwrite = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
-	}
-
-	if (didwrite < 0) {
-		didwrite = 0;
-	}
-	
-	return didwrite;
+	return php_openssl_sockop_io(0, stream, (char*)buf, count TSRMLS_CC);
 }
 
-static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+/**
+ * Factored out common functionality (blocking, timeout, loop management) for read and write.
+ * Perform IO (read or write) to an SSL socket. If we have a timeout, we switch to non-blocking mode
+ * for the duration of the operation, using select to do our waits. If we time out, or we have an error
+ * report that back to PHP
+ *
+ */
+static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
 
+	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
 		int retry = 1;
+		struct timeval start_time;
+		struct timeval *timeout = NULL;
+		int began_blocked = sslsock->s.is_blocked;
+		int has_timeout = 0;
 
+		/* never use a timeout with non-blocking sockets */
+		if (began_blocked && &sslsock->s.timeout) {
+			timeout = &sslsock->s.timeout;
+		}
+
+		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC) == SUCCESS) {
+			sslsock->s.is_blocked = 0;
+		}
+
+		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec || timeout->tv_usec)) {
+			has_timeout = 1;
+			/* gettimeofday is not monotonic; using it here is not strictly correct */
+			gettimeofday(&start_time, NULL);
+		}
+
+		/* Main IO loop. */
 		do {
-			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
+			struct timeval cur_time, elapsed_time, left_time;
+	
+			/* If we have a timeout to check, figure out how much time has elapsed since we started. */
+			if (has_timeout) {
+				gettimeofday(&cur_time, NULL);
 
-			if (nr_bytes <= 0) {
-				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
-				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
-				
-			} else {
-				/* we got the data */
-				break;
+				/* Determine how much time we've taken so far. */
+				elapsed_time = subtract_timeval(cur_time, start_time);
+
+				/* and return an error if we've taken too long. */
+				if (compare_timeval(elapsed_time, *timeout) > 0 ) {
+					/* If the socket was originally blocking, set it back. */
+					if (began_blocked) {
+						php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
+						sslsock->s.is_blocked = 1;
+					}
+					sslsock->s.timeout_event = 1;
+					return -1;
+				}
 			}
+
+			/* Now, do the IO operation. Don't block if we can't complete... */
+			if (read) {
+				nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
+			} else {
+				nr_bytes = SSL_write(sslsock->ssl_handle, buf, count);
+			}
+
+			/* Now, how much time until we time out? */
+			if (has_timeout) {
+				left_time = subtract_timeval( *timeout, elapsed_time );
+			}
+
+			/* If we didn't do anything on the last loop (or an error) check to see if we should retry or exit. */
+			if (nr_bytes <= 0) {
+
+				/* Get the error code from SSL, and check to see if it's an error or not. */
+				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
+				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
+
+				/* If we get this (the above doesn't check) then we'll retry as well. */
+				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
+					retry = 1;
+				}
+				if (errno == EAGAIN && err == SSL_ERROR_WANT_WRITE && read == 0) {
+					retry = 1;
+				}
+
+				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
+				if (read) {
+					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+				}
+
+				/* Don't loop indefinitely in non-blocking mode if no data is available */
+				if (began_blocked == 0) {
+					break;
+				}
+
+				/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
+				 * available. Now, php_pollfd_for uses select to wait up to our time_left value only...
+				 */
+				if (retry) {
+					if (read) {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
+							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
+					} else {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
+					}
+				}
+			} else {
+				/* Else, if we got bytes back, check for possible errors. */
+				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
+
+				/* If we didn't get any error, then let's return it to PHP. */
+				if (err == SSL_ERROR_NONE) {
+					break;
+				}
+
+				/* Otherwise, we need to wait again (up to time_left or we get an error) */
+				if (began_blocked) {
+					if (read) {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
+							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
+					} else {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
+					}
+				}
+			}
+		/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
 		} while (retry);
 
+		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 		}
-	}
-	else
-	{
-		nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
+
+		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
+		if (began_blocked && php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC) == SUCCESS) {
+			sslsock->s.is_blocked = 1;
+		}
+	} else {
+		/* This block is if we had no timeout... We will just sit and wait forever on the IO operation. */
+		if (read) {
+			nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
+		} else {
+			nr_bytes = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
+		}
 	}
 
+	/* PHP doesn't expect a negative return. */
 	if (nr_bytes < 0) {
 		nr_bytes = 0;
 	}
@@ -241,6 +340,31 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 	return nr_bytes;
 }
 
+struct timeval subtract_timeval( struct timeval a, struct timeval b )
+{
+	struct timeval difference;
+
+	difference.tv_sec  = a.tv_sec  - b.tv_sec;
+	difference.tv_usec = a.tv_usec - b.tv_usec;
+
+	if (a.tv_usec < b.tv_usec) {
+	  	b.tv_sec  -= 1L;
+	   	b.tv_usec += 1000000L;
+	}
+
+	return difference;
+}
+
+int compare_timeval( struct timeval a, struct timeval b )
+{
+	if (a.tv_sec > b.tv_sec || (a.tv_sec == b.tv_sec && a.tv_usec > b.tv_usec) ) {
+		return 1;
+	} else if( a.tv_sec == b.tv_sec && a.tv_usec == b.tv_usec ) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
 
 static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
@@ -339,9 +463,14 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 			break;
 #endif
 		case STREAM_CRYPTO_METHOD_SSLv3_CLIENT:
+#ifdef OPENSSL_NO_SSL3
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
+			return -1;
+#else
 			sslsock->is_client = 1;
 			method = SSLv3_client_method();
 			break;
+#endif
 		case STREAM_CRYPTO_METHOD_TLS_CLIENT:
 			sslsock->is_client = 1;
 			method = TLSv1_client_method();
@@ -351,9 +480,14 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 			method = SSLv23_server_method();
 			break;
 		case STREAM_CRYPTO_METHOD_SSLv3_SERVER:
+#ifdef OPENSSL_NO_SSL3
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
+			return -1;
+#else
 			sslsock->is_client = 0;
 			method = SSLv3_server_method();
 			break;
+#endif
 		case STREAM_CRYPTO_METHOD_SSLv2_SERVER:
 #ifdef OPENSSL_NO_SSL2
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
@@ -482,16 +616,9 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 			if (has_timeout) {
 				gettimeofday(&cur_time, NULL);
-				elapsed_time.tv_sec  = cur_time.tv_sec  - start_time.tv_sec;
-				elapsed_time.tv_usec = cur_time.tv_usec - start_time.tv_usec;
-				if (cur_time.tv_usec < start_time.tv_usec) {
-					elapsed_time.tv_sec  -= 1L;
-					elapsed_time.tv_usec += 1000000L;
-				}
+				elapsed_time = subtract_timeval( cur_time, start_time );
 			
-				if (elapsed_time.tv_sec > timeout->tv_sec ||
-						(elapsed_time.tv_sec == timeout->tv_sec &&
-						elapsed_time.tv_usec > timeout->tv_usec)) {
+				if (compare_timeval( elapsed_time, *timeout) > 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: crypto enabling timeout");
 					return -1;
 				}
@@ -507,12 +634,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					struct timeval left_time;
 					
 					if (has_timeout) {
-						left_time.tv_sec  = timeout->tv_sec  - elapsed_time.tv_sec;
-						left_time.tv_usec =	timeout->tv_usec - elapsed_time.tv_usec;
-						if (timeout->tv_usec < elapsed_time.tv_usec) {
-							left_time.tv_sec  -= 1L;
-							left_time.tv_usec += 1000000L;
-						}
+						left_time = subtract_timeval( *timeout, elapsed_time );
 					}
 					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 						(POLLIN|POLLPRI) : POLLOUT, has_timeout ? &left_time : NULL);
@@ -825,6 +947,21 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
+				/* OpenSSL has an internal buffer which select() cannot see. If we don't
+				 * fetch it into the stream's buffer, no activity will be reported on the
+				 * stream even though there is data waiting to be read - but we only fetch
+				 * the lower of bytes OpenSSL has ready to give us or chunk_size since we
+				 * weren't asked for any data at this stage. This is only likely to cause
+				 * issues with non-blocking streams, but it's harmless to always do it. */
+				size_t pending;
+				if (stream->writepos == stream->readpos
+					&& sslsock->ssl_active
+					&& (pending = (size_t)SSL_pending(sslsock->ssl_handle)) > 0) {
+						php_stream_fill_read_buffer(stream, pending < stream->chunk_size
+							? pending
+							: stream->chunk_size);
+				}
+
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;

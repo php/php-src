@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,6 +125,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
 		if (CG(unclean_shutdown)) {
+			generator->execute_data = NULL;
 			return;
 		}
 
@@ -604,9 +605,9 @@ ZEND_METHOD(Generator, __wakeup)
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zval *object = ((zend_generator_iterator *) iterator)->object;
+	zend_generator_iterator *iter = (zend_generator_iterator *) iterator;
 
-	zval_ptr_dtor(&object);
+	zend_objects_store_del_ref_by_handle(iter->handle TSRMLS_CC);
 }
 /* }}} */
 
@@ -698,8 +699,8 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	/* We have to keep a reference to the generator object zval around,
 	 * otherwise the generator may be destroyed during iteration. */
-	Z_ADDREF_P(object);
-	iterator->object = object;
+	iterator->handle = Z_OBJ_HANDLE_P(object);
+	zend_objects_store_add_ref_by_handle(iterator->handle TSRMLS_CC);
 
 	return (zend_object_iterator *) iterator;
 }

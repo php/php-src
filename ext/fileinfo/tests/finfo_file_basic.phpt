@@ -19,6 +19,7 @@ echo "*** Testing finfo_file() : basic functionality ***\n";
 var_dump( finfo_file( $finfo, __FILE__) );
 var_dump( finfo_file( $finfo, __FILE__, FILEINFO_CONTINUE ) );
 var_dump( finfo_file( $finfo, $magicFile ) );
+var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
 
 ?>
 ===DONE===
@@ -27,4 +28,7 @@ var_dump( finfo_file( $finfo, $magicFile ) );
 string(28) "text/x-php; charset=us-ascii"
 string(22) "PHP script, ASCII text"
 string(25) "text/plain; charset=utf-8"
+
+Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
+bool(false)
 ===DONE===

@@ -223,7 +223,7 @@ No match
     babababc
 No match
 
-/^\ca\cA\c[\c{\c:/
+/^\ca\cA\c[;\c:/
     \x01\x01\e;z
  0: \x01\x01\x1b;z
 
@@ -8234,6 +8234,16 @@ MK: M
     aaaabcde
  0: aaaab
  1: aaaab
+    
+/((?(R)a|(?1)))*/
+    aaa
+ 0: aaa
+ 1: a
+
+/((?(R)a|(?1)))+/
+    aaa
+ 0: aaa
+ 1: a
 
 /a(*:any 
 name)/K
@@ -9312,5 +9322,93 @@ No match
  0: b
  0+ c
  1: ab
+
+/(?:x|(?:(xx|yy)+|x|x|x|x|x)|a|a|a)bc/
+    acb
+No match
+
+'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+
+'\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+ 0: NON QUOTED "QUOT""ED" AFTER 
+ 1:  AFTER 
+ 2: 
+
+/^\w+(?>\s*)(?<=\w)/
+  test test
+ 0: tes
+
+/(?P<same>a)(?P<same>b)/gJ
+    abbaba
+ 0: ab
+ 1: a
+ 2: b
+ 0: ab
+ 1: a
+ 2: b
+
+/(?P<same>a)(?P<same>b)(?P=same)/gJ
+    abbaba
+ 0: aba
+ 1: a
+ 2: b
+
+/(?P=same)?(?P<same>a)(?P<same>b)/gJ
+    abbaba
+ 0: ab
+ 1: a
+ 2: b
+ 0: ab
+ 1: a
+ 2: b
+
+/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/gJ
+    bbbaaabaabb
+ 0: bbbaaaba
+ 1: a
+ 2: b
+ 0: bb
+ 1: <unset>
+ 2: b
+
+/(?:(?P=same)?(?:(?P=same)(?P<same>a)(?P=same)|(?P=same)?(?P<same>b)(?P=same)){2}(?P=same)(?P<same>c)(?P=same)){2}(?P<same>z)?/gJ
+    bbbaaaccccaaabbbcc
+No match
+
+/(?P<Name>a)?(?P<Name2>b)?(?(<Name>)c|d)*l/
+    acl
+ 0: acl
+ 1: a
+    bdl
+ 0: bdl
+ 1: <unset>
+ 2: b
+    adl
+ 0: dl
+    bcl    
+ 0: l
+
+/\sabc/
+    \x{0b}abc
+ 0: \x0babc
+
+/[\Qa]\E]+/
+    aa]]
+ 0: aa]]
+
+/[\Q]a\E]+/
+    aa]]
+ 0: aa]]
 
 /-- End of testinput1 --/

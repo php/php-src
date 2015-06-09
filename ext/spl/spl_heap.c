@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -249,9 +249,10 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, spl_ptr_heap_element elem, v
 	heap->ctor(elem TSRMLS_CC);
 
 	/* sifting up */
-	for(i = heap->count++; i > 0 && heap->cmp(heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
+	for(i = heap->count; i > 0 && heap->cmp(heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
 		heap->elements[i] = heap->elements[(i-1)/2];
 	}
+	heap->count++;
 
 	if (EG(exception)) {
 		/* exception thrown during comparison */

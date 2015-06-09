@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -1415,6 +1415,9 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 
 		if (key_type == HASH_KEY_IS_LONG) {
 			p->h = num_index;
+			if ((long)num_index >= (long)ht->nNextFreeElement) {
+				ht->nNextFreeElement = num_index < LONG_MAX ? num_index + 1 : LONG_MAX;
+			}
 		} else {
 			p->h = h;
 			p->nKeyLength = str_length;

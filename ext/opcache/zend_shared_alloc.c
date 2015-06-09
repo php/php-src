@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) 1998-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -346,10 +346,10 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 	retval = ZCG(mem);;
 	ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
 	memcpy(retval, source, size);
+	zend_shared_alloc_register_xlat_entry(source, retval);
 	if (free_source) {
 		interned_efree((char*)source);
 	}
-	zend_shared_alloc_register_xlat_entry(source, retval);
 	return retval;
 }
 

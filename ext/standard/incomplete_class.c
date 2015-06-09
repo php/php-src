@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -144,7 +144,7 @@ PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
 
 	object_properties = Z_OBJPROP_P(object);
 
-	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
+	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS && Z_TYPE_PP(val) == IS_STRING) {
 		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 
 		if (nlen) {

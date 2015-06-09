@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -698,9 +698,9 @@ PHP_FUNCTION(com_event_sink)
 		/* 0 => typelibname, 1 => dispname */
 		zval **tmp;
 
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS)
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_STRING)
 			typelibname = Z_STRVAL_PP(tmp);
-		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS)
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_STRING)
 			dispname = Z_STRVAL_PP(tmp);
 	} else if (sink != NULL) {
 		convert_to_string(sink);

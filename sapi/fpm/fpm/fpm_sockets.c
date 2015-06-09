@@ -39,29 +39,6 @@ struct listening_socket_s {
 
 static struct fpm_array_s sockets_list;
 
-static int fpm_sockets_resolve_af_inet(char *node, char *service, struct sockaddr_in *addr) /* {{{ */
-{
-	struct addrinfo *res;
-	struct addrinfo hints;
-	int ret;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	ret = getaddrinfo(node, service, &hints, &res);
-
-	if (ret != 0) {
-		zlog(ZLOG_ERROR, "can't resolve hostname '%s%s%s': getaddrinfo said: %s%s%s\n",
-					node, service ? ":" : "", service ? service : "",
-					gai_strerror(ret), ret == EAI_SYSTEM ? ", system error: " : "", ret == EAI_SYSTEM ? strerror(errno) : "");
-		return -1;
-	}
-
-	*addr = *(struct sockaddr_in *) res->ai_addr;
-	freeaddrinfo(res);
-	return 0;
-}
-/* }}} */
-
 enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
 static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
@@ -98,14 +75,34 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
+static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+/* }}} */
+
+static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return ntohs(((struct sockaddr_in*)sa)->sin_port);
+    }
+
+    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+}
+/* }}} */
+
 static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op) /* {{{ */
 {
 	if (key == NULL) {
 		switch (type) {
 			case FPM_AF_INET : {
-				struct sockaddr_in *sa_in = (struct sockaddr_in *) sa;
-				key = alloca(sizeof("xxx.xxx.xxx.xxx:ppppp"));
-				sprintf(key, "%u.%u.%u.%u:%u", IPQUAD(&sa_in->sin_addr), (unsigned int) ntohs(sa_in->sin_port));
+				key = alloca(INET6_ADDRSTRLEN+10);
+				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, INET6_ADDRSTRLEN);
+				sprintf(key+strlen(key), ":%d", fpm_get_in_port(sa));
 				break;
 			}
 
@@ -254,11 +251,15 @@ enum fpm_address_domain fpm_sockets_domain_from_address(char *address) /* {{{ */
 
 static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	struct sockaddr_in sa_in;
+	struct addrinfo hints, *servinfo, *p;
 	char *dup_address = strdup(wp->config->listen_address);
-	char *port_str = strchr(dup_address, ':');
+	char *port_str = strrchr(dup_address, ':');
 	char *addr = NULL;
+	char tmpbuf[INET6_ADDRSTRLEN];
+	int addr_len;
 	int port = 0;
+	int sock = -1;
+	int status;
 
 	if (port_str) { /* this is host:port pair */
 		*port_str++ = '\0';
@@ -274,23 +275,49 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	memset(&sa_in, 0, sizeof(sa_in));
+	if (!addr) {
+		/* no address: default documented behavior, all IPv4 addresses */
+		struct sockaddr_in sa_in;
 
-	if (addr) {
-		sa_in.sin_addr.s_addr = inet_addr(addr);
-		if (sa_in.sin_addr.s_addr == INADDR_NONE) { /* do resolve */
-			if (0 > fpm_sockets_resolve_af_inet(addr, NULL, &sa_in)) {
-				return -1;
-			}
-			zlog(ZLOG_NOTICE, "address '%s' resolved as %u.%u.%u.%u", addr, IPQUAD(&sa_in.sin_addr));
-		}
-	} else {
+		memset(&sa_in, 0, sizeof(sa_in));
+		sa_in.sin_family = AF_INET;
+		sa_in.sin_port = htons(port);
 		sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
+		free(dup_address);
+		return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_in, sizeof(struct sockaddr_in));
 	}
-	sa_in.sin_family = AF_INET;
-	sa_in.sin_port = htons(port);
+
+	/* strip brackets from address for getaddrinfo */
+	addr_len = strlen(addr);
+	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+		addr[addr_len - 1] = '\0';
+		addr++;
+	}
+
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	if ((status = getaddrinfo(addr, port_str, &hints, &servinfo)) != 0) {
+		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		return -1;
+	}
+
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		inet_ntop(p->ai_family, fpm_get_in_addr(p->ai_addr), tmpbuf, INET6_ADDRSTRLEN);
+		if (sock < 0) {
+			if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
+				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", dup_address, tmpbuf);
+			}
+		} else {
+			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", dup_address, tmpbuf);
+		}
+	}
+
 	free(dup_address);
-	return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_in, sizeof(struct sockaddr_in));
+	freeaddrinfo(servinfo);
+
+	return sock;
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -196,7 +196,6 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
-				salt[2] >= 'a' && salt[2] <= 'z' &&
 				salt[3] == '$' &&
 				salt[4] >= '0' && salt[4] <= '3' &&
 				salt[5] >= '0' && salt[5] <= '9' &&
@@ -219,7 +218,7 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 			_crypt_extended_init_r();
 
 			crypt_res = _crypt_extended_r(password, salt, &buffer);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 				return FAILURE;
 			} else {
 				*result = estrdup(crypt_res);
@@ -240,7 +239,7 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
 		crypt_res = crypt_r(password, salt, &buffer);
-		if (!crypt_res) {
+		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 			return FAILURE;
 		} else {
 			*result = estrdup(crypt_res);

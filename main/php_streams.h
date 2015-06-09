@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -296,6 +296,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRML
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
+
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC);
+#define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size) TSRMLS_CC)
 
 #ifdef ZTS
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);

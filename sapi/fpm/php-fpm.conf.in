@@ -131,6 +131,7 @@
 
 ; Per pool prefix
 ; It only applies on the following directives:
+; - 'access.log'
 ; - 'slowlog'
 ; - 'listen' (unixsocket)
 ; - 'chroot'
@@ -150,10 +151,14 @@ group = @php_fpm_group@
 
 ; The address on which to accept FastCGI requests.
 ; Valid syntaxes are:
-;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
+;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific IPv4 address on
 ;                            a specific port;
-;   'port'                 - to listen on a TCP socket to all addresses on a
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
+;   'port'                 - to listen on a TCP socket to all IPv4 addresses on a
 ;                            specific port;
+;   '[::]:port'            - to listen on a TCP socket to all addresses
+;                            (IPv6 and IPv4-mapped) on a specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
 ; Note: This value is mandatory.
 listen = 127.0.0.1:9000
@@ -171,7 +176,7 @@ listen = 127.0.0.1:9000
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0660
  
-; List of ipv4 addresses of FastCGI clients which are allowed to connect.
+; List of addresses (IPv4/IPv6) of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
 ; PHP FCGI (5.2.2+). Makes sense only with a tcp listening socket. Each address
 ; must be separated by a comma. If this value is left blank, connections will be

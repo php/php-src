@@ -9,7 +9,7 @@ Test eregi() function : basic functionality - confirm case insensitivity
  */
 
 /*
- * Test basic funtionality of eregi()
+ * Test basic functionality of eregi()
  */
 
 echo "*** Testing eregi() : basic functionality ***\n";

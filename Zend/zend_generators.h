@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,9 +28,9 @@ extern ZEND_API zend_class_entry *zend_ce_generator;
 typedef struct _zend_generator_iterator {
 	zend_object_iterator intern;
 
-	/* The generator object zval has to be stored, because the iterator is
-	 * holding a ref to it, which has to be dtored. */
-	zval *object;
+	/* The generator object handle has to be stored, because the
+	 * iterator is holding a ref to it, which has to be dtored. */
+	zend_object_handle handle;
 } zend_generator_iterator;
 
 typedef struct _zend_generator {

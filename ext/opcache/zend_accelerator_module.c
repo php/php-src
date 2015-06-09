@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) 1998-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -320,14 +320,16 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len + 1);
 		if (persistent_script) {
 			return !persistent_script->corrupted &&
-				validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
+				(!ZCG(accel_directives).validate_timestamps ||
+				validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS);
 		}
 	}
 
 	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1);
 		return persistent_script && !persistent_script->corrupted &&
-			validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
+			(!ZCG(accel_directives).validate_timestamps ||
+			validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS);
 	}
 
 	return 0;
@@ -775,7 +777,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 		op_array = persistent_compile_file(&handle, ZEND_INCLUDE TSRMLS_CC);
 	} zend_catch {
 		EG(current_execute_data) = orig_execute_data;
-		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s" TSRMLS_CC, handle.filename);
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
 	} zend_end_try();
 
 	if(op_array != NULL) {

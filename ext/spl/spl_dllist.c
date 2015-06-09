@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,12 +43,10 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 
 #define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
 	efree(elem); \
-	elem = NULL; \
 }
 
 #define SPL_LLIST_ADDREF(elem) (elem)->rc++
@@ -914,6 +912,11 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 
 		if(llist->dtor) {
 			llist->dtor(element TSRMLS_CC);
+		}
+
+		if (intern->traverse_pointer == element) {
+			SPL_LLIST_DELREF(element);
+			intern->traverse_pointer = NULL;
 		}
 
 		zval_ptr_dtor((zval **)&element->data);

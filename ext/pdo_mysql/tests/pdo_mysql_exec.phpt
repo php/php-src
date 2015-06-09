@@ -179,7 +179,7 @@ $db = MySQLPDOTest::factory();
 @$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
-Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d
-[016] [42000] 42000 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line %d
+Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d
+[016] [42000] 42000 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line %d
 [035] With emulated PS it works but makes no sense given that exec() returns sort of affected rows...
 done!

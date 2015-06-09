@@ -24,9 +24,5 @@ resource(%d) of type (odbc result)
 bool(false)
 resource(%d) of type (odbc result)
 bool(false)
-
-Warning: odbc_columns(): SQL error: Failed to fetch error message, SQL state HY000 in SQLColumns in %s on line %d
+resource(%d) of type (odbc result)
 bool(false)
-
-Warning: odbc_fetch_row() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL

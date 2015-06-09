@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 
 #if !defined(MYSQLI_USE_MYSQLND)
@@ -413,8 +414,18 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
-			case MYSQL_TYPE_DOUBLE:
 			case MYSQL_TYPE_FLOAT:
+				convert_to_double_ex(args[i]);
+				stmt->result.buf[ofs].type = IS_DOUBLE;
+				stmt->result.buf[ofs].buflen = sizeof(float);
+
+				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(float));
+				bind[ofs].buffer_type = MYSQL_TYPE_FLOAT;
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				break;
+
+			case MYSQL_TYPE_DOUBLE:
 				convert_to_double_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_DOUBLE;
 				stmt->result.buf[ofs].buflen = sizeof(double);
@@ -1045,8 +1056,22 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						}
 						break;
 					case IS_DOUBLE:
-						ZVAL_DOUBLE(stmt->result.vars[i], *(double *)stmt->result.buf[i].val);
+					{
+						double dval;
+						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_FLOAT) {
+#ifndef NOT_FIXED_DEC
+# define NOT_FIXED_DEC 31
+#endif
+							dval = mysql_float_to_double(*(float *)stmt->result.buf[i].val,
+										(stmt->stmt->fields[i].decimals >= NOT_FIXED_DEC) ? -1 :
+										stmt->stmt->fields[i].decimals);
+						} else {
+							dval = *((double *)stmt->result.buf[i].val);
+						}
+
+						ZVAL_DOUBLE(stmt->result.vars[i], dval);
 						break;
+					}
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
 #if MYSQL_VERSION_ID > 50002

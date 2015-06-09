@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,26 +116,26 @@ timelib_tzinfo* timelib_tzinfo_ctor(char *name)
 timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 {
 	timelib_tzinfo *tmp = timelib_tzinfo_ctor(tz->name);
-	tmp->ttisgmtcnt = tz->ttisgmtcnt;
-	tmp->ttisstdcnt = tz->ttisstdcnt;
-	tmp->leapcnt = tz->leapcnt;
-	tmp->timecnt = tz->timecnt;
-	tmp->typecnt = tz->typecnt;
-	tmp->charcnt = tz->charcnt;
-	
-	tmp->trans = (int32_t *) malloc(tz->timecnt * sizeof(int32_t));
-	tmp->trans_idx = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
-	memcpy(tmp->trans, tz->trans, tz->timecnt * sizeof(int32_t));
-	memcpy(tmp->trans_idx, tz->trans_idx, tz->timecnt * sizeof(unsigned char));
+	tmp->bit32.ttisgmtcnt = tz->bit32.ttisgmtcnt;
+	tmp->bit32.ttisstdcnt = tz->bit32.ttisstdcnt;
+	tmp->bit32.leapcnt = tz->bit32.leapcnt;
+	tmp->bit32.timecnt = tz->bit32.timecnt;
+	tmp->bit32.typecnt = tz->bit32.typecnt;
+	tmp->bit32.charcnt = tz->bit32.charcnt;
 
-	tmp->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
-	memcpy(tmp->type, tz->type, tz->typecnt * sizeof(struct ttinfo));
+	tmp->trans = (int32_t *) malloc(tz->bit32.timecnt * sizeof(int32_t));
+	tmp->trans_idx = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
+	memcpy(tmp->trans, tz->trans, tz->bit32.timecnt * sizeof(int32_t));
+	memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 
-	tmp->timezone_abbr = (char*) malloc(tz->charcnt);
-	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->charcnt);
+	tmp->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
 
-	tmp->leap_times = (tlinfo*) malloc(tz->leapcnt * sizeof(tlinfo));
-	memcpy(tmp->leap_times, tz->leap_times, tz->leapcnt * sizeof(tlinfo));
+	tmp->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
+	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);
+
+	tmp->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
+	memcpy(tmp->leap_times, tz->leap_times, tz->bit32.leapcnt * sizeof(tlinfo));
 
 	return tmp;
 }
@@ -236,7 +236,7 @@ void timelib_dump_date(timelib_time *d, int options)
 
 	if ((options & 1) == 1) {
 		if (d->have_relative) {
-			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS", 
+			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS",
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
 			if (d->relative.first_last_day_of != 0) {
 				switch (d->relative.first_last_day_of) {
@@ -271,7 +271,7 @@ void timelib_dump_date(timelib_time *d, int options)
 
 void timelib_dump_rel_time(timelib_rel_time *d)
 {
-	printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS (days: %lld)%s", 
+	printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS (days: %lld)%s",
 		d->y, d->m, d->d, d->h, d->i, d->s, d->days, d->invert ? " inverted" : "");
 	if (d->first_last_day_of != 0) {
 		switch (d->first_last_day_of) {

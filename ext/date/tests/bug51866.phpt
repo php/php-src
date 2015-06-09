@@ -44,7 +44,7 @@ array(4) {
 
 string(6) "Y-m-d+"
 string(19) "2001-11-29 13:20:01"
-object(DateTime)#2 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -70,7 +70,7 @@ array(4) {
 
 string(7) "Y-m-d +"
 string(19) "2001-11-29 13:20:01"
-object(DateTime)#3 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -96,7 +96,7 @@ array(4) {
 
 string(6) "Y-m-d+"
 string(10) "2001-11-29"
-object(DateTime)#2 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -139,7 +139,7 @@ array(4) {
 
 string(7) "Y-m-d +"
 string(11) "2001-11-29 "
-object(DateTime)#2 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>

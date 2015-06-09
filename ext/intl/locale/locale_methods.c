@@ -269,8 +269,7 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 		grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 		if( grOffset >= 0 ){
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-				tag_value = estrdup(loc_name);
-				return tag_value;
+				return estrdup(loc_name);
 			} else {
 				/* Since Grandfathered , no value , do nothing , retutn NULL */
 				return NULL;
@@ -280,8 +279,8 @@ static char* get_icu_value_internal( const char* loc_name , char* tag_name, int*
 	if( fromParseLocale==1 ){
 		/* Handle singletons */
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) ==1 ) ){
-				return (char *)loc_name;
+			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1) ){
+				return estrdup(loc_name);
 			}
 		}
 
@@ -497,6 +496,14 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		efree(msg);
 		RETURN_FALSE;
 	}
+
+    if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
+        /* See bug 67397: overlong locale names cause trouble in uloc_getDisplayName */
+		spprintf(&msg , 0, "locale_get_display_%s : name too long", tag_name );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 TSRMLS_CC );
+		efree(msg);
+		RETURN_FALSE;
+    }
 
 	if(loc_name_len == 0) {
 		loc_name = intl_locale_get_default(TSRMLS_C);
@@ -1187,14 +1194,12 @@ static int strToMatch(const char* str ,char *retstr)
 	char* 	anchor 	= NULL;
 	const char* 	anchor1 = NULL;
 	int 	result 	= 0;
-	int 	len 	= 0;
 
     if( (!str) || str[0] == '\0'){
         return result;
     } else {
 	anchor = retstr;
 	anchor1 = str;
-        len = strlen(str);
         while( (*str)!='\0' ){
 		if( *str == '-' ){
 			*retstr =  '_';

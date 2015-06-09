@@ -1,9 +1,8 @@
-
 /*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,9 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
-
 /*
-Copyright (c) 2007, Lite Speed Technologies Inc.
+Copyright (c) 2002-2015, Lite Speed Technologies Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -113,12 +111,14 @@ enum
 #define LSAPI_RESP_END              5
 #define LSAPI_STDERR_STREAM         6
 #define LSAPI_REQ_RECEIVED          7
+#define LSAPI_CONN_CLOSE            8
+#define LSAPI_INTERNAL_ERROR        9
 
 
 #define LSAPI_MAX_HEADER_LEN        65535
 #define LSAPI_MAX_DATA_PACKET_LEN   16384
 
-#define LSAPI_RESP_HTTP_HEADER_MAX  4096
+#define LSAPI_RESP_HTTP_HEADER_MAX  32768
 #define LSAPI_PACKET_HEADER_LEN     8
 
 

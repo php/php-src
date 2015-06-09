@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -385,6 +385,23 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
+/* {{{ _set_lderrno
+ */
+static void _set_lderrno(LDAP *ldap, int lderr)
+{
+#if !HAVE_NSLDAP
+#if LDAP_API_VERSION > 2000 || HAVE_ORALDAP
+	/* New versions of OpenLDAP do it this way */
+	ldap_set_option(ldap, LDAP_OPT_ERROR_NUMBER, &lderr);
+#else
+	ldap->ld_errno = lderr;
+#endif
+#else
+	ldap_set_lderrno(ldap, lderr, NULL, NULL);
+#endif
+}
+/* }}} */
+
 /* {{{ proto bool ldap_bind(resource link [, string dn [, string password]])
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
@@ -399,17 +416,19 @@ PHP_FUNCTION(ldap_bind)
 		RETURN_FALSE;
 	}
 
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+
 	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
+		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "DN contains a null byte");
 		RETURN_FALSE;
 	}
 
 	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
+		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password contains a null byte");
 		RETURN_FALSE;
 	}
-
-	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
 	if ((rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));

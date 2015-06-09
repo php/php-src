@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -449,7 +449,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
-		status = filter->fops->filter(stream, filter, inp, outp, NULL, flags TSRMLS_CC);
+		status = filter->fops->filter(stream, current, inp, outp, NULL, flags TSRMLS_CC);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;

@@ -12,7 +12,7 @@ var_dump(openssl_x509_parse($cert));
 var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
-array(12) {
+array(15) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -55,6 +55,12 @@ array(12) {
   int(1214821723)
   ["validTo_time_t"]=>
   int(1217413723)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
   array(9) {
     [1]=>
@@ -152,7 +158,7 @@ serial:AE:C5:56:CC:72:37:50:A2
     string(7) "CA:TRUE"
   }
 }
-array(12) {
+array(15) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
   ["subject"]=>
@@ -195,6 +201,12 @@ array(12) {
   int(1214821723)
   ["validTo_time_t"]=>
   int(1217413723)
+  ["signatureTypeSN"]=>
+  string(8) "RSA-SHA1"
+  ["signatureTypeLN"]=>
+  string(21) "sha1WithRSAEncryption"
+  ["signatureTypeNID"]=>
+  int(65)
   ["purposes"]=>
   array(9) {
     [1]=>

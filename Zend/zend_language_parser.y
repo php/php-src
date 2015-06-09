@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -249,10 +249,10 @@ use_declarations:
 ;
 
 use_declaration:
-		namespace_name 			{ zend_do_use(&$1, NULL, 0 TSRMLS_CC); }
-	|	namespace_name T_AS T_STRING	{ zend_do_use(&$1, &$3, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { zend_do_use(&$2, NULL, 1 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name T_AS T_STRING { zend_do_use(&$2, &$4, 1 TSRMLS_CC); }
+		namespace_name 			{ zend_do_use(&$1, NULL TSRMLS_CC); }
+	|	namespace_name T_AS T_STRING	{ zend_do_use(&$1, &$3 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { zend_do_use(&$2, NULL TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name T_AS T_STRING { zend_do_use(&$2, &$4 TSRMLS_CC); }
 ;
 
 constant_declaration:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -730,13 +730,16 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = strlen(message);
+			int ret, len = strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
+			ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
 			free(buf);
+			if (ret < 0) {
+				php_handle_aborted_connection();
+			}
 		} else {
 			fprintf(stderr, "%s\n", message);
 		}
@@ -1661,13 +1664,15 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len;
+	int  len = 0;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {
 		p = strchr(h->header, ':');
-		len = p - h->header;
-		if (p && (len > 0)) {
+		if (NULL != p) {
+			len = p - h->header;
+		}
+		if (len > 0) {
 			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
 				len--;
 			}
@@ -1821,7 +1826,7 @@ int main(int argc, char *argv[])
 		unsigned char *p;
 		decoded_query_string = strdup(query_string);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
-		for (p = decoded_query_string; *p &&  *p <= ' '; p++) {
+		for (p = (unsigned char *)decoded_query_string; *p &&  *p <= ' '; p++) {
 			/* skip all leading spaces */
 		}
 		if(*p == '-') {
@@ -2223,9 +2228,9 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 #if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
@@ -2432,13 +2437,16 @@ consult the installation file that came with this distribution, or visit \n\
 						    int i = 1;
 
 						    c = file_handle.handle.stream.mmap.buf[i++];
-							while (c != '\n' && c != '\r' && c != EOF) {
+							while (c != '\n' && c != '\r' && i < file_handle.handle.stream.mmap.len) {
 								c = file_handle.handle.stream.mmap.buf[i++];
 							}
 							if (c == '\r') {
-								if (file_handle.handle.stream.mmap.buf[i] == '\n') {
+								if (i < file_handle.handle.stream.mmap.len && file_handle.handle.stream.mmap.buf[i] == '\n') {
 									i++;
 								}
+							}
+							if(i > file_handle.handle.stream.mmap.len) {
+								i = file_handle.handle.stream.mmap.len;
 							}
 							file_handle.handle.stream.mmap.buf += i;
 							file_handle.handle.stream.mmap.len -= i;

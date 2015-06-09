@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1414,7 +1414,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
-				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0 TSRMLS_CC);
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
 			}
@@ -1979,8 +1979,10 @@ SPL_METHOD(RegexIterator, accept)
 	
 	if (intern->current.data == NULL) {
 		RETURN_FALSE;
+	} else if (Z_TYPE_P(intern->current.data) == IS_ARRAY) {
+		RETURN_FALSE;
 	}
-	
+
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject_ptr = intern->current.key;
 	} else {
@@ -2014,8 +2016,7 @@ SPL_METHOD(RegexIterator, accept)
 		ALLOC_INIT_ZVAL(intern->current.data);
 		php_pcre_match_impl(intern->u.regex.pce, subject, subject_len, &zcount, 
 			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0 TSRMLS_CC);
-		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
-		RETVAL_BOOL(count > 0);
+		RETVAL_BOOL(Z_LVAL(zcount) > 0);
 		break;
 
 	case REGIT_MODE_SPLIT:
@@ -2193,7 +2194,7 @@ SPL_METHOD(RecursiveRegexIterator, __construct)
 SPL_METHOD(RecursiveRegexIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
-	zval                 *retval, *regex;
+	zval                 *retval;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2203,15 +2204,60 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception)) {
+		zval **args[5], *object, *regex, *mode, *flags, *preg_flags;
+
+		MAKE_STD_ZVAL(object);
 		MAKE_STD_ZVAL(regex);
+		MAKE_STD_ZVAL(mode);
+		MAKE_STD_ZVAL(flags);
+		MAKE_STD_ZVAL(preg_flags);
+
+		MAKE_COPY_ZVAL(&retval, object);
 		ZVAL_STRING(regex, intern->u.regex.regex, 1);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, retval, regex TSRMLS_CC);
+		ZVAL_LONG(mode, intern->u.regex.mode);
+		ZVAL_LONG(flags, intern->u.regex.flags);
+		ZVAL_LONG(preg_flags, intern->u.regex.preg_flags);
+
+		args[0] = &object;
+		args[1] = &regex;
+		args[2] = &mode;
+		args[3] = &flags;
+		args[4] = &preg_flags;
+
+		spl_instantiate_arg_n(Z_OBJCE_P(getThis()), &return_value, 5, args TSRMLS_CC);
+
+		zval_ptr_dtor(&object);
 		zval_ptr_dtor(&regex);
+		zval_ptr_dtor(&mode);
+		zval_ptr_dtor(&flags);
+		zval_ptr_dtor(&preg_flags);
 	}
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
 } /* }}} */
+
+SPL_METHOD(RecursiveRegexIterator, accept)
+{
+	spl_dual_it_object *intern;
+	zval *rv;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
+
+	if (intern->current.data == NULL) {
+		RETURN_FALSE;
+	} else if (Z_TYPE_P(intern->current.data) == IS_ARRAY) {
+		RETURN_BOOL(zend_hash_num_elements(Z_ARRVAL_P(intern->current.data)) > 0);
+	}
+
+	zend_call_method_with_0_params(&(getThis()), spl_ce_RegexIterator, NULL, "accept", &rv);
+
+	RETURN_ZVAL(rv, 1, 1);
+}
 
 #endif
 
@@ -2403,6 +2449,7 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
 	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  accept,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator, hasChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveRegexIterator,  getChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END

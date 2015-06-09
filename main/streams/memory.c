@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,15 +87,19 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
-	if (ms->fpos + count >= ms->fsize) {
-		count = ms->fsize - ms->fpos;
+	if (ms->fpos == ms->fsize) {
 		stream->eof = 1;
-	}
-	if (count) {
-		assert(ms->data!= NULL);
-		assert(buf!= NULL);
-		memcpy(buf, ms->data+ms->fpos, count);
-		ms->fpos += count;
+		count = 0;
+	} else {
+		if (ms->fpos + count >= ms->fsize) {
+			count = ms->fsize - ms->fpos;
+		}
+		if (count) {
+			assert(ms->data!= NULL);
+			assert(buf!= NULL);
+			memcpy(buf, ms->data+ms->fpos, count);
+			ms->fpos += count;
+		}
 	}
 	return count;
 }
@@ -370,6 +374,10 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 
 		if (memsize + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_tmpfile();
+			if (file == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
+				return 0;
+			}
 			php_stream_write(file, membuf, memsize);
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;

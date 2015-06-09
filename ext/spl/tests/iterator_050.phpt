@@ -46,8 +46,6 @@ array(3) {
   [2]=>
   %s(1) "2"
 }
-
-Notice: Array to string conversion in %siterator_050.php on line %d
 int(0)
 array(2) {
   [0]=>
@@ -69,8 +67,6 @@ array(2) {
   [1]=>
   %s(1) "1"
 }
-
-Notice: Array to string conversion in %siterator_050.php on line %d
 object(ArrayIterator)#%d (1) {
   %s"storage"%s"ArrayIterator":private]=>
   array(9) {

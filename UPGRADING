@@ -7,6 +7,7 @@ PHP 5.5 UPGRADE NOTES
 2.  Changes in SAPI modules
 3.  Deprecated Functionality
 4.  Changed Functions
+    a. unserialize() change
 5.  New Functions
 6.  New Classes and Interfaces
 7.  Removed Extensions
@@ -193,8 +194,46 @@ PHP 5.5 UPGRADE NOTES
 - Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
   specify escape char.
 
-- Manipulated serialization strings for objects implementing Serializable by
-  replacing "C:" with "O:" at the start will now produce an error.
+4a. unserialize() change
+------------------------
+
+- Starting PHP 5.5.13, the bug fix for bug #67072 introduces a change to 
+  unserialize() function, detailed below:
+
+    If the string looking like 'O:..:"ClassName":...' is unserialized, and
+    the class named is an internal class that declares custom unserializer
+    function, or extends such class, unserialize would fail.
+
+    Using O: for user classes not extending internal classes (including
+    those implementing Serializable) is still supported in 5.4, though
+    it is deprecated and may not be supported in 5.6 for classes that do not 
+    originally serialize to O:. Same for using O: for internal classes 
+    implementing Serializable (like ArrayObject) and classes that extend 
+    them.
+
+    The reason for that is that O: format is meant to be used with classes
+    that do not define custom handlers, and was never intended for the use
+    with classes that do. When used with the class that relies on custom
+    unserializer, it can leave the object of such internal class in an
+    inconsistent state which has been observed to result in crashes and may
+    also lead to memory corruption and ultimately even arbitrary code
+    execution. This was never the intended use of unserializer, and mere
+    possibility of doing this constitutes a bug, since the data passed to
+    unserialize() is not a valid serialization of any object. Since there
+    are many applications applying unserialize() to untrusted data, this
+    presents a potential security vulnerability. Thus, keeping such bug in
+    the code base was considered too dangerous.
+
+    We are aware that some applications use O: format as a way to
+    instantiate classes. This was never the intended usage of serializer,
+    and ReflectionClass methods such as newInstance or
+    newInstanceWithoutConstructor can be used for that. We're working on
+    providing more comprehensive solution for such use cases in PHP 5.6 and
+    welcome the ideas in this area.
+
+    We note also that using unserialize() on any data that is not the result
+    of serialize() call continues to be an unsupported scenario and should
+    not be relied on to produce any specific result.
 
 ========================================
 5. New Functions
@@ -369,6 +408,7 @@ None
 - cURL:
   - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
   - Added CURL_WRAPPERS_ENABLED to reflect --with-curlwrappers.
+  - Added CURL_HTTP_VERSION_2_0 and CURL_VERSION_HTTP2 in 5.5.24+.
 
 - GD
   - Added constants for imageflip:

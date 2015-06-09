@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2014 The PHP Group                                |
+  | Copyright (c) 2005-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -598,50 +598,40 @@ int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len
  *
  * Meta-data is in this format:
  * [len32][data...]
- * 
+ *
  * data is the serialized zval
  */
-int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSRMLS_DC) /* {{{ */
+int phar_parse_metadata(char **buffer, zval **metadata, php_uint32 zip_metadata_len TSRMLS_DC) /* {{{ */
 {
-	const unsigned char *p;
-	php_uint32 buf_len;
 	php_unserialize_data_t var_hash;
 
-	if (!zip_metadata_len) {
-		PHAR_GET_32(*buffer, buf_len);
-	} else {
-		buf_len = zip_metadata_len;
-	}
-
-	if (buf_len) {
+	if (zip_metadata_len) {
+		const unsigned char *p;
+		unsigned char *p_buff = (unsigned char *)estrndup(*buffer, zip_metadata_len);
+		p = p_buff;
 		ALLOC_ZVAL(*metadata);
 		INIT_ZVAL(**metadata);
-		p = (const unsigned char*) *buffer;
 		PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-		if (!php_var_unserialize(metadata, &p, p + buf_len, &var_hash TSRMLS_CC)) {
+		if (!php_var_unserialize(metadata, &p, p + zip_metadata_len, &var_hash TSRMLS_CC)) {
+			efree(p_buff);
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_ptr_dtor(metadata);
 			*metadata = NULL;
 			return FAILURE;
 		}
-
+		efree(p_buff);
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 		if (PHAR_G(persist)) {
 			/* lazy init metadata */
 			zval_ptr_dtor(metadata);
-			*metadata = (zval *) pemalloc(buf_len, 1);
-			memcpy(*metadata, *buffer, buf_len);
-			*buffer += buf_len;
+			*metadata = (zval *) pemalloc(zip_metadata_len, 1);
+			memcpy(*metadata, *buffer, zip_metadata_len);
 			return SUCCESS;
 		}
 	} else {
 		*metadata = NULL;
-	}
-
-	if (!zip_metadata_len) {
-		*buffer += buf_len;
 	}
 
 	return SUCCESS;
@@ -653,7 +643,7 @@ int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSR
  *
  * Parse a new one and add it to the cache, returning either SUCCESS or
  * FAILURE, and setting pphar to the pointer to the manifest entry
- * 
+ *
  * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
@@ -664,6 +654,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	phar_entry_info entry;
 	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
+	php_uint32 len;
 	long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
@@ -1029,16 +1020,21 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	mydata->is_persistent = PHAR_G(persist);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
+	PHAR_GET_32(buffer, len);
 	if (mydata->is_persistent) {
-		PHAR_GET_32(buffer, mydata->metadata_len);
-		if (phar_parse_metadata(&buffer, &mydata->metadata, mydata->metadata_len TSRMLS_CC) == FAILURE) {
-			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
-		}
-	} else {
-		if (phar_parse_metadata(&buffer, &mydata->metadata, 0 TSRMLS_CC) == FAILURE) {
-			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
+		mydata->metadata_len = len;
+		if(!len) {
+			/* FIXME: not sure why this is needed but removing it breaks tests */
+			PHAR_GET_32(buffer, len);
 		}
 	}
+	if(len > endbuffer - buffer) {
+		MAPPHAR_FAIL("internal corruption of phar \"%s\" (trying to read past buffer end)");
+	}
+	if (phar_parse_metadata(&buffer, &mydata->metadata, len TSRMLS_CC) == FAILURE) {
+		MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
+	}
+	buffer += len;
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
@@ -1073,7 +1069,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.manifest_pos = manifest_index;
 		}
 
-		if (buffer + entry.filename_len + 20 > endbuffer) {
+		if (entry.filename_len + 20 > endbuffer - buffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
 		}
 
@@ -1109,19 +1105,21 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		}
 
+		PHAR_GET_32(buffer, len);
 		if (entry.is_persistent) {
-			PHAR_GET_32(buffer, entry.metadata_len);
-			if (!entry.metadata_len) buffer -= 4;
-			if (phar_parse_metadata(&buffer, &entry.metadata, entry.metadata_len TSRMLS_CC) == FAILURE) {
-				pefree(entry.filename, entry.is_persistent);
-				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-			}
+			entry.metadata_len = len;
 		} else {
-			if (phar_parse_metadata(&buffer, &entry.metadata, 0 TSRMLS_CC) == FAILURE) {
-				pefree(entry.filename, entry.is_persistent);
-				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
-			}
+			entry.metadata_len = 0;
 		}
+		if (len > endbuffer - buffer) {
+			pefree(entry.filename, entry.is_persistent);
+			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)");
+		}
+		if (phar_parse_metadata(&buffer, &entry.metadata, len TSRMLS_CC) == FAILURE) {
+			pefree(entry.filename, entry.is_persistent);
+			MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
+		}
+		buffer += len;
 
 		entry.offset = entry.offset_abs = offset;
 		offset += entry.compressed_filesize;
@@ -2239,7 +2237,7 @@ last_time:
 
 /**
  * Process a phar stream name, ensuring we can handle any of:
- * 
+ *
  * - whatever.phar
  * - whatever.phar.gz
  * - whatever.phar.bz2
@@ -3380,6 +3378,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 
 	zend_try {
 		failed = 0;
+		CG(zend_lineno) = 0;
 		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	} zend_catch {
 		failed = 1;

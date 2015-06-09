@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -223,6 +223,7 @@ static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 304, "Not Modified" },
 	{ 305, "Use Proxy" },
 	{ 307, "Temporary Redirect" },
+	{ 308, "Permanent Redirect" },
 	{ 400, "Bad Request" },
 	{ 401, "Unauthorized" },
 	{ 402, "Payment Required" },
@@ -241,6 +242,7 @@ static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 415, "Unsupported Media Type" },
 	{ 416, "Requested Range Not Satisfiable" },
 	{ 417, "Expectation Failed" },
+	{ 426, "Upgrade Required" },
 	{ 428, "Precondition Required" },
 	{ 429, "Too Many Requests" },
 	{ 431, "Request Header Fields Too Large" },
@@ -664,11 +666,10 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
-		if (!h->header_len) {
-			continue;
+		if (h->header_len) {
+			smart_str_appendl(&buffer, h->header, h->header_len);
+			smart_str_appendl(&buffer, "\r\n", 2);
 		}
-		smart_str_appendl(&buffer, h->header, h->header_len);
-		smart_str_appendl(&buffer, "\r\n", 2);
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
@@ -707,6 +708,11 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 {
 	char *new_val = (char *)val;
 	uint new_val_len;
+
+	if (NULL == val) {
+		return;
+	}
+
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array TSRMLS_CC);
 	}
@@ -894,11 +900,11 @@ static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode
 #endif
 } /* }}} */
 
-static int php_cli_server_poller_poll(php_cli_server_poller *poller, const struct timeval *tv) /* {{{ */
+static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv) /* {{{ */
 {
 	memmove(&poller->active.rfds, &poller->rfds, sizeof(poller->rfds));
 	memmove(&poller->active.wfds, &poller->wfds, sizeof(poller->wfds));
-	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, (struct timeval *)tv);
+	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
 } /* }}} */
 
 static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, int fd, int events)) /* {{{ */
@@ -1684,10 +1690,14 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
-		zend_hash_add(&client->request.headers_original_case, client->current_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
-		efree(header_name);
+		/* strip off the colon */
+		char *orig_header_name = estrndup(client->current_header_name, client->current_header_name_len);
+		char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+
+		zend_hash_add(&client->request.headers, lc_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		zend_hash_add(&client->request.headers_original_case, orig_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		efree(lc_header_name);
+		efree(orig_header_name);
 	}
 
 	if (client->current_header_name_allocated) {
@@ -2252,7 +2262,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 			*p++ = '\0';
 			if (*p == ':') {
 				port = strtol(p + 1, &p, 10);
-				if (port <= 0) {
+				if (port <= 0 || port > 65535) {
 					p = NULL;
 				}
 			} else if (*p != '\0') {
@@ -2268,7 +2278,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		if (p) {
 			*p++ = '\0';
 			port = strtol(p, &p, 10);
-			if (port <= 0) {
+			if (port <= 0 || port > 65535) {
 				p = NULL;
 			}
 		}
@@ -2337,7 +2347,7 @@ out:
 		if (_router) {
 			pefree(_router, 1);
 		}
-		if (server_sock >= -1) {
+		if (server_sock > -1) {
 			closesocket(server_sock);
 		}
 	}
@@ -2476,7 +2486,7 @@ static int php_cli_server_do_event_loop(php_cli_server *server TSRMLS_DC) /* {{{
 {
 	int retval = SUCCESS;
 	while (server->is_running) {
-		static const struct timeval tv = { 1, 0 };
+		struct timeval tv = { 1, 0 };
 		int n = php_cli_server_poller_poll(&server->poller, &tv);
 		if (n > 0) {
 			php_cli_server_do_event_for_each_fd(server,

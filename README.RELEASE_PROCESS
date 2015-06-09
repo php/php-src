@@ -196,11 +196,11 @@ last commit id to web/php.git, then, mirrors will now sync
 Getting the stable release announced
 ------------------------------------
 
-1. Run the bumpRelease script for phpweb on your local checkout
+1. Update phpweb/include/releases.inc with the old release info
+  (updates the download archives)
 
- a. ``php bin/bumpRelease 5`` to create the release file (releases/x_y_z.php)
-    The release announcement file should list in detail security fixes and
-    changes in behavior (whether due to a bug fix or not).
+ a. You can run ``php bin/bumpRelease 5`` if you are making a release for the
+    highest branch, otherwise you have to do this manually, see point 1.b
 
  b. In case multiple PHP minor versions are in active development you have
     to manually copy the old information to include/releases.inc
@@ -213,15 +213,18 @@ Getting the stable release announced
 
  c. ``$PHP_X_MD5`` array and update all the md5 sums
 
- d. set ``$PHP_X_RC`` to false!
+ d. ``$PHP_X_SHA256`` array and update all the SHA256 sums
 
- e. Make sure there are no outdated "notes" or edited "date" keys in the
+ e. set ``$PHP_X_RC`` to false!
+
+ f. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
- f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
+ g. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
-3. Update phpweb/include/releases.php with the old release info
-  (updates the download archives)
+3. Create the release file (releases/x_y_z.php)
+   Usually we use the same content as for point 6, but included in php template
+   instead of the release xml.
 
 4. Update php-qa/include/release-qa.php and add the next version as an QARELEASE
    (prepare for next RC)
@@ -266,6 +269,9 @@ to upgrade.
 9. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 http://news.php.net/php.internals/17222.
+Please make sure that the mail to php-announce@ is its own completely seperate email.
+This is to make sure that repiles to the announcement on php-general@ or internals@
+will not accidentally hit the php-announce@ mailinglist.
 
 Re-releasing the same version (or -pl)
 --------------------------------------
@@ -282,7 +288,9 @@ Re-releasing the same version (or -pl)
 
  d. ``$PHP_X_MD5`` array and update all the md5 sums
 
- e. Make sure there are no outdated "notes" or edited "date" keys in the
+ e. ``$PHP_X_SHA256`` array and update all the SHA256 sums
+
+ f. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
 3. Add a short notice to phpweb stating that there is a new release, and
@@ -299,3 +307,6 @@ to upgrade.
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 the news entry.
+Please make sure that the mail to php-announce@ is its own completely seperate email.
+This is to make sure that repiles to the announcement on php-general@ or internals@
+will not accidentally hit the php-announce@ mailinglist.

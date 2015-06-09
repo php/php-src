@@ -3051,8 +3051,8 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		}
 	}
 
-	/* free old palette buffer */
-	for (yy = y - 1; yy >= yy - 1; yy--) {
+	/* free old palette buffer (y is sy) */
+	for (yy = 0; yy < y; yy++) {
 		gdFree(src->pixels[yy]);
 	}
 	gdFree(src->pixels);

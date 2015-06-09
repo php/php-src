@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,6 +115,7 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 	}
 	if (PS(id)) {
 		efree(PS(id));
+		PS(id) = NULL;
 	}
 }
 /* }}} */
@@ -301,7 +302,8 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 	if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &array) == SUCCESS &&
 		Z_TYPE_PP(array) == IS_ARRAY &&
-		zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS
+		zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS &&
+		Z_TYPE_PP(token) == IS_STRING
 	) {
 		remote_addr = Z_STRVAL_PP(token);
 	}
@@ -1422,9 +1424,16 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-#define PPID2SID \
-		convert_to_string((*ppid)); \
-		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
+static void ppid2sid(zval **ppid TSRMLS_DC) {
+	if (Z_TYPE_PP(ppid) != IS_STRING) {
+		PS(id) = NULL;
+		PS(send_cookie) = 1;
+	} else {
+		convert_to_string((*ppid));
+		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid));
+		PS(send_cookie) = 0;
+	}
+}
 
 PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
@@ -1518,9 +1527,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
+			ppid2sid(ppid TSRMLS_CC);
 			PS(apply_trans_sid) = 0;
-			PS(send_cookie) = 0;
 			PS(define_sid) = 0;
 		}
 
@@ -1529,8 +1537,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1538,8 +1545,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
 		) {
-			PPID2SID;
-			PS(send_cookie) = 0;
+			ppid2sid(ppid TSRMLS_CC);
 		}
 	}
 
@@ -2048,6 +2054,11 @@ static PHP_FUNCTION(session_decode)
 static PHP_FUNCTION(session_start)
 {
 	/* skipping check for non-zero args for performance reasons here ?*/
+	if (PS(id) && !strlen(PS(id))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
+		RETURN_FALSE;
+	}
+
 	php_session_start(TSRMLS_C);
 
 	if (PS(session_status) != php_session_active) {

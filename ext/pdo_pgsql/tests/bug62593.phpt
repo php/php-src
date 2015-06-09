@@ -34,6 +34,19 @@ $query->execute();
 $errors[] = $query->errorInfo();
 var_dump($value);
 
+// Try with strings - Bug #68351
+$value = '0';
+$query->bindParam(':foo', $value, PDO::PARAM_BOOL);
+$query->execute();
+$errors[] = $query->errorInfo();
+var_dump($query->fetchColumn());
+
+$value = "abc";
+$query->bindParam(':foo', $value, PDO::PARAM_BOOL);
+$query->execute();
+$errors[] = $query->errorInfo();
+var_dump($query->fetchColumn());
+
 $expect = 'No errors found';
 
 foreach ($errors as $error)
@@ -46,6 +59,8 @@ foreach ($errors as $error)
 echo $expect;
 ?>
 --EXPECTF--
+bool(true)
+bool(false)
 bool(true)
 bool(false)
 No errors found

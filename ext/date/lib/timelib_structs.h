@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,12 +104,22 @@ typedef struct tlocinfo
 typedef struct timelib_tzinfo
 {
 	char    *name;
-	uint32_t ttisgmtcnt;
-	uint32_t ttisstdcnt;
-	uint32_t leapcnt;
-	uint32_t timecnt;
-	uint32_t typecnt;
-	uint32_t charcnt;
+	struct {
+		uint32_t ttisgmtcnt;
+		uint32_t ttisstdcnt;
+		uint32_t leapcnt;
+		uint32_t timecnt;
+		uint32_t typecnt;
+		uint32_t charcnt;
+	} bit32;
+	struct {
+		uint64_t ttisgmtcnt;
+		uint64_t ttisstdcnt;
+		uint64_t leapcnt;
+		uint64_t timecnt;
+		uint64_t typecnt;
+		uint64_t charcnt;
+	} bit64;
 
 	int32_t *trans;
 	unsigned char *trans_idx;
