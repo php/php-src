@@ -1438,14 +1438,14 @@ num_index:
 		if (retval == NULL) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, hval);
+					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
 					/* break missing intentionally */
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, hval);
+					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
 					/* break missing intentionally */
 				case BP_VAR_W:
 					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
