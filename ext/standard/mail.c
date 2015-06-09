@@ -237,7 +237,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 
 	while(*hdr) {
 		if (*hdr == '\r') {
-			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
+			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\0' || *(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
 				/* Malformed or multiple newlines. */
 				return 1;
 			} else {
