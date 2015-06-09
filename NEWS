@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015 PHP 5.4.42
+11 Jun 2015 PHP 5.4.42
 
 - Core:
   . Imroved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
