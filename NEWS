@@ -1,12 +1,8 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 7.0.0
+25 Jun 2015, PHP 7.0.0 Alpha 2
 
-- CLI server:
-  . Refactor MIME type handling to use a hash table instead of linear search.
-    (Adam)
-  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
-  . Added support for SEARCH WebDav method. (Mats Lindh)
+11 Jun 2015, PHP 7.0.0 Alpha 1
 
 - Core:
   . Fixed bug #69767 (Default parameter value with wrong type segfaults).
@@ -87,6 +83,12 @@
   . Implemented the RFC `Context Sensitive Lexer`. (Marcio Almada)
   . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
     (Jan Starke, Anatol)
+
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+  . Added support for SEARCH WebDav method. (Mats Lindh)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
