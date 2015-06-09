@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 May 2015, PHP 5.5.26RC1
+11 Jun 2015, PHP 5.5.26
 
 - Core:
   . Fixed bug #69566 (Conditional jump or move depends on uninitialised value
@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - Opcache
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
+
+- Sqlite3:
+  . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
+    CVE-2015-3416) (Kaplan)
 
 14 May 2015, PHP 5.5.25
 
