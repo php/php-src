@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed POST data processing slowdown due to small input buffer size
     on Windows. (Jorge Oliveira, Anatol)
 
+- FTP
+  . Improved fix for bug #69545 (Integer overflow in ftp_genlist()
+    resulting in heap overflow). (Max Spelsberg)
+
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
 
