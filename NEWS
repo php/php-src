@@ -1,4 +1,4 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2015, PHP 5.6.11
 
@@ -36,6 +36,10 @@
 
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
+- Opcache
+  . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
+    (Laruence, Dmitry)
 
 - Phar:
   . Fixed bug #69680 (phar symlink in binary directory broken).
