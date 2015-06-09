@@ -22,12 +22,20 @@ PHP                                                                        NEWS
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
 
+- Opcache
+  . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
+    (Laruence, Dmitry)
+
 - Phar:
   . Fixed bug #69680 (phar symlink in binary directory broken).
     (Matteo Bernardini, Remi)
 
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+
+- Sqlite3:
+  . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
+    CVE-2015-3416) (Kaplan)
 
 14 May 2015, PHP 5.6.9
 
