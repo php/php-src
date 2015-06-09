@@ -225,7 +225,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 	size_t len;
 
-	if (!hdr || !(len = strlen(hdr))) {
+	if (!hdr) {
 		return 0;
 	}
 
@@ -237,14 +237,14 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 
 	while(*hdr) {
 		if (*hdr == '\r') {
-			if (*(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
+			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || (*(hdr+1) == '\n' && (*(hdr+2) == '\n' || *(hdr+2) == '\r'))) {
 				/* Malformed or multiple newlines. */
 				return 1;
 			} else {
 				hdr += 2;
 			}
 		} else if (*hdr == '\n') {
-			if (*(hdr+1) == '\r' || *(hdr+1) == '\n') {
+			if (*(hdr+1) == '\0' || *(hdr+1) == '\r' || *(hdr+1) == '\n') {
 				/* Malformed or multiple newlines. */
 				return 1;
 			} else {
@@ -253,11 +253,6 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 		} else {
 			hdr++;
 		}
-	}
-
-	/* Should not have any newlines at the end. */
-	if(*(hdr+len-1) == '\n' || *(hdr+len-1) == '\r') {
-		return 1;
 	}
 
 	return 0;
