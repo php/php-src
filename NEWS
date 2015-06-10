@@ -11,6 +11,8 @@
     (Christian Wenz, Anatol Belski)
   . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
     fault). (Christoph M. Becker)
+  . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
+    7/8/8.1/10 as "Business"). (Christian Wenz)
 
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
