@@ -1983,7 +1983,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	id = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &source, &source_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), (mode == DOM_LOAD_FILE ? "p|l" : "s|l"), &source, &source_len, &options) == FAILURE) {
 		return;
 	}
 
