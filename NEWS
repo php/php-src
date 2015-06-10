@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015 PHP 5.4.42
+?? ??? 2015 PHP 5.4.43
+
+11 Jun 2015 PHP 5.4.42
 
 - Core:
   . Imroved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
@@ -11,6 +13,10 @@ PHP                                                                        NEWS
 
 - Litespeed SAPI:
   . Fixed bug #68812 (Unchecked return value). (George Wang)
+
+- Mail:
+  . Fixed bug #68776 (mail() does not have mail header injection prevention for
+    additional headers). (Yasuo)
 
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
