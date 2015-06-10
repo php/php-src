@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Litespeed SAPI:
   . Fixed bug #68812 (Unchecked return value). (George Wang)
 
+- Mail:
+  . Fixed bug #68776 (mail() does not have mail header injection prevention for
+    additional headers). (Yasuo)
+
 - Postgres:
   . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
 
