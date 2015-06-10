@@ -7,8 +7,10 @@
     (dja at axtens dot net, Kalle)
   . Fixed bug #69732 (can induce segmentation fault with basic php code).
     (Dmitry)
-  . Fixed #69642 (Windows 10 reported as Windows 8).
+  . Fixed bug #69642 (Windows 10 reported as Windows 8).
     (Christian Wenz, Anatol Belski)
+  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
+    fault). (Christoph M. Becker)
 
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
