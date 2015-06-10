@@ -8011,6 +8011,72 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(41, ZEND_FUNC_EXISTS, CONST|TMP|VAR|CV, ANY)
+{
+	USE_OPLINE
+	zend_function *fbc;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	if (OP1_TYPE == IS_CONST) {
+		switch ((uintptr_t) CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+			case 0x1:
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				break;
+
+			case 0x0:
+				if ((fbc = zend_hash_find_ptr(EG(function_table), Z_STR_P(EX_CONSTANT(opline->op1)))) == NULL) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
+					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), (void *) 0x1);
+					break;
+				}
+				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), fbc);
+				/* intentionally missing break */
+			default:
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				break;
+		}
+
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	do {
+		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		zend_string *name, *lcname;
+
+ZEND_VM_C_LABEL(try_func_ex):
+		if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+			Z_ADDREF_P(value);
+			name = Z_STR_P(value);
+		} else if (OP1_TYPE & (IS_CV|IS_VAR) && Z_TYPE_P(value) == IS_REFERENCE) {
+			value = Z_REFVAL_P(value);
+			ZEND_VM_C_GOTO(try_func_ex);
+		} else if (Z_TYPE_P(value) != IS_OBJECT || !zend_parse_arg_str_slow(value, &name)) {
+			zend_error(E_WARNING, "function_exists() expects parameter 1 to be string, %s given", zend_get_type_by_const(Z_TYPE_P(value)));
+			ZVAL_NULL(EX_VAR(opline->result.var));
+			break;
+		}
+
+		if (name->val[0] == '\\') {
+			/* Ignore leading "\" */
+			lcname = zend_string_alloc(name->len - 1, 0);
+			zend_str_tolower_copy(lcname->val, name->val + 1, name->len - 1);
+		} else {
+			lcname = zend_string_tolower(name);
+		}
+
+		fbc = zend_hash_find_ptr(EG(function_table), lcname);
+		zend_string_release(lcname);
+		zend_string_release(name);
+
+		ZVAL_BOOL(EX_VAR(opline->result.var), fbc && (fbc->type != ZEND_INTERNAL_FUNCTION || fbc->internal_function.handler != zif_display_disabled_function));
+	} while (0);
+
+	FREE_OP1();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
 {
 	USE_OPLINE

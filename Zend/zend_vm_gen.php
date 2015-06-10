@@ -579,6 +579,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_ANY_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*[A-Za-z_]*\s*,\s*(.*)\s*\);/m",
 				),
@@ -587,6 +588,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
 						return "return " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_ANY_HANDLER", strlen("ZEND_VM_DISPATCH_TO_ANY_HANDLER")) == 0) {
+						return "return " . $matches[1] . ($spec?"_SPEC":"") . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
 						return "return " . helper_name($matches[1], $spec, $op1, $op2) . "(" . $matches[2]. " ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);";
 					} else {
@@ -600,6 +603,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_ANY_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/m",
 				),
@@ -608,6 +612,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
 						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_LABEL";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_ANY_HANDLER", strlen("ZEND_VM_DISPATCH_TO_ANY_HANDLER")) == 0) {
+						return "goto " . $matches[1] . ($spec?"_SPEC":"") . "_LABEL";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
 						return $matches[2] . " = " . $matches[3] .  "; goto " . helper_name($matches[1], $spec, $op1, $op2) . ";";
 					} else {
@@ -621,6 +627,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_ANY_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/m",
 				),
@@ -629,6 +636,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
 						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_ANY_HANDLER", strlen("ZEND_VM_DISPATCH_TO_ANY_HANDLER")) == 0) {
+						return "goto " . $matches[1] . ($spec?"_SPEC":"") . "_HANDLER";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
 						return $matches[2] . " = " . $matches[3] .  "; goto " . helper_name($matches[1], $spec, $op1, $op2) . ";";
 					} else {
@@ -1416,7 +1425,7 @@ function gen_vm($def, $skel) {
 
 	// Search for opcode handlers those are used by other opcode handlers
 	foreach ($opcodes as $dsc) {
-		if (preg_match("/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $m)) {
+		if (preg_match("/ZEND_VM_DISPATCH_TO(?:ANY_)?_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $m)) {
 			$op = $m[1];
 			if (!isset($opnames[$op])) {
 				die("ERROR ($def:$lineno): Opcode with name '$op' is not defined.\n");
