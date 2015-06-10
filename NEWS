@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
+- Core:
+  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
+    fault). (Christoph M. Becker)
+
 11 Jun 2015, PHP 7.0.0 Alpha 1
 
 - Core:
