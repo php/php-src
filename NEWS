@@ -30,12 +30,22 @@
     (Christoph M. Becker)
   . Improved fix for bug #69545 (Integer overflow in ftp_genlist()
     resulting in heap overflow). (Max Spelsberg)
+  . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
+    (Anatol Belski)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
 
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
+
+- Litespeed SAPI:
+  . Fixed bug #68812 (Unchecked return value). (George Wang)
+
+- Mail:
+  . Fixed bug #68776 (mail() does not have mail header injection prevention for
+    additional headers). (Yasuo)
 
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
