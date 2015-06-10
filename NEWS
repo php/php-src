@@ -14,6 +14,10 @@
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
 
+- PDO_pgsql:
+  . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
+    Statements when closeCuror() is u). (Philip Hofstetter)
+
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
     node name). (Christoph Michael Becker)
