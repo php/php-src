@@ -6,7 +6,11 @@ bcmod() - mod by 0
 bcmath.scale=0
 --FILE--
 <?php
-echo bcmod("10", "0");
+try {
+    var_dump(bcmod("10", "0"));
+} catch (Exception $e) {
+    echo "\nException: " . $e->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
-Warning: bcmod(): Division by zero in %s on line %d
+Exception: Division by zero
