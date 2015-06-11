@@ -69,6 +69,9 @@ PHP                                                                        NEWS
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
     (Laruence, Dmitry)
 
+- PCRE
+  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
+
 - Phar:
   . Fixed bug #69680 (phar symlink in binary directory broken).
     (Matteo Bernardini, Remi)
@@ -122,9 +125,6 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed bug #68598 (pcntl_exec() should not allow null char). (CVE-2015-4026)
     (Stas)
-
-- PCRE
-  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
 
 - Phar:
   . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry
