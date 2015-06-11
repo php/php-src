@@ -2588,7 +2588,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				}
 				ZVAL_UNDEF(&tmp);
 				if (Z_TYPE_P(src_zval) == IS_OBJECT) {
-					ZVAL_DUP(&tmp, src_zval);
+					ZVAL_COPY(&tmp, src_zval);
 					convert_to_array(&tmp);
 					src_zval = &tmp;
 				}
@@ -4624,7 +4624,7 @@ PHP_FUNCTION(array_sum)
 		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
 			continue;
 		}
-		ZVAL_DUP(&entry_n, entry);
+		ZVAL_COPY(&entry_n, entry);
 		convert_scalar_to_number(&entry_n);
 		fast_add_function(return_value, return_value, &entry_n);
 	} ZEND_HASH_FOREACH_END();
@@ -4653,7 +4653,7 @@ PHP_FUNCTION(array_product)
 		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
 			continue;
 		}
-		ZVAL_DUP(&entry_n, entry);
+		ZVAL_COPY(&entry_n, entry);
 		convert_scalar_to_number(&entry_n);
 
 		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {

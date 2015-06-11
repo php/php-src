@@ -3730,8 +3730,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_HANDLER(ZEND_O
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}
@@ -12350,8 +12349,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}
@@ -15827,8 +15825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}
@@ -29481,8 +29478,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}

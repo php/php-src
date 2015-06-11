@@ -2074,8 +2074,7 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_REPLACE:
 			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1, &rv);
 			if (Z_TYPE_P(replacement) != IS_STRING) {
-				tmp_replacement = *replacement;
-				zval_copy_ctor(&tmp_replacement);
+				ZVAL_COPY(&tmp_replacement, replacement);
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
@@ -2787,11 +2786,11 @@ SPL_METHOD(CachingIterator, __toString)
 		return;
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
-		ZVAL_DUP(return_value, &intern->current.key);
+		ZVAL_COPY(return_value, &intern->current.key);
 		convert_to_string(return_value);
 		return;
 	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
-		ZVAL_DUP(return_value, &intern->current.data);
+		ZVAL_COPY(return_value, &intern->current.data);
 		convert_to_string(return_value);
 		return;
 	}

@@ -5432,8 +5432,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}
