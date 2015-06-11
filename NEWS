@@ -17,6 +17,8 @@
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
+  . Fixed bug #69362 (PDO-pgsql fails to connect if password contains a
+    leading single quote). (Matteo)
 
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
