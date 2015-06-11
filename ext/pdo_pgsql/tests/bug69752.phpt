@@ -38,7 +38,7 @@ for($i = 0; $i < $max; $i++) {
     );
     $stmt->execute($data);
     $stmt->closeCursor();
-    $usage = intval(memory_get_usage() / 1024);
+    $usage = intval(floor(memory_get_usage() / 1024));
 
     if ($first_time_usage === null) $first_time_usage = $usage;
 
