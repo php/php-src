@@ -42,7 +42,8 @@ for($i = 0; $i < $max; $i++) {
 
     if ($first_time_usage === null) $first_time_usage = $usage;
 
-    if ($first_time_usage != $usage){
+    /* Use delta instead of direct comparison here */
+    if (abs($first_time_usage - $usage) > 3){
         printf("Memory Leak Detected: %d != %d\n", $usage, $first_time_usage);
         break;
     }
