@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
 
+- mysqlnd:
+  . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
+    bound variables). (Laruence);
+
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
