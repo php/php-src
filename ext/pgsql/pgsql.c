@@ -4246,7 +4246,7 @@ PHP_FUNCTION(pg_copy_from)
 #if HAVE_PQPUTCOPYDATA
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
 					zval tmp;
-					ZVAL_DUP(&tmp, value);
+					ZVAL_COPY(&tmp, value);
 					convert_to_string_ex(&tmp);
 					query = (char *)emalloc(Z_STRLEN(tmp) + 2);
 					strlcpy(query, Z_STRVAL(tmp), Z_STRLEN(tmp) + 2);
@@ -4270,7 +4270,7 @@ PHP_FUNCTION(pg_copy_from)
 #else
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
 					zval tmp;
-					ZVAL_DUP(&tmp, value);
+					ZVAL_COPY(&tmp, value);
 					convert_to_string_ex(&tmp);
 					query = (char *)emalloc(Z_STRLEN(tmp) + 2);
 					strlcpy(query, Z_STRVAL(tmp), Z_STRLEN(tmp) + 2);

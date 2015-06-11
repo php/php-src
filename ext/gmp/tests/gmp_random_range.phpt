@@ -5,8 +5,8 @@ gmp_random_range() basic tests
 --FILE--
 <?php
 
-$minusTen = gmp_init(-1);
-$plusTen = gmp_init(1);
+$minusTen = gmp_init(-10);
+$plusTen = gmp_init(10);
 $zero = gmp_init(0);
 
 var_dump(gmp_random_range());

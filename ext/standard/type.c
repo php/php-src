@@ -101,7 +101,6 @@ PHP_FUNCTION(settype)
 	}
 
 	ZVAL_DEREF(var);
-	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {

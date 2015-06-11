@@ -209,7 +209,7 @@ try_again:
 				(op) = &(holder);											\
 				break;														\
 			case IS_OBJECT:													\
-				ZVAL_DUP(&(holder), op);										\
+				ZVAL_COPY(&(holder), op);										\
 				convert_to_long_base(&(holder), 10);						\
 				if (Z_TYPE(holder) == IS_LONG) {							\
 					(op) = &(holder);										\
@@ -312,7 +312,7 @@ ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
+			zval_ptr_dtor(op);
 			ZVAL_LONG(op, tmp);
 			break;
 		case IS_OBJECT:
@@ -369,7 +369,7 @@ ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
+			zval_ptr_dtor(op);
 			ZVAL_DOUBLE(op, tmp);
 			break;
 		case IS_OBJECT:
@@ -408,7 +408,7 @@ ZEND_API void ZEND_FASTCALL convert_to_null(zval *op) /* {{{ */
 		}
 	}
 
-	zval_dtor(op);
+	zval_ptr_dtor(op);
 	ZVAL_NULL(op);
 }
 /* }}} */
@@ -452,7 +452,7 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op) /* {{{ */
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
+			zval_ptr_dtor(op);
 			ZVAL_BOOL(op, tmp);
 			break;
 		case IS_OBJECT:
@@ -516,7 +516,7 @@ ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			zval_dtor(op);
+			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
 			break;
 		case IS_OBJECT: {
@@ -603,14 +603,10 @@ ZEND_API void ZEND_FASTCALL convert_to_object(zval *op) /* {{{ */
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
-				HashTable *properties = emalloc(sizeof(HashTable));
-				zend_array *arr = Z_ARR_P(op);
-
-				memcpy(properties, Z_ARRVAL_P(op), sizeof(HashTable));
-				object_and_properties_init(op, zend_standard_class_def, properties);
-				if (--GC_REFCOUNT(arr) == 0) {
-					efree_size(arr, sizeof(zend_array));
-				}
+				zval tmp;
+				ZVAL_COPY_VALUE(&tmp, op);
+				SEPARATE_ARRAY(&tmp);
+				object_and_properties_init(op, zend_standard_class_def, Z_ARR(tmp));
 				break;
 			}
 		case IS_OBJECT:
