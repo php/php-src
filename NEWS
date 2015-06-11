@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     fault). (Christoph M. Becker)
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
+  . Fixed bug #69740 (finally in generator (yield) swallows exception in
+    iteration). (Nikita)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
