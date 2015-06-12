@@ -297,8 +297,8 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							sizeof(Oid));
 				}
 				if (param->paramno >= 0) {
-					if (param->paramno >= zend_hash_num_elements(stmt->bound_param_map)) {
-						pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+					if (param->paramno >= zend_hash_num_elements(stmt->bound_params)) {
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 						return 0;
 					}
 
