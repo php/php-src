@@ -461,6 +461,10 @@ Other
     IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
     IntlDateFormatter::setTimeZone() instead.
 
+- libxml:
+  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
+    and adds suppport for line numbers >16-bit in the error reporting.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().
@@ -540,7 +544,12 @@ Other
     accessible through stream_get_meta_data() output.
 
 - Reflection
-  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
+  . Added a ReflectionGenerator class (yield from Traces, current file/line,
+    etc.)
+  . Added a ReflectionType class to better support the new return type and
+    scalar type declarations features. The new ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType() methods both return an
+    instance of ReflectionType.
 
 ========================================
 3. Changes in SAPI modules
@@ -654,7 +663,7 @@ out, that the corresponding SDK isn't available anymore.
   . ZLIB_FINISH
 
 - GD
-  . T1Lib support removed, thrus lifting the optional dependency on T1Lib, the 
+  . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
     following is therefore not available anymore:
 
     Functions:

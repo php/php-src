@@ -176,8 +176,10 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	if (finally_op_num) {
 		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 
-		Z_OBJ_P(fast_call) = NULL;
+		Z_OBJ_P(fast_call) = EG(exception);
+		EG(exception) = NULL;
 		fast_call->u2.lineno = (uint32_t)-1;
+
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator);

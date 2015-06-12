@@ -2897,7 +2897,13 @@ int zend_compile_func_strlen(znode *result, zend_ast_list *args) /* {{{ */
 	}
 
 	zend_compile_expr(&arg_node, args->child[0]);
-	zend_emit_op_tmp(result, ZEND_STRLEN, &arg_node, NULL);
+	if (arg_node.op_type == IS_CONST && Z_TYPE(arg_node.u.constant) == IS_STRING) {
+		result->op_type = IS_CONST;
+		ZVAL_LONG(&result->u.constant, Z_STRLEN(arg_node.u.constant));
+		zval_dtor(&arg_node.u.constant);
+	} else {
+		zend_emit_op_tmp(result, ZEND_STRLEN, &arg_node, NULL);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -4374,7 +4380,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 							"with a class type hint can only be NULL");
 					} else if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a %s type hint can only be %s or NULL", arg_info->class_name->val, arg_info->class_name->val);
+							"with a %s type hint can only be %s or NULL",
+							zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
 					}
 				}
 			}
@@ -5579,6 +5586,13 @@ static inline void zend_ct_eval_binary_op(zval *result, uint32_t opcode, zval *o
 }
 /* }}} */
 
+static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op) /* {{{ */
+{
+	unary_op_type fn = get_unary_op(opcode);
+	fn(result, op);
+}
+/* }}} */
+
 static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
 	binary_op_type fn = kind == ZEND_AST_UNARY_PLUS
@@ -5772,6 +5786,14 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
+	if (expr_node.op_type == IS_CONST) {
+		result->op_type = IS_CONST;
+		zend_ct_eval_unary_op(&result->u.constant, opcode,
+			&expr_node.u.constant);
+		zval_ptr_dtor(&expr_node.u.constant);
+		return;
+	}
+
 	zend_emit_op_tmp(result, opcode, &expr_node, NULL);
 }
 /* }}} */
@@ -5827,8 +5849,14 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&right_node, right_ast);
 
-	opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
-	SET_NODE(opline_bool->result, result);
+	if (right_node.op_type == IS_CONST) {
+		result->op_type = IS_CONST;
+		ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
+		zval_ptr_dtor(&right_node.u.constant);
+	} else {
+		opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
+		SET_NODE(opline_bool->result, result);
+	}
 
 	zend_update_jump_target_to_next(opnum_jmpz);
 }

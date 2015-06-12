@@ -364,7 +364,6 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 
 #define convert_to_ex_master(pzv, lower_type, upper_type)	\
 	if (Z_TYPE_P(pzv)!=upper_type) {					\
-		SEPARATE_ZVAL_IF_NOT_REF(pzv);						\
 		convert_to_##lower_type(pzv);						\
 	}
 
@@ -400,7 +399,6 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 
 #define convert_to_explicit_type_ex(pzv, str_type)	\
 	if (Z_TYPE_P(pzv) != str_type) {				\
-		SEPARATE_ZVAL_IF_NOT_REF(pzv);				\
 		convert_to_explicit_type(pzv, str_type);	\
 	}
 
@@ -414,7 +412,6 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 
 #define convert_scalar_to_number_ex(pzv)							\
 	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
-		SEPARATE_ZVAL_IF_NOT_REF(pzv);								\
 		convert_scalar_to_number(pzv);					\
 	}
 

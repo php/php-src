@@ -517,7 +517,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			case IS_DOUBLE:
 			case IS_NULL:
 				if (Z_TYPE_P(value) != IS_STRING) {
-					ZVAL_DUP(&zval_copy, value);
+					ZVAL_COPY(&zval_copy, value);
 					value = &zval_copy;
 					convert_to_string(value);
 					new_value = 1;
