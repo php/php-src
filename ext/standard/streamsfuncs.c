@@ -1038,8 +1038,8 @@ PHP_FUNCTION(stream_context_get_params)
 		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
 		if (Z_REFCOUNTED(context->notifier->ptr)) Z_ADDREF(context->notifier->ptr);
 	}
-	ZVAL_ZVAL(&options, &context->options, 1, 0);
-	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &options);
+	if (Z_REFCOUNTED(context->options)) Z_ADDREF(context->options);
+	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
 }
 /* }}} */
 

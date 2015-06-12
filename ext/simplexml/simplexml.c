@@ -1930,12 +1930,8 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
    Returns the string content */
 SXE_METHOD(__toString)
 {
-	zval           result;
-
-	if (sxe_object_cast_ex(getThis(), &result, IS_STRING) == SUCCESS) {
-		RETURN_ZVAL(&result, 0, 0);
-	} else {
-		zval_ptr_dtor(&result);
+	if (sxe_object_cast_ex(getThis(), return_value, IS_STRING) != SUCCESS) {
+		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -1979,9 +1975,9 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 			if (!Z_ISUNDEF(intern->tmp)) {
 				zval_ptr_dtor(&intern->tmp);
 			}
-			ZVAL_ZVAL(&intern->tmp, &rv, 0, 0);
-			convert_to_long(&intern->tmp);
-			*count = (zend_long)Z_LVAL(intern->tmp);
+			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			zval_ptr_dtor(&rv);
+			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;

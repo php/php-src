@@ -1720,7 +1720,7 @@ ZEND_METHOD(reflection_function, getClosureThis)
 	if (!Z_ISUNDEF(intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj);
 		if (!Z_ISUNDEF_P(closure_this)) {
-			RETURN_ZVAL(closure_this, 1, 0);
+			ZVAL_COPY(return_value, closure_this);
 		}
 	}
 }
@@ -3153,7 +3153,7 @@ ZEND_METHOD(reflection_method, getClosure)
 		if (Z_OBJCE_P(obj) == zend_ce_closure &&
 			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 		{
-			RETURN_ZVAL(obj, 1, 0);
+			ZVAL_COPY(return_value, obj);
 		} else {
 			zend_create_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
 		}

@@ -4005,7 +4005,7 @@ PHP_METHOD(Phar, setMetadata)
 		ZVAL_UNDEF(&phar_obj->archive->metadata);
 	}
 
-	ZVAL_ZVAL(&phar_obj->archive->metadata, metadata, 1, 0);
+	ZVAL_COPY(&phar_obj->archive->metadata, metadata);
 	phar_obj->archive->is_modified = 1;
 	phar_flush(phar_obj->archive, 0, 0, 0, &error);
 
@@ -4674,7 +4674,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 		ZVAL_UNDEF(&entry_obj->entry->metadata);
 	}
 
-	ZVAL_ZVAL(&entry_obj->entry->metadata, metadata, 1, 0);
+	ZVAL_COPY(&entry_obj->entry->metadata, metadata);
 
 	entry_obj->entry->is_modified = 1;
 	entry_obj->entry->phar->is_modified = 1;

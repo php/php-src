@@ -821,7 +821,7 @@ PHP_FUNCTION(end)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		RETURN_ZVAL(entry, 1, 0);
 	}
 }
 /* }}} */
@@ -854,7 +854,7 @@ PHP_FUNCTION(prev)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		RETURN_ZVAL(entry, 1, 0);
 	}
 }
 /* }}} */
@@ -887,7 +887,7 @@ PHP_FUNCTION(next)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		RETURN_ZVAL(entry, 1, 0);
 	}
 }
 /* }}} */
@@ -920,7 +920,7 @@ PHP_FUNCTION(reset)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		RETURN_ZVAL(entry, 1, 0);
 	}
 }
 /* }}} */
@@ -950,7 +950,7 @@ PHP_FUNCTION(current)
 		entry = Z_INDIRECT_P(entry);
 	}
 
-	RETURN_ZVAL_FAST(entry);
+	RETURN_ZVAL(entry, 1, 0);
 }
 /* }}} */
 
@@ -996,7 +996,7 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
-				RETVAL_ZVAL_FAST(result);
+				RETVAL_ZVAL(result, 1, 0);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		RETVAL_ZVAL_FAST(min);
+		RETVAL_ZVAL(min, 1, 0);
 	}
 }
 /* }}} */
@@ -1043,7 +1043,7 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
-				RETVAL_ZVAL_FAST(result);
+				RETVAL_ZVAL(result, 1, 0);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		RETVAL_ZVAL_FAST(max);
+		RETVAL_ZVAL(max, 1, 0);
 	}
 }
 /* }}} */
@@ -4701,7 +4701,8 @@ PHP_FUNCTION(array_reduce)
 	htbl = Z_ARRVAL_P(input);
 
 	if (zend_hash_num_elements(htbl) == 0) {
-		RETURN_ZVAL(&result, 1, 1);
+		ZVAL_COPY_VALUE(return_value, &result);
+		return;
 	}
 
 	fci.retval = &retval;
@@ -4856,7 +4857,7 @@ PHP_FUNCTION(array_map)
 
 		/* Short-circuit: if no callback and only one array, just return it. */
 		if (!ZEND_FCI_INITIALIZED(fci)) {
-			RETVAL_ZVAL(&arrays[0], 1, 0);
+			ZVAL_COPY(return_value, &arrays[0]);
 			return;
 		}
 

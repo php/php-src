@@ -614,7 +614,7 @@ U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
 		&TIMEZONE_ERROR(to), "intltz_to_date_time_zone", &tmp);
 
 	if (ret) {
-		RETURN_ZVAL(ret, 1, 1);
+		ZVAL_COPY_VALUE(return_value, ret);
 	} else {
 		RETURN_FALSE;
 	}

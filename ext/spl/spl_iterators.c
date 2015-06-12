@@ -494,7 +494,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				}
 
 				if (user_caching_it_flags) {
-					ZVAL_ZVAL(&caching_it_flags, user_caching_it_flags, 1, 0);
+					ZVAL_COPY(&caching_it_flags, user_caching_it_flags);
 				} else {
 					ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
 				}
@@ -1067,10 +1067,10 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 	if (data) {
 		RETVAL_ZVAL(data, 1, 0);
 		if (Z_TYPE_P(return_value) == IS_ARRAY) {
-			zval_dtor(return_value);
+			zval_ptr_dtor(return_value);
 			ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1);
 		} else {
-			convert_to_string(return_value);
+			convert_to_string_ex(return_value);
 		}
 	}
 	zend_restore_error_handling(&error_handling);
@@ -1268,9 +1268,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (object->flags & RTIT_BYPASS_KEY) {
-		zval *key_ptr = &key;
-		RETVAL_ZVAL(key_ptr, 1, 0);
-		zval_dtor(&key);
+		RETVAL_ZVAL(&key, 1, 1);
 		return;
 	}
 
@@ -2089,7 +2087,7 @@ SPL_METHOD(RegexIterator, accept)
 			}
 
 			if (replacement == &tmp_replacement) {
-				zval_dtor(replacement);
+				zval_ptr_dtor(replacement);
 			}
 			RETVAL_BOOL(count > 0);
 	}
@@ -3528,7 +3526,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser) 
 			return ZEND_HASH_APPLY_STOP;
 		}
 		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data);
-		zval_dtor(&key);
+		zval_ptr_dtor(&key);
 	} else {
 		Z_TRY_ADDREF_P(data);
 		add_next_index_zval(return_value, data);
@@ -3570,7 +3568,7 @@ PHP_FUNCTION(iterator_to_array)
 	array_init(return_value);
 
 	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value) != SUCCESS) {
-		zval_dtor(return_value);
+		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
 } /* }}} */
