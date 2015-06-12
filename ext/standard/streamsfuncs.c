@@ -955,7 +955,7 @@ PHP_FUNCTION(stream_context_get_options)
 		RETURN_FALSE;
 	}
 
-	RETURN_ZVAL(&context->options, 1, 0);
+	ZVAL_COPY(return_value, &context->options);
 }
 /* }}} */
 

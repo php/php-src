@@ -3512,7 +3512,8 @@ ZEND_METHOD(reflection_function, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	RETURN_ZVAL(name, 1, 0);
+	ZVAL_DEREF(name);
+	ZVAL_COPY(return_value, name);
 }
 /* }}} */
 
@@ -3819,14 +3820,15 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	prop = zend_std_get_static_property(ce, name, 1);
 	if (!prop) {
 		if (def_value) {
-			RETURN_ZVAL(def_value, 1, 0);
+			ZVAL_COPY(return_value, def_value);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
 		}
 		return;
 	} else {
-		RETURN_ZVAL(prop, 1, 0);
+		ZVAL_DEREF(prop);
+		ZVAL_COPY(return_value, prop);
 	}
 }
 /* }}} */
@@ -5138,7 +5140,8 @@ ZEND_METHOD(reflection_class, getShortName)
 	{
 		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
 	}
-	RETURN_ZVAL(name, 1, 0);
+	ZVAL_DEREF(name);
+	ZVAL_COPY(return_value, name);
 }
 /* }}} */
 

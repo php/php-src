@@ -273,7 +273,7 @@ PHP_FUNCTION(msg_get_queue)
 			RETURN_FALSE;
 		}
 	}
-	RETVAL_ZVAL(zend_list_insert(mq, le_sysvmsg), 0, 0);
+	ZVAL_COPY_VALUE(return_value, zend_list_insert(mq, le_sysvmsg));
 }
 /* }}} */
 

@@ -3965,14 +3965,13 @@ PHP_METHOD(Phar, getMetadata)
 
 	if (Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF) {
 		if (phar_obj->archive->is_persistent) {
-			zval ret;
 			char *buf = estrndup((char *) Z_PTR(phar_obj->archive->metadata), phar_obj->archive->metadata_len);
 			/* assume success, we would have failed before */
-			phar_parse_metadata(&buf, &ret, phar_obj->archive->metadata_len);
+			phar_parse_metadata(&buf, return_value, phar_obj->archive->metadata_len);
 			efree(buf);
-			RETURN_ZVAL(&ret, 0, 1);
+		} else {
+			ZVAL_COPY(return_value, &phar_obj->archive->metadata);
 		}
-		RETURN_ZVAL(&phar_obj->archive->metadata, 1, 0);
 	}
 }
 /* }}} */
@@ -4622,14 +4621,13 @@ PHP_METHOD(PharFileInfo, getMetadata)
 
 	if (Z_TYPE(entry_obj->entry->metadata) != IS_UNDEF) {
 		if (entry_obj->entry->is_persistent) {
-			zval ret;
 			char *buf = estrndup((char *) Z_PTR(entry_obj->entry->metadata), entry_obj->entry->metadata_len);
 			/* assume success, we would have failed before */
-			phar_parse_metadata(&buf, &ret, entry_obj->entry->metadata_len);
+			phar_parse_metadata(&buf, return_value, entry_obj->entry->metadata_len);
 			efree(buf);
-			RETURN_ZVAL(&ret, 0, 1);
+		} else {
+			ZVAL_COPY(return_value, &entry_obj->entry->metadata);
 		}
-		RETURN_ZVAL(&entry_obj->entry->metadata, 1, 0);
 	}
 }
 /* }}} */

@@ -821,7 +821,8 @@ PHP_FUNCTION(end)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL(entry, 1, 0);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -854,7 +855,8 @@ PHP_FUNCTION(prev)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL(entry, 1, 0);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -887,7 +889,8 @@ PHP_FUNCTION(next)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL(entry, 1, 0);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -920,7 +923,8 @@ PHP_FUNCTION(reset)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL(entry, 1, 0);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -950,7 +954,8 @@ PHP_FUNCTION(current)
 		entry = Z_INDIRECT_P(entry);
 	}
 
-	RETURN_ZVAL(entry, 1, 0);
+	ZVAL_DEREF(entry);
+	ZVAL_COPY(return_value, entry);
 }
 /* }}} */
 
@@ -996,7 +1001,8 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
-				RETVAL_ZVAL(result, 1, 0);
+				ZVAL_DEREF(result);
+				ZVAL_COPY(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1016,7 +1022,8 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		RETVAL_ZVAL(min, 1, 0);
+		ZVAL_DEREF(min);
+		ZVAL_COPY(return_value, min);
 	}
 }
 /* }}} */
@@ -1043,7 +1050,8 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
-				RETVAL_ZVAL(result, 1, 0);
+				ZVAL_DEREF(result);
+				ZVAL_COPY(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1063,7 +1071,8 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		RETVAL_ZVAL(max, 1, 0);
+		ZVAL_DEREF(max);
+		ZVAL_COPY(return_value, max);
 	}
 }
 /* }}} */

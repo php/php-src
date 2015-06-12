@@ -459,7 +459,8 @@ ZEND_FUNCTION(func_get_arg)
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
-	RETURN_ZVAL(arg, 1, 0);
+	ZVAL_DEREF(arg);
+	ZVAL_COPY(return_value, arg);
 }
 /* }}} */
 

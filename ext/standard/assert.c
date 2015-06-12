@@ -343,7 +343,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_CALLBACK:
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
-			RETVAL_ZVAL(&ASSERTG(callback), 1, 0);
+			ZVAL_COPY(return_value, &ASSERTG(callback));
 		} else if (ASSERTG(cb)) {
 			RETVAL_STRING(ASSERTG(cb));
 		} else {
