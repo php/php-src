@@ -855,8 +855,11 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 
 zend_string *zend_resolve_class_name_ast(zend_ast *ast) /* {{{ */
 {
-	zend_string *name = zend_ast_get_str(ast);
-	return zend_resolve_class_name(name, ast->attr);
+	zval *class_name = zend_ast_get_zval(ast);
+	if (Z_TYPE_P(class_name) != IS_STRING) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
+	}
+	return zend_resolve_class_name(Z_STR_P(class_name), ast->attr);
 }
 /* }}} */
 
