@@ -536,6 +536,8 @@ Other
     (RFC: https://wiki.php.net/rfc/generator-delegation)
   . Reserved keywords can now be used in various new contexts.
     (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
+  . Added support for scalar type declatarations and strict mode using
+    declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
