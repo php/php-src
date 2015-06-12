@@ -4238,9 +4238,11 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
 				zend_assert_valid_class_name(class_name);
+				arg_info->lower_class_name = zend_string_tolower(class_name);
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				zend_string_addref(class_name);
+				arg_info->lower_class_name = NULL;
 			}
 
 			arg_info->type_hint = IS_OBJECT;

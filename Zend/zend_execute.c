@@ -587,7 +587,12 @@ ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info
 
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce)
 {
-	*pce = zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+	/* optimization to not always recalculate the lowercase name and hash */
+	if (cur_arg_info->lower_class_name) {
+		*pce = zend_hash_find_ptr(EG(class_table), cur_arg_info->lower_class_name);
+	} else { /* "extra" fetch type */
+		*pce = zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+	}
 
 	*class_name = (*pce) ? (*pce)->name->val : cur_arg_info->class_name->val;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
