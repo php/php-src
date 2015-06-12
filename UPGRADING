@@ -61,7 +61,7 @@ Changes to variable handling
       $last = array_pop((getArray()));
       // Strict Standards: Only variables should be passed by reference
 
-  will now throw a strict standards error irregardless of whether parentheses
+  will now throw a strict standards error regardless of whether parentheses
   are used. Previously no notice was generated in the second case.
 
 * Array elements or object properties that are automatically created during
