@@ -291,24 +291,24 @@ typedef struct _zend_property_info {
 
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
-	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
-	zend_uchar pass_by_reference;
-	zend_bool allow_null;
-	zend_bool is_variadic;
-	void *reserved; /* to align with zend_arg_info */
+	const char  *name;
+	const char  *class_name;
+	zend_string *lower_class_name;  /* to align with zend_arg_info */
+	zend_uchar   type_hint;
+	zend_uchar   pass_by_reference;
+	zend_bool    allow_null;
+	zend_bool    is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_string *class_name;
-	zend_uchar type_hint;
-	zend_uchar pass_by_reference;
-	zend_bool allow_null;
-	zend_bool is_variadic;
 	zend_string *lower_class_name;
+	zend_uchar   type_hint;
+	zend_uchar   pass_by_reference;
+	zend_bool    allow_null;
+	zend_bool    is_variadic;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
