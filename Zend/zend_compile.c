@@ -4989,8 +4989,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-
-	zend_string *name = decl->name, *lcname, *import_name = NULL;
+	zend_string *name, *lcname, *import_name = NULL;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
@@ -4998,42 +4997,36 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *original_ce = CG(active_class_entry);
 	znode original_implementing_class = FC(implementing_class);
 
-	if (decl->flags & ZEND_ACC_ANON_CLASS) {
-		decl->name = name = zend_generate_anon_class_name(decl->lex_pos);
-
-		/* Serialization is not supported for anonymous classes */
-		ce->serialize = zend_class_serialize_deny;
-		ce->unserialize = zend_class_unserialize_deny;
-	}
-
-	if (CG(active_class_entry) && !(decl->flags & ZEND_ACC_ANON_CLASS)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
-	}
-
-	zend_assert_valid_class_name(name);
-
-	lcname = zend_string_tolower(name);
-
-	if (FC(imports)) {
-		import_name = zend_hash_find_ptr(FC(imports), lcname);
-	}
-
-	if (FC(current_namespace)) {
-		name = zend_prefix_with_ns(name);
-
-		zend_string_release(lcname);
+	if (EXPECTED(decl->flags & ZEND_ACC_ANON_CLASS) == 0) {
+		if (CG(active_class_entry)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
+		}
+		name = decl->name;
+		zend_assert_valid_class_name(name);
 		lcname = zend_string_tolower(name);
+		if (FC(current_namespace)) {
+			name = zend_prefix_with_ns(name);
+
+			zend_string_release(lcname);
+			lcname = zend_string_tolower(name);
+		} else {
+			zend_string_addref(name);
+		}
+
+		if (FC(imports)) {
+			import_name = zend_hash_find_ptr(FC(imports), lcname);
+		}
+
+		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+					"because the name is already in use", name->val);
+		}
+
+		name = zend_new_interned_string(name);
+		lcname = zend_new_interned_string(lcname);
 	} else {
-		zend_string_addref(name);
+		lcname = name = zend_generate_anon_class_name(decl->lex_pos);
 	}
-
-	if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-			"because the name is already in use", name->val);
-	}
-
-	name = zend_new_interned_string(name);
-	lcname = zend_new_interned_string(lcname);
 
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
@@ -5043,8 +5036,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	ce->info.user.filename = zend_get_compiled_filename();
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
+
 	if (decl->doc_comment) {
 		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
+	}
+
+	if (UNEXPECTED(decl->flags & ZEND_ACC_ANON_CLASS)) {
+		/* Serialization is not supported for anonymous classes */
+		ce->serialize = zend_class_serialize_deny;
+		ce->unserialize = zend_class_unserialize_deny;
 	}
 
 	if (extends_ast) {
