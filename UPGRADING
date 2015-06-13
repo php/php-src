@@ -492,7 +492,7 @@ Other
 
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
-    preg_reaplace_callback() instead.
+    preg_replace_callback() instead.
 
 - PDO_pgsql:
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
