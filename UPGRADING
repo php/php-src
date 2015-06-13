@@ -636,6 +636,7 @@ Other
 - sapi/tux
 - sapi/webjames
 - ext/mssql
+- ext/mysql
 - ext/sybase_ct
 For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
