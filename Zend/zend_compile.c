@@ -4999,7 +4999,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *original_ce = CG(active_class_entry);
 	znode original_implementing_class = FC(implementing_class);
 
-	if (EXPECTED(decl->flags & ZEND_ACC_ANON_CLASS) == 0) {
+	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		if (CG(active_class_entry)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		}
@@ -5043,7 +5043,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
 	}
 
-	if (UNEXPECTED(decl->flags & ZEND_ACC_ANON_CLASS)) {
+	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {
 		/* Serialization is not supported for anonymous classes */
 		ce->serialize = zend_class_serialize_deny;
 		ce->unserialize = zend_class_unserialize_deny;
