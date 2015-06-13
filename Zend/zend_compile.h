@@ -297,6 +297,7 @@ typedef struct _zend_internal_arg_info {
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
+	void *reserved; /* to align with zend_arg_info */
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
@@ -307,6 +308,7 @@ typedef struct _zend_arg_info {
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
+	zend_string *lower_class_name;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
