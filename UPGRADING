@@ -638,7 +638,12 @@ Other
 - ext/mssql
 - ext/mysql
 - ext/sybase_ct
-For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+- ext/ereg
+
+For more details see 
+
+https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
 
 NOTE NSAPI was not voted in the RFC, however it was removed afterwards. It turned
 out, that the corresponding SDK isn't available anymore.
