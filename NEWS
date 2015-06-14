@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
     bound variables). (Laruence);
 
+- Curl:
+  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
+    yahoo dot com)
+
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
