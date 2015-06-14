@@ -144,12 +144,6 @@ assert(0 && ($a = function () {
 
 ?>
 --EXPECTF--
-Warning: Unsupported declare 'A' in %sexpect_015.php on line %d
-
-Warning: Unsupported declare 'B' in %sexpect_015.php on line %d
-
-Warning: Unsupported declare 'C' in %sexpect_015.php on line %d
-
 Warning: assert(): assert(0 && ($a = function () {
     global $a;
     global $$b;
