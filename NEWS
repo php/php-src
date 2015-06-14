@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
+  . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
+    extensions are loaded). (Laruence)
   . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
     (Laruence)
   . Fixed bug #69761 (Serialization of anonymous classes should be prevented).
