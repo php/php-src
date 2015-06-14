@@ -13,7 +13,7 @@ require 'weak_include_strict_2.inc';
 --EXPECTF--
 Fatal error: Uncaught TypeError: Argument 1 passed to takes_int() must be of the type integer, float given, called in %sweak_include_strict_2.inc on line 9 and defined in %sweak_include_strict_2.inc:5
 Stack trace:
-#0 %s(%d): takes_int()
+#0 %s(%d): takes_int(1)
 #1 %s(%d): require('%s')
 #2 {main}
   thrown in %sweak_include_strict_2.inc on line 5

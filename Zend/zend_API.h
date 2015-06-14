@@ -68,9 +68,9 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
 #define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_MN(classname##_##name))
 
-#define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 
-#define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 #define ZEND_RAW_NAMED_FE(zend_name, name, arg_info) ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
 
 #define ZEND_NAMED_FE(zend_name, name, arg_info)	ZEND_FENTRY(zend_name, name, arg_info, 0)
@@ -593,20 +593,17 @@ END_EXTERN_C()
 		zval *__z = (z);						\
 		zval *__zv = (zv);						\
 		if (EXPECTED(!Z_ISREF_P(__zv))) {		\
-			ZVAL_COPY_VALUE(__z, __zv);			\
-		} else {                                \
-			ZVAL_COPY_VALUE(__z,                \
-				Z_REFVAL_P(__zv));				\
-		}										\
-		if (copy) {								\
-			zval_opt_copy_ctor(__z);			\
-	    }										\
-		if (dtor) {								\
-			if (!copy) {						\
-				ZVAL_NULL(__zv);				\
+			if (copy && !dtor) {				\
+				ZVAL_COPY(__z, __zv);			\
+			} else {							\
+				ZVAL_COPY_VALUE(__z, __zv);		\
 			}									\
-			zval_ptr_dtor(__zv);				\
-	    }										\
+		} else {								\
+			ZVAL_COPY(__z, Z_REFVAL_P(__zv));	\
+			if (dtor || !copy) {				\
+				zval_ptr_dtor(__zv);			\
+			}									\
+		}										\
 	} while (0)
 
 #define RETVAL_BOOL(b)					ZVAL_BOOL(return_value, b)
@@ -644,18 +641,6 @@ END_EXTERN_C()
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
-
-#define RETVAL_ZVAL_FAST(z) do {      \
-	zval *_z = (z);                   \
-	if (Z_ISREF_P(_z)) {              \
-		RETVAL_ZVAL(_z, 1, 0);        \
-	} else {                          \
-		zval_ptr_dtor(return_value);  \
-		ZVAL_COPY(return_value, _z);  \
-	}                                 \
-} while (0)
-
-#define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
@@ -774,6 +759,8 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 
 #define Z_PARAM_PROLOGUE(separate) \
 	++_i; \
+	ZEND_ASSERT(_i <= _min_num_args || _optional==1); \
+	ZEND_ASSERT(_i >  _min_num_args || _optional==0); \
 	if (_optional) { \
 		if (UNEXPECTED(_i >_num_args)) break; \
 	} \
@@ -1010,7 +997,10 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 			Z_PARAM_PROLOGUE(separate); \
 			zend_parse_arg_zval_deref(_arg, &dest, check_null); \
 		} else { \
-			if (UNEXPECTED(++_i >_num_args)) break; \
+			++_i; \
+			ZEND_ASSERT(_i <= _min_num_args || _optional==1); \
+			ZEND_ASSERT(_i >  _min_num_args || _optional==0); \
+			if (_optional && UNEXPECTED(_i >_num_args)) break; \
 			_real_arg++; \
 			zend_parse_arg_zval(_real_arg, &dest, check_null); \
 		}

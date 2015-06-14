@@ -37,6 +37,6 @@ $a->b($b);
 
 Fatal error: Uncaught TypeError: Argument 1 passed to FooBar::a() must implement interface Foo, instance of Blort given, called in %s on line 27 and defined in %s:12
 Stack trace:
-#0 %s(%d): FooBar->a()
+#0 %s(%d): FooBar->a(Object(Blort))
 #1 {main}
   thrown in %s on line 12

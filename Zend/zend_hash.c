@@ -28,7 +28,7 @@
 # define HT_ASSERT(c) ZEND_ASSERT(c)
 #else
 # define HT_ASSERT(c)
-#endif 
+#endif
 
 #if ZEND_DEBUG
 /*
@@ -71,7 +71,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 #define HASH_PROTECT_RECURSION(ht)														\
 	if ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION) {									\
-		if ((ht)->u.flags >= (3 << 8)) {												\
+		if (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >= (3 << 8)) {												\
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");\
 		}																				\
 		ZEND_HASH_INC_APPLY_COUNT(ht);													\
@@ -125,13 +125,13 @@ static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	ZEND_ASSERT(!((ht)->u.flags & HASH_FLAG_INITIALIZED));
 	if (packed) {
-		(ht)->u.flags |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
 		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+		(ht)->u.flags |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
 		HT_HASH_RESET_PACKED(ht);
 	} else {
-		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
 		(ht)->nTableMask = -(ht)->nTableSize;
 		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
 		HT_HASH_RESET(ht);
 	}
 }
@@ -219,7 +219,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 
 ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
-	_zend_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_CC);
+	_zend_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
 	if (!bApplyProtection) {
 		ht->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 	}
@@ -567,7 +567,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key,
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, flag ZEND_FILE_LINE_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, flag ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -575,7 +575,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const c
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -583,7 +583,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *st
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -591,7 +591,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update_ind(HashTable *ht, const char
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
 	zend_string_release(key);
 	return ret;
 }
@@ -599,14 +599,13 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add(HashTable *ht, const char *str, 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_new(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zend_string *key = zend_string_init(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_CC);
-	zend_string_release(key);
+	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	zend_string_delref(key);
 	return ret;
 }
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_empty_element(HashTable *ht, zend_ulong h)
 {
-
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
@@ -615,7 +614,6 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_empty_element(HashTable *ht, ze
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_empty_element(HashTable *ht, zend_string *key)
 {
-
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
@@ -624,7 +622,6 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_add_empty_element(HashTable *ht, zend_str
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_empty_element(HashTable *ht, const char *str, size_t len)
 {
-
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
@@ -1698,7 +1695,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = source->pDestructor;
 
 	if (source->nNumUsed == 0) {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;

@@ -3217,7 +3217,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 		if (Z_TYPE_P(zphrase) == IS_STRING) {
 			passphrase = Z_STRVAL_P(zphrase);
 		} else {
-			ZVAL_DUP(&tmp, zphrase);
+			ZVAL_COPY(&tmp, zphrase);
 			convert_to_string(&tmp);
 			passphrase = Z_STRVAL(tmp);
 		}
@@ -5253,7 +5253,7 @@ PHP_FUNCTION(openssl_encrypt)
 /* }}} */
 
 /* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = '']])
-   Takes raw or base64 encoded string and dectupt it using given method and key */
+   Takes raw or base64 encoded string and decrypts it using given method and key */
 PHP_FUNCTION(openssl_decrypt)
 {
 	zend_long options = 0;

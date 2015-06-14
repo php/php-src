@@ -2,6 +2,7 @@ $Id$
 
 PHP 7.0 INTERNALS UPGRADE NOTES
 
+0. Wiki Examples
 1. Internal API changes
   e. New data types
   f. zend_parse_parameters() specs
@@ -21,6 +22,14 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 2. Build system changes
   a. Unix build system changes
   b. Windows build system changes
+
+
+================
+0. Wiki Examples
+================
+
+The wiki contains multiple examples and further explanations of the internal
+changes. See: https://wiki.php.net/phpng-upgrading
 
 
 ========================
@@ -169,7 +178,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      before any globals was accessed.
 
      Porting an extension or SAPI is usually as easy as removing all the TSRMLS_*
-     ocurrences and integrating the macros mentioned above. However if tsrm_ls
+     occurrences and integrating the macros mentioned above. However if tsrm_ls
      is used explicitly, its usage can be considered obsolete in most cases.
      Additionally, if an extension triggers its own threads, TSRMLS_CACHE shouldn't
      be passed to that threads directly.
@@ -196,10 +205,10 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      zend_fetch_resource_ex. More details can be found in Zend/zend_list.c.
 
   t. Optimized strings concatenation.
-     ZEND_ADD_STRING/VAR/CHAR are replaced with ZEND_ROPE_INTI, ZEND_ROPE_ADD,
+     ZEND_ADD_STRING/VAR/CHAR are replaced with ZEND_ROPE_INIT, ZEND_ROPE_ADD,
      ZEND_ROPE_END.
      Instead of reallocation and copying string on each ZEND_ADD_STRING/VAR/CAHR,
-     collect all the strings and then alloca te and construct the resulting string once.
+     collect all the strings and then allocate and construct the resulting string once.
 
 
 ========================
@@ -230,7 +239,8 @@ PHP 7.0 INTERNALS UPGRADE NOTES
        which suppresses the most frequent false positive warnings
 
      - the --with-mp option will by default utilize all the available cores. It's
-       enabled by default and can be disabled with the special "disable" keyword.
+       enabled by default for release builds and can be disabled with the special
+       "disable" keyword.
 
 ========================
 3. Module changes
@@ -251,7 +261,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
       Do not access PS(id) directly, but use this handler and it's parameter.
     - PS_UPDATE_TIMESTAMP() defines timestamp updating handler. This handler
       must update session data timestamp for GC if it is needed. e.g. Memcache
-      updates timestap on read, so it does not need to update timestamp. Return
+      updates timestamp on read, so it does not need to update timestamp. Return
       SUCCESS simply for this case.
     - PS_CREATE_SID() should check session ID collision. Return NULL for failure.
     - More documentation can be found in ext/session/mod_files.c as comments.

@@ -163,7 +163,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, time)
-	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse, 0, 0, 1)
@@ -888,6 +888,10 @@ PHP_MSHUTDOWN_FUNCTION(date)
 	if (DATEG(last_errors)) {
 		timelib_error_container_dtor(DATEG(last_errors));
 	}
+
+#ifndef ZTS
+	DATEG(default_timezone) = NULL;
+#endif
 
 	return SUCCESS;
 }
@@ -2569,18 +2573,16 @@ PHP_FUNCTION(date_create)
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL;
 	size_t          time_str_len = 0;
-	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_date_instantiate(date_ce_date, &datetime_object);
-	if (!php_date_initialize(Z_PHPDATE_P(&datetime_object), time_str, time_str_len, NULL, timezone_object, 0)) {
-		zval_dtor(&datetime_object);
+	php_date_instantiate(date_ce_date, return_value);
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
 /* }}} */
 
@@ -2592,18 +2594,16 @@ PHP_FUNCTION(date_create_immutable)
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL;
 	size_t          time_str_len = 0;
-	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_date_instantiate(date_ce_immutable, &datetime_object);
-	if (!php_date_initialize(Z_PHPDATE_P(&datetime_object), time_str, time_str_len, NULL, timezone_object, 0)) {
-		zval_dtor(&datetime_object);
+	php_date_instantiate(date_ce_immutable, return_value);
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
 /* }}} */
 
@@ -2615,18 +2615,16 @@ PHP_FUNCTION(date_create_from_format)
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL, *format_str = NULL;
 	size_t             time_str_len = 0, format_str_len = 0;
-	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O!", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_date_instantiate(date_ce_date, &datetime_object);
-	if (!php_date_initialize(Z_PHPDATE_P(&datetime_object), time_str, time_str_len, format_str, timezone_object, 0)) {
-		zval_dtor(&datetime_object);
+	php_date_instantiate(date_ce_date, return_value);
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
 /* }}} */
 
@@ -2638,18 +2636,16 @@ PHP_FUNCTION(date_create_immutable_from_format)
 	zval           *timezone_object = NULL;
 	char           *time_str = NULL, *format_str = NULL;
 	size_t          time_str_len = 0, format_str_len = 0;
-	zval            datetime_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O!", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	php_date_instantiate(date_ce_immutable, &datetime_object);
-	if (!php_date_initialize(Z_PHPDATE_P(&datetime_object), time_str, time_str_len, format_str, timezone_object, 0)) {
-		zval_dtor(&datetime_object);
+	php_date_instantiate(date_ce_immutable, return_value);
+	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
-	RETVAL_ZVAL(&datetime_object, 0, 0);
 }
 /* }}} */
 
@@ -3075,11 +3071,12 @@ PHP_FUNCTION(date_modify)
 		RETURN_FALSE;
 	}
 
-	if (php_date_modify(object, modify, modify_len)) {
-		RETURN_ZVAL(object, 1, 0);
+	if (!php_date_modify(object, modify, modify_len)) {
+		RETURN_FALSE;
 	}
 
-	RETURN_FALSE;
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3096,11 +3093,11 @@ PHP_METHOD(DateTimeImmutable, modify)
 	}
 
 	date_clone_immutable(object, &new_object);
-	if (php_date_modify(&new_object, modify, modify_len)) {
-		RETURN_ZVAL(&new_object, 0, 1);
+	if (!php_date_modify(&new_object, modify, modify_len)) {
+		RETURN_FALSE;
 	}
 
-	RETURN_FALSE;
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3133,7 +3130,8 @@ PHP_FUNCTION(date_add)
 
 	php_date_add(object, interval, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3150,7 +3148,7 @@ PHP_METHOD(DateTimeImmutable, add)
 	date_clone_immutable(object, &new_object);
 	php_date_add(&new_object, interval, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3188,7 +3186,8 @@ PHP_FUNCTION(date_sub)
 
 	php_date_sub(object, interval, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3205,7 +3204,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 	date_clone_immutable(object, &new_object);
 	php_date_sub(&new_object, interval, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3290,7 +3289,8 @@ PHP_FUNCTION(date_timezone_set)
 
 	php_date_timezone_set(object, timezone_object, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3308,7 +3308,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 	date_clone_immutable(object, &new_object);
 	php_date_timezone_set(&new_object, timezone_object, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3373,7 +3373,8 @@ PHP_FUNCTION(date_time_set)
 
 	php_date_time_set(object, h, i, s, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3391,7 +3392,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 	date_clone_immutable(object, &new_object);
 	php_date_time_set(&new_object, h, i, s, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3421,7 +3422,8 @@ PHP_FUNCTION(date_date_set)
 
 	php_date_date_set(object, y, m, d, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3439,7 +3441,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 	date_clone_immutable(object, &new_object);
 	php_date_date_set(&new_object, y, m, d, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3473,7 +3475,8 @@ PHP_FUNCTION(date_isodate_set)
 
 	php_date_isodate_set(object, y, w, d, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3491,7 +3494,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 	date_clone_immutable(object, &new_object);
 	php_date_isodate_set(&new_object, y, w, d, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 
@@ -3519,7 +3522,8 @@ PHP_FUNCTION(date_timestamp_set)
 
 	php_date_timestamp_set(object, timestamp, return_value);
 
-	RETURN_ZVAL(object, 1, 0);
+	Z_ADDREF_P(object);
+	ZVAL_COPY_VALUE(return_value, object);
 }
 /* }}} */
 
@@ -3537,7 +3541,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 	date_clone_immutable(object, &new_object);
 	php_date_timestamp_set(&new_object, timestamp, return_value);
 
-	RETURN_ZVAL(&new_object, 0, 1);
+	ZVAL_COPY_VALUE(return_value, &new_object);
 }
 /* }}} */
 

@@ -337,4 +337,33 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #endif
 
+/* Global stat declarations */
+#ifndef _S_IFDIR
+#define _S_IFDIR S_IFDIR
+#endif
+
+#ifndef _S_IFREG
+#define _S_IFREG S_IFREG
+#endif
+
+#ifndef S_IFLNK
+# define S_IFLNK 0120000
+#endif
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISREG
+#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
+#endif
+
+#ifndef S_ISLNK
+#define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
+#endif
+
+#ifndef S_IXROOT
+#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+#endif
+
 #endif /* VIRTUAL_CWD_H */

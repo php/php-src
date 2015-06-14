@@ -1854,8 +1854,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_COPY_VALUE(writeobj, retval_ptr);
 			} else {
 				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
 			}
@@ -1866,8 +1866,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_COPY_VALUE(writeobj, retval_ptr);
 			} else {
 				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
 			}
@@ -1878,7 +1878,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 		return SUCCESS;
 	}
 	if (readobj == writeobj) {
-		zval_dtor(readobj);
+		zval_ptr_dtor(readobj);
 	}
 	ZVAL_NULL(writeobj);
 	return FAILURE;
@@ -2031,7 +2031,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 
 	if (intern->u.file.max_line_len > 0) {
 		buf = safe_emalloc((intern->u.file.max_line_len + 1), sizeof(char), 0);
-		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len, &line_len) == NULL) {
+		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len + 1, &line_len) == NULL) {
 			efree(buf);
 			buf = NULL;
 		} else {
@@ -2140,7 +2140,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
 			if (Z_TYPE_P(return_value) != IS_NULL) {
-				zval_dtor(return_value);
+				zval_ptr_dtor(return_value);
 				ZVAL_NULL(return_value);
 			}
 			ZVAL_ZVAL(return_value, &intern->u.file.current_zval, 1, 0);

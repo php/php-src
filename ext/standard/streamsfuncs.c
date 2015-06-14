@@ -397,7 +397,7 @@ PHP_FUNCTION(stream_get_contents)
 {
 	php_stream	*stream;
 	zval		*zsrc;
-	zend_long		maxlen		= PHP_STREAM_COPY_ALL,
+	zend_long		maxlen		= (ssize_t) PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
 	zend_string *contents;
 
@@ -955,7 +955,7 @@ PHP_FUNCTION(stream_context_get_options)
 		RETURN_FALSE;
 	}
 
-	RETURN_ZVAL(&context->options, 1, 0);
+	ZVAL_COPY(return_value, &context->options);
 }
 /* }}} */
 
@@ -1038,8 +1038,8 @@ PHP_FUNCTION(stream_context_get_params)
 		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
 		if (Z_REFCOUNTED(context->notifier->ptr)) Z_ADDREF(context->notifier->ptr);
 	}
-	ZVAL_ZVAL(&options, &context->options, 1, 0);
-	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &options);
+	if (Z_REFCOUNTED(context->options)) Z_ADDREF(context->options);
+	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
 }
 /* }}} */
 

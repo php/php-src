@@ -229,13 +229,13 @@ struct _zend_array {
 	HT_HASH_EX((ht)->arData, idx)
 
 #define HT_HASH_SIZE(ht) \
-	((-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
+	(((size_t)(uint32_t)-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
 #define HT_DATA_SIZE(ht) \
-	((ht)->nTableSize * sizeof(Bucket))
+	((size_t)(ht)->nTableSize * sizeof(Bucket))
 #define HT_SIZE(ht) \
 	(HT_HASH_SIZE(ht) + HT_DATA_SIZE(ht))
 #define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + ((ht)->nNumUsed * sizeof(Bucket)))
+	(HT_HASH_SIZE(ht) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
 #define HT_HASH_RESET(ht) \
 	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht))
 #define HT_HASH_RESET_PACKED(ht) do { \
@@ -802,7 +802,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
-#if SIZEOF_ZEND_LONG == 4
+#if SIZEOF_SIZE_T == 4
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
 	do {												\
 		uint32_t _w2 = v->value.ww.w2;					\
@@ -810,14 +810,14 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		z->value.ww.w2 = _w2;							\
 		Z_TYPE_INFO_P(z) = t;							\
 	} while (0)
-#elif SIZEOF_ZEND_LONG == 8
+#elif SIZEOF_SIZE_T == 8
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
 	do {												\
 		Z_COUNTED_P(z) = gc;							\
 		Z_TYPE_INFO_P(z) = t;							\
 	} while (0)
 #else
-# error "Unknbown SIZEOF_ZEND_LONG"
+# error "Unknown SIZEOF_SIZE_T"
 #endif
 
 #define ZVAL_COPY_VALUE(z, v)							\
@@ -890,11 +890,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define SEPARATE_ARRAY(zv) do {							\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNT_P(_zv) > 1) {					\
+		zend_array *_arr = Z_ARR_P(_zv);				\
+		if (GC_REFCOUNT(_arr) > 1) {					\
 			if (!Z_IMMUTABLE_P(_zv)) {					\
-				Z_DELREF_P(_zv);						\
+				GC_REFCOUNT(_arr)--;					\
 			}											\
-			zval_copy_ctor_func(_zv);					\
+			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
 		}												\
 	} while (0)
 

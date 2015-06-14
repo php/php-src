@@ -1,14 +1,40 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 7.0.0
-
-- CLI server:
-  . Refactor MIME type handling to use a hash table instead of linear search.
-    (Adam)
-  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
-  . Added support for SEARCH WebDav method. (Mats Lindh)
+25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
+  . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
+    extensions are loaded). (Laruence)
+  . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
+    (Laruence)
+  . Fixed bug #69761 (Serialization of anonymous classes should be prevented).
+    (Laruence)
+  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
+    fault). (Christoph M. Becker)
+  . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
+    7/8/8.1/10 as "Business"). (Christian Wenz)
+
+- mysqlnd:
+  . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
+    bound variables). (Laruence);
+
+- Curl:
+  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
+    yahoo dot com)
+
+- PDO_pgsql:
+  . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
+    Statements when closeCuror() is u). (Philip Hofstetter)
+
+11 Jun 2015, PHP 7.0.0 Alpha 1
+
+- Core:
+  . Fixed bug #69767 (Default parameter value with wrong type segfaults).
+    (cmb, Laruence)
+  . Fixed bug #69756 (Fatal error: Nesting level too deep - recursive dependency
+    ? with ===). (Dmitry, Laruence)
+  . Fixed bug #69758 (Item added to array not being removed by array_pop/shift
+    ). (Laruence)
   . Fixed bug #68475 (Add support for $callable() sytnax with 'Class::method').
     (Julien, Aaron Piotrowski)
   . Fixed bug #69485 (Double free on zend_list_dtor). (Laruence)
@@ -77,7 +103,16 @@
   . Implemented the RFC `Constructor behaviour of internal classes`. (Dan, Dmitry)
   . Implemented the RFC `Fix "foreach" behavior`. (Dmitry)
   . Implemented the RFC `Generator Delegation`. (Bob)
-  . Implemented the RFC ` Anonymous Class Support`. (Joe, Nikita, Dmitry)
+  . Implemented the RFC `Anonymous Class Support`. (Joe, Nikita, Dmitry)
+  . Implemented the RFC `Context Sensitive Lexer`. (Marcio Almada)
+  . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
+    (Jan Starke, Anatol)
+
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+  . Added support for SEARCH WebDav method. (Mats Lindh)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
@@ -104,6 +139,7 @@
 
 - GD:
   . Made fontFetch's path parser thread-safe. (Sara)
+  . Removed T1Lib support. (Kalle)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
@@ -117,7 +153,7 @@
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - FTP:
-  . Fixed bug #69082 FTPS support on Windows
+  . Fixed bug #69082 (FTPS support on Windows). (Anatol) 
 
 - Intl:
   . Removed deprecated aliases datefmt_set_timezone_id() and
@@ -135,12 +171,18 @@
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- libxml:
+  . Fixed handling of big lines in error messages with libxml >= 2.9.0.
+    (Christoph M. Becker)
+
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
   . Removed mcrypt_generic_end() alias. (Nikita)
   . Removed mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb(), mcrypt_ofb(). (Nikita)
 
 - Opcache:
+  . Fixed bug #69688 (segfault with eval and opcache fast shutdown).
+    (Laruence)
   . Added experimental (disabled by default) file based opcode cache.
     (Dmitry, Laruence, Anatol)
   . Fixed bug with try blocks being removed when extended_info opcode
@@ -181,6 +223,8 @@
 - Reflection
   . Fixed inheritance chain of Reflector interface. (Tjerk)
   . Added ReflectionGenerator class. (Bob)
+  . Added reflection support for return types and type declarations. (Sara,
+    Matteo)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
@@ -198,13 +242,14 @@
     nor curruption state). (Julien)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
-  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
 - Sqlite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
     required_num_args). (Julien)
 
 - Standard:
+  . Fixed bug #69723 (Passing parameters by reference and array_column).
+    (Laruence)
   . Fixed bug #69523 (Cookie name cannot be empty). (Christoph M. Becker)
   . Fixed bug #69325 (php_copy_file_ex does not pass the argument).
     (imbolk at gmail dot com)
@@ -220,7 +265,11 @@
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
     (Daniel Lowrey)
   . Added preg_replace_callback_array function. (Wei Dai)
-  . Deprecated salt option to password_hash. (Anthony) 
+  . Deprecated salt option to password_hash. (Anthony)
+  . Fixed bug #69686 (password_verify reports back error on PHP7 will null
+    string). (Anthony)
+  . Added Windows support for getrusage(). (Kalle)
+  . Removed hardcoded limit on number of pipes in proc_open(). (Tony)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).

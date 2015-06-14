@@ -517,7 +517,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			case IS_DOUBLE:
 			case IS_NULL:
 				if (Z_TYPE_P(value) != IS_STRING) {
-					ZVAL_DUP(&zval_copy, value);
+					ZVAL_COPY(&zval_copy, value);
 					value = &zval_copy;
 					convert_to_string(value);
 					new_value = 1;
@@ -1066,7 +1066,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			return 0;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-			if (!node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last) {
+			if (sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -1186,7 +1186,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 
-			if ( !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -1930,12 +1930,8 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
    Returns the string content */
 SXE_METHOD(__toString)
 {
-	zval           result;
-
-	if (sxe_object_cast_ex(getThis(), &result, IS_STRING) == SUCCESS) {
-		RETURN_ZVAL(&result, 0, 0);
-	} else {
-		zval_ptr_dtor(&result);
+	if (sxe_object_cast_ex(getThis(), return_value, IS_STRING) != SUCCESS) {
+		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -1979,9 +1975,9 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 			if (!Z_ISUNDEF(intern->tmp)) {
 				zval_ptr_dtor(&intern->tmp);
 			}
-			ZVAL_ZVAL(&intern->tmp, &rv, 0, 0);
-			convert_to_long(&intern->tmp);
-			*count = (zend_long)Z_LVAL(intern->tmp);
+			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			zval_ptr_dtor(&rv);
+			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;

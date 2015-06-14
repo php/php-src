@@ -589,6 +589,15 @@ static zend_always_inline void *zend_hash_index_add_ptr(HashTable *ht, zend_ulon
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_index_add_new_ptr(HashTable *ht, zend_ulong h, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_index_add_new(ht, h, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_ulong h, void *pData)
 {
 	zval tmp, *zv;
@@ -845,8 +854,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_APPLY_PROTECTION(ht) \
 	((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION)
 
-#define ZEND_HASH_APPLY_SHIFT 8
-#define ZEND_HASH_GET_APPLY_COUNT(ht) ((ht)->u.flags >> ZEND_HASH_APPLY_SHIFT)
+#define ZEND_HASH_APPLY_SHIFT         8
+#define ZEND_HASH_APPLY_COUNT_MASK    0xff00
+#define ZEND_HASH_GET_APPLY_COUNT(ht) (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >> ZEND_HASH_APPLY_SHIFT)
 #define ZEND_HASH_INC_APPLY_COUNT(ht) ((ht)->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
 #define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
 
@@ -877,7 +887,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
 
-static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
+static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
@@ -896,9 +906,10 @@ static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
+	return &p->val;
 }
 
-static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
+static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
@@ -917,6 +928,7 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	ht->nNumUsed = idx + 1;
 	ht->nNumOfElements++;
+	return &p->val;
 }
 
 static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string *key, zval *ptr)

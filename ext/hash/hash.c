@@ -794,6 +794,9 @@ static void php_hash_dtor(zend_resource *rsrc) /* {{{ */
 
 #ifdef PHP_MHASH_BC
 
+#if 0
+/* See #69823, we should not insert module into module_registry while doing startup */
+
 PHP_MINFO_FUNCTION(mhash)
 {
 	php_info_print_table_start();
@@ -814,6 +817,7 @@ zend_module_entry mhash_module_entry = {
 	PHP_MHASH_VERSION,
 	STANDARD_MODULE_PROPERTIES,
 };
+#endif
 
 static void mhash_init(INIT_FUNC_ARGS)
 {
@@ -830,7 +834,8 @@ static void mhash_init(INIT_FUNC_ARGS)
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
 		zend_register_long_constant(buf, len, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number);
 	}
-	zend_register_internal_module(&mhash_module_entry);
+
+	/* TODO: this cause #69823 zend_register_internal_module(&mhash_module_entry); */
 }
 
 /* {{{ proto string mhash(int hash, string data [, string key])
@@ -1090,6 +1095,14 @@ PHP_MINFO_FUNCTION(hash)
 	php_info_print_table_row(2, "hash support", "enabled");
 	php_info_print_table_row(2, "Hashing Engines", buffer);
 	php_info_print_table_end();
+
+#ifdef PHP_MHASH_BC
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MHASH support", "Enabled");
+	php_info_print_table_row(2, "MHASH API Version", "Emulated Support");
+	php_info_print_table_end();
+#endif
+
 }
 /* }}} */
 

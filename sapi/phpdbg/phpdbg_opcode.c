@@ -106,8 +106,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_UNUSED:
-			asprintf(&decode, "<unused>");
-		break;
+			return NULL;
 	}
 	return decode;
 } /* }}} */
@@ -116,42 +115,72 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 {
 	char *decode[4] = {NULL, NULL, NULL, NULL};
 
+	/* OP1 */
 	switch (op->opcode) {
 	case ZEND_JMP:
 	case ZEND_GOTO:
 	case ZEND_FAST_CALL:
 		asprintf(&decode[1], "J%ld", OP_JMP_ADDR(op, op->op1) - ops->opcodes);
-		goto format;
+		break;
 
-	case ZEND_JMPZNZ:
+	case ZEND_INIT_FCALL:
+	case ZEND_RECV:
+	case ZEND_RECV_INIT:
+	case ZEND_RECV_VARIADIC:
+		asprintf(&decode[1], "%" PRIu32, op->op1.num);
+		break;
+
+	default:
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
+		break;
+	}
+
+	/* OP2 */
+	switch (op->opcode) {
+	/* TODO: ZEND_FAST_CALL, ZEND_FAST_RET op2 */
+	case ZEND_JMPZNZ:
 		asprintf(&decode[2], "J%u or J%" PRIu32, op->op2.opline_num, op->extended_value);
-		goto result;
+		break;
 
 	case ZEND_JMPZ:
 	case ZEND_JMPNZ:
 	case ZEND_JMPZ_EX:
 	case ZEND_JMPNZ_EX:
 	case ZEND_JMP_SET:
-		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
+	case ZEND_ASSERT_CHECK:
 		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
-		goto result;
+		break;
 
-	case ZEND_RECV_INIT:
-		goto result;
+	case ZEND_SEND_VAL:
+	case ZEND_SEND_VAL_EX:
+	case ZEND_SEND_VAR:
+	case ZEND_SEND_VAR_NO_REF:
+	case ZEND_SEND_REF:
+	case ZEND_SEND_VAR_EX:
+	case ZEND_SEND_USER:
+		asprintf(&decode[2], "%" PRIu32, op->op2.num);
+		break;
 
 	default:
-		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
 		decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars);
-result:
-		decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars);
-format:
-		asprintf(&decode[0],
-			"%-20s %-20s %-20s",
-			decode[1] ? decode[1] : "",
-			decode[2] ? decode[2] : "",
-			decode[3] ? decode[3] : "");
+		break;
 	}
+
+	/* RESULT */
+	switch (op->opcode) {
+	case ZEND_CATCH:
+		asprintf(&decode[2], "%" PRIu32, op->result.num);
+		break;
+	default:
+		decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars);
+		break;
+	}
+
+	asprintf(&decode[0],
+		"%-20s %-20s %-20s",
+		decode[1] ? decode[1] : "",
+		decode[2] ? decode[2] : "",
+		decode[3] ? decode[3] : "");
 
 	if (decode[1])
 		free(decode[1]);

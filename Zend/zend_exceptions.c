@@ -38,7 +38,7 @@ static zend_class_entry *type_error_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
-static zend_class_entry *zend_get_exception_base(zval *object)
+static inline zend_class_entry *zend_get_exception_base(zval *object)
 {
 	return instanceof_function(Z_OBJCE_P(object), default_exception_ce) ? default_exception_ce : error_ce;
 }
@@ -131,7 +131,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 
 	if (!EG(current_execute_data)->func ||
 	    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
-	    (EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
+	    EG(current_execute_data)->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;
 	}
@@ -573,7 +573,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	object = getThis();
 	base_ce = zend_get_exception_base(object);
 
-	trace = zend_read_property(base_ce, getThis(), "trace", sizeof("trace")-1, 1, &rv);
+	trace = zend_read_property(base_ce, object, "trace", sizeof("trace")-1, 1, &rv);
 	if (Z_TYPE_P(trace) != IS_ARRAY) {
 		RETURN_FALSE;
 	}

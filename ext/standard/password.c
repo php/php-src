@@ -260,7 +260,7 @@ PHP_FUNCTION(password_verify)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len)) == NULL) {
+	if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len, 1)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -340,18 +340,13 @@ PHP_FUNCTION(password_hash)
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
-			case IS_OBJECT: {
-				zval cast_option_buffer;
-
-				ZVAL_DUP(&cast_option_buffer, option_buffer);
-				convert_to_string(&cast_option_buffer);
-				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
-					buffer_len = Z_STRLEN(cast_option_buffer);
-					zval_dtor(&cast_option_buffer);
-					break;
-				}
-				zval_dtor(&cast_option_buffer);
+			case IS_OBJECT:
+			{
+				zend_string *tmp = zval_get_string(option_buffer);
+				buffer = estrndup(tmp->val, tmp->len);
+				buffer_len = tmp->len;
+				zend_string_release(tmp);
+				break;
 			}
 			case IS_FALSE:
 			case IS_TRUE:
@@ -415,7 +410,7 @@ PHP_FUNCTION(password_hash)
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
 	hash_len = (int) (hash_format_len + salt_len);
 
-	if ((result = php_crypt(password, (int)password_len, hash, hash_len)) == NULL) {
+	if ((result = php_crypt(password, (int)password_len, hash, hash_len, 1)) == NULL) {
 		efree(hash);
 		RETURN_FALSE;
 	}

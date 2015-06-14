@@ -164,11 +164,12 @@ ZEND_VM_HANDLER(4, ZEND_DIV, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	fast_div_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	fast_div_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -218,11 +219,12 @@ ZEND_VM_HANDLER(6, ZEND_SL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	shift_left_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	shift_left_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -233,11 +235,12 @@ ZEND_VM_HANDLER(7, ZEND_SR, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	shift_right_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	shift_right_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -248,12 +251,58 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	concat_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
-	FREE_OP1();
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+
+	do {
+		if ((OP1_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
+		    (OP2_TYPE == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
+			zend_string *op1_str = Z_STR_P(op1);
+			zend_string *op2_str = Z_STR_P(op2);
+			zend_string *str;
+
+			if (OP1_TYPE != IS_CONST) {
+				if (UNEXPECTED(op1_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
+					FREE_OP1();
+					break;
+				}
+			}
+			if (OP2_TYPE != IS_CONST) {
+				if (UNEXPECTED(op2_str->len == 0)) {
+					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
+					FREE_OP1();
+					break;
+				}
+			}
+			if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_CV &&
+			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    size_t len = op1_str->len;
+
+				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
+				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+				break;
+			} else {
+				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+				memcpy(str->val, op1_str->val, op1_str->len);
+				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+			}
+		} else {
+			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+				op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+			}
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+				op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+			}
+			concat_function(EX_VAR(opline->result.var), op1, op2);
+		}
+		FREE_OP1();
+	} while (0);
 	FREE_OP2();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -263,12 +312,13 @@ ZEND_VM_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 	int result;
 
 	SAVE_OPLINE();
-	result = fast_is_identical_function(
-		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
-		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+	result = fast_is_identical_function(op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	ZEND_VM_SMART_BRANCH(result, (OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR));
@@ -283,12 +333,13 @@ ZEND_VM_HANDLER(16, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 	int result;
 
 	SAVE_OPLINE();
-	result = fast_is_not_identical_function(
-		GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R),
-		GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+	result = fast_is_not_identical_function(op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	ZEND_VM_SMART_BRANCH(result, (OP1_TYPE|OP2_TYPE) & (IS_VAR|IS_TMP_VAR));
@@ -310,18 +361,18 @@ ZEND_VM_HANDLER(17, ZEND_IS_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	do {
 		int result;
 
-		if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = ((double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
 			} else {
 				break;
 			}
-		} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+		} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
 			} else {
 				break;
@@ -353,10 +404,10 @@ ZEND_VM_HANDLER(17, ZEND_IS_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	} while (0);
 
 	SAVE_OPLINE();
-	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 	}
-	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
@@ -379,18 +430,18 @@ ZEND_VM_HANDLER(18, ZEND_IS_NOT_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	do {
 		int result;
 
-		if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = ((double)Z_LVAL_P(op1) != Z_DVAL_P(op2));
 			} else {
 				break;
 			}
-		} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+		} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2)));
 			} else {
 				break;
@@ -422,10 +473,10 @@ ZEND_VM_HANDLER(18, ZEND_IS_NOT_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	} while (0);
 
 	SAVE_OPLINE();
-	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 	}
-	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
@@ -543,12 +594,12 @@ ZEND_VM_HANDLER(170, ZEND_SPACESHIP, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *result = EX_VAR(opline->result.var);
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	compare_function(result,
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	compare_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -559,11 +610,12 @@ ZEND_VM_HANDLER(9, ZEND_BW_OR, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	bitwise_or_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	bitwise_or_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -574,11 +626,12 @@ ZEND_VM_HANDLER(10, ZEND_BW_AND, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	bitwise_and_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	bitwise_and_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -589,11 +642,12 @@ ZEND_VM_HANDLER(11, ZEND_BW_XOR, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	bitwise_xor_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	bitwise_xor_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -604,11 +658,12 @@ ZEND_VM_HANDLER(14, ZEND_BOOL_XOR, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	boolean_xor_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	boolean_xor_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -678,7 +733,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -708,42 +762,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
 		} else {
-			zval *z;
-			zval rv, obj;
-
-			ZVAL_OBJ(&obj, Z_OBJ_P(object));
-			Z_ADDREF(obj);
-			if (Z_OBJ_HT(obj)->read_property &&
-				(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv)) != NULL) {
-				if (UNEXPECTED(EG(exception))) {
-					OBJ_RELEASE(Z_OBJ(obj));
-					break;
-				}
-				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval rv2;
-					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
-
-					if (z == &rv) {
-						zval_ptr_dtor(&rv);
-					}
-					ZVAL_COPY_VALUE(z, value);
-				}
-				zptr = z;
-				ZVAL_DEREF(z);
-				SEPARATE_ZVAL_NOREF(z);
-				binary_op(z, z, value);
-				Z_OBJ_HT(obj)->write_property(&obj, property, z, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), z);
-				}
-				zval_ptr_dtor(zptr);
-			} else {
-				zend_error(E_WARNING, "Attempt to assign property of non-object");
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(EX_VAR(opline->result.var));
-				}
-			}
-			OBJ_RELEASE(Z_OBJ(obj));
+			zend_assign_op_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), value, binary_op, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
 		}
 	} while (0);
 
@@ -775,7 +794,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -846,7 +864,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1091,7 +1108,7 @@ ZEND_VM_HANDLER(33, ZEND_ASSIGN_BW_XOR, VAR|UNUSED|CV, CONST|TMPVAR|UNUSED|CV)
 #endif
 }
 
-ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, incdec_t incdec_op)
+ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1113,7 +1130,6 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1134,51 +1150,27 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
 
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+				if (inc) {
+					fast_long_increment_function(zptr);
+				} else {
+					fast_long_decrement_function(zptr);
+				}
+			} else {
+				ZVAL_DEREF(zptr);
+				SEPARATE_ZVAL_NOREF(zptr);
 
-			incdec_op(zptr);
+				if (inc) {
+					increment_function(zptr);
+				} else {
+					decrement_function(zptr);
+				}
+			}
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
 		} else {
-			zval rv;
-
-			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-				zval *z, obj;
-				
-				ZVAL_OBJ(&obj, Z_OBJ_P(object));
-				Z_ADDREF(obj);
-				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				if (UNEXPECTED(EG(exception))) {
-					OBJ_RELEASE(Z_OBJ(obj));
-					break;
-				}
-
-				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-					zval rv2;
-					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
-
-					if (z == &rv) {
-						zval_ptr_dtor(&rv);
-					}
-					ZVAL_COPY_VALUE(z, value);
-				}
-				ZVAL_DEREF(z);
-				SEPARATE_ZVAL_NOREF(z);
-				incdec_op(z);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), z);
-				}
-				Z_OBJ_HT(obj)->write_property(&obj, property, z, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				OBJ_RELEASE(Z_OBJ(obj));
-				zval_ptr_dtor(z);
-			} else {
-				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(EX_VAR(opline->result.var));
-				}
-			}
+			zend_pre_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
 		}
 	} while (0);
 
@@ -1190,15 +1182,15 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 
 ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_pre_incdec_property_helper, incdec_op, increment_function);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_pre_incdec_property_helper, inc, 1);
 }
 
 ZEND_VM_HANDLER(133, ZEND_PRE_DEC_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_pre_incdec_property_helper, incdec_op, decrement_function);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_pre_incdec_property_helper, inc, 0);
 }
 
-ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, incdec_t incdec_op)
+ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1220,7 +1212,6 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1239,44 +1230,25 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
 			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL))) != NULL)) {
 
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-			zval_opt_copy_ctor(zptr);
-			incdec_op(zptr);
-		} else {
-			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-				zval rv, obj;
-				zval *z;
-				zval z_copy;
-
-				ZVAL_OBJ(&obj, Z_OBJ_P(object));
-				Z_ADDREF(obj);
-				z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), &rv);
-				if (UNEXPECTED(EG(exception))) {
-					OBJ_RELEASE(Z_OBJ(obj));
-					break;
+			if (EXPECTED(Z_TYPE_P(zptr) == IS_LONG)) {
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+				if (inc) {
+					fast_long_increment_function(zptr);
+				} else {
+					fast_long_decrement_function(zptr);
 				}
-
-				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-					zval rv2;
-					zval *value = Z_OBJ_HT_P(z)->get(z, &rv2);
-					if (z == &rv) {
-						zval_ptr_dtor(&rv);
-					}
-					ZVAL_COPY_VALUE(z, value);
-				}
-				ZVAL_DUP(EX_VAR(opline->result.var), z);
-				ZVAL_DUP(&z_copy, z);
-				incdec_op(&z_copy);
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-				Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL));
-				OBJ_RELEASE(Z_OBJ(obj));
-				zval_ptr_dtor(&z_copy);
-				zval_ptr_dtor(z);
 			} else {
-				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-				ZVAL_NULL(EX_VAR(opline->result.var));
+				ZVAL_DEREF(zptr);
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
+				zval_opt_copy_ctor(zptr);
+				if (inc) {
+					increment_function(zptr);
+				} else {
+					decrement_function(zptr);
+				}
 			}
+		} else {
+			zend_post_incdec_overloaded_property(object, property, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), inc, EX_VAR(opline->result.var));
 		}
 	} while (0);
 
@@ -1288,12 +1260,12 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 
 ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_post_incdec_property_helper, incdec_op, increment_function);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_post_incdec_property_helper, inc, 1);
 }
 
 ZEND_VM_HANDLER(135, ZEND_POST_DEC_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_post_incdec_property_helper, incdec_op, decrement_function);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_post_incdec_property_helper, inc, 0);
 }
 
 ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
@@ -1307,7 +1279,6 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1355,7 +1326,6 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1403,7 +1373,6 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1444,7 +1413,6 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1481,7 +1449,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMPVAR|CV, ANY)
 	zval *z;
 
 	SAVE_OPLINE();
-	z = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	z = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (Z_TYPE_P(z) == IS_STRING) {
 		zend_string *str = Z_STR_P(z);
@@ -1494,6 +1462,8 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMPVAR|CV, ANY)
 
 		if (str->len != 0) {
 			zend_write(str->val, str->len);
+		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(z) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(z, BP_VAR_R);
 		}
 		zend_string_release(str);
 	}
@@ -1513,7 +1483,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 	HashTable *target_symbol_table;
 
 	SAVE_OPLINE();
-	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
  	if (OP1_TYPE == IS_CONST) {
 		name = Z_STR_P(varname);
@@ -1521,6 +1491,9 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 		name = Z_STR_P(varname);
 		zend_string_addref(name);
 	} else {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
+		}
 		name = zval_get_string(varname);
 	}
 
@@ -1714,7 +1687,6 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1738,7 +1710,6 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1785,7 +1756,6 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUS
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 			FREE_UNFETCHED_OP2();
-			FREE_OP1_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
 		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1822,7 +1792,6 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1854,7 +1823,8 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (OP1_TYPE == IS_CONST ||
+	    (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT))) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
 			if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
@@ -1927,7 +1897,6 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -1960,7 +1929,6 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
@@ -1992,7 +1960,8 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (OP1_TYPE == IS_CONST ||
+	    (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT))) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
 			if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
@@ -2074,7 +2043,6 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|CV, CONST|TMPV
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 			FREE_OP2();
-			FREE_OP1_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
 		zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
@@ -2110,7 +2078,6 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
@@ -2130,7 +2097,7 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_LIST, CONST|TMPVAR|CV, CONST)
 	zval *container;
 
 	SAVE_OPLINE();
-	container = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	container = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_fetch_list):
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -2142,7 +2109,8 @@ ZEND_VM_C_LABEL(try_fetch_list):
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
+	} else if (OP1_TYPE != IS_CONST &&
+	           UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
 		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
@@ -2154,10 +2122,13 @@ ZEND_VM_C_LABEL(try_fetch_list):
 		} else {
 			ZVAL_NULL(result);
 		}
-	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(container) == IS_REFERENCE) {
 		container = Z_REFVAL_P(container);
 		ZEND_VM_C_GOTO(try_fetch_list);
 	} else {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(container, BP_VAR_R);
+		}
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 	CHECK_EXCEPTION();
@@ -2185,7 +2156,6 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	zend_assign_to_object(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object, OP1_TYPE, property_name, OP2_TYPE, (opline+1)->op1_type, (opline+1)->op1, execute_data, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property_name)) : NULL));
@@ -2214,11 +2184,9 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
-ZEND_VM_C_LABEL(try_assign_dim):
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 ZEND_VM_C_LABEL(try_assign_dim_array):
 		if (OP2_TYPE == IS_UNUSED) {
@@ -2246,53 +2214,58 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 		}
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
-		zend_free_op free_op2;
-		zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
-		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
-		FREE_OP2();
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-			if (OP2_TYPE == IS_UNUSED) {
-				zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
-				FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-				FREE_OP1_VAR_PTR();
-				HANDLE_EXCEPTION();
-			} else {
-				zend_long offset;
-
-				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-				offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-				FREE_OP2();
-				value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-				zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-				FREE_OP(free_op_data1);
-			}
-		} else {
-			zval_ptr_dtor_nogc(object_ptr);
-ZEND_VM_C_LABEL(assign_dim_convert_to_array):
-			ZVAL_NEW_ARR(object_ptr);
-			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
-			ZEND_VM_C_GOTO(try_assign_dim_array);
-		}
-	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
-		object_ptr = Z_REFVAL_P(object_ptr);
-		ZEND_VM_C_GOTO(try_assign_dim);
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
-			ZEND_VM_C_GOTO(assign_dim_clean);
-		}
-		ZEND_VM_C_GOTO(assign_dim_convert_to_array);
 	} else {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		if (EXPECTED(Z_ISREF_P(object_ptr))) {
+			object_ptr = Z_REFVAL_P(object_ptr);
+			if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
+				ZEND_VM_C_GOTO(try_assign_dim_array);
+			}
+		}
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
+			zend_free_op free_op2;
+			zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
+			zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
+			FREE_OP2();
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+				if (OP2_TYPE == IS_UNUSED) {
+					zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+					FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
+					FREE_OP1_VAR_PTR();
+					HANDLE_EXCEPTION();
+				} else {
+					zend_long offset;
+
+					dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+					offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+					FREE_OP2();
+					value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+					zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+					FREE_OP(free_op_data1);
+				}
+			} else {
+				zval_ptr_dtor_nogc(object_ptr);
+ZEND_VM_C_LABEL(assign_dim_convert_to_array):
+				ZVAL_NEW_ARR(object_ptr);
+				zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+				ZEND_VM_C_GOTO(try_assign_dim_array);
+			}
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == &EG(error_zval))) {
+				ZEND_VM_C_GOTO(assign_dim_clean);
+			}
+			ZEND_VM_C_GOTO(assign_dim_convert_to_array);
+		} else {
+			zend_error(E_WARNING, "Cannot use a scalar value as an array");
 ZEND_VM_C_LABEL(assign_dim_clean):
-		dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		FREE_OP2();
-		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		FREE_OP(free_op_data1);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			FREE_OP2();
+			value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			FREE_OP(free_op_data1);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 		}
 	}
  	FREE_OP1_VAR_PTR();
@@ -2343,7 +2316,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 	if (OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-		FREE_OP2_VAR_PTR();
 		FREE_UNFETCHED_OP1();
 		HANDLE_EXCEPTION();
 	}
@@ -2366,7 +2338,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 		FREE_OP2_VAR_PTR();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR &&
@@ -2735,28 +2706,60 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	zend_string *op1_str, *op2_str, *str;
 
 	SAVE_OPLINE();
-	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (OP1_TYPE == IS_CONST) {
 		op1_str = Z_STR_P(op1);
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		op1_str = zend_string_copy(Z_STR_P(op1));
 	} else {
-		op1_str = zval_get_string(op1);
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(op1, BP_VAR_R);
+		}
+		op1_str = _zval_get_string_func(op1);
 	}
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (OP2_TYPE == IS_CONST) {
 		op2_str = Z_STR_P(op2);
+	} else if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		op2_str = zend_string_copy(Z_STR_P(op2));
 	} else {
-		op2_str = zval_get_string(op2);
+		if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
+			GET_OP2_UNDEF_CV(op2, BP_VAR_R);
+		}
+		op2_str = _zval_get_string_func(op2);
 	}
-	str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-	memcpy(str->val, op1_str->val, op1_str->len);
-	memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
-	ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-	if (OP1_TYPE != IS_CONST) {
-		zend_string_release(op1_str);
-	}
-	if (OP2_TYPE != IS_CONST) {
-		zend_string_release(op2_str);
-	}
+	do {
+		if (OP1_TYPE != IS_CONST) {
+			if (UNEXPECTED(op1_str->len == 0)) {
+				if (OP2_TYPE == IS_CONST) {
+					zend_string_addref(op2_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
+				zend_string_release(op1_str);
+				break;
+			}
+		}
+		if (OP2_TYPE != IS_CONST) {
+			if (UNEXPECTED(op2_str->len == 0)) {
+				if (OP1_TYPE == IS_CONST) {
+					zend_string_addref(op1_str);
+				}
+				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
+				zend_string_release(op2_str);
+				break;
+			}
+		}
+		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
+		memcpy(str->val, op1_str->val, op1_str->len);
+		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
+		if (OP1_TYPE != IS_CONST) {
+			zend_string_release(op1_str);
+		}
+		if (OP2_TYPE != IS_CONST) {
+			zend_string_release(op2_str);
+		}
+	} while (0);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -2776,11 +2779,22 @@ ZEND_VM_HANDLER(54, ZEND_ROPE_INIT, UNUSED, CONST|TMPVAR|CV)
 		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		rope[0] = zend_string_copy(Z_STR_P(var));
 	} else {
-		SAVE_OPLINE();
-		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		rope[0] = zval_get_string(var);
-		FREE_OP2();
-		CHECK_EXCEPTION();
+		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+		if (EXPECTED(Z_TYPE_P(var) == IS_STRING)) {
+			if (OP2_TYPE == IS_CV) {
+				rope[0] = zend_string_copy(Z_STR_P(var));
+			} else {
+				rope[0] = Z_STR_P(var);
+			}
+		} else {
+			SAVE_OPLINE();
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
+				GET_OP2_UNDEF_CV(var, BP_VAR_R);
+			}
+			rope[0] = _zval_get_string_func(var);
+			FREE_OP2();
+			CHECK_EXCEPTION();
+		}
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2798,11 +2812,22 @@ ZEND_VM_HANDLER(55, ZEND_ROPE_ADD, TMP, CONST|TMPVAR|CV)
 		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
 	} else {
-		SAVE_OPLINE();
-		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		rope[opline->extended_value] = zval_get_string(var);
-		FREE_OP2();
-		CHECK_EXCEPTION();
+		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+		if (EXPECTED(Z_TYPE_P(var) == IS_STRING)) {
+			if (OP2_TYPE == IS_CV) {
+				rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+			} else {
+				rope[opline->extended_value] = Z_STR_P(var);
+			}
+		} else {
+			SAVE_OPLINE();
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
+				GET_OP2_UNDEF_CV(var, BP_VAR_R);
+			}
+			rope[opline->extended_value] = _zval_get_string_func(var);
+			FREE_OP2();
+			CHECK_EXCEPTION();
+		}
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2822,11 +2847,22 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV)
 		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
 	} else {
-		SAVE_OPLINE();
-		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		rope[opline->extended_value] = zval_get_string(var);
-		FREE_OP2();
-		CHECK_EXCEPTION();
+		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+		if (EXPECTED(Z_TYPE_P(var) == IS_STRING)) {
+			if (OP2_TYPE == IS_CV) {
+				rope[opline->extended_value] = zend_string_copy(Z_STR_P(var));
+			} else {
+				rope[opline->extended_value] = Z_STR_P(var);
+			}
+		} else {
+			SAVE_OPLINE();
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
+				GET_OP2_UNDEF_CV(var, BP_VAR_R);
+			}
+			rope[opline->extended_value] = _zval_get_string_func(var);
+			FREE_OP2();
+			CHECK_EXCEPTION();
+		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
 		len += rope[i]->len;
@@ -2858,7 +2894,7 @@ ZEND_VM_HANDLER(109, ZEND_FETCH_CLASS, ANY, CONST|TMPVAR|UNUSED|CV)
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_op2;
-		zval *class_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zval *class_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_class_name):
 		if (OP2_TYPE == IS_CONST) {
@@ -2876,6 +2912,9 @@ ZEND_VM_C_LABEL(try_class_name):
 			class_name = Z_REFVAL_P(class_name);
 			ZEND_VM_C_GOTO(try_class_name);
 		} else {
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(class_name) == IS_UNDEF)) {
+				GET_OP2_UNDEF_CV(class_name, BP_VAR_R);
+			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
@@ -2902,7 +2941,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 
 	SAVE_OPLINE();
 
-	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP2_TYPE != IS_CONST &&
 	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
@@ -2912,6 +2951,9 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 					break;
 				}
+			}
+			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+				GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -2923,7 +2965,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 		} while (0);
 	}
 
-	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
+	object = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
@@ -2933,12 +2975,15 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 
 	if (OP1_TYPE != IS_UNUSED) {
 		do {
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
 					object = Z_REFVAL_P(object);
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
 						break;
 					}
+				}
+				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
+					GET_OP1_UNDEF_CV(object, BP_VAR_R);
 				}
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -2986,7 +3031,8 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
-	} else if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
+	} else if (OP1_TYPE & (IS_VAR|IS_TMP_VAR|IS_CV)) {
+		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
@@ -3044,9 +3090,12 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 	} else if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
 
-		function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		if (OP2_TYPE != IS_CONST) {
 			if (UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+				if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+					GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+				}
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
@@ -3174,7 +3223,7 @@ ZEND_VM_HANDLER(128, ZEND_INIT_DYNAMIC_CALL, ANY, CONST|TMPVAR|CV)
 	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION;
 
 	SAVE_OPLINE();
-	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_function_name):
 	if (OP2_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
@@ -3354,6 +3403,9 @@ ZEND_VM_C_LABEL(try_function_name):
 		function_name = Z_REFVAL_P(function_name);
 		ZEND_VM_C_GOTO(try_function_name);
 	} else {
+		if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
+			GET_OP2_UNDEF_CV(function_name, BP_VAR_R);
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
 		}
@@ -3908,6 +3960,10 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 			}
 		}
 		zend_verify_return_type(EX(func), retval_ptr);
+
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			FREE_OP1();
+		}
 #endif
 	}
 	CHECK_EXCEPTION();
@@ -3924,15 +3980,14 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(retval_ptr) == IS_UNDEF)) {
 		SAVE_OPLINE();
 		retval_ptr = GET_OP1_UNDEF_CV(retval_ptr, BP_VAR_R);
-		CHECK_EXCEPTION();
-	}
-
-	if (!EX(return_value)) {
+		if (EX(return_value)) {
+			ZVAL_NULL(EX(return_value));
+		}
+	} else if (!EX(return_value)) {
 		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_TMP_VAR ) {
 			if (Z_REFCOUNTED_P(free_op1) && !Z_DELREF_P(free_op1)) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(free_op1));
-				CHECK_EXCEPTION();
 			}
 		}
 	} else {
@@ -3998,7 +4053,6 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(retval_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot return string offsets by reference");
-			FREE_OP1_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
 
@@ -4080,7 +4134,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	do {
 		if (OP1_TYPE == IS_CONST || UNEXPECTED(Z_TYPE_P(value) != IS_OBJECT)) {
@@ -4089,6 +4143,9 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 				if (EXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 					break;
 				}
+			}
+			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				GET_OP1_UNDEF_CV(value, BP_VAR_R);
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -4297,7 +4354,6 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Only variables can be passed by reference");
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 
@@ -4376,71 +4432,67 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	int arg_num;
 
 	SAVE_OPLINE();
-	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	args = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
 ZEND_VM_C_LABEL(send_again):
-	switch (Z_TYPE_P(args)) {
-		case IS_ARRAY: {
-			HashTable *ht = Z_ARRVAL_P(args);
-			zval *arg, *top;
-			zend_string *name;
+	if (EXPECTED(Z_TYPE_P(args) == IS_ARRAY)) {
+		HashTable *ht = Z_ARRVAL_P(args);
+		zval *arg, *top;
+		zend_string *name;
 
-			zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht));
+		zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht));
 
-			if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
-				uint32_t i;
-				int separate = 0;
+		if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+			uint32_t i;
+			int separate = 0;
 
-				/* check if any of arguments are going to be passed by reference */
-				for (i = 0; i < zend_hash_num_elements(ht); i++) {
-					if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + i)) {
-						separate = 1;
-						break;
-					}
-				}
-				if (separate) {
-					zval_copy_ctor(args);
-					ht = Z_ARRVAL_P(args);
+			/* check if any of arguments are going to be passed by reference */
+			for (i = 0; i < zend_hash_num_elements(ht); i++) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + i)) {
+					separate = 1;
+					break;
 				}
 			}
-
-			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
-				if (name) {
-					zend_error(E_EXCEPTION | E_ERROR, "Cannot unpack array with string keys");
-					FREE_OP1();
-					HANDLE_EXCEPTION();
-				}
-
-				top = ZEND_CALL_ARG(EX(call), arg_num);
-				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-					if (!Z_IMMUTABLE_P(args)) {
-						ZVAL_MAKE_REF(arg);
-						Z_ADDREF_P(arg);
-						ZVAL_REF(top, Z_REF_P(arg));
-					} else {
-						ZVAL_DUP(top, arg);
-					}
-				} else if (Z_ISREF_P(arg)) {
-					ZVAL_COPY(top, Z_REFVAL_P(arg));
-				} else {
-					ZVAL_COPY(top, arg);
-				}
-
-				ZEND_CALL_NUM_ARGS(EX(call))++;
-				arg_num++;
-			} ZEND_HASH_FOREACH_END();
-
-			break;
+			if (separate) {
+				zval_copy_ctor(args);
+				ht = Z_ARRVAL_P(args);
+			}
 		}
-		case IS_OBJECT: {
-			zend_class_entry *ce = Z_OBJCE_P(args);
-			zend_object_iterator *iter;
 
-			if (!ce || !ce->get_iterator) {
-				zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
-				break;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
+			if (name) {
+				zend_error(E_EXCEPTION | E_ERROR, "Cannot unpack array with string keys");
+				FREE_OP1();
+				HANDLE_EXCEPTION();
 			}
+
+			top = ZEND_CALL_ARG(EX(call), arg_num);
+			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+				if (!Z_IMMUTABLE_P(args)) {
+					ZVAL_MAKE_REF(arg);
+					Z_ADDREF_P(arg);
+					ZVAL_REF(top, Z_REF_P(arg));
+				} else {
+					ZVAL_DUP(top, arg);
+				}
+			} else if (Z_ISREF_P(arg)) {
+				ZVAL_COPY(top, Z_REFVAL_P(arg));
+			} else {
+				ZVAL_COPY(top, arg);
+			}
+
+			ZEND_CALL_NUM_ARGS(EX(call))++;
+			arg_num++;
+		} ZEND_HASH_FOREACH_END();
+
+	} else if (EXPECTED(Z_TYPE_P(args) == IS_OBJECT)) {
+		zend_class_entry *ce = Z_OBJCE_P(args);
+		zend_object_iterator *iter;
+
+		if (!ce || !ce->get_iterator) {
+			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+		} else {
 
 			iter = ce->get_iterator(ce, args, 0);
 			if (UNEXPECTED(!iter)) {
@@ -4518,14 +4570,15 @@ ZEND_VM_C_LABEL(send_again):
 
 ZEND_VM_C_LABEL(unpack_iter_dtor):
 			zend_iterator_dtor(iter);
-			break;
 		}
-		case IS_REFERENCE:
-			args = Z_REFVAL_P(args);
-			ZEND_VM_C_GOTO(send_again);
-			break;
-		default:
-			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+	} else if (EXPECTED(Z_ISREF_P(args))) {
+		args = Z_REFVAL_P(args);
+		ZEND_VM_C_GOTO(send_again);
+	} else {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(args) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(args, BP_VAR_R);
+		}
+		zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
 	}
 
 	FREE_OP1();
@@ -4817,31 +4870,8 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
-{
-	USE_OPLINE
-	zend_brk_cont_element *el;
-
-	SAVE_OPLINE();
-	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->op1.opline_num,
-	                   &EX(func)->op_array, execute_data);
-	ZEND_VM_JMP(EX(func)->op_array.opcodes + el->brk);
-}
-
-ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
-{
-	USE_OPLINE
-	zend_brk_cont_element *el;
-
-	SAVE_OPLINE();
-	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->op1.opline_num,
-	                   &EX(func)->op_array, execute_data);
-	ZEND_VM_JMP(EX(func)->op_array.opcodes + el->cont);
-}
-
 ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 {
-	zend_op *brk_opline;
 	USE_OPLINE
 	zend_brk_cont_element *el;
 
@@ -4849,14 +4879,12 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->extended_value,
  	                   &EX(func)->op_array, execute_data);
 
-	brk_opline = EX(func)->op_array.opcodes + el->brk;
+	if (el->start >= 0) {
+		zend_op *brk_opline = EX(func)->op_array.opcodes + el->brk;
 
-	if (brk_opline->opcode == ZEND_FREE) {
-		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+		if (brk_opline->opcode == ZEND_FREE) {
 			zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-		}
-	} else if (brk_opline->opcode == ZEND_FE_FREE) {
-		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+		} else if (brk_opline->opcode == ZEND_FE_FREE) {
 			zval *var = EX_VAR(brk_opline->op1.var);
 			if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 				zend_hash_iterator_del(Z_FE_ITER_P(var));
@@ -4878,18 +4906,18 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	do {
 		int result;
 
-		if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = ((double)Z_LVAL_P(op1) == Z_DVAL_P(op2));
 			} else {
 				break;
 			}
-		} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
-			if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+		} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+			if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
 				result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				result = (Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2)));
 			} else {
 				break;
@@ -4920,10 +4948,10 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	} while (0);
 
 	SAVE_OPLINE();
-	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op1) == IS_UNDEF)) {
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 		op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
 	}
-	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
@@ -4999,7 +5027,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
-	obj = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
+	obj = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(obj) == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
@@ -5014,7 +5042,10 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
 		    		break;
 				}
-		    }
+			}
+			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(obj) == IS_UNDEF)) {
+				GET_OP1_UNDEF_CV(obj, BP_VAR_R);
+			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
@@ -5075,7 +5106,6 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_constant *c;
-		zval *retval;
 
 		if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 			c = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
@@ -5101,67 +5131,80 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		} else {
 			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), c);
 		}
-		retval = EX_VAR(opline->result.var);
-		ZVAL_COPY_VALUE(retval, &c->value);
-		if (Z_OPT_COPYABLE_P(retval) || Z_OPT_REFCOUNTED_P(retval)) {
-			if (Z_OPT_COPYABLE_P(retval)) {
-				zval_copy_ctor_func(retval);
-			} else {
-				Z_ADDREF_P(retval);
-			}
+#ifdef ZTS
+		if (c->flags & CONST_PERSISTENT) {
+			ZVAL_DUP(EX_VAR(opline->result.var), &c->value);
+		} else {
+			ZVAL_COPY(EX_VAR(opline->result.var), &c->value);
 		}
+#else
+		ZVAL_COPY(EX_VAR(opline->result.var), &c->value);
+#endif
 	} else {
 		/* class constant */
 		zend_class_entry *ce;
 		zval *value;
 
-		if (OP1_TYPE == IS_CONST) {
-			if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
-				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-				ZVAL_DEREF(value);
-				ZVAL_DUP(EX_VAR(opline->result.var), value);
-				ZEND_VM_C_GOTO(constant_fetch_end);
-			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
-				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
-			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-				if (UNEXPECTED(ce == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
-					HANDLE_EXCEPTION();
-				}
-				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce);
-			}
-		} else {
-			ce = Z_CE_P(EX_VAR(opline->op1.var));
-			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
-				ZVAL_DEREF(value);
-				ZVAL_DUP(EX_VAR(opline->result.var), value);
-				ZEND_VM_C_GOTO(constant_fetch_end);
-			}
-		}
-
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
-			ZVAL_DEREF(value);
-			if (Z_CONSTANT_P(value)) {
-				EG(scope) = ce;
-				zval_update_constant_ex(value, 1, NULL);
-				EG(scope) = EX(func)->op_array.scope;
-			}
+		do {
 			if (OP1_TYPE == IS_CONST) {
-				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), value);
+				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
+					ZVAL_DEREF(value);
+#ifdef ZTS
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+#endif
+					break;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+				} else {
+					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
+					if (UNEXPECTED(ce == NULL)) {
+						zend_error(E_EXCEPTION | E_ERROR, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
+						HANDLE_EXCEPTION();
+					}
+					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce);
+				}
 			} else {
-				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce, value);
+				ce = Z_CE_P(EX_VAR(opline->op1.var));
+				if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
+					ZVAL_DEREF(value);
+					break;
+				}
 			}
+
+			if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+				ZVAL_DEREF(value);
+				if (Z_CONSTANT_P(value)) {
+					EG(scope) = ce;
+					zval_update_constant_ex(value, 1, NULL);
+					EG(scope) = EX(func)->op_array.scope;
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
+				}
+				if (OP1_TYPE == IS_CONST) {
+					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), value);
+				} else {
+					CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce, value);
+				}
+			} else {
+				zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+		} while (0);
+#ifdef ZTS
+		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ZVAL_DUP(EX_VAR(opline->result.var), value);
 		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
+#else
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+#endif
 	}
-ZEND_VM_C_LABEL(constant_fetch_end):
-	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -5173,11 +5216,10 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 
 	SAVE_OPLINE();
 	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) &&
-	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
+	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
 			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
-			FREE_OP1_VAR_PTR();
 			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
@@ -5187,11 +5229,11 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 	} else {
 		expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		if (OP1_TYPE == IS_TMP_VAR) {
-			ZVAL_COPY_VALUE(&new_expr, expr_ptr);
-			expr_ptr = &new_expr;
+			/* pass */
 		} else if (OP1_TYPE == IS_CONST) {
-			if (!Z_IMMUTABLE_P(expr_ptr)) {
-				ZVAL_DUP(&new_expr, expr_ptr);
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(expr_ptr))) {
+				ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+				zval_copy_ctor_func(&new_expr);
 				expr_ptr = &new_expr;
 			}
 		} else if (OP1_TYPE == IS_CV) {
@@ -5217,48 +5259,46 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 
 	if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zval *offset = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 		zend_string *str;
 		zend_ulong hval;
 
 ZEND_VM_C_LABEL(add_again):
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				ZEND_VM_C_GOTO(num_index);
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-ZEND_VM_C_LABEL(num_index):
-				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
-				break;
-			case IS_STRING:
-				str = Z_STR_P(offset);
-				if (OP2_TYPE != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(str, hval)) {
-						ZEND_VM_C_GOTO(num_index);
-					}
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (OP2_TYPE != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					ZEND_VM_C_GOTO(num_index);
 				}
+			}
 ZEND_VM_C_LABEL(str_index):
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
-				break;
-			case IS_NULL:
-				str = STR_EMPTY_ALLOC();
-				ZEND_VM_C_GOTO(str_index);
-			case IS_FALSE:
-				hval = 0;
-				ZEND_VM_C_GOTO(num_index);
-			case IS_TRUE:
-				hval = 1;
-				ZEND_VM_C_GOTO(num_index);
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				ZEND_VM_C_GOTO(add_again);
-				break;
-			default:
-				zend_error(E_WARNING, "Illegal offset type");
-				zval_ptr_dtor(expr_ptr);
-				/* do nothing */
-				break;
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+ZEND_VM_C_LABEL(num_index):
+			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			ZEND_VM_C_GOTO(add_again);
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = STR_EMPTY_ALLOC();
+			ZEND_VM_C_GOTO(str_index);
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			ZEND_VM_C_GOTO(num_index);
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			ZEND_VM_C_GOTO(num_index);
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			ZEND_VM_C_GOTO(num_index);
+		} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
+			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
+			str = STR_EMPTY_ALLOC();
+			ZEND_VM_C_GOTO(str_index);
+		} else {
+			zend_error(E_WARNING, "Illegal offset type");
+			zval_ptr_dtor(expr_ptr);
 		}
 		FREE_OP2();
 	} else {
@@ -5392,8 +5432,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 						}
 					}
 				} else {
-					ZVAL_COPY_VALUE(result, expr);
-					zval_opt_copy_ctor(result);
+					ZVAL_COPY(result, expr);
 					convert_to_object(result);
 				}
 			}
@@ -5414,10 +5453,13 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 	zend_bool failure_retval=0;
 
 	SAVE_OPLINE();
-	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	inc_filename = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(inc_filename) == IS_UNDEF)) {
+			inc_filename = GET_OP1_UNDEF_CV(inc_filename, BP_VAR_R);
+		}
 		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
@@ -5560,10 +5602,13 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMPVAR|CV, UNUSED|CONST|VAR)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	ZVAL_UNDEF(&tmp);
 	if (OP1_TYPE != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			varname = GET_OP1_UNDEF_CV(varname, BP_VAR_R);
+		}
 		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
@@ -5616,6 +5661,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	zval *container;
 	zval *offset;
 	zend_ulong hval;
+	zend_string *key;
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
@@ -5627,72 +5673,81 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
-	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	offset = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-ZEND_VM_C_LABEL(unset_dim_again):
-	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		HashTable *ht;
+	do {
+		if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			HashTable *ht;
 
+ZEND_VM_C_LABEL(unset_dim_array):
+			SEPARATE_ARRAY(container);
+			ht = Z_ARRVAL_P(container);
 ZEND_VM_C_LABEL(offset_again):
-		SEPARATE_ARRAY(container);
-		ht = Z_ARRVAL_P(container);
-		switch (Z_TYPE_P(offset)) {
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
-				zend_hash_index_del(ht, hval);
-				break;
-			case IS_LONG:
-				hval = Z_LVAL_P(offset);
-ZEND_VM_C_LABEL(num_index_dim):
-				zend_hash_index_del(ht, hval);
-				break;
-			case IS_STRING:
+			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+				key = Z_STR_P(offset);
 				if (OP2_TYPE != IS_CONST) {
-					if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
+					if (ZEND_HANDLE_NUMERIC(key, hval)) {
 						ZEND_VM_C_GOTO(num_index_dim);
 					}
 				}
+ZEND_VM_C_LABEL(str_index_dim):
 				if (ht == &EG(symbol_table)) {
-					zend_delete_global_variable(Z_STR_P(offset));
+					zend_delete_global_variable(key);
 				} else {
-					zend_hash_del(ht, Z_STR_P(offset));
+					zend_hash_del(ht, key);
 				}
-				break;
-			case IS_NULL:
-				zend_hash_del(ht, STR_EMPTY_ALLOC());
-				break;
-			case IS_FALSE:
-				hval = 0;
-				ZEND_VM_C_GOTO(num_index_dim);
-			case IS_TRUE:
-				hval = 1;
-				ZEND_VM_C_GOTO(num_index_dim);
-			case IS_RESOURCE:
-				hval = Z_RES_HANDLE_P(offset);
-				ZEND_VM_C_GOTO(num_index_dim);
-			case IS_REFERENCE:
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+				hval = Z_LVAL_P(offset);
+ZEND_VM_C_LABEL(num_index_dim):
+				zend_hash_index_del(ht, hval);
+			} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(offset_again);
-				break;
-			default:
+			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				ZEND_VM_C_GOTO(num_index_dim);
+			} else if (Z_TYPE_P(offset) == IS_NULL) {
+				key = STR_EMPTY_ALLOC();
+				ZEND_VM_C_GOTO(str_index_dim);
+			} else if (Z_TYPE_P(offset) == IS_FALSE) {
+				hval = 0;
+				ZEND_VM_C_GOTO(num_index_dim);
+			} else if (Z_TYPE_P(offset) == IS_TRUE) {
+				hval = 1;
+				ZEND_VM_C_GOTO(num_index_dim);
+			} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+				hval = Z_RES_HANDLE_P(offset);
+				ZEND_VM_C_GOTO(num_index_dim);
+			} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
+				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
+				key = STR_EMPTY_ALLOC();
+				ZEND_VM_C_GOTO(str_index_dim);
+			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
-				break;
+			}
+			break;
+		} else if (OP1_TYPE != IS_UNUSED && Z_ISREF_P(container)) {
+			container = Z_REFVAL_P(container);
+			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+				ZEND_VM_C_GOTO(unset_dim_array);
+			}
 		}
-	} else if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
-		} else {
-			Z_OBJ_HT_P(container)->unset_dimension(container, offset);
+		if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+			offset = GET_OP2_UNDEF_CV(offset, BP_VAR_R);
 		}
-	} else if (OP1_TYPE != IS_UNUSED && Z_ISREF_P(container)) {
-		container = Z_REFVAL_P(container);
-		ZEND_VM_C_GOTO(unset_dim_again);
-	} else if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
-	}
+		if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
+				zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+			} else {
+				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
+			}
+		} else if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
+		}
+	} while (0);
+
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	CHECK_EXCEPTION();
@@ -5716,7 +5771,6 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
-		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
@@ -6520,14 +6574,15 @@ ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|T
 		HANDLE_EXCEPTION();
 	}
 
-	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	offset = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-ZEND_VM_C_LABEL(isset_dim_obj_again):
 	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		HashTable *ht = Z_ARRVAL_P(container);
+		HashTable *ht;
 		zval *value;
 		zend_string *str;
 
+ZEND_VM_C_LABEL(isset_dim_obj_array):
+		ht = Z_ARRVAL_P(container);
 ZEND_VM_C_LABEL(isset_again):
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
@@ -6542,31 +6597,31 @@ ZEND_VM_C_LABEL(str_index_prop):
 			hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_prop):
 			value = zend_hash_index_find(ht, hval);
+		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(offset))) {
+			offset = Z_REFVAL_P(offset);
+			ZEND_VM_C_GOTO(isset_again);
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval(Z_DVAL_P(offset));
+			ZEND_VM_C_GOTO(num_index_prop);
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = STR_EMPTY_ALLOC();
+			ZEND_VM_C_GOTO(str_index_prop);
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			ZEND_VM_C_GOTO(num_index_prop);
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			ZEND_VM_C_GOTO(num_index_prop);
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			hval = Z_RES_HANDLE_P(offset);
+			ZEND_VM_C_GOTO(num_index_prop);
+		} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
+			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
+			str = STR_EMPTY_ALLOC();
+			ZEND_VM_C_GOTO(str_index_prop);
 		} else {
-			switch (Z_TYPE_P(offset)) {
-				case IS_DOUBLE:
-					hval = zend_dval_to_lval(Z_DVAL_P(offset));
-					ZEND_VM_C_GOTO(num_index_prop);
-				case IS_NULL:
-					str = STR_EMPTY_ALLOC();
-					ZEND_VM_C_GOTO(str_index_prop);
-				case IS_FALSE:
-					hval = 0;
-					ZEND_VM_C_GOTO(num_index_prop);
-				case IS_TRUE:
-					hval = 1;
-					ZEND_VM_C_GOTO(num_index_prop);
-				case IS_RESOURCE:
-					hval = Z_RES_HANDLE_P(offset);
-					ZEND_VM_C_GOTO(num_index_prop);
-				case IS_REFERENCE:
-					offset = Z_REFVAL_P(offset);
-					ZEND_VM_C_GOTO(isset_again);
-				default:
-					zend_error(E_WARNING, "Illegal offset type in isset or empty");
-					value = NULL;
-					break;
-			}
+			zend_error(E_WARNING, "Illegal offset type in isset or empty");
+			ZEND_VM_C_GOTO(isset_not_found);
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
@@ -6576,50 +6631,61 @@ ZEND_VM_C_LABEL(num_index_prop):
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
-	} else if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		ZEND_VM_C_GOTO(isset_dim_obj_exit);
+	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
+		container = Z_REFVAL_P(container);
+		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			ZEND_VM_C_GOTO(isset_dim_obj_array);
+		}
+	}
+
+	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		offset = GET_OP2_UNDEF_CV(offset, BP_VAR_R);
+	}
+
+	if (OP1_TYPE == IS_UNUSED ||
+	    (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+			result =
+				((opline->extended_value & ZEND_ISSET) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
-			result = 0;
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
+			ZEND_VM_C_GOTO(isset_not_found);
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
-		zval tmp;
+		zend_long lval;
 
-		result = 0;
-		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+ZEND_VM_C_LABEL(isset_str_offset):
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				if (opline->extended_value & ZEND_ISSET) {
+					result = 1;
+				} else {
+					result = (Z_STRVAL_P(container)[lval] == '0');
+				}
+			} else {
+				ZEND_VM_C_GOTO(isset_not_found);
+			}
+		} else {
 			if (OP2_TYPE & (IS_CV|IS_VAR)) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				ZVAL_DUP(&tmp, offset);
-				convert_to_long(&tmp);
-				offset = &tmp;
+				lval = zval_get_long(offset);
+				ZEND_VM_C_GOTO(isset_str_offset);
 			}
+			ZEND_VM_C_GOTO(isset_not_found);
 		}
-		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
-			if (offset->value.lval >= 0 && (size_t)offset->value.lval < Z_STRLEN_P(container)) {
-				if ((opline->extended_value & ZEND_ISSET) ||
-				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
-			}
-		}
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
-	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
-		container = Z_REFVAL_P(container);
-		ZEND_VM_C_GOTO(isset_dim_obj_again);
 	} else {
+ZEND_VM_C_LABEL(isset_not_found):
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	}
 
+ZEND_VM_C_LABEL(isset_dim_obj_exit):
 	FREE_OP2();
 	FREE_OP1();
 	ZEND_VM_SMART_BRANCH(result, 1);
@@ -6647,7 +6713,8 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (OP1_TYPE == IS_CONST ||
+	    (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT))) {
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(container)) {
 			container = Z_REFVAL_P(container);
 			if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
@@ -6662,10 +6729,9 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 ZEND_VM_C_LABEL(isset_no_object):
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
-		result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
-		if ((opline->extended_value & ZEND_ISSET) == 0) {
-			result = !result;
-		}
+		result =
+			((opline->extended_value & ZEND_ISSET) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	FREE_OP2();
@@ -7000,7 +7066,7 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMPVAR|CV, CONST|VAR)
 	zend_bool result;
 
 	SAVE_OPLINE();
-	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	expr = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 ZEND_VM_C_LABEL(try_instanceof):
 	if (Z_TYPE_P(expr) == IS_OBJECT) {
@@ -7027,6 +7093,9 @@ ZEND_VM_C_LABEL(try_instanceof):
 		expr = Z_REFVAL_P(expr);
 		ZEND_VM_C_GOTO(try_instanceof);
 	} else {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(expr) == IS_UNDEF)) {
+			GET_OP1_UNDEF_CV(expr, BP_VAR_R);
+		}
 		result = 0;
 	}
 	FREE_OP1();
@@ -7265,17 +7334,13 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				zend_op *brk_opline = &EX(func)->op_array.opcodes[EX(func)->op_array.brk_cont_array[i].brk];
 
 				if (brk_opline->opcode == ZEND_FREE) {
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-					}
+					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 				} else if (brk_opline->opcode == ZEND_FE_FREE) {
-					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
-						zval *var = EX_VAR(brk_opline->op1.var);
-						if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-							zend_hash_iterator_del(Z_FE_ITER_P(var));
-						}
-						zval_ptr_dtor_nogc(var);
+					zval *var = EX_VAR(brk_opline->op1.var);
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
+					zval_ptr_dtor_nogc(var);
 				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
 					/* restore previous error_reporting value */
 					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
@@ -7446,7 +7511,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	zend_generator *generator = zend_get_running_generator(execute_data);
 
 	SAVE_OPLINE();
-	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
 		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
 		FREE_UNFETCHED_OP2();
 		FREE_UNFETCHED_OP1();
@@ -7463,7 +7528,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	if (OP1_TYPE != IS_UNUSED) {
 		zend_free_op free_op1;
 
-		if (EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
 			if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
@@ -7473,11 +7538,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 				value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (OP1_TYPE != IS_TMP_VAR) {
-					zval_opt_copy_ctor(&generator->value);
+				if (OP1_TYPE != IS_CONST) {
+					if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
+						zval_copy_ctor_func(&generator->value);
+					}
 				}
 			} else {
 				zval *value_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
@@ -7485,7 +7549,6 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				if (OP1_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
 					zend_error(E_EXCEPTION | E_ERROR, "Cannot yield string offsets by reference");
 					FREE_UNFETCHED_OP2();
-					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
 
@@ -7508,11 +7571,14 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 			/* Consts, temporary variables and references need copying */
 			if (OP1_TYPE == IS_CONST) {
-				ZVAL_DUP(&generator->value, value);
+				ZVAL_COPY_VALUE(&generator->value, value);
+				if (UNEXPECTED(Z_OPT_COPYABLE(generator->value))) {
+					zval_copy_ctor_func(&generator->value);
+				}
 			} else if (OP1_TYPE == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) && Z_ISREF_P(value)) {
-				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
+            } else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
 				FREE_OP1_IF_VAR();
 			} else {
 				ZVAL_COPY_VALUE(&generator->value, value);
@@ -7533,11 +7599,14 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 		/* Consts, temporary variables and references need copying */
 		if (OP2_TYPE == IS_CONST) {
-			ZVAL_DUP(&generator->key, key);
+			ZVAL_COPY_VALUE(&generator->key, key);
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->key))) {
+				zval_copy_ctor_func(&generator->key);
+			}
 		} else if (OP2_TYPE == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-		} else if ((OP2_TYPE == IS_VAR || OP2_TYPE == IS_CV) && Z_ISREF_P(key)) {
-			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(key)) {
+			ZVAL_COPY(&generator->key, Z_REFVAL_P(key));
 			FREE_OP2_IF_VAR();
 		} else {
 			ZVAL_COPY_VALUE(&generator->key, key);
@@ -7742,11 +7811,12 @@ ZEND_VM_HANDLER(166, ZEND_POW, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
 
 	SAVE_OPLINE();
-	pow_function(EX_VAR(opline->result.var),
-		GET_OP1_ZVAL_PTR(BP_VAR_R),
-		GET_OP2_ZVAL_PTR(BP_VAR_R));
+	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	pow_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -7846,13 +7916,16 @@ ZEND_VM_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 ZEND_VM_C_LABEL(try_strlen):
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
 	} else {
 		zend_bool strict;
 
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			value = GET_OP1_UNDEF_CV(value, BP_VAR_R);
+		}
 		if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(value) == IS_REFERENCE) {
 			value = Z_REFVAL_P(value);
 			ZEND_VM_C_GOTO(try_strlen);
@@ -7890,7 +7963,7 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EXPECTED(Z_TYPE_P(value) == opline->extended_value)) {
-		if (UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+		if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
 			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||

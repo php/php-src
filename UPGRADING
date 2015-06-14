@@ -461,6 +461,10 @@ Other
     IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
     IntlDateFormatter::setTimeZone() instead.
 
+- libxml:
+  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
+    and adds suppport for line numbers >16-bit in the error reporting.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().
@@ -488,7 +492,7 @@ Other
 
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
-    preg_reaplace_callback() instead.
+    preg_replace_callback() instead.
 
 - PDO_pgsql:
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
@@ -530,6 +534,12 @@ Other
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
   . Added the yield from operator for delegating Generators like coroutines.
     (RFC: https://wiki.php.net/rfc/generator-delegation)
+  . Reserved keywords can now be used in various new contexts.
+    (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
+  . Added support for scalar type declatarations and strict mode using
+    declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
+  . Added support for cryptographically secure user land RNG
+    (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
@@ -538,7 +548,12 @@ Other
     accessible through stream_get_meta_data() output.
 
 - Reflection
-  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
+  . Added a ReflectionGenerator class (yield from Traces, current file/line,
+    etc.)
+  . Added a ReflectionType class to better support the new return type and
+    scalar type declarations features. The new ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType() methods both return an
+    instance of ReflectionType.
 
 ========================================
 3. Changes in SAPI modules
@@ -575,6 +590,10 @@ Other
     acceptable classes: 
     unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
 
+- proc_open():
+  The maximum number of pipes used by proc_open() was previously limited by
+  hardcoded value of 16. This limit is now removed and the number of pipes is
+  effectively limited by the amount of memory available to PHP.
 
 ========================================
 6. New Functions
@@ -611,6 +630,7 @@ Other
 - sapi/continuity
 - sapi/isapi
 - sapi/milter
+- sapi/nsapi
 - sapi/phttpd
 - sapi/pi3web
 - sapi/roxen
@@ -618,8 +638,17 @@ Other
 - sapi/tux
 - sapi/webjames
 - ext/mssql
+- ext/mysql
 - ext/sybase_ct
-For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+- ext/ereg
+
+For more details see 
+
+https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
+
+NOTE NSAPI was not voted in the RFC, however it was removed afterwards. It turned
+out, that the corresponding SDK isn't available anymore.
 
 ========================================
 9. Other Changes to Extensions
@@ -643,6 +672,23 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
   . ZLIB_BLOCK
   . ZLIB_FINISH
 
+- GD
+  . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
+    following is therefore not available anymore:
+
+    Functions:
+      - imagepsbbox()
+      - imagepsencodefont()
+      - imagepsextendedfont()
+      - imagepsfreefont()
+      - imagepsloadfont()
+      - imagepsslantfont()
+      - imagepstext()
+
+    Resources:
+      - 'gd PS font'
+      - 'gd PS encoding'
+
 ========================================
 11. Changes to INI File Handling
 ========================================
@@ -659,6 +705,7 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 - Core
   . Support for native 64 bit integers in 64 bit builds.
   . Support for large files in 64 bit builds.
+  . Support for getrusage()
 
 - ftp
   . The ftp extension is always shipped shared

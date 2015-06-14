@@ -459,7 +459,8 @@ ZEND_FUNCTION(func_get_arg)
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
-	RETURN_ZVAL_FAST(arg);
+	ZVAL_DEREF(arg);
+	ZVAL_COPY(return_value, arg);
 }
 /* }}} */
 
@@ -1105,8 +1106,10 @@ ZEND_FUNCTION(get_class_vars)
 		RETURN_FALSE;
 	} else {
 		array_init(return_value);
-		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-			return;
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				return;
+			}
 		}
 		add_class_vars(ce, 0, return_value);
 		add_class_vars(ce, 1, return_value);
@@ -1684,7 +1687,7 @@ ZEND_FUNCTION(set_error_handler)
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-		RETVAL_ZVAL(&EG(user_error_handler), 1, 0);
+		ZVAL_COPY(return_value, &EG(user_error_handler));
 
 		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
 		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
@@ -1695,7 +1698,7 @@ ZEND_FUNCTION(set_error_handler)
 		return;
 	}
 
-	ZVAL_DUP(&EG(user_error_handler), error_handler);
+	ZVAL_COPY(&EG(user_error_handler), error_handler);
 	EG(user_error_handler_error_reporting) = (int)error_type;
 }
 /* }}} */
@@ -1752,7 +1755,7 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-		RETVAL_ZVAL(&EG(user_exception_handler), 1, 0);
+		ZVAL_COPY(return_value, &EG(user_exception_handler));
 
 		zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 	}
@@ -1762,7 +1765,7 @@ ZEND_FUNCTION(set_exception_handler)
 		return;
 	}
 
-	ZVAL_DUP(&EG(user_exception_handler), exception_handler);
+	ZVAL_COPY(&EG(user_exception_handler), exception_handler);
 }
 /* }}} */
 

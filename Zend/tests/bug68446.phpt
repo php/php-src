@@ -34,7 +34,7 @@ array(1) {
 
 Fatal error: Uncaught TypeError: Argument 1 passed to a() must be of the type array, null given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): a()
+#0 %s(%d): a(NULL)
 #1 {main}
   thrown in %s on line %d
 

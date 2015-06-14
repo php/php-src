@@ -383,6 +383,14 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 		}
 	}
 #ifdef PHP_WIN32
+	if (y > 0 && '\\' == cmd->val[y - 1]) {
+		int k = 0, n = y - 1;
+		for (; n >= 0 && '\\' == cmd->val[n]; n--, k++);
+		if (k % 2) {
+			cmd->val[y++] = '\\';
+		}
+	}
+
 	cmd->val[y++] = '"';
 #else
 	cmd->val[y++] = '\'';

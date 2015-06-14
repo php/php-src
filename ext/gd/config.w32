@@ -2,7 +2,6 @@
 // vim:ft=javascript
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
-ARG_WITH("t1lib", "t1lib support", "yes");
 ARG_WITH("libvpx", "vpx support", "yes");
 
 if (PHP_GD != "no") {
@@ -21,15 +20,6 @@ if (PHP_GD != "no") {
 		CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
 		CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
 		) {
-		if (PHP_T1LIB != "no") {
-			if (CHECK_LIB("T1_StaticMD.lib", "gd", PHP_GD) &&
-				CHECK_HEADER_ADD_INCLUDE("t1lib.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\t1lib")
-				) {
-				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBT1");
-				} else {
-				WARNING("t1lib not enabled; libraries and headers not found");
-			}
-		}
 
 		if (PHP_LIBVPX != "no") {
 			if (CHECK_LIB("vpxmt.lib", "gd", PHP_GD) &&

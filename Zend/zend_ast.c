@@ -394,7 +394,12 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval tmp;
 
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
-				ZVAL_ZVAL(result, &tmp, 1, 1);
+				if (UNEXPECTED(Z_ISREF(tmp))) {
+					ZVAL_DUP(result, Z_REFVAL(tmp));
+				} else {
+					ZVAL_DUP(result, &tmp);
+				}
+				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
 				zval_dtor(&op2);
 			}
@@ -1149,9 +1154,6 @@ simple_list:
 		case ZEND_AST_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			break;
-		case ZEND_AST_RESOLVE_CLASS_NAME:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			APPEND_STR("::class");
 		case ZEND_AST_UNPACK:
 			smart_str_appends(str, "...");
 			ast = ast->child[0];

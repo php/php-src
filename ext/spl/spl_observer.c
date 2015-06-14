@@ -657,7 +657,7 @@ SPL_METHOD(SplObjectStorage, current)
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		return;
 	}
-	RETVAL_ZVAL(&element->obj, 1, 0);
+	ZVAL_COPY(return_value, &element->obj);
 } /* }}} */
 
 /* {{{ proto mixed SplObjectStorage::getInfo()
@@ -674,7 +674,7 @@ SPL_METHOD(SplObjectStorage, getInfo)
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
 		return;
 	}
-	RETVAL_ZVAL(&element->inf, 1, 0);
+	ZVAL_COPY(return_value, &element->inf);
 } /* }}} */
 
 /* {{{ proto mixed SplObjectStorage::setInfo(mixed $inf)
@@ -693,7 +693,7 @@ SPL_METHOD(SplObjectStorage, setInfo)
 		return;
 	}
 	zval_ptr_dtor(&element->inf);
-	ZVAL_ZVAL(&element->inf, inf, 1, 0);
+	ZVAL_COPY(&element->inf, inf);
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::next()

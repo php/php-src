@@ -178,11 +178,17 @@ PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len) {
 
 
 PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
+	int ret;
+
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_consume_bytes(sock, ptr, len, tmo);
 	}
 
-	return read(sock, ptr, len);
+	do {
+		ret = read(sock, ptr, len);
+	} while (ret == -1 && errno == EINTR);
+
+	return ret;
 }
 
 

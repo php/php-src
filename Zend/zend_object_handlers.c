@@ -265,15 +265,14 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 
 static zend_always_inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce) /* {{{ */
 {
-	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PUBLIC:
-			return 1;
-		case ZEND_ACC_PROTECTED:
-			return zend_check_protected(property_info->ce, EG(scope));
-		case ZEND_ACC_PRIVATE:
-			return (ce == EG(scope) || property_info->ce == EG(scope));
+	if (property_info->flags & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
+		return (ce == EG(scope) || property_info->ce == EG(scope));
+	} else {
+		ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+		return zend_check_protected(property_info->ce, EG(scope));
 	}
-	return 0;
 }
 /* }}} */
 
@@ -673,7 +672,7 @@ write_std_property:
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
 				/* if we assign referenced variable, we should separate it */
-				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
+				ZVAL_COPY(&tmp, Z_REFVAL_P(value));
 				value = &tmp;
 			} else {
 				Z_ADDREF_P(value);
@@ -1256,8 +1255,10 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		goto undeclared_property;
 	}
 
-	if (UNEXPECTED(zend_update_class_constants(ce)) != SUCCESS) {
-		return NULL;
+	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (UNEXPECTED(zend_update_class_constants(ce)) != SUCCESS) {
+			return NULL;
+		}
 	}
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 

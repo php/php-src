@@ -923,20 +923,15 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 
 	if (Z_TYPE_P(data) == IS_STRING) {
 		str = php_base64_encode((unsigned char*)Z_STRVAL_P(data), Z_STRLEN_P(data));
-		text = xmlNewTextLen(BAD_CAST(str->val), str->len);
-		xmlAddChild(ret, text);
-		zend_string_release(str);
 	} else {
-		zval tmp;
-
-		ZVAL_DUP(&tmp, data);
-		convert_to_string(&tmp);
-		str = php_base64_encode((unsigned char*)Z_STRVAL(tmp), Z_STRLEN(tmp));
-		text = xmlNewTextLen(BAD_CAST(str->val), str->len);
-		xmlAddChild(ret, text);
-		zend_string_release(str);
-		zval_dtor(&tmp);
+		zend_string *tmp = zval_get_string(data);
+		str = php_base64_encode((unsigned char*) tmp->val, tmp->len);
+		zend_string_release(tmp);
 	}
+
+	text = xmlNewTextLen(BAD_CAST(str->val), str->len);
+	xmlAddChild(ret, text);
+	zend_string_release(str);
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);

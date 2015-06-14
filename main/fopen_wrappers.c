@@ -53,10 +53,6 @@
 #include <sys/socket.h>
 #endif
 
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode) & S_IFMT) == S_IFREG)
-#endif
-
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #elif defined(NETWARE) && defined(USE_WINSOCK)

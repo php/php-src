@@ -54,10 +54,6 @@
 # endif
 #endif
 
-#ifndef S_IFLNK
-# define S_IFLNK 0120000
-#endif
-
 #ifdef NETWARE
 #include <fsio.h>
 #endif
@@ -87,14 +83,6 @@ cwd_state main_cwd_state; /* True global */
 #include <unistd.h>
 #else
 #include <direct.h>
-#endif
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
 #endif
 
 #ifdef TSRM_WIN32
@@ -237,6 +225,10 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	typedef BOOL (WINAPI *gfpnh_func)(HANDLE, LPTSTR, DWORD, DWORD);
 	gfpnh_func pGetFinalPathNameByHandle;
 
+	if (!target_len) {
+		return -1;
+	}
+
 	kernel32 = LoadLibrary("kernel32.dll");
 
 	if (kernel32) {
@@ -260,8 +252,14 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 			return -1;
 	}
 
-	dwRet = pGetFinalPathNameByHandle(hFile, target, MAXPATHLEN, VOLUME_NAME_DOS);
-	if(dwRet >= MAXPATHLEN || dwRet == 0) {
+	/* Despite MSDN has documented it won't to, the length returned by
+		GetFinalPathNameByHandleA includes the length of the
+		null terminator. This behavior is at least reproducible
+		with VS2012 and earlier, and seems not to be fixed till
+		now. Thus, correcting target_len so it's suddenly don't
+		overflown. */
+	dwRet = pGetFinalPathNameByHandle(hFile, target, target_len - 1, VOLUME_NAME_DOS);
+	if(dwRet >= target_len || dwRet >= MAXPATHLEN || dwRet == 0) {
 		return -1;
 	}
 
@@ -555,6 +553,11 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 		return retval;
 	}
 #endif
+	if (!state->cwd) {
+		*length = 0;
+		return NULL;
+	}
+
 	*length = state->cwd_length;
 	return estrdup(state->cwd);
 }
@@ -574,6 +577,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 	if (length > size-1) {
 		efree(cwd);
 		errno = ERANGE; /* Is this OK? */
+		return NULL;
+	}
+	if (!cwd) {
 		return NULL;
 	}
 	memcpy(buf, cwd, length+1);

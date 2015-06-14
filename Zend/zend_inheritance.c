@@ -1451,7 +1451,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			 * then check whether the property is already there
 			 */
 			flags = property_info->flags;
-			if ((flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+			if (flags & ZEND_ACC_PUBLIC) {
 				prop_name = zend_string_copy(property_info->name);
 			} else {
 				const char *pname;

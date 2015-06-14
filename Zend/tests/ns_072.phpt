@@ -32,6 +32,6 @@ NULL
 
 Fatal error: Uncaught TypeError: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo, instance of stdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): foo\bar->__construct()
+#0 %s(%d): foo\bar->__construct(Object(stdClass))
 #1 {main}
   thrown in %s on line %d

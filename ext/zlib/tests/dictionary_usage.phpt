@@ -9,6 +9,10 @@ $r = deflate_init(ZLIB_ENCODING_DEFLATE, ["dictionary" => $dict]);
 $a = deflate_add($r, "abdcde", ZLIB_FINISH);
 var_dump($a);
 
+$r = deflate_init(ZLIB_ENCODING_DEFLATE, ["dictionary" => implode("\0", $dict)."\0"]);
+$dictStr_a = deflate_add($r, "abdcde", ZLIB_FINISH);
+var_dump($dictStr_a === $a);
+
 $r = inflate_init(ZLIB_ENCODING_DEFLATE, ["dictionary" => $dict]);
 var_dump(inflate_add($r, $a, ZLIB_FINISH));
 
@@ -19,6 +23,7 @@ var_dump(inflate_add($r, $a, ZLIB_FINISH));
 ?>
 --EXPECTF--
 string(%d) "%s"
+bool(true)
 string(6) "abdcde"
 
 Warning: inflate_add(): dictionary does not match expected dictionary (incorrect adler32 hash) in %s on line %d

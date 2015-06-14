@@ -2048,6 +2048,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 #endif
 #if ZEND_MM_STAT
 		heap->real_peak = ZEND_MM_CHUNK_SIZE;
+		heap->size = heap->peak = 0;
 #endif
 	}
 }

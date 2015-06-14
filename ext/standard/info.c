@@ -307,7 +307,17 @@ char* php_get_windows_name()
 		GetSystemInfo(&si);
 	}
 
-	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6 ) {
+	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
+		if (osvi.dwMajorVersion == 10) {
+			if( osvi.dwMinorVersion == 0 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION ) {
+					major = "Windows 10";
+				} else {
+					major = "Windows Server 2016";
+				}
+			}
+		}
+	} else if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6) {
 		if (osvi.dwMajorVersion == 6) {
 			if( osvi.dwMinorVersion == 0 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION ) {
@@ -323,6 +333,11 @@ char* php_get_windows_name()
 				}
 			} else if ( osvi.dwMinorVersion == 2 ) {
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
+				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
+					- if the PHP build doesn't use the correct manifest
+					- if PHP DLL loaded under some binary that doesn't use the correct manifest 
+					
+					So keep the handling here as is for now, even if we know 6.2 is win8 and nothing else, and think about an improvement. */
 				OSVERSIONINFOEX osvi81;
 				DWORDLONG dwlConditionMask = 0;
 				int op = VER_GREATER_EQUAL;
@@ -353,6 +368,12 @@ char* php_get_windows_name()
 						major = "Windows Server 2012";
 					}
 				}
+			} else if (osvi.dwMinorVersion == 3) {
+				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					major = "Windows 8.1";
+				} else {
+					major = "Windows Server 2012 R2";
+				}
 			} else {
 				major = "Unknown Windows version";
 			}
@@ -374,10 +395,25 @@ char* php_get_windows_name()
 					sub = "Enterprise Edition";
 					break;
 				case PRODUCT_BUSINESS:
-					sub = "Business Edition";
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Professional Edition";
+					} else {
+						sub = "Business Edition";
+					}
+					break;
+				case PRODUCT_BUSINESS_N:
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Professional N Edition";
+					} else {
+						sub = "Business N Edition";
+					}
 					break;
 				case PRODUCT_STARTER:
-					sub = "Starter Edition";
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Starter N Edition";
+					} else {
+					    sub = "Starter Edition";
+					}
 					break;
 				case PRODUCT_CLUSTER_SERVER:
 					sub = "Cluster Server Edition";
