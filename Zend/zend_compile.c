@@ -5854,7 +5854,10 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&right_node, right_ast);
 
-	if (right_node.op_type == IS_CONST) {
+	if (right_node.op_type == IS_CONST && (
+	       (ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
+	    || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))
+	)) {
 		result->op_type = IS_CONST;
 		ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
 		zval_ptr_dtor(&right_node.u.constant);
