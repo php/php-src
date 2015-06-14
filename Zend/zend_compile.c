@@ -5841,10 +5841,8 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&left_node, left_ast);
 
 	if (left_node.op_type == IS_CONST) {
-		if (
-		       (ast->kind == ZEND_AST_AND && !zend_is_true(&left_node.u.constant))
-		    || (ast->kind == ZEND_AST_OR && zend_is_true(&left_node.u.constant))
-		) {
+		if ((ast->kind == ZEND_AST_AND && !zend_is_true(&left_node.u.constant))
+		    || (ast->kind == ZEND_AST_OR && zend_is_true(&left_node.u.constant))) {
 			result->op_type = IS_CONST;
 			ZVAL_BOOL(&result->u.constant, zend_is_true(&left_node.u.constant));
 		} else {
@@ -5870,8 +5868,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	if (left_node.op_type == IS_TMP_VAR) {
 		SET_NODE(opline_jmpz->result, &left_node);
-	}
-	if (left_node.op_type != IS_TMP_VAR) {
+	} else {
 		opline_jmpz->result.var = get_temporary_variable(CG(active_op_array));
 		opline_jmpz->result_type = IS_TMP_VAR;
 	}
@@ -5879,10 +5876,8 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&right_node, right_ast);
 
 	if (right_node.op_type == IS_CONST && opnum_jmpz == CG(active_op_array)->last) {
-		if (
-		       (ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
-		    || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))
-		) {
+		if ((ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
+			|| (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))) {
 			CG(active_op_array)->last--;
 			result->op_type = IS_CONST;
 			ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
