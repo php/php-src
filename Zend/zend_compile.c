@@ -5840,65 +5840,31 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&left_node, left_ast);
 
-	if (left_node.op_type == IS_CONST) {
-		if (
-		       (ast->kind == ZEND_AST_AND && !zend_is_true(&left_node.u.constant))
-		    || (ast->kind == ZEND_AST_OR && zend_is_true(&left_node.u.constant))
-		) {
-			result->op_type = IS_CONST;
-			ZVAL_BOOL(&result->u.constant, zend_is_true(&left_node.u.constant));
-		} else {
-			zend_compile_expr(&right_node, right_ast);
-
-			if (right_node.op_type == IS_CONST) {
-				result->op_type = IS_CONST;
-				ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
-			} else {
-				zend_emit_op(result, ZEND_BOOL, &right_node, NULL);
-			}
-
-			zval_ptr_dtor(&right_node.u.constant);
-		}
-
-		zval_ptr_dtor(&left_node.u.constant);
-		return;
-	}
-
 	opnum_jmpz = get_next_op_number(CG(active_op_array));
 	opline_jmpz = zend_emit_op(NULL, ast->kind == ZEND_AST_AND ? ZEND_JMPZ_EX : ZEND_JMPNZ_EX,
 		&left_node, NULL);
 
 	if (left_node.op_type == IS_TMP_VAR) {
 		SET_NODE(opline_jmpz->result, &left_node);
-	}
-
-	zend_compile_expr(&right_node, right_ast);
-
-	if (right_node.op_type == IS_CONST && opnum_jmpz == CG(active_op_array)->last) {
-		if (
-		       (ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
-		    || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))
-		) {
-			CG(active_op_array)->last--;
-			result->op_type = IS_CONST;
-			ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
-		} else {
-			opline_jmpz->opcode = ZEND_BOOL;
-			zend_make_var_result(result, opline_jmpz);
-		}
-
-		zval_ptr_dtor(&right_node.u.constant);
-		return;
-	}
-
-	if (left_node.op_type != IS_TMP_VAR) {
+	} else {
 		opline_jmpz->result.var = get_temporary_variable(CG(active_op_array));
 		opline_jmpz->result_type = IS_TMP_VAR;
 	}
 	GET_NODE(result, opline_jmpz->result);
 
-	opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
-	SET_NODE(opline_bool->result, result);
+	zend_compile_expr(&right_node, right_ast);
+
+	if (right_node.op_type == IS_CONST && (
+	       (ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
+	    || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))
+	)) {
+		result->op_type = IS_CONST;
+		ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
+		zval_ptr_dtor(&right_node.u.constant);
+	} else {
+		opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
+		SET_NODE(opline_bool->result, result);
+	}
 
 	zend_update_jump_target_to_next(opnum_jmpz);
 }
