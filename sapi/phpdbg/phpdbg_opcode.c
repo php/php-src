@@ -147,6 +147,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 	case ZEND_JMPZ_EX:
 	case ZEND_JMPNZ_EX:
 	case ZEND_JMP_SET:
+	case ZEND_ASSERT_CHECK:
 		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
 		break;
 
