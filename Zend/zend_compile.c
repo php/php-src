@@ -5842,7 +5842,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	if (left_node.op_type == IS_CONST) {
 		if ((ast->kind == ZEND_AST_AND && !zend_is_true(&left_node.u.constant))
-		    || (ast->kind == ZEND_AST_OR && zend_is_true(&left_node.u.constant))) {
+		 || (ast->kind == ZEND_AST_OR && zend_is_true(&left_node.u.constant))) {
 			result->op_type = IS_CONST;
 			ZVAL_BOOL(&result->u.constant, zend_is_true(&left_node.u.constant));
 		} else {
@@ -5875,9 +5875,9 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&right_node, right_ast);
 
-	if (right_node.op_type == IS_CONST && opnum_jmpz == CG(active_op_array)->last) {
+	if (right_node.op_type == IS_CONST && opnum_jmpz == get_next_op_number(CG(active_op_array)) - 1) {
 		if ((ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
-			|| (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))) {
+		 || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))) {
 			CG(active_op_array)->last--;
 			result->op_type = IS_CONST;
 			ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
