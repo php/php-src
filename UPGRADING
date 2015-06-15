@@ -484,6 +484,10 @@ Other
   . session.lazy_write(default=On) INI setting enables only write session data when
     session data is updated.
 
+- Opcache
+  . Removed opcache.load_comments configuration directive. Now doc comments
+    loading costs nothing and always enabled.
+
 - OpenSSL:
   . Removed the "rsa_key_size" SSL context option in favor of automatically
     setting the appropriate size given the negotiated crypto algorithm.
