@@ -668,6 +668,9 @@ out, that the corresponding SDK isn't available anymore.
 9. Other Changes to Extensions
 ========================================
 
+- Mhash
+  Mhash is not an extension anymore, use function_exists("mhash") to check whether
+  it is avaliable.
 
 ========================================
 10. New Global Constants
