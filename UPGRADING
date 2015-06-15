@@ -550,7 +550,10 @@ Other
     default). To enable it, PHP should be configured and built with 
     --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
     should be set in php.ini. The second level cache may improve performance
-    at server restart or SHM reset.
+    at server restart or SHM reset. In addition, it's possibe to use file cache
+    without SHM at all, using opcache.file_cache_only=1 (this may be useful for
+    sharing hosting), and disable file cache consistency check, to speedup
+    loading in cost of safety, using opcache.file_cache_consistency_checks=0.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
