@@ -206,7 +206,7 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 }
 /* }}} */
 
-/* {{{ proto Exception Exception::__clone()
+/* {{{ proto Exception|Error Exception|Error::__clone()
    Clone the exception object */
 ZEND_METHOD(exception, __clone)
 {
@@ -215,7 +215,7 @@ ZEND_METHOD(exception, __clone)
 }
 /* }}} */
 
-/* {{{ proto Exception::__construct(string message, int code [, Throwable previous])
+/* {{{ proto Exception|Error::__construct(string message, int code [, Throwable previous])
    Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
@@ -225,13 +225,13 @@ ZEND_METHOD(exception, __construct)
 	zend_class_entry *base_ce;
 	int    argc = ZEND_NUM_ARGS();
 
-	object = getThis();
-	base_ce = zend_get_exception_base(object);
-
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, base_ce) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", base_ce->name->val);
 		return;
 	}
+
+	object = getThis();
+	base_ce = zend_get_exception_base(object);
 
 	if (message) {
 		zend_update_property_str(base_ce, object, "message", sizeof("message")-1, message);
@@ -257,7 +257,7 @@ ZEND_METHOD(error_exception, __construct)
 	int    argc = ZEND_NUM_ARGS();
 	size_t message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for ErrorException([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])");
 		return;
 	}
@@ -298,7 +298,7 @@ ZEND_METHOD(error_exception, __construct)
 #define GET_PROPERTY_SILENT(object, name) \
 	zend_read_property(zend_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &rv)
 
-/* {{{ proto string Exception::getFile()
+/* {{{ proto string Exception|Error::getFile()
    Get the file in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
@@ -310,7 +310,7 @@ ZEND_METHOD(exception, getFile)
 }
 /* }}} */
 
-/* {{{ proto int Exception::getLine()
+/* {{{ proto int Exception|Error::getLine()
    Get the line in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
@@ -322,7 +322,7 @@ ZEND_METHOD(exception, getLine)
 }
 /* }}} */
 
-/* {{{ proto string Exception::getMessage()
+/* {{{ proto string Exception|Error::getMessage()
    Get the exception message */
 ZEND_METHOD(exception, getMessage)
 {
@@ -334,7 +334,7 @@ ZEND_METHOD(exception, getMessage)
 }
 /* }}} */
 
-/* {{{ proto int Exception::getCode()
+/* {{{ proto int Exception|Error::getCode()
    Get the exception code */
 ZEND_METHOD(exception, getCode)
 {
@@ -346,7 +346,7 @@ ZEND_METHOD(exception, getCode)
 }
 /* }}} */
 
-/* {{{ proto array Exception::getTrace()
+/* {{{ proto array Exception|Error::getTrace()
    Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
@@ -557,7 +557,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 }
 /* }}} */
 
-/* {{{ proto string Exception::getTraceAsString()
+/* {{{ proto string Exception|Error::getTraceAsString()
    Obtain the backtrace for the exception as a string (instead of an array) */
 ZEND_METHOD(exception, getTraceAsString)
 {
@@ -595,8 +595,8 @@ ZEND_METHOD(exception, getTraceAsString)
 }
 /* }}} */
 
-/* {{{ proto string Exception::getPrevious()
-   Return previous Exception or NULL. */
+/* {{{ proto Throwable Exception|Error::getPrevious()
+   Return previous Throwable or NULL. */
 ZEND_METHOD(exception, getPrevious)
 {
 	zval rv;
@@ -630,7 +630,7 @@ zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string Exception::__toString()
+/* {{{ proto string Exception|Error::__toString()
    Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
 {
