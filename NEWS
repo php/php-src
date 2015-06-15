@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     extensions are loaded). (Laruence)
   . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
     (Laruence)
+  . Fixed bug #69802 (Reflection on Closure::__invoke borks type hint class
+    name). (Dmitry)
   . Fixed bug #69761 (Serialization of anonymous classes should be prevented).
     (Laruence)
   . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation

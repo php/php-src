@@ -2620,7 +2620,10 @@ ZEND_METHOD(reflection_parameter, getClass)
 		const char *class_name;
 		size_t class_name_len;
 
-		if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+		    /* Closure::__invoke() reuses arg_info of user function and
+		     * don't set ZEND_ACC_HAS_TYPE_HINTS flag */
+		    (param->fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 			class_name = ((zend_internal_arg_info*)param->arg_info)->class_name;
 			class_name_len = strlen(class_name);
 		} else {
@@ -2648,7 +2651,8 @@ ZEND_METHOD(reflection_parameter, getClass)
 			}
 			ce = ce->parent;
 		} else {
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+			    (param->fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 				zend_string *name = zend_string_init(class_name, class_name_len, 0);
 				ce = zend_lookup_class(name);
 				zend_string_release(name);
