@@ -926,7 +926,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 
 		zend_string_release(file);
 		zend_string_release(message);
-	} else if (instanceof_function(ce_exception, default_exception_ce) || instanceof_function(ce_exception, error_ce)) {
+	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
