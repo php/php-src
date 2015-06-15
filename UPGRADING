@@ -545,6 +545,13 @@ Other
   . Added support for cryptographically secure user land RNG
     (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
 
+- Opcache
+  . Added second level file based opcode cache (experimental - disabled by
+    default). To enable it, PHP should be configured and built with 
+    --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
+    should be set in php.ini. The second level cache may improve performance
+    at server restart or SHM reset.
+
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
     streams to negotiate alternative protocols using the ALPN TLS extension when
