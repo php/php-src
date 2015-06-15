@@ -37,7 +37,7 @@ ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
 
-static zend_class_entry *assertion_exception_ce;
+static zend_class_entry *assertion_error_ce;
 
 #ifdef ZTS
 #define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
@@ -113,8 +113,8 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "AssertionException", NULL);
-	assertion_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default());
+	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
+	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_get_error());
 
 	return SUCCESS;
 }
@@ -244,14 +244,14 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(exception)) {
 		if (!description) {
-			zend_throw_exception(assertion_exception_ce, NULL, E_ERROR);
+			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_exception_ce)) {
+			instanceof_function(Z_OBJCE_P(description), assertion_error_ce)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
 			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_exception_ce, str->val, E_ERROR);
+			zend_throw_exception(assertion_error_ce, str->val, E_ERROR);
 			zend_string_release(str);
 		}
 	} else if (ASSERTG(warning)) {
