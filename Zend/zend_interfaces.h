@@ -31,7 +31,6 @@ extern ZEND_API zend_class_entry *zend_ce_aggregate;
 extern ZEND_API zend_class_entry *zend_ce_iterator;
 extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
-extern ZEND_API zend_class_entry *zend_ce_throwable;
 
 typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
@@ -49,6 +48,14 @@ ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_
 
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2)
+
+#define REGISTER_INTERFACE(class_name, class_name_str) \
+	{\
+		zend_class_entry ce;\
+		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
+		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
+		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
+	}
 
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter);
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter);

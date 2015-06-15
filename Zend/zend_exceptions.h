@@ -26,6 +26,8 @@
 
 BEGIN_EXTERN_C()
 
+extern ZEND_API zend_class_entry *zend_ce_throwable;
+
 ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *add_previous);
 ZEND_API void zend_exception_save(void);
 ZEND_API void zend_exception_restore(void);

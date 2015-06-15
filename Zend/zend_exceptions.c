@@ -30,6 +30,8 @@
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
 
+ZEND_API zend_class_entry *zend_ce_throwable;
+
 static zend_class_entry *default_exception_ce;
 static zend_class_entry *error_exception_ce;
 static zend_class_entry *error_ce;
@@ -37,6 +39,21 @@ static zend_class_entry *parse_error_ce;
 static zend_class_entry *type_error_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
+
+/* {{{ zend_implement_throwable */
+static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	if (instanceof_function(class_type, default_exception_ce) || instanceof_function(class_type, error_ce)) {
+		return SUCCESS;
+	}
+	zend_error_noreturn(E_ERROR, "Class %s cannot implement interface %s, extend %s or %s instead",
+		class_type->name->val,
+		interface->name->val,
+		default_exception_ce->name->val,
+		error_ce->name->val);
+	return FAILURE;
+}
+/* }}} */
 
 static inline zend_class_entry *zend_get_exception_base(zval *object)
 {
@@ -710,6 +727,20 @@ ZEND_METHOD(exception, __toString)
 }
 /* }}} */
 
+/** {{{ Throwable method definition */
+const zend_function_entry zend_funcs_throwable[] = {
+	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
+	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getLine,          NULL)
+	ZEND_ABSTRACT_ME(throwable, getTrace,         NULL)
+	ZEND_ABSTRACT_ME(throwable, getPrevious,      NULL)
+	ZEND_ABSTRACT_ME(throwable, getTraceAsString, NULL)
+	ZEND_ABSTRACT_ME(throwable, __toString,       NULL)
+	ZEND_FE_END
+};
+/* }}} */
+
 /* {{{ internal structs */
 /* All functions that may be used in uncaught exception handlers must be final
  * and must not throw exceptions. Otherwise we would need a facility to handle
@@ -760,6 +791,8 @@ void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
 	zend_property_info *prop;
+	
+	REGISTER_INTERFACE(throwable, Throwable);
 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
