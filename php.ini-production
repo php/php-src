@@ -1767,11 +1767,6 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
-; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-; may be always stored (save_comments=1), but not loaded by applications
-; that don't need them anyway.
-;opcache.load_comments=1
-
 ; If enabled, a fast shutdown sequence is used for the accelerated code
 ;opcache.fast_shutdown=0
 
