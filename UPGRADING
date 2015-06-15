@@ -324,7 +324,7 @@ Changes to error handling
 -------------------------
 
 * There are now two exception classes: Exception and Error. Both classes
-  implement a new interface Throwable. Typehints in exception handling code
+  implement a new interface Throwable. Type hints in exception handling code
   may need to be changed to account for this.
 
 * Some fatal errors and recoverable fatal errors now throw an Error instead.
@@ -333,7 +333,7 @@ Changes to error handling
 
   For the recoverable fatal errors which have been converted into an exception,
   it is no longer possible to silently ignore the error from an error handler.
-  In particular, it is no longer possible to ignore typehint failures.
+  In particular, it is no longer possible to ignore type hint failures.
 
 * Parser errors now generate a ParseError that extends Error. Error
   handling for eval()s on potentially invalid code should be changed to catch
@@ -347,6 +347,7 @@ Changes to error handling
 
 Relevant RFCs:
 * https://wiki.php.net/rfc/engine_exceptions_for_php7
+* https://wiki.php.net/rfc/throwable-interface
 * https://wiki.php.net/rfc/internal_constructor_behaviour
 * https://wiki.php.net/rfc/reclassify_e_strict
 
