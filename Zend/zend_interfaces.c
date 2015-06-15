@@ -509,9 +509,11 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 	if (instanceof_function(class_type, zend_exception_get_default()) || instanceof_function(class_type, zend_get_error())) {
 		return SUCCESS;
 	}
-	zend_error_noreturn(E_CORE_ERROR, "Class %s cannot implement interface %s, extend Exception or Error instead",
+	zend_error_noreturn(E_ERROR, "Class %s cannot implement interface %s, extend %s or %s instead",
 		class_type->name->val,
-		interface->name->val);
+		interface->name->val,
+		zend_exception_get_default()->name->val,
+		zend_get_error()->name->val);
 	return FAILURE;
 }
 /* }}} */

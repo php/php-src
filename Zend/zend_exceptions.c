@@ -53,7 +53,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	}
 	ZVAL_OBJ(&tmp, add_previous);
 	if (!instanceof_function(Z_OBJCE(tmp), zend_ce_throwable)) {
-		zend_error_noreturn(E_CORE_ERROR, "Cannot set non exception as previous exception");
+		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
 		return;
 	}
 	ZVAL_OBJ(&zv, exception);
@@ -215,7 +215,7 @@ ZEND_METHOD(exception, __clone)
 }
 /* }}} */
 
-/* {{{ proto Exception::__construct(string message, int code [, Exception previous])
+/* {{{ proto Exception::__construct(string message, int code [, Throwable previous])
    Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
@@ -229,7 +229,7 @@ ZEND_METHOD(exception, __construct)
 	base_ce = zend_get_exception_base(object);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, base_ce) == FAILURE) {
-		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", base_ce->name->val);
 		return;
 	}
 
@@ -247,7 +247,7 @@ ZEND_METHOD(exception, __construct)
 }
 /* }}} */
 
-/* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Exception previous]]])
+/* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Throwable previous]]])
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
@@ -258,7 +258,7 @@ ZEND_METHOD(error_exception, __construct)
 	size_t message_len, filename_len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
-		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for ErrorException([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])");
 		return;
 	}
 
@@ -761,13 +761,13 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_class_entry ce;
 	zend_property_info *prop;
 
+	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	default_exception_handlers.clone_obj = NULL;
+
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	default_exception_ce = zend_register_internal_class_ex(&ce, NULL);
 	default_exception_ce->create_object = zend_default_exception_new;
 	zend_class_implements(default_exception_ce, 1, zend_ce_throwable);
-
-	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	default_exception_handlers.clone_obj = NULL;
 
 	zend_declare_property_string(default_exception_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(default_exception_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
