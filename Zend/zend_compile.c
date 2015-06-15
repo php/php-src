@@ -5621,6 +5621,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
+	zend_bool is_constant = 1;
 
 	/* First ensure that *all* child nodes are constant and by-val */
 	for (i = 0; i < list->children; ++i) {
@@ -5632,8 +5633,12 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		if (by_ref || elem_ast->child[0]->kind != ZEND_AST_ZVAL
 			|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
 		) {
-			return 0;
+			is_constant = 0;
 		}
+	}
+
+	if (!is_constant) {
+		return 0;
 	}
 
 	array_init_size(result, list->children);
