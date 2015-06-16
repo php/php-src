@@ -645,14 +645,14 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_NEW_ARR(z) do {									\
 		zval *__z = (z);										\
-		zend_array *_arr = emalloc(sizeof(zend_array));			\
+		zend_array *_arr = (zend_array *) emalloc(sizeof(zend_array)); \
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
 		zval *__z = (z);										\
-		zend_array *_arr = malloc(sizeof(zend_array));			\
+		zend_array *_arr = (zend_array *) malloc(sizeof(zend_array)); \
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
@@ -670,7 +670,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
-		zend_resource *_res = emalloc(sizeof(zend_resource));	\
+		zend_resource *_res = (zend_resource *) emalloc(sizeof(zend_resource)); \
 		zval *__z;												\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
@@ -683,7 +683,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
-		zend_resource *_res = malloc(sizeof(zend_resource));	\
+		zend_resource *_res = (zend_resource *) malloc(sizeof(zend_resource)); \
 		zval *__z;												\
 		GC_REFCOUNT(_res) = 1;									\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
@@ -702,7 +702,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_NEW_EMPTY_REF(z) do {								\
-		zend_reference *_ref = emalloc(sizeof(zend_reference));	\
+		zend_reference *_ref = (zend_reference *) emalloc(sizeof(zend_reference)); \
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		Z_REF_P(z) = _ref;										\
@@ -710,7 +710,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_NEW_REF(z, r) do {									\
-		zend_reference *_ref = emalloc(sizeof(zend_reference));	\
+		zend_reference *_ref = (zend_reference *) emalloc(sizeof(zend_reference)); \
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
@@ -719,7 +719,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\
-		zend_reference *_ref = malloc(sizeof(zend_reference));	\
+		zend_reference *_ref = (zend_reference *) malloc(sizeof(zend_reference)); \
 		GC_REFCOUNT(_ref) = 1;									\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
@@ -729,7 +729,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_NEW_AST(z, a) do {									\
 		zval *__z = (z);										\
-		zend_ast_ref *_ast = emalloc(sizeof(zend_ast_ref));		\
+		zend_ast_ref *_ast = (zend_ast_ref *) emalloc(sizeof(zend_ast_ref)); \
 		GC_REFCOUNT(_ast) = 1;									\
 		GC_TYPE_INFO(_ast) = IS_CONSTANT_AST;					\
 		_ast->ast = (a);										\
