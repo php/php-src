@@ -1065,12 +1065,12 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 	 * without __toString is converted to string is converted into an exception. */
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 	if (data) {
-		RETVAL_ZVAL(data, 1, 0);
-		if (Z_TYPE_P(return_value) == IS_ARRAY) {
-			zval_ptr_dtor(return_value);
+		ZVAL_DEREF(data);
+		if (Z_TYPE_P(data) == IS_ARRAY) {
 			ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1);
 		} else {
-			convert_to_string_ex(return_value);
+			ZVAL_COPY(return_value, data);
+			convert_to_string(return_value);
 		}
 	}
 	zend_restore_error_handling(&error_handling);

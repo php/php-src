@@ -135,17 +135,23 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len) /* {{{ 
 }
 /* }}} */
 
+static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
+{
+	if (Z_REFCOUNT_P(op) == 1) {
+		ZVAL_UNREF(op);
+	} else {
+		Z_DELREF_P(op);
+		ZVAL_COPY(op, Z_REFVAL_P(op));
+	}
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_REFERENCE:
-			if (Z_REFCOUNT_P(op) == 1) {
-				ZVAL_UNREF(op);
-			} else {
-				Z_DELREF_P(op);
-				ZVAL_COPY(op, Z_REFVAL_P(op));
-			}
+			zend_unwrap_reference(op);
 			goto try_again;
 		case IS_STRING:
 			{
@@ -284,6 +290,7 @@ ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base) /* {{{ */
 {
 	zend_long tmp;
 
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -331,6 +338,9 @@ ZEND_API void ZEND_FASTCALL convert_to_long_base(zval *op, int base) /* {{{ */
 				}
 				return;
 			}
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -340,6 +350,7 @@ ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 {
 	double tmp;
 
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -388,6 +399,9 @@ ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 				}
 				break;
 			}
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -417,6 +431,7 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op) /* {{{ */
 {
 	int tmp;
 
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_FALSE:
 		case IS_TRUE:
@@ -469,6 +484,9 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op) /* {{{ */
 				}
 				break;
 			}
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -482,6 +500,7 @@ ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {
 
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_UNDEF:
 		case IS_NULL:
@@ -534,6 +553,9 @@ ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{
 			}
 			break;
 		}
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -553,7 +575,7 @@ static void convert_scalar_to_array(zval *op) /* {{{ */
 
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op) /* {{{ */
 {
-
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			break;
@@ -590,6 +612,9 @@ ZEND_API void ZEND_FASTCALL convert_to_array(zval *op) /* {{{ */
 			ZVAL_NEW_ARR(op);
 			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
 			break;
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		default:
 			convert_scalar_to_array(op);
 			break;
@@ -599,7 +624,7 @@ ZEND_API void ZEND_FASTCALL convert_to_array(zval *op) /* {{{ */
 
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op) /* {{{ */
 {
-
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
@@ -614,6 +639,9 @@ ZEND_API void ZEND_FASTCALL convert_to_object(zval *op) /* {{{ */
 		case IS_NULL:
 			object_init(op);
 			break;
+		case IS_REFERENCE:
+			zend_unwrap_reference(op);
+			goto try_again;
 		default: {
 			zval tmp;
 			ZVAL_COPY_VALUE(&tmp, op);

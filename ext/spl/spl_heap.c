@@ -112,9 +112,7 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 		return FAILURE;
 	}
 
-	convert_to_long(&zresult);
-	*result = Z_LVAL(zresult);
-
+	*result = zval_get_long(&zresult);
 	zval_ptr_dtor(&zresult);
 
 	return SUCCESS;

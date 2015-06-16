@@ -3099,17 +3099,15 @@ PHP_FUNCTION(array_column)
 			zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
 		}
 
-		if (Z_REFCOUNTED_P(zcolval)) {
-			Z_ADDREF_P(zcolval);
-		}
+		Z_TRY_ADDREF_P(zcolval);
 		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
-			SEPARATE_ZVAL(zkeyval);
-			convert_to_string(zkeyval);
-			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
+			zend_string *key = zval_get_string(zkeyval);
+			zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
+			zend_string_release(key);
 		} else {
 			add_next_index_zval(return_value, zcolval);
 		}
