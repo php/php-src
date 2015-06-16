@@ -5584,10 +5584,26 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static inline void zend_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	binary_op_type fn = get_binary_op(opcode);
+
+	/* don't evaluate division by zero at compile-time */
+	if (opcode == ZEND_DIV) {
+		convert_scalar_to_number(op2);
+		if (Z_TYPE_P(op2) == IS_LONG) {
+			if (Z_LVAL_P(op2) == 0) {
+				return 0;
+			}
+		} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
+			if (Z_DVAL_P(op2) == 0.0) {
+				return 0;
+			}
+		}
+	}
+
 	fn(result, op1, op2);
+	return 1;
 }
 /* }}} */
 
@@ -5696,30 +5712,14 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&right_node, right_ast);
 
 	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
-		do {
-			/* don't evaluate divsion by zero at compile-time */
-			if (opcode == ZEND_DIV) {
-				zval *op2 = &right_node.u.constant;
-
-				convert_scalar_to_number(op2);
-				if (Z_TYPE_P(op2) == IS_LONG) {
-					if (Z_LVAL_P(op2) == 0) {
-						break;
-					}
-				} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
-					if (Z_DVAL_P(op2) == 0.0) {
-						break;
-					}
-				}
-			}
-
+		if (zend_try_ct_eval_binary_op(&result->u.constant, opcode,
+				&left_node.u.constant, &right_node.u.constant)
+		) {
 			result->op_type = IS_CONST;
-			zend_ct_eval_binary_op(&result->u.constant, opcode,
-				&left_node.u.constant, &right_node.u.constant);
 			zval_ptr_dtor(&left_node.u.constant);
 			zval_ptr_dtor(&right_node.u.constant);
 			return;
-		} while (0);
+		}
 	}
 
 	do {
@@ -7148,24 +7148,11 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				return;
 			}
 
-			/* don't evaluate divsion by zero at compile-time */
-			if (ast->attr == ZEND_DIV) {
-				zval *op2 = zend_ast_get_zval(ast->child[1]);
-
-				convert_scalar_to_number(op2);
-				if (Z_TYPE_P(op2) == IS_LONG) {
-					if (Z_LVAL_P(op2) == 0) {
-						return;
-					}
-				} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
-					if (Z_DVAL_P(op2) == 0.0) {
-						return;
-					}
-				}
+			if (!zend_try_ct_eval_binary_op(&result, ast->attr,
+					zend_ast_get_zval(ast->child[0]), zend_ast_get_zval(ast->child[1]))
+			) {
+				return;
 			}
-
-			zend_ct_eval_binary_op(&result, ast->attr,
-				zend_ast_get_zval(ast->child[0]), zend_ast_get_zval(ast->child[1]));
 			break;
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
