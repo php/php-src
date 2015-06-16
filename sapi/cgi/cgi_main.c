@@ -1550,7 +1550,7 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 	} else {
 		return;
 	}
-	add_assoc_stringl_ex(return_value, var, var_len+1, val, val_len);
+	add_assoc_stringl_ex(return_value, var, var_len, val, val_len);
 	if (str) {
 		free_alloca(var, use_heap);
 	}
