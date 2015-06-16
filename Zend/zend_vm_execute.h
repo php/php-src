@@ -17115,12 +17115,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_VAR_CONST_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CONST != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -17135,12 +17183,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_VAR_CONST_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CONST != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -17155,12 +17251,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_VAR_CONST_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CONST != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -19211,12 +19355,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_VAR_UNUSED_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -19231,12 +19423,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_VAR_UNUSED_
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -19251,12 +19491,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_VAR_UNUSED_
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -20324,12 +20612,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_VAR_CV_HANDL
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CV != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -20344,12 +20680,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_VAR_CV_HAND
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CV != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -20364,12 +20748,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_VAR_CV_HAND
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && IS_CV != IS_UNUSED)
+		zend_free_op free_op1;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -21990,12 +22422,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_VAR_TMPVAR_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -22010,12 +22490,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_VAR_TMPVAR_
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -22030,12 +22558,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_VAR_TMPVAR_
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_VAR != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op1, free_op2;
+		zval *container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+			zval_ptr_dtor_nogc(free_op1);
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_VAR_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -23503,12 +24079,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CONST
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -23523,12 +24147,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CONS
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -23543,12 +24215,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CONS
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25315,12 +26035,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_UNUSED_UNUSE
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25335,12 +26103,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_UNUSED_UNUS
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25355,12 +26171,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUS
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25901,12 +26765,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CV_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25921,12 +26833,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CV_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -25941,12 +26901,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CV_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -27390,12 +28398,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_UNUSED_TMPVA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -27410,12 +28466,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_UNUSED_TMPV
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -27430,12 +28534,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_TMPV
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_UNUSED != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = NULL;
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -31188,12 +32340,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_CV_CONST_HAN
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -31208,12 +32408,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_CV_CONST_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -31228,12 +32476,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_CV_CONST_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CONST != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = EX_CONSTANT(opline->op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -34565,12 +35861,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_CV_UNUSED_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -34585,12 +35929,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_CV_UNUSED_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -34605,12 +35997,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_CV_UNUSED_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_UNUSED != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = NULL;
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -36504,12 +37944,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_CV_CV_HANDLE
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -36524,12 +38012,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_CV_CV_HANDL
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -36544,12 +38080,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_CV_CV_HANDL
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && IS_CV != IS_UNUSED)
+
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || (IS_CV != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -39197,12 +40781,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_OR_SPEC_CV_TMPVAR_HA
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] |= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) | lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_or_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -39217,12 +40849,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_AND_SPEC_CV_TMPVAR_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] &= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) & lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_and_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
@@ -39237,12 +40917,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_CV_TMPVAR_H
 	}
 # endif
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+#endif
+
+#if 0 || (IS_CV != IS_UNUSED && (IS_TMP_VAR|IS_VAR) != IS_UNUSED)
+		zend_free_op free_op2;
+		zval *container = _get_zval_ptr_cv_deref_BP_VAR_W(execute_data, opline->op1.var);
+		if (Z_TYPE_P(container) == IS_STRING && EXPECTED(Z_STRLEN_P(container) != 0)) {
+			zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			zend_long off = zend_check_string_offset(dim, BP_VAR_W);
+
+			if (EXPECTED(off < Z_STRLEN_P(container))) {
+				zend_string *str;
+				zend_free_op free_op_data1;
+				zval *value = _get_zval_ptr((opline + 1)->op1_type, (opline + 1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+				SEPARATE_STRING(container);
+
+				str = Z_STR_P(container);
+				if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
+					if (Z_STRLEN_P(value) > 0) {
+						str->val[off] ^= *Z_STRVAL_P(value);
+					}
+				} else {
+					zend_long lval;
+					char buf[2];
+					if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+						lval = Z_LVAL_P(value);
+					} else {
+						lval = zval_get_long(value);
+					}
+					snprintf(buf, 2, ZEND_LONG_FMT, (str->val[off] >= '0' && str->val[off] <= '9' ? str->val[off] - '0' : 0) ^ lval);
+					str->val[off] = *buf;
+				}
+
+				FREE_OP(free_op_data1);
+			} else {
+				zend_error(E_NOTICE, "Undefined offset: " ZEND_ULONG_FMT, off);
+			}
+
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), container);
+			}
+
+			zval_ptr_dtor_nogc(free_op2);
+			CHECK_EXCEPTION();
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_NEXT_OPCODE();
+		}
+#endif
+
 		return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
+
+#if 0 || ((IS_TMP_VAR|IS_VAR) != IS_UNUSED)
 	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_OBJ)) */ {
 		return zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 	}
-#else
-	return zend_binary_assign_op_dim_helper_SPEC_CV_TMPVAR(bitwise_xor_function ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC);
 #endif
 }
 
