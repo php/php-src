@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
 
+- SPL
+  . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
+
 11 Jun 2015, PHP 7.0.0 Alpha 1
 
 - Core:

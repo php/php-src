@@ -845,7 +845,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, void 
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_read_dimension(object, member, type, rv);
 	}
 	return std_object_handlers.read_property(object, member, type, cache_slot, rv);
@@ -856,7 +856,7 @@ static void spl_array_write_property(zval *object, zval *member, zval *value, vo
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+	&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		spl_array_write_dimension(object, member, value);
 		return;
 	}
@@ -868,7 +868,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_get_dimension_ptr(1, object, member, type);
 	}
 	//!!! FIXME
@@ -881,7 +881,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_has_dimension(object, member, has_set_exists);
 	}
 	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot);
@@ -892,7 +892,7 @@ static void spl_array_unset_property(zval *object, zval *member, void **cache_sl
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		spl_array_unset_dimension(object, member);
 		return;
 	}
