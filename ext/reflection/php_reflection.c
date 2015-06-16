@@ -667,7 +667,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	}
 	if (arg_info->class_name) {
 		string_printf(str, "%s ",
-			(fptr->type == ZEND_INTERNAL_FUNCTION) ?
+			(fptr->type == ZEND_INTERNAL_FUNCTION &&
+			 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
 			((zend_internal_arg_info*)arg_info)->class_name :
 			arg_info->class_name->val);
 		if (arg_info->allow_null) {
@@ -687,7 +688,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	}
 	if (arg_info->name) {
 		string_printf(str, "$%s",
-			(fptr->type == ZEND_INTERNAL_FUNCTION) ?
+			(fptr->type == ZEND_INTERNAL_FUNCTION &&
+			 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
 			((zend_internal_arg_info*)arg_info)->name :
 			arg_info->name->val);
 	} else {
@@ -891,7 +893,8 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 		string_printf(str, "  %s- Return [ ", indent);
 		if (fptr->common.arg_info[-1].class_name) {
 			string_printf(str, "%s ",
-				(fptr->type == ZEND_INTERNAL_FUNCTION) ?
+				(fptr->type == ZEND_INTERNAL_FUNCTION &&
+				 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
 					((zend_internal_arg_info*)(fptr->common.arg_info - 1))->class_name :
 					fptr->common.arg_info[-1].class_name->val);
 			if (fptr->common.arg_info[-1].allow_null) {
@@ -1224,7 +1227,8 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	zval name;
 
 	if (arg_info->name) {
-		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
+		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 			ZVAL_STRING(&name, ((zend_internal_arg_info*)arg_info)->name);
 		} else {
 			ZVAL_STR_COPY(&name, arg_info->name);
@@ -2340,7 +2344,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 	uint32_t num_args;
 	zend_class_entry *ce = NULL;
 	zend_bool is_closure = 0;
-	zend_bool is_invoke = 0;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zz", &reference, &parameter) == FAILURE) {
 		return;
@@ -2405,7 +2408,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
-					is_invoke = 1;
 				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, lcname, lcname_len)) == NULL) {
 					efree(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -2462,7 +2464,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 		position= -1;
 		convert_to_string_ex(parameter);
-		if (!is_invoke && fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
+		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
 					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, Z_STRVAL_P(parameter)) == 0) {
@@ -2498,7 +2501,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 	}
 
 	if (arg_info[position].name) {
-		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
+		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 			ZVAL_STRING(&name, ((zend_internal_arg_info*)arg_info)[position].name);
 		} else {
 			ZVAL_STR_COPY(&name, arg_info[position].name);
@@ -2621,9 +2625,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		size_t class_name_len;
 
 		if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-		    /* Closure::__invoke() reuses arg_info of user function and
-		     * don't set ZEND_ACC_HAS_TYPE_HINTS flag */
-		    (param->fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 			class_name = ((zend_internal_arg_info*)param->arg_info)->class_name;
 			class_name_len = strlen(class_name);
 		} else {
@@ -2698,7 +2700,8 @@ ZEND_METHOD(reflection_parameter, getType)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if ((param->fptr->type == ZEND_INTERNAL_FUNCTION ?
+	if (((param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+	      !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
 		((zend_internal_arg_info*)param->arg_info)->type_hint :
 		param->arg_info->type_hint) == 0)
 	{
@@ -2993,7 +2996,8 @@ ZEND_METHOD(reflection_type, __toString)
 		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
 		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
 		case IS_OBJECT:
-			if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
+			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 				if (!(param->fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
 				}

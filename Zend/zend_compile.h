@@ -214,6 +214,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_DTOR		0x4000
 #define ZEND_ACC_CLONE		0x8000
 
+/* method flag used by Closure::__invoke() */
+#define ZEND_ACC_USER_ARG_INFO 0x80
+
 /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
 
