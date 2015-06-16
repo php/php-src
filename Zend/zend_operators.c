@@ -144,7 +144,7 @@ try_again:
 				ZVAL_UNREF(op);
 			} else {
 				Z_DELREF_P(op);
-				ZVAL_COPY_VALUE(op, Z_REFVAL_P(op));
+				ZVAL_COPY(op, Z_REFVAL_P(op));
 			}
 			goto try_again;
 		case IS_STRING:
