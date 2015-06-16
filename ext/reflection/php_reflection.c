@@ -2998,9 +2998,7 @@ ZEND_METHOD(reflection_type, __toString)
 		case IS_OBJECT:
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				if (!(param->fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-					RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
-				}
+				RETURN_STRING(((zend_internal_arg_info*)param->arg_info)->class_name);
 			}
 			RETURN_STR_COPY(param->arg_info->class_name);
 		case IS_STRING:   RETURN_STRINGL("string", sizeof("string") - 1);
