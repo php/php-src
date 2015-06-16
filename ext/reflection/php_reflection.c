@@ -2654,7 +2654,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 			ce = ce->parent;
 		} else {
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
-			    (param->fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 				zend_string *name = zend_string_init(class_name, class_name_len, 0);
 				ce = zend_lookup_class(name);
 				zend_string_release(name);
