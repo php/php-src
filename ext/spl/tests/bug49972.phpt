@@ -8,7 +8,7 @@ $iterator->undefined();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Call to undefined method AppendIterator::undefined() in %s:%d
+Fatal error: Uncaught Error: Call to undefined method AppendIterator::undefined() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

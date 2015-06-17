@@ -10,25 +10,25 @@ set_error_handler(function($errno, $errstr){
 
 try {
 	new CallbackFilterIterator();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 
 try {
 	new CallbackFilterIterator(null);
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 
 try {
 	new CallbackFilterIterator(new ArrayIterator(array()), null);
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 
 try {
 	new CallbackFilterIterator(new ArrayIterator(array()), array());
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 

@@ -16,13 +16,13 @@ class TestClass
 try {
 	echo "Too few arguments:\n";
 	$methodInfo = new ReflectionMethod();
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	echo "\nToo many arguments:\n";
 	$methodInfo = new ReflectionMethod("TestClass", "foo", true);
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
@@ -45,7 +45,7 @@ try {
 try{
 	//invalid 2nd param
 	$methodInfo = new ReflectionMethod("TestClass", []);
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

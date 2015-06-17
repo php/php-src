@@ -4,7 +4,7 @@ SPL: RecursiveTreeIterator(non-traversable)
 <?php
 try {
 	new RecursiveTreeIterator(new ArrayIterator(array()));
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>

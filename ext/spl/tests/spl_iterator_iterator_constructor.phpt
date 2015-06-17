@@ -15,7 +15,7 @@ try {
     $test = new IteratorIterator($arrayIterator, 1, 1);
     $test = new IteratorIterator($arrayIterator, 1, 1, 1);
     $test = new IteratorIterator($arrayIterator, 1, 1, 1, 1);
-} catch (TypeException $e){
+} catch (TypeError $e){
   echo $e->getMessage() . "\n";
 }
 

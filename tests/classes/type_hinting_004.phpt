@@ -18,32 +18,32 @@ Ensure type hints are enforced for functions invoked as callbacks.
   }
   try {
     call_user_func('f1', 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func('f1', new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func('f2', 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func('f2');
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func('f2', new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func('f2', null);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   
@@ -67,32 +67,32 @@ Ensure type hints are enforced for functions invoked as callbacks.
 
   try {
     call_user_func(array('C', 'f1'), 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array('C', 'f1'), new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array('C', 'f2'), 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array('C', 'f2'));
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array('C', 'f2'), new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array('C', 'f2'), null);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   
@@ -117,32 +117,32 @@ Ensure type hints are enforced for functions invoked as callbacks.
 
   try {
     call_user_func(array($d, 'f1'), 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array($d, 'f1'), new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array($d, 'f2'), 1);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array($d, 'f2'));
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array($d, 'f2'), new A);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   try {
     call_user_func(array($d, 'f2'), null);
-  } catch (EngineException $ex) {
+  } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
   

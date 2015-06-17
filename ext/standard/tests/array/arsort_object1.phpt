@@ -87,7 +87,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing arsort() : object functionality ***
 
-Fatal error: Uncaught EngineException: Class 'for_integer_asort' not found in %sarsort_object1.php:%d
+Fatal error: Uncaught Error: Class 'for_integer_asort' not found in %sarsort_object1.php:%d
 Stack trace:
 #0 {main}
   thrown in %sarsort_object1.php on line %d

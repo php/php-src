@@ -5,19 +5,19 @@ SPL: FixedArray: Invalid arguments
 
 try {
 	$a = new SplFixedArray(new stdClass);
-} catch (TypeException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 try {
 	$a = new SplFixedArray('FOO');
-} catch (TypeException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 try {
 	$a = new SplFixedArray('');
-} catch (TypeException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 

@@ -41,7 +41,7 @@ Warning: intlcal_get_day_of_week_type() expects parameter 2 to be integer, strin
 Warning: intlcal_get_day_of_week_type(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeException: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, integer given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_day_of_week_type(1, 1)
 #1 {main}

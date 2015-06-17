@@ -7,7 +7,7 @@ assert.exception=1
 <?php
 try {
     assert(false);
-} catch (AssertionException $ex) {
+} catch (AssertionError $ex) {
     var_dump($ex->getMessage());
 }
 ?>
