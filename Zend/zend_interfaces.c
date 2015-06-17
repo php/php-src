@@ -551,23 +551,20 @@ const zend_function_entry zend_funcs_serializable[] = {
 };
 /* }}} */
 
-#define REGISTER_ITERATOR_IMPLEMENT(class_name, interface_name) \
-	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
-
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
-	REGISTER_INTERFACE(traversable, Traversable);
+	REGISTER_MAGIC_INTERFACE(traversable, Traversable);
 
-	REGISTER_INTERFACE(aggregate, IteratorAggregate);
-	REGISTER_ITERATOR_IMPLEMENT(aggregate, traversable);
+	REGISTER_MAGIC_INTERFACE(aggregate, IteratorAggregate);
+	REGISTER_MAGIC_IMPLEMENT(aggregate, traversable);
 
-	REGISTER_INTERFACE(iterator, Iterator);
-	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
+	REGISTER_MAGIC_INTERFACE(iterator, Iterator);
+	REGISTER_MAGIC_IMPLEMENT(iterator, traversable);
 
-	REGISTER_INTERFACE(arrayaccess, ArrayAccess);
+	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
 
-	REGISTER_INTERFACE(serializable, Serializable);
+	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
 }
 /* }}} */
 

@@ -792,7 +792,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_class_entry ce;
 	zend_property_info *prop;
 	
-	REGISTER_INTERFACE(throwable, Throwable);
+	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
