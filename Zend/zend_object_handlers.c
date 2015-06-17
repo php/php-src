@@ -628,6 +628,12 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 				goto found;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
 				zend_assign_to_variable(variable_ptr, value, IS_CV);
@@ -815,20 +821,31 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				}
 			}
 		} else {
-			if (UNEXPECTED(!zobj->properties) ||
-			    UNEXPECTED((retval = zend_hash_find(zobj->properties, name)) == NULL)) {
-				if (EXPECTED(!zobj->ce->__get) ||
-				    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
-					if (UNEXPECTED(!zobj->properties)) {
-						rebuild_object_properties(zobj);
+			if (EXPECTED(zobj->properties)) {
+				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_REFCOUNT(zobj->properties)--;
 					}
-					retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
-					/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
-					 * being overwritten in an error handler. */
-					if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-						zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, name->val);
+					zobj->properties = zend_array_dup(zobj->properties);
+				}
+			    if (EXPECTED((retval = zend_hash_find(zobj->properties, name)) != NULL)) {
+					if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
+						zend_string_release(name);
 					}
-	        	}
+					return retval;
+			    }
+			}
+			if (EXPECTED(!zobj->ce->__get) ||
+			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
+				if (UNEXPECTED(!zobj->properties)) {
+					rebuild_object_properties(zobj);
+				}
+				retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
+				/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
+				 * being overwritten in an error handler. */
+				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+					zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, name->val);
+				}
 			}
 		}
 	}
@@ -866,9 +883,16 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 				ZVAL_UNDEF(slot);
 				goto exit;
 			}
-		} else if (EXPECTED(zobj->properties != NULL) &&
-        	EXPECTED(zend_hash_del(zobj->properties, Z_STR_P(member)) != FAILURE)) {
-			goto exit;
+		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
+			if (EXPECTED(zend_hash_del(zobj->properties, Z_STR_P(member)) != FAILURE)) {
+				goto exit;
+			}
 		}
 	} else if (UNEXPECTED(EG(exception))) {
 		goto exit;

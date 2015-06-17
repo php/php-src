@@ -1151,6 +1151,12 @@ ZEND_FUNCTION(get_object_vars)
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
 		/* fast copy */
+		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
+			if (EXPECTED(!(GC_FLAGS(properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(properties)++;
+			}
+			RETURN_ARR(properties);
+		}
 		RETURN_ARR(zend_array_dup(properties));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));

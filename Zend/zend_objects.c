@@ -55,7 +55,11 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	zval *p, *end;
 
 	if (object->properties) {
-		zend_array_destroy(object->properties);
+		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
+			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+				zend_array_destroy(object->properties);
+			}
+		}
 	}
 	p = object->properties_table;
 	if (EXPECTED(object->ce->default_properties_count)) {
@@ -163,7 +167,17 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			src++;
 			dst++;
 		} while (src != end);
+	} else if (old_object->properties && !old_object->ce->clone) {
+		/* fast copy */
+		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
+			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(old_object->properties)++;
+			}
+			new_object->properties = old_object->properties;
+			return;
+		}
 	}
+
 	if (old_object->properties &&
 	    EXPECTED(zend_hash_num_elements(old_object->properties))) {
 		zval *prop, new_prop;

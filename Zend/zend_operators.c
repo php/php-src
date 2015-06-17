@@ -588,9 +588,24 @@ try_again:
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
 					if (obj_ht) {
 						zval arr;
-						ZVAL_ARR(&arr, zend_array_dup(obj_ht));
-						zval_dtor(op);
-						ZVAL_COPY_VALUE(op, &arr);
+
+						if (!Z_OBJCE_P(op)->default_properties_count && obj_ht == Z_OBJ_P(op)->properties) {
+							/* fast copy */
+							if (EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
+								ZVAL_ARR(&arr, obj_ht);
+								if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(op)->properties) & IS_ARRAY_IMMUTABLE))) {
+									GC_REFCOUNT(Z_OBJ_P(op)->properties)++;
+								}
+							} else {
+								ZVAL_ARR(&arr, zend_array_dup(obj_ht));
+							}
+							zval_dtor(op);
+							ZVAL_COPY_VALUE(op, &arr);
+						} else {
+							ZVAL_ARR(&arr, zend_array_dup(obj_ht));
+							zval_dtor(op);
+							ZVAL_COPY_VALUE(op, &arr);
+						}
 						return;
 					}
 				} else {
