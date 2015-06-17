@@ -32,7 +32,7 @@
 
 static zend_class_entry *base_exception_ce;
 static zend_class_entry *default_exception_ce;
-static zend_class_entry *error_exception_ce;
+static zend_class_entry *error_ce;
 static zend_class_entry *engine_exception_ce;
 static zend_class_entry *parse_exception_ce;
 static zend_class_entry *type_exception_ce;
@@ -747,6 +747,7 @@ void zend_register_default_exception(void) /* {{{ */
 	base_exception_ce->create_object = NULL;
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
+    zend_class_implements(base_exception_ce, 1, zend_ce_throwable);
 
 	zend_declare_property_string(base_exception_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(base_exception_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
@@ -779,21 +780,40 @@ void zend_register_default_exception(void) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	INIT_CLASS_ENTRY(ce, "ErrorException", error_exception_functions);
-	error_exception_ce = zend_register_internal_class_ex(&ce, default_exception_ce);
-	error_exception_ce->create_object = zend_error_exception_new;
-	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED);
+	INIT_CLASS_ENTRY(ce, "Error", NULL);
+	error_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
+	error_ce->create_object = zend_default_exception_new;
+	zend_declare_property_long(error_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED);
 
-	INIT_CLASS_ENTRY(ce, "EngineException", NULL);
-	engine_exception_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
+	/* A trick, to make visible private properties of BaseException */
+	ZEND_HASH_FOREACH_PTR(&error_ce->properties_info, prop) {
+		if (prop->flags & ZEND_ACC_SHADOW) {
+			if (prop->name->len == sizeof("\0BaseException\0string")-1) {
+				prop->flags &= ~ZEND_ACC_SHADOW;
+				prop->flags |= ZEND_ACC_PRIVATE;
+				prop->ce = error_ce;
+			} else if (prop->name->len == sizeof("\0BaseException\0trace")-1) {
+				prop->flags &= ~ZEND_ACC_SHADOW;
+				prop->flags |= ZEND_ACC_PRIVATE;
+				prop->ce = error_ce;
+			} else if (prop->name->len == sizeof("\0BaseException\0previous")-1) {
+				prop->flags &= ~ZEND_ACC_SHADOW;
+				prop->flags |= ZEND_ACC_PRIVATE;
+				prop->ce = error_ce;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	INIT_CLASS_ENTRY(ce, "EngineError", NULL);
+	engine_exception_ce = zend_register_internal_class_ex(&ce, error_ce);
 	engine_exception_ce->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "ParseException", NULL);
-	parse_exception_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
+	INIT_CLASS_ENTRY(ce, "ParseError", NULL);
+	parse_exception_ce = zend_register_internal_class_ex(&ce, error_ce);
 	parse_exception_ce->create_object = zend_default_exception_new;
 
-	INIT_CLASS_ENTRY(ce, "TypeException", NULL);
-	type_exception_ce = zend_register_internal_class_ex(&ce, engine_exception_ce);
+	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
+	type_exception_ce = zend_register_internal_class_ex(&ce, error_ce);
 	type_exception_ce->create_object = zend_default_exception_new;
 }
 /* }}} */
@@ -810,9 +830,9 @@ ZEND_API zend_class_entry *zend_exception_get_default(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_error_exception(void) /* {{{ */
+ZEND_API zend_class_entry *zend_get_error(void) /* {{{ */
 {
-	return error_exception_ce;
+	return error_ce;
 }
 /* }}} */
 
