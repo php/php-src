@@ -427,7 +427,7 @@ static void smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
 	str->s->len += len;
 
 	for (i = 0; i < l; ++i) {
-		char c = s[i];
+		unsigned char c = s[i];
 		if (c < 32 || c == '\\' || c > 126) {
 			*res++ = '\\';
 			switch (c) {
