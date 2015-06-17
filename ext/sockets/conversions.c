@@ -889,7 +889,7 @@ static void from_zval_write_control(const zval			*arr,
 	if (space_left < req_space) {
 		*control_buf = safe_erealloc(*control_buf, 2, req_space, *control_len);
 		*control_len += 2 * req_space;
-		memset(*control_buf + *offset, '\0', *control_len - *offset);
+		memset((char *)*control_buf + *offset, '\0', *control_len - *offset);
 		memcpy(&alloc->data, control_buf, sizeof *control_buf);
 	}
 
