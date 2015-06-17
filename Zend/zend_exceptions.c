@@ -243,7 +243,14 @@ ZEND_METHOD(exception, __construct)
 	int    argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
-		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", base_ce->name->val);
+		zend_class_entry *ce;
+
+		if (execute_data->called_scope) {
+			ce = execute_data->called_scope;
+		} else {
+			ce = zend_get_exception_base(getThis());
+		}
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ce->name->val);
 		return;
 	}
 
