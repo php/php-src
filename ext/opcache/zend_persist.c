@@ -581,9 +581,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				}
 				if (arg_info[i].class_name) {
 					zend_accel_store_interned_string(arg_info[i].class_name);
-					if (arg_info[i].lower_class_name) {
-						zend_accel_store_interned_string(arg_info[i].lower_class_name);
-					}
 				}
 			}
 		}

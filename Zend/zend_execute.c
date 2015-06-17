@@ -585,21 +585,9 @@ ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info
 	}
 }
 
-ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce)
+static zend_always_inline zend_class_entry* zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info)
 {
-	/* optimization to not always recalculate the lowercase name and hash */
-	if (cur_arg_info->lower_class_name) {
-		*pce = zend_hash_find_ptr(EG(class_table), cur_arg_info->lower_class_name);
-	} else { /* "extra" fetch type */
-		*pce = zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
-	}
-
-	*class_name = (*pce) ? (*pce)->name->val : cur_arg_info->class_name->val;
-	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
-		return "implement interface ";
-	} else {
-		return "be an instance of ";
-	}
+	return zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 }
 
 ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
@@ -749,15 +737,15 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 	}
 }
 
-static int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value)
+static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
-	char *need_msg, *class_name;
+	char *need_msg;
 	zend_class_entry *ce;
 
 	if (EXPECTED(arg_num <= zf->common.num_args)) {
 		cur_arg_info = &zf->common.arg_info[arg_num-1];
-	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
+	} else if (UNEXPECTED(zf->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 	} else {
 		return 1;
@@ -767,16 +755,40 @@ static int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, 
 		ZVAL_DEREF(arg);
 		if (EXPECTED(cur_arg_info->type_hint == Z_TYPE_P(arg))) {
 			if (cur_arg_info->class_name) {
-				need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
-				if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
-					zend_verify_arg_error(zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+				if (EXPECTED(*cache_slot)) {
+					ce = (zend_class_entry*)*cache_slot;
+				} else {
+					ce = zend_verify_arg_class_kind(cur_arg_info);
+					if (UNEXPECTED(!ce)) {
+						zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+						return 0;
+					}
+					*cache_slot = (void*)ce;
+				}
+				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
+					need_msg =
+						(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+						"implement interface " : "be an instance of ";
+					zend_verify_arg_error(zf, arg_num, need_msg, ce->name->val, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
 					return 0;
 				}
 			}
 		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
 			if (cur_arg_info->class_name) {
-				need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
-				zend_verify_arg_error(zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg);
+				if (EXPECTED(*cache_slot)) {
+					ce = (zend_class_entry*)*cache_slot;
+				} else {
+					ce = zend_verify_arg_class_kind(cur_arg_info);
+					if (UNEXPECTED(!ce)) {
+						zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+						return 0;
+					}
+					*cache_slot = (void*)ce;
+				}
+				need_msg =
+					(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+					"implement interface " : "be an instance of ";
+				zend_verify_arg_error(zf, arg_num, need_msg, ce->name->val, zend_zval_type_name(arg), "", arg);
 				return 0;
 			} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
@@ -795,7 +807,7 @@ static int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, 
 	return 1;
 }
 
-static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_num)
+static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_num, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -803,7 +815,7 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 
 	if (EXPECTED(arg_num <= zf->common.num_args)) {
 		cur_arg_info = &zf->common.arg_info[arg_num-1];
-	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
+	} else if (UNEXPECTED(zf->common.fn_flags & ZEND_ACC_VARIADIC)) {
 		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 	} else {
 		return 1;
@@ -811,10 +823,20 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 
 	if (cur_arg_info->type_hint) {
 		if (cur_arg_info->class_name) {
-			char *class_name;
-
-			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce);
-			zend_verify_arg_error(zf, arg_num, need_msg, class_name, "none", "", NULL);
+			if (EXPECTED(*cache_slot)) {
+				ce = (zend_class_entry*)*cache_slot;
+			} else {
+				ce = zend_verify_arg_class_kind(cur_arg_info);
+				if (UNEXPECTED(!ce)) {
+					zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "none", "", NULL);
+					return 0;
+				}
+				*cache_slot = (void*)ce;
+			}
+			need_msg =
+				(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+				"implement interface " : "be an instance of ";
+			zend_verify_arg_error(zf, arg_num, need_msg, ce->name->val, "none", "", NULL);
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			zend_verify_arg_error(zf, arg_num, "be callable", "", "none", "", NULL);
 		} else {
@@ -825,10 +847,10 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 	return 1;
 }
 
-static int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num)
+static zend_always_inline int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
 	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
-	    zend_verify_missing_arg_type(EX(func), arg_num)) {
+	    zend_verify_missing_arg_type(EX(func), arg_num, cache_slot)) {
 		const char *class_name = EX(func)->common.scope ? EX(func)->common.scope->name->val : "";
 		const char *space = EX(func)->common.scope ? "::" : "";
 		const char *func_name = EX(func)->common.function_name ? EX(func)->common.function_name->val : "main";
@@ -926,24 +948,48 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 }
 #endif
 
-static void zend_verify_return_type(zend_function *zf, zval *ret)
+static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *ret, void **cache_slot)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
-	char *need_msg, *class_name;
+	char *need_msg;
 	zend_class_entry *ce;
 
 	if (ret_info->type_hint) {
 		if (EXPECTED(ret_info->type_hint == Z_TYPE_P(ret))) {
 			if (ret_info->class_name) {
-				need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-				if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
-					zend_verify_return_error(zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
+				if (EXPECTED(*cache_slot)) {
+					ce = (zend_class_entry*)*cache_slot;
+				} else {
+					ce = zend_verify_arg_class_kind(ret_info);
+					if (UNEXPECTED(!ce)) {
+						zend_verify_return_error(zf, "be an instance of ", ret_info->class_name->val, "instance of ", Z_OBJCE_P(ret)->name->val);
+						return;
+					}
+					*cache_slot = (void*)ce;
+				}
+				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(ret), ce))) {
+					need_msg =
+						(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+						"implement interface " : "be an instance of ";
+					zend_verify_return_error(zf, need_msg, ce->name->val, "instance of ", Z_OBJCE_P(ret)->name->val);
 				}
 			}
 		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
 			if (ret_info->class_name) {
-				need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-				zend_verify_return_error(zf, need_msg, class_name, zend_zval_type_name(ret), "");
+				if (EXPECTED(*cache_slot)) {
+					ce = (zend_class_entry*)*cache_slot;
+				} else {
+					ce = zend_verify_arg_class_kind(ret_info);
+					if (UNEXPECTED(!ce)) {
+						zend_verify_return_error(zf, "be an instance of ", ret_info->class_name->val, zend_zval_type_name(ret), "");
+						return;
+					}
+					*cache_slot = (void*)ce;
+				}
+				need_msg =
+					(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+					"implement interface " : "be an instance of ";
+				zend_verify_return_error(zf, need_msg, ce->name->val, zend_zval_type_name(ret), "");
 			} else if (ret_info->type_hint == IS_CALLABLE) {
 				if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_return_error(zf, "be callable", "", zend_zval_type_name(ret), "");
@@ -958,7 +1004,7 @@ static void zend_verify_return_type(zend_function *zf, zval *ret)
 	}
 }
 
-static inline int zend_verify_missing_return_type(zend_function *zf)
+static zend_always_inline int zend_verify_missing_return_type(zend_function *zf, void **cache_slot)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 	char *need_msg;
@@ -966,10 +1012,20 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 
 	if (ret_info->type_hint) {
 		if (ret_info->class_name) {
-			char *class_name;
-
-			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-			zend_verify_return_error(zf, need_msg, class_name, "none", "");
+			if (EXPECTED(*cache_slot)) {
+				ce = (zend_class_entry*)*cache_slot;
+			} else {
+				ce = zend_verify_arg_class_kind(ret_info);
+				if (UNEXPECTED(!ce)) {
+					zend_verify_return_error(zf, "be an instance of ", ret_info->class_name->val, "none", "");
+					return 0;
+				}
+				*cache_slot = (void*)ce;
+			}
+			need_msg =
+				(ce->ce_flags & ZEND_ACC_INTERFACE) ?
+				"implement interface " : "be an instance of ";
+			zend_verify_return_error(zf, need_msg, ce->name->val, "none", "");
 			return 0;
 		} else if (ret_info->type_hint == IS_CALLABLE) {
 			zend_verify_return_error(zf, "be callable", "", "none", "");

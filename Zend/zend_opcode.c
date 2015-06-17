@@ -410,10 +410,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			}
 			if (arg_info[i].class_name) {
 				zend_string_release(arg_info[i].class_name);
-
-				if (arg_info[i].lower_class_name) {
-					zend_string_release(arg_info[i].lower_class_name);
-				}
 			}
 		}
 		efree(arg_info);

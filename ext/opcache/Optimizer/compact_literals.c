@@ -128,6 +128,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	if (op_array->last_literal) {
+		cache_size = 0;
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
 
 	    /* Mark literals of specific types */
@@ -286,6 +287,19 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_BIND_GLOBAL:
 					LITERAL_INFO(opline->op2.constant, LITERAL_GLOBAL, 0, 1, 1);
 					break;
+				case ZEND_RECV_INIT:
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, 1);
+					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
+						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
+				case ZEND_RECV:
+				case ZEND_VERIFY_RETURN_TYPE:
+					if (opline->op2.num != -1) {
+						opline->op2.num = cache_size;
+						cache_size += sizeof(void *);
+					}
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
@@ -319,7 +333,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 #endif
 
 		/* Merge equal constants */
-		j = 0; cache_size = 0;
+		j = 0;
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
@@ -331,15 +345,24 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
 				case IS_NULL:
-					if (l_null < 0) {
-						l_null = j;
+					if ((info[i].flags & LITERAL_MAY_MERGE)) {
+						if (l_null < 0) {
+							l_null = j;
+							if (i != j) {
+								op_array->literals[j] = op_array->literals[i];
+								info[j] = info[i];
+							}
+							j++;
+						}
+						map[i] = l_null;
+					} else {
+						map[i] = j;
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
 						j++;
 					}
-					map[i] = l_null;
 					break;
 				case IS_FALSE:
 					if (l_false < 0) {

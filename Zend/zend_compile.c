@@ -2032,7 +2032,6 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 }
 /* }}} */
 
-
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
 	if (return_info->type_hint != IS_UNDEF) {
@@ -2041,10 +2040,15 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 			opline->result_type = expr->op_type = IS_TMP_VAR;
 			opline->result.var = expr->u.op.var = get_temporary_variable(CG(active_op_array));
 		}
+		if (return_info->class_name) {
+			opline->op2.num = CG(active_op_array)->cache_size;
+			CG(active_op_array)->cache_size += sizeof(void*);
+		} else {
+			opline->op2.num = -1;
+		}
 	}
 }
 /* }}} */
-
 
 void zend_emit_final_return(zval *zv) /* {{{ */
 {
@@ -4222,7 +4226,6 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 }
 /* }}} */
 
-
 static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{ */
 {
 	if (ast->kind == ZEND_AST_TYPE) {
@@ -4238,11 +4241,9 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
 				zend_assert_valid_class_name(class_name);
-				arg_info->lower_class_name = zend_string_tolower(class_name);
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				zend_string_addref(class_name);
-				arg_info->lower_class_name = NULL;
 			}
 
 			arg_info->type_hint = IS_OBJECT;
@@ -4251,7 +4252,6 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 	}
 }
 /* }}} */
-
 
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 {
@@ -4388,6 +4388,22 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 							"with a %s type hint can only be %s or NULL",
 							zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
 					}
+				}
+			}
+
+			/* Allocate cache slot to speed-up run-time class resolution */
+			if (opline->opcode == ZEND_RECV_INIT) {
+				if (arg_info->class_name) {
+					zend_alloc_cache_slot(opline->op2.constant);
+				} else {
+					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = -1;
+				}
+			} else {
+				if (arg_info->class_name) {
+					opline->op2.num = op_array->cache_size;
+					op_array->cache_size += sizeof(void*);
+				} else {
+					opline->op2.num = -1;
 				}
 			}
 		}
