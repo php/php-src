@@ -188,6 +188,7 @@ ext/iconv/php_have_glibc_iconv.h
 ext/iconv/php_php_iconv_impl.h
 ext/iconv/php_have_iconv.h
 ext/iconv/php_iconv_supports_errno.h
+ext/iconv/php_iconv_broken_ignore.h
 ext/mbstring/libmbfl/Makefile.in
 ext/mbstring/libmbfl/autoscan.log
 ext/mbstring/libmbfl/config.sub
