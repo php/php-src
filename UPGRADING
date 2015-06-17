@@ -328,8 +328,8 @@ Changes to error handling
   may need to be changed to account for this.
 
 * Some fatal errors and recoverable fatal errors now throw an Error instead.
-  As Error is a separate class from Exception, these exceptions will not caught
-  by existing try/catch blocks.
+  As Error is a separate class from Exception, these exceptions will not be
+  caught by existing try/catch blocks.
 
   For the recoverable fatal errors which have been converted into an exception,
   it is no longer possible to silently ignore the error from an error handler.
