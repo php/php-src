@@ -282,7 +282,14 @@ ZEND_METHOD(error_exception, __construct)
 	size_t message_len, filename_len;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
-		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for ErrorException([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])");
+		zend_class_entry *ce;
+
+		if (execute_data->called_scope) {
+			ce = execute_data->called_scope;
+		} else {
+			ce = error_exception_ce;
+		}
+		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ce->name->val);
 		return;
 	}
 
