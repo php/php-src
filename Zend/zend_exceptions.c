@@ -804,7 +804,6 @@ static const zend_function_entry error_exception_functions[] = {
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
-	zend_property_info *prop;
 	
 	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
 
