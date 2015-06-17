@@ -248,7 +248,7 @@ ZEND_METHOD(exception, __construct)
 		if (execute_data->called_scope) {
 			ce = execute_data->called_scope;
 		} else {
-			ce = zend_get_exception_base(getThis());
+			ce = default_exception_ce;
 		}
 		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ce->name->val);
 		return;
