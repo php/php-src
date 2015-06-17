@@ -1,5 +1,5 @@
 --TEST--
-Testing throw exception doesn't crash with wrong params, variant 2
+Test that the original class name is present in the error out when extending ErrorException
 --FILE--
 <?php
 
