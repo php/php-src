@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #69740 (finally in generator (yield) swallows exception in
     iteration). (Nikita)
 
+- GD:
+  . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
+
 - GMP:
   . Fixed bug #69803 (gmp_random_range() modifies second parameter if GMP
     number). (Nikita)
