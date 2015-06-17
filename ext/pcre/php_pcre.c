@@ -1395,10 +1395,13 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 			if ((result = php_replace_in_subject(regex, replace, subject_entry, limit_val, is_callable_replace, &replace_count)) != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
+					zval zv;
+
+					ZVAL_STR(&zv, result);
 					if (string_key) {
-						add_assoc_str_ex(return_value, string_key->val, string_key->len, result);
+						zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &zv);
 					} else {
-						add_index_str(return_value, num_key, result);
+						zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &zv);
 					}
 				} else {
 					zend_string_release(result);
