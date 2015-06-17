@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
 
+- GD:
+  . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
+
 - mysqlnd:
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
     bound variables). (Laruence);
