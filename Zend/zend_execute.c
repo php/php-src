@@ -2428,9 +2428,21 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
 		int __result; \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
-			__result = (_result); \
+			if (UNEXPECTED((opline+1)->op1_type == IS_CONST)) { \
+				zend_uchar __type = Z_TYPE_P(EX_CONSTANT((opline+1)->op1)); \
+				ZEND_ASSERT(__type == IS_TRUE || __type == IS_FALSE); /* assume boolean */ \
+				__result = __type == IS_TRUE; \
+			} else { \
+				__result = (_result); \
+			} \
 		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
-			__result = !(_result); \
+			if (UNEXPECTED((opline+1)->op1_type == IS_CONST)) { \
+				zend_uchar __type = Z_TYPE_P(EX_CONSTANT((opline+1)->op1)); \
+				ZEND_ASSERT(__type == IS_TRUE || __type == IS_FALSE); /* assume boolean */ \
+				__result = __type != IS_TRUE; \
+			} else { \
+				__result = !(_result); \
+			} \
 		} else { \
 			break; \
 		} \

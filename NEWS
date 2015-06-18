@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
+  . Fixed bug #69872 (uninitialised value in strtr with array). (Laruence)
   . Fixed bug #69868 (Invalid read of size 1 in zend_compile_short_circuiting).
     (Laruence)
   . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
