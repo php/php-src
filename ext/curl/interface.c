@@ -3008,7 +3008,7 @@ PHP_FUNCTION(curl_getinfo)
 		}
 #endif
 		if (ch->header.str) {
-			CAASTR("request_header", ch->header.str);
+			CAASTR("request_header", zend_string_copy(ch->header.str));
 		}
 	} else {
 		switch (option) {

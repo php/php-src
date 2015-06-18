@@ -1735,17 +1735,17 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
-		RETURN_ZVAL(&tmp, 0, 1);
+		ZVAL_COPY_VALUE(return_value, &tmp);
 	} else {
 		zval *element;
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
-			RETVAL_ZVAL(element, 1, 0);
+			ZVAL_DEREF(element);
+			ZVAL_COPY(return_value, element);
 		} else {
 			ZVAL_EMPTY_STRING(return_value);
 		}
+		zval_ptr_dtor(&tmp);
 	}
-
-	zval_ptr_dtor(&tmp);
 }
 /* }}} */
 

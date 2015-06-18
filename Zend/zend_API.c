@@ -476,7 +476,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 				zval_dtor(arg);
 				ZVAL_NULL(arg);
 				if (!zend_make_printable_zval(z, arg)) {
-					ZVAL_ZVAL(arg, z, 1, 1);
+					ZVAL_COPY_VALUE(arg, z);
 				}
 				*dest = Z_STR_P(arg);
 				return 1;

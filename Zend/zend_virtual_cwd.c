@@ -553,6 +553,11 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 		return retval;
 	}
 #endif
+	if (!state->cwd) {
+		*length = 0;
+		return NULL;
+	}
+
 	*length = state->cwd_length;
 	return estrdup(state->cwd);
 }
@@ -572,6 +577,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 	if (length > size-1) {
 		efree(cwd);
 		errno = ERANGE; /* Is this OK? */
+		return NULL;
+	}
+	if (!cwd) {
 		return NULL;
 	}
 	memcpy(buf, cwd, length+1);

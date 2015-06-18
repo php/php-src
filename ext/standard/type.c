@@ -101,7 +101,6 @@ PHP_FUNCTION(settype)
 	}
 
 	ZVAL_DEREF(var);
-	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
@@ -155,7 +154,7 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETVAL_ZVAL(num, 1, 0);
+	ZVAL_DUP(return_value, num);
 	convert_to_long_base(return_value, (int)base);
 }
 /* }}} */
@@ -170,8 +169,7 @@ PHP_FUNCTION(floatval)
 		return;
 	}
 
-	RETVAL_ZVAL(num, 1, 0);
-	convert_to_double(return_value);
+	RETURN_DOUBLE(zval_get_double(num));
 }
 /* }}} */
 

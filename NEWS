@@ -1,14 +1,45 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 7.0.0
-
-- CLI server:
-  . Refactor MIME type handling to use a hash table instead of linear search.
-    (Adam)
-  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
-  . Added support for SEARCH WebDav method. (Mats Lindh)
+25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
+  . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
+    extensions are loaded). (Laruence)
+  . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
+    (Laruence)
+  . Fixed bug #69802 (Reflection on Closure::__invoke borks type hint class
+    name). (Dmitry)
+  . Fixed bug #69761 (Serialization of anonymous classes should be prevented).
+    (Laruence)
+  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
+    fault). (Christoph M. Becker)
+  . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
+    7/8/8.1/10 as "Business"). (Christian Wenz)
+
+- mysqlnd:
+  . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
+    bound variables). (Laruence);
+
+- Curl:
+  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
+    yahoo dot com)
+
+- Opcache:
+  . Removed opcache.load_comments configuration directive. Now doc comments
+    loading costs nothing and always enabled. (Dmitry)
+
+- PDO_pgsql:
+  . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
+    Statements when closeCuror() is u). (Philip Hofstetter)
+
+- SPL
+  . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
+
+11 Jun 2015, PHP 7.0.0 Alpha 1
+
+- Core:
+  . Fixed bug #69767 (Default parameter value with wrong type segfaults).
+    (cmb, Laruence)
   . Fixed bug #69756 (Fatal error: Nesting level too deep - recursive dependency
     ? with ===). (Dmitry, Laruence)
   . Fixed bug #69758 (Item added to array not being removed by array_pop/shift
@@ -86,6 +117,12 @@
   . Fixed bug #69511 (Off-by-one buffer overflow in php_sys_readlink).
     (Jan Starke, Anatol)
 
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+  . Added support for SEARCH WebDav method. (Mats Lindh)
+
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
   . Removed support for unsafe file uploads. (Nikita)
@@ -143,6 +180,10 @@
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- libxml:
+  . Fixed handling of big lines in error messages with libxml >= 2.9.0.
+    (Christoph M. Becker)
+
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
   . Removed mcrypt_generic_end() alias. (Nikita)
@@ -191,6 +232,8 @@
 - Reflection
   . Fixed inheritance chain of Reflector interface. (Tjerk)
   . Added ReflectionGenerator class. (Bob)
+  . Added reflection support for return types and type declarations. (Sara,
+    Matteo)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)

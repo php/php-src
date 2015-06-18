@@ -1937,7 +1937,7 @@ end_raw_value_chars:
 	}
 
 	/* Eat leading and trailing double quotes */
-	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
+	if (yyleng > 1 && yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
 	} else if (sc) {

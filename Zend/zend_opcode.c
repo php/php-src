@@ -180,6 +180,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 #else
 		ce->static_members_table = NULL;
 #endif
+		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		while (p != end) {
 			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
 			p++;
@@ -409,6 +410,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			}
 			if (arg_info[i].class_name) {
 				zend_string_release(arg_info[i].class_name);
+
+				if (arg_info[i].lower_class_name) {
+					zend_string_release(arg_info[i].lower_class_name);
+				}
 			}
 		}
 		efree(arg_info);

@@ -61,7 +61,7 @@ Changes to variable handling
       $last = array_pop((getArray()));
       // Strict Standards: Only variables should be passed by reference
 
-  will now throw a strict standards error irregardless of whether parentheses
+  will now throw a strict standards error regardless of whether parentheses
   are used. Previously no notice was generated in the second case.
 
 * Array elements or object properties that are automatically created during
@@ -461,6 +461,10 @@ Other
     IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
     IntlDateFormatter::setTimeZone() instead.
 
+- libxml:
+  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
+    and adds suppport for line numbers >16-bit in the error reporting.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().
@@ -480,6 +484,10 @@ Other
   . session.lazy_write(default=On) INI setting enables only write session data when
     session data is updated.
 
+- Opcache
+  . Removed opcache.load_comments configuration directive. Now doc comments
+    loading costs nothing and always enabled.
+
 - OpenSSL:
   . Removed the "rsa_key_size" SSL context option in favor of automatically
     setting the appropriate size given the negotiated crypto algorithm.
@@ -488,7 +496,7 @@ Other
 
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
-    preg_reaplace_callback() instead.
+    preg_replace_callback() instead.
 
 - PDO_pgsql:
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
@@ -532,6 +540,20 @@ Other
     (RFC: https://wiki.php.net/rfc/generator-delegation)
   . Reserved keywords can now be used in various new contexts.
     (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
+  . Added support for scalar type declatarations and strict mode using
+    declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
+  . Added support for cryptographically secure user land RNG
+    (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
+
+- Opcache
+  . Added second level file based opcode cache (experimental - disabled by
+    default). To enable it, PHP should be configured and built with 
+    --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
+    should be set in php.ini. The second level cache may improve performance
+    at server restart or SHM reset. In addition, it's possibe to use file cache
+    without SHM at all, using opcache.file_cache_only=1 (this may be useful for
+    sharing hosting), and disable file cache consistency check, to speedup
+    loading in cost of safety, using opcache.file_cache_consistency_checks=0.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
@@ -540,7 +562,12 @@ Other
     accessible through stream_get_meta_data() output.
 
 - Reflection
-  . Added a ReflectionGenerator class (yield from Traces, current file/line etc.)
+  . Added a ReflectionGenerator class (yield from Traces, current file/line,
+    etc.)
+  . Added a ReflectionType class to better support the new return type and
+    scalar type declarations features. The new ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType() methods both return an
+    instance of ReflectionType.
 
 ========================================
 3. Changes in SAPI modules
@@ -625,8 +652,14 @@ Other
 - sapi/tux
 - sapi/webjames
 - ext/mssql
+- ext/mysql
 - ext/sybase_ct
-For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+- ext/ereg
+
+For more details see 
+
+https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
 
 NOTE NSAPI was not voted in the RFC, however it was removed afterwards. It turned
 out, that the corresponding SDK isn't available anymore.
@@ -635,6 +668,9 @@ out, that the corresponding SDK isn't available anymore.
 9. Other Changes to Extensions
 ========================================
 
+- Mhash
+  Mhash is not an extension anymore, use function_exists("mhash") to check whether
+  it is avaliable.
 
 ========================================
 10. New Global Constants
@@ -654,7 +690,7 @@ out, that the corresponding SDK isn't available anymore.
   . ZLIB_FINISH
 
 - GD
-  . T1Lib support removed, thrus lifting the optional dependency on T1Lib, the 
+  . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
     following is therefore not available anymore:
 
     Functions:

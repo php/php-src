@@ -1500,8 +1500,8 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(apache_child_terminate) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none()) {
+		return;
 	}
 	if (fcgi_is_fastcgi()) {
 		fcgi_terminate();
@@ -1550,7 +1550,7 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 	} else {
 		return;
 	}
-	add_assoc_stringl_ex(return_value, var, var_len+1, val, val_len);
+	add_assoc_stringl_ex(return_value, var, var_len, val, val_len);
 	if (str) {
 		free_alloca(var, use_heap);
 	}
@@ -1559,8 +1559,8 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none()) {
+		return;
 	}
 	array_init(return_value);
 	if (fcgi_is_fastcgi()) {

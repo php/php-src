@@ -1466,7 +1466,7 @@ PHP_FUNCTION(oci_fetch_all)
 		while (!php_oci_statement_fetch(statement, nrows)) {
 			for (i = 0; i < statement->ncolumns; i++) {
 				php_oci_column_to_zval(columns[ i ], &element, PHP_OCI_RETURN_LOBS);
-				zend_hash_index_update(&(outarrs[ i ])->value.arr->ht, rows, &element);
+				zend_hash_index_update(Z_ARRVAL_P(outarrs[ i ]), rows, &element);
 			}
 
 			rows++;
@@ -1613,7 +1613,7 @@ PHP_FUNCTION(oci_error)
 	}
 
 	if (ZEND_NUM_ARGS() > 0) {
-		statement = (php_oci_statement *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_statement);
+		statement = (php_oci_statement *) zend_fetch_resource_ex(arg, NULL, le_statement);
 		if (statement) {
 			errh = statement->err;
 			errcode = statement->errcode;
@@ -1624,14 +1624,14 @@ PHP_FUNCTION(oci_error)
 			goto go_out;
 		}
 
-		connection = (php_oci_connection *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_connection);
+		connection = (php_oci_connection *) zend_fetch_resource_ex(arg, NULL, le_connection);
 		if (connection) {
 			errh = connection->err;
 			errcode = connection->errcode;
 			goto go_out;
 		}
 
-		connection = (php_oci_connection *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_pconnection);
+		connection = (php_oci_connection *) zend_fetch_resource_ex(arg, NULL, le_pconnection);
 		if (connection) {
 			errh = connection->err;
 			errcode = connection->errcode;
