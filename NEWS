@@ -43,10 +43,10 @@
     (Julien)
   . Fixed bug #69628 (complex GLOB_BRACE fails on Windows).
     (Christoph M. Becker)
-  . Improved fix for bug #69545 (Integer overflow in ftp_genlist()
-    resulting in heap overflow). (Max Spelsberg)
+  . Improved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
+    heap overflow). (CVE-2015-4643) (Max Spelsberg)
   . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
-    (Anatol Belski)
+    (CVE-2015-4642) (Anatol Belski)
   . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
 
 - GD:
@@ -73,7 +73,7 @@
     (Matteo Bernardini, Remi)
 
 - Postgres:
-  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (CVE-2015-4644) (Remi)
 
 - Opcache
   . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
