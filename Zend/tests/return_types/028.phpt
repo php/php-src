@@ -11,7 +11,7 @@ function foo(): stdClass {
 
 try {
 	foo();
-} catch (BaseException $e) {
+} catch (Error $e) {
 	print $e->getMessage();
 }
 

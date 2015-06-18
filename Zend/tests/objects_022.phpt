@@ -36,7 +36,7 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Fatal error: Uncaught TypeException: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo->testFoo(Object(stdClass))
 #1 {main}

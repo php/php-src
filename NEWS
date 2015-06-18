@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
+  . Fixed bug #69872 (uninitialised value in strtr with array). (Laruence)
+  . Fixed bug #69868 (Invalid read of size 1 in zend_compile_short_circuiting).
+    (Laruence)
   . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
     extensions are loaded). (Laruence)
   . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
@@ -15,6 +18,9 @@ PHP                                                                        NEWS
     fault). (Christoph M. Becker)
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
+
+- GD:
+  . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
 
 - mysqlnd:
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to

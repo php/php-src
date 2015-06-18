@@ -54,7 +54,7 @@ const ok
 class ok
 ok
 
-Fatal error: Uncaught EngineException: Undefined constant 'unknown' in %sns_058.php:%d
+Fatal error: Uncaught Error: Undefined constant 'unknown' in %sns_058.php:%d
 Stack trace:
 #0 {main}
   thrown in %sns_058.php on line %d

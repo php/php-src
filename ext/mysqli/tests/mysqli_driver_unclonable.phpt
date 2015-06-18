@@ -10,7 +10,7 @@ Trying to clone mysqli_driver object
 	print "done!";
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Trying to clone an uncloneable object of class mysqli_driver in %s:%d
+Fatal error: Uncaught Error: Trying to clone an uncloneable object of class mysqli_driver in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

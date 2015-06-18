@@ -1357,22 +1357,37 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
+static zend_always_inline int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 {
+#if 1
+	/* first 256 bits for first character, and second 256 bits for the next */
+	static const uint32_t charset[16] = {
+	     /*  31      0   63     32   95     64   127    96 */
+			0x00000000, 0x00000000, 0x87fffffe, 0x07fffffe,
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+	     /*  31      0   63     32   95     64   127    96 */
+			0x00000000, 0x03ff0000, 0x87fffffe, 0x07fffffe,
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
+		};
+#endif
 	size_t i;
-	int ch;
+	uint32_t ch;
 
-	if (!var_name_len) {
+	if (UNEXPECTED(!var_name_len)) {
 		return 0;
 	}
 
 	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
-	ch = (int)((unsigned char *)var_name)[0];
+	ch = (uint32_t)((unsigned char *)var_name)[0];
+#if 1
+	if (UNEXPECTED(!(charset[ch >> 5] & (1 << (ch & 0x1f))))) {
+#else
 	if (var_name[0] != '_' &&
 		(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
 		(ch < 97  /* a    */ || /* z    */ ch > 122) &&
 		(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
 	) {
+#endif
 		return 0;
 	}
 
@@ -1380,13 +1395,17 @@ static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 	if (var_name_len > 1) {
 		i = 1;
 		do {
-			ch = (int)((unsigned char *)var_name)[i];
+			ch = (uint32_t)((unsigned char *)var_name)[i];
+#if 1
+			if (UNEXPECTED(!(charset[8 + (ch >> 5)] & (1 << (ch & 0x1f))))) {
+#else
 			if (var_name[i] != '_' &&
 				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&
 				(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
 				(ch < 97  /* a    */ || /* z    */ ch > 122) &&
 				(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
 			) {
+#endif
 				return 0;
 			}
 		} while (++i < var_name_len);

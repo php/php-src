@@ -16,7 +16,7 @@ $c = new c();
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught EngineException: Call to undefined method b::b() in %s:%d
+Fatal error: Uncaught Error: Call to undefined method b::b() in %s:%d
 Stack trace:
 #0 %s(%d): c->__construct()
 #1 {main}

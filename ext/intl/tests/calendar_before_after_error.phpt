@@ -19,45 +19,45 @@ set_error_handler('eh');
 
 try {
 	var_dump($c->after());
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->before());
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump($c->after(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->before(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try{
 	var_dump($c->after($c, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->before($c, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump(intlcal_after($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_before($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--

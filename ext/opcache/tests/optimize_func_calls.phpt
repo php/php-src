@@ -127,7 +127,7 @@ Array
 string(7) "changed"
 string(7) "changed"
 
-Fatal error: Uncaught EngineException: Cannot pass parameter 1 by reference in %soptimize_func_calls.php:%d
+Fatal error: Uncaught Error: Cannot pass parameter 1 by reference in %soptimize_func_calls.php:%d
 Stack trace:
 #0 {main}
   thrown in %soptimize_func_calls.php on line %d

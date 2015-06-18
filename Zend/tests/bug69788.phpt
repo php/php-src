@@ -1,5 +1,5 @@
 --TEST--
-Bug #69788: Malformed script causes Uncaught EngineException in php-cgi, valgrind SIGILL
+Bug #69788: Malformed script causes Uncaught Error in php-cgi, valgrind SIGILL
 --FILE--
 <?php [t.[]]; ?>
 --EXPECTF--

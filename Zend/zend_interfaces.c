@@ -551,31 +551,20 @@ const zend_function_entry zend_funcs_serializable[] = {
 };
 /* }}} */
 
-#define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
-	{\
-		zend_class_entry ce;\
-		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
-		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
-		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
-	}
-
-#define REGISTER_ITERATOR_IMPLEMENT(class_name, interface_name) \
-	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
-
 /* {{{ zend_register_interfaces */
 ZEND_API void zend_register_interfaces(void)
 {
-	REGISTER_ITERATOR_INTERFACE(traversable, Traversable);
+	REGISTER_MAGIC_INTERFACE(traversable, Traversable);
 
-	REGISTER_ITERATOR_INTERFACE(aggregate, IteratorAggregate);
-	REGISTER_ITERATOR_IMPLEMENT(aggregate, traversable);
+	REGISTER_MAGIC_INTERFACE(aggregate, IteratorAggregate);
+	REGISTER_MAGIC_IMPLEMENT(aggregate, traversable);
 
-	REGISTER_ITERATOR_INTERFACE(iterator, Iterator);
-	REGISTER_ITERATOR_IMPLEMENT(iterator, traversable);
+	REGISTER_MAGIC_INTERFACE(iterator, Iterator);
+	REGISTER_MAGIC_IMPLEMENT(iterator, traversable);
 
-	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
+	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
 
-	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
+	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
 }
 /* }}} */
 

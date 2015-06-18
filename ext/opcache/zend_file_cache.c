@@ -438,9 +438,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->class_name)) {
 					SERIALIZE_STR(p->class_name);
 				}
-				if (p->class_name && !IS_SERIALIZED(p->lower_class_name)) {
-					SERIALIZE_STR(p->lower_class_name);
-				}
 				p++;
 			}
 		}
@@ -964,9 +961,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				}
 				if (!IS_UNSERIALIZED(p->class_name)) {
 					UNSERIALIZE_STR(p->class_name);
-				}
-				if (p->class_name && !IS_UNSERIALIZED(p->lower_class_name)) {
-					UNSERIALIZE_STR(p->lower_class_name);
 				}
 				p++;
 			}

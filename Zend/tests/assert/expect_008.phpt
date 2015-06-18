@@ -12,7 +12,7 @@ class One {
 }
 class Two extends One {}
 
-class OdEar extends AssertionException {}
+class OdEar extends AssertionError {}
 
 function blah(){ return 1; }
 

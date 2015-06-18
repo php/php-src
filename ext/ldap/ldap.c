@@ -96,10 +96,17 @@ static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
 {
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
-	ldap_unbind_s(ld->link);
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+	/* ldap_unbind_s() is deprecated;
+	 * the distinction between ldap_unbind() and ldap_unbind_s() is moot */
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+	ldap_unbind_ext(ld->link, NULL, NULL);
+#ifdef HAVE_3ARG_SETREBINDPROC
 	zval_ptr_dtor(&ld->rebindproc);
 #endif
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+	ldap_unbind_s(ld->link);
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
+
 	efree(ld);
 	LDAPG(num_links)--;
 }
@@ -298,8 +305,14 @@ PHP_MINFO_FUNCTION(ldap)
 PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
-	size_t hostlen;
-	zend_long port = 389; /* Default port */
+	size_t hostlen = 0;
+	zend_long port =
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+	LDAP_PORT
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+	389 /* Default port */
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
+	;
 #ifdef HAVE_ORALDAP
 	char *wallet = NULL, *walletpasswd = NULL;
 	size_t walletlen = 0, walletpasswdlen = 0;
@@ -307,7 +320,7 @@ PHP_FUNCTION(ldap_connect)
 	int ssl=0;
 #endif
 	ldap_linkdata *ld;
-	LDAP *ldap;
+	LDAP *ldap = NULL;
 
 #ifdef HAVE_ORALDAP
 	if (ZEND_NUM_ARGS() == 3 || ZEND_NUM_ARGS() == 4) {
@@ -335,21 +348,37 @@ PHP_FUNCTION(ldap_connect)
 	ld = ecalloc(1, sizeof(ldap_linkdata));
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
-	if (host != NULL && strchr(host, '/')) {
+	/* OpenLDAP provides a specific call to detect valid LDAP URIs;
+	 * ldap_init()/ldap_open() is deprecated, use ldap_initialize() instead.
+	 */
+	{
 		int rc;
+		char	*url = host;
+		if (!ldap_is_ldap_url(url)) {
+			int	urllen = hostlen + sizeof( "ldap://:65535" );
 
-		rc = ldap_initialize(&ldap, host);
+			if (port <= 0 || port > 65535) {
+				php_error_docref(NULL, E_WARNING, "invalid port number: %ld", port);
+				RETURN_FALSE;
+			}
+
+			url = emalloc(urllen);
+			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+		}
+
+		rc = ldap_initialize(&ldap, url);
+		if (url != host) {
+			efree(url);
+		}
 		if (rc != LDAP_SUCCESS) {
 			efree(ld);
 			php_error_docref(NULL, E_WARNING, "Could not create session handle: %s", ldap_err2string(rc));
 			RETURN_FALSE;
 		}
-	} else {
-		ldap = ldap_init(host, port);
 	}
-#else
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
 	ldap = ldap_open(host, port);
-#endif
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 
 	if (ldap == NULL) {
 		efree(ld);
@@ -439,7 +468,21 @@ PHP_FUNCTION(ldap_bind)
 		RETURN_FALSE;
 	}
 
-	if ((rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+	{
+		struct berval   cred;
+
+		/* ldap_bind_s() is deprecated; use ldap_sasl_bind_s() instead */
+		cred.bv_val = ldap_bind_pw;
+		cred.bv_len = ldap_bind_pw ? ldap_bind_pwlen : 0;
+		rc = ldap_sasl_bind_s(ld->link, ldap_bind_dn, LDAP_SASL_SIMPLE, &cred,
+				NULL, NULL,     /* no controls right now */
+				NULL);	  /* we don't care about the server's credentials */
+	}
+#else
+	rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE);
+#endif
+	if ( rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
 		RETURN_FALSE;
 	} else {
@@ -1314,7 +1357,12 @@ PHP_FUNCTION(ldap_explode_dn)
 		add_index_string(return_value, i, ldap_value[i]);
 	}
 
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+	/* ldap_value_free() is deprecated */
+	ber_memvfree((void **)ldap_value);
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
 	ldap_value_free(ldap_value);
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 }
 /* }}} */
 

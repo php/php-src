@@ -1021,6 +1021,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
+	zend_bool quit_immediately = 0;
 	zend_bool remote = 0;
 	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
@@ -1086,7 +1087,9 @@ phpdbg_main:
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
-				phpdbg_startup_run++;
+				if (settings == NULL) {
+					phpdbg_startup_run++;
+				}
 				break;
 			case 'n':
 				ini_ignore = 1;
@@ -1545,7 +1548,7 @@ phpdbg_interact:
 		do {
 			zend_try {
 				if (phpdbg_startup_run) {
-					zend_bool quit_immediately = phpdbg_startup_run > 1;
+					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
 					PHPDBG_COMMAND_HANDLER(run)(NULL);
 					if (quit_immediately) {
@@ -1691,7 +1694,7 @@ phpdbg_out:
 
 	}
 
-	if (cleaning > 0 || remote) {
+	if ((cleaning > 0 || remote) && !quit_immediately) {
 		goto phpdbg_main;
 	}
 

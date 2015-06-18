@@ -35,7 +35,7 @@ test
 derived
 base
 
-Fatal error: Uncaught EngineException: Call to private method base::show() from context 'derived' in %s:%d
+Fatal error: Uncaught Error: Call to private method base::show() from context 'derived' in %s:%d
 Stack trace:
 #0 %s(%d): derived->test()
 #1 {main}

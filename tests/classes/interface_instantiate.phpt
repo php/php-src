@@ -13,7 +13,7 @@ $t = new if_a();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Cannot instantiate interface if_a in %s:%d
+Fatal error: Uncaught Error: Cannot instantiate interface if_a in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -225,9 +225,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			}
 			if (arg_info[i].class_name) {
 				ADD_INTERNED_STRING(arg_info[i].class_name, 1);
-				if (arg_info[i].lower_class_name) {
-					ADD_INTERNED_STRING(arg_info[i].lower_class_name, 1);
-				}
 			}
 		}
 	}

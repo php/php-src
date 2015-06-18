@@ -1559,7 +1559,7 @@ next:
 		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
 		     execute_data->opline->opcode == ZEND_DO_UCALL ||
 		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
-		    execute_data->func->type == ZEND_USER_FUNCTION) {
+		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
 		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		

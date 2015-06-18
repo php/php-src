@@ -44,7 +44,7 @@ var_dump(iterator_apply($it, 'test'));
 echo "===ERRORS===\n";
 try {
 	var_dump(iterator_apply($it, 'test', 1));
-} catch (EngineException $e) {
+} catch (Error $e) {
 	my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 }
 var_dump(iterator_apply($it, 'non_existing_function'));

@@ -14,7 +14,7 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n --rc unknown`);
 var_dump(`"$php" -n --rc stdclass`);
-var_dump(`"$php" -n --rc baseexception`);
+var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
 ?>
@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1368) "Class [ <internal:Core> abstract class BaseException ] {
+string(1544) "Class [ <internal:Core> class Exception implements Throwable ] {
 
   - Constants [0] {
   }
@@ -74,28 +74,28 @@ string(1368) "Class [ <internal:Core> abstract class BaseException ] {
       }
     }
 
-    Method [ <internal:Core> final public method getMessage ] {
+    Method [ <internal:Core, prototype Throwable> final public method getMessage ] {
     }
 
-    Method [ <internal:Core> final public method getCode ] {
+    Method [ <internal:Core, prototype Throwable> final public method getCode ] {
     }
 
-    Method [ <internal:Core> final public method getFile ] {
+    Method [ <internal:Core, prototype Throwable> final public method getFile ] {
     }
 
-    Method [ <internal:Core> final public method getLine ] {
+    Method [ <internal:Core, prototype Throwable> final public method getLine ] {
     }
 
-    Method [ <internal:Core> final public method getTrace ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
     }
 
-    Method [ <internal:Core> final public method getPrevious ] {
+    Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
     }
 
-    Method [ <internal:Core> final public method getTraceAsString ] {
+    Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
     }
 
-    Method [ <internal:Core> public method __toString ] {
+    Method [ <internal:Core, prototype Throwable> public method __toString ] {
     }
   }
 }

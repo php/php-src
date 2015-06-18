@@ -1202,14 +1202,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_missing_arg(execute_data, arg_num))) {
+		if (UNEXPECTED(!zend_verify_missing_arg(execute_data, arg_num, CACHE_ADDR(opline->op2.num)))) {
 			HANDLE_EXCEPTION();
 		}
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, NULL))) {
+		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, NULL, CACHE_ADDR(opline->op2.num)))) {
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -1237,7 +1237,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEN
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 				do {
-					zend_verify_arg_type(EX(func), arg_num, param, NULL);
+					zend_verify_arg_type(EX(func), arg_num, param, NULL, CACHE_ADDR(opline->op2.num));
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
 					param++;
@@ -2354,8 +2354,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 	}
 
 	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+		zval *default_value = EX_CONSTANT(opline->op2);
+
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2)))) {
+		if (UNEXPECTED(!zend_verify_arg_type(EX(func), arg_num, param, default_value, CACHE_ADDR(Z_CACHE_SLOT_P(default_value))))) {
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -7973,13 +7975,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if 0 || (IS_CONST != IS_UNUSED)
 	USE_OPLINE
-#endif
 
 	SAVE_OPLINE();
 	if (IS_CONST == IS_UNUSED) {
-		zend_verify_missing_return_type(EX(func));
+		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CONST != IS_UNUSED)
@@ -8013,7 +8013,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-		zend_verify_return_type(EX(func), retval_ptr);
+		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -13854,13 +13854,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UN
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	USE_OPLINE
-#endif
 
 	SAVE_OPLINE();
 	if (IS_TMP_VAR == IS_UNUSED) {
-		zend_verify_missing_return_type(EX(func));
+		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_TMP_VAR != IS_UNUSED)
@@ -13894,7 +13892,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-		zend_verify_return_type(EX(func), retval_ptr);
+		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op1);
@@ -19605,13 +19603,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if 0 || (IS_VAR != IS_UNUSED)
 	USE_OPLINE
-#endif
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_UNUSED) {
-		zend_verify_missing_return_type(EX(func));
+		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_VAR != IS_UNUSED)
@@ -19645,7 +19641,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-		zend_verify_return_type(EX(func), retval_ptr);
+		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor_nogc(free_op1);
@@ -25379,13 +25375,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUS
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if 0 || (IS_UNUSED != IS_UNUSED)
 	USE_OPLINE
-#endif
 
 	SAVE_OPLINE();
 	if (IS_UNUSED == IS_UNUSED) {
-		zend_verify_missing_return_type(EX(func));
+		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_UNUSED != IS_UNUSED)
@@ -25419,7 +25413,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-		zend_verify_return_type(EX(func), retval_ptr);
+		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 
@@ -35013,13 +35007,11 @@ assign_dim_clean:
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if 0 || (IS_CV != IS_UNUSED)
 	USE_OPLINE
-#endif
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_UNUSED) {
-		zend_verify_missing_return_type(EX(func));
+		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
 #if 0 || (IS_CV != IS_UNUSED)
@@ -35053,7 +35045,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 				SEPARATE_ZVAL_NOREF(retval_ptr);
 			}
 		}
-		zend_verify_return_type(EX(func), retval_ptr);
+		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 

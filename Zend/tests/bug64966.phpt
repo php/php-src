@@ -5,7 +5,7 @@ Bug #64966 (segfault in zend_do_fcall_common_helper_SPEC)
 function test($func) {
 	try {
 		$a = $func("");
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		throw new Exception();
 	}
 	return true;

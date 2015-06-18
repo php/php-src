@@ -26,7 +26,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call to function show()
 
-Fatal error: Uncaught EngineException: Cannot instantiate abstract class fail in %s:%d
+Fatal error: Uncaught Error: Cannot instantiate abstract class fail in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

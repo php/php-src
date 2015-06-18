@@ -10,7 +10,7 @@ if (!class_exists('finfo'))
 try {
     $finfo = new finfo(1, '', false);
     var_dump($finfo);
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 --EXPECTF--

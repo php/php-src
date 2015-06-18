@@ -8,12 +8,12 @@ Steve Seear <stevseea@php.net>
 
 try {
 	new ReflectionMethod();
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	new ReflectionMethod('a', 'b', 'c');
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

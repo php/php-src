@@ -5,7 +5,7 @@ zend.assertions=1
 assert.exception=1
 --FILE--
 <?php
-class MyExpectations extends AssertionException {
+class MyExpectations extends AssertionError {
     public function __toString() {
         return sprintf(
             "[Message]: %s", __CLASS__);
@@ -22,7 +22,7 @@ class Two extends One {}
 new Two();
 ?>
 --EXPECTF--
-Fatal error: Uncaught AssertionException: [Message]: MyExpectations in %sexpect_011.php:%d
+Fatal error: Uncaught AssertionError: [Message]: MyExpectations in %sexpect_011.php:%d
 Stack trace:
 #0 %sexpect_011.php(%d): assert(false, '[Message]: MyEx...')
 #1 %sexpect_011.php(%d): One->__construct()

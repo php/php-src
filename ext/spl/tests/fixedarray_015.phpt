@@ -5,7 +5,7 @@ SPL: FixedArray: accessing uninitialized array
 
 try {
 	$a = new SplFixedArray('');
-} catch (TypeException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
