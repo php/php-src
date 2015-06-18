@@ -5911,6 +5911,7 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
+	opline_jmpz = &CG(active_op_array)->opcodes[opnum_jmpz];
 	GET_NODE(result, opline_jmpz->result);
 
 	opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
