@@ -4406,7 +4406,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 					opline->op2.num = -1;
 				}
 			}
-		}
+		} else {
+			if (opline->opcode == ZEND_RECV_INIT) {
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = -1;
+			} else {
+				opline->op2.num = -1;
+			}
+		}	
 	}
 
 	/* These are assigned at the end to avoid unitialized memory in case of an error */
