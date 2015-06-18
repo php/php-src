@@ -6,9 +6,9 @@ PHP                                                                        NEWS
 
 - Core:
   . Imroved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
-    heap overflow). (Max Spelsberg)
+    heap overflow). (CVE-2015-4643) (Max Spelsberg)
   . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
-    (Anatol Belski)
+    (CVE-2015-4642) (Anatol Belski)
   . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
 
 - Litespeed SAPI:
@@ -19,7 +19,7 @@ PHP                                                                        NEWS
     additional headers). (Yasuo)
 
 - Postgres:
-  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (CVE-2015-4644) (Remi)
 
 - Sqlite3:
   . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
