@@ -13,6 +13,8 @@
     fault). (Christoph M. Becker)
   . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
     7/8/8.1/10 as "Business"). (Christian Wenz)
+  . Fixes bug #69835 (phpinfo() does not report many Windows SKUs).
+    (Christian Wenz)
 
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
