@@ -261,7 +261,7 @@ int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_st
 			zend_string_release(key);
 			key = zend_string_init("_empty_", sizeof("_empty_") - 1, 0);
 		} else if (key->val[0] == '\0') {
-			parser->scanner.errcode = PHP_JSON_ERROR_MANGLED_PROPERTY_NAME;
+			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
 			zend_string_release(key);
 			zval_dtor(zvalue);
 			zval_dtor(object);
