@@ -299,7 +299,7 @@ Changes to string handling
     if (false === $int) {
         throw new Exception("Invalid integer!");
     }
-    var_dump($num); // int(65535)
+    var_dump($int); // int(65535)
 
 * Due to the addition of the Unicode Codepoint Escape Syntax for double-quoted
   strings and heredocs, "\u{" followed by an invalid sequence will now result in
