@@ -394,14 +394,17 @@ char* php_get_windows_name()
 				case PRODUCT_ULTIMATE:
 					sub = "Ultimate Edition";
 					break;
-				case PRODUCT_HOME_PREMIUM:
-					sub = "Home Premium Edition";
-					break;
 				case PRODUCT_HOME_BASIC:
 					sub = "Home Basic Edition";
 					break;
+				case PRODUCT_HOME_PREMIUM:
+					sub = "Home Premium Edition";
+					break;
 				case PRODUCT_ENTERPRISE:
 					sub = "Enterprise Edition";
+					break;
+				case PRODUCT_HOME_BASIC_N:
+					sub = "Home Basic N Edition";
 					break;
 				case PRODUCT_BUSINESS:
 					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
@@ -410,12 +413,17 @@ char* php_get_windows_name()
 						sub = "Business Edition";
 					}
 					break;
-				case PRODUCT_BUSINESS_N:
-					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
-						sub = "Professional N Edition";
-					} else {
-						sub = "Business N Edition";
-					}
+				case PRODUCT_STANDARD_SERVER:
+					sub = "Standard Edition";
+					break;
+				case PRODUCT_DATACENTER_SERVER:
+					sub = "Datacenter Edition";
+					break;
+				case PRODUCT_SMALLBUSINESS_SERVER:
+					sub = "Small Business Server";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER:
+					sub = "Enterprise Edition";
 					break;
 				case PRODUCT_STARTER:
 					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
@@ -424,17 +432,11 @@ char* php_get_windows_name()
 					    sub = "Starter Edition";
 					}
 					break;
-				case PRODUCT_CLUSTER_SERVER:
-					sub = "Cluster Server Edition";
-					break;
-				case PRODUCT_DATACENTER_SERVER:
-					sub = "Datacenter Edition";
-					break;
 				case PRODUCT_DATACENTER_SERVER_CORE:
 					sub = "Datacenter Edition (core installation)";
 					break;
-				case PRODUCT_ENTERPRISE_SERVER:
-					sub = "Enterprise Edition";
+				case PRODUCT_STANDARD_SERVER_CORE:
+					sub = "Standard Edition (core installation)";
 					break;
 				case PRODUCT_ENTERPRISE_SERVER_CORE:
 					sub = "Enterprise Edition (core installation)";
@@ -442,20 +444,192 @@ char* php_get_windows_name()
 				case PRODUCT_ENTERPRISE_SERVER_IA64:
 					sub = "Enterprise Edition for Itanium-based Systems";
 					break;
-				case PRODUCT_SMALLBUSINESS_SERVER:
-					sub = "Small Business Server";
+				case PRODUCT_BUSINESS_N:
+					if ((osvi.dwMajorVersion > 6) || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion > 0)) {
+						sub = "Professional N Edition";
+					} else {
+						sub = "Business N Edition";
+					}
+					break;
+				case PRODUCT_WEB_SERVER:
+					sub = "Web Server Edition";
+					break;
+				case PRODUCT_CLUSTER_SERVER:
+					sub = "HPC Edition";
+					break;
+				case PRODUCT_HOME_SERVER:
+					sub = "Storage Server Essentials Edition";
+					break;
+				case PRODUCT_STORAGE_EXPRESS_SERVER:
+					sub = "Storage Server Express Edition";
+					break;
+				case PRODUCT_STORAGE_STANDARD_SERVER:
+					sub = "Storage Server Standard Edition";
+					break;
+				case PRODUCT_STORAGE_WORKGROUP_SERVER:
+					sub = "Storage Server Workgroup Edition";
+					break;
+				case PRODUCT_STORAGE_ENTERPRISE_SERVER:
+					sub = "Storage Server Enterprise Edition";
+					break;
+				case PRODUCT_SERVER_FOR_SMALLBUSINESS:
+					sub = "Essential Server Solutions Edition";
 					break;
 				case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
 					sub = "Small Business Server Premium Edition";
 					break;
-				case PRODUCT_STANDARD_SERVER:
-					sub = "Standard Edition";
+				case PRODUCT_HOME_PREMIUM_N:
+					sub = "Home Premium N Edition";
 					break;
-				case PRODUCT_STANDARD_SERVER_CORE:
-					sub = "Standard Edition (core installation)";
+				case PRODUCT_ENTERPRISE_N:
+					sub = "Enterprise N Edition";
 					break;
-				case PRODUCT_WEB_SERVER:
-					sub = "Web Server Edition";
+				case PRODUCT_ULTIMATE_N:
+					sub = "Ultimate N Edition";
+					break;
+				case PRODUCT_WEB_SERVER_CORE:
+					sub = "Web Server Edition (core installation)";
+					break;
+				case PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT:
+					sub = "Essential Business Server Management Server Edition";
+					break;
+				case PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY:
+					sub = "Essential Business Server Management Security Edition";
+					break;
+				case PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING:
+					sub = "Essential Business Server Management Messaging Edition";
+					break;
+				case PRODUCT_SERVER_FOUNDATION:
+					sub = "Foundation Edition";
+					break;
+				case PRODUCT_HOME_PREMIUM_SERVER:
+					sub = "Home Server 2011 Edition";
+					break;
+				case PRODUCT_SERVER_FOR_SMALLBUSINESS_V:
+					sub = "Essential Server Solutions Edition (without Hyper-V)";
+					break;
+				case PRODUCT_STANDARD_SERVER_V:
+					sub = "Standard Edition (without Hyper-V)";
+					break;
+				case PRODUCT_DATACENTER_SERVER_V:
+					sub = "Datacenter Edition (without Hyper-V)";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER_V:
+					sub = "Enterprise Edition (without Hyper-V)";
+					break;
+				case PRODUCT_DATACENTER_SERVER_CORE_V:
+					sub = "Datacenter Edition (core installation, without Hyper-V)";
+					break;
+				case PRODUCT_STANDARD_SERVER_CORE_V:
+					sub = "Standard Edition (core installation, without Hyper-V)";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER_CORE_V:
+					sub = "Enterprise Edition (core installation, without Hyper-V)";
+					break;
+				case PRODUCT_HYPERV:
+					sub = "Hyper-V Server";
+					break;
+				case PRODUCT_STORAGE_EXPRESS_SERVER_CORE:
+					sub = "Storage Server Express Edition (core installation)";
+					break;
+				case PRODUCT_STORAGE_STANDARD_SERVER_CORE:
+					sub = "Storage Server Standard Edition (core installation)";
+					break;
+				case PRODUCT_STORAGE_WORKGROUP_SERVER_CORE:
+					sub = "Storage Server Workgroup Edition (core installation)";
+					break;
+				case PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE:
+					sub = "Storage Server Enterprise Edition (core installation)";
+					break;
+				case PRODUCT_STARTER_N:
+					sub = "Starter N Edition";
+					break;
+				case PRODUCT_PROFESSIONAL:
+					sub = "Professional Edition";
+					break;
+				case PRODUCT_PROFESSIONAL_N:
+					sub = "Professional N Edition";
+					break;
+				case PRODUCT_SB_SOLUTION_SERVER:
+					sub = "Small Business Server 2011 Essentials Edition";
+					break;
+				case PRODUCT_SERVER_FOR_SB_SOLUTIONS:
+					sub = "Server For SB Solutions Edition";
+					break;
+				case PRODUCT_STANDARD_SERVER_SOLUTIONS:
+					sub = "Solutions Premium Edition";
+					break;
+				case PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE:
+					sub = "Solutions Premium Edition (core installation)";
+					break;
+				case PRODUCT_SB_SOLUTION_SERVER_EM:
+					sub = "Server For SB Solutions EM Edition";
+					break;
+				case PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM:
+					sub = "Server For SB Solutions EM Edition";
+					break;
+				case PRODUCT_SOLUTION_EMBEDDEDSERVER:
+					sub = "MultiPoint Server Edition";
+					break;
+				case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT:
+					sub = "Essential Server Solution Management Edition";
+					break;
+				case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL:
+					sub = "Essential Server Solution Additional Edition";
+					break;
+				case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC:
+					sub = "Essential Server Solution Management SVC Edition";
+					break;
+				case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC:
+					sub = "Essential Server Solution Additional SVC Edition";
+					break;
+				case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE:
+					sub = "Small Business Server Premium Edition (core installation)";
+					break;
+				case PRODUCT_CLUSTER_SERVER_V:
+					sub = "Hyper Core V Edition";
+					break;
+				case PRODUCT_STARTER_E:
+					sub = "Hyper Core V Edition";
+					break;
+				case PRODUCT_ENTERPRISE_EVALUATION:
+					sub = "Enterprise Edition (evaluation installation)";
+					break;
+				case PRODUCT_MULTIPOINT_STANDARD_SERVER:
+					sub = "MultiPoint Server Standard Edition (full installation)";
+					break;
+				case PRODUCT_MULTIPOINT_PREMIUM_SERVER:
+					sub = "MultiPoint Server Premium Edition (full installation)";
+					break;
+				case PRODUCT_STANDARD_EVALUATION_SERVER:
+					sub = "Standard Edition (evaluation installation)";
+					break;
+				case PRODUCT_DATACENTER_EVALUATION_SERVER:
+					sub = "Datacenter Edition (evaluation installation)";
+					break;
+				case PRODUCT_ENTERPRISE_N_EVALUATION:
+					sub = "Enterprise N Edition (evaluation installation)";
+					break;
+				case PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER:
+					sub = "Storage Server Workgroup Edition (evaluation installation)";
+					break;
+				case PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER:
+					sub = "Storage Server Standard Edition (evaluation installation)";
+					break;
+				case PRODUCT_CORE_N:
+					sub = "Windows 8 N Edition";
+					break;
+				case PRODUCT_CORE_COUNTRYSPECIFIC:
+					sub = "Windows 8 China Edition";
+					break;
+				case PRODUCT_CORE_SINGLELANGUAGE:
+					sub = "Windows 8 Single Language Edition";
+					break;
+				case PRODUCT_CORE:
+					sub = "Windows 8 Edition";
+					break;
+				case PRODUCT_PROFESSIONAL_WMC:
+					sub = "Professional with Media Center Edition";
 					break;
 			}
 		}
