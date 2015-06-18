@@ -11,6 +11,11 @@ var_dump(preg_replace('/(?<!k)/u', '*', 'm'));
 // Sinhala characters
 preg_match_all('/(?<!ක)/u', 'ම', $matches, PREG_OFFSET_CAPTURE);
 var_dump($matches);
+// invalid UTF-8
+var_dump(preg_replace('/(?<!ක)/u', '*', "\xFCක"));
+var_dump(preg_replace('/(?<!ක)/u', '*', "ක\xFC"));
+var_dump(preg_match_all('/(?<!ක)/u', "\xFCම", $matches, PREG_OFFSET_CAPTURE));
+var_dump(preg_match_all('/(?<!ක)/u', "\xFCම", $matches, PREG_OFFSET_CAPTURE));
 ?>
 --EXPECT--
 string(4) "*ක"
@@ -36,3 +41,7 @@ array(1) {
     }
   }
 }
+NULL
+NULL
+bool(false)
+bool(false)
