@@ -242,20 +242,20 @@ ZEND_METHOD(exception, __construct)
 	zend_class_entry *base_ce;
 	int    argc = ZEND_NUM_ARGS();
 
+	object = getThis();
+	base_ce = zend_get_exception_base(object);
+
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SlO!", &message, &code, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
 		if (execute_data->called_scope) {
 			ce = execute_data->called_scope;
 		} else {
-			ce = default_exception_ce;
+			ce = base_ce;
 		}
 		zend_error(E_EXCEPTION | E_ERROR, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ce->name->val);
 		return;
 	}
-
-	object = getThis();
-	base_ce = zend_get_exception_base(object);
 
 	if (message) {
 		zend_update_property_str(base_ce, object, "message", sizeof("message")-1, message);
