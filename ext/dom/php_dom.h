@@ -132,7 +132,8 @@ int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty);
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = dom_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
+entry = zend_register_internal_class_ex(&ce, parent_ce); \
+entry->ce_flags |= ZEND_ACC_USE_GUARDS;
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
