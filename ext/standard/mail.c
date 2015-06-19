@@ -225,7 +225,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 	size_t len;
 
-	if (!hdr) {
+	if (!hdr || !strlen(hdr)) {
 		return 0;
 	}
 
@@ -320,7 +320,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		efree(f);
 	}
 
-	if (hdr && strlen(hdr) && php_mail_detect_multiple_crlf(hdr)) {
+	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Multiple or malformed newlines found in additional_header");
 		MAIL_RET(0);
 	}
