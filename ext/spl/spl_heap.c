@@ -694,10 +694,6 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value_out)) {
-		Z_ADDREF_P(value_out);
-	}
-
 	RETVAL_ZVAL(value_out, 1, 0);
 	zval_ptr_dtor(&value);
 }
