@@ -182,6 +182,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	int previndex=0;
 	HashTable *nodeht;
 	zval *entry;
+	zend_bool do_curobj_undef = 1;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -201,6 +202,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					zval_ptr_dtor(&iterator->curobj);
 					ZVAL_UNDEF(&iterator->curobj);
 					ZVAL_COPY(&iterator->curobj, entry);
+					do_curobj_undef = 0;
 				}
 			} else {
 				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
@@ -231,7 +233,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 		}
 	}
 err:
-	if (IS_UNDEF != Z_TYPE(iterator->curobj)) {
+	if (do_curobj_undef) {
 		zval_ptr_dtor(&iterator->curobj);
 		ZVAL_UNDEF(&iterator->curobj);
 	}
