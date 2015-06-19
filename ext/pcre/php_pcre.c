@@ -1082,7 +1082,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
 	size_offsets = num_subpats * 3;
-	offsets = (int *)do_alloca_ex(size_offsets * sizeof(int), 32 * sizeof(int), use_heap);
+	if (size_offsets <= 32) {
+		offsets = (int *)do_alloca(size_offsets * sizeof(int), use_heap);
+	} else {
+		offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
+	}
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will
@@ -1279,7 +1283,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		start_offset = offsets[1];
 	}
 
-	free_alloca(offsets, use_heap);
+	if (size_offsets <= 32) {
+		free_alloca(offsets, use_heap);
+	} else {
+		efree(offsets);
+	}
 	if (UNEXPECTED(subpat_names)) {
 		efree(subpat_names);
 	}
