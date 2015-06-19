@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixes bug #69835 (phpinfo() does not report many Windows SKUs).
     (Christian Wenz)
 
+- DOM:
+  . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
+    DOMNodeList). (Anatol Belski)
+
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
 
