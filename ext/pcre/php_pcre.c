@@ -1029,8 +1029,7 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zval *replace_val,
-	int is_callable_replace, int limit, int *replace_count)
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
@@ -1058,19 +1057,22 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	unsigned char   *mark = NULL;       /* Target for MARK name */
 	zend_string		*result;			/* Result of replacement */
 	zend_string     *eval_result=NULL;  /* Result of custom function */
+
 	ALLOCA_FLAG(use_heap);
 
 	if (extra == NULL) {
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
 	}
+
 	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 
-	if (pce->preg_options & PREG_REPLACE_EVAL) {
+	if (UNEXPECTED(pce->preg_options & PREG_REPLACE_EVAL)) {
 		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
 		return NULL;
 	}
+
 	if (!is_callable_replace) {
 		replace = Z_STRVAL_P(replace_val);
 		replace_len = (int)Z_STRLEN_P(replace_val);
@@ -1080,18 +1082,14 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
 	size_offsets = num_subpats * 3;
-	if (size_offsets <= 32) {
-		offsets = (int *)do_alloca(size_offsets * sizeof(int), use_heap);
-	} else {
-		offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
-	}
+	offsets = (int *)do_alloca_ex(size_offsets * sizeof(int), 32 * sizeof(int), use_heap);
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will
 	 * allocate the table only if there are any named subpatterns.
 	 */
 	subpat_names = NULL;
-	if (pce->name_count > 0) {
+	if (UNEXPECTED(pce->name_count > 0)) {
 		subpat_names = make_subpats_table(num_subpats, pce);
 		if (!subpat_names) {
 			return NULL;
@@ -1120,29 +1118,30 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		exoptions |= PCRE_NO_UTF8_CHECK;
 
 		/* Check for too many substrings condition. */
-		if (count == 0) {
+		if (UNEXPECTED(count == 0)) {
 			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets/3;
+			count = size_offsets / 3;
 		}
 
 		piece = subject + start_offset;
 
-		if (count > 0 && (limit == -1 || limit > 0)) {
-			if (replace_count) {
+		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
+		if (EXPECTED(count > 0 && limit)) {
+			if (UNEXPECTED(replace_count)) {
 				++*replace_count;
 			}
+
 			/* Set the match location in subject */
 			match = subject + offsets[0];
 
 			new_len = result_len + offsets[0] - start_offset; /* part before the match */
 			
-			if (is_callable_replace) {
-				/* Use custom function to get replacement string and its length. */
-				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark);
-				new_len += (int)eval_result->len;
-			} else { /* do regular substitution */
+			/* if (!is_callable_replace) */
+			if (EXPECTED(replace)) {
+				/* do regular substitution */
 				walk = replace;
 				walk_last = 0;
+
 				while (walk < replace_end) {
 					if ('\\' == *walk || '$' == *walk) {
 						if (walk_last == '\\') {
@@ -1160,33 +1159,23 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					walk++;
 					walk_last = walk[-1];
 				}
-			}
 
-			if (new_len >= alloc_len) {
-				if (alloc_len == 0) {
-					alloc_len = 2 * subject_len;
-					if (new_len >= alloc_len) {
-						alloc_len = alloc_len + 2 * new_len;
-					}
-					result = zend_string_alloc(alloc_len, 0);
-				} else {
+				if (new_len >= alloc_len) {
 					alloc_len = alloc_len + 2 * new_len;
-					result = zend_string_extend(result, alloc_len, 0);
+					if (result == NULL) {
+						result = zend_string_alloc(alloc_len, 0);
+					} else {
+						result = zend_string_extend(result, alloc_len, 0);
+					}
 				}
-			}
-			/* copy the part of the string before the match */
-			memcpy(&result->val[result_len], piece, match-piece);
-			result_len += (int)(match-piece);
 
-			/* copy replacement and backrefs */
-			walkbuf = result->val + result_len;
-			
-			/* If using custom function, copy result to the buffer and clean up. */
-			if (is_callable_replace) {
-				memcpy(walkbuf, eval_result->val, eval_result->len);
-				result_len += (int)eval_result->len;
-				if (eval_result) zend_string_release(eval_result);
-			} else { /* do regular backreference copying */
+				/* copy the part of the string before the match */
+				memcpy(&result->val[result_len], piece, match-piece);
+				result_len += (int)(match-piece);
+
+				/* copy replacement and backrefs */
+				walkbuf = result->val + result_len;
+
 				walk = replace;
 				walk_last = 0;
 				while (walk < replace_end) {
@@ -1211,12 +1200,36 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				result_len += (int)(walkbuf - (result->val + result_len));
+			} else {
+				/* Use custom function to get replacement string and its length. */
+				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark);
+				ZEND_ASSERT(eval_result);
+				new_len += (int)eval_result->len;
+				if (new_len >= alloc_len) {
+					alloc_len = alloc_len + 2 * new_len;
+					if (result == NULL) {
+						result = zend_string_alloc(alloc_len, 0);
+					} else {
+						result = zend_string_extend(result, alloc_len, 0);
+					}
+				}
+				/* copy the part of the string before the match */
+				memcpy(&result->val[result_len], piece, match-piece);
+				result_len += (int)(match-piece);
+
+				/* copy replacement and backrefs */
+				walkbuf = result->val + result_len;
+
+				/* If using custom function, copy result to the buffer and clean up. */
+				memcpy(walkbuf, eval_result->val, eval_result->len);
+				result_len += (int)eval_result->len;
+				zend_string_release(eval_result);
 			}
 
-			if (limit != -1)
+			if (EXPECTED(limit)) {
 				limit--;
-
-		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
+			}
+		} else if (count == PCRE_ERROR_NOMATCH || UNEXPECTED(limit == 0)) {
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
@@ -1266,12 +1279,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		start_offset = offsets[1];
 	}
 
-	if (size_offsets <= 32) {
-		free_alloca(offsets, use_heap);
-	} else {
-		efree(offsets);
-	}
-	if (subpat_names) {
+	free_alloca(offsets, use_heap);
+	if (UNEXPECTED(subpat_names)) {
 		efree(subpat_names);
 	}
 
