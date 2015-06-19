@@ -5900,25 +5900,8 @@ void zend_compile_short_circuiting(znode *result, zend_ast *ast) /* {{{ */
 		opline_jmpz->result_type = IS_TMP_VAR;
 	}
 
-	zend_compile_expr(&right_node, right_ast);
-
-	if (right_node.op_type == IS_CONST && opnum_jmpz == get_next_op_number(CG(active_op_array)) - 1) {
-		if ((ast->kind == ZEND_AST_AND && !zend_is_true(&right_node.u.constant))
-		 || (ast->kind == ZEND_AST_OR && zend_is_true(&right_node.u.constant))) {
-			CG(active_op_array)->last--;
-			result->op_type = IS_CONST;
-			ZVAL_BOOL(&result->u.constant, zend_is_true(&right_node.u.constant));
-		} else {
-			opline_jmpz->opcode = ZEND_BOOL;
-			zend_make_var_result(result, opline_jmpz);
-		}
-
-		zval_ptr_dtor(&right_node.u.constant);
-		return;
-	}
-
-	opline_jmpz = &CG(active_op_array)->opcodes[opnum_jmpz];
 	GET_NODE(result, opline_jmpz->result);
+	zend_compile_expr(&right_node, right_ast);
 
 	opline_bool = zend_emit_op(NULL, ZEND_BOOL, &right_node, NULL);
 	SET_NODE(opline_bool->result, result);
