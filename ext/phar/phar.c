@@ -195,8 +195,8 @@ ZEND_INI_MH(phar_ini_cache_list) /* {{{ */
 /* }}} */
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN( "phar.readonly", "1", PHP_INI_ALL, phar_ini_modify_handler, readonly, zend_phar_globals, phar_globals)
-	STD_PHP_INI_BOOLEAN( "phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.readonly", "1", PHP_INI_ALL, phar_ini_modify_handler, readonly, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
 	STD_PHP_INI_ENTRY("phar.cache_list", "", PHP_INI_SYSTEM, phar_ini_cache_list, cache_list, zend_phar_globals, phar_globals)
 PHP_INI_END()
 
