@@ -225,7 +225,6 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size TSR
 
 static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
-	size_t len;
 
 	if (!hdr) {
 		return 0;
