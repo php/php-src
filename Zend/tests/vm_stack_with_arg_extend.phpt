@@ -14,4 +14,4 @@ function f(...$args) {
 
 ?>
 --EXPECT--
-1024
+int(1024)
