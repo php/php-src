@@ -2206,84 +2206,59 @@ ZEND_API int ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, co
 	return SUCCESS;
 }
 
-
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered)
-{
+static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered) {
 	uint32_t idx1, idx2;
-	Bucket *p1, *p2 = NULL;
-	int result;
-	zval *pData1, *pData2;
-
-	IS_CONSISTENT(ht1);
-	IS_CONSISTENT(ht2);
-
-	HASH_PROTECT_RECURSION(ht1);
-	HASH_PROTECT_RECURSION(ht2);
 
 	if (ht1->nNumOfElements != ht2->nNumOfElements) {
-		HASH_UNPROTECT_RECURSION(ht1);
-		HASH_UNPROTECT_RECURSION(ht2);
 		return ht1->nNumOfElements > ht2->nNumOfElements ? 1 : -1;
 	}
 
 	for (idx1 = 0, idx2 = 0; idx1 < ht1->nNumUsed; idx1++) {
-		p1 = ht1->arData + idx1;
-		if (Z_TYPE(p1->val) == IS_UNDEF) continue;
+		Bucket *p1 = ht1->arData + idx1, *p2;
+		zval *pData1, *pData2;
+		int result;
 
+		if (Z_TYPE(p1->val) == IS_UNDEF) continue;
 		if (ordered) {
 			while (1) {
+				ZEND_ASSERT(idx2 != ht2->nNumUsed);
 				p2 = ht2->arData + idx2;
-				if (idx2 == ht2->nNumUsed) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
-					return 1; /* That's not supposed to happen */
-				}
 				if (Z_TYPE(p2->val) != IS_UNDEF) break;
 				idx2++;
 			}
 			if (p1->key == NULL && p2->key == NULL) { /* numeric indices */
 				if (p1->h != p2->h) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
 					return p1->h > p2->h ? 1 : -1;
 				}
 			} else if (p1->key != NULL && p2->key != NULL) { /* string indices */
 				if (p1->key->len != p2->key->len) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
 					return p1->key->len > p2->key->len ? 1 : -1;
 				}
 
 				result = memcmp(p1->key->val, p2->key->val, p1->key->len);
 				if (result != 0) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
 					return result;
 				}
 			} else {
 				/* Mixed key types: A string key is considered as larger */
-				HASH_UNPROTECT_RECURSION(ht1);
-				HASH_UNPROTECT_RECURSION(ht2);
 				return p1->key != NULL ? 1 : -1;
 			}
 			pData2 = &p2->val;
+			idx2++;
 		} else {
 			if (p1->key == NULL) { /* numeric index */
 				pData2 = zend_hash_index_find(ht2, p1->h);
 				if (pData2 == NULL) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
 					return 1;
 				}
 			} else { /* string index */
 				pData2 = zend_hash_find(ht2, p1->key);
 				if (pData2 == NULL) {
-					HASH_UNPROTECT_RECURSION(ht1);
-					HASH_UNPROTECT_RECURSION(ht2);
 					return 1;
 				}
 			}
 		}
+
 		pData1 = &p1->val;
 		if (Z_TYPE_P(pData1) == IS_INDIRECT) {
 			pData1 = Z_INDIRECT_P(pData1);
@@ -2291,6 +2266,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		if (Z_TYPE_P(pData2) == IS_INDIRECT) {
 			pData2 = Z_INDIRECT_P(pData2);
 		}
+
 		if (Z_TYPE_P(pData1) == IS_UNDEF) {
 			if (Z_TYPE_P(pData2) != IS_UNDEF) {
 				return -1;
@@ -2299,20 +2275,28 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 			return 1;
 		} else {
 			result = compar(pData1, pData2);
-		}
-		if (result != 0) {
-			HASH_UNPROTECT_RECURSION(ht1);
-			HASH_UNPROTECT_RECURSION(ht2);
-			return result;
-		}
-		if (ordered) {
-			idx2++;
+			if (result != 0) {
+				return result;
+			}
 		}
 	}
 
+	return 0;
+}
+
+ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered)
+{
+	int result;
+	IS_CONSISTENT(ht1);
+	IS_CONSISTENT(ht2);
+
+	HASH_PROTECT_RECURSION(ht1);
+	HASH_PROTECT_RECURSION(ht2);
+	result = zend_hash_compare_impl(ht1, ht2, compar, ordered);
 	HASH_UNPROTECT_RECURSION(ht1);
 	HASH_UNPROTECT_RECURSION(ht2);
-	return 0;
+
+	return result;
 }
 
 
