@@ -30,7 +30,7 @@ PHP                                                                        NEWS
 
 - mysqlnd:
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
-    bound variables). (Laruence);
+    bound variables). (Laruence)
 
 - Curl:
   . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
@@ -47,6 +47,10 @@ PHP                                                                        NEWS
 
 - SPL
   . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
+
+- Standard
+  . Fixed bug #62922 (Truncating entire string should result in string).
+    (Nikita)
 
 11 Jun 2015, PHP 7.0.0 Alpha 1
 

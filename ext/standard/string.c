@@ -2406,7 +2406,7 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f >= (zend_long)str->len) {
+	if (f > (zend_long)str->len) {
 		RETURN_FALSE;
 	}
 
