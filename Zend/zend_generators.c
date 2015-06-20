@@ -34,53 +34,15 @@ static zend_object *zend_generator_create(zend_class_entry *class_type);
 static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
-	zend_op_array *op_array = &execute_data->func->op_array;
+	/* -1 required because we want the last run opcode, not the next to-be-run one. */
+	uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
 	if (generator->send_target) {
 		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
 		generator->send_target = NULL;
 	}
 
-	/* Manually free loop variables, as execution couldn't reach their
-	 * SWITCH_FREE / FREE opcodes. */
-	{
-		/* -1 required because we want the last run opcode, not the
-		 * next to-be-run one. */
-		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
-
-		int i;
-		for (i = 0; i < op_array->last_brk_cont; ++i) {
-			zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
-
-			if (brk_cont->start < 0) {
-				continue;
-			} else if ((uint32_t)brk_cont->start > op_num) {
-				break;
-			} else if (brk_cont->brk >= 0 && (uint32_t)brk_cont->brk > op_num) {
-				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
-
-				if (brk_opline->opcode == ZEND_FREE) {
-					zval *var = EX_VAR(brk_opline->op1.var);
-					zval_ptr_dtor_nogc(var);
-				} else if (brk_opline->opcode == ZEND_FE_FREE) {
-					zval *var = EX_VAR(brk_opline->op1.var);
-					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-						zend_hash_iterator_del(Z_FE_ITER_P(var));
-					}
-					zval_ptr_dtor_nogc(var);
-				}
-			}
-		}
-	}
-
-	/* If yield was used as a function argument there may be active
-	 * method calls those objects need to be freed */
-	while (execute_data->call) {
-		if (ZEND_CALL_INFO(execute_data->call) & ZEND_CALL_RELEASE_THIS) {
-			OBJ_RELEASE(Z_OBJ(execute_data->call->This));
-		}
-		execute_data->call = execute_data->call->prev_execute_data;
-	}
+	zend_cleanup_unfinished_execution(execute_data, op_num, 0);
 }
 /* }}} */
 
