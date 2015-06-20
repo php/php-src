@@ -42,7 +42,23 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		generator->send_target = NULL;
 	}
 
-	zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+	{
+		/* There may be calls to zend_vm_stack_free_call_frame(), which modifies the VM stack
+		 * globals, so need to load/restore those. */
+		zend_vm_stack original_stack = EG(vm_stack);
+		original_stack->top = EG(vm_stack_top);
+		EG(vm_stack_top) = generator->stack->top;
+		EG(vm_stack_end) = generator->stack->end;
+		EG(vm_stack) = generator->stack;
+
+		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+
+		generator->stack = EG(vm_stack);
+		generator->stack->top = EG(vm_stack_top);
+		EG(vm_stack_top) = original_stack->top;
+		EG(vm_stack_end) = original_stack->end;
+		EG(vm_stack) = original_stack;
+	}
 }
 /* }}} */
 
