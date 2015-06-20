@@ -780,7 +780,11 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 				} else {
 					ce = zend_verify_arg_class_kind(cur_arg_info);
 					if (UNEXPECTED(!ce)) {
-						zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+						if (Z_TYPE_P(arg) == IS_OBJECT) {
+							zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "instance of ", Z_OBJCE_P(arg)->name->val, arg);
+						} else {
+							zend_verify_arg_error(zf, arg_num, "be an instance of ", cur_arg_info->class_name->val, "", zend_zval_type_name(arg), arg);
+						}
 						return 0;
 					}
 					*cache_slot = (void*)ce;
