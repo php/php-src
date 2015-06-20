@@ -2220,11 +2220,10 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	HASH_PROTECT_RECURSION(ht1);
 	HASH_PROTECT_RECURSION(ht2);
 
-	result = ht1->nNumOfElements - ht2->nNumOfElements;
-	if (result!=0) {
+	if (ht1->nNumOfElements != ht2->nNumOfElements) {
 		HASH_UNPROTECT_RECURSION(ht1);
 		HASH_UNPROTECT_RECURSION(ht2);
-		return result;
+		return ht1->nNumOfElements > ht2->nNumOfElements ? 1 : -1;
 	}
 
 	for (idx1 = 0, idx2 = 0; idx1 < ht1->nNumUsed; idx1++) {

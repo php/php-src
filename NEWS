@@ -24,6 +24,7 @@ PHP                                                                        NEWS
     (Christian Wenz)
   . Fixed bug #69889 (Null coalesce operator doesn't work for string offsets).
     (Nikita)
+  . Fixed bug #69891 (Unexpected array comparison result). (Nikita)
   . Fixed bug #69892 (Different arrays compare indentical due to integer key
     truncation). (Nikita)
   . Fixed bug #69893 (Strict comparison between integer and empty string keys
