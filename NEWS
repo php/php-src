@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #69872 (uninitialised value in strtr with array). (Laruence)
   . Fixed bug #69868 (Invalid read of size 1 in zend_compile_short_circuiting).
     (Laruence)
+  . Fixed bug #69849 (Broken output of apache_request_headers). (Kalle)
+  . Fixed bug #69840 (iconv_substr() doesn't work with UTF-16BE). (Kalle)
   . Fixed bug #69823 (PHP 7.0.0alpha1 segmentation fault when exactly 33
     extensions are loaded). (Laruence)
   . Fixed bug #69805 (null ptr deref and seg fault in zend_resolve_class_name).
