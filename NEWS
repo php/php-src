@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #69892 (Different arrays compare indentical due to integer key
     truncation). (Nikita)
+  . Fixed bug #69893 (Strict comparison between integer and empty string keys
+    crashes). (Nikita)
 
 - DOM:
   . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
