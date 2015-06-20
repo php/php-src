@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Removed opcache.load_comments configuration directive. Now doc comments
     loading costs nothing and always enabled. (Dmitry)
+  . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
