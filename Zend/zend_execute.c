@@ -1781,9 +1781,11 @@ try_string_offset:
 					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
 						break;
 					}
-					if (type != BP_VAR_IS) {
-						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
+					if (type == BP_VAR_IS) {
+						ZVAL_NULL(result);
+						return;
 					}
+					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					break;
 				case IS_DOUBLE:
 				case IS_NULL:
@@ -1809,8 +1811,10 @@ try_string_offset:
 		if (UNEXPECTED(offset < 0) || UNEXPECTED(Z_STRLEN_P(container) <= (size_t)offset)) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE, "Uninitialized string offset: %pd", offset);
+				ZVAL_EMPTY_STRING(result);
+			} else {
+				ZVAL_NULL(result);
 			}
-			ZVAL_EMPTY_STRING(result);
 		} else {
 			zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[offset];
 

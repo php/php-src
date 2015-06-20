@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     7/8/8.1/10 as "Business"). (Christian Wenz)
   . Fixes bug #69835 (phpinfo() does not report many Windows SKUs).
     (Christian Wenz)
+  . Fixed bug #69889 (Null coalesce operator doesn't work for string offsets).
+    (Nikita)
 
 - DOM:
   . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
