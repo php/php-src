@@ -3942,20 +3942,18 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 
 		if (UNEXPECTED(!ret_info->class_name
 			&& ret_info->type_hint != IS_CALLABLE
-			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr)))) {
-			/* A cast or an error will happen, so separate the zval to prevent overwriting it */
-
-			if (EXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) == 0)) {
-				/* Does not return by reference */
-				if (retval_ref != retval_ptr && Z_REFCOUNT_P(retval_ref) == 1) {
-					ZVAL_UNREF(retval_ref);
-				} else {
-					SEPARATE_ZVAL(retval_ref);
-				}
-				retval_ptr = retval_ref;
+			&& !ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(retval_ptr))
+			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			&& retval_ref != retval_ptr)
+		) {
+			/* A cast might happen - unwrap the reference if this is a by-value return */
+			if (Z_REFCOUNT_P(retval_ref) == 1) {
+				ZVAL_UNREF(retval_ref);
 			} else {
-				SEPARATE_ZVAL_NOREF(retval_ptr);
+				Z_DELREF_P(retval_ref);
+				ZVAL_COPY(retval_ref, retval_ptr);
 			}
+			retval_ptr = retval_ref;
 		}
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
