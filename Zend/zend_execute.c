@@ -142,7 +142,7 @@ static const zend_internal_function zend_pass_function = {
 	((ZEND_VM_STACK_PAGE_SLOTS(gen) - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
 
 #define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size) \
-	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE(gen) - 1)) & ~ZEND_VM_STACK_PAGE_SIZE(gen))
+	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE(gen) - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE(gen) - 1))
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
@@ -2330,6 +2330,8 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
 	*new_call = *call;
+	ZEND_SET_CALL_INFO(new_call, ZEND_CALL_INFO(new_call) | ZEND_CALL_ALLOCATED);
+
 	if (passed_args) {
 		zval *src = ZEND_CALL_ARG(call, 1);
 		zval *dst = ZEND_CALL_ARG(new_call, 1);
