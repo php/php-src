@@ -2750,7 +2750,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 }
 /* }}} */
 
-static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive, int replace) /* {{{ */
+static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive, int replace) /* {{{ */
 {
 	zval *args = NULL;
 	zval *arg;
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(array_values)
 	/* Go through input array and add values to the return array */
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-			if (Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1) {
+			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
 				entry = Z_REFVAL_P(entry);
 			}
 			Z_TRY_ADDREF_P(entry);
