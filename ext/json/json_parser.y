@@ -73,7 +73,7 @@ int json_yydebug = 1;
 int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
 void php_json_yyerror(php_json_parser *parser, char const *msg);
 void php_json_parser_object_init(php_json_parser *parser, zval *object);
-void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue);
+int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue);
 void php_json_parser_array_init(zval *object);
 void php_json_parser_array_append(zval *array, zval *zvalue);
 
@@ -130,11 +130,13 @@ member:
 		pair
 			{
 				php_json_parser_object_init(parser, &$$);
-				php_json_parser_object_update(parser, &$$, $1.key, &$1.val);
+				if (php_json_parser_object_update(parser, &$$, $1.key, &$1.val) == FAILURE)
+					YYERROR;
 			}
 	|	member ',' pair
 			{
-				php_json_parser_object_update(parser, &$1, $3.key, &$3.val);
+				if (php_json_parser_object_update(parser, &$1, $3.key, &$3.val) == FAILURE)
+					YYERROR;
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
 	|	member errlex
@@ -248,7 +250,7 @@ void php_json_parser_object_init(php_json_parser *parser, zval *object)
 	}
 }
 
-void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
+int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
 {
 	/* if JSON_OBJECT_AS_ARRAY is set */
 	if (Z_TYPE_P(object) == IS_ARRAY) {
@@ -258,6 +260,12 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_s
 		if (key->len == 0) {
 			zend_string_release(key);
 			key = zend_string_init("_empty_", sizeof("_empty_") - 1, 0);
+		} else if (key->val[0] == '\0') {
+			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
+			zend_string_release(key);
+			zval_dtor(zvalue);
+			zval_dtor(object);
+			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL); 
@@ -267,6 +275,8 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_s
 		}
 	}
 	zend_string_release(key);
+
+	return SUCCESS;
 }
 
 void php_json_parser_array_init(zval *array)
