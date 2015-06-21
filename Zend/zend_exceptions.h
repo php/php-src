@@ -43,6 +43,8 @@ ZEND_API zend_class_entry *zend_get_parse_error(void);
 ZEND_API zend_class_entry *zend_get_type_error(void);
 ZEND_API void zend_register_default_classes(void);
 
+ZEND_API void zend_throw_death_exception(void);
+
 /* exception_ce   NULL or zend_exception_get_default() or a derived class
  * message        NULL or the message of the exception */
 ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code);
@@ -55,7 +57,7 @@ ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce,
 extern ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
-ZEND_API void zend_exception_error(zend_object *exception, int severity);
+ZEND_API int zend_exception_error(zend_object *exception, int severity);
 
 /* do not export, in php it's available thru spprintf directly */
 size_t zend_spprintf(char **message, size_t max_len, const char *format, ...);

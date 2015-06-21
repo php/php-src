@@ -697,7 +697,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			}
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
-				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
+				phpdbg_error("stop", "type=\"bailout\"", "Caught exception/error from VM");
 				restore = 0;
 			}
 		} zend_end_try();
