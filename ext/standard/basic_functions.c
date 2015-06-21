@@ -4897,7 +4897,7 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 
 static int user_shutdown_function_call(zval *zv) /* {{{ */
 {
-    php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
+	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
 	zend_string *function_name;
 
@@ -4922,6 +4922,12 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 	{
 		zval_dtor(&retval);
 	}
+
+	if (EG(exception)) {
+		EG(exception) = NULL;
+		zend_bailout(); // we want to abort if we were told to abort in form of an exception
+	}
+
 	return 0;
 }
 /* }}} */

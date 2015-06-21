@@ -2480,6 +2480,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		zend_try {
 			zend_exception_error(EG(exception), E_ERROR);
 		} zend_end_try();
+		EG(exception) = NULL;
 	}
 
 #if HAVE_BROKEN_GETCWD
@@ -2607,8 +2608,10 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 			retval = SUCCESS;
 		}
 	} zend_end_try();
+
 	if (EG(exception)) {
 		zend_exception_error(EG(exception), E_ERROR);
+		EG(exception) = NULL;
 	}
 
 	return retval;

@@ -6768,7 +6768,7 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMPVAR|UNUSED|CV, ANY)
 	}
 #endif
 	zend_throw_death_exception();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)

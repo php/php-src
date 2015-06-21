@@ -1389,28 +1389,33 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 			zend_execute(op_array, retval);
 			zend_exception_restore();
 			if (EG(exception)) {
-				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-					zval orig_user_exception_handler;
-					zval params[1], retval2;
-					zend_object *old_exception;
-					old_exception = EG(exception);
-					EG(exception) = NULL;
-					ZVAL_OBJ(&params[0], old_exception);
-					ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+				if (instanceof_function(EG(exception)->ce, zend_ce_throwable)) {
+					if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+						zval orig_user_exception_handler;
+						zval params[1], retval2;
+						zend_object *old_exception;
+						old_exception = EG(exception);
+						EG(exception) = NULL;
+						ZVAL_OBJ(&params[0], old_exception);
+						ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
 
-					if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
-						zval_ptr_dtor(&retval2);
-						if (EG(exception)) {
-							OBJ_RELEASE(EG(exception));
-							EG(exception) = NULL;
+						if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
+							zval_ptr_dtor(&retval2);
+							if (EG(exception)) {
+								OBJ_RELEASE(EG(exception));
+								EG(exception) = NULL;
+							}
+							OBJ_RELEASE(old_exception);
+						} else {
+							EG(exception) = old_exception;
+							zend_exception_error(EG(exception), E_ERROR);
 						}
-						OBJ_RELEASE(old_exception);
 					} else {
-						EG(exception) = old_exception;
 						zend_exception_error(EG(exception), E_ERROR);
 					}
 				} else {
-					zend_exception_error(EG(exception), E_ERROR);
+					OBJ_RELEASE(EG(exception));
+					EG(exception) = NULL;
 				}
 			}
 			destroy_op_array(op_array);
