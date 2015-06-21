@@ -127,8 +127,18 @@ ZEND_METHOD(Closure, call)
 	my_function.common.scope = Z_OBJCE_P(newthis);
 	fci_cache.function_handler = &my_function;
 
+	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
+	if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+		my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
+		memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
+	}
+
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		ZVAL_COPY_VALUE(return_value, &closure_result);
+	}
+
+	if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+		efree(my_function.op_array.run_time_cache);
 	}
 }
 /* }}} */
@@ -138,7 +148,7 @@ ZEND_METHOD(Closure, call)
 ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
-	zend_closure *closure;
+	zend_closure *closure, *new_closure;
 	zend_class_entry *ce, *called_scope;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
@@ -183,6 +193,15 @@ ZEND_METHOD(Closure, bind)
 	}
 
 	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
+	new_closure = (zend_closure *) Z_OBJ_P(return_value);
+
+	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
+	if (ZEND_USER_CODE(closure->func.type) && (closure->func.common.scope != new_closure->func.common.scope || (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA))) {
+		new_closure->func.op_array.run_time_cache = emalloc(new_closure->func.op_array.cache_size);
+		memset(new_closure->func.op_array.run_time_cache, 0, new_closure->func.op_array.cache_size);
+
+		new_closure->func.op_array.fn_flags |= ZEND_ACC_NO_RT_ARENA;
+	}
 }
 /* }}} */
 
@@ -297,6 +316,10 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 	zend_object_std_dtor(&closure->std);
 
 	if (closure->func.type == ZEND_USER_FUNCTION) {
+		if (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA) {
+			efree(closure->func.op_array.run_time_cache);
+			closure->func.op_array.run_time_cache = NULL;
+		}
 		destroy_op_array(&closure->func.op_array);
 	}
 
@@ -510,7 +533,10 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			zend_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_apply_with_arguments(static_variables, zval_copy_static_var, 1, closure->func.op_array.static_variables);
 		}
-		closure->func.op_array.run_time_cache = NULL;
+		if (UNEXPECTED(!closure->func.op_array.run_time_cache)) {
+			closure->func.op_array.run_time_cache = func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
+			memset(func->op_array.run_time_cache, 0, func->op_array.cache_size);
+		}
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
 		}
