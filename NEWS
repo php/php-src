@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 
 - SPL
   . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
+
+- SQLite3
+  . Fixed bug #69897 (segfault when manually constructing SQLite3Result). 
+    (Kalle)
 
 - Standard
   . Fixed bug #62922 (Truncating entire string should result in string).
