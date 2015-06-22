@@ -3,12 +3,6 @@ ZE2 __toString()
 --FILE--
 <?php
 
-function my_error_handler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
-}
-
-set_error_handler('my_error_handler');
-
 class test1
 {
 }
@@ -33,7 +27,11 @@ class test3
 echo "====test1====\n";
 $o = new test1;
 print_r($o);
-var_dump((string)$o);
+try {
+    var_dump((string)$o);
+} catch (Error $e) {
+    var_dump($e->getMessage());
+}
 var_dump($o);
 
 echo "====test2====\n";
@@ -70,7 +68,11 @@ echo sprintf("%s", $o);
 echo "====test10====\n";
 $o = new test3;
 var_dump($o);
-echo $o;
+try {
+    echo $o;
+} catch (Error $e) {
+    var_dump($e->getMessage());
+}
 
 ?>
 ====DONE====
@@ -80,7 +82,6 @@ test1 Object
 (
 )
 string(54) "Object of class test1 could not be converted to string"
-string(0) ""
 object(test1)#%d (0) {
 }
 ====test2====
@@ -113,7 +114,8 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-string(19) "Illegal offset type"
+
+Warning: Illegal offset type in %s on line %d
 ====test8====
 test2::__toString()
 string(9) "Converted"

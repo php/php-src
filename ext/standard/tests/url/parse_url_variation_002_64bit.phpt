@@ -72,7 +72,7 @@ $values = array(
 // loop through each element of the array for url_component
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( parse_url($url, $value) );
 };
 
@@ -175,9 +175,8 @@ NULL
 Arg value string 
 Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(71)
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 
-Arg value  
+Arg value stdClass 
 Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(71)
 NULL
 

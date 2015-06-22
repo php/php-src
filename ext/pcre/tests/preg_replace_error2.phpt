@@ -33,5 +33,8 @@ Arg value is: Array
 Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace_error2.php on line %d
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error2.php on line %d
-
+Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in %s:%d
+Stack trace:
+#0 %s(%d): preg_replace('/[a-zA-Z]/', Object(stdClass), 'test')
+#1 {main}
+  thrown in %s on line %d

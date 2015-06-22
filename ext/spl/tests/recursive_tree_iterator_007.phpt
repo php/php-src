@@ -22,12 +22,12 @@ try {
 	foreach(new RecursiveTreeIterator($it) as $k => $v) {
 		echo "[$k] => $v\n";
 	}
-} catch (UnexpectedValueException $e) {
-	echo "UnexpectedValueException thrown\n";
+} catch (Throwable $e) {
+	echo get_class($e) . " thrown\n";
 }
 
 ?>
 ===DONE===
 --EXPECTF--
-UnexpectedValueException thrown
+Error thrown
 ===DONE===

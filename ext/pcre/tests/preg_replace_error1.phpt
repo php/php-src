@@ -55,5 +55,9 @@ string(1) "a"
 Arg value is /[a-zA-Z]/
 string(1) "1"
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error1.php on line %d
+Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in %s:%d
+Stack trace:
+#0 %s(%d): preg_replace(Object(stdClass), '1', 'a')
+#1 {main}
+  thrown in %s on line %d
 

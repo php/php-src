@@ -80,7 +80,7 @@ $values = array(
 // loop through each element of the array for autoload
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( class_exists($classname, $value) );
 };
 
@@ -184,9 +184,8 @@ bool(false)
 Arg value string 
 In __autoload(string_val)
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(80)
 
-Arg value  
+Arg value stdClass 
 Error: 2 - class_exists() expects parameter 2 to be boolean, object given, %s(81)
 NULL
 
