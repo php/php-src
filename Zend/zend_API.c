@@ -458,16 +458,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 				*dest = Z_STR_P(arg);
 				return 1;
 			}
-		}
-		/* Standard PHP objects */
-		if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
-			SEPARATE_ZVAL_NOREF(arg);
-			if (zend_std_cast_object_tostring(arg, arg, IS_STRING) == SUCCESS) {
-				*dest = Z_STR_P(arg);
-				return 1;
-			}
-		}
-		if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
+		} else if (Z_OBJ_HANDLER_P(arg, get)) {
 			zval rv;
 			zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
 
