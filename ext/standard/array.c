@@ -164,7 +164,7 @@ static void php_set_compare_func(zend_long sort_type) /* {{{ */
 
 		case PHP_SORT_REGULAR:
 		default:
-			ARRAYG(compare_func) = compare_function;
+			ARRAYG(compare_func) = zval_compare_function;
 			break;
 	}
 }

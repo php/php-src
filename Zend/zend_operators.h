@@ -327,7 +327,8 @@ again:
 	return result;
 }
 
-ZEND_API int compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API int zval_compare_function(zval *result, zval *op1, zval *op2);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2);
 ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2);
