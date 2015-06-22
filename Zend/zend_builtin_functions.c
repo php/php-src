@@ -163,9 +163,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strncasecmp, 0, 3, IS_LONG, 0, 0
 	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-/* array each(array arr) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_each, 0, 1, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, arr, IS_ARRAY, 0)
+/* array each(array &arr) */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 /* int error_reporting([int new_error_level]) */
