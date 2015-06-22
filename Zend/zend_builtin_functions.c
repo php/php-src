@@ -102,289 +102,148 @@ static ZEND_FUNCTION(gc_disable);
 ZEND_BEGIN_ARG_INFO(arginfo_zend__void, 0)
 ZEND_END_ARG_INFO()
 
-/* string zend_version(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* int gc_collect_cycles(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_collect_cycles, 0, 0, IS_LONG, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* void gc_enabled(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gc_enabled, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* void gc_enable(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gc_enable, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* void gc_disable(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gc_disable, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* int func_num_args(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_func_num_args, 0, 0, IS_LONG, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* mixed func_get_arg(int arg_num) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_func_get_arg, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, arg_num, IS_LONG, 0)
+	ZEND_ARG_INFO(0, arg_num)
 ZEND_END_ARG_INFO()
 
-/* array func_get_args() */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_func_get_args, 0, 0, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strlen, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-/* int strlen(string str) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strlen, 0, 1, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strcmp, 0, 0, 2)
+	ZEND_ARG_INFO(0, str1)
+	ZEND_ARG_INFO(0, str2)
 ZEND_END_ARG_INFO()
 
-/* int strcmp(string str1, string str2) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strcmp, 0, 2, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strncmp, 0, 0, 3)
+	ZEND_ARG_INFO(0, str1)
+	ZEND_ARG_INFO(0, str2)
+	ZEND_ARG_INFO(0, len)
 ZEND_END_ARG_INFO()
 
-/* int strncmp(string str1, string str2, int len) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strncmp, 0, 3, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
+	ZEND_ARG_INFO(1, arr)
 ZEND_END_ARG_INFO()
 
-/* int strcasecmp(string str1, string str2) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strcasecmp, 0, 2, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
+	ZEND_ARG_INFO(0, new_error_level)
 ZEND_END_ARG_INFO()
 
-/* int strncasecmp(string str1, string str2, int len) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strncasecmp, 0, 3, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-/* array each(array arr) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_each, 0, 1, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, arr, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-/* int error_reporting([int new_error_level]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_error_reporting, 0, 0, IS_LONG, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, new_error_level, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-/* bool define(string constant_name, mixed value[, boolean case_insensitive=false]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_define, 0, 2, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 3)
+	ZEND_ARG_INFO(0, constant_name)
 	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_TYPE_INFO(0, case_insensitive=false, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, case_insensitive)
 ZEND_END_ARG_INFO()
 
-/* bool defined(string constant_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_defined, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_defined, 0, 0, 1)
+	ZEND_ARG_INFO(0, constant_name)
 ZEND_END_ARG_INFO()
 
-/* string get_class([object object]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class, 0, 0, IS_STRING, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-/* string get_called_class() */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_called_class, 0, 0, IS_STRING, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* string get_parent_class([mixed object]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_parent_class, 0, 0, IS_STRING, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_is_subclass_of, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, allow_string)
 ZEND_END_ARG_INFO()
 
-/* bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_subclass_of, 0, 2, _IS_BOOL, 0, 0)
-	ZEND_ARG_INFO(0, object_or_string)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, allow_string=true, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
+	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
-/* bool is_a(mixed object_or_string, string class_name [, bool allow_string=false]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_a, 0, 2, _IS_BOOL, 0, 0)
-	ZEND_ARG_INFO(0, object_or_string)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, allow_string=false, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_class_vars(string class_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_vars, 0, 1, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_object_vars(object obj) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_object_vars, 0, 1, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_object_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
-/* array get_class_methods(mixed class) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_methods, 0, 1, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_methods, 0, 0, 1)
 	ZEND_ARG_INFO(0, class)
 ZEND_END_ARG_INFO()
 
-/* bool method_exists(object object, string method) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_method_exists, 0, 2, _IS_BOOL, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_method_exists, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
-/* bool property_exists(mixed object_or_class, string property_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_property_exists, 0, 2, _IS_BOOL, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_property_exists, 0, 0, 2)
 	ZEND_ARG_INFO(0, object_or_class)
-	ZEND_ARG_TYPE_INFO(0, property_name, IS_STRING, 0)
+	ZEND_ARG_INFO(0, property_name)
 ZEND_END_ARG_INFO()
 
-/* bool class_exists(string classname [, bool autoload]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_exists, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, classname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_exists, 0, 0, 1)
+	ZEND_ARG_INFO(0, classname)
+	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
-/* bool interface_exists(string classname [, bool autoload]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interface_exists, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, classname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_trait_exists, 0, 0, 1)
+	ZEND_ARG_INFO(0, traitname)
+	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
-/* bool trait_exists(string traitname [, bool autoload]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trait_exists, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, traitname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_function_exists, 0, 0, 1)
+	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
 
-/* bool function_exists(string function_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_function_exists, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-/* bool class_alias(string user_class_name , string alias_name [, bool autoload]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_alias, 0, 2, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, user_class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, alias_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_alias, 0, 0, 2)
+	ZEND_ARG_INFO(0, user_class_name)
+	ZEND_ARG_INFO(0, alias_name)
+	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
 #if ZEND_DEBUG
-/* void leak([int num_bytes=3]) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leak, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, num_bytes=3, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-/* void leak_variable(mixed variable [, bool leak_data]) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leak_variable, 0, 0, 1)
 	ZEND_ARG_INFO(0, variable)
-	ZEND_ARG_TYPE_INFO(0, leak_data, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-/* void crash(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_crash, 0, 0, 0)
+	ZEND_ARG_INFO(0, leak_data)
 ZEND_END_ARG_INFO()
 #endif
 
-/* array get_included_files(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_included_files, 0, 0, IS_ARRAY, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* void trigger_error(string message [, int error_type]) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, error_type, IS_LONG, 0)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, error_type)
 ZEND_END_ARG_INFO()
 
-/* string set_error_handler(string error_handler [, int error_types]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_error_handler, 0, 1, IS_STRING, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, error_handler, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, error_types, IS_LONG, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, error_handler)
+	ZEND_ARG_INFO(0, error_types)
 ZEND_END_ARG_INFO()
 
-/* void restore_error_handler(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_restore_error_handler, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, exception_handler)
 ZEND_END_ARG_INFO()
 
-/* string set_exception_handler(callable exception_handler) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_exception_handler, 0, 1, IS_STRING, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, exception_handler, IS_CALLABLE, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)
+	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_INFO(0, code)
 ZEND_END_ARG_INFO()
 
-/* void restore_exception_handler(void) */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_restore_exception_handler, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resource_type, 0, 0, 1)
+	ZEND_ARG_INFO(0, res)
 ZEND_END_ARG_INFO()
 
-/* array get_declared_traits() */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_traits, 0, 0, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_resources, 0, 0, 0)
+	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-/* array get_declared_classes() */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_classes, 0, 0, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_loaded_extensions, 0, 0, 0)
+	ZEND_ARG_INFO(0, zend_extensions)
 ZEND_END_ARG_INFO()
 
-/* array get_declared_interfaces() */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_interfaces, 0, 0, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_constants, 0, 0, 0)
+	ZEND_ARG_INFO(0, categorize)
 ZEND_END_ARG_INFO()
 
-/* array get_defined_functions(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_functions, 0, 0, IS_ARRAY, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_backtrace, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
-/* array get_defined_vars(void) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_vars, 0, 0, IS_ARRAY, 0, 0)
-ZEND_END_ARG_INFO()
-
-/* string create_function(string args, string code) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_create_function, 0, 2, IS_STRING, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-/* string get_resource_type(resource res) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resource_type, 0, 1, IS_STRING, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, res, IS_RESOURCE, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_resources([string resouce_type]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resources, 0, 0, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, resouce_type, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_loaded_extensions([bool zend_extensions]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_loaded_extensions, 0, 0, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, zend_extensions, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_defined_constants([bool categorize]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_constants, 0, 0, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, categorize, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-/* void debug_print_backtrace([int options[, int limit]]) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_print_backtrace, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, limit, IS_LONG, 0)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-/* array debug_backtrace([int options[, int limit]]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_debug_backtrace, 0, 0, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, limit, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-/* bool extension_loaded(string extension_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_extension_loaded, 0, 1, _IS_BOOL, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, extension_name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-/* array get_extension_funcs(string extension_name) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_extension_funcs, 0, 1, IS_ARRAY, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, extension_name, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
+	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
 
 #ifdef ZEND_DEBUG
@@ -916,7 +775,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool define(string constant_name, mixed value[, boolean case_insensitive=false])
+/* {{{ proto bool define(string constant_name, mixed value, boolean case_insensitive=false)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
@@ -1707,7 +1566,7 @@ ZEND_FUNCTION(class_alias)
 /* }}} */
 
 #if ZEND_DEBUG
-/* {{{ proto void leak([int num_bytes=3])
+/* {{{ proto void leak(int num_bytes=3)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
