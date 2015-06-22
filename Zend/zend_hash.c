@@ -107,7 +107,7 @@ static uint32_t zend_always_inline zend_hash_check_size(uint32_t nSize)
 		   rather than using an undefined bis scan result. */
 		return nSize;
 	}
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || __has_builtin(__builtin_clz)
 	return 0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
 #else
 	nSize -= 1;
