@@ -195,7 +195,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_called_class, 0, 0, IS_STRIN
 ZEND_END_ARG_INFO()
 
 /* mixed get_parent_class([mixed object]) */
-ZEND_BEGIN_ARG_TYPE_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
