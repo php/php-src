@@ -163,7 +163,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strncasecmp, 0, 3, IS_LONG, 0, 0
 	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-/* array each(array &arr) */
+/* mixed each(array &arr) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -194,8 +194,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_called_class, 0, 0, IS_STRING, 0, 0)
 ZEND_END_ARG_INFO()
 
-/* string get_parent_class([mixed object]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_parent_class, 0, 0, IS_STRING, 0, 0)
+/* mixed get_parent_class([mixed object]) */
+ZEND_BEGIN_ARG_TYPE_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -307,8 +307,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_restore_error_handler, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-/* string set_exception_handler(callable exception_handler) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_exception_handler, 0, 1, IS_STRING, 0, 0)
+/* mixed set_exception_handler(callable exception_handler) */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, exception_handler, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
@@ -1071,8 +1071,8 @@ ZEND_FUNCTION(get_called_class)
 }
 /* }}} */
 
-/* {{{ proto string get_parent_class([mixed object])
-   Retrieves the parent class name for object or class or current scope. */
+/* {{{ proto mixed get_parent_class([mixed object])
+   Retrieves the parent class name for object or class or current scope or false if not in a scope. */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
@@ -1878,7 +1878,7 @@ ZEND_FUNCTION(restore_error_handler)
 /* }}} */
 
 /* {{{ proto mixed set_exception_handler(callable exception_handler)
-   Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
+   Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
