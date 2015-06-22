@@ -38,13 +38,21 @@ if($m) {
             echo "ZEND_BEGIN_ARG_INFO_EX(arginfo_{$name}, 0, 0, {$required})\n";
         }
         foreach($args as $arg) {
-            list($type,$name) = explode(' ', $arg, 2);
-            list($name,) = explode('|', $name, 2); // No |'s in the names - choose the first
+            list($type, $name) = explode(' ', trim($arg), 2);
+            list($name) = explode('|', trim($name), 2); // No |'s in the names - choose the first
+            $name = trim($name);
+            if ($ref = ($name[0] == "&")) {
+                $name = trim(substr($name, 1));
+            }
+            list($name, $default) = explode("=", $name, 2);
+            $name = trim($name);
+            $allow_null = (int) (trim($default) == "null");
+            $ref = (int) $ref;
             $type=trim($type);
             if(!empty($types[$type])) {
-                echo "\tZEND_ARG_TYPE_INFO(0, {$name}, {$types[$type]}, 0)\n";
+                echo "\tZEND_ARG_TYPE_INFO($ref, {$name}, {$types[$type]}, $allow_null)\n";
             } else {
-                echo "\tZEND_ARG_INFO(0, {$name})\n";
+                echo "\tZEND_ARG_INFO($ref, {$name})\n";
             }
         }
         echo "ZEND_END_ARG_INFO()\n\n";
