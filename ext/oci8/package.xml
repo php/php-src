@@ -441,7 +441,6 @@ Fixed oci_field_* reflection: $field can be a column name or index
    <file name="oci8_statement.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
-   <file name="oci8.dsp" role="src" />
    <file name="README" role="doc" />
   </dir> <!-- / -->
  </contents>
