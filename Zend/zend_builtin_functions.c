@@ -300,9 +300,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, error_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-/* string set_error_handler(string error_handler [, int error_types]) */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_error_handler, 0, 1, IS_STRING, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, error_handler, IS_STRING, 0)
+/* mixed set_error_handler(string error_handler [, int error_types]) */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, error_handler, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, error_types, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -1811,7 +1811,7 @@ ZEND_FUNCTION(trigger_error)
 }
 /* }}} */
 
-/* {{{ proto string set_error_handler(string error_handler [, int error_types])
+/* {{{ proto string set_error_handler(callable error_handler [, int error_types])
    Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
@@ -1880,7 +1880,7 @@ ZEND_FUNCTION(restore_error_handler)
 }
 /* }}} */
 
-/* {{{ proto string set_exception_handler(callable exception_handler)
+/* {{{ proto mixed set_exception_handler(callable exception_handler)
    Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
