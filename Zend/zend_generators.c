@@ -848,7 +848,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send(mixed $value)
+/* {{{ proto mixed Generator::send(mixed value)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -887,7 +887,7 @@ ZEND_METHOD(Generator, send)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::throw(Exception $exception)
+/* {{{ proto mixed Generator::throw(Exception exception)
  * Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {

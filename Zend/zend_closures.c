@@ -69,7 +69,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
+/* {{{ proto mixed Closure::call(object to [, mixed parameter] [, mixed ...] )
    Call closure, binding to a given object with its class as the scope */
 ZEND_METHOD(Closure, call)
 {
@@ -143,7 +143,7 @@ ZEND_METHOD(Closure, call)
 }
 /* }}} */
 
-/* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
+/* {{{ proto Closure Closure::bind(callable old, object to [, mixed scope])
    Create a closure from another one and bind to another object and scope */
 ZEND_METHOD(Closure, bind)
 {

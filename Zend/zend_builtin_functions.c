@@ -2115,7 +2115,7 @@ static int add_constant_info(zval *item, void *arg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array get_loaded_extensions([bool zend_extensions]) U
+/* {{{ proto array get_loaded_extensions([bool zend_extensions])
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
