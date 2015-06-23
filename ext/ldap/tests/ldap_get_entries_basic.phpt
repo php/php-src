@@ -57,7 +57,7 @@ array(2) {
     ["count"]=>
     int(2)
     ["dn"]=>
-    string(23) "o=test,dc=mcmic,dc=test"
+    string(%d) "o=test,%s"
   }
 }
 ===DONE===
