@@ -3,7 +3,6 @@
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
-  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
   . Fixed bug #69872 (uninitialised value in strtr with array). (Laruence)
   . Fixed bug #69868 (Invalid read of size 1 in zend_compile_short_circuiting).
     (Laruence)
@@ -50,6 +49,9 @@
   . Removed opcache.load_comments configuration directive. Now doc comments
     loading costs nothing and always enabled. (Dmitry)
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
+  
+- PCRE:
+  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
