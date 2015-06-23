@@ -187,13 +187,14 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
 {
+	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	int *num_clean = (int *)arg;
 
-	if (*num_clean > 0) {
+	if (*num_clean > 0 && !pce->refcount) {
 		(*num_clean)--;
-		return 1;
+		return ZEND_HASH_APPLY_REMOVE;
 	} else {
-		return 0;
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 /* }}} */
@@ -461,6 +462,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		NULL;
 	new_entry.tables = tables;
 #endif
+	new_entry.refcount = 0;
 
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &new_entry.capture_count);
 	if (rc < 0) {
@@ -584,8 +586,10 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_match_impl(pce, subject->val, (int)subject->len, return_value, subpats,
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -1017,14 +1021,18 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  int limit, int *replace_count)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
+	zend_string	 		*result;			/* Function result */
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		return NULL;
 	}
-
-	return php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_val,
+	pce->refcount++;
+	result = php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_val,
 		is_callable_replace, limit, replace_count);
+	pce->refcount--;
+
+	return result;
 }
 /* }}} */
 
@@ -1660,7 +1668,9 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_split_impl(pce, subject->val, (int)subject->len, return_value, (int)limit_val, flags);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -1967,7 +1977,9 @@ static PHP_FUNCTION(preg_grep)
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_grep_impl(pce, input, return_value, flags);
+	pce->refcount--;
 }
 /* }}} */
 
