@@ -1,10 +1,43 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2015, PHP 5.6.11
 
 - Core:
-  . Fixed #69642 (Windows 10 reported as Windows 8).
+  . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
+    (dja at axtens dot net, Kalle)
+  . Fixed bug #69732 (can induce segmentation fault with basic php code).
+    (Dmitry)
+  . Fixed bug #69642 (Windows 10 reported as Windows 8).
     (Christian Wenz, Anatol Belski)
+  . Fixed bug #69551 (parse_ini_file() and parse_ini_string() segmentation
+    fault). (Christoph M. Becker)
+  . Fixed bug #69781 (phpinfo() reports Professional Editions of Windows
+    7/8/8.1/10 as "Business"). (Christian Wenz)
+  . Fixed bug #69740 (finally in generator (yield) swallows exception in
+    iteration). (Nikita)
+  . Fixed bug #69835 (phpinfo() does not report many Windows SKUs).
+    (Christian Wenz)
+  . Fixed bug #69892 (Different arrays compare indentical due to integer key
+    truncation). (Nikita)
+
+- GD:
+  . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
+
+- GMP:
+  . Fixed bug #69803 (gmp_random_range() modifies second parameter if GMP
+    number). (Nikita)
+
+- PDO_pgsql:
+  . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
+    Statements when closeCuror() is u). (Philip Hofstetter)
+  . Fixed bug #69362 (PDO-pgsql fails to connect if password contains a
+    leading single quote). (Matteo)
+  . Fixed bug #69344 (PDO PgSQL Incorrect binding numeric array with gaps).
+    (Matteo)
+
+- SimpleXML:
+  . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
+    node name). (Christoph Michael Becker)
 
 - SPL:
   . Fixed bug #69737 (Segfault when SplMinHeap::compare produces fatal error).
@@ -23,10 +56,13 @@
     (Christoph M. Becker)
   . Fixed POST data processing slowdown due to small input buffer size
     on Windows. (Jorge Oliveira, Anatol)
-  . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
-    (dja at axtens dot net, Kalle)
-  . Fixed bug #69732 (can induce segmentation fault with basic php code).
-    (Dmitry)
+  . Fixed bug #69646 (OS command injection vulnerability in escapeshellarg).
+    (CVE-2015-4642) (Anatol Belski)
+  . Fixed bug #69719 (Incorrect handling of paths with NULs). (Stas)
+
+- FTP
+  . Improved fix for bug #69545 (Integer overflow in ftp_genlist() resulting in
+    heap overflow). (CVE-2015-4643) (Max Spelsberg)
 
 - GD:
   . Fixed bug #69479 (GD fails to build with newer libvpx). (Remi)
@@ -34,19 +70,29 @@
 - Iconv:
   . Fixed bug #48147 (iconv with //IGNORE cuts the string). (Stas)
 
+- Litespeed SAPI:
+  . Fixed bug #68812 (Unchecked return value). (George Wang)
+
+- Mail:
+  . Fixed bug #68776 (mail() does not have mail header injection prevention for
+    additional headers). (Yasuo)
+
 - MCrypt:
   . Added file descriptor caching to mcrypt_create_iv() (Leigh)
+
+- Opcache
+  . Fixed bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF).
+    (Laruence, Dmitry)
+
+- PCRE
+  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
 
 - Phar:
   . Fixed bug #69680 (phar symlink in binary directory broken).
     (Matteo Bernardini, Remi)
 
 - Postgres:
-  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (Remi)
-
-- SimpleXML:
-  . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
-    node name). (Christoph Michael Becker)
+  . Fixed bug #69667 (segfault in php_pgsql_meta_data). (CVE-2015-4644) (Remi)
 
 - Sqlite3:
   . Upgrade bundled sqlite to 3.8.10.2. (CVE-2015-3414, CVE-2015-3415,
@@ -94,9 +140,6 @@
 - PCNTL:
   . Fixed bug #68598 (pcntl_exec() should not allow null char). (CVE-2015-4026)
     (Stas)
-
-- PCRE
-  . Upgraded pcrelib to 8.37. (CVE-2015-2325, CVE-2015-2326)
 
 - Phar:
   . Fixed bug #69453 (Memory Corruption in phar_parse_tarfile when entry

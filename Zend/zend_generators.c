@@ -198,6 +198,9 @@ static void zend_generator_dtor_storage(zend_generator *generator, zend_object_h
 	if (finally_op_num) {
 		ex->opline = &ex->op_array->opcodes[finally_op_num];
 		ex->fast_ret = NULL;
+		ex->delayed_exception = EG(exception);
+		EG(exception) = NULL;
+
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator TSRMLS_CC);
 	}

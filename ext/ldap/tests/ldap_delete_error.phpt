@@ -17,7 +17,7 @@ var_dump(ldap_delete());
 var_dump(ldap_delete($link));
 
 // Too many parameters
-var_dump(ldap_delete($link, "dc=my-domain,dc=com", "Additional data"));
+var_dump(ldap_delete($link, "$base", "Additional data"));
 
 // Invalid DN
 var_dump(
@@ -28,7 +28,7 @@ var_dump(
 
 // Deleting unexisting data
 var_dump(
-	ldap_delete($link, "dc=my-domain,dc=com"),
+	ldap_delete($link, "dc=my-domain,$base"),
 	ldap_error($link),
 	ldap_errno($link)
 );

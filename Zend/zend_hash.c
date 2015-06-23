@@ -1446,11 +1446,10 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		}
 		if (ordered) {
 			if (p1->nKeyLength==0 && p2->nKeyLength==0) { /* numeric indices */
-				result = p1->h - p2->h;
-				if (result!=0) {
+				if (p1->h != p2->h) {
 					HASH_UNPROTECT_RECURSION(ht1); 
 					HASH_UNPROTECT_RECURSION(ht2); 
-					return result;
+					return p1->h > p2->h ? 1 : -1;
 				}
 			} else { /* string indices */
 				result = p1->nKeyLength - p2->nKeyLength;

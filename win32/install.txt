@@ -6,7 +6,6 @@ Installing PHP
    1. General Installation Considerations
    2. Installation on Windows systems
 
-        Windows Installer
         Manual Installation Steps
         ActiveScript
         Microsoft IIS
@@ -107,9 +106,6 @@ Chapter 2. Installation on Windows systems
    refer to the supported Windows platforms as Win32. Windows 95 is no
    longer supported as of PHP 4.3.0.
 
-   There are two main ways to install PHP for Windows: either manually or
-   by using the installer.
-
    If you have Microsoft Visual Studio, you can also build PHP from the
    original source code.
 
@@ -124,129 +120,6 @@ Chapter 2. Installation on Windows systems
    optimised.
      __________________________________________________________________
 
-Windows Installer (PHP 5.2 and later)
-
-   The Windows PHP installer for later versions of PHP is built using MSI
-   technology using the Wix Toolkit (http://wix.sourceforge.net/). It will
-   install and configure PHP and all the built-in and PECL extensions, as
-   well as configure many of the popular web servers such as IIS, Apache,
-   and Xitami.
-
-   First, install your selected HTTP (web) server on your system, and make
-   sure that it works. Then proceed with one of the following install
-   types.
-     __________________________________________________________________
-
-Normal Install
-
-   Run the MSI installer and follow the instructions provided by the
-   installation wizard. You will be prompted to select the Web Server you
-   wish to configure first, along with any configuration details needed.
-
-   You will then be prompted to select which features and extensions you
-   wish to install and enable. By selecting "Will be installed on local
-   hard drive" in the drop-down menu for each item you can trigger whether
-   to install the feature or not. By selecting "Entire feature will be
-   installed on local hard drive", you will be able to install all
-   sub-features of the included feature ( for example by selecting this
-   options for the feature "PDO" you will install all PDO Drivers ).
-
-   Warning
-
-   It is not recommended to install all extensions by default, since many
-   other them require dependencies from outside PHP in order to function
-   properly. Instead, use the Installation Repair Mode that can be
-   triggered thru the 'Add/Remove Programs' control panel to enable or
-   disable extensions and features after installation.
-
-   The installer then sets up PHP to be used in Windows and the php.ini
-   file, and configures certain web servers to use PHP. The installer will
-   currently configure IIS (CGI mode only), Apache, Xitami, and Sambar
-   Server; if you are using a different web server you'll need to
-   configure it manually.
-     __________________________________________________________________
-
-Silent Install
-
-   The installer also supports a silent mode, which is helpful for Systems
-   Administrators to deploy PHP easily. To use silent mode:
-   msiexec.exe /i php-VERSION-win32-install.msi /q
-
-   You can control the install directory by passing it as a parameter to
-   the install. For example, to install to e:\php:
-   msiexec.exe /i php-VERSION-win32-install.msi /q INSTALLDIR=e:\php
-
-   You can also use the same syntax to specify the Apache Configuration
-   Directory (APACHEDIR), the Sambar Server directory (SAMBARDIR), and the
-   Xitami Server directory (XITAMIDIR).
-
-   You can also specify what features to install. For example, to install
-   the mysqli extension and the CGI executable:
-   msiexec.exe /i php-VERSION-win32-install.msi /q ADDLOCAL=cgi,ext_php_mysqli
-
-   The current list of Features to install is as follows:
-MainExecutable - php.exe executable
-ScriptExecutable - php-win.exe executable
-ext_php_* - the various extensions ( for example: ext_php_mysql for MySQL )
-apache13 - Apache 1.3 module
-apache20 - Apache 2.0 module
-apache22 - Apache 2,2 module
-apacheCGI - Apache CGI executable
-iis4ISAPI - IIS ISAPI module
-iis4CGI - IIS CGI executable
-NSAPI - Sun/iPlanet/Netscape server module
-Xitami - Xitami CGI executable
-Sambar - Sambar Server ISAPI module
-CGI - php-cgi.exe executable
-PEAR - PEAR installer
-Manual - PHP Manual in CHM Format
-
-   For more information on installing MSI installers from the command
-   line, visit
-   http://msdn.microsoft.com/library/en-us/msi/setup/command_line_options.
-   asp
-     __________________________________________________________________
-
-Windows Installer (PHP 5.1.0 and earlier)
-
-   The Windows PHP installer is available from the downloads page at
-   http://www.php.net/downloads.php. This installs the CGI version of PHP
-   and for IIS and Xitami, it configures the web server as well. The
-   installer does not include any extra external PHP extensions
-   (php_*.dll) as you'll only find those in the Windows Zip Package and
-   PECL downloads.
-
-     Note: While the Windows installer is an easy way to make PHP work,
-     it is restricted in many aspects as, for example, the automatic
-     setup of extensions is not supported. Use of the installer isn't the
-     preferred method for installing PHP.
-
-   First, install your selected HTTP (web) server on your system, and make
-   sure that it works.
-
-   Run the executable installer and follow the instructions provided by
-   the installation wizard. Two types of installation are supported -
-   standard, which provides sensible defaults for all the settings it can,
-   and advanced, which asks questions as it goes along.
-
-   The installation wizard gathers enough information to set up the
-   php.ini file, and configure certain web servers to use PHP. One of the
-   web servers the PHP installer does not configure for is Apache, so
-   you'll need to configure it manually.
-
-   Once the installation has completed, the installer will inform you if
-   you need to restart your system, restart the server, or just start
-   using PHP.
-
-   Warning
-
-   Be aware, that this setup of PHP is not secure. If you would like to
-   have a secure PHP setup, you'd better go on the manual way, and set
-   every option carefully. This automatically working setup gives you an
-   instantly working PHP installation, but it is not meant to be used on
-   online servers.
-     __________________________________________________________________
-
 Manual Installation Steps
 
    This install guide will help you manually install and configure PHP
@@ -254,11 +127,10 @@ Manual Installation Steps
    download the zip binary distribution from the downloads page at
    http://www.php.net/downloads.php.
 
-   Although there are many all-in-one installation kits, and we also
-   distribute a PHP installer for Microsoft Windows, we recommend you take
-   the time to setup PHP yourself as this will provide you with a better
-   understanding of the system, and enables you to install PHP extensions
-   easily when needed.
+   Although there are many all-in-one installation kits, we recommend you
+   take the time to setup PHP yourself as this will provide you with a
+   better understanding of the system, and enables you to install PHP
+   extensions easily when needed.
 
      Upgrading from a previous PHP version: Previous editions of the
      manual suggest moving various ini and DLL files into your SYSTEM
@@ -533,10 +405,10 @@ General considerations for all installations of PHP with IIS
        extensions_dir value is "c:\php\ext" and an example IIS doc_root
        value is "c:\Inetpub\wwwroot".
      * PHP extension DLL files, such as php_mysql.dll and php_curl.dll,
-       are found in the zip package of the PHP download (not the PHP
-       installer). In PHP 5, many extensions are part of PECL and can be
-       downloaded in the "Collection of PECL modules" package. Files such
-       as php_zip.dll and php_ssh2.dll. Download PHP files here.
+       are found in the zip package of the PHP download. In PHP 5, many
+       extensions are part of PECL and can be downloaded in the
+       "Collection of PECL modules" package. Files such as php_zip.dll and
+       php_ssh2.dll. Download PHP files here.
      * When defining the executable, the 'check that file exists' box may
        also be checked. For a small performance penalty, the IIS
        will check that the script file exists and sort out authentication

@@ -1841,6 +1841,7 @@ ZEND_FUNCTION(gmp_random_range)
 {
 	zval *min_arg, *max_arg;
 	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
+	mpz_t gmpnum_range;
 	gmp_temp_t temp_a, temp_b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &min_arg, &max_arg) == FAILURE) {
@@ -1859,22 +1860,23 @@ ZEND_FUNCTION(gmp_random_range)
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
+		mpz_init(gmpnum_range);
 
-		if (Z_LVAL_P(min_arg)) {
-			mpz_sub_ui(gmpnum_max, gmpnum_max, Z_LVAL_P(min_arg));
+		if (Z_LVAL_P(min_arg) != 0) {
+			mpz_sub_ui(gmpnum_range, gmpnum_max, Z_LVAL_P(min_arg) - 1);
+		} else {
+			mpz_add_ui(gmpnum_range, gmpnum_max, 1);
 		}
 
-		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
 
-		if (Z_LVAL_P(min_arg)) {
+		if (Z_LVAL_P(min_arg) != 0) {
 			mpz_add_ui(gmpnum_result, gmpnum_result, Z_LVAL_P(min_arg));
 		}
 
+		mpz_clear(gmpnum_range);
 		FREE_GMP_TEMP(temp_a);
-
-	}
-	else {
+	} else {
 		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
 
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
@@ -1885,12 +1887,14 @@ ZEND_FUNCTION(gmp_random_range)
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
+		mpz_init(gmpnum_range);
 
-		mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
-		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_sub(gmpnum_range, gmpnum_max, gmpnum_min);
+		mpz_add_ui(gmpnum_range, gmpnum_range, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
 		mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
 
+		mpz_clear(gmpnum_range);
 		FREE_GMP_TEMP(temp_b);
 		FREE_GMP_TEMP(temp_a);
 	}

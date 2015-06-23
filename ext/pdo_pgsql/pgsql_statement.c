@@ -224,7 +224,7 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && !stmt->column_count) {
+	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
 		stmt->column_count = (int) PQnfields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
@@ -297,8 +297,8 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							sizeof(Oid));
 				}
 				if (param->paramno >= 0) {
-					if (param->paramno >= zend_hash_num_elements(stmt->bound_param_map)) {
-						pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+					if (param->paramno >= zend_hash_num_elements(stmt->bound_params)) {
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 						return 0;
 					}
 
@@ -612,6 +612,12 @@ done:
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+
+	if (S->cols != NULL){
+		efree(S->cols);
+		S->cols = NULL;
+	}
 	return 1;
 }
 
