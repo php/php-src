@@ -169,13 +169,14 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(void *data, void *arg TSRMLS_DC)
 {
+	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	int *num_clean = (int *)arg;
 
-	if (*num_clean > 0) {
+	if (*num_clean > 0 && !pce->refcount) {
 		(*num_clean)--;
-		return 1;
+		return ZEND_HASH_APPLY_REMOVE;
 	} else {
-		return 0;
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 /* }}} */
@@ -446,6 +447,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
 #endif
+	new_entry.refcount = 0;
 
 	/*
 	 * Interned strings are not duplicated when stored in HashTable,
@@ -550,8 +552,10 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -988,14 +992,18 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 							  int *result_len, int limit, int *replace_count TSRMLS_DC)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
+	char		 		*result;			/* Function result */
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
-
-	return php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
+	pce->refcount++;
+	result = php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
 		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
+	pce->refcount--;
+
+	return result;
 }
 /* }}} */
 
@@ -1476,7 +1484,9 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_split_impl(pce, subject, subject_len, return_value, limit_val, flags TSRMLS_CC);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -1756,8 +1766,10 @@ static PHP_FUNCTION(preg_grep)
 	if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
-	
+
+	pce->refcount++;
 	php_pcre_grep_impl(pce, input, return_value, flags TSRMLS_CC);
+	pce->refcount--;
 }
 /* }}} */
 
