@@ -1,5 +1,11 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+09 Jul 2015, PHP 7.0.0 Beta 1
+
+- PCRE:
+  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+    string). (cmb)
+
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
@@ -51,8 +57,6 @@
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
   
 - PCRE:
-  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
-    string). (cmb)
   . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
 
 - PDO_pgsql:
