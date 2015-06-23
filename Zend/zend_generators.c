@@ -34,15 +34,16 @@ static zend_object *zend_generator_create(zend_class_entry *class_type);
 static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
-	/* -1 required because we want the last run opcode, not the next to-be-run one. */
-	uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
 	if (generator->send_target) {
-		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
+		Z_TRY_DELREF_P(generator->send_target);
 		generator->send_target = NULL;
 	}
 
-	{
+	if (execute_data->opline != execute_data->func->op_array.opcodes) {
+		/* -1 required because we want the last run opcode, not the next to-be-run one. */
+		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
+
 		/* There may be calls to zend_vm_stack_free_call_frame(), which modifies the VM stack
 		 * globals, so need to load/restore those. */
 		zend_vm_stack original_stack = EG(vm_stack);
@@ -847,7 +848,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send(mixed $value)
+/* {{{ proto mixed Generator::send(mixed value)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -886,7 +887,7 @@ ZEND_METHOD(Generator, send)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::throw(Exception $exception)
+/* {{{ proto mixed Generator::throw(Exception exception)
  * Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {

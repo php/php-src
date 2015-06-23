@@ -600,8 +600,8 @@ ZEND_FUNCTION(strncasecmp)
 }
 /* }}} */
 
-/* {{{ proto array each(array arr)
-   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element */
+/* {{{ proto mixed each(array &arr)
+   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element, or false if there is no element at this place */
 ZEND_FUNCTION(each)
 {
 	zval *array, *entry, tmp;
@@ -775,7 +775,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool define(string constant_name, mixed value, boolean case_insensitive=false)
+/* {{{ proto bool define(string constant_name, mixed value[, boolean case_insensitive])
    Define a new constant */
 ZEND_FUNCTION(define)
 {
@@ -933,8 +933,8 @@ ZEND_FUNCTION(get_called_class)
 }
 /* }}} */
 
-/* {{{ proto string get_parent_class([mixed object])
-   Retrieves the parent class name for object or class or current scope. */
+/* {{{ proto mixed get_parent_class([mixed object])
+   Retrieves the parent class name for object or class or current scope or false if not in a scope. */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
@@ -1025,7 +1025,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 }
 /* }}} */
 
-/* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true])
+/* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string])
    Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
@@ -1033,7 +1033,7 @@ ZEND_FUNCTION(is_subclass_of)
 }
 /* }}} */
 
-/* {{{ proto bool is_a(mixed object_or_string, string class_name [, bool allow_string=false])
+/* {{{ proto bool is_a(mixed object_or_string, string class_name [, bool allow_string])
    Returns true if the first argument is an object and is this class or has this class as one of its parents, */
 ZEND_FUNCTION(is_a)
 {
@@ -1566,7 +1566,7 @@ ZEND_FUNCTION(class_alias)
 /* }}} */
 
 #if ZEND_DEBUG
-/* {{{ proto void leak(int num_bytes=3)
+/* {{{ proto void leak([int num_bytes])
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
@@ -1670,7 +1670,7 @@ ZEND_FUNCTION(trigger_error)
 }
 /* }}} */
 
-/* {{{ proto string set_error_handler(string error_handler [, int error_types])
+/* {{{ proto string set_error_handler(callable error_handler [, int error_types])
    Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
@@ -1739,8 +1739,8 @@ ZEND_FUNCTION(restore_error_handler)
 }
 /* }}} */
 
-/* {{{ proto string set_exception_handler(callable exception_handler)
-   Sets a user-defined exception handler function.  Returns the previously defined exception handler, or false on error */
+/* {{{ proto mixed set_exception_handler(callable exception_handler)
+   Sets a user-defined exception handler function. Returns the previously defined exception handler, or false on error */
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
@@ -2115,7 +2115,7 @@ static int add_constant_info(zval *item, void *arg) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array get_loaded_extensions([bool zend_extensions]) U
+/* {{{ proto array get_loaded_extensions([bool zend_extensions])
    Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {

@@ -150,7 +150,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 };
 /* }}} */
 
-/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]); */
+/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]) */
 PHP_METHOD(domelement, __construct)
 {
 

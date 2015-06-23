@@ -2153,7 +2153,7 @@ ZEND_METHOD(reflection_function, getExtensionName)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionGenerator::__construct(Generator) */
+/* {{{ proto public void ReflectionGenerator::__construct(object Generator) */
 ZEND_METHOD(reflection_generator, __construct)
 {
 	zval *generator, *object;
@@ -3839,7 +3839,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionClass::setStaticPropertyValue($name, $value)
+/* {{{ proto public void ReflectionClass::setStaticPropertyValue(string $name, mixed $value)
    Sets the value of a static property */
 ZEND_METHOD(reflection_class, setStaticPropertyValue)
 {
