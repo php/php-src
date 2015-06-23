@@ -3,6 +3,7 @@
 ?? ??? 2015, PHP 5.5.27
 
 - Core:
+  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
   . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
     (dja at axtens dot net, Kalle)
   . Fixed bug #69732 (can induce segmentation fault with basic php code).
