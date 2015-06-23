@@ -51,6 +51,8 @@
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
   
 - PCRE:
+  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+    string). (cmb)
   . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
 
 - PDO_pgsql:
