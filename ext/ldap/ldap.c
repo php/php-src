@@ -785,7 +785,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 			/* Run the actual search */
-			rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly);
+			ldap_search_ext(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, NULL, NULL, NULL, ldap_sizelimit, &rcs[i]);
 			lds[i] = ld;
 			zend_hash_move_forward(Z_ARRVAL_P(link));
 		}
@@ -826,7 +826,7 @@ cleanup_parallel:
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		errno = ldap_search_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_res);
+		errno = ldap_search_ext_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, NULL, NULL, NULL, ldap_sizelimit, &ldap_res);
 
 		if (errno != LDAP_SUCCESS
 			&& errno != LDAP_SIZELIMIT_EXCEEDED
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(ldap_explode_dn)
 	}
 
 	/* ldap_value_free() is deprecated */
-	ber_memvfree((void **)ldap_value);
+	ldap_memvfree((void **)ldap_value);
 }
 /* }}} */
 
@@ -1467,7 +1467,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
 	if (is_full_add == 1) {
-		if ((i = ldap_add_s(ld->link, dn, ldap_mods)) != LDAP_SUCCESS) {
+		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {
 			php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
@@ -1547,7 +1547,7 @@ PHP_FUNCTION(ldap_delete)
 		RETURN_FALSE;
 	}
 
-	if ((rc = ldap_delete_s(ld->link, dn)) != LDAP_SUCCESS) {
+	if ((rc = ldap_delete_ext_s(ld->link, dn, NULL, NULL)) != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
 		RETURN_FALSE;
 	}
@@ -1970,7 +1970,11 @@ PHP_FUNCTION(ldap_compare)
 		RETURN_FALSE;
 	}
 
-	errno = ldap_compare_s(ld->link, dn, attr, value);
+	struct berval lvalue;
+	lvalue.bv_val = value;
+	lvalue.bv_len = value_len;
+
+	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, NULL, NULL);
 
 	switch (errno) {
 		case LDAP_COMPARE_TRUE:
@@ -2345,7 +2349,7 @@ PHP_FUNCTION(ldap_parse_result)
 					add_next_index_string(referrals, *refp);
 					refp++;
 				}
-				ldap_value_free(lreferrals);
+				ldap_memvfree((void**)lreferrals);
 			}
 		case 5:
 			zval_ptr_dtor(errmsg);
@@ -2469,7 +2473,7 @@ PHP_FUNCTION(ldap_parse_reference)
 			add_next_index_string(referrals, *refp);
 			refp++;
 		}
-		ldap_value_free(lreferrals);
+		ldap_memvfree((void**)lreferrals);
 	}
 	RETURN_TRUE;
 }
