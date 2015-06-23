@@ -579,7 +579,7 @@ SPL_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed $value)
+/* {{{ proto bool SplHeap::insert(mixed value)
 	   Push $value on the heap */
 SPL_METHOD(SplHeap, insert)
 {
@@ -630,7 +630,7 @@ SPL_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed $value, mixed $priority)
+/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
@@ -736,7 +736,7 @@ SPL_METHOD(SplPriorityQueue, top)
 /* }}} */
 
 
-/* {{{ proto int SplPriorityQueue::setExtractFlags($flags)
+/* {{{ proto int SplPriorityQueue::setExtractFlags(int flags)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {

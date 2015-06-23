@@ -1926,7 +1926,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::__toString() U
+/* {{{ proto object SimpleXMLElement::__toString()
    Returns the string content */
 SXE_METHOD(__toString)
 {

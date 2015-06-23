@@ -5260,7 +5260,7 @@ PHP_FUNCTION(pg_result_status)
 }
 /* }}} */
 
-/* {{{ proto array pg_get_notify([resource connection[, result_type]])
+/* {{{ proto mixed pg_get_notify([resource connection[, int result_type]])
    Get asynchronous notification */
 PHP_FUNCTION(pg_get_notify)
 {
@@ -5400,7 +5400,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 }
 /* }}} */
 
-/* {{{ proto resource pg_socket(resource)
+/* {{{ proto resource pg_socket(resource connection)
    Get a read-only handle to the socket underlying the pgsql connection */
 PHP_FUNCTION(pg_socket)
 {
@@ -5427,7 +5427,7 @@ PHP_FUNCTION(pg_socket)
 }
 /* }}} */
 
-/* {{{ proto bool pg_consume_input(resource)
+/* {{{ proto bool pg_consume_input(resource connection)
    Reads input on the connection */
 PHP_FUNCTION(pg_consume_input)
 {
@@ -5446,7 +5446,7 @@ PHP_FUNCTION(pg_consume_input)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_flush(resource)
+/* {{{ proto mixed pg_flush(resource connection)
    Flush outbound query data on the connection */
 PHP_FUNCTION(pg_flush)
 {

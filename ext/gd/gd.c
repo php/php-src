@@ -2670,7 +2670,7 @@ PHP_FUNCTION(imagepng)
 
 
 #ifdef HAVE_GD_WEBP
-/* {{{ proto bool imagewebp(resource im [, string filename[, quality]] )
+/* {{{ proto bool imagewebp(resource im [, string filename[, int quality]] )
    Output WEBP image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
@@ -2690,7 +2690,7 @@ PHP_FUNCTION(imagejpeg)
 /* }}} */
 #endif /* HAVE_GD_JPG */
 
-/* {{{ proto bool imagewbmp(resource im [, string filename, [, int foreground]])
+/* {{{ proto bool imagewbmp(resource im [, string filename [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
@@ -2706,7 +2706,7 @@ PHP_FUNCTION(imagegd)
 }
 /* }}} */
 
-/* {{{ proto bool imagegd2(resource im [, string filename, [, int chunk_size, [, int type]]])
+/* {{{ proto bool imagegd2(resource im [, string filename [, int chunk_size [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
@@ -4376,7 +4376,7 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_FALSE;
 }
 
-/* {{{ proto bool imagefilter(resource src_im, int filtertype, [args] )
+/* {{{ proto bool imagefilter(resource src_im, int filtertype[, int arg1 [, int arg2 [, int arg3 [, int arg4 ]]]] )
    Applies Filter an image using a custom angle */
 PHP_FUNCTION(imagefilter)
 {
@@ -4582,7 +4582,7 @@ PHP_FUNCTION(imagecrop)
 }
 /* }}} */
 
-/* {{{ proto void imagecropauto(resource im [, int mode [, threshold [, color]]])
+/* {{{ proto void imagecropauto(resource im [, int mode [, float threshold [, int color]]])
    Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
 {
@@ -4632,7 +4632,7 @@ PHP_FUNCTION(imagecropauto)
 }
 /* }}} */
 
-/* {{{ proto resource imagescale(resource im, new_width[, new_height[, method]])
+/* {{{ proto resource imagescale(resource im, int new_width[, int new_height[, int method]])
    Scale an image using the given new width and height. */
 PHP_FUNCTION(imagescale)
 {
@@ -4775,7 +4775,7 @@ PHP_FUNCTION(imageaffine)
 }
 /* }}} */
 
-/* {{{ proto array imageaffinematrixget(type[, options])
+/* {{{ proto array imageaffinematrixget(int type[, array options])
    Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffinematrixget)
 {
@@ -4923,7 +4923,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 } /* }}} */
 
-/* {{{ proto resource imagesetinterpolation(resource im, [, method]])
+/* {{{ proto resource imagesetinterpolation(resource im [, int method]])
    Set the default interpolation method, passing -1 or 0 sets it to the libgd default (bilinear). */
 PHP_FUNCTION(imagesetinterpolation)
 {

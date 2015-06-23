@@ -978,7 +978,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
+/* {{{ proto string SplFileInfo::getBasename([string $suffix])
    Returns filename component of path */
 SPL_METHOD(SplFileInfo, getBasename)
 {
@@ -1005,7 +1005,7 @@ SPL_METHOD(SplFileInfo, getBasename)
 }
 /* }}}*/
 
-/* {{{ proto string DirectoryIterator::getBasename([string $suffix]) U
+/* {{{ proto string DirectoryIterator::getBasename([string $suffix])
    Returns filename component of current dir entry */
 SPL_METHOD(DirectoryIterator, getBasename)
 {
@@ -1215,7 +1215,7 @@ FileInfoFunction(isDir, FS_IS_DIR)
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getLinkTarget() U
+/* {{{ proto string SplFileInfo::getLinkTarget()
    Return the target of a symbolic link */
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
@@ -2656,7 +2656,7 @@ SPL_METHOD(SplFileObject, fputcsv)
 }
 /* }}} */
 
-/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
+/* {{{ proto void SplFileObject::setCsvControl([string delimiter [, string enclosure [, string escape ]]])
    Set the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
 {
