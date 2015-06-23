@@ -233,6 +233,25 @@ static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce)
 }
 /* }}} */
 
+/* {{{ static calculate_unit_length */
+/* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE_UTF8. */
+static zend_always_inline int calculate_unit_length(pcre_cache_entry *pce, char *start)
+{
+	int unit_len;
+
+	if (pce->compile_options & PCRE_UTF8) {
+		char *end = start;
+
+		/* skip continuation bytes */
+		while ((*++end & 0xC0) == 0x80);
+		unit_len = end - start;
+	} else {
+		unit_len = 1;
+	}
+	return unit_len;
+}
+/* }}} */
+
 /* {{{ pcre_get_compiled_regex_cache
  */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
@@ -854,8 +873,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
+				int unit_len = calculate_unit_length(pce, subject + start_offset);
+				
 				offsets[0] = (int)start_offset;
-				offsets[1] = (int)(start_offset + 1);
+				offsets[1] = (int)(start_offset + unit_len);
 			} else
 				break;
 		} else {
@@ -1247,10 +1268,12 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
+				int unit_len = calculate_unit_length(pce, piece);
+
 				offsets[0] = start_offset;
-				offsets[1] = start_offset + 1;
-				memcpy(&result->val[result_len], piece, 1);
-				result_len++;
+				offsets[1] = start_offset + unit_len;
+				memcpy(&result->val[result_len], piece, unit_len);
+				result_len += unit_len;
 			} else {
 				if (!result && subject_str) {
 					result = zend_string_copy(subject_str);
