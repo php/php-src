@@ -1200,12 +1200,12 @@ PHP_FUNCTION(explode)
  */
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 {
-	zval         *tmp;
+    zval         *tmp;
 	int           numelems;
 	zend_string  *str;
 	char         *cptr;
 	size_t        len = 0;
-	zend_string **strings, **strptr;
+	zend_string **strings, **strptr, **s;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
@@ -1222,54 +1222,24 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	strptr = strings - 1;
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
-		if (Z_TYPE_P(tmp) == IS_LONG) {
-			double val = Z_LVAL_P(tmp);
-			*++strptr = NULL;
-			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
-			if (val < 0) {
-				val = -10 * val;
-			}
-			if (val < 10) {
-				len++;
-			} else {
-				len += (int) log10(10 * (double) val);
-			}
-		} else {
-			*++strptr = zval_get_string(tmp);
-			len += (*strptr)->len;
-		}
+		*++strptr = zval_get_string(tmp);
+		len += (*strptr)->len;
 	} ZEND_HASH_FOREACH_END();
 
 	str = zend_string_alloc(len + (numelems - 1) * delim->len, 0);
-	cptr = str->val + str->len;
-	*cptr = 0;
+	cptr = str->val;
 
-	do {
-		if (*strptr) {
-			cptr -= (*strptr)->len;
-			memcpy(cptr, (*strptr)->val, (*strptr)->len);
-			zend_string_release(*strptr);
-		} else {
-			char *oldPtr = cptr;
-			char oldVal = *cptr;
-			zend_long val = ((zend_long *) (strings + numelems))[strptr - strings];
-			cptr = zend_print_long_to_buf(cptr, val);
-			*oldPtr = oldVal;
-		}
+	for (s = strings; s < strptr; s++) {
+		memcpy(cptr, (*s)->val, (*s)->len);
+		cptr += (*s)->len;
+		zend_string_release(*s);
 
-		cptr -= delim->len;
 		memcpy(cptr, delim->val, delim->len);
-	} while (--strptr > strings);
-
-	if (*strptr) {
-		memcpy(str->val, (*strptr)->val, (*strptr)->len);
-		zend_string_release(*strptr);
-	} else {
-		char *oldPtr = cptr;
-		char oldVal = *cptr;
-		zend_print_long_to_buf(cptr, ((zend_long *) (strings + numelems))[strptr - strings]);
-		*oldPtr = oldVal;
+		cptr += delim->len;
 	}
+
+	memcpy(cptr, (*s)->val, (*s)->len + 1);
+	zend_string_release(*s);
 
 	efree(strings);
 	RETURN_NEW_STR(str);
