@@ -2355,8 +2355,9 @@ static inline int accel_find_sapi(void)
 				return SUCCESS;
 			}
 		}
-		if (ZCG(accel_directives).enable_cli &&
-		    strcmp(sapi_module.name, "cli") == 0) {
+		if (ZCG(accel_directives).enable_cli && (
+		    strcmp(sapi_module.name, "cli") == 0
+		  || strcmp(sapi_module.name, "phpdbg") == 0)) {
 			return SUCCESS;
 		}
 	}

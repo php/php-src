@@ -94,7 +94,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		}
 		ht->nTableMask = -hash_size;
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
-		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
+		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
 		HT_HASH_RESET(ht);
 		memcpy(ht->arData, old_buckets, ht->nNumUsed * sizeof(Bucket));
 		efree(old_data);

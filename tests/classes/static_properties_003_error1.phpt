@@ -15,7 +15,7 @@ unset($c->y);
 
 --> Access non-visible static prop like instance prop:
 
-Fatal error: Uncaught EngineException: Cannot access protected property C::$y in %s:8
+Fatal error: Uncaught Error: Cannot access protected property C::$y in %s:8
 Stack trace:
 #0 {main}
   thrown in %s on line 8

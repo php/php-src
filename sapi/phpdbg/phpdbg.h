@@ -130,6 +130,7 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_opcode.h"
 #ifdef PHP_WIN32
 # include "phpdbg_sigio_win32.h"
 #endif
@@ -264,6 +265,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
+	zend_arena *oplog_arena;                     /* arena for storing oplog */
+	phpdbg_oplog_list *oplog_list;               /* list of oplog starts */
+	phpdbg_oplog_entry *oplog_cur;               /* current oplog entry */
+
 	struct {
 		FILE *ptr;
 		int fd;

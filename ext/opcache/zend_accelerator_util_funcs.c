@@ -373,18 +373,8 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		prop_info = ARENA_REALLOC(Z_PTR(p->val));
 		ZVAL_PTR(&q->val, prop_info);
 
-		if (prop_info->ce == old_ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
-			/* Copy constructor */
-			if (prop_info->doc_comment) {
-				if (ZCG(accel_directives).load_comments) {
-					prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
-				} else {
-					prop_info->doc_comment = NULL;
-				}
-			}
-			prop_info->ce = ARENA_REALLOC(prop_info->ce);
-		} else if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
-		           (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
+		    (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
 			prop_info->ce = ARENA_REALLOC(prop_info->ce);
 		}
 	}
@@ -446,13 +436,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
 	} else {
 		ce->interfaces = NULL;
-	}
-	if (ZEND_CE_DOC_COMMENT(ce)) {
-		if (ZCG(accel_directives).load_comments) {
-			ZEND_CE_DOC_COMMENT(ce) = zend_string_dup(ZEND_CE_DOC_COMMENT(ce), 0);
-		} else {
-			ZEND_CE_DOC_COMMENT(ce) =  NULL;
-		}
 	}
 
 	if (ce->parent) {

@@ -257,9 +257,10 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 
 		array_init(&token_stream);
 		if((success = (zendparse() == SUCCESS))) {
-			ZVAL_ZVAL(return_value, &token_stream, 1, 0);
+			ZVAL_COPY_VALUE(return_value, &token_stream);
+		} else {
+			zval_ptr_dtor(&token_stream);
 		}
-		zval_dtor(&token_stream);
 
 		zend_ast_destroy(CG(ast));
 		zend_arena_destroy(CG(ast_arena));

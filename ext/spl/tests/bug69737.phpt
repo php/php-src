@@ -13,7 +13,7 @@ $h->insert(6);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught EngineException: Call to undefined method SplMinHeap::notexist() in %s%ebug69737.php:%d
+Fatal error: Uncaught Error: Call to undefined method SplMinHeap::notexist() in %s%ebug69737.php:%d
 Stack trace:
 #0 [internal function]: SplMinHeap1->compare(1, 6)
 #1 %s%ebug69737.php(%d): SplHeap->insert(6)

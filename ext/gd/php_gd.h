@@ -185,16 +185,6 @@ PHP_FUNCTION(imagesy);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
-PHP_FUNCTION(imagepsloadfont);
-/*
-PHP_FUNCTION(imagepscopyfont);
-*/
-PHP_FUNCTION(imagepsfreefont);
-PHP_FUNCTION(imagepsencodefont);
-PHP_FUNCTION(imagepsextendfont);
-PHP_FUNCTION(imagepsslantfont);
-PHP_FUNCTION(imagepstext);
-PHP_FUNCTION(imagepsbbox);
 
 PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);

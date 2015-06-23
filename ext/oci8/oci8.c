@@ -2561,7 +2561,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 	}
 
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
-		zend_register_resource(value, column->stmtid, 0); /* XXX type correct? */
+		ZVAL_RES(value, zend_register_resource(column->stmtid, 0)); /* XXX type correct? */
 		++GC_REFCOUNT(column->stmtid);
 	} else if (column->is_descr) {
 
@@ -2844,7 +2844,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	}
 
 	/* Populate key if passed */
-	if (hash_key->val) {
+	if (hash_key && hash_key->val) {
 		session_pool->spool_hash_key = zend_string_dup(hash_key, 1);
 		if (session_pool->spool_hash_key == NULL) {
 			iserror = 1;

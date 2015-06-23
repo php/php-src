@@ -147,6 +147,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 	case ZEND_JMPZ_EX:
 	case ZEND_JMPNZ_EX:
 	case ZEND_JMP_SET:
+	case ZEND_ASSERT_CHECK:
 		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
 		break;
 
@@ -224,6 +225,15 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		if (decode) {
 			free(decode);
 		}
+	}
+
+	if (PHPDBG_G(oplog_list)) {
+		phpdbg_oplog_entry *cur = zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry));
+		cur->op = (zend_op *) execute_data->opline;
+		cur->op_array = &execute_data->func->op_array;
+		cur->next = NULL;
+		PHPDBG_G(oplog_cur)->next = cur;
+		PHPDBG_G(oplog_cur) = cur;
 	}
 } /* }}} */
 

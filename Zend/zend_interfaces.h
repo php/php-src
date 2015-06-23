@@ -49,6 +49,17 @@ ZEND_API zval* zend_call_method(zval *object_pp, zend_class_entry *obj_ce, zend_
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2)
 
+#define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
+	{\
+		zend_class_entry ce;\
+		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
+		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
+		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
+	}
+
+#define REGISTER_MAGIC_IMPLEMENT(class_name, interface_name) \
+	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
+
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter);
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key);

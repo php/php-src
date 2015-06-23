@@ -8,7 +8,7 @@ Parse errors during token_get_all()
 function test_parse_error($code) {
     try {
         var_dump(token_get_all($code));
-    } catch (ParseException $e) {
+    } catch (ParseError $e) {
         echo $e->getMessage(), "\n";
     }
 }

@@ -31,7 +31,7 @@ array(1) {
   string(2) "ok"
 }
 
-Fatal error: Uncaught EngineException: Cannot use [] for reading in %sbug34064.php:18
+Fatal error: Uncaught Error: Cannot use [] for reading in %sbug34064.php:18
 Stack trace:
 #0 %s(%d): XmlTest->run()
 #1 {main}

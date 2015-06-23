@@ -9,7 +9,7 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 <?php
 try {
     $comment = new DOMComment("comment1", "comment2");
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>

@@ -18,7 +18,7 @@ Phar::loadPhar(array());
 Phar::canCompress('hi');
 try {
 	$a = new Phar(array());
-} catch (TypeException $e) {
+} catch (TypeError $e) {
 	print_exception($e);
 }
 try {

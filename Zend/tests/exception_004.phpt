@@ -15,7 +15,7 @@ try {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Exceptions must be valid objects derived from the Exception base class in %s:%d
+Fatal error: Uncaught Error: Cannot throw objects that do not implement Throwable in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -394,7 +394,12 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval tmp;
 
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
-				ZVAL_ZVAL(result, &tmp, 1, 1);
+				if (UNEXPECTED(Z_ISREF(tmp))) {
+					ZVAL_DUP(result, Z_REFVAL(tmp));
+				} else {
+					ZVAL_DUP(result, &tmp);
+				}
+				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
 				zval_dtor(&op2);
 			}

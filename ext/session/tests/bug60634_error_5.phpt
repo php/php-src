@@ -44,7 +44,7 @@ echo "um, hi\n";
 --EXPECTF--
 close: goodbye cruel world
 
-Fatal error: Uncaught EngineException: Call to undefined function undefined_function() in %s:%d
+Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d
 Stack trace:
 #0 [internal function]: close()
 #1 %s(%d): session_write_close()

@@ -164,7 +164,7 @@ static void php_set_compare_func(zend_long sort_type) /* {{{ */
 
 		case PHP_SORT_REGULAR:
 		default:
-			ARRAYG(compare_func) = compare_function;
+			ARRAYG(compare_func) = zval_compare_function;
 			break;
 	}
 }
@@ -821,7 +821,8 @@ PHP_FUNCTION(end)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -854,7 +855,8 @@ PHP_FUNCTION(prev)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -887,7 +889,8 @@ PHP_FUNCTION(next)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -920,7 +923,8 @@ PHP_FUNCTION(reset)
 			entry = Z_INDIRECT_P(entry);
 		}
 
-		RETURN_ZVAL_FAST(entry);
+		ZVAL_DEREF(entry);
+		ZVAL_COPY(return_value, entry);
 	}
 }
 /* }}} */
@@ -950,7 +954,8 @@ PHP_FUNCTION(current)
 		entry = Z_INDIRECT_P(entry);
 	}
 
-	RETURN_ZVAL_FAST(entry);
+	ZVAL_DEREF(entry);
+	ZVAL_COPY(return_value, entry);
 }
 /* }}} */
 
@@ -996,7 +1001,8 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
-				RETVAL_ZVAL_FAST(result);
+				ZVAL_DEREF(result);
+				ZVAL_COPY(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1016,7 +1022,8 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		RETVAL_ZVAL_FAST(min);
+		ZVAL_DEREF(min);
+		ZVAL_COPY(return_value, min);
 	}
 }
 /* }}} */
@@ -1043,7 +1050,8 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
-				RETVAL_ZVAL_FAST(result);
+				ZVAL_DEREF(result);
+				ZVAL_COPY(return_value, result);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1063,7 +1071,8 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		RETVAL_ZVAL_FAST(max);
+		ZVAL_DEREF(max);
+		ZVAL_COPY(return_value, max);
 	}
 }
 /* }}} */
@@ -1348,22 +1357,37 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
+static zend_always_inline int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 {
+#if 1
+	/* first 256 bits for first character, and second 256 bits for the next */
+	static const uint32_t charset[16] = {
+	     /*  31      0   63     32   95     64   127    96 */
+			0x00000000, 0x00000000, 0x87fffffe, 0x07fffffe,
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+	     /*  31      0   63     32   95     64   127    96 */
+			0x00000000, 0x03ff0000, 0x87fffffe, 0x07fffffe,
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
+		};
+#endif
 	size_t i;
-	int ch;
+	uint32_t ch;
 
-	if (!var_name_len) {
+	if (UNEXPECTED(!var_name_len)) {
 		return 0;
 	}
 
 	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
-	ch = (int)((unsigned char *)var_name)[0];
+	ch = (uint32_t)((unsigned char *)var_name)[0];
+#if 1
+	if (UNEXPECTED(!(charset[ch >> 5] & (1 << (ch & 0x1f))))) {
+#else
 	if (var_name[0] != '_' &&
 		(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
 		(ch < 97  /* a    */ || /* z    */ ch > 122) &&
 		(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
 	) {
+#endif
 		return 0;
 	}
 
@@ -1371,13 +1395,17 @@ static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 	if (var_name_len > 1) {
 		i = 1;
 		do {
-			ch = (int)((unsigned char *)var_name)[i];
+			ch = (uint32_t)((unsigned char *)var_name)[i];
+#if 1
+			if (UNEXPECTED(!(charset[8 + (ch >> 5)] & (1 << (ch & 0x1f))))) {
+#else
 			if (var_name[i] != '_' &&
 				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&
 				(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
 				(ch < 97  /* a    */ || /* z    */ ch > 122) &&
 				(ch < 127 /* 0x7f */ || /* 0xff */ ch > 255)
 			) {
+#endif
 				return 0;
 			}
 		} while (++i < var_name_len);
@@ -2588,7 +2616,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				}
 				ZVAL_UNDEF(&tmp);
 				if (Z_TYPE_P(src_zval) == IS_OBJECT) {
-					ZVAL_DUP(&tmp, src_zval);
+					ZVAL_COPY(&tmp, src_zval);
 					convert_to_array(&tmp);
 					src_zval = &tmp;
 				}
@@ -2722,7 +2750,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 }
 /* }}} */
 
-static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive, int replace) /* {{{ */
+static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive, int replace) /* {{{ */
 {
 	zval *args = NULL;
 	zval *arg;
@@ -2961,7 +2989,7 @@ PHP_FUNCTION(array_values)
 	/* Go through input array and add values to the return array */
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-			if (Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1) {
+			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
 				entry = Z_REFVAL_P(entry);
 			}
 			Z_TRY_ADDREF_P(entry);
@@ -3090,17 +3118,15 @@ PHP_FUNCTION(array_column)
 			zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
 		}
 
-		if (Z_REFCOUNTED_P(zcolval)) {
-			Z_ADDREF_P(zcolval);
-		}
+		Z_TRY_ADDREF_P(zcolval);
 		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
-			SEPARATE_ZVAL(zkeyval);
-			convert_to_string(zkeyval);
-			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
+			zend_string *key = zval_get_string(zkeyval);
+			zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
+			zend_string_release(key);
 		} else {
 			add_next_index_zval(return_value, zcolval);
 		}
@@ -4624,7 +4650,7 @@ PHP_FUNCTION(array_sum)
 		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
 			continue;
 		}
-		ZVAL_DUP(&entry_n, entry);
+		ZVAL_COPY(&entry_n, entry);
 		convert_scalar_to_number(&entry_n);
 		fast_add_function(return_value, return_value, &entry_n);
 	} ZEND_HASH_FOREACH_END();
@@ -4653,7 +4679,7 @@ PHP_FUNCTION(array_product)
 		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
 			continue;
 		}
-		ZVAL_DUP(&entry_n, entry);
+		ZVAL_COPY(&entry_n, entry);
 		convert_scalar_to_number(&entry_n);
 
 		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
@@ -4701,7 +4727,8 @@ PHP_FUNCTION(array_reduce)
 	htbl = Z_ARRVAL_P(input);
 
 	if (zend_hash_num_elements(htbl) == 0) {
-		RETURN_ZVAL(&result, 1, 1);
+		ZVAL_COPY_VALUE(return_value, &result);
+		return;
 	}
 
 	fci.retval = &retval;
@@ -4856,7 +4883,7 @@ PHP_FUNCTION(array_map)
 
 		/* Short-circuit: if no callback and only one array, just return it. */
 		if (!ZEND_FCI_INITIALIZED(fci)) {
-			RETVAL_ZVAL(&arrays[0], 1, 0);
+			ZVAL_COPY(return_value, &arrays[0]);
 			return;
 		}
 

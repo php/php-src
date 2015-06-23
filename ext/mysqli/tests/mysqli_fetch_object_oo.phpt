@@ -34,7 +34,7 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (!is_null($tmp = @$res->fetch_object($link, $link)))
 			printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (!is_null($tmp = @$res->fetch_object($link, $link, $link)))
 			printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
@@ -84,7 +84,7 @@ require_once('skipifconnectfailure.inc');
 			printf("[009] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
 			var_dump($obj);
 		}
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 		mysqli_fetch_object($res);
 	}

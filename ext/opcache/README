@@ -127,11 +127,6 @@ opcache.save_comments (default "1")
 	size of the optimized code. Disabling "Doc Comments" may break some
 	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
 
-opcache.load_comments (default "1")
-	If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-	may be always stored (save_comments=1), but not loaded by applications
-	that don't need them anyway.
-
 opcache.fast_shutdown (default "0")
 	If enabled, a fast shutdown sequence is used for the accelerated code
 	The fast shutdown sequence doesn't free each allocated block, but lets

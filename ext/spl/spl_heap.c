@@ -112,9 +112,7 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 		return FAILURE;
 	}
 
-	convert_to_long(&zresult);
-	*result = Z_LVAL(zresult);
-
+	*result = zval_get_long(&zresult);
 	zval_ptr_dtor(&zresult);
 
 	return SUCCESS;
@@ -694,10 +692,6 @@ SPL_METHOD(SplPriorityQueue, extract)
 		zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
 		zval_ptr_dtor(&value);
 		return;
-	}
-
-	if (Z_REFCOUNTED_P(value_out)) {
-		Z_ADDREF_P(value_out);
 	}
 
 	RETVAL_ZVAL(value_out, 1, 0);

@@ -18,14 +18,14 @@ set_error_handler("error_handler");
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 try {
 	var_dump($tz->hasSameRules('foo'));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	var_dump($ex->getCode(), $ex->getMessage());
 	echo "\n";
 }
 
 try {
 	var_dump(intltz_has_same_rules(null, $tz));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	var_dump($ex->getCode(), $ex->getMessage());
 	echo "\n";
 }

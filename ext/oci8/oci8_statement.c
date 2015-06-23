@@ -1439,7 +1439,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		return NULL;
 	}
 
-	statement = (php_oci_statement *) zend_fetch_resource(z_statement, -1, "oci8 statement", NULL, 1, le_statement);
+	statement = (php_oci_statement *) zend_fetch_resource_ex(z_statement, "oci8 statement", le_statement);
 
 	if (!statement) {
 		return NULL;

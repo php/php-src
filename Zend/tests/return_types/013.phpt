@@ -16,7 +16,7 @@ $baz = new foo();
 var_dump($func=$baz->bar(), $func());
 
 --EXPECTF--
-Fatal error: Uncaught TypeException: Return value of foo::{closure}() must be of the type array, null returned in %s:%d
+Fatal error: Uncaught TypeError: Return value of foo::{closure}() must be of the type array, null returned in %s:%d
 Stack trace:
 #0 %s(%d): foo->{closure}()
 #1 {main}

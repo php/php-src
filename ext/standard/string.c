@@ -1735,17 +1735,17 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
-		RETURN_ZVAL(&tmp, 0, 1);
+		ZVAL_COPY_VALUE(return_value, &tmp);
 	} else {
 		zval *element;
 		if ((element = zend_hash_get_current_data(Z_ARRVAL(tmp))) != NULL) {
-			RETVAL_ZVAL(element, 1, 0);
+			ZVAL_DEREF(element);
+			ZVAL_COPY(return_value, element);
 		} else {
 			ZVAL_EMPTY_STRING(return_value);
 		}
+		zval_ptr_dtor(&tmp);
 	}
-
-	zval_ptr_dtor(&tmp);
 }
 /* }}} */
 
@@ -2406,7 +2406,7 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f >= (zend_long)str->len) {
+	if (f > (zend_long)str->len) {
 		RETURN_FALSE;
 	}
 
@@ -2988,14 +2988,13 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	size_t minlen = 128*1024;
 	size_t maxlen = 0;
 	HashTable str_hash;
-	zval *entry, tmp, dummy;
+	zval *entry;
 	char *key;
 	smart_str result = {0};
 	zend_ulong bitset[256/sizeof(zend_ulong)];
 	zend_ulong *num_bitset;
 
 	/* we will collect all possible key lengths */
-	ZVAL_NULL(&dummy);
 	num_bitset = ecalloc((slen + (sizeof(zend_ulong)-1)) / sizeof(zend_ulong), sizeof(zend_ulong));
 	memset(bitset, 0, sizeof(bitset));
 
@@ -3024,17 +3023,15 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	} ZEND_HASH_FOREACH_END();
 
 	if (UNEXPECTED(num_keys)) {
+		zend_string *key_used;
 		/* we have to rebuild HashTable with numeric keys */
 		zend_hash_init(&str_hash, zend_hash_num_elements(pats), NULL, NULL, 0);
 		ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
 			if (UNEXPECTED(!str_key)) {
-				ZVAL_LONG(&tmp, num_key);
-				convert_to_string(&tmp);
-				str_key = Z_STR(tmp);
-				len = str_key->len;
+				key_used = zend_long_to_str(num_key);
+				len = key_used->len;
 				if (UNEXPECTED(len > slen)) {
 					/* skip long patterns */
-					zval_dtor(&tmp);
 					continue;
 				}
 				if (len > maxlen) {
@@ -3045,17 +3042,18 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 				}
 				/* remember possible key length */
 				num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
-				bitset[((unsigned char)str_key->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)str_key->val[0]) % sizeof(zend_ulong));
+				bitset[((unsigned char)key_used->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)key_used->val[0]) % sizeof(zend_ulong));
 			} else {
-				len = str_key->len;
+				key_used = str_key;
+				len = key_used->len;
 				if (UNEXPECTED(len > slen)) {
 					/* skip long patterns */
 					continue;
 				}
 			}
-			zend_hash_add(&str_hash, str_key, entry);
-			if (str_key == Z_STR(tmp)) {
-				zval_dtor(&tmp);
+			zend_hash_add(&str_hash, key_used, entry);
+			if (UNEXPECTED(!str_key)) {
+				zend_string_release(key_used);
 			}
 		} ZEND_HASH_FOREACH_END();
 		pats = &str_hash;
@@ -3073,22 +3071,23 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	old_pos = pos = 0;
 	while (pos <= slen - minlen) {
 		key = str + pos;
-		if (bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) {
+		if (bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & (Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong)))) {
 			len = maxlen;
 			if (len > slen - pos) {
 				len = slen - pos;
 			}
 			while (len >= minlen) {
-				if (num_bitset[len / sizeof(zend_ulong)] & Z_UL(1) << (len % sizeof(zend_ulong)) == 0) continue;
-				entry = zend_hash_str_find(pats, key, len);
-				if (entry != NULL) {
-					zend_string *s = zval_get_string(entry);
-					smart_str_appendl(&result, str + old_pos, pos - old_pos);
-					smart_str_append(&result, s);
-					old_pos = pos + len;
-					pos = old_pos - 1;
-					zend_string_release(s);
-					break;
+				if ((num_bitset[len / sizeof(zend_ulong)] & (Z_UL(1) << (len % sizeof(zend_ulong))))) {
+					entry = zend_hash_str_find(pats, key, len);
+					if (entry != NULL) {
+						zend_string *s = zval_get_string(entry);
+						smart_str_appendl(&result, str + old_pos, pos - old_pos);
+						smart_str_append(&result, s);
+						old_pos = pos + len;
+						pos = old_pos - 1;
+						zend_string_release(s);
+						break;
+					}
 				}
 				len--;
 			}

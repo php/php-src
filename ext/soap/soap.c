@@ -1496,10 +1496,10 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 	ZVAL_OBJ(&exception_object, EG(exception));
 	if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
 		soap_server_fault_ex(function, &exception_object, NULL);
-	} else if (instanceof_function(Z_OBJCE(exception_object), zend_get_engine_exception())) {
+	} else if (instanceof_function(Z_OBJCE(exception_object), zend_get_error())) {
 		if (service->send_errors) {
 			zval rv;
-			zend_string *msg = zval_get_string(zend_read_property(zend_exception_get_base(), &exception_object, "message", sizeof("message")-1, 0, &rv));
+			zend_string *msg = zval_get_string(zend_read_property(zend_get_error(), &exception_object, "message", sizeof("message")-1, 0, &rv));
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", msg->val, NULL, NULL);
 			zend_string_release(msg);
 		} else {
@@ -2596,13 +2596,13 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
 			ret = FALSE;
 		} else if (Z_TYPE_P(response) != IS_STRING) {
-			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_get_engine_exception())) {
+			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_get_error())) {
 				zval rv;
 				zend_string *msg;
 				zval exception_object;
 
 				ZVAL_OBJ(&exception_object, EG(exception));
-				msg = zval_get_string(zend_read_property(zend_exception_get_base(), &exception_object, "message", sizeof("message")-1, 0, &rv));
+				msg = zval_get_string(zend_read_property(zend_get_error(), &exception_object, "message", sizeof("message")-1, 0, &rv));
 				/* change class */
 				EG(exception)->ce = soap_fault_class_entry;
 				set_soap_fault(&exception_object, NULL, "Client", msg->val, NULL, NULL, NULL);

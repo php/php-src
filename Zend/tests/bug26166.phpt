@@ -37,25 +37,25 @@ function my_error_handler($errno, $errstr, $errfile, $errline) {
 
 set_error_handler('my_error_handler');
 
-class None
+class NoneTest
 {
 	function __toString() {
 	}
 }
 
-$o = new None;
+$o = new NoneTest;
 echo $o;
 
 echo "===THROW===\n";
 
-class Error 
+class ErrorTest
 {
 	function __toString() {
 		throw new Exception("This is an error!");
 	}
 }
 
-$o = new Error;
+$o = new ErrorTest;
 try {
 	echo $o;
 }
@@ -68,7 +68,7 @@ catch (Exception $e) {
 --EXPECTF--
 Hello World!
 ===NONE===
-string(52) "Method None::__toString() must return a string value"
+string(56) "Method NoneTest::__toString() must return a string value"
 ===THROW===
 
-Fatal error: Method Error::__toString() must not throw an exception in %sbug26166.php on line %d
+Fatal error: Method ErrorTest::__toString() must not throw an exception in %sbug26166.php on line %d

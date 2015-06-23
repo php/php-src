@@ -181,7 +181,7 @@ define ____printzv_contents
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
-			____print_ht &$zvalue->value.arr->ht 1
+			____print_ht $zvalue->value.arr
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0

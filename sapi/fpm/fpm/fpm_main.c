@@ -561,7 +561,7 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 
 void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 {
-	fcgi_request *request;
+	fcgi_request *request = NULL;
 
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
@@ -1391,11 +1391,12 @@ static void init_request_info(void)
 }
 /* }}} */
 
-static void fpm_init_request(fcgi_request *req, int listen_fd) /* {{{ */ {
-	fcgi_init_request(req, listen_fd);
-	req->hook.on_accept = fpm_request_accepting;
-	req->hook.on_read = fpm_request_reading_headers;
-	req->hook.on_close = fpm_request_finished;
+static fcgi_request *fpm_init_request(int listen_fd) /* {{{ */ {
+	fcgi_request *req = fcgi_init_request(listen_fd,
+		fpm_request_accepting,
+		fpm_request_reading_headers,
+		fpm_request_finished);
+	return req;
 }
 /* }}} */
 
@@ -1562,7 +1563,7 @@ int main(int argc, char *argv[])
 	int max_requests = 500;
 	int requests = 0;
 	int fcgi_fd = 0;
-	fcgi_request request;
+	fcgi_request *request;
 	char *fpm_config = NULL;
 	char *fpm_prefix = NULL;
 	char *fpm_pid = NULL;
@@ -1862,13 +1863,13 @@ consult the installation file that came with this distribution, or visit \n\
 	php_import_environment_variables = cgi_php_import_environment_variables;
 
 	/* library is already initialized, now init our request */
-	fpm_init_request(&request, fcgi_fd);
+	request = fpm_init_request(fcgi_fd);
 
 	zend_first_try {
-		while (EXPECTED(fcgi_accept_request(&request) >= 0)) {
+		while (EXPECTED(fcgi_accept_request(request) >= 0)) {
 			char *primary_script = NULL;
 			request_body_fd = -1;
-			SG(server_context) = (void *) &request;
+			SG(server_context) = (void *) request;
 			init_request_info();
 
 			fpm_request_info();
@@ -1876,7 +1877,7 @@ consult the installation file that came with this distribution, or visit \n\
 			/* request startup only after we've done all we can to
 			 *            get path_translated */
 			if (UNEXPECTED(php_request_startup() == FAILURE)) {
-				fcgi_finish_request(&request, 1);
+				fcgi_finish_request(request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown();
 				return FPM_EXIT_SOFTWARE;
@@ -1969,12 +1970,12 @@ fastcgi_request_done:
 
 			requests++;
 			if (UNEXPECTED(max_requests && (requests == max_requests))) {
-				fcgi_finish_request(&request, 1);
+				fcgi_finish_request(request, 1);
 				break;
 			}
 			/* end of fastcgi loop */
 		}
-		fcgi_destroy_request(&request);
+		fcgi_destroy_request(request);
 		fcgi_shutdown();
 
 		if (cgi_sapi_module.php_ini_path_override) {

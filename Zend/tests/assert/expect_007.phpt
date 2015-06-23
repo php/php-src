@@ -11,12 +11,12 @@ $data = array(
     "value" => "testing"
 );
 
-class HeaderMalfunctionException extends AssertionException {}
+class HeaderMalfunctionError extends AssertionError {}
 
-assert (preg_match("~^([a-zA-Z0-9-]+)$~", $data["key"]), new HeaderMalfunctionException("malformed key found at {$next} \"{$data["key"]}\""));
+assert (preg_match("~^([a-zA-Z0-9-]+)$~", $data["key"]), new HeaderMalfunctionError("malformed key found at {$next} \"{$data["key"]}\""));
 ?>
 --EXPECTF--
-Fatal error: Uncaught HeaderMalfunctionException: malformed key found at 1 "X-HTTP " in %sexpect_007.php:10
+Fatal error: Uncaught HeaderMalfunctionError: malformed key found at 1 "X-HTTP " in %sexpect_007.php:10
 Stack trace:
 #0 {main}
   thrown in %sexpect_007.php on line 10

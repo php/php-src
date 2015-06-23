@@ -20,7 +20,7 @@ Warning: IntlTimeZone::getID() expects exactly 0 parameters, 1 given in %s on li
 Warning: IntlTimeZone::getID(): intltz_get_id: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeException: Argument 1 passed to intltz_get_id() must be an instance of IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_id() must be an instance of IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_id(NULL)
 #1 {main}

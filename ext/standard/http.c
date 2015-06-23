@@ -36,7 +36,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	const char *prop_name;
 	size_t arg_sep_len, newprefix_len, prop_len;
 	zend_ulong idx;
-	zval *zdata = NULL, copyzval;
+	zval *zdata = NULL;
 
 	if (!ht) {
 		return FAILURE;
@@ -204,16 +204,14 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				default:
 					{
 						zend_string *ekey;
-						/* fall back on convert to string */
-						ZVAL_DUP(&copyzval, zdata);
-						convert_to_string_ex(&copyzval);
+						zend_string *tmp = zval_get_string(zdata);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_raw_url_encode(tmp->val, tmp->len);
 						} else {
-							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+							ekey = php_url_encode(tmp->val, tmp->len);
 						}
 						smart_str_append(formstr, ekey);
-						zval_ptr_dtor(&copyzval);
+						zend_string_release(tmp);
 						zend_string_free(ekey);
 					}
 			}
