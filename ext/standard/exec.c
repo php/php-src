@@ -281,9 +281,10 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 				break;
 #else
 			/* % is Windows specific for enviromental variables, ^%PATH% will 
-				output PATH whil ^%PATH^% not. escapeshellcmd will escape all %.
+				output PATH while ^%PATH^% will not. escapeshellcmd will escape all % and !.
 			*/
 			case '%':
+			case '!':
 			case '"':
 			case '\'':
 #endif
@@ -366,6 +367,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 #ifdef PHP_WIN32
 		case '"':
 		case '%':
+		case '!':
 			cmd[y++] = ' ';
 			break;
 #else
