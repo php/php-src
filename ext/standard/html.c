@@ -1443,19 +1443,20 @@ encode_amp:
  */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-	zend_string *str, *hint_charset = NULL;
+	zval *str;
+	zend_string *hint_charset = NULL;
 	char *default_charset;
 	zend_long flags = ENT_COMPAT;
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_STR(str)
+		Z_PARAM_ZVAL(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_STR_EX(hint_charset, 1, 0)
@@ -1463,10 +1464,18 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
+	if (Z_TYPE_P(str) != IS_STRING && Z_TYPE_P(str) != IS_OBJECT) {
+		convert_to_string(str);
+		RETURN_STRING(str);
+	}
+	if (Z_TYPE_P(str) == IS_OBJECT) {
+		convert_to_string(str);
+	}
+
 	if (!hint_charset) {
 		default_charset = get_default_charset();
 	}
-	replaced = php_escape_html_entities_ex((unsigned char*)str->val, str->len, all, (int) flags, (hint_charset ? hint_charset->val : default_charset), double_encode);
+	replaced = php_escape_html_entities_ex((unsigned char*) Z_STR_P(str)->val, Z_STR_P(str)->len, all, (int) flags, (hint_charset ? hint_charset->val : default_charset), double_encode);
 	RETVAL_STR(replaced);
 }
 /* }}} */
