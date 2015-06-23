@@ -77,43 +77,6 @@ typedef enum _fcgi_protocol_status {
 	FCGI_UNKNOWN_ROLE		= 3
 } dcgi_protocol_status;
 
-typedef struct _fcgi_header {
-	unsigned char version;
-	unsigned char type;
-	unsigned char requestIdB1;
-	unsigned char requestIdB0;
-	unsigned char contentLengthB1;
-	unsigned char contentLengthB0;
-	unsigned char paddingLength;
-	unsigned char reserved;
-} fcgi_header;
-
-typedef struct _fcgi_begin_request {
-	unsigned char roleB1;
-	unsigned char roleB0;
-	unsigned char flags;
-	unsigned char reserved[5];
-} fcgi_begin_request;
-
-typedef struct _fcgi_begin_request_rec {
-	fcgi_header hdr;
-	fcgi_begin_request body;
-} fcgi_begin_request_rec;
-
-typedef struct _fcgi_end_request {
-    unsigned char appStatusB3;
-    unsigned char appStatusB2;
-    unsigned char appStatusB1;
-    unsigned char appStatusB0;
-    unsigned char protocolStatus;
-    unsigned char reserved[3];
-} fcgi_end_request;
-
-typedef struct _fcgi_end_request_rec {
-	fcgi_header hdr;
-	fcgi_end_request body;
-} fcgi_end_request_rec;
-
 /* FastCGI client API */
 
 typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
@@ -122,69 +85,7 @@ typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsi
 #define FCGI_HASH_TABLE_MASK (FCGI_HASH_TABLE_SIZE - 1)
 #define FCGI_HASH_SEG_SIZE   4096
 
-typedef struct _fcgi_hash_bucket {
-	unsigned int              hash_value;
-	unsigned int              var_len;
-	char                     *var;
-	unsigned int              val_len;
-	char                     *val;
-	struct _fcgi_hash_bucket *next;
-	struct _fcgi_hash_bucket *list_next;
-} fcgi_hash_bucket;
-
-typedef struct _fcgi_hash_buckets {
-	unsigned int	           idx;
-	struct _fcgi_hash_buckets *next;
-	struct _fcgi_hash_bucket   data[FCGI_HASH_TABLE_SIZE];
-} fcgi_hash_buckets;
-
-typedef struct _fcgi_data_seg {
-	char                  *pos;
-	char                  *end;
-	struct _fcgi_data_seg *next;
-	char                   data[1];
-} fcgi_data_seg;
-
-typedef struct _fcgi_hash {
-	fcgi_hash_bucket  *hash_table[FCGI_HASH_TABLE_SIZE];
-	fcgi_hash_bucket  *list;
-	fcgi_hash_buckets *buckets;
-	fcgi_data_seg     *data;
-} fcgi_hash;
-
-typedef struct _fcgi_request 	fcgi_request;
-typedef struct _fcgi_req_hook 	fcgi_req_hook;
-
-struct _fcgi_req_hook {
-	void(*on_accept)();
-	void(*on_read)();
-	void(*on_close)();
-};
-
-struct _fcgi_request {
-	int            listen_socket;
-	int            tcp;
-	int            fd;
-	int            id;
-	int            keep;
-#ifdef TCP_NODELAY
-	int            nodelay;
-#endif
-	int            closed;
-	int            in_len;
-	int            in_pad;
-
-	fcgi_header   *out_hdr;
-
-	unsigned char *out_pos;
-	unsigned char  out_buf[1024*8];
-	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
-
-	fcgi_req_hook  hook;
-
-	int            has_env;
-	fcgi_hash      env;
-};
+typedef struct _fcgi_request fcgi_request;
 
 int fcgi_init(void);
 void fcgi_shutdown(void);
@@ -194,7 +95,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy);
 int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
-fcgi_request* fcgi_init_request(fcgi_request *request, int listen_socket);
+fcgi_request* fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)());
 void fcgi_destroy_request(fcgi_request *req);
 void fcgi_set_allowed_clients(char *ip);
 int fcgi_accept_request(fcgi_request *req);
@@ -207,6 +108,7 @@ typedef void (*fcgi_logger)(int type, const char *fmt, ...);
 void fcgi_set_logger(fcgi_logger lg);
 #endif
 
+int   fcgi_has_env(fcgi_request *req);
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
 char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);

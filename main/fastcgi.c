@@ -132,6 +132,106 @@ static int is_impersonate = 0;
 
 #include "fastcgi.h"
 
+typedef struct _fcgi_header {
+	unsigned char version;
+	unsigned char type;
+	unsigned char requestIdB1;
+	unsigned char requestIdB0;
+	unsigned char contentLengthB1;
+	unsigned char contentLengthB0;
+	unsigned char paddingLength;
+	unsigned char reserved;
+} fcgi_header;
+
+typedef struct _fcgi_begin_request {
+	unsigned char roleB1;
+	unsigned char roleB0;
+	unsigned char flags;
+	unsigned char reserved[5];
+} fcgi_begin_request;
+
+typedef struct _fcgi_begin_request_rec {
+	fcgi_header hdr;
+	fcgi_begin_request body;
+} fcgi_begin_request_rec;
+
+typedef struct _fcgi_end_request {
+    unsigned char appStatusB3;
+    unsigned char appStatusB2;
+    unsigned char appStatusB1;
+    unsigned char appStatusB0;
+    unsigned char protocolStatus;
+    unsigned char reserved[3];
+} fcgi_end_request;
+
+typedef struct _fcgi_end_request_rec {
+	fcgi_header hdr;
+	fcgi_end_request body;
+} fcgi_end_request_rec;
+
+typedef struct _fcgi_hash_bucket {
+	unsigned int              hash_value;
+	unsigned int              var_len;
+	char                     *var;
+	unsigned int              val_len;
+	char                     *val;
+	struct _fcgi_hash_bucket *next;
+	struct _fcgi_hash_bucket *list_next;
+} fcgi_hash_bucket;
+
+typedef struct _fcgi_hash_buckets {
+	unsigned int	           idx;
+	struct _fcgi_hash_buckets *next;
+	struct _fcgi_hash_bucket   data[FCGI_HASH_TABLE_SIZE];
+} fcgi_hash_buckets;
+
+typedef struct _fcgi_data_seg {
+	char                  *pos;
+	char                  *end;
+	struct _fcgi_data_seg *next;
+	char                   data[1];
+} fcgi_data_seg;
+
+typedef struct _fcgi_hash {
+	fcgi_hash_bucket  *hash_table[FCGI_HASH_TABLE_SIZE];
+	fcgi_hash_bucket  *list;
+	fcgi_hash_buckets *buckets;
+	fcgi_data_seg     *data;
+} fcgi_hash;
+
+typedef struct _fcgi_req_hook 	fcgi_req_hook;
+
+struct _fcgi_req_hook {
+	void(*on_accept)();
+	void(*on_read)();
+	void(*on_close)();
+};
+
+struct _fcgi_request {
+	int            listen_socket;
+	int            tcp;
+	int            fd;
+	int            id;
+	int            keep;
+#ifdef TCP_NODELAY
+	int            nodelay;
+#endif
+	int            closed;
+	int            in_len;
+	int            in_pad;
+
+	fcgi_header   *out_hdr;
+
+	unsigned char *out_pos;
+	unsigned char  out_buf[1024*8];
+	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
+
+	fcgi_req_hook  hook;
+
+	int            has_env;
+	fcgi_hash      env;
+};
+
 /* maybe it's better to use weak name instead */
 #ifndef HAVE_ATTRIBUTE_WEAK
 static fcgi_logger fcgi_log;
@@ -772,9 +872,9 @@ static void fcgi_hook_dummy() {
 	return;
 }
 
-fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
+fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)())
 {
-	memset(req, 0, sizeof(fcgi_request));
+	fcgi_request *req = calloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
 	req->fd = -1;
 	req->id = -1;
@@ -794,9 +894,9 @@ fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 
 	*/
 	req->out_pos = req->out_buf;
-	req->hook.on_accept = fcgi_hook_dummy;
-	req->hook.on_read = fcgi_hook_dummy;
-	req->hook.on_close = fcgi_hook_dummy;
+	req->hook.on_accept = on_accept ? on_accept : fcgi_hook_dummy;
+	req->hook.on_read = on_read ? on_read : fcgi_hook_dummy;
+	req->hook.on_close = on_close ? on_close : fcgi_hook_dummy;
 
 #ifdef _WIN32
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
@@ -809,6 +909,7 @@ fcgi_request *fcgi_init_request(fcgi_request *req, int listen_socket)
 
 void fcgi_destroy_request(fcgi_request *req) {
 	fcgi_hash_destroy(&req->env);
+	free(req);
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
@@ -1551,6 +1652,11 @@ int fcgi_finish_request(fcgi_request *req, int force_close)
 		fcgi_close(req, force_close, 1);
 	}
 	return ret;
+}
+
+int fcgi_has_env(fcgi_request *req)
+{
+	return req && req->has_env;
 }
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
