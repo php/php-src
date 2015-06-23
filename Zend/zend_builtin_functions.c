@@ -177,7 +177,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_define, 0, 2, _IS_BOOL, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
 	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_TYPE_INFO(0, case_insensitive=false, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, case_insensitive, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 /* bool defined(string constant_name) */
@@ -199,18 +199,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-/* bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true]) */
+/* bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string]) */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_subclass_of, 0, 2, _IS_BOOL, 0, 0)
 	ZEND_ARG_INFO(0, object_or_string)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, allow_string=true, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, allow_string, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-/* bool is_a(mixed object_or_string, string class_name [, bool allow_string=false]) */
+/* bool is_a(mixed object_or_string, string class_name [, bool allow_string]) */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_a, 0, 2, _IS_BOOL, 0, 0)
 	ZEND_ARG_INFO(0, object_or_string)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, allow_string=false, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, allow_string, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 /* array get_class_vars(string class_name) */
@@ -271,9 +271,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_alias, 0, 2, _IS_BOOL, 0, 
 ZEND_END_ARG_INFO()
 
 #if ZEND_DEBUG
-/* void leak([int num_bytes=3]) */
+/* void leak([int num_bytes]) */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leak, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, num_bytes=3, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, num_bytes, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 /* void leak_variable(mixed variable [, bool leak_data]) */
