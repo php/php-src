@@ -21,7 +21,6 @@ if (PHP_LDAP != "no") {
 		AC_DEFINE('HAVE_LDAP', 1);
 		AC_DEFINE('HAVE_LDAP_SASL', 1);
 		AC_DEFINE('HAVE_LDAP_SASL_SASL_H', 1);
-		AC_DEFINE('LDAP_DEPRECATED', 1);
 
 	} else {
 		WARNING("ldap not enabled; libraries and headers not found");

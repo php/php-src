@@ -72,7 +72,7 @@
 
 typedef struct {
 	LDAP *link;
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(HAVE_3ARG_SETREBINDPROC)
 	zval rebindproc;
 #endif
 } ldap_linkdata;
@@ -98,14 +98,10 @@ static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
 
 	/* ldap_unbind_s() is deprecated;
 	 * the distinction between ldap_unbind() and ldap_unbind_s() is moot */
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
 	ldap_unbind_ext(ld->link, NULL, NULL);
 #ifdef HAVE_3ARG_SETREBINDPROC
 	zval_ptr_dtor(&ld->rebindproc);
 #endif
-#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
-	ldap_unbind_s(ld->link);
-#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 
 	efree(ld);
 	LDAPG(num_links)--;
@@ -306,13 +302,7 @@ PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
 	size_t hostlen = 0;
-	zend_long port =
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
-	LDAP_PORT
-#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
-	389 /* Default port */
-#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
-	;
+	zend_long port = LDAP_PORT;
 #ifdef HAVE_ORALDAP
 	char *wallet = NULL, *walletpasswd = NULL;
 	size_t walletlen = 0, walletpasswdlen = 0;
@@ -347,7 +337,6 @@ PHP_FUNCTION(ldap_connect)
 
 	ld = ecalloc(1, sizeof(ldap_linkdata));
 
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
 	/* OpenLDAP provides a specific call to detect valid LDAP URIs;
 	 * ldap_init()/ldap_open() is deprecated, use ldap_initialize() instead.
 	 */
@@ -376,9 +365,6 @@ PHP_FUNCTION(ldap_connect)
 			RETURN_FALSE;
 		}
 	}
-#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
-	ldap = ldap_open(host, port);
-#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 
 	if (ldap == NULL) {
 		efree(ld);
@@ -468,7 +454,6 @@ PHP_FUNCTION(ldap_bind)
 		RETURN_FALSE;
 	}
 
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
 	{
 		struct berval   cred;
 
@@ -479,9 +464,6 @@ PHP_FUNCTION(ldap_bind)
 				NULL, NULL,     /* no controls right now */
 				NULL);	  /* we don't care about the server's credentials */
 	}
-#else
-	rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE);
-#endif
 	if ( rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
 		RETURN_FALSE;
@@ -1357,12 +1339,8 @@ PHP_FUNCTION(ldap_explode_dn)
 		add_index_string(return_value, i, ldap_value[i]);
 	}
 
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
 	/* ldap_value_free() is deprecated */
 	ber_memvfree((void **)ldap_value);
-#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
-	ldap_value_free(ldap_value);
-#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 }
 /* }}} */
 
@@ -2569,7 +2547,7 @@ PHP_FUNCTION(ldap_start_tls)
 #endif
 #endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP */
 
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(HAVE_3ARG_SETREBINDPROC)
 /* {{{ _ldap_rebind_proc()
 */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
@@ -2925,7 +2903,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 		RETURN_FALSE;
 	}
 
-	lctrl = ldap_find_control(LDAP_CONTROL_PAGEDRESULTS, lserverctrls);
+	lctrl = ldap_control_find(LDAP_CONTROL_PAGEDRESULTS, lserverctrls, NULL);
 	if (lctrl == NULL) {
 		ldap_controls_free(lserverctrls);
 		php_error_docref(NULL, E_WARNING, "No paged results control response in result");
@@ -3226,7 +3204,7 @@ ZEND_END_ARG_INFO()
 #endif
 #endif
 
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(HAVE_3ARG_SETREBINDPROC)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, callback)
@@ -3314,7 +3292,7 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #endif
 
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(HAVE_3ARG_SETREBINDPROC)
 	PHP_FE(ldap_set_rebind_proc,						arginfo_ldap_set_rebind_proc)
 #endif
 
