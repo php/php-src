@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Jul 2015, PHP 5.6.11
 
 - Core:
+  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
   . Fixed bug #69703 (Use __builtin_clzl on PowerPC).
     (dja at axtens dot net, Kalle)
   . Fixed bug #69732 (can induce segmentation fault with basic php code).
