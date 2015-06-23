@@ -226,7 +226,7 @@ try_again:
 
 /* }}} */
 
-/* {{{ convert_object_to_type */
+/* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
 #define convert_object_to_type(op, dst, ctype, conv_func)									\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
@@ -332,7 +332,6 @@ try_again:
 				if (Z_TYPE(dst) == IS_LONG) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name->val);
 
 					ZVAL_LONG(op, 1);
 				}
@@ -393,8 +392,6 @@ try_again:
 				if (Z_TYPE(dst) == IS_DOUBLE) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to float", Z_OBJCE_P(op)->name->val);
-
 					ZVAL_DOUBLE(op, 1.0);
 				}
 				break;
@@ -542,13 +539,11 @@ try_again:
 			zval dst;
 
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
+			zval_dtor(op);
 
 			if (Z_TYPE(dst) == IS_STRING) {
-				zval_dtor(op);
 				ZVAL_COPY_VALUE(op, &dst);
 			} else {
-				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name->val);
-				zval_dtor(op);
 				ZVAL_NEW_STR(op, zend_string_init("Object", sizeof("Object")-1, 0));
 			}
 			break;
@@ -742,7 +737,6 @@ try_again:
 				if (Z_TYPE(dst) == IS_LONG) {
 					return Z_LVAL(dst);
 				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name->val);
 					return 1;
 				}
 			}
@@ -782,8 +776,6 @@ try_again:
 				if (Z_TYPE(dst) == IS_DOUBLE) {
 					return Z_DVAL(dst);
 				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name->val);
-
 					return 1.0;
 				}
 			}

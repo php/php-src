@@ -148,6 +148,13 @@ struct _zend_vm_stack {
 #define ZEND_VM_STACK_ELEMETS(stack) \
 	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOTS)
 
+/*
+ * In general in RELEASE build ZEND_ASSERT() must be zero-cost, but for some
+ * reason, GCC generated worse code, performing CSE on assertion code and the
+ * following "slow path" and moving memory read operatins from slow path into
+ * common header. This made a degradation for the fast path.
+ * The following "#if ZEND_DEBUG" eliminates it.
+ */
 #if ZEND_DEBUG
 # define ZEND_ASSERT_VM_STACK(stack) ZEND_ASSERT(stack->top > (zval *) stack && stack->end > (zval *) stack && stack->top <= stack->end)
 # define ZEND_ASSERT_VM_STACK_GLOBAL ZEND_ASSERT(EG(vm_stack_top) > (zval *) EG(vm_stack) && EG(vm_stack_end) > (zval *) EG(vm_stack) && EG(vm_stack_top) <= EG(vm_stack_end))
