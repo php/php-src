@@ -1466,7 +1466,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 
 	if (Z_TYPE_P(str) != IS_STRING && Z_TYPE_P(str) != IS_OBJECT) {
 		convert_to_string(str);
-		RETURN_STRING(str);
+		RETURN_ZVAL(str, 0, 1);
 	}
 	if (Z_TYPE_P(str) == IS_OBJECT) {
 		convert_to_string(str);
