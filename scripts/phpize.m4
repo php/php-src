@@ -38,6 +38,22 @@ dnl Find php-config script
 PHP_ARG_WITH(php-config,,
 [  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
 
+PHP_ARG_ENABLE(api-checks, whether to perform API compliance checks,
+[  --enable-api-checks        Perform API compliance checks], no, no)
+if test "$PHP_API_CHECKS" = "yes"; then
+  AC_DEFINE(ZEND_EXT_CHECK_API,1,[Perform API compliance checks])
+else
+  AC_DEFINE(ZEND_EXT_CHECK_API,0,[Perform API compliance checks])
+fi
+
+PHP_ARG_ENABLE(strict-api, whether to enforce strict API compliance,
+[  --enable-strict-api        Enforce strict API compliance], no, no)
+if test "$PHP_STRICT_API" = "yes"; then
+  AC_DEFINE(ZEND_EXT_STRICT_API,1,[Enforce strict API compliance])
+else
+  AC_DEFINE(ZEND_EXT_STRICT_API,0,[Enforce strict API compliance])
+fi
+
 dnl For BC
 PHP_CONFIG=$PHP_PHP_CONFIG
 prefix=`$PHP_CONFIG --prefix 2>/dev/null`
