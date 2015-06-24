@@ -346,9 +346,12 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 {
 	if (!init_file && use_default) {
 		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
+		char *sys_ini;
 		int i;
 
-		phpdbg_try_file_init(PHPDBG_STRL(PHP_CONFIG_FILE_PATH "/" PHPDBG_INIT_FILENAME), 0);
+		asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH);
+		phpdbg_try_file_init(sys_ini, strlen(sys_ini), 0);
+		free(sys_ini);
 
 		if (!scan_dir) {
 			scan_dir = PHP_CONFIG_FILE_SCAN_DIR;

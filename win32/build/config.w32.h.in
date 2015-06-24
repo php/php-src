@@ -10,7 +10,7 @@
 #define NTDDI_VERSION  0x06000100
 
 /* Default PHP / PEAR directories */
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
+#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
