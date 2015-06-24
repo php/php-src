@@ -1464,13 +1464,30 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (Z_TYPE_P(str) != IS_STRING && Z_TYPE_P(str) != IS_OBJECT) {
-		convert_to_string(str);
-		RETURN_ZVAL(str, 1, 0);
+	if (Z_TYPE_P(str) != IS_STRING) {
+		if (Z_TYPE_P(str) == IS_OBJECT) {
+			convert_to_string(str);
+		} else {
+			convert_to_string(str);
+			RETURN_ZVAL(str, 1, 0);
+		}
 	}
-	if (Z_TYPE_P(str) == IS_OBJECT) {
-		convert_to_string(str);
+	/* switch is much slower than previous if */
+	/*
+	switch (Z_TYPE_P(str)) {
+		case IS_STRING:
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_OBJECT:
+		case IS_TRUE:
+		case IS_FALSE:
+			convert_to_string(str);
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Invalid type");
 	}
+	*/
 
 	if (!hint_charset) {
 		default_charset = get_default_charset();
