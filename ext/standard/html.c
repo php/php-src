@@ -1486,6 +1486,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Invalid type");
+			convert_to_string(str);
 	}
 	*/
 
