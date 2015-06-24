@@ -114,4 +114,10 @@ Test 31: -123456789
 Test 32: 1234.5678
 Test 33: -1234.5678
 Test 34: abcdefg
+
+Try with resource
+Test 35: Resource id #5
+Test 36: Resource id #5
+Test 37: Resource id #5
+Test 38: Resource id #5
 ===DONE===
