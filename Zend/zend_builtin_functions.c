@@ -129,7 +129,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
 	ZEND_ARG_INFO(0, new_error_level)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 2)
 	ZEND_ARG_INFO(0, constant_name)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, case_insensitive)
