@@ -1,6 +1,10 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.27
+?? ??? 2015, PHP 5.5.28
+
+** PHP 5.5 is in security-only mode , please do not commit to this branch **
+
+9 Jul 2015, PHP 5.5.27
 
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
