@@ -836,8 +836,9 @@ ZEND_END_ARG_INFO()
 #endif
 /* }}} */
 /* {{{ assert.c */
-ZEND_BEGIN_ARG_INFO(arginfo_assert, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_assert, 0, 0, 1)
 	ZEND_ARG_INFO(0, assertion)
+	ZEND_ARG_INFO(0, description)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
