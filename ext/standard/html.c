@@ -1465,11 +1465,11 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 #endif
 
 	if (Z_TYPE_P(str) != IS_STRING && Z_TYPE_P(str) != IS_OBJECT) {
-		_convert_to_string(str);
-		RETURN_ZVAL(str, 0, 1);
+		convert_to_string(str);
+		RETURN_ZVAL(str, 1, 0);
 	}
 	if (Z_TYPE_P(str) == IS_OBJECT) {
-		_convert_to_string(str);
+		convert_to_string(str);
 	}
 
 	if (!hint_charset) {
