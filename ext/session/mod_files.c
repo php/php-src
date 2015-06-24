@@ -195,8 +195,14 @@ static void ps_files_open(ps_files *data, const char *key)
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
 			/* check that this session file was created by us or root – we
-			   don't want to end up accepting the sessions of another webapp */
-			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
+			   don't want to end up accepting the sessions of another webapp
+
+			   If the process is ran by root, we ignore session file ownership
+			   Use case: session is initiated by Apache under non-root and then
+			   accessed by backend with root permissions to execute some system tasks.
+
+			   */
+			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid() && getuid() != 0)) {
 				close(data->fd);
 				data->fd = -1;
 				return;
