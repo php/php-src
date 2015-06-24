@@ -135,7 +135,7 @@ struct _zval_struct {
 };
 
 struct _zend_refcounted {
-	uint32_t         refcount;			/* reference counter 32-bit */
+	uint32_t         _ZEND_PROTECTED_STRICT(zend_refcounted,refcount);	/* reference counter 32-bit */
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -144,7 +144,7 @@ struct _zend_refcounted {
 				uint16_t      gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
 		uint32_t type_info;
-	} u;
+	} _ZEND_PROTECTED_STRICT(zend_refcounted,u);
 };
 
 struct _zend_string {
@@ -355,11 +355,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
-#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
-#define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
-#define GC_FLAGS(p)					((zend_refcounted*)(p))->u.v.flags
-#define GC_INFO(p)					((zend_refcounted*)(p))->u.v.gc_info
-#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->u.type_info
+#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,refcount)
+#define GC_TYPE(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.type
+#define GC_FLAGS(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.flags
+#define GC_INFO(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.gc_info
+#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).type_info
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
