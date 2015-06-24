@@ -168,7 +168,6 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
 			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 			ret->len = len;
-			ret->val[len] = '\0';
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
@@ -177,7 +176,6 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 	}
 	ret = zend_string_alloc(len, persistent);
 	memcpy(ret->val, s->val, MIN(len, s->len) + 1);
-	ret->val[len] = '\0';
 	return ret;
 }
 
@@ -210,7 +208,6 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
 			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
 			ret->len = len;
-			ret->val[len] = '\0';
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
@@ -219,7 +216,6 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 	}
 	ret = zend_string_alloc(len, persistent);
 	memcpy(ret->val, s->val, len);
-	ret->val[len] = '\0';
 	return ret;
 }
 
