@@ -1081,7 +1081,7 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 	zend_ulong value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	value = Z_LVAL_P(arg);
@@ -1108,7 +1108,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
@@ -1119,7 +1119,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 		/* Don't try to convert +/- infinity */
 		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
 			php_error_docref(NULL, E_WARNING, "Number too large");
-			return STR_EMPTY_ALLOC();
+			return ZSTR_EMPTY_ALLOC();
 		}
 
 		end = ptr = buf + sizeof(buf) - 1;

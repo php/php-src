@@ -1358,7 +1358,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn)
 	if (meta->name != mysqlnd_empty_string) {
 		meta->sname = zend_string_init(meta->name, meta->name_length, packet->persistent_alloc);
 	} else {
-		meta->sname = STR_EMPTY_ALLOC();
+		meta->sname = ZSTR_EMPTY_ALLOC();
 	}
 	meta->name = meta->sname->val;
 	meta->name_length = meta->sname->len;

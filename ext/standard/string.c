@@ -1301,7 +1301,7 @@ PHP_FUNCTION(implode)
 			return;
 		}
 
-		delim = STR_EMPTY_ALLOC();
+		delim = ZSTR_EMPTY_ALLOC();
 		arr = arg1;
 	} else {
 		if (Z_TYPE_P(arg1) == IS_ARRAY) {
@@ -2130,12 +2130,12 @@ PHP_FUNCTION(strripos)
 		RETURN_FALSE;
 	}
 
-	STR_ALLOCA_ALLOC(ord_needle, 1, use_heap);
+	ZSTR_ALLOCA_ALLOC(ord_needle, 1, use_heap);
 	if (Z_TYPE_P(zneedle) == IS_STRING) {
 		needle = Z_STR_P(zneedle);
 	} else {
 		if (php_needle_char(zneedle, ord_needle->val) != SUCCESS) {
-			STR_ALLOCA_FREE(ord_needle, use_heap);
+			ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 			RETURN_FALSE;
 		}
 		ord_needle->val[1] = '\0';
@@ -2143,7 +2143,7 @@ PHP_FUNCTION(strripos)
 	}
 
 	if ((haystack->len == 0) || (needle->len == 0)) {
-		STR_ALLOCA_FREE(ord_needle, use_heap);
+		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 
@@ -2152,7 +2152,7 @@ PHP_FUNCTION(strripos)
 		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
 			if ((size_t)offset > haystack->len) {
-				STR_ALLOCA_FREE(ord_needle, use_heap);
+				ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
@@ -2161,7 +2161,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = haystack->val;
 			if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
-				STR_ALLOCA_FREE(ord_needle, use_heap);
+				ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
@@ -2171,12 +2171,12 @@ PHP_FUNCTION(strripos)
 		*ord_needle->val = tolower(*needle->val);
 		while (e >= p) {
 			if (tolower(*e) == *ord_needle->val) {
-				STR_ALLOCA_FREE(ord_needle, use_heap);
+				ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
-		STR_ALLOCA_FREE(ord_needle, use_heap);
+		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 
@@ -2184,7 +2184,7 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > haystack->len) {
 			zend_string_release(haystack_dup);
-			STR_ALLOCA_FREE(ord_needle, use_heap);
+			ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
@@ -2193,7 +2193,7 @@ PHP_FUNCTION(strripos)
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 			zend_string_release(haystack_dup);
-			STR_ALLOCA_FREE(ord_needle, use_heap);
+			ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
@@ -2210,11 +2210,11 @@ PHP_FUNCTION(strripos)
 		RETVAL_LONG(found - haystack_dup->val);
 		zend_string_release(needle_dup);
 		zend_string_release(haystack_dup);
-		STR_ALLOCA_FREE(ord_needle, use_heap);
+		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 	} else {
 		zend_string_release(needle_dup);
 		zend_string_release(haystack_dup);
-		STR_ALLOCA_FREE(ord_needle, use_heap);
+		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 }
@@ -3853,7 +3853,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 	zend_string *new_str;
 
 	if (!str) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	source = str->val;
@@ -4708,7 +4708,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *all
 	rp = rbuf;
 	br = 0;
 	if (allow) {
-//???		if (IS_INTERNED(allow)) {
+//???		if (ZSTR_IS_INTERNED(allow)) {
 //???			allow_free = allow = zend_str_tolower_dup(allow, allow_len);
 //???		} else {
 			allow_free = NULL;

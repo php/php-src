@@ -174,7 +174,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
-					// TODO: USE STR_EMPTY_ALLOC()?
+					// TODO: USE ZSTR_EMPTY_ALLOC()?
 					ZVAL_NEW_STR(&new_property, zend_string_init("", sizeof("")-1, persistent));
 				} else { /* Other than true/false setting */
 					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));

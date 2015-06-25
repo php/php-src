@@ -477,7 +477,7 @@ PS_READ_FUNC(files)
 	data->st_size = sbuf.st_size;
 
 	if (sbuf.st_size == 0) {
-		*val = STR_EMPTY_ALLOC();
+		*val = ZSTR_EMPTY_ALLOC();
 		return SUCCESS;
 	}
 
@@ -515,7 +515,7 @@ PS_READ_FUNC(files)
 			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
 		}
 		zend_string_release(*val);
-		*val =  STR_EMPTY_ALLOC();
+		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
 

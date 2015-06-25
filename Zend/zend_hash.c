@@ -524,7 +524,7 @@ add_to_hash:
 	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
 	p = ht->arData + idx;
 	p->key = key;
-	if (!IS_INTERNED(key)) {
+	if (!ZSTR_IS_INTERNED(key)) {
 		zend_string_addref(key);
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_hash_val(key);

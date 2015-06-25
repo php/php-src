@@ -249,7 +249,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 	ALLOCA_FLAG(use_heap);
 
 	if (key == NULL) {
-		STR_ALLOCA_ALLOC(lc_method_name, method->len, use_heap);
+		ZSTR_ALLOCA_ALLOC(lc_method_name, method->len, use_heap);
 		zend_str_tolower_copy(lc_method_name->val, method->val, method->len);
 	} else {
 		lc_method_name = Z_STR_P(key);
@@ -270,7 +270,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 
 end:
 	if (key == NULL) {
-	 	STR_ALLOCA_FREE(lc_method_name, use_heap);
+	 	ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
 
 	return ret;

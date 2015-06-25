@@ -199,14 +199,14 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 		return ret;
 	}
 
-	len = ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + str->len + 1);
+	len = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	ret = (void*)(info->str_size | Z_UL(1));
 	zend_shared_alloc_register_xlat_entry(str, ret);
 	if (info->str_size + len > ((zend_string*)ZCG(mem))->len) {
 		size_t new_len = info->str_size + len;
 		ZCG(mem) = (void*)zend_string_realloc(
 			(zend_string*)ZCG(mem),
-			((_STR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_STR_HEADER_SIZE + 1),
+			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
 	}
 	memcpy(((zend_string*)ZCG(mem))->val + info->str_size, str, len);
@@ -717,7 +717,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	mem = buf = emalloc(script->size);
 #endif
 
-	ZCG(mem) = zend_string_alloc(4096 - (_STR_HEADER_SIZE + 1), 0);
+	ZCG(mem) = zend_string_alloc(4096 - (_ZSTR_HEADER_SIZE + 1), 0);
 
 	zend_shared_alloc_init_xlat_table();
 	if (!in_shm) {

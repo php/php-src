@@ -4735,7 +4735,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CONST_HANDLE
 				}
 			}
 			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -6246,7 +6246,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -6259,7 +6259,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -6539,7 +6539,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -6552,7 +6552,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -8097,7 +8097,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -8110,7 +8110,7 @@ num_index:
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -8760,7 +8760,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 				}
 			}
 			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -9981,7 +9981,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -9994,7 +9994,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -10087,7 +10087,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -10100,7 +10100,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -10635,7 +10635,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 				}
 			}
 			if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -11767,7 +11767,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -11780,7 +11780,7 @@ num_index:
 			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -11873,7 +11873,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -11886,7 +11886,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -13244,7 +13244,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -13257,7 +13257,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -13976,7 +13976,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -13989,7 +13989,7 @@ num_index:
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -14530,7 +14530,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -14543,7 +14543,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -15043,7 +15043,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -15056,7 +15056,7 @@ num_index:
 			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -18141,7 +18141,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -18154,7 +18154,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -18254,7 +18254,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -18267,7 +18267,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -19725,7 +19725,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -19738,7 +19738,7 @@ num_index:
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -21300,7 +21300,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -21313,7 +21313,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -21413,7 +21413,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -21426,7 +21426,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -22879,7 +22879,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -22892,7 +22892,7 @@ num_index:
 			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -22992,7 +22992,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -23005,7 +23005,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -24383,7 +24383,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -24396,7 +24396,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -24519,7 +24519,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -24532,7 +24532,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -26670,7 +26670,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -26683,7 +26683,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -26806,7 +26806,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -26819,7 +26819,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -28164,7 +28164,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -28177,7 +28177,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -28302,7 +28302,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -28315,7 +28315,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -30455,7 +30455,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 				}
 			}
 			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -32558,7 +32558,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -32571,7 +32571,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -32753,7 +32753,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -32766,7 +32766,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -32994,7 +32994,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -33007,7 +33007,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -35129,7 +35129,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -35142,7 +35142,7 @@ num_index:
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -35769,7 +35769,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 				}
 			}
 			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -37700,7 +37700,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -37713,7 +37713,7 @@ num_index:
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -37813,7 +37813,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -37826,7 +37826,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -37949,7 +37949,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -37962,7 +37962,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -38502,7 +38502,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 				}
 			}
 			if (IS_CV != IS_CONST && IS_CV != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -40309,7 +40309,7 @@ num_index:
 			offset = Z_REFVAL_P(offset);
 			goto add_again;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -40322,7 +40322,7 @@ num_index:
 			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -40422,7 +40422,7 @@ num_index_dim:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				goto num_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -40435,7 +40435,7 @@ num_index_dim:
 				goto num_index_dim;
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -40560,7 +40560,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -40573,7 +40573,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -41577,7 +41577,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -42754,7 +42754,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -42767,7 +42767,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -44007,7 +44007,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -44763,7 +44763,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -44776,7 +44776,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");
@@ -45170,7 +45170,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -45928,7 +45928,7 @@ num_index_prop:
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			goto num_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -45941,7 +45941,7 @@ num_index_prop:
 			goto num_index_prop;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			goto str_index_prop;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");

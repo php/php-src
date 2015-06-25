@@ -969,7 +969,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 		res = zend_string_init((char*)tmp, strlen((char *)tmp), 0);
 		xmlFree(tmp);
 	} else {
-		res = STR_EMPTY_ALLOC();
+		res = ZSTR_EMPTY_ALLOC();
 	}
 
 	return res;

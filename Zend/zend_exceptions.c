@@ -673,7 +673,7 @@ ZEND_METHOD(exception, __toString)
 
 	DEFAULT_0_PARAMS;
 
-	str = STR_EMPTY_ALLOC();
+	str = ZSTR_EMPTY_ALLOC();
 
 	exception = getThis();
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);

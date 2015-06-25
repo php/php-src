@@ -1048,7 +1048,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 
 	func->prototype = fbc;
 	func->scope = fbc->common.scope;
-	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : STR_EMPTY_ALLOC();
+	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
 	func->line_end = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_end : 0;
 
@@ -1084,13 +1084,13 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		use_heap = 0;
 #endif
 	} else {
-		STR_ALLOCA_ALLOC(lc_method_name, method_name->len, use_heap);
+		ZSTR_ALLOCA_ALLOC(lc_method_name, method_name->len, use_heap);
 		zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 	}
 
 	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
 		if (UNEXPECTED(!key)) {
-			STR_ALLOCA_FREE(lc_method_name, use_heap);
+			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
 		if (zobj->ce->__call) {
 			return zend_get_user_call_function(zobj->ce, method_name);
@@ -1149,7 +1149,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	}
 
 	if (UNEXPECTED(!key)) {
-		STR_ALLOCA_FREE(lc_method_name, use_heap);
+		ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
 	return fbc;
 }

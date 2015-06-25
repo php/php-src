@@ -1079,7 +1079,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 	int                  weekYearSet = 0;
 
 	if (!format_len) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	if (localtime) {
@@ -4212,7 +4212,7 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 	char                 buffer[33];
 
 	if (!format_len) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	for (i = 0; i < format_len; i++) {
