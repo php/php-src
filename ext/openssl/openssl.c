@@ -2575,7 +2575,15 @@ PHP_FUNCTION(openssl_pkcs12_read)
 				zval * zextracert;
 				X509* aCA = sk_X509_pop(ca);
 				if (!aCA) break;
-				
+
+				/* fix for bug 69882 */
+				{
+					int err = ERR_peek_error();
+					if (err == OPENSSL_ERROR_X509_PRIVATE_KEY_VALUES_MISMATCH) {
+						ERR_get_error();
+					}
+				}
+
 				bio_out = BIO_new(BIO_s_mem());
 				if (PEM_write_bio_X509(bio_out, aCA)) {
 					BUF_MEM *bio_buf;
