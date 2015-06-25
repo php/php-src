@@ -417,7 +417,7 @@ int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *
 	return found;
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::attach($obj, $inf = NULL)
+/* {{{ proto void SplObjectStorage::attach(object obj, mixed inf = NULL)
  Attaches an object to the storage if not yet contained */
 SPL_METHOD(SplObjectStorage, attach)
 {
@@ -431,7 +431,7 @@ SPL_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, getThis(), obj, inf);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::detach($obj)
+/* {{{ proto void SplObjectStorage::detach(object obj)
  Detaches an object from the storage */
 SPL_METHOD(SplObjectStorage, detach)
 {
@@ -447,7 +447,7 @@ SPL_METHOD(SplObjectStorage, detach)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::getHash($object)
+/* {{{ proto string SplObjectStorage::getHash(object obj)
  Returns the hash of an object */
 SPL_METHOD(SplObjectStorage, getHash)
 {
@@ -461,7 +461,7 @@ SPL_METHOD(SplObjectStorage, getHash)
 
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::offsetGet($object)
+/* {{{ proto mixed SplObjectStorage::offsetGet(object obj)
  Returns associated information for a stored object */
 SPL_METHOD(SplObjectStorage, offsetGet)
 {
@@ -564,7 +564,7 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 }
 /* }}} */
 
-/* {{{ proto bool SplObjectStorage::contains($obj)
+/* {{{ proto bool SplObjectStorage::contains(object obj)
  Determine whethe an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
 {

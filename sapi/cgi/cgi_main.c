@@ -1036,12 +1036,12 @@ static int is_valid_path(const char *path)
 /* }}} */
 
 #define CGI_GETENV(name) \
-	((request->has_env) ? \
+	((has_env) ? \
 		FCGI_GETENV(request, name) : \
     	getenv(name))
 
 #define CGI_PUTENV(name, value) \
-	((request->has_env) ? \
+	((has_env) ? \
 		FCGI_PUTENV(request, name, value) : \
 		_sapi_cgi_putenv(name, sizeof(name)-1, value))
 
@@ -1113,6 +1113,7 @@ static int is_valid_path(const char *path)
  */
 static void init_request_info(fcgi_request *request)
 {
+	int has_env = fcgi_has_env(request);
 	char *env_script_filename = CGI_GETENV("SCRIPT_FILENAME");
 	char *env_path_translated = CGI_GETENV("PATH_TRANSLATED");
 	char *script_path_translated = env_script_filename;
@@ -1734,7 +1735,7 @@ int main(int argc, char *argv[])
 	int fastcgi;
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
-	fcgi_request request = {0};
+	fcgi_request *request = NULL;
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
@@ -1972,7 +1973,7 @@ consult the installation file that came with this distribution, or visit \n\
 		php_import_environment_variables = cgi_php_import_environment_variables;
 
 		/* library is already initialized, now init our request */
-		fcgi_init_request(&request, fcgi_fd);
+		request = fcgi_init_request(fcgi_fd, NULL, NULL, NULL);
 
 #ifndef PHP_WIN32
 		/* Pre-fork, if required */
@@ -2101,8 +2102,8 @@ consult the installation file that came with this distribution, or visit \n\
 					break;
 				case 'h':
 				case '?':
-					if (request.listen_socket) {
-						fcgi_destroy_request(&request);
+					if (request) {
+						fcgi_destroy_request(request);
 					}
 					fcgi_shutdown();
 					no_headers = 1;
@@ -2125,9 +2126,9 @@ consult the installation file that came with this distribution, or visit \n\
 			fcgi_impersonate();
 		}
 #endif
-		while (!fastcgi || fcgi_accept_request(&request) >= 0) {
-			SG(server_context) = fastcgi ? (void *)&request : (void *) 1;
-			init_request_info(&request);
+		while (!fastcgi || fcgi_accept_request(request) >= 0) {
+			SG(server_context) = fastcgi ? (void *)request : (void *) 1;
+			init_request_info(request);
 
 			if (!cgi && !fastcgi) {
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -2312,7 +2313,7 @@ consult the installation file that came with this distribution, or visit \n\
 			 * get path_translated */
 			if (php_request_startup() == FAILURE) {
 				if (fastcgi) {
-					fcgi_finish_request(&request, 1);
+					fcgi_finish_request(request, 1);
 				}
 				SG(server_context) = NULL;
 				php_module_shutdown();
@@ -2523,7 +2524,7 @@ fastcgi_request_done:
 			/* only fastcgi will get here */
 			requests++;
 			if (max_requests && (requests == max_requests)) {
-				fcgi_finish_request(&request, 1);
+				fcgi_finish_request(request, 1);
 				if (bindpath) {
 					free(bindpath);
 				}
@@ -2536,8 +2537,8 @@ fastcgi_request_done:
 			/* end of fastcgi loop */
 		}
 		
-		if (request.listen_socket) {
-			fcgi_destroy_request(&request);
+		if (request) {
+			fcgi_destroy_request(request);
 		}
 		fcgi_shutdown();
 

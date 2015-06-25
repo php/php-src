@@ -79,7 +79,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
   g. sprintf() formats
 
        New printf modifier 'p' was implemented to platform independently output zend_long,
-       zend_ulong and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+       zend_ulong and php_size_t datatypes. That modifier can be used with 'd', 'u', 'x' and 'o'
        printf format specs with spprintf, snprintf and the wrapping printf implementations.
        %pu is sufficient for both zend_ulong and php_size_t. the code using %p spec to output
        pointer address might need to be enclosed into #ifdef when it unlickily followed by 'd',

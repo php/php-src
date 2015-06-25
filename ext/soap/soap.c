@@ -1333,7 +1333,7 @@ PHP_METHOD(SoapServer, setClass)
 /* }}} */
 
 
-/* {{{ proto void SoapServer::setObject(object)
+/* {{{ proto void SoapServer::setObject(object obj)
    Sets object which will handle SOAP requests */
 PHP_METHOD(SoapServer, setObject)
 {

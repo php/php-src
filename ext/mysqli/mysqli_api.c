@@ -315,7 +315,7 @@ end:
 #endif
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed,....]) U
+/* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed ...])
    Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
@@ -580,7 +580,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 #endif
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var, [,mixed, ...]) U
+/* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var [,mixed ...])
    Bind variables to a prepared statement for result storage */
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
@@ -790,7 +790,7 @@ PHP_FUNCTION(mysqli_data_seek)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_debug(string debug) U
+/* {{{ proto void mysqli_debug(string debug)
 */
 PHP_FUNCTION(mysqli_debug)
 {
@@ -1137,7 +1137,7 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 /* }}} */
 
-/* {{{ proto mixed mysqli_stmt_fetch(object stmt) U
+/* {{{ proto mixed mysqli_stmt_fetch(object stmt)
    Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_stmt_fetch)
 {
@@ -2235,7 +2235,7 @@ PHP_FUNCTION(mysqli_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher]) U
+/* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher])
 */
 PHP_FUNCTION(mysqli_ssl_set)
 {
@@ -2507,7 +2507,7 @@ PHP_FUNCTION(mysqli_stmt_result_metadata)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_store_result(stmt)
+/* {{{ proto bool mysqli_stmt_store_result(object stmt)
 */
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
@@ -2576,7 +2576,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_store_result(object link [, flags])
+/* {{{ proto object mysqli_store_result(object link [, int flags])
    Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
 {

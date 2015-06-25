@@ -2328,7 +2328,7 @@ static char * exif_get_markername(int marker)
 #endif
 /* }}} */
 
-/* {{{ proto string exif_tagname(index)
+/* {{{ proto string exif_tagname(int index)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
@@ -3905,7 +3905,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 }
 /* }}} */
 
-/* {{{ proto array exif_read_data(string filename [, sections_needed [, sub_arrays[, read_thumbnail]]])
+/* {{{ proto array exif_read_data(string filename [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
    Reads header data from the JPEG/TIFF image filename and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {

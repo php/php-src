@@ -1054,7 +1054,7 @@ PHP_FUNCTION(unserialize)
 }
 /* }}} */
 
-/* {{{ proto int memory_get_usage([real_usage])
+/* {{{ proto int memory_get_usage([bool real_usage])
    Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
 	zend_bool real_usage = 0;
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(memory_get_usage) {
 }
 /* }}} */
 
-/* {{{ proto int memory_get_peak_usage([real_usage])
+/* {{{ proto int memory_get_peak_usage([bool real_usage])
    Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
 	zend_bool real_usage = 0;

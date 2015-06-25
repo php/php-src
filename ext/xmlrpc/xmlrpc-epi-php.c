@@ -1417,7 +1417,7 @@ PHP_FUNCTION(xmlrpc_get_type)
 }
 /* }}} */
 
-/* {{{ proto bool xmlrpc_is_fault(array)
+/* {{{ proto bool xmlrpc_is_fault(array arg)
    Determines if an array value represents an XMLRPC fault. */
 PHP_FUNCTION(xmlrpc_is_fault)
 {

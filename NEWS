@@ -1,5 +1,14 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+09 Jul 2015, PHP 7.0.0 Beta 1
+
+- Core:
+  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
+
+- PCRE:
+  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+    string). (cmb)
+
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
@@ -49,6 +58,9 @@
   . Removed opcache.load_comments configuration directive. Now doc comments
     loading costs nothing and always enabled. (Dmitry)
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
+  
+- PCRE:
+  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML

@@ -187,13 +187,14 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
 {
+	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	int *num_clean = (int *)arg;
 
-	if (*num_clean > 0) {
+	if (*num_clean > 0 && !pce->refcount) {
 		(*num_clean)--;
-		return 1;
+		return ZEND_HASH_APPLY_REMOVE;
 	} else {
-		return 0;
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 /* }}} */
@@ -229,6 +230,25 @@ static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce)
 		name_table += name_size;
 	}
 	return subpat_names;
+}
+/* }}} */
+
+/* {{{ static calculate_unit_length */
+/* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE_UTF8. */
+static zend_always_inline int calculate_unit_length(pcre_cache_entry *pce, char *start)
+{
+	int unit_len;
+
+	if (pce->compile_options & PCRE_UTF8) {
+		char *end = start;
+
+		/* skip continuation bytes */
+		while ((*++end & 0xC0) == 0x80);
+		unit_len = end - start;
+	} else {
+		unit_len = 1;
+	}
+	return unit_len;
 }
 /* }}} */
 
@@ -461,6 +481,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		NULL;
 	new_entry.tables = tables;
 #endif
+	new_entry.refcount = 0;
 
 	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &new_entry.capture_count);
 	if (rc < 0) {
@@ -584,8 +605,10 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_match_impl(pce, subject->val, (int)subject->len, return_value, subpats,
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -850,8 +873,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
+				int unit_len = calculate_unit_length(pce, subject + start_offset);
+				
 				offsets[0] = (int)start_offset;
-				offsets[1] = (int)(start_offset + 1);
+				offsets[1] = (int)(start_offset + unit_len);
 			} else
 				break;
 		} else {
@@ -1017,14 +1042,18 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  int limit, int *replace_count)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
+	zend_string	 		*result;			/* Function result */
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		return NULL;
 	}
-
-	return php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_val,
+	pce->refcount++;
+	result = php_pcre_replace_impl(pce, subject_str, subject, subject_len, replace_val,
 		is_callable_replace, limit, replace_count);
+	pce->refcount--;
+
+	return result;
 }
 /* }}} */
 
@@ -1239,10 +1268,12 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
+				int unit_len = calculate_unit_length(pce, piece);
+
 				offsets[0] = start_offset;
-				offsets[1] = start_offset + 1;
-				memcpy(&result->val[result_len], piece, 1);
-				result_len++;
+				offsets[1] = start_offset + unit_len;
+				memcpy(&result->val[result_len], piece, unit_len);
+				result_len += unit_len;
 			} else {
 				if (!result && subject_str) {
 					result = zend_string_copy(subject_str);
@@ -1660,7 +1691,9 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_split_impl(pce, subject->val, (int)subject->len, return_value, (int)limit_val, flags);
+	pce->refcount--;
 }
 /* }}} */
 
@@ -1967,7 +2000,9 @@ static PHP_FUNCTION(preg_grep)
 		RETURN_FALSE;
 	}
 
+	pce->refcount++;
 	php_pcre_grep_impl(pce, input, return_value, flags);
+	pce->refcount--;
 }
 /* }}} */
 

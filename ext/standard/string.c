@@ -347,7 +347,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 }
 /* }}} */
 
-/* {{{ proto int strspn(string str, string mask [, start [, len]])
+/* {{{ proto int strspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
@@ -355,7 +355,7 @@ PHP_FUNCTION(strspn)
 }
 /* }}} */
 
-/* {{{ proto int strcspn(string str, string mask [, start [, len]])
+/* {{{ proto int strcspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
@@ -801,9 +801,10 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 
 	if (what) {
 		if (what_len == 1) {
+			char p = *what;
 			if (mode & 1) {
 				for (i = 0; i < len; i++) {
-					if (c[i] == *what) {
+					if (c[i] == p) {
 						trimmed++;
 					} else {
 						break;
@@ -816,7 +817,7 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 				if (len > 0) {
 					i = len - 1;
 					do {
-						if (c[i] == *what) {
+						if (c[i] == p) {
 							len--;
 						} else {
 							break;
@@ -1200,12 +1201,12 @@ PHP_FUNCTION(explode)
  */
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 {
-    zval         *tmp;
+	zval         *tmp;
 	int           numelems;
 	zend_string  *str;
 	char         *cptr;
 	size_t        len = 0;
-	zend_string **strings, **strptr, **s;
+	zend_string **strings, **strptr;
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
 
@@ -1222,24 +1223,54 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	strptr = strings - 1;
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
-		*++strptr = zval_get_string(tmp);
-		len += (*strptr)->len;
+		if (Z_TYPE_P(tmp) == IS_LONG) {
+			double val = Z_LVAL_P(tmp);
+			*++strptr = NULL;
+			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
+			if (val < 0) {
+				val = -10 * val;
+			}
+			if (val < 10) {
+				len++;
+			} else {
+				len += (int) log10(10 * (double) val);
+			}
+		} else {
+			*++strptr = zval_get_string(tmp);
+			len += (*strptr)->len;
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	str = zend_string_alloc(len + (numelems - 1) * delim->len, 0);
-	cptr = str->val;
+	cptr = str->val + str->len;
+	*cptr = 0;
 
-	for (s = strings; s < strptr; s++) {
-		memcpy(cptr, (*s)->val, (*s)->len);
-		cptr += (*s)->len;
-		zend_string_release(*s);
+	do {
+		if (*strptr) {
+			cptr -= (*strptr)->len;
+			memcpy(cptr, (*strptr)->val, (*strptr)->len);
+			zend_string_release(*strptr);
+		} else {
+			char *oldPtr = cptr;
+			char oldVal = *cptr;
+			zend_long val = ((zend_long *) (strings + numelems))[strptr - strings];
+			cptr = zend_print_long_to_buf(cptr, val);
+			*oldPtr = oldVal;
+		}
 
+		cptr -= delim->len;
 		memcpy(cptr, delim->val, delim->len);
-		cptr += delim->len;
-	}
+	} while (--strptr > strings);
 
-	memcpy(cptr, (*s)->val, (*s)->len + 1);
-	zend_string_release(*s);
+	if (*strptr) {
+		memcpy(str->val, (*strptr)->val, (*strptr)->len);
+		zend_string_release(*strptr);
+	} else {
+		char *oldPtr = cptr;
+		char oldVal = *cptr;
+		zend_print_long_to_buf(cptr, ((zend_long *) (strings + numelems))[strptr - strings]);
+		*oldPtr = oldVal;
+	}
 
 	efree(strings);
 	RETURN_NEW_STR(str);

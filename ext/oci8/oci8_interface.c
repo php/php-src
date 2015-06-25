@@ -93,7 +93,7 @@ PHP_FUNCTION(oci_define_by_name)
 }
 /* }}} */
 
-/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var, [, int maxlength [, int type]])
+/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var [, int maxlength [, int type]])
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!! */
 PHP_FUNCTION(oci_bind_by_name)
