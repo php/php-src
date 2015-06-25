@@ -572,8 +572,20 @@ END_EXTERN_C()
 		ZVAL_STRINGL(z, _s, strlen(_s));		\
 	} while (0)
 
+#define ZVAL_STR_LEN(z, l) do {					\
+		zend_string_set_len(Z_STR_P(z), l);		\
+	} while (0)
+
+#define ZVAL_STR_DEC_LEN(z) do {					\
+		zend_string_dec_len(Z_STR_P(z));		\
+	} while (0)
+
+#define ZVAL_STR_INC_LEN(z) do {					\
+		zend_string_inc_len(Z_STR_P(z));		\
+	} while (0)
+
 #define ZVAL_EMPTY_STRING(z) do {				\
-		ZVAL_INTERNED_STR(z, STR_EMPTY_ALLOC());		\
+		ZVAL_INTERNED_STR(z, ZSTR_EMPTY_ALLOC());		\
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\
@@ -1126,8 +1138,8 @@ static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size
 		*dest = NULL;
 		*dest_len = 0;
 	} else {
-		*dest = str->val;
-		*dest_len = str->len;
+		*dest = ZSTR_VAL(str);
+		*dest_len = ZSTR_LEN(str);
 	}
 	return 1;
 }
@@ -1135,7 +1147,7 @@ static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size
 static zend_always_inline int zend_parse_arg_path_str(zval *arg, zend_string **dest, int check_null)
 {
 	if (!zend_parse_arg_str(arg, dest, check_null) ||
-	    (*dest && UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len)))) {
+	    (*dest && UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest))))) {
 		return 0;
 	}
 	return 1;
@@ -1152,8 +1164,8 @@ static zend_always_inline int zend_parse_arg_path(zval *arg, char **dest, size_t
 		*dest = NULL;
 		*dest_len = 0;
 	} else {
-		*dest = str->val;
-		*dest_len = str->len;
+		*dest = ZSTR_VAL(str);
+		*dest_len = ZSTR_LEN(str);
 	}
 	return 1;
 }
