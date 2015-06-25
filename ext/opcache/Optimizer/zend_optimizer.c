@@ -482,6 +482,8 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 {
 	zend_op *opline, *end;
 
+	efree(op_array->T_liveliness);
+
 	/* Revert pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
@@ -526,6 +528,8 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 
 	/* Do actual optimizations */
 	zend_optimize(op_array, ctx);
+
+	op_array->T_liveliness = generate_var_liveliness_info(op_array);
 
 	/* Redo pass_two() */
 	opline = op_array->opcodes;
