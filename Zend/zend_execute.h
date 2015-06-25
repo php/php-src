@@ -58,7 +58,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 {
 	zend_refcounted *ref = NULL;
 
-	if ((value_type & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
 		ref = Z_COUNTED_P(value);
 		value = Z_REFVAL_P(value);
 	}
@@ -78,7 +78,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value);
 				return variable_ptr;
 			}
-			if ((value_type & (IS_VAR|IS_CV)) && variable_ptr == value) {
+			if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && variable_ptr == value) {
 				return variable_ptr;
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
@@ -93,7 +93,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 						Z_ADDREF_P(variable_ptr);
 					}
-				} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
+				} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
 					if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
 						efree_size(ref, sizeof(zend_reference));
 					} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
@@ -122,7 +122,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 			Z_ADDREF_P(variable_ptr);
 		}
-	} else if (/* value_type == IS_VAR && */ UNEXPECTED(ref)) {
+	} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
 		if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
 			efree_size(ref, sizeof(zend_reference));
 		} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
