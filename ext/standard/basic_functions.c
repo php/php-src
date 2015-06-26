@@ -2089,7 +2089,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_blocking, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
-ZEND_BEGIN_ARG_INFO(arginfo_stream_set_timeout, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_set_timeout, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, seconds)
 	ZEND_ARG_INFO(0, microseconds)
@@ -5509,14 +5509,14 @@ PHP_FUNCTION(connection_status)
 }
 /* }}} */
 
-/* {{{ proto int ignore_user_abort([string value])
+/* {{{ proto int ignore_user_abort([bool value])
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-	zend_string *arg = NULL;
+	zend_bool arg = 0;
 	int old_setting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &arg) == FAILURE) {
 		return;
 	}
 
@@ -5524,7 +5524,7 @@ PHP_FUNCTION(ignore_user_abort)
 
 	if (arg) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort"), 0);
-		zend_alter_ini_entry_ex(key, arg, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
+		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(key);
 	}
 

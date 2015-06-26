@@ -1940,12 +1940,6 @@ try_function_name:
 			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
 			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
 
-			if (!mname_length) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-
-				HANDLE_EXCEPTION();
-			}
-
 			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
 
 			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -2398,12 +2392,6 @@ try_function_name:
 			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
 			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
 
-			if (!mname_length) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-
-				HANDLE_EXCEPTION();
-			}
-
 			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
 
 			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -2656,12 +2644,6 @@ try_function_name:
 			zend_string *mname;
 			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
 			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
-
-			if (!mname_length) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-				zval_ptr_dtor_nogc(free_op2);
-				HANDLE_EXCEPTION();
-			}
 
 			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
 
