@@ -1,5 +1,5 @@
 --TEST--
-Bug #69462 __soapCall with a SoapVar that has a namespace but no name crashes
+Bug #69462 (__soapCall with a SoapVar that has a namespace but no name crashes)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -22,5 +22,6 @@ catch (Exception $e) {
 	/* ignore any errors, we're testing for segmentation fault anyway */
 	echo "good";
 }
+?>
 --EXPECT--
 good
