@@ -148,14 +148,17 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
  */
 static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 {
-	size_t target_length = oldlen >> 1;
+	size_t odd = oldlen & 1;
+	size_t target_length = (oldlen >> 1) + odd;
 	zend_string *str = zend_string_alloc(target_length, 0);
 	unsigned char *ret = (unsigned char *)str->val;
-	size_t i, j;
+	unsigned char c = 0, d = 0;
+	size_t i = 0, j = 0;
 
-	for (i = j = 0; i < target_length; i++) {
-		unsigned char c = old[j++];
-		unsigned char d;
+	if (odd) goto loop_start_odd;
+	for (; i < target_length; i++) {
+		c = old[j++];
+		d = 0;
 
 		if (c >= '0' && c <= '9') {
 			d = (c - '0') << 4;
@@ -167,6 +170,8 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 			zend_string_free(str);
 			return NULL;
 		}
+
+loop_start_odd:
 		c = old[j++];
 		if (c >= '0' && c <= '9') {
 			d |= c - '0';
@@ -274,11 +279,6 @@ PHP_FUNCTION(hex2bin)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
 		return;
-	}
-
-	if (data->len % 2 != 0) {
-		php_error_docref(NULL, E_WARNING, "Hexadecimal input string must have an even length");
-		RETURN_FALSE;
 	}
 
 	result = php_hex2bin((unsigned char *)data->val, data->len);
