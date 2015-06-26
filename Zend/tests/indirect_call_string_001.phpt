@@ -16,7 +16,10 @@ namespace TestNamespace
             printf("Static method called with args: %s, %s, %s\n", $arg1, $arg2, $arg3);
         }
     }
+}
 
+namespace CallNamespace
+{
     // Test basic call using Class::method syntax.
     $callback = 'TestNamespace\TestClass::staticMethod';
     $callback();
