@@ -855,7 +855,6 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	zend_arena *arena = zend_arena_create((sizeof(var_live_info) + 2 * sizeof(var_live_info *)) * op_array->T + sizeof(zend_op *) * op_array->last);
 	var_live_info **TsTop = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
 	var_live_info **Ts = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
-	uint32_t *op_list = zend_arena_alloc(&arena, sizeof(uint32_t) * op_array->last), *op_cur = op_list;
 	int i, op_live_total = 0;
 	uint32_t *info, info_off = op_array->last;
 
@@ -885,44 +884,37 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		}
 		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR)) && cur_op->opcode != ZEND_FE_FREE) {
 			Ts[cur_op->op1.var]->end = cur_op - op_array->opcodes;
+			if (cur_op->opcode == ZEND_OP_DATA) {
+				Ts[cur_op->op1.var]->end--;
+			}
 		}
 		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)) {
 			Ts[cur_op->op2.var]->end = cur_op - op_array->opcodes;
-		}
-		/* All the expression ops where an exception may be thrown in */
-		if (cur_op->opcode == ZEND_DO_FCALL
-		 || cur_op->opcode == ZEND_DO_FCALL_BY_NAME
-		 || cur_op->opcode == ZEND_YIELD
-		 || cur_op->opcode == ZEND_YIELD_FROM
-		 || cur_op->opcode == ZEND_DO_ICALL
-		 || cur_op->opcode == ZEND_DO_UCALL) {
-			*op_cur++ = cur_op - op_array->opcodes;
+			if (cur_op->opcode == ZEND_OP_DATA) {
+				Ts[cur_op->op2.var]->end--;
+			}
 		}
 	}
 
-	*op_cur = -1;
-	for (op_cur = op_list; 1 + *op_cur; op_cur++) {
-		uint32_t off = *op_cur;
-		for (i = 0; i < op_array->T; i++) {
-			var_live_info *T = TsTop[i];
+	for (i = 0; i < op_array->last; i++) {
+		int j;
+		for (j = 0; j < op_array->T; j++) {
+			var_live_info *T = TsTop[j];
 			do {
-				op_live_total += off > T->start && off < T->end;
+				op_live_total += i > T->start && i < T->end;
 			} while ((T = T->next));
 		}
 	}
 
 	info = emalloc(op_live_total * sizeof(uint32_t) + op_array->last * sizeof(uint32_t));
-	op_cur = op_list;
 	for (i = 0; i < op_array->last; i++) {
-		uint32_t off = *op_cur;
 		uint32_t j;
 		info[i] = info_off;
-		if (i == *op_cur) {
-			op_cur++;
+		if (op_array->opcodes[i].opcode != ZEND_THROW) {
 			for (j = 0; j < op_array->T; j++) {
 				var_live_info *T = TsTop[j];
 				do {
-					if (off > T->start && off < T->end) {
+					if (i > T->start && i < T->end) {
 						info[info_off++] = op_array->last_var + j;
 					}
 				} while ((T = T->next));
