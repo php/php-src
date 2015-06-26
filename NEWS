@@ -5,8 +5,11 @@
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
+- COM:
+  . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
+
 - PCRE:
-  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+  . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
     string). (cmb)
 
 - OpenSSL:
