@@ -1,6 +1,6 @@
---FILE--
-Closure must not leak during a dynmaic call interrupted by an exception
 --TEST--
+Closure must not leak during a dynamic call interrupted by an exception
+--FILE--
 <?php
 
 (function() {
