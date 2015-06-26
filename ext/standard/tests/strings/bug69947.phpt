@@ -1,5 +1,5 @@
 --TEST--
-Bug #61660: bin2hex(hex2bin($data)) != $data
+Bug #69947: hex2bin() with odd-length input
 --FILE--
 <?php
 
