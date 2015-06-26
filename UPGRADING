@@ -610,6 +610,11 @@ Other
   hardcoded value of 16. This limit is now removed and the number of pipes is
   effectively limited by the amount of memory available to PHP.
 
+- array_column():
+  The function now supports an array of objects as well as two-dimensional
+  arrays. Only public properties are considered, and objects that make use of
+  __get() for dynamic properties must also implement __isset().
+
 ========================================
 6. New Functions
 ========================================
