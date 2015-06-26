@@ -2487,7 +2487,7 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-				zend_object_release(call->func->common.prototype);
+				zend_object_release((zend_object *) call->func->common.prototype);
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				zend_string_release(call->func->common.function_name);
