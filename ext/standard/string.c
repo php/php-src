@@ -2501,9 +2501,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (f > Z_STRLEN_P(str) || (f < 0 && -f > Z_STRLEN_P(str))) {
-				RETURN_FALSE;
-			} else if (l > Z_STRLEN_P(str) || (l < 0 && -l > Z_STRLEN_P(str))) {
+			if (l > Z_STRLEN_P(str) || (l < 0 && -l > Z_STRLEN_P(str))) {
 				l = Z_STRLEN_P(str);
 			}
 
