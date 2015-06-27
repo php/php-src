@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? Jul 2015, PHP 5.6.12
 
 - CLI server:
-  . Fix #64878 (304 responses return Content-Type header). (cmb)
+  . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
+  . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
 
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error “key values mismatch” after 
