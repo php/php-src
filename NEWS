@@ -17,7 +17,7 @@ PHP                                                                        NEWS
     string). (cmb)
 
 - OpenSSL:
-  . Fixed bug #69882 (OpenSSL error "œkey values mismatch" after
+  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
     openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
