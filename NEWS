@@ -5,6 +5,9 @@
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
+- CLI server:
+  . Fix #64878 (304 responses return Content-Type header). (cmb)
+
 - COM:
   . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
 
