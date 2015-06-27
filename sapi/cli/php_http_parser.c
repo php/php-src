@@ -604,15 +604,20 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
 
         matcher = method_strings[parser->method];
-        if (ch == ' ' && (matcher[index] == '\0' || parser->method == PHP_HTTP_NOT_IMPLEMENTED)) {
+        if (ch == ' ') {
+          if (parser->method != PHP_HTTP_NOT_IMPLEMENTED && matcher[index] != '\0') {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
+          }
           state = s_req_spaces_before_url;
-        } else if (ch == matcher[index]) {
+        } else if (parser->method == PHP_HTTP_NOT_IMPLEMENTED || ch == matcher[index]) {
           ; /* nada */
         } else if (parser->method == PHP_HTTP_CONNECT) {
           if (index == 1 && ch == 'H') {
             parser->method = PHP_HTTP_CHECKOUT;
           } else if (index == 2  && ch == 'P') {
             parser->method = PHP_HTTP_COPY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (parser->method == PHP_HTTP_MKCOL) {
           if (index == 1 && ch == 'O') {
@@ -623,6 +628,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
             parser->method = PHP_HTTP_MSEARCH;
           } else if (index == 2 && ch == 'A') {
             parser->method = PHP_HTTP_MKACTIVITY;
+          } else {
+            parser->method = PHP_HTTP_NOT_IMPLEMENTED;
           }
         } else if (index == 1 && parser->method == PHP_HTTP_POST && ch == 'R') {
           parser->method = PHP_HTTP_PROPFIND; /* or HTTP_PROPPATCH */
