@@ -7,12 +7,10 @@ namespace {
     function bar() {}
 
     use function foo\bar;
-}
 
-namespace {
-    echo "Done";
+    bar();
 }
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use function foo\bar as bar because the name is already in use in %s on line %d
+Fatal error: Call to undefined function foo\bar() in %s on line %d

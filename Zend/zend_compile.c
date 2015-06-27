@@ -5260,17 +5260,6 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 }
 /* }}} */
 
-static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend_string *new_name, zend_string *check_name) /* {{{ */
-{
-	if (zend_string_equals_ci(old_name, check_name)) {
-		return;
-	}
-
-	zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
-		"is already in use", zend_get_use_type_str(type), old_name->val, new_name->val);
-}
-/* }}} */
-
 void zend_compile_use(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5319,51 +5308,6 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 		if (type == T_CLASS && zend_is_reserved_class_name(new_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' "
 				"is a special class name", old_name->val, new_name->val, new_name->val);
-		}
-
-		if (current_ns) {
-			zend_string *ns_name = zend_string_alloc(current_ns->len + 1 + new_name->len, 0);
-			zend_str_tolower_copy(ns_name->val, current_ns->val, current_ns->len);
-			ns_name->val[current_ns->len] = '\\';
-			memcpy(ns_name->val + current_ns->len + 1, lookup_name->val, lookup_name->len);
-
-			if (zend_hash_exists(CG(class_table), ns_name)) {
-				zend_check_already_in_use(type, old_name, new_name, ns_name);
-			}
-
-			zend_string_free(ns_name);
-		} else {
-			switch (type) {
-				case T_CLASS:
-				{
-					zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lookup_name);
-					if (ce && ce->type == ZEND_USER_CLASS
-						&& ce->info.user.filename == CG(compiled_filename)
-					) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				case T_FUNCTION:
-				{
-					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
-					if (fn && fn->type == ZEND_USER_FUNCTION
-						&& fn->op_array.filename == CG(compiled_filename)
-					) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				case T_CONST:
-				{
-					zend_string *filename = zend_hash_find_ptr(&CG(const_filenames), lookup_name);
-					if (filename && filename == CG(compiled_filename)) {
-						zend_check_already_in_use(type, old_name, new_name, lookup_name);
-					}
-					break;
-				}
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
 		}
 
 		zend_string_addref(old_name);

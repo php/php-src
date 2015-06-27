@@ -7,12 +7,10 @@ namespace {
     const bar = 42;
 
     use const foo\bar;
-}
 
-namespace {
-    echo "Done";
+    echo bar;
 }
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use const foo\bar as bar because the name is already in use in %s on line %d
+Fatal error: Undefined constant 'foo\bar' in %s on line %d
