@@ -85,6 +85,7 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 	sapi_header_line ctr = {0};
 	int result;
 	zend_string *encoded_value = NULL;
+	zend_string *z_name = zend_string_init(name, name_len, 0);
 
 	if (!name_len) {
 		zend_error( E_WARNING, "Cookie names must not be empty" );
@@ -98,6 +99,13 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 		zend_error( E_WARNING, "Cookie values cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
 	}
+
+	if (zend_hash_exists(SG(cookies), z_name) == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "should not be used twice with the same name");
+	}
+
+	zend_hash_add_empty_element(SG(cookies), z_name);
+	zend_string_release(z_name);
 
 	len += name_len;
 	if (value && url_encode) {

@@ -5,31 +5,31 @@ setcookie() tests
 date.timezone=UTC
 --FILE--
 <?php
-setcookie('name');
-setcookie('name', 'value');
-setcookie('name', 'space value');
-setcookie('name', 'value', 0);
-setcookie('name', 'value', $tsp = time() + 5);
-setcookie('name', 'value', $tsn = time() - 6);
-setcookie('name', 'value', $tsc = time());
-setcookie('name', 'value', 0, '/path/');
-setcookie('name', 'value', 0, '', 'domain.tld');
-setcookie('name', 'value', 0, '', '', TRUE);
-setcookie('name', 'value', 0, '', '', FALSE, TRUE);
+setcookie('name0');
+setcookie('name1', 'value');
+setcookie('name2', 'space value');
+setcookie('name3', 'value', 0);
+setcookie('name4', 'value', $tsp = time() + 5);
+setcookie('name5', 'value', $tsn = time() - 6);
+setcookie('name6', 'value', $tsc = time());
+setcookie('name7', 'value', 0, '/path/');
+setcookie('name8', 'value', 0, '', 'domain.tld');
+setcookie('name9', 'value', 0, '', '', TRUE);
+setcookie('name10', 'value', 0, '', '', FALSE, TRUE);
 
 
 $expected = array(
-	'Set-Cookie: name=',
-	'Set-Cookie: name=value',
-	'Set-Cookie: name=space+value',
-	'Set-Cookie: name=value',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=-6',
-	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
-	'Set-Cookie: name=value; path=/path/',
-	'Set-Cookie: name=value; domain=domain.tld',
-	'Set-Cookie: name=value; secure',
-	'Set-Cookie: name=value; HttpOnly'
+	'Set-Cookie: name0=',
+	'Set-Cookie: name1=value',
+	'Set-Cookie: name2=space+value',
+	'Set-Cookie: name3=value',
+	'Set-Cookie: name4=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
+	'Set-Cookie: name5=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=-6',
+	'Set-Cookie: name6=value; expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
+	'Set-Cookie: name7=value; path=/path/',
+	'Set-Cookie: name8=value; domain=domain.tld',
+	'Set-Cookie: name9=value; secure',
+	'Set-Cookie: name10=value; HttpOnly'
 );
 
 $headers = headers_list();
