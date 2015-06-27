@@ -584,7 +584,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	str = zend_string_alloc(len * 4, 0);
 	str->len = 0;
 	while (pos > 0) {
-		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
+		c = encoder((unsigned char)(*s));
 		if (c < 0x80) {
 			str->val[str->len++] = (char) c;
 		} else if (c < 0x800) {
@@ -640,7 +640,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 			c = '?';
 		}
 
-		str->val[str->len++] = decoder ? decoder(c) : c;
+		str->val[str->len++] = decoder(c);
 	}
 	str->val[str->len] = '\0';
 	if (str->len < len) {
