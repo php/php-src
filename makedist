@@ -100,6 +100,9 @@ done
 find . -name \*.orig -print0 | xargs -0 rm
 rm -fr autom4te.cache/
 
+# touching everything to be packaged
+find php-$VER -exec touch -c {} \;
+
 # download pear 
 $ECHO_N "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
