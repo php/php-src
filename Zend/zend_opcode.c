@@ -866,8 +866,10 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	zend_op *end_op = op_array->opcodes + op_array->last;
 	zend_op *cur_op = op_array->opcodes;
 	for (; cur_op < end_op; cur_op++) {
+
 		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
-		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)) {
+		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)
+		 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD) {
 			var_live_info *T = Ts[cur_op->result.var];
 			if (T->end) {
 				T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
@@ -882,7 +884,9 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 				}
 			}
 		}
-		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR)) && cur_op->opcode != ZEND_FE_FREE) {
+		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
+		 && cur_op->opcode != ZEND_FE_FREE
+		 && cur_op->opcode != ZEND_ROPE_ADD && cur_op->opcode != ZEND_ROPE_END) {
 			Ts[cur_op->op1.var]->end = cur_op - op_array->opcodes;
 			if (cur_op->opcode == ZEND_OP_DATA) {
 				Ts[cur_op->op1.var]->end--;
