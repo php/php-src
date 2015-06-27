@@ -128,7 +128,7 @@ static void php_oci_descriptor_list_dtor (zend_resource *);
 static void php_oci_spool_list_dtor(zend_resource *entry);
 static void php_oci_collection_list_dtor (zend_resource *);
 
-static int php_oci_persistent_helper(zend_resource *le);
+static int php_oci_persistent_helper(zval *zv);
 static int php_oci_connection_ping(php_oci_connection *);
 static int php_oci_connection_status(php_oci_connection *);
 static int php_oci_connection_close(php_oci_connection *);
@@ -1321,7 +1321,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 	 * unable to process a pconnection because of a refcount, the processing would happen from
 	 * np-destructor which is called when refcount goes to zero - php_oci_pconnection_list_np_dtor
 	 */
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper);
+	zend_hash_apply(&EG(persistent_list), php_oci_persistent_helper);
 
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
@@ -1530,9 +1530,9 @@ static void php_oci_collection_list_dtor(zend_resource *entry)
  *
  * Define hash destructor
  */
-void php_oci_define_hash_dtor(void *data)
+void php_oci_define_hash_dtor(zval *data)
 {
-	php_oci_define *define = (php_oci_define *) data;
+	php_oci_define *define = (php_oci_define *) Z_PTR_P(data);
 
 	zval_ptr_dtor(&define->zval);
 
@@ -1547,9 +1547,9 @@ void php_oci_define_hash_dtor(void *data)
  *
  * Bind hash destructor
  */
-void php_oci_bind_hash_dtor(void *data)
+void php_oci_bind_hash_dtor(zval *data)
 {
-	php_oci_bind *bind = (php_oci_bind *) data;
+	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
 
 	if (bind->array.elements) {
 		efree(bind->array.elements);
@@ -1571,17 +1571,17 @@ void php_oci_bind_hash_dtor(void *data)
  *
  * Column hash destructor
  */
-void php_oci_column_hash_dtor(void *data)
+void php_oci_column_hash_dtor(zval *data)
 {
-	php_oci_out_column *column = (php_oci_out_column *) data;
+	php_oci_out_column *column = (php_oci_out_column *) Z_PTR_P(data);
 
-	/* if (column->stmtid) { */ /* PHPNG TODO */
+	if (column->stmtid) {
 		zend_list_close(column->stmtid);
-	/* } */
+	}
 
-	/* if (column->is_descr) { */ /* PHPNG TODO */
+	if (column->is_descr) {
 		zend_list_close(column->descid);
-	/* } */
+	}
 
 	if (column->data) {
 		efree(column->data);
@@ -1597,9 +1597,9 @@ void php_oci_column_hash_dtor(void *data)
  *
  * Flush descriptors on commit
  */
-void php_oci_descriptor_flush_hash_dtor(void *data)
+void php_oci_descriptor_flush_hash_dtor(zval *data)
 {
-	php_oci_descriptor *descriptor = *(php_oci_descriptor **)data;
+	php_oci_descriptor *descriptor = (php_oci_descriptor *) Z_PTR_P(data);
 
 	if (descriptor && descriptor->buffering == PHP_OCI_LOB_BUFFER_USED && (descriptor->type == OCI_DTYPE_LOB || descriptor->type == OCI_DTYPE_FILE)) {
 		php_oci_lob_flush(descriptor, OCI_LOB_BUFFER_FREE);
@@ -2076,7 +2076,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 		if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 			/* try to find an idle connection and kill it */
-			zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper);
+			zend_hash_apply(&EG(persistent_list), php_oci_persistent_helper);
 
 			if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
@@ -2561,7 +2561,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 	}
 
 	if (column->is_cursor) { /* REFCURSOR -> simply return the statement id */
-		ZVAL_RES(value, zend_register_resource(column->stmtid, 0)); /* XXX type correct? */
+		ZVAL_RES(value, column->stmtid);
 		++GC_REFCOUNT(column->stmtid);
 	} else if (column->is_descr) {
 
@@ -2797,8 +2797,9 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
  * Helper function to close/rollback persistent connections at the end of request. A return value of
  * 1 indicates that the connection is to be destroyed
  */
-static int php_oci_persistent_helper(zend_resource *le)
+static int php_oci_persistent_helper(zval *zv)
 {
+	zend_resource *le = Z_RES_P(zv);
 	time_t timestamp;
 	php_oci_connection *connection;
 

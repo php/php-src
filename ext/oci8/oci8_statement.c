@@ -207,9 +207,9 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch )
 
 /* {{{ php_oci_cleanup_pre_fetch()
    Helper function to cleanup ref-cursors and descriptors from the previous row */
-int php_oci_cleanup_pre_fetch(void *data)
+int php_oci_cleanup_pre_fetch(zval *data)
 {
-	php_oci_out_column *outcol = data;
+	php_oci_out_column *outcol = (php_oci_out_column*) Z_PTR_P(data);
 
 	if (!outcol->is_descr && !outcol->is_cursor)
 		return ZEND_HASH_APPLY_KEEP;
@@ -254,7 +254,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 
 	if (statement->has_descr && statement->columns) {
-		zend_hash_apply(statement->columns, (apply_func_t) php_oci_cleanup_pre_fetch);
+		zend_hash_apply(statement->columns, php_oci_cleanup_pre_fetch);
     }
 
 	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
@@ -479,7 +479,6 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 {
 	php_oci_out_column *outcol;
-	php_oci_out_column column;
 	OCIParam *param = NULL;
 	text *colname;
 	ub4 counter;
@@ -530,7 +529,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 
 		if (statement->binds) {
 			int result = 0;
-			zend_hash_apply_with_argument(statement->binds, (apply_func_arg_t) php_oci_bind_pre_exec, (void *)&result);
+			zend_hash_apply_with_argument(statement->binds, php_oci_bind_pre_exec, (void *)&result);
 			if (result) {
 				return 1;
 			}
@@ -546,7 +545,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 		}
 		
 		if (statement->binds) {
-			zend_hash_apply(statement->binds, (apply_func_t) php_oci_bind_post_exec);
+			zend_hash_apply(statement->binds, php_oci_bind_post_exec);
 		}
 
 		if (mode & OCI_COMMIT_ON_SUCCESS) {
@@ -587,9 +586,9 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 		statement->ncolumns = colcount;
 		
 		for (counter = 1; counter <= colcount; counter++) {
-			memset(&column,0,sizeof(php_oci_out_column));
+			outcol = (php_oci_out_column *) ecalloc(1, sizeof(php_oci_out_column));
 			
-			if ((outcol = zend_hash_index_update_ptr(statement->columns, counter, &column)) == NULL) {
+			if ((outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol)) == NULL) {
 				efree(statement->columns);
 				/* out of memory */
 				return 1;
@@ -902,9 +901,9 @@ void php_oci_statement_free(php_oci_statement *statement)
 
 /* {{{ php_oci_bind_pre_exec()
  Helper function */
-int php_oci_bind_pre_exec(void *data, void *result)
+int php_oci_bind_pre_exec(zval *data, void *result)
 {
-	php_oci_bind *bind = (php_oci_bind *) data;
+	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
 
 	*(int *)result = 0;
 
@@ -961,9 +960,9 @@ int php_oci_bind_pre_exec(void *data, void *result)
 
 /* {{{ php_oci_bind_post_exec()
  Helper function */
-int php_oci_bind_post_exec(void *data)
+int php_oci_bind_post_exec(zval *data)
 {
-	php_oci_bind *bind = (php_oci_bind *) data;
+	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
 	php_oci_connection *connection = bind->parent_statement->connection;
 	sword errstatus;
 
@@ -1317,7 +1316,7 @@ sb4 php_oci_bind_in_callback(
 		return OCI_ERROR;
 	}
 
-	if (ZVAL_IS_NULL(val)) {
+	if (Z_ISNULL_P(val)) {
 		/* we're going to insert a NULL column */
 		phpbind->indicator = -1;
 		*bufpp = 0;
@@ -1597,10 +1596,10 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 								(text *)name,
 								name_len,
 								(dvoid *) bindp->array.elements,
-								(sb4) bind->array.max_length,
+								(sb4) bindp->array.max_length,
 								(ub2)type,
 								(dvoid *)bindp->array.indicators,
-								(ub2 *)bind->array.element_lengths,
+								(ub2 *)bindp->array.element_lengths,
 								(ub2 *)0, /* bindp->array.retcodes, */
 								(ub4) max_table_length,
 								(ub4 *) &(bindp->array.current_length),
@@ -1610,13 +1609,11 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	
 		
 	if (errstatus != OCI_SUCCESS) {
-		efree(bind);
 		statement->errcode = php_oci_error(statement->err, errstatus);
 		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
 		return 1;
 	}
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
-	efree(bind);
 	return 0;
 }
 /* }}} */
@@ -1636,9 +1633,11 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 		zend_hash_internal_pointer_reset(hash);
 		while ((entry = zend_hash_get_current_data(hash)) != NULL) {
 			convert_to_string_ex(entry);
-			if (Z_STRLEN_P(entry) > maxlength) {
+
+			if (maxlength == -1 || Z_STRLEN_P(entry) > maxlength) {
 				maxlength = Z_STRLEN_P(entry) + 1;
 			}
+
 			zend_hash_move_forward(hash);
 		}
 	}

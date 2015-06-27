@@ -1429,7 +1429,7 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL(row), &element);
 				} else { /* default to ASSOC */
-					zend_symtable_update(Z_ARRVAL(row), zend_string_init(columns[ i ]->name, columns[ i ]->name_len+1, 0), &element);
+					zend_symtable_update(Z_ARRVAL(row), zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0), &element);
 				}
 			}
 
@@ -1459,7 +1459,7 @@ PHP_FUNCTION(oci_fetch_all)
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zend_string_init(columns[ i ]->name, columns[ i ]->name_len+1, 0), &tmp);
+				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0), &tmp);
 			}
 		}
 
