@@ -15,7 +15,7 @@ $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 // Note the PDO test setup sets PDO::ATTR_STRINGIFY_FETCHES to true
 // (and sets PDO::ATTR_CASE to PDO::CASE_LOWER)
 
-$query = "begin execute immediate 'drop table mytable'; exception when others then if sqlcode <> -942 then raise; end if; end;";
+$query = "begin execute immediate 'drop table bug57702'; exception when others then if sqlcode <> -942 then raise; end if; end;";
 $stmt = $db->prepare($query);
 $stmt->execute();
 
