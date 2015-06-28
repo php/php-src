@@ -866,8 +866,11 @@ function gen_labels($f, $spec, $kind, $prolog) {
 				$next++;
 			}
 			$next = $num+1;
-		  // Emit pointer to unspecialized handler
-			switch ($kind) {
+
+			//ugly trick for ZEND_VM_DEFINE_OP
+			if ($dsc["code"]) {
+				// Emit pointer to unspecialized handler
+				switch ($kind) {
 				case ZEND_VM_KIND_CALL:
 					out($f,$prolog.$dsc["op"]."_HANDLER,\n");
 					break;
@@ -877,6 +880,19 @@ function gen_labels($f, $spec, $kind, $prolog) {
 				case ZEND_VM_KIND_GOTO:
 					out($f,$prolog."(void*)&&".$dsc["op"]."_HANDLER,\n");
 					break;
+				}
+			} else {
+				switch ($kind) {
+					case ZEND_VM_KIND_CALL:
+						out($f,$prolog."ZEND_NULL_HANDLER,\n");
+						break;
+					case ZEND_VM_KIND_SWITCH:
+						out($f,$prolog."(void*)(uintptr_t)-1,\n");
+						break;
+					case ZEND_VM_KIND_GOTO:
+						out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
+						break;
+				}
 			}
 		}
 	}
