@@ -202,7 +202,7 @@ static void ps_files_open(ps_files *data, const char *key)
 			   accessed by backend with root permissions to execute some system tasks.
 
 			   */
-			if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid() && getuid() != 0)) {
+			if (zend_fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid() && getuid() != 0)) {
 				close(data->fd);
 				data->fd = -1;
 				return;
