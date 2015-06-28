@@ -1443,6 +1443,9 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		/* check for uncaught exceptions */
 		if (exception && PHPDBG_G(handled_exception) != exception) {
 			zend_execute_data *prev_ex = execute_data;
+			zval zv, rv;
+			zend_string *file;
+			zend_long line;
 
 			do {
 				prev_ex = zend_generator_check_placeholder_frame(prev_ex);
@@ -1457,7 +1460,13 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			} while ((prev_ex = prev_ex->prev_execute_data));
 
 			PHPDBG_G(handled_exception) = exception;
-			phpdbg_error("exception", "name=\"%s\"", "Uncaught exception %s", exception->ce->name->val);
+
+			ZVAL_OBJ(&zv, exception);
+			file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
+			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
+
+			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught exception %s in %s on line %lld", exception->ce->name->val, file->val, line);
+			zend_string_release(file);
 			DO_INTERACTIVE(1);
 		}
 ex_is_caught:

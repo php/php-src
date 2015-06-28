@@ -36,6 +36,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception);
 
 void zend_register_default_exception(void);
 
+ZEND_API zend_class_entry *zend_get_exception_base(zval *object);
 ZEND_API zend_class_entry *zend_exception_get_default(void);
 ZEND_API zend_class_entry *zend_get_error_exception(void);
 ZEND_API zend_class_entry *zend_get_error(void);
