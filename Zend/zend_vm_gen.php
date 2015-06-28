@@ -1185,7 +1185,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 				case "ZEND_VM_CONTINUE_LABEL":
 					if ($kind == ZEND_VM_KIND_CALL) {
 					  // Only SWITCH dispatch method use it
+						out($f,"#if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)\n");
 						out($f,$m[1]."\tint ret;".$m[3]."\n");
+						out($f,"#endif\n");
 					} else if ($kind == ZEND_VM_KIND_SWITCH) {
 					  // Only SWITCH dispatch method use it
 						out($f,"zend_vm_continue:".$m[3]."\n");

@@ -398,7 +398,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 	LOAD_OPLINE();
 
 	while (1) {
+#if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
     	int ret;
+#endif
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 		((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		if (UNEXPECTED(!OPLINE)) {
