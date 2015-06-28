@@ -80,14 +80,14 @@ printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x,
 	y = crop->y;
 	if (src->trueColor) {
 		unsigned int dst_y = 0;
-		while (y < (crop->y + (crop->height - 1))) {
+		while (y < (crop->y + crop->height)) {
 			/* TODO: replace 4 w/byte per channel||pitch once available */
 			memcpy(dst->tpixels[dst_y++], src->tpixels[y++] + crop->x, crop->width * 4);
 		}
 	} else {
 		int x;
-		for (y = crop->y; y < (crop->y + (crop->height - 1)); y++) {
-			for (x = crop->x; x < (crop->x + (crop->width - 1)); x++) {
+		for (y = crop->y; y < (crop->y + crop->height); y++) {
+			for (x = crop->x; x < (crop->x + crop->width); x++) {
 				dst->pixels[y - crop->y][x - crop->x] = src->pixels[y][x];
 			}
 		}
