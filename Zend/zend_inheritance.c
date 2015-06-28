@@ -372,8 +372,12 @@ static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zen
 			smart_str_appendc(str, ' ');
 		}
 	} else if (arg_info->type_hint) {
-		const char *type_name = zend_get_type_by_const(arg_info->type_hint);
-		smart_str_appends(str, type_name);
+		if (arg_info->type_hint == IS_LONG) {
+			smart_str_appendl(str, "int", 3);
+		} else {
+			const char *type_name = zend_get_type_by_const(arg_info->type_hint);
+			smart_str_appends(str, type_name);
+		}
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
@@ -390,7 +394,8 @@ static zend_string *zend_get_function_declaration(const zend_function *fptr) /* 
 	}
 
 	if (fptr->common.scope) {
-		smart_str_append(&str, fptr->common.scope->name);
+		/* cut off on NULL byte ... class@anonymous */
+		smart_str_appendl(&str, fptr->common.scope->name->val, strlen(fptr->common.scope->name->val));
 		smart_str_appends(&str, "::");
 	}
 
@@ -563,11 +568,15 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		child->common.prototype->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_HAS_RETURN_TYPE)
 	)) {
 		if (UNEXPECTED(!zend_do_perform_implementation_check(child, child->common.prototype))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, zend_get_function_declaration(child->common.prototype)->val);
+			zend_string *method_prototype = zend_get_function_declaration(parent);
+			zend_string *child_prototype = zend_get_function_declaration(child);
+			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", child_prototype->val, method_prototype->val);
 		}
 	} else if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
 		zend_string *method_prototype = zend_get_function_declaration(parent);
-		zend_error(E_WARNING, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, method_prototype->val);
+		zend_string *child_prototype = zend_get_function_declaration(child);
+		zend_error(E_WARNING, "Declaration of %s should be compatible with %s", child_prototype->val, method_prototype->val);
+		zend_string_free(child_prototype);
 		zend_string_free(method_prototype);
 	}
 }
