@@ -1,13 +1,24 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 09 Jul 2015, PHP 7.0.0 Beta 1
 
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
+- CLI server:
+  . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
+  . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
+
+- COM:
+  . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
+
 - PCRE:
-  . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+  . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
     string). (cmb)
+
+- OpenSSL:
+  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
+    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
 

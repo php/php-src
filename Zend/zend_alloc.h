@@ -84,7 +84,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 #include "zend_alloc_sizes.h"
 
 /* _emalloc() & _efree() specialization */
-#if !ZEND_DEBUG && !defined(_WIN32)
+#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 
 # define _ZEND_BIN_ALLOCATOR_DEF(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void* ZEND_FASTCALL _emalloc_  ## _size(void) ZEND_ATTRIBUTE_MALLOC;

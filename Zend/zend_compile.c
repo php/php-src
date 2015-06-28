@@ -2866,16 +2866,30 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
-		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
-			Z_STR(name_node->u.constant));
-		zend_alloc_cache_slot(opline->op2.constant);
+		const char *colon;
+		zend_string *str = Z_STR(name_node->u.constant);
+		if ((colon = zend_memrchr(str->val, ':', str->len)) != NULL && colon > str->val && *(colon - 1) == ':') {
+			zend_string *class = zend_string_init(str->val, colon - str->val - 1, 0);
+			zend_string *method = zend_string_init(colon + 1, str->len - (colon - str->val) - 1, 0);
+			opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
+			opline->op1_type = IS_CONST;
+			opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), class);
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), method);
+			zend_alloc_cache_slot(opline->op2.constant);
+			zval_ptr_dtor(&name_node->u.constant);
+		} else {
+			opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+			SET_UNUSED(opline->op1);
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), str);
+			zend_alloc_cache_slot(opline->op2.constant);
+		}
 	} else {
 		opline->opcode = ZEND_INIT_DYNAMIC_CALL;
+		SET_UNUSED(opline->op1);
 		SET_NODE(opline->op2, name_node);
 	}
-	SET_UNUSED(opline->op1);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }

@@ -181,7 +181,7 @@ void phpdbg_list_function(const zend_function *fbc) /* {{{ */
 	const zend_op_array *ops;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
-		phpdbg_error("list", "type=\"internalfunction\" function=\"%s\"", "The function requested (%s) is not user defined", fbc->common.function_name);
+		phpdbg_error("list", "type=\"internalfunction\" function=\"%s\"", "The function requested (%s) is not user defined", fbc->common.function_name->val);
 		return;
 	}
 

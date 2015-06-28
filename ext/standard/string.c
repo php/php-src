@@ -801,9 +801,10 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 
 	if (what) {
 		if (what_len == 1) {
+			char p = *what;
 			if (mode & 1) {
 				for (i = 0; i < len; i++) {
-					if (c[i] == *what) {
+					if (c[i] == p) {
 						trimmed++;
 					} else {
 						break;
@@ -816,7 +817,7 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 				if (len > 0) {
 					i = len - 1;
 					do {
-						if (c[i] == *what) {
+						if (c[i] == p) {
 							len--;
 						} else {
 							break;

@@ -266,7 +266,7 @@ to upgrade.
 
 8. Commit all the changes to their respective git repos
 
-9. Please note down the md5, sha245 and the PGP signature (.asc). These *must* be
+9. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
 10. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to

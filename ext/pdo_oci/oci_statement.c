@@ -188,6 +188,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
+	zval *parameter;
 
 	if (!param) {
 		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_input_cb; this should not happen");
@@ -196,19 +197,24 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 
 	*indpp = &P->indicator;
 
+    if (Z_ISREF(param->parameter))
+		parameter = Z_REFVAL(param->parameter);
+	else
+		parameter = &param->parameter;
+
 	if (P->thing) {
 		*bufpp = P->thing;
 		*alenp = sizeof(void*);
-	} else if (ZVAL_IS_NULL(&param->parameter)) {
+	} else if (ZVAL_IS_NULL(parameter)) {
 		/* insert a NULL value into the column */
 		P->indicator = -1; /* NULL */
 		*bufpp = 0;
 		*alenp = -1;
 	} else if (!P->thing) {
 		/* regular string bind */
-		convert_to_string(&param->parameter);
-		*bufpp = Z_STRVAL(param->parameter);
-		*alenp = Z_STRLEN(param->parameter);
+		convert_to_string(parameter);
+		*bufpp = Z_STRVAL_P(parameter);
+		*alenp = Z_STRLEN_P(parameter);
 	}
 
 	*piecep = OCI_ONE_PIECE;
@@ -219,11 +225,17 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
+	zval *parameter;
 
 	if (!param) {
 		php_error_docref(NULL, E_WARNING, "param is NULL in oci_bind_output_cb; this should not happen");
 		return OCI_ERROR;
 	}
+
+	if (Z_ISREF(param->parameter))
+        parameter = Z_REFVAL(param->parameter);
+    else
+        parameter = &param->parameter;
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
 		P->actual_len = sizeof(OCILobLocator*);
@@ -235,20 +247,20 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 		return OCI_CONTINUE;
 	}
 
-	if (Z_TYPE(param->parameter) == IS_OBJECT || Z_TYPE(param->parameter) == IS_RESOURCE) {
+	if (Z_TYPE_P(parameter) == IS_OBJECT || Z_TYPE_P(parameter) == IS_RESOURCE) {
 		return OCI_CONTINUE;
 	}
 
-	convert_to_string(&param->parameter);
-	zval_dtor(&param->parameter);
+	convert_to_string(parameter);
+	zval_dtor(parameter);
 
-	Z_STRLEN(param->parameter) = param->max_value_len;
-	Z_STR(param->parameter) = ecalloc(1, Z_STRLEN(param->parameter)+1);
+	Z_STRLEN_P(parameter) = param->max_value_len;
+	Z_STR_P(parameter) = ecalloc(1, Z_STRLEN_P(parameter)+1);
 	P->used_for_output = 1;
 
-	P->actual_len = Z_STRLEN(param->parameter);
+	P->actual_len = Z_STRLEN_P(parameter);
 	*alenpp = &P->actual_len;
-	*bufpp = Z_STRVAL(param->parameter);
+	*bufpp = Z_STRVAL_P(parameter);
 	*piecep = OCI_ONE_PIECE;
 	*rcodepp = &P->retcode;
 	*indpp = &P->indicator;
@@ -264,6 +276,12 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 	if (param->is_param) {
 		pdo_oci_bound_param *P;
 		sb4 value_sz = -1;
+		zval *parameter;
+
+		if (Z_ISREF(param->parameter))
+			parameter = Z_REFVAL(param->parameter);
+		else
+			parameter = &param->parameter;
 
 		P = (pdo_oci_bound_param*)param->driver_data;
 
@@ -343,21 +361,21 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 				if (P->used_for_output) {
 					if (P->indicator == -1) {
 						/* set up a NULL value */
-						if (Z_TYPE(param->parameter) == IS_STRING) {
+						if (Z_TYPE_P(parameter) == IS_STRING) {
 							/* OCI likes to stick non-terminated strings in things */
-							*Z_STRVAL(param->parameter) = '\0';
+							*Z_STRVAL_P(parameter) = '\0';
 						}
-						zval_dtor(&param->parameter);
-						ZVAL_UNDEF(&param->parameter);
-					} else if (Z_TYPE(param->parameter) == IS_STRING) {
-						Z_STRLEN(param->parameter) = P->actual_len;
-						Z_STR(param->parameter) = erealloc(Z_STRVAL(param->parameter), P->actual_len+1);
-						Z_STRVAL(param->parameter)[P->actual_len] = '\0';
+						zval_dtor(parameter);
+						ZVAL_UNDEF(parameter);
+					} else if (Z_TYPE_P(parameter) == IS_STRING) {
+						Z_STRLEN_P(parameter) = P->actual_len;
+						Z_STR_P(parameter) = erealloc(Z_STRVAL_P(parameter), P->actual_len+1);
+						Z_STRVAL_P(parameter)[P->actual_len] = '\0';
 					}
 				} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->thing) {
 					php_stream *stm;
 
-					if (Z_TYPE(param->parameter) == IS_NULL) {
+					if (Z_TYPE_P(parameter) == IS_NULL) {
 						/* if the param is NULL, then we assume that they
 						 * wanted to bind a lob locator into it from the query
 						 * */
@@ -365,7 +383,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						stm = oci_create_lob_stream(stmt, (OCILobLocator*)P->thing);
 						if (stm) {
 							OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
-							php_stream_to_zval(stm, &param->parameter);
+							php_stream_to_zval(stm, parameter);
 							P->thing = NULL;
 						}
 					} else {
@@ -374,7 +392,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						ub4 amt, offset = 1;
 						char *consume;
 
-						php_stream_from_zval_no_verify(stm, &param->parameter);
+						php_stream_from_zval_no_verify(stm, parameter);
 						if (stm) {
 							OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
 							do {
@@ -397,10 +415,10 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 							} while (1);
 							OCILobClose(S->H->svc, S->err, (OCILobLocator*)P->thing);
 							OCILobFlushBuffer(S->H->svc, S->err, (OCILobLocator*)P->thing, 0);
-						} else if (Z_TYPE(param->parameter) == IS_STRING) {
+						} else if (Z_TYPE_P(parameter) == IS_STRING) {
 							/* stick the string into the LOB */
-							consume = Z_STRVAL(param->parameter);
-							n = Z_STRLEN(param->parameter);
+							consume = Z_STRVAL_P(parameter);
+							n = Z_STRLEN_P(parameter);
 							if (n) {
 								OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
 								while (n) {
@@ -651,7 +669,7 @@ static int oci_blob_close(php_stream *stream, int close_handle)
 		efree(self);
 	}
 
-	php_pdo_free_statement(stmt);
+	/* php_pdo_free_statement(stmt); */
 	return 0;
 }
 

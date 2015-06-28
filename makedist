@@ -100,6 +100,16 @@ done
 find . -name \*.orig -print0 | xargs -0 rm
 rm -fr autom4te.cache/
 
+# touching everything to be packaged
+find $MY_OLDPWD/php-$VER -exec touch -c {} \;
+
+# tweak zendparse to be exported through ZEND_API
+# NOTE this has to be revisited once bison supports foreign skeletons
+#      and that bison version is used. Read /usr/share/bison/README for more
+sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.c
+sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
+sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
+
 # download pear 
 $ECHO_N "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
