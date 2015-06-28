@@ -138,7 +138,7 @@ std:
 	UTF16_2 = UTFPREF "0" HEX7 HEX{2} ;
 	UTF16_3 = UTFPREF ( ( ( HEXC | [efEF] ) HEX ) | ( [dD] HEX7 ) ) HEX{2} ;
 	UTF16_4 = UTFPREF [dD] [89abAB] HEX{2} UTFPREF [dD] [c-fC-F] HEX{2} ;
-	
+
 	<JS>"{"                  { return '{'; }
 	<JS>"}"                  { return '}'; }
 	<JS>"["                  { return '['; }
@@ -190,7 +190,7 @@ std:
 		if (s->limit < s->cursor) {
 			return PHP_JSON_T_EOI;
 		} else {
-			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
 			return PHP_JSON_T_ERROR;
 		}
 	}
@@ -199,6 +199,18 @@ std:
 		s->str_esc = 0;
 		PHP_JSON_CONDITION_SET(STR_P1);
 		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
+	<JS>CTRL                 {
+		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		return PHP_JSON_T_ERROR;
+	}
+	<JS>UTF8                 {
+		s->errcode = PHP_JSON_ERROR_SYNTAX;
+		return PHP_JSON_T_ERROR;
+	}
+	<JS>ANY                  {
+		s->errcode = PHP_JSON_ERROR_UTF8;
+		return PHP_JSON_T_ERROR;
 	}
 
 	<STR_P1>CTRL             {
