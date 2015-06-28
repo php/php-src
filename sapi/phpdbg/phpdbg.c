@@ -894,7 +894,6 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	/* phpdbg options */
 	{'q', 0, "no banner"},
 	{'v', 0, "disable quietness"},
-	{'s', 0, "enable stepping"},
 	{'b', 0, "boring colours"},
 	{'i', 1, "specify init"},
 	{'I', 0, "ignore init"},
@@ -1168,7 +1167,6 @@ int main(int argc, char **argv) /* {{{ */
 	long cleaning = -1;
 	zend_bool quit_immediately = 0;
 	zend_bool remote = 0;
-	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;
 	char *address;
@@ -1223,7 +1221,6 @@ phpdbg_main:
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
-	step = 0;
 	sapi_name = NULL;
 	if (settings) {
 		exec = settings->exec;
@@ -1316,10 +1313,6 @@ phpdbg_main:
 
 			case 'v': /* set quietness off */
 				flags &= ~PHPDBG_IS_QUIET;
-			break;
-
-			case 's': /* set stepping on */
-				step = 1;
 			break;
 
 			case 'E': /* stepping through eval on */
@@ -1675,11 +1668,6 @@ phpdbg_main:
 				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
-		}
-
-		/* step from here, not through init */
-		if (step) {
-			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
 		phpdbg_fully_started = 1;
