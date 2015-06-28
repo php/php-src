@@ -5625,7 +5625,7 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 	binary_op_type fn = get_binary_op(opcode);
 
 	/* don't evaluate division by zero at compile-time */
-	if (opcode == ZEND_DIV) {
+	if (opcode == ZEND_DIV || opcode == ZEND_MOD) {
 		convert_scalar_to_number(op2);
 		if (Z_TYPE_P(op2) == IS_LONG) {
 			if (Z_LVAL_P(op2) == 0) {
