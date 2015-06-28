@@ -6622,6 +6622,11 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
+		zend_brk_cont_element *info = get_next_brk_cont_element(CG(active_op_array));
+		info->brk = opline - CG(active_op_array)->opcodes;
+		info->start = rope_init_lineno;
+		info->parent = CG(context).current_brk_cont;
+		info->cont = -1;
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
