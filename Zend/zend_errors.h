@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Patrick Allaert <patrick@catchy.io>                         |
    +----------------------------------------------------------------------+
 */
 
@@ -42,6 +43,32 @@
 
 #define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED | E_STRICT)
 #define E_CORE (E_CORE_ERROR | E_CORE_WARNING)
+
+typedef enum {
+	E_HOOK_DISPLAY,
+	E_HOOK_LOG,
+	E_HOOK_PROCESS,
+	E_HOOK_BAILOUT,
+	E_HOOK_LAST
+} zend_error_cb_hook_t;
+
+#define ZEND_ERROR_CB_FUNC_ARGS int type, const char *error_filename, const uint error_lineno, const char *format, va_list args
+#define ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU type, error_filename, error_lineno, format, args
+#define ZEND_ERROR_CB_HOOK_ARGS ZEND_ERROR_CB_FUNC_ARGS, const char *error_type_str
+#define ZEND_ERROR_CB_HOOK_ARGS_PASSTHRU ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU, error_type_str
+#define ZEND_ERROR_CB_API ZEND_API int
+
+BEGIN_EXTERN_C()
+ZEND_ERROR_CB_API zend_error_display_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_ERROR_CB_API zend_error_log_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_ERROR_CB_API zend_error_bailout_cb(ZEND_ERROR_CB_HOOK_ARGS);
+ZEND_API void zend_append_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
+ZEND_API void zend_prepend_error_hook(zend_error_cb_hook_t hook_part, int (*hook)(ZEND_ERROR_CB_HOOK_ARGS));
+ZEND_API void zend_clear_error_hook(zend_error_cb_hook_t hook_part);
+ZEND_API void zend_init_error_hooks(void);
+ZEND_API void zend_register_error_hooks(void);
+ZEND_API void zend_unregister_error_hooks(void);
+END_EXTERN_C()
 
 #endif /* ZEND_ERRORS_H */
 

@@ -164,6 +164,7 @@ struct _php_core_globals {
 	char *mail_log;
 
 	zend_bool in_error_log;
+	zend_llist error_hooks[E_HOOK_LAST];
 
 #ifdef PHP_WIN32
 	zend_bool windows_show_crt_warning;

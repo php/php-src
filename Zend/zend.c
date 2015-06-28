@@ -53,7 +53,7 @@ ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
-ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+ZEND_API void (*zend_error_cb)(ZEND_ERROR_CB_FUNC_ARGS);
 size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
@@ -1168,7 +1168,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
 		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(type, error_filename, error_lineno, format, args);
+		zend_error_cb(ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU);
 	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
@@ -1177,7 +1177,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
-			zend_error_cb(type, error_filename, error_lineno, format, args);
+			zend_error_cb(ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU);
 			break;
 		default:
 			/* Handle the error in user space */
@@ -1239,13 +1239,13 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
+						zend_error_cb(ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU);
 					}
 					zval_ptr_dtor(&retval);
 				}
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
+				zend_error_cb(ZEND_ERROR_CB_FUNC_ARGS_PASSTHRU);
 			}
 
 			if (in_compilation) {
