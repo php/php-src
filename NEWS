@@ -16,13 +16,17 @@ PHP                                                                        NEWS
   . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
     (Cameron Porter)
 
+- OpenSSL:
+  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
+    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+
 - PCRE:
   . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
     string). (cmb)
 
-- OpenSSL:
-  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
-    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+- Session:
+  . Fixed bug #69952 (Data integrity issues accessing superglobals by
+    reference). (Bob)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
 

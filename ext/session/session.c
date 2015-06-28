@@ -1436,6 +1436,7 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name) /* {{{ */
 /* }}} */
 
 static void ppid2sid(zval *ppid) {
+	ZVAL_DEREF(ppid);
 	if (Z_TYPE_P(ppid) == IS_STRING) {
 		PS(id) = zend_string_init(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
 		PS(send_cookie) = 0;
@@ -1547,28 +1548,26 @@ PHPAPI void php_session_start(void) /* {{{ */
 	 */
 
 	if (!PS(id)) {
-		if (PS(use_cookies) && (data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1)) &&
-				Z_TYPE_P(data) == IS_ARRAY &&
-				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
-		) {
-			ppid2sid(ppid);
-			PS(send_cookie) = 0;
+		if (PS(use_cookies) && (data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1))) {
+			ZVAL_DEREF(data);
+			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+				ppid2sid(ppid);
+				PS(send_cookie) = 0;
+			}
 		}
 
-		if (PS(define_sid) && !PS(id) &&
-				(data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1)) &&
-				Z_TYPE_P(data) == IS_ARRAY &&
-				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
-		) {
-			ppid2sid(ppid);
+		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
+			ZVAL_DEREF(data);
+			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+				ppid2sid(ppid);
+			}
 		}
 
-		if (PS(define_sid) && !PS(id) &&
-				(data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1)) &&
-				Z_TYPE_P(data) == IS_ARRAY &&
-				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
-		) {
-			ppid2sid(ppid);
+		if (PS(define_sid) && !PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
+			ZVAL_DEREF(data);
+			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
+				ppid2sid(ppid);
+			}
 		}
 
 		/* Check the REQUEST_URI symbol for a string of the form
