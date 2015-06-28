@@ -213,13 +213,17 @@ std:
 		s->str_esc += 4;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
+	<STR_P1>UTF16_3          {
+		s->str_esc += 3;
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
 	<STR_P1>UTF16_4          {
 		s->str_esc += 8;
 		PHP_JSON_CONDITION_GOTO(STR_P1);
 	}
 	<STR_P1>UCS2             {
-		s->str_esc += 3;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		s->errcode = PHP_JSON_ERROR_UTF16;
+		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>ESC              {
 		s->str_esc++;
@@ -272,6 +276,15 @@ std:
 		s->str_start = s->cursor;
 		PHP_JSON_CONDITION_GOTO(STR_P2);
 	}
+	<STR_P2>UTF16_3             {
+		int utf16 = php_json_ucs2_to_int(s, 4);
+		PHP_JSON_SCANNER_COPY_UTF();
+		*(s->pstr++) = (char) (0xe0 | (utf16 >> 12));
+		*(s->pstr++) = (char) (0x80 | ((utf16 >> 6) & 0x3f));
+		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
+		s->str_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO(STR_P2);
+	}
 	<STR_P2>UTF16_4             {
 		int utf32, utf16_hi, utf16_lo;
 		utf16_hi = php_json_ucs2_to_int(s, 4);
@@ -282,15 +295,6 @@ std:
 		*(s->pstr++) = (char) (0x80 | ((utf32 >> 12) & 0x3f));
 		*(s->pstr++) = (char) (0x80 | ((utf32 >> 6) & 0x3f));
 		*(s->pstr++) = (char) (0x80 | (utf32 & 0x3f));
-		s->str_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(STR_P2);
-	}
-	<STR_P2>UCS2             {
-		int utf16 = php_json_ucs2_to_int(s, 4);
-		PHP_JSON_SCANNER_COPY_UTF();
-		*(s->pstr++) = (char) (0xe0 | (utf16 >> 12));
-		*(s->pstr++) = (char) (0x80 | ((utf16 >> 6) & 0x3f));
-		*(s->pstr++) = (char) (0x80 | (utf16 & 0x3f));
 		s->str_start = s->cursor;
 		PHP_JSON_CONDITION_GOTO(STR_P2);
 	}

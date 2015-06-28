@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
 
+- JSON
+  . Fixed bug #62010 (json_decode produces invalid byte-sequences).
+	(Jakub Zelenka)
+
 - OCI8:
   . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
     (Cameron Porter)
