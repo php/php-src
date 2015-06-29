@@ -637,6 +637,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		}												\
 	} while (0)
 
+#define ZVAL_STR_RESIZE(z, l) do {						\
+		zval *__z = (z);								\
+		Z_STR_P(__z) = zend_string_resize(Z_STR_P(__z), l); \
+	} while (0)
+
 #define ZVAL_ARR(z, a) do {						\
 		zval *__z = (z);						\
 		Z_ARR_P(__z) = (a);						\

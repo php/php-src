@@ -93,6 +93,11 @@ static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 	return 1;
 }
 
+static zend_always_inline zend_uchar zend_string_is_persistent(zend_string *s)
+{
+	return (GC_FLAGS(s) & IS_STR_PERSISTENT);
+}
+
 static zend_always_inline zend_string *zend_string_alloc(size_t len, int persistent)
 {
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), persistent);
@@ -170,7 +175,7 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
-	memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
+	memcpy(ret->val, s->val, MIN(len, s->len) + 1);
 	return ret;
 }
 
@@ -210,9 +215,53 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
-	memcpy(ret->val, s->val, len + 1);
+	memcpy(ret->val, s->val, len);
 	return ret;
 }
+
+static zend_always_inline zend_string *zend_string_resize(zend_string *s, size_t len)
+{
+	zend_string *ret;
+
+	if (!IS_INTERNED(s)) {
+		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
+			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_STR_HEADER_SIZE + len + 1), zend_string_is_persistent(s));
+			ret->len = len;
+			s->val[len] = '\0';
+			zend_string_forget_hash_val(ret);
+			return ret;
+		} else {
+			GC_REFCOUNT(s)--;
+		}
+	}
+	ret = zend_string_alloc(len, zend_string_is_persistent(s));
+	memcpy(ret->val, s->val, MIN(len, s->len));
+	ret->val[len] = '\0';
+	return ret;
+}
+
+static zend_always_inline zend_string *zend_string_append_buf_len(zend_string *s1, char *s2, size_t len2)
+{
+	ZEND_ASSERT(s1);
+	ZEND_ASSERT(s2);
+	s1 = zend_string_resize(s1, s1->len + len2);
+	memcpy(s1->val + s1->len - len2, s2, len2 + 1);
+	return s1;
+}	
+	
+static zend_always_inline zend_string *zend_string_append(zend_string *s1, zend_string *s2)
+{
+	ZEND_ASSERT(s1 != s2); // zend_string_append(s, s) is not supported
+	return zend_string_append_buf_len(s1, s2->val, s2->len);
+}	
+	
+static zend_always_inline zend_string *zend_string_append_buf(zend_string *s1, char *s2)
+{
+	return zend_string_append_buf_len(s1, s2, strlen(s2));
+}	
+
+#define zend_string_append_literal(_s1, _c) \
+	zend_string_append_buf_len(_s1, _c, sizeof(c) - 1);
 
 static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, int persistent)
 {
@@ -237,7 +286,7 @@ static zend_always_inline void zend_string_free(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		ZEND_ASSERT(GC_REFCOUNT(s) <= 1);
-		pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
+		pefree(s, zend_string_is_persistent(s));
 	}
 }
 
@@ -245,7 +294,7 @@ static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		if (--GC_REFCOUNT(s) == 0) {
-			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
+			pefree(s, zend_string_is_persistent(s));
 		}
 	}
 }
