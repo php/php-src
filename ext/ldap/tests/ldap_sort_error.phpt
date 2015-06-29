@@ -18,27 +18,27 @@ var_dump(ldap_sort($link, $link, "sn"));
 ?>
 ===DONE===
 --EXPECTF--
-Deprecated: ldap_sort(): Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions in %s.php on line %d
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
 Warning: ldap_sort() expects exactly 3 parameters, 1 given in %s on line %d
 bool(false)
 
-Deprecated: ldap_sort(): Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions in %s.php on line %d
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
 Warning: ldap_sort() expects exactly 3 parameters, 2 given in %s on line %d
 bool(false)
 
-Deprecated: ldap_sort(): Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions in %s.php on line %d
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
 Warning: ldap_sort() expects exactly 3 parameters, 4 given in %s on line %d
 bool(false)
 
-Deprecated: ldap_sort(): Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions in %s.php on line %d
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
 Warning: ldap_sort() expects parameter 3 to be %binary_string_optional%, resource given in %s on line %d
 bool(false)
 
-Deprecated: ldap_sort(): Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions in %s.php on line %d
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 
 Warning: ldap_sort(): Supplied resource is not a valid ldap result resource in %s on line %d
 bool(false)

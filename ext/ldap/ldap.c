@@ -2001,8 +2001,6 @@ PHP_FUNCTION(ldap_sort)
 	size_t sflen;
 	zend_resource *le;
 
-    php_error_docref(NULL, E_DEPRECATED, "Usage of ldap_sort is deprecated and will be removed in one of the next PHP-versions");
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrs", &link, &result, &sortfilter, &sflen) != SUCCESS) {
 		RETURN_FALSE;
 	}
@@ -3279,7 +3277,7 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_err2str,								arginfo_ldap_err2str)
 	PHP_FE(ldap_error,									arginfo_ldap_resource)
 	PHP_FE(ldap_compare,								arginfo_ldap_compare)
-	PHP_FE(ldap_sort,									arginfo_ldap_sort)
+	PHP_DEP_FE(ldap_sort,									arginfo_ldap_sort)
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
 	PHP_FE(ldap_rename,									arginfo_ldap_rename)
