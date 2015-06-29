@@ -1348,7 +1348,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stat, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ formatted_print.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sprintf, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sprintf, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
