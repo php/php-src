@@ -120,7 +120,7 @@ PHPDBG_INFO(constants) /* {{{ */
 		phpdbg_out("Address            Refs    Type      Constant\n");
 		ZEND_HASH_FOREACH_PTR(&consts, data) {
 
-#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("constant", "address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %.*s" msg, &data->value, Z_REFCOUNT(data->value), zend_zval_type_name(&data->value), data->name->len, data->name->val, ##__VA_ARGS__)
+#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("constant", "address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %.*s" msg, &data->value, Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, zend_zval_type_name(&data->value), data->name->len, data->name->val, ##__VA_ARGS__)
 
 			switch (Z_TYPE(data->value)) {
 				case IS_STRING:
