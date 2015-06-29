@@ -1470,11 +1470,6 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
  */
 static PHP_MINIT_FUNCTION(cgi)
 {
-#ifdef ZTS
-	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
-#else
-	php_cgi_globals_ctor(&php_cgi_globals);
-#endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -1726,10 +1721,6 @@ int main(int argc, char *argv[])
 	size_t ini_entries_len = 0;
 	/* end of temporary locals */
 
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
-
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi;
@@ -1774,8 +1765,14 @@ int main(int argc, char *argv[])
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-	tsrm_ls = ts_resource(0);
+	(void)ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
+#ifdef ZTS
+	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
+#else
+	php_cgi_globals_ctor(&php_cgi_globals);
 #endif
 
 	sapi_startup(&cgi_sapi_module);
