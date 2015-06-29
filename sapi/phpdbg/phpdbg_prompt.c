@@ -493,6 +493,7 @@ int phpdbg_skip_line_helper() /* {{{ */ {
 			 || opline->opcode == ZEND_GENERATOR_RETURN
 			 || opline->opcode == ZEND_EXIT
 			 || opline->opcode == ZEND_YIELD
+			 || opline->opcode == ZEND_YIELD_FROM
 			) {
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 				break;
@@ -537,6 +538,7 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_YIELD:
+			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 				return;
 		}
