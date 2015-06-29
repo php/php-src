@@ -804,13 +804,11 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 			if (OP1_TYPE != IS_UNUSED) {
 				ZVAL_DEREF(container);
 			}
-#if !defined(ZEND_VM_SPEC) || (OP2_TYPE != IS_UNUSED)
 			if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 				value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 				zend_binary_assign_op_obj_dim(container, dim, value, UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, binary_op);
 				break;
 			}
-#endif
 		}
 
 		zend_fetch_dimension_address_RW(&rv, container, dim, OP2_TYPE);
