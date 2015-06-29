@@ -190,7 +190,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	}
 
 	old_error_reporting = EG(error_reporting);
-	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
+	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_DEBUG|E_USER_WARNING|E_USER_NOTICE|E_USER_DEBUG);
 
 	/* Changed ternary operator to an if/else so that additional comparisons can be done on the ssl_method property */
 	if (use_ssl && !*use_proxy) {
