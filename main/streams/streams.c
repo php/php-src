@@ -1414,7 +1414,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	zend_string *result;
 
 	if (maxlen == 0) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {

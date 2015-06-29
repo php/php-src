@@ -279,7 +279,7 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 				}
 			}
 			if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_CV &&
-			    !IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
+			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			    size_t len = op1_str->len;
 
 				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
@@ -5271,7 +5271,7 @@ ZEND_VM_C_LABEL(num_index):
 			offset = Z_REFVAL_P(offset);
 			ZEND_VM_C_GOTO(add_again);
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -5284,7 +5284,7 @@ ZEND_VM_C_LABEL(num_index):
 			ZEND_VM_C_GOTO(num_index);
 		} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
@@ -5699,7 +5699,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {
 				hval = 0;
@@ -5712,7 +5712,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				ZEND_VM_C_GOTO(num_index_dim);
 			} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 				GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-				key = STR_EMPTY_ALLOC();
+				key = ZSTR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index_dim);
 			} else {
 				zend_error(E_WARNING, "Illegal offset type in unset");
@@ -6594,7 +6594,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			hval = zend_dval_to_lval(Z_DVAL_P(offset));
 			ZEND_VM_C_GOTO(num_index_prop);
 		} else if (Z_TYPE_P(offset) == IS_NULL) {
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index_prop);
 		} else if (Z_TYPE_P(offset) == IS_FALSE) {
 			hval = 0;
@@ -6607,7 +6607,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			ZEND_VM_C_GOTO(num_index_prop);
 		} else if (OP2_TYPE == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			GET_OP2_UNDEF_CV(offset, BP_VAR_R);
-			str = STR_EMPTY_ALLOC();
+			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index_prop);
 		} else {
 			zend_error(E_WARNING, "Illegal offset type in isset or empty");

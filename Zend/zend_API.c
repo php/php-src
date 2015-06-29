@@ -1644,7 +1644,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_symtable_update(ht, Z_STR_P(key), value);
 			break;
 		case IS_NULL:
-			result = zend_symtable_update(ht, STR_EMPTY_ALLOC(), value);
+			result = zend_symtable_update(ht, ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_RESOURCE:
 			zend_error(E_NOTICE, "Resource ID#" ZEND_LONG_FMT " used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
@@ -2833,7 +2833,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	zend_string *lcname;
 	ALLOCA_FLAG(use_heap);
 
-	STR_ALLOCA_ALLOC(lcname, name_len, use_heap);
+	ZSTR_ALLOCA_ALLOC(lcname, name_len, use_heap);
 	zend_str_tolower_copy(lcname->val, name->val, name_len);
 
 	*strict_class = 0;
@@ -2904,7 +2904,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	} else {
 		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, name->val);
 	}
-	STR_ALLOCA_FREE(lcname, use_heap);
+	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	return ret;
 }
 /* }}} */
@@ -2934,7 +2934,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 
 		/* Skip leading \ */
 		if (UNEXPECTED(Z_STRVAL_P(callable)[0] == '\\')) {
-			STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1, use_heap);
+			ZSTR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1, use_heap);
 		} else {
 			lmname = Z_STR_P(callable);
 		}
@@ -2942,23 +2942,23 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		 * This may be a compound name that includes namespace name */
 		if (EXPECTED((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL)) {
 			if (lmname != Z_STR_P(callable)) {
-				STR_ALLOCA_FREE(lmname, use_heap);
+				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
 			return 1;
 		} else {
 			if (lmname == Z_STR_P(callable)) {
-				STR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable), Z_STRLEN_P(callable), use_heap);
+				ZSTR_ALLOCA_INIT(lmname, Z_STRVAL_P(callable), Z_STRLEN_P(callable), use_heap);
 			} else {
 				zend_string_forget_hash_val(lmname);
 			}
 			zend_str_tolower(lmname->val, lmname->len);
 			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
-				STR_ALLOCA_FREE(lmname, use_heap);
+				ZSTR_ALLOCA_FREE(lmname, use_heap);
 				return 1;
 			}
 		}
 		if (lmname != Z_STR_P(callable)) {
-			STR_ALLOCA_FREE(lmname, use_heap);
+			ZSTR_ALLOCA_FREE(lmname, use_heap);
 		}
 	}
 

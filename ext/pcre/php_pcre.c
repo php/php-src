@@ -503,7 +503,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!IS_INTERNED(regex) || !(GC_FLAGS(regex) & IS_STR_PERMANENT)) {
+	if (!ZSTR_IS_INTERNED(regex) || !(GC_FLAGS(regex) & IS_STR_PERMANENT)) {
 		zend_string *str = zend_string_init(regex->val, regex->len, 1);
 		GC_REFCOUNT(str) = 0; /* will be incremented by zend_hash_update_mem() */
 		str->h = regex->h;
@@ -1339,7 +1339,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	uint32_t replace_idx;
 	zend_string	*subject_str = zval_get_string(subject);
 
-	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
+	/* FIXME: This might need to be changed to ZSTR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 	ZVAL_EMPTY_STRING(&empty_replace);
 
 	/* If regex is an array */

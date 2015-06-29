@@ -454,7 +454,7 @@ finish:
 
 			user_headers = estrndup(tmp->val, tmp->len);
 
-			if (IS_INTERNED(tmp)) {
+			if (ZSTR_IS_INTERNED(tmp)) {
 				tmp = zend_string_init(tmp->val, tmp->len, 0);
 			} else if (GC_REFCOUNT(tmp) > 1) {
 				GC_REFCOUNT(tmp)--;

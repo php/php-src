@@ -894,7 +894,7 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_COPY_VALUE(&p->val, zv);
-	if (!IS_INTERNED(key)) {
+	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);		
@@ -916,7 +916,7 @@ static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_PTR(&p->val, ptr);
-	if (!IS_INTERNED(key)) {
+	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);		
@@ -938,7 +938,7 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_INDIRECT(&p->val, ptr);
-	if (!IS_INTERNED(key)) {
+	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);		

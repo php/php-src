@@ -39,7 +39,7 @@
 			zend_string_release(str); \
 			str = new_str; \
 		} else { \
-	    	new_str = zend_accel_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1); \
+	    	new_str = zend_accel_memdup((void*)str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
 			zend_string_release(str); \
 	    	str = new_str; \
 	    	zend_string_hash_val(str); \
@@ -47,7 +47,7 @@
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
-		str = zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1); \
+		str = zend_accel_memdup(str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
     	zend_string_hash_val(str); \
 		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 	} while (0)

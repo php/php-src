@@ -1303,7 +1303,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 				continue;
 			} else {
 				zend_string_free(replaced);
-				return STR_EMPTY_ALLOC();
+				return ZSTR_EMPTY_ALLOC();
 			}
 		} else { /* SUCCESS */
 			mbsequence = &old[cursor_before];

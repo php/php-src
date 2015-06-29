@@ -795,7 +795,7 @@ try_again:
 		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
-			return STR_EMPTY_ALLOC();
+			return ZSTR_EMPTY_ALLOC();
 		case IS_TRUE:
 			return zend_string_init("1", 1, 0);
 		case IS_RESOURCE: {
@@ -830,7 +830,7 @@ try_again:
 				zval_ptr_dtor(z);
 			}
 			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name->val);
-			return STR_EMPTY_ALLOC();
+			return ZSTR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
