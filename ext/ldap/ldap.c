@@ -1961,6 +1961,7 @@ PHP_FUNCTION(ldap_compare)
 	size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
 	int errno;
+	struct berval lvalue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len) != SUCCESS) {
 		return;
@@ -1970,7 +1971,6 @@ PHP_FUNCTION(ldap_compare)
 		RETURN_FALSE;
 	}
 
-	struct berval lvalue;
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
