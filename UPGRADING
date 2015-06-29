@@ -541,7 +541,7 @@ Other
     (RFC: https://wiki.php.net/rfc/generator-delegation)
   . Reserved keywords can now be used in various new contexts.
     (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
-  . Added support for scalar type declatarations and strict mode using
+  . Added support for scalar type declarations and strict mode using
     declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
   . Added support for cryptographically secure user land RNG
     (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
@@ -554,7 +554,7 @@ Other
     at server restart or SHM reset. In addition, it's possibe to use file cache
     without SHM at all, using opcache.file_cache_only=1 (this may be useful for
     sharing hosting), and disable file cache consistency check, to speedup
-    loading in cost of safety, using opcache.file_cache_consistency_checks=0.
+    loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
@@ -603,7 +603,7 @@ Other
   . Added second parameter for unserialize function 
     (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
     acceptable classes: 
-    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
+    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]]);
 
 - proc_open():
   The maximum number of pipes used by proc_open() was previously limited by
@@ -667,7 +667,7 @@ For more details see
 https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
 
-NOTE NSAPI was not voted in the RFC, however it was removed afterwards. It turned
+NOTE: NSAPI was not voted in the RFC, however it was removed afterwards. It turned
 out, that the corresponding SDK isn't available anymore.
 
 ========================================
@@ -745,9 +745,9 @@ out, that the corresponding SDK isn't available anymore.
 
 - Core
   . Instead of being undefined and platform-dependent, NaN and Infinity will
-    always be zero when casted to integer.
-  . Calling a method on a non-object no longer raises a fatal error; see
-    also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object.
+    always be zero when cast to integer.
+  . Calling a method on a non-object now raises a catchable error instead of a
+    fatal error; see: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
   . Error messages for zend_parse_parameters, type hints and conversions now
     always say "integer" and "float" instead of "long" and "double".
   . Output buffering now continues to work for an aborted connection if
