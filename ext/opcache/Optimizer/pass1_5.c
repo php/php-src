@@ -444,9 +444,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
 
-					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL &&
-							func->type == ZEND_INTERNAL_FUNCTION &&
-							func->module->type == MODULE_PERSISTENT) {
+					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL
+						 && func->type == ZEND_INTERNAL_FUNCTION
+						 && func->module->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && func->module->handle == NULL
+#endif
+						) {
 						zval t;
 						if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("is_callable") - 1 ||
 								func->handler != ZEND_FN(display_disabled_function)) {
@@ -483,7 +487,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							ZVAL_FALSE(&t);
 						}
 					} else {
-						if (m->type == MODULE_PERSISTENT) {
+						if (m->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && m->handle == NULL
+#endif
+						) {
 							ZVAL_TRUE(&t);
 						} else {
 							break;
