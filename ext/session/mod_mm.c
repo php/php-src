@@ -375,7 +375,7 @@ PS_READ_FUNC(mm)
 
 	sd = ps_sd_lookup(data, PS(id)->val, 0);
 	if (sd) {
-		*val = zend_string_init(sd->data, sd->datalen, 0);
+		*val = ZSTR_INIT(sd->data, sd->datalen, 0);
 		ret = SUCCESS;
 	}
 
@@ -484,7 +484,7 @@ PS_CREATE_SID_FUNC(mm)
 		/* Check collision */
 		if (ps_mm_key_exists(data, sid->val) == SUCCESS) {
 			if (sid) {
-				zend_string_release(sid);
+				ZSTR_RELEASE(sid);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {

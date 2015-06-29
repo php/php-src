@@ -253,7 +253,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 #endif
 
 
-	cmd = zend_string_alloc(2 * l, 0);
+	cmd = ZSTR_ALLOC(2 * l, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
@@ -326,7 +326,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = zend_string_truncate(cmd, y, 0);
+		cmd = ZSTR_TRUNCATE(cmd, y, 0);
 	}
 
 	cmd->len = y;
@@ -344,7 +344,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	size_t estimate = (4 * l) + 3;
 
 
-	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
+	cmd = ZSTR_ALLOC(4 * l + 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
 	cmd->val[y++] = '"';
@@ -400,7 +400,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = zend_string_truncate(cmd, y, 0);
+		cmd = ZSTR_TRUNCATE(cmd, y, 0);
 	}
 	cmd->len = y;
 	return cmd;

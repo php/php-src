@@ -902,11 +902,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
 			l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
-				zend_string *tmp = zend_string_alloc(l, 0);
+				zend_string *tmp = ZSTR_ALLOC(l, 0);
 				memcpy(tmp->val, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
 			} else {
-				Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
+				Z_STR(ZEND_OP1_LITERAL(last_op)) = ZSTR_EXTEND(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
 			}
 			Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
 			memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
@@ -942,16 +942,16 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			old_len = Z_STRLEN(ZEND_OP2_LITERAL(src));
 			l = old_len + Z_STRLEN(ZEND_OP2_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(src))) {
-				zend_string *tmp = zend_string_alloc(l, 0);
+				zend_string *tmp = ZSTR_ALLOC(l, 0);
 				memcpy(tmp->val, Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
 				Z_STR(ZEND_OP2_LITERAL(last_op)) = tmp;
 			} else {
-				Z_STR(ZEND_OP2_LITERAL(src)) = zend_string_extend(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
+				Z_STR(ZEND_OP2_LITERAL(src)) = ZSTR_EXTEND(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
 			}
 			Z_TYPE_INFO(ZEND_OP2_LITERAL(last_op)) = IS_STRING_EX;
 			memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
-			zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
+			ZSTR_RELEASE(Z_STR(ZEND_OP2_LITERAL(opline)));
 			Z_STR(ZEND_OP2_LITERAL(opline)) = zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src)));
 			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(opline))) {
 				Z_TYPE_FLAGS(ZEND_OP2_LITERAL(opline)) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);

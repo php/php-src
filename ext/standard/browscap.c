@@ -61,7 +61,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		efree(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		ZSTR_RELEASE(Z_STR_P(zvalue));
 	}
 }
 /* }}} */
@@ -71,7 +71,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		ZSTR_RELEASE(Z_STR_P(zvalue));
 	}
 }
 /* }}} */
@@ -83,7 +83,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	zend_string *res;
 	char *lc_pattern;
 
-	res = zend_string_safe_alloc(Z_STRLEN_P(pattern), 2, 4, persistent);
+	res = ZSTR_SAFE_ALLOC(Z_STRLEN_P(pattern), 2, 4, persistent);
 	t = res->val;
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
@@ -167,7 +167,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
-					ZVAL_NEW_STR(&new_property, zend_string_init("1", sizeof("1")-1, persistent));
+					ZVAL_NEW_STR(&new_property, ZSTR_INIT("1", sizeof("1")-1, persistent));
 				} else if (
 					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
@@ -175,14 +175,14 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
 					// TODO: USE ZSTR_EMPTY_ALLOC()?
-					ZVAL_NEW_STR(&new_property, zend_string_init("", sizeof("")-1, persistent));
+					ZVAL_NEW_STR(&new_property, ZSTR_INIT("", sizeof("")-1, persistent));
 				} else { /* Other than true/false setting */
-					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));
+					ZVAL_STR(&new_property, ZSTR_DUP(Z_STR_P(arg2), persistent));
 				}
-				new_key = zend_string_dup(Z_STR_P(arg1), persistent);
+				new_key = ZSTR_DUP(Z_STR_P(arg1), persistent);
 				zend_str_tolower(new_key->val, new_key->len);
 				zend_hash_update(Z_ARRVAL(bdata->current_section), new_key, &new_property);
-				zend_string_release(new_key);
+				ZSTR_RELEASE(new_key);
 			}
 			break;
 		case ZEND_INI_PARSER_SECTION: {
@@ -208,7 +208,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_hash_update(bdata->htab, Z_STR_P(arg1), &bdata->current_section);
 
 				ZVAL_STR(&processed, Z_STR_P(arg1));
-				ZVAL_STR(&unprocessed, zend_string_dup(Z_STR_P(arg1), persistent));
+				ZVAL_STR(&unprocessed, ZSTR_DUP(Z_STR_P(arg1), persistent));
 
 				convert_browscap_pattern(&processed, persistent);
 				zend_hash_str_update(Z_ARRVAL(bdata->current_section), "browser_name_regex", sizeof("browser_name_regex")-1, &processed);

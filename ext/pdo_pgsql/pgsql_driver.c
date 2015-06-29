@@ -66,7 +66,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 static zend_string* _pdo_pgsql_escape_credentials(char *str)
 {
 	if (str) {
-		zend_string *tmp = zend_string_init(str, strlen(str), 0);
+		zend_string *tmp = ZSTR_INIT(str, strlen(str), 0);
 
 		return php_addcslashes(tmp, 1, "\\'", sizeof("\\'"));
 	}
@@ -1231,10 +1231,10 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	H->server = PQconnectdb(conn_str);
 
 	if (tmp_user) {
-		zend_string_release(tmp_user);
+		ZSTR_RELEASE(tmp_user);
 	}
 	if (tmp_pass) {
-		zend_string_release(tmp_pass);
+		ZSTR_RELEASE(tmp_pass);
 	}
 
 	efree(conn_str);

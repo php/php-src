@@ -662,11 +662,11 @@ PHP_FUNCTION(file_put_contents)
 						if (bytes_written != str->len) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
 							ret_ok = 0;
-							zend_string_release(str);
+							ZSTR_RELEASE(str);
 							break;
 						}
 					}
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
@@ -787,7 +787,7 @@ parse_eol:
 	}
 
 	if (target_buf) {
-		zend_string_free(target_buf);
+		ZSTR_FREE(target_buf);
 	}
 	php_stream_close(stream);
 }
@@ -822,7 +822,7 @@ PHP_FUNCTION(tempnam)
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
-	zend_string_release(p);
+	ZSTR_RELEASE(p);
 }
 /* }}} */
 
@@ -1777,7 +1777,7 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_NEW_STR(return_value, zend_string_alloc(len, 0));
+	ZVAL_NEW_STR(return_value, ZSTR_ALLOC(len, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/
@@ -1932,7 +1932,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		zend_string_release(field_str);
+		ZSTR_RELEASE(field_str);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');

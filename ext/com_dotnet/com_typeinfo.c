@@ -186,7 +186,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				}
 
 				const_name = php_com_olestring_to_string(bstr_ids, &len, codepage);
-				c.name = zend_string_init(const_name, len, 1);
+				c.name = ZSTR_INIT(const_name, len, 1);
 				// TODO: avoid reallocation???
 				efree(const_name);
 				if(c.name == NULL) {
@@ -201,7 +201,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, exists)) {
 						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", c.name);
 					}
-					zend_string_release(c.name);
+					ZSTR_RELEASE(c.name);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}

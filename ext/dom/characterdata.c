@@ -110,7 +110,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return SUCCESS;
 }
 

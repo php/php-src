@@ -81,7 +81,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 						}
 					}
 					asprintf(&decode, "\"%.*s\"%c", str->len <= 18 ? (int) str->len : 17, str->val, str->len <= 18 ? 0 : '+');
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 					} break;
 				case IS_RESOURCE:
 					asprintf(&decode, "Rsrc #%d", Z_RES_HANDLE_P(literal));

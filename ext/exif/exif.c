@@ -3882,7 +3882,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0);
 	ImageInfo->FileName          = estrndup(base->val, base->len);
-	zend_string_release(base);
+	ZSTR_RELEASE(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;

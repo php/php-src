@@ -96,7 +96,7 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	zend_hash_destroy(&persistent_script->class_table);
 
 	if (persistent_script->full_path) {
-		zend_string_release(persistent_script->full_path);
+		ZSTR_RELEASE(persistent_script->full_path);
 	}
 
 	efree(persistent_script);
@@ -717,7 +717,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			if (!zend_hash_exists(EG(zend_constants), name)) {
 				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0);
 			}
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));

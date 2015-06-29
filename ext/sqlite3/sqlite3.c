@@ -909,10 +909,10 @@ PHP_METHOD(sqlite3, createFunction)
 
 	if (!zend_is_callable(callback_func, 0, &callback_name)) {
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
-		zend_string_release(callback_name);
+		ZSTR_RELEASE(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
+	ZSTR_RELEASE(callback_name);
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
 
@@ -959,17 +959,17 @@ PHP_METHOD(sqlite3, createAggregate)
 
 	if (!zend_is_callable(step_callback, 0, &callback_name)) {
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
-		zend_string_release(callback_name);
+		ZSTR_RELEASE(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
+	ZSTR_RELEASE(callback_name);
 
 	if (!zend_is_callable(fini_callback, 0, &callback_name)) {
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
-		zend_string_release(callback_name);
+		ZSTR_RELEASE(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
+	ZSTR_RELEASE(callback_name);
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
 
@@ -1016,10 +1016,10 @@ PHP_METHOD(sqlite3, createCollation)
 
 	if (!zend_is_callable(callback_func, 0, &callback_name)) {
 		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
-		zend_string_release(callback_name);
+		ZSTR_RELEASE(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
+	ZSTR_RELEASE(callback_name);
 
 	collation = (php_sqlite3_collation *)ecalloc(1, sizeof(*collation));
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
@@ -1362,19 +1362,19 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	if (param->name) {
 		if (param->name->val[0] != ':') {
 			/* pre-increment for character + 1 for null */
-			zend_string *temp = zend_string_alloc(param->name->len + 1, 0);
+			zend_string *temp = ZSTR_ALLOC(param->name->len + 1, 0);
 			temp->val[0] = ':';
 			memmove(temp->val + 1, param->name->val, param->name->len + 1);
 			param->name = temp;
 		} else {
-			param->name = zend_string_init(param->name->val, param->name->len, 0);
+			param->name = ZSTR_INIT(param->name->val, param->name->len, 0);
 		}
 		/* do lookup*/
 		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, param->name->val);
 	}
 
 	if (param->param_number < 1) {
-		zend_string_release(param->name);
+		ZSTR_RELEASE(param->name);
 		return 0;
 	}
 
@@ -1530,7 +1530,7 @@ PHP_METHOD(sqlite3stmt, execute)
 					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, buffer->val, buffer->len, SQLITE_TRANSIENT);
 
 					if (stream) {
-						zend_string_release(buffer);
+						ZSTR_RELEASE(buffer);
 					}
 					break;
 				}
@@ -2170,7 +2170,7 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 	struct php_sqlite3_bound_param *param = (struct php_sqlite3_bound_param*)Z_PTR_P(data);
 
 	if (param->name) {
-		zend_string_release(param->name);
+		ZSTR_RELEASE(param->name);
 	}
 
 	if (!Z_ISNULL(param->parameter)) {

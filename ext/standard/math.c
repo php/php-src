@@ -1094,7 +1094,7 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 		value /= base;
 	} while (ptr > buf && value);
 
-	return zend_string_init(ptr, end - ptr, 0);
+	return ZSTR_INIT(ptr, end - ptr, 0);
 }
 /* }}} */
 
@@ -1130,7 +1130,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 			fvalue /= base;
 		} while (ptr > buf && fabs(fvalue) >= 1);
 
-		return zend_string_init(ptr, end - ptr, 0);
+		return ZSTR_INIT(ptr, end - ptr, 0);
 	}
 
 	return _php_math_longtobase(arg, base);
@@ -1330,7 +1330,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	if (is_negative) {
 		reslen++;
 	}
-	res = zend_string_alloc(reslen, 0);
+	res = ZSTR_ALLOC(reslen, 0);
 
 	s = tmpbuf->val + tmpbuf->len - 1;
 	t = res->val + reslen;
@@ -1379,7 +1379,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 
 	res->len = reslen;
-	zend_string_release(tmpbuf);
+	ZSTR_RELEASE(tmpbuf);
 	return res;
 }
 

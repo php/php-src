@@ -1349,20 +1349,20 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 				(*pphar)->is_writeable = 1;
 			}
 			if (actual) {
-				zend_string_release(actual);
+				ZSTR_RELEASE(actual);
 			}
 			return SUCCESS;
 		} else {
 			/* file exists, but is either corrupt or not a phar archive */
 			if (actual) {
-				zend_string_release(actual);
+				ZSTR_RELEASE(actual);
 			}
 			return FAILURE;
 		}
 	}
 
 	if (actual) {
-		zend_string_release(actual);
+		ZSTR_RELEASE(actual);
 	}
 
 	if (PHAR_G(readonly) && !is_data) {
@@ -1508,7 +1508,7 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 			}
 		}
 		if (actual) {
-			zend_string_release(actual);
+			ZSTR_RELEASE(actual);
 		}
 		return FAILURE;
 	}
@@ -1521,7 +1521,7 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error);
 
 	if (actual) {
-		zend_string_release(actual);
+		ZSTR_RELEASE(actual);
 	}
 
 	return ret;
@@ -2297,7 +2297,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
 		}
 		if (actual) {
-			zend_string_release(actual);
+			ZSTR_RELEASE(actual);
 		}
 		return FAILURE;
 	}
@@ -2310,7 +2310,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
-		zend_string_release(actual);
+		ZSTR_RELEASE(actual);
 	}
 
 	return ret;
@@ -2598,7 +2598,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "illegal stub for phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				zend_string_free(suser_stub);
+				ZSTR_FREE(suser_stub);
 			}
 			return EOF;
 		}
@@ -2615,13 +2615,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				zend_string_free(suser_stub);
+				ZSTR_FREE(suser_stub);
 			}
 			return EOF;
 		}
 		phar->halt_offset = len + 5;
 		if (free_user_stub) {
-			zend_string_free(suser_stub);
+			ZSTR_FREE(suser_stub);
 		}
 	} else {
 		size_t written;

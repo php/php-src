@@ -278,7 +278,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 		PHPDBG_BREAK_MAPPING(new_break.id, broken);
 
 		if (pending) {
-			zend_string *file, *path_str = zend_string_init(path, path_len, 0);
+			zend_string *file, *path_str = ZSTR_INIT(path, path_len, 0);
 			ZEND_HASH_FOREACH_STR_KEY(&PHPDBG_G(file_sources), file) {
 				HashTable *fileht;
 
@@ -289,7 +289,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
-			zend_string_release(path_str);
+			ZSTR_RELEASE(path_str);
 		}
 
 		if (pending) {
@@ -783,7 +783,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	new_break.code = estrndup(expr, expr_len);
 	new_break.code_len = expr_len;
 
-	Z_STR(pv) = zend_string_alloc(expr_len + sizeof("return ;") - 1, 0);
+	Z_STR(pv) = ZSTR_ALLOC(expr_len + sizeof("return ;") - 1, 0);
 	memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 	memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
 	Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';

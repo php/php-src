@@ -1749,7 +1749,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = zend_string_init(stats_header->message, stats_header->message_len, 0);
+				*message = ZSTR_INIT(stats_header->message, stats_header->message_len, 0);
 				DBG_INF((*message)->val);
 			}
 			PACKET_FREE(stats_header);
@@ -2495,7 +2495,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
+				ZVAL_NEW_STR(&attrz, ZSTR_INIT(value, strlen(value), 1));
 				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;

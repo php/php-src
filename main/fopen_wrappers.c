@@ -342,7 +342,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, z
 		//TODO :avoid reallocation
 		char *tmp = expand_filepath_with_mode(path, NULL, NULL, 0, CWD_EXPAND);
 		if (tmp) {
-			*opened_path = zend_string_init(tmp, strlen(tmp), 0);
+			*opened_path = ZSTR_INIT(tmp, strlen(tmp), 0);
 			efree(tmp);
 		}
 	}
@@ -443,7 +443,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		}
 		return FAILURE;
 	}
-	zend_string_release(resolved_path);
+	ZSTR_RELEASE(resolved_path);
 
 	orig_display_errors = PG(display_errors);
 	PG(display_errors) = 0;
@@ -495,7 +495,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 		wrapper = php_stream_locate_url_wrapper(filename, &actual_path, STREAM_OPEN_FOR_INCLUDE);
 		if (wrapper == &php_plain_files_wrapper) {
 			if (tsrm_realpath(actual_path, resolved_path)) {
-				return zend_string_init(resolved_path, strlen(resolved_path), 0);
+				return ZSTR_INIT(resolved_path, strlen(resolved_path), 0);
 			}
 		}
 		return NULL;
@@ -508,7 +508,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	    !path ||
 	    !*path) {
 		if (tsrm_realpath(filename, resolved_path)) {
-			return zend_string_init(resolved_path, strlen(resolved_path), 0);
+			return ZSTR_INIT(resolved_path, strlen(resolved_path), 0);
 		} else {
 			return NULL;
 		}
@@ -558,14 +558,14 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 					php_stream_statbuf ssb;
 
 					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
-						return zend_string_init(trypath, strlen(trypath), 0);
+						return ZSTR_INIT(trypath, strlen(trypath), 0);
 					}
 				}
 				continue;
 			}
 		}
 		if (tsrm_realpath(actual_path, resolved_path)) {
-			return zend_string_init(resolved_path, strlen(resolved_path), 0);
+			return ZSTR_INIT(resolved_path, strlen(resolved_path), 0);
 		}
 	} /* end provided path */
 
@@ -594,7 +594,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 						php_stream_statbuf ssb;
 
 						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
-							return zend_string_init(trypath, strlen(trypath), 0);
+							return ZSTR_INIT(trypath, strlen(trypath), 0);
 						}
 					}
 					return NULL;
@@ -602,7 +602,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 			}
 
 			if (tsrm_realpath(actual_path, resolved_path)) {
-				return zend_string_init(resolved_path, strlen(resolved_path), 0);
+				return ZSTR_INIT(resolved_path, strlen(resolved_path), 0);
 			}
 		}
 	}

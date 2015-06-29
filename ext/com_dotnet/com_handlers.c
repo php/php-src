@@ -238,7 +238,7 @@ static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
 
-	zend_string_release(f->function_name);
+	ZSTR_RELEASE(f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -277,7 +277,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		f.function_name = zend_string_copy(name);
+		f.function_name = ZSTR_COPY(name);
 		f.handler = PHP_FN(com_method_handler);
 		zend_set_function_arg_flags((zend_function*)&f);
 
@@ -428,7 +428,7 @@ static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
-	return zend_string_copy(obj->ce->name);
+	return ZSTR_COPY(obj->ce->name);
 }
 
 /* This compares two variants for equality */

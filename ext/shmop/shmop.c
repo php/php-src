@@ -254,7 +254,7 @@ PHP_FUNCTION(shmop_read)
 	startaddr = shmop->addr + start;
 	bytes = count ? count : shmop->size - start;
 
-	return_string = zend_string_init(startaddr, bytes, 0);
+	return_string = ZSTR_INIT(startaddr, bytes, 0);
 
 	RETURN_NEW_STR(return_string);
 }

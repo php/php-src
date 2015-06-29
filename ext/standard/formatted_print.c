@@ -61,7 +61,7 @@ php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
 	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(), (*buffer)->len));
-		*buffer = zend_string_extend(*buffer, (*buffer)->len << 1, 0);
+		*buffer = ZSTR_EXTEND(*buffer, (*buffer)->len << 1, 0);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	(*buffer)->val[(*pos)++] = add;
@@ -101,7 +101,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 			size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %d bytes\n", size));
-		*buffer = zend_string_extend(*buffer, size, 0);
+		*buffer = ZSTR_EXTEND(*buffer, size, 0);
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {
@@ -438,7 +438,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 
 	format = Z_STRVAL(args[format_offset]);
 	format_len = Z_STRLEN(args[format_offset]);
-	result = zend_string_alloc(size, 0);
+	result = ZSTR_ALLOC(size, 0);
 
 	currarg = 1;
 
@@ -584,7 +584,7 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 											 alignment,
 											 str->len,
 											 0, expprec, 0);
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 					break;
 				}
 
@@ -707,7 +707,7 @@ PHP_FUNCTION(user_printf)
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
-	zend_string_free(result);
+	ZSTR_FREE(result);
 	RETURN_LONG(rlen);
 }
 /* }}} */
@@ -723,7 +723,7 @@ PHP_FUNCTION(vprintf)
 		RETURN_FALSE;
 	}
 	rlen = PHPWRITE(result->val, result->len);
-	zend_string_free(result);
+	ZSTR_FREE(result);
 	RETURN_LONG(rlen);
 }
 /* }}} */
@@ -753,7 +753,7 @@ PHP_FUNCTION(fprintf)
 	php_stream_write(stream, result->val, result->len);
 
 	RETVAL_LONG(result->len);
-	zend_string_free(result);
+	ZSTR_FREE(result);
 }
 /* }}} */
 
@@ -782,7 +782,7 @@ PHP_FUNCTION(vfprintf)
 	php_stream_write(stream, result->val, result->len);
 
 	RETVAL_LONG(result->len);
-	zend_string_free(result);
+	ZSTR_FREE(result);
 }
 /* }}} */
 

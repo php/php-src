@@ -166,7 +166,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			out = php_md5_crypt_r(password, salt, output);
 			if (out) {
-				return zend_string_init(out, strlen(out), 0);
+				return ZSTR_INIT(out, strlen(out), 0);
 			}
 			return NULL;
 		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
@@ -179,7 +179,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				efree(output);
 				return NULL;
 			} else {
-				result = zend_string_init(output, strlen(output), 0);
+				result = ZSTR_INIT(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
@@ -194,7 +194,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				efree(output);
 				return NULL;
 			} else {
-				result = zend_string_init(output, strlen(output), 0);
+				result = ZSTR_INIT(output, strlen(output), 0);
 				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return result;
@@ -212,7 +212,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return NULL;
 			} else {
-				result = zend_string_init(output, strlen(output), 0);
+				result = ZSTR_INIT(output, strlen(output), 0);
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
@@ -239,7 +239,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 				return NULL;
 			} else {
-				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
+				result = ZSTR_INIT(crypt_res, strlen(crypt_res), 0);
 				return result;
 			}
 		}
@@ -266,7 +266,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 			return NULL;
 		} else {
-			result = zend_string_init(crypt_res, strlen(crypt_res), 0);
+			result = ZSTR_INIT(crypt_res, strlen(crypt_res), 0);
 			return result;
 		}
 	}

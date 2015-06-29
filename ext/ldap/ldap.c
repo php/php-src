@@ -2633,10 +2633,10 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	/* callable? */
 	if (!zend_is_callable(callback, 0, &callback_name)) {
 		php_error_docref(NULL, E_WARNING, "Two arguments expected for '%s' to be a valid callback", callback_name->val);
-		zend_string_release(callback_name);
+		ZSTR_RELEASE(callback_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(callback_name);
+	ZSTR_RELEASE(callback_name);
 
 	/* register rebind procedure */
 	if (Z_ISUNDEF(ld->rebindproc)) {

@@ -140,14 +140,14 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UIDNA		  *uts46;
 	int32_t		  len;
 	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
+	zend_string	  *buffer = ZSTR_ALLOC(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
 			mode) == FAILURE) {
-		zend_string_free(buffer);
+		ZSTR_FREE(buffer);
 		RETURN_FALSE;
 	}
 
@@ -161,7 +161,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode) == FAILURE) {
 		uidna_close(uts46);
-		zend_string_free(buffer);
+		ZSTR_FREE(buffer);
 		RETURN_FALSE;
 	}
 	if (len >= 255) {
@@ -194,7 +194,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (!buffer_used) {
-		zend_string_free(buffer);
+		ZSTR_FREE(buffer);
 	}
 
 	uidna_close(uts46);

@@ -262,7 +262,7 @@ static zend_always_inline double _zval_get_double(zval *op) {
 	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op);
 }
 static zend_always_inline zend_string *_zval_get_string(zval *op) {
-	return Z_TYPE_P(op) == IS_STRING ? zend_string_copy(Z_STR_P(op)) : _zval_get_string_func(op);
+	return Z_TYPE_P(op) == IS_STRING ? ZSTR_COPY(Z_STR_P(op)) : _zval_get_string_func(op);
 }
 
 #define zval_get_long(op) _zval_get_long((op))

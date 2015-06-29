@@ -575,7 +575,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
 	*buffer = (unsigned char *) estrndup(buf.s->val, buf.s->len);
 	*buf_len = buf.s->len;
-	zend_string_release(buf.s);
+	ZSTR_RELEASE(buf.s);
 
 	return SUCCESS;
 }
@@ -759,7 +759,7 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 		num_len++;
 	}
 
-	str = zend_string_alloc(num_len, 0);
+	str = ZSTR_ALLOC(num_len, 0);
 	mpz_get_str(str->val, base, gmpnum);
 
 	/*
@@ -1148,7 +1148,7 @@ ZEND_FUNCTION(gmp_export)
 		size_t count = (mpz_sizeinbase(gmpnumber, 2) + bits_per_word - 1) / bits_per_word;
 		size_t out_len = count * size;
 
-		zend_string *out_string = zend_string_alloc(out_len, 0);
+		zend_string *out_string = ZSTR_ALLOC(out_len, 0);
 		mpz_export(out_string->val, NULL, order, size, endian, 0, gmpnumber);
 		out_string->val[out_len] = '\0';
 

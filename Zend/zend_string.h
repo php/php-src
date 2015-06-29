@@ -43,7 +43,7 @@ END_EXTERN_C()
 #define STR_ALLOCA_ALLOC(str, _len, use_heap)	ZSTR_ALLOCA_ALLOC(str, _len, use_heap)
 #define STR_ALLOCA_INIT(str, s, len, use_heap)	ZSTR_ALLOCA_INIT(str, s, len, use_heap)
 #define STR_ALLOCA_FREE(str, use_heap)			ZSTR_ALLOCA_FREE(str, use_heap)
-#define zend_string_hash_val(zstr)				ZSTR_HASH(zstr) 
+#define ZSTR_HASH(zstr)				ZSTR_HASH(zstr) 
 #define zend_string_forget_hash_val(zstr)		ZSTR_FORGET_HASH(zstr) 
 #define zend_string_refcount(zstr)				ZSTR_REFCOUNT(zstr)
 #define zend_string_addref(zstr)				ZSTR_INC_REFCOUNT(zstr)
@@ -417,7 +417,7 @@ static zend_always_inline void zend_interned_empty_string_init(zend_string **s)
 #ifndef ZTS
 	*s = zend_new_interned_string(str);
 #else
-	zend_string_hash_val(str);
+	ZSTR_HASH(str);
 	GC_FLAGS(str) |= IS_STR_INTERNED;
 	*s = str;
 #endif

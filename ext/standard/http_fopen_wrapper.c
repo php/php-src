@@ -230,7 +230,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (errstr) {
 		php_stream_wrapper_log_error(wrapper, options, "%s", errstr->val);
-		zend_string_release(errstr);
+		ZSTR_RELEASE(errstr);
 		errstr = NULL;
 	}
 
@@ -455,10 +455,10 @@ finish:
 			user_headers = estrndup(tmp->val, tmp->len);
 
 			if (ZSTR_IS_INTERNED(tmp)) {
-				tmp = zend_string_init(tmp->val, tmp->len, 0);
+				tmp = ZSTR_INIT(tmp->val, tmp->len, 0);
 			} else if (GC_REFCOUNT(tmp) > 1) {
 				GC_REFCOUNT(tmp)--;
-				tmp = zend_string_init(tmp->val, tmp->len, 0);
+				tmp = ZSTR_INIT(tmp->val, tmp->len, 0);
 			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
@@ -530,7 +530,7 @@ finish:
 
 		}
 		if (tmp) {
-			zend_string_release(tmp);
+			ZSTR_RELEASE(tmp);
 		}
 	}
 
@@ -557,7 +557,7 @@ finish:
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 		}
 
-		zend_string_free(stmp);
+		ZSTR_FREE(stmp);
 	}
 
 	/* if the user has configured who they are, send a From: line */

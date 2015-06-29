@@ -553,13 +553,13 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 				"address", addr_str->val);
 	}
 
-	zend_string_release(addr_str);
+	ZSTR_RELEASE(addr_str);
 }
 static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 {
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
-	zend_string *str = zend_string_alloc(size - 1, 0);
+	zend_string *str = ZSTR_ALLOC(size - 1, 0);
 	memset(str->val, '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
@@ -603,13 +603,13 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 				"address", Z_STRVAL_P(zaddr_str));
 	}
 
-	zend_string_release(addr_str);
+	ZSTR_RELEASE(addr_str);
 }
 static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 {
 	const struct in6_addr *addr = (const struct in6_addr *)data;
 	socklen_t size = INET6_ADDRSTRLEN;
-	zend_string *str = zend_string_alloc(size - 1, 0);
+	zend_string *str = ZSTR_ALLOC(size - 1, 0);
 
 	memset(str->val, '\0', size);
 
@@ -663,7 +663,7 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	memcpy(&saddr->sun_path, path_str->val, path_str->len);
 	saddr->sun_path[path_str->len] = '\0';
 
-	zend_string_release(path_str);
+	ZSTR_RELEASE(path_str);
 }
 static void to_zval_read_sun_path(const char *data, zval *zv, res_context *ctx) {
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)data;
@@ -1205,7 +1205,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	for (i = 0; bytes_left > 0 && i < (uint)iovlen; i++) {
 		zval elem;
 		size_t len = MIN(msghdr->msg_iov[i].iov_len, (size_t)bytes_left);
-		zend_string	*buf = zend_string_alloc(len, 0);
+		zend_string	*buf = ZSTR_ALLOC(len, 0);
 
 		memcpy(buf->val, msghdr->msg_iov[i].iov_base, buf->len);
 		buf->val[buf->len] = '\0';
@@ -1277,7 +1277,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 				"name, an integer interface index must be supplied instead");
 #endif
 
-		zend_string_release(str);
+		ZSTR_RELEASE(str);
 	}
 
 	if (!ctx->err.has_error) {

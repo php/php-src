@@ -482,7 +482,7 @@ yy66:
 			ZVAL_EMPTY_STRING(&s->value);
 			return PHP_JSON_T_ESTRING;
 		}
-		str = zend_string_alloc(len, 0);
+		str = ZSTR_ALLOC(len, 0);
 		str->val[len] = '\0';
 		ZVAL_STR(&s->value, str);
 		if (s->str_esc) {

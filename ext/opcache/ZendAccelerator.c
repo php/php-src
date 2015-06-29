@@ -163,12 +163,12 @@ static ZEND_FUNCTION(accel_chdir)
 	orig_chdir(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		if (ZCG(cwd)) {
-			zend_string_release(ZCG(cwd));
+			ZSTR_RELEASE(ZCG(cwd));
 		}
-		ZCG(cwd) = zend_string_init(cwd, strlen(cwd), 0);
+		ZCG(cwd) = ZSTR_INIT(cwd, strlen(cwd), 0);
 	} else {
 		if (ZCG(cwd)) {
-			zend_string_release(ZCG(cwd));
+			ZSTR_RELEASE(ZCG(cwd));
 			ZCG(cwd) = NULL;
 		}
 	}
@@ -186,7 +186,7 @@ static inline zend_string* accel_getcwd(void)
 		if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			return NULL;
 		}
-		ZCG(cwd) = zend_string_init(cwd, strlen(cwd), 0);
+		ZCG(cwd) = ZSTR_INIT(cwd, strlen(cwd), 0);
 		ZCG(cwd_key_len) = 0;
 		ZCG(cwd_check) = 1;
 		return ZCG(cwd);
@@ -287,7 +287,7 @@ static zend_string *accel_find_interned_string(zend_string *str)
 		return str;
 	}
 
-	h = zend_string_hash_val(str);
+	h = ZSTR_HASH(str);
 	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
@@ -327,7 +327,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 		return str;
 	}
 
-	h = zend_string_hash_val(str);
+	h = ZSTR_HASH(str);
 	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
@@ -336,7 +336,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 		p = HT_HASH_TO_BUCKET(&ZCSG(interned_strings), idx);
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				return p->key;
 			}
 		}
@@ -372,7 +372,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	ZVAL_INTERNED_STR(&p->val, p->key);
 	Z_NEXT(p->val) = HT_HASH(&ZCSG(interned_strings), nIndex);
 	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return p->key;
 #else
 	return str;
@@ -392,7 +392,7 @@ static void accel_use_shm_interned_strings(void)
 		char s[2];
 		s[0] = j;
 		s[1] = 0;
-		CG(one_char_string)[j] = accel_new_interned_string(zend_string_init(s, 1, 0));
+		CG(one_char_string)[j] = accel_new_interned_string(ZSTR_INIT(s, 1, 0));
 	}
 
 	/* function table hash keys */
@@ -478,7 +478,7 @@ static void accel_use_shm_interned_strings(void)
 
 		auto_global = (zend_auto_global*)Z_PTR(p->val);;
 
-		zend_string_addref(auto_global->name);
+		ZSTR_INC_REFCOUNT(auto_global->name);
 		auto_global->name = accel_new_interned_string(auto_global->name);
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);
@@ -857,7 +857,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 		    persistent_script->full_path != full_path_ptr &&
 		    (persistent_script->full_path->len != full_path_ptr->len ||
 		     memcmp(persistent_script->full_path->val, full_path_ptr->val, full_path_ptr->len) != 0)) {
-			zend_string_release(full_path_ptr);
+			ZSTR_RELEASE(full_path_ptr);
 			return FAILURE;
 		}
 		file_handle->opened_path = full_path_ptr;
@@ -865,7 +865,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 	if (persistent_script->timestamp == 0) {
 		if (full_path_ptr) {
-			zend_string_release(full_path_ptr);
+			ZSTR_RELEASE(full_path_ptr);
 			file_handle->opened_path = NULL;
 		}
 		return FAILURE;
@@ -873,13 +873,13 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 	if (zend_get_file_handle_timestamp(file_handle, NULL) == persistent_script->timestamp) {
 		if (full_path_ptr) {
-			zend_string_release(full_path_ptr);
+			ZSTR_RELEASE(full_path_ptr);
 			file_handle->opened_path = NULL;
 		}
 		return SUCCESS;
 	}
 	if (full_path_ptr) {
-		zend_string_release(full_path_ptr);
+		ZSTR_RELEASE(full_path_ptr);
 		file_handle->opened_path = NULL;
 	}
 
@@ -952,7 +952,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					if (!str) {
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
-						str = accel_new_interned_string(zend_string_copy(cwd_str));
+						str = accel_new_interned_string(ZSTR_COPY(cwd_str));
 						if (str == cwd_str) {
 							str = NULL;
 						}
@@ -991,7 +991,7 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 					if (!str) {
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
-						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
+						str = accel_new_interned_string(ZSTR_COPY(ZCG(include_path)));
 						if (str == ZCG(include_path)) {
 							str = NULL;
 						}
@@ -1073,7 +1073,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 			realpath = accelerator_orig_zend_resolve_path(filename, filename_len);
 			if (realpath) {
 				zend_file_cache_invalidate(realpath);
-				zend_string_release(realpath);
+				ZSTR_RELEASE(realpath);
 			}
 		}
 #endif
@@ -1121,7 +1121,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 	}
 
 	accelerator_shm_read_unlock();
-	zend_string_release(realpath);
+	ZSTR_RELEASE(realpath);
 
 	return SUCCESS;
 }
@@ -1384,8 +1384,8 @@ static void zend_accel_init_auto_globals(void)
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
 
 	for (i = 0; i < ag_size ; i++) {
-		jit_auto_globals_str[i] = zend_string_init(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
-		zend_string_hash_val(jit_auto_globals_str[i]);
+		jit_auto_globals_str[i] = ZSTR_INIT(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
+		ZSTR_HASH(jit_auto_globals_str[i]);
 		jit_auto_globals_str[i] = accel_new_interned_string(jit_auto_globals_str[i]);
 	}
 }
@@ -1528,11 +1528,11 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	}
 
 	if (file_handle->opened_path) {
-		new_persistent_script->full_path = zend_string_copy(file_handle->opened_path);
+		new_persistent_script->full_path = ZSTR_COPY(file_handle->opened_path);
 	} else {
-		new_persistent_script->full_path = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
+		new_persistent_script->full_path = ZSTR_INIT(file_handle->filename, strlen(file_handle->filename), 0);
 	}
-	zend_string_hash_val(new_persistent_script->full_path);
+	ZSTR_HASH(new_persistent_script->full_path);
 
 	/* Now persistent_script structure is ready in process memory */
 	return new_persistent_script;
@@ -1868,7 +1868,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 			/* we are in include_once or FastCGI request */
 			handle->filename = (char*)filename;
 			handle->free_filename = 0;
-			handle->opened_path = zend_string_copy(ZCG(cache_persistent_script)->full_path);
+			handle->opened_path = ZSTR_COPY(ZCG(cache_persistent_script)->full_path);
 			handle->type = ZEND_HANDLE_FILENAME;
 			return SUCCESS;
 		}
@@ -1910,7 +1910,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 						if (!persistent_script->corrupted) {
 							ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 							ZCG(cache_persistent_script) = persistent_script;
-							return zend_string_copy(persistent_script->full_path);
+							return ZSTR_COPY(persistent_script->full_path);
 						}
 					}
 				} else {
@@ -2296,7 +2296,7 @@ static void accel_deactivate(void)
 #endif
 
 	if (ZCG(cwd)) {
-		zend_string_release(ZCG(cwd));
+		ZSTR_RELEASE(ZCG(cwd));
 		ZCG(cwd) = NULL;
 	}
 

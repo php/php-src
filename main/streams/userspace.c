@@ -385,7 +385,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* if the opened path is set, copy it out */
 		if (Z_ISREF(args[3]) && Z_TYPE_P(Z_REFVAL(args[3])) == IS_STRING && opened_path) {
-			*opened_path = zend_string_copy(Z_STR_P(Z_REFVAL(args[3])));
+			*opened_path = ZSTR_COPY(Z_STR_P(Z_REFVAL(args[3])));
 		}
 
 		/* set wrapper data to be a reference to our object */

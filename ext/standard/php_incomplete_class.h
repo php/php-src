@@ -31,15 +31,15 @@
 	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
 		class_name = php_lookup_class_name(struc); \
 		if (!class_name) { \
-			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
+			class_name = ZSTR_INIT(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
 		incomplete_class = 1; \
 	} else { \
-		class_name = zend_string_copy(Z_OBJCE_P(struc)->name); \
+		class_name = ZSTR_COPY(Z_OBJCE_P(struc)->name); \
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	zend_string_release(class_name)
+	ZSTR_RELEASE(class_name)
 
 #define PHP_CLASS_ATTRIBUTES											\
 	zend_string *class_name;											\

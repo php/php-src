@@ -34,7 +34,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				break;
 			}
 		case IS_ARRAY: {
@@ -91,7 +91,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
-				zend_string_free(str);
+				ZSTR_FREE(str);
 				break;
 			}
 		case IS_ARRAY: {
@@ -141,7 +141,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			zend_string_release(Z_STR_P(zvalue));
+			ZSTR_RELEASE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_AST:
@@ -172,7 +172,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			zend_string_free(Z_STR_P(zvalue));
+			ZSTR_FREE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_AST:
@@ -230,7 +230,7 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING) ||
 	           EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
+		Z_STR_P(zvalue) = ZSTR_DUP(Z_STR_P(zvalue), 0);
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
 		zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
 

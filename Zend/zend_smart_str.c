@@ -38,7 +38,7 @@ ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
 		str->a = len < SMART_STR_START_SIZE
 				? SMART_STR_START_SIZE
 				: SMART_STR_NEW_SIZE(len);
-		str->s = zend_string_alloc(str->a, 0);
+		str->s = ZSTR_ALLOC(str->a, 0);
 		str->s->len = 0;
 	} else {
 		str->a = SMART_STR_NEW_SIZE(len);
@@ -52,7 +52,7 @@ ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 		str->a = len < SMART_STR_START_SIZE
 				? SMART_STR_START_SIZE
 				: SMART_STR_NEW_SIZE(len);
-		str->s = zend_string_alloc(str->a, 1);
+		str->s = ZSTR_ALLOC(str->a, 1);
 		str->s->len = 0;
 	} else {
 		str->a = SMART_STR_NEW_SIZE(len);

@@ -612,13 +612,13 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	sregexp = zend_string_init(regexp, sizeof(regexp) - 1, 0);
+	sregexp = ZSTR_INIT(regexp, sizeof(regexp) - 1, 0);
 	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options);
 	if (!re) {
-		zend_string_release(sregexp);
+		ZSTR_RELEASE(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	zend_string_release(sregexp);
+	ZSTR_RELEASE(sregexp);
 	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */

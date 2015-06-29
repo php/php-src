@@ -568,7 +568,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 	if (n == 0) {
 		if (errstr) {
 			php_error_docref(NULL, E_WARNING, "Failed to resolve `%s': %s", tmp, errstr->val);
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 		goto out;
 	}
@@ -650,10 +650,10 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 					if (ua->sun_path[0] == '\0') {
 						/* abstract name */
 						int len = strlen(ua->sun_path + 1) + 1;
-						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
+						*textaddr = ZSTR_INIT((char*)ua->sun_path, len, 0);
 					} else {
 						int len = strlen(ua->sun_path);
-						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
+						*textaddr = ZSTR_INIT((char*)ua->sun_path, len, 0);
 					}
 				}
 				break;
@@ -885,7 +885,7 @@ skip_bind:
 			}
 			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
-				zend_string_release(*error_string);
+				ZSTR_RELEASE(*error_string);
 				*error_string = NULL;
 			}
 
@@ -1055,7 +1055,7 @@ PHPAPI zend_string *php_socket_error_str(long err)
 	char *errstr;
 
 	errstr = strerror(err);
-	return zend_string_init(errstr, strlen(errstr), 0);
+	return ZSTR_INIT(errstr, strlen(errstr), 0);
 #else
 	zend_string *ret;
 	char *sysbuf;
@@ -1075,7 +1075,7 @@ PHPAPI zend_string *php_socket_error_str(long err)
 		sysbuf = "Unknown Error";
 	}
 
-	ret = zend_string_init(sysbuf, strlen(sysbuf), 0);
+	ret = ZSTR_INIT(sysbuf, strlen(sysbuf), 0);
 
 	if (free_it) {
 		LocalFree(sysbuf);

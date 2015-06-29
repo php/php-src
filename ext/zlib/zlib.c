@@ -348,7 +348,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 	Z.zfree = php_zlib_free;
 
 	if (Z_OK == (status = deflateInit2(&Z, level, Z_DEFLATED, encoding, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
-		out = zend_string_alloc(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
+		out = ZSTR_ALLOC(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
 
 		Z.next_in = (Bytef *) in_buf;
 		Z.next_out = (Bytef *) out->val;
@@ -360,11 +360,11 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
-			out = zend_string_truncate(out, Z.total_out, 0);
+			out = ZSTR_TRUNCATE(out, Z.total_out, 0);
 			out->val[out->len] = '\0';
 			return out;
 		} else {
-			zend_string_free(out);
+			ZSTR_FREE(out);
 		}
 	}
 
@@ -831,7 +831,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 						memcpy(dictptr, (*ptr)->val, (*ptr)->len);
 						dictptr += (*ptr)->len;
 						*dictptr++ = 0;
-						zend_string_release(*ptr);
+						ZSTR_RELEASE(*ptr);
 					} while (++ptr != end);
 					efree(strings);
 				}
@@ -945,7 +945,7 @@ PHP_FUNCTION(inflate_add)
 		RETURN_EMPTY_STRING();
 	}
 
-	out = zend_string_alloc((in_len > CHUNK_SIZE) ? in_len : CHUNK_SIZE, 0);
+	out = ZSTR_ALLOC((in_len > CHUNK_SIZE) ? in_len : CHUNK_SIZE, 0);
 	ctx->next_in = (Bytef *) in_buf;
 	ctx->next_out = (Bytef *) out->val;
 	ctx->avail_in = in_len;
@@ -959,7 +959,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_OK:
 				if (ctx->avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					out = ZSTR_REALLOC(out, out->len + CHUNK_SIZE, 0);
 					ctx->avail_out = CHUNK_SIZE;
 					ctx->next_out = (Bytef *) out->val + buffer_used;
 					break;
@@ -972,7 +972,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					out = ZSTR_REALLOC(out, out->len + CHUNK_SIZE, 0);
 					ctx->avail_out = CHUNK_SIZE;
 					ctx->next_out = (Bytef *) out->val + buffer_used;
 					break;
@@ -991,7 +991,7 @@ PHP_FUNCTION(inflate_add)
 						case Z_DATA_ERROR:
 							php_error_docref(NULL, E_WARNING, "dictionary does not match expected dictionary (incorrect adler32 hash)");
 							efree(php_ctx->inflateDict);
-							zend_string_release(out);
+							ZSTR_RELEASE(out);
 							php_ctx->inflateDict = NULL;
 							RETURN_FALSE;
 						EMPTY_SWITCH_DEFAULT_CASE()
@@ -1002,14 +1002,14 @@ PHP_FUNCTION(inflate_add)
 					RETURN_FALSE;
 				}
 			default:
-				zend_string_release(out);
+				ZSTR_RELEASE(out);
 				php_error_docref(NULL, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 		}
 	} while (1);
 
 	complete: {
-		out = zend_string_realloc(out, buffer_used, 0);
+		out = ZSTR_REALLOC(out, buffer_used, 0);
 		out->val[buffer_used] = 0;
 		RETURN_STR(out);
 	}
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(deflate_add)
 	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(ctx->total_in + in_len);
 	out_size = (ctx->total_out >= out_size) ? 16 : (out_size - ctx->total_out);
 	out_size = (out_size < 16) ? 16 : out_size;
-	out = zend_string_alloc(out_size, 0);
+	out = ZSTR_ALLOC(out_size, 0);
 
 	ctx->next_in = (Bytef *) in_buf;
 	ctx->next_out = (Bytef *) out->val;
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(deflate_add)
 			RETURN_STR(out);
 			break;
 		default:
-			zend_string_release(out);
+			ZSTR_RELEASE(out);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
 			RETURN_FALSE;
 	}

@@ -267,7 +267,7 @@ ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int
 		write_func(str->val, len);
 	}
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return len;
 }
 /* }}} */
@@ -294,7 +294,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			HashTable *properties = NULL;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			zend_printf("%s Object (", class_name->val);
-			zend_string_release(class_name);
+			ZSTR_RELEASE(class_name);
 
 			if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
 				ZEND_PUTS(" *RECURSION*");
@@ -349,7 +349,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 				ZEND_PUTS_EX(class_name->val);
-				zend_string_release(class_name);
+				ZSTR_RELEASE(class_name);
 
 				ZEND_PUTS_EX(" Object\n");
 				if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
@@ -380,7 +380,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path) /* {{{ */
 {
 	if (opened_path) {
-		*opened_path = zend_string_init(filename, strlen(filename), 0);
+		*opened_path = ZSTR_INIT(filename, strlen(filename), 0);
 	}
 	return fopen(filename, "rb");
 }
@@ -736,7 +736,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
-	zend_register_auto_global(zend_string_init("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
+	zend_register_auto_global(ZSTR_INIT("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
 
 #ifndef ZTS
 	zend_init_rsrc_plist();
@@ -1194,7 +1194,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 			va_copy(usr_copy, args);
 			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
+			ZVAL_NEW_STR(&params[1], ZSTR_INIT(str, len, 0));
 			efree(str);
 #ifdef va_copy
 			va_end(usr_copy);
@@ -1459,7 +1459,7 @@ void free_estring(char **str_p) /* {{{ */
 void free_string_zval(zval *zv) /* {{{ */
 {
 	zend_string *str = Z_PTR_P(zv);
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 }
 /* }}} */
 

@@ -1440,7 +1440,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	if (tmp->len > 0) {
 		if (!(re = _php_mb_compile_regex(tmp->val))) {
-			zend_string_release(tmp);
+			ZSTR_RELEASE(tmp);
 			return FAILURE;
 		}
 	}
@@ -1451,7 +1451,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	MBSTRG(http_output_conv_mimetypes) = re;
 
-	zend_string_release(tmp);
+	ZSTR_RELEASE(tmp);
 	return SUCCESS;
 }
 /* }}} */
@@ -1749,14 +1749,14 @@ PHP_FUNCTION(mb_language)
 	if (name == NULL) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
 	} else {
-		zend_string *ini_name = zend_string_init("mbstring.language", sizeof("mbstring.language") - 1, 0);
+		zend_string *ini_name = ZSTR_INIT("mbstring.language", sizeof("mbstring.language") - 1, 0);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			php_error_docref(NULL, E_WARNING, "Unknown language \"%s\"", name->val);
 			RETVAL_FALSE;
 		} else {
 			RETVAL_TRUE;
 		}
-		zend_string_release(ini_name);
+		ZSTR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -3921,7 +3921,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 				if (state == 0 || state == 1) {
 					if(token && token_pos > 0) {
-						fld_name = zend_string_init(token, token_pos, 0);
+						fld_name = ZSTR_INIT(token, token_pos, 0);
 					}
 					state = 2;
 				} else {
@@ -3987,7 +3987,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 					case 3:
 						if (crlf_state == -1) {
 							if(token && token_pos > 0) {
-								fld_val = zend_string_init(token, token_pos, 0);
+								fld_val = ZSTR_INIT(token, token_pos, 0);
 							}
 
 							if (fld_name != NULL && fld_val != NULL) {
@@ -3999,7 +3999,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 								zend_hash_update(ht, fld_name, &val);
 
-								zend_string_release(fld_name);
+								ZSTR_RELEASE(fld_name);
 							}
 
 							fld_name = fld_val = NULL;
@@ -4036,7 +4036,7 @@ out:
 	}
 	if (state == 3) {
 		if(token && token_pos > 0) {
-			fld_val = zend_string_init(token, token_pos, 0);
+			fld_val = ZSTR_INIT(token, token_pos, 0);
 		}
 		if (fld_name != NULL && fld_val != NULL) {
 			zval val;
@@ -4047,7 +4047,7 @@ out:
 
 			zend_hash_update(ht, fld_name, &val);
 
-			zend_string_release(fld_name);
+			ZSTR_RELEASE(fld_name);
 		}
 	}
 	return state;
@@ -4314,7 +4314,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	if (extra_cmd) {
-		zend_string_release(extra_cmd);
+		ZSTR_RELEASE(extra_cmd);
 	}
 
 	if (to_r != to) {

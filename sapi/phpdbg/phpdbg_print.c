@@ -194,7 +194,7 @@ PHPDBG_PRINT(method) /* {{{ */
 
 	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *fbc;
-		zend_string *lcname = zend_string_alloc(strlen(param->method.name), 0);
+		zend_string *lcname = ZSTR_ALLOC(strlen(param->method.name), 0);
 		zend_str_tolower_copy(lcname->val, param->method.name, lcname->len);
 
 		if ((fbc = zend_hash_find_ptr(&ce->function_table, lcname))) {
@@ -208,7 +208,7 @@ PHPDBG_PRINT(method) /* {{{ */
 			phpdbg_error("print", "type=\"nomethod\" method=\"%s::%s\"", "The method %s::%s could not be found", param->method.class, param->method.name);
 		}
 
-		zend_string_release(lcname);
+		ZSTR_RELEASE(lcname);
 	} else {
 		phpdbg_error("print", "type=\"noclass\" class=\"%s\"", "The class %s could not be found", param->method.class);
 	}
@@ -241,7 +241,7 @@ PHPDBG_PRINT(func) /* {{{ */
 		func_table = EG(function_table);
 	}
 
-	lcname = zend_string_alloc(func_name_len, 0);
+	lcname = ZSTR_ALLOC(func_name_len, 0);
 	zend_str_tolower_copy(lcname->val, func_name, lcname->len);
 
 	phpdbg_try_access {

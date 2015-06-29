@@ -49,7 +49,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, 
 	assert(strval != NULL);
 
 	/* Prepare value */
-	ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
+	ZVAL_NEW_STR(&new_entry, ZSTR_INIT(strval, str_len, 0));
 	php_register_variable_ex(var, &new_entry, track_vars_array);
 }
 
@@ -542,7 +542,7 @@ static void php_build_argv(char *s, zval *track_vars_array)
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ZVAL_STRING(&tmp, SG(request_info).argv[i]);
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				ZSTR_FREE(Z_STR(tmp));
 			}
 		}
 	} else 	if (s && *s) {
@@ -556,7 +556,7 @@ static void php_build_argv(char *s, zval *track_vars_array)
 			ZVAL_STRING(&tmp, ss);
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				ZSTR_FREE(Z_STR(tmp));
 			}
 			if (space) {
 				*space = '+';
@@ -823,13 +823,13 @@ static zend_bool php_auto_globals_create_request(zend_string *name)
 
 void php_startup_auto_globals(void)
 {
-	zend_register_auto_global(zend_string_init("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
-	zend_register_auto_global(zend_string_init("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
-	zend_register_auto_global(zend_string_init("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
-	zend_register_auto_global(zend_string_init("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server);
-	zend_register_auto_global(zend_string_init("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env);
-	zend_register_auto_global(zend_string_init("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request);
-	zend_register_auto_global(zend_string_init("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
+	zend_register_auto_global(ZSTR_INIT("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
+	zend_register_auto_global(ZSTR_INIT("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
+	zend_register_auto_global(ZSTR_INIT("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
+	zend_register_auto_global(ZSTR_INIT("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server);
+	zend_register_auto_global(ZSTR_INIT("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env);
+	zend_register_auto_global(ZSTR_INIT("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request);
+	zend_register_auto_global(ZSTR_INIT("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
 }
 
 /*

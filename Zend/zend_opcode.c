@@ -108,7 +108,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
-		zend_string_release(function->common.function_name);
+		ZSTR_RELEASE(function->common.function_name);
 	}
 }
 
@@ -123,7 +123,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
-		zend_string_release(function->common.function_name);
+		ZSTR_RELEASE(function->common.function_name);
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
@@ -200,16 +200,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
-	 				zend_string_release(ce->trait_aliases[i]->trait_method->method_name);
+	 				ZSTR_RELEASE(ce->trait_aliases[i]->trait_method->method_name);
 				}
 				if (ce->trait_aliases[i]->trait_method->class_name) {
-	 				zend_string_release(ce->trait_aliases[i]->trait_method->class_name);
+	 				ZSTR_RELEASE(ce->trait_aliases[i]->trait_method->class_name);
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
 
 			if (ce->trait_aliases[i]->alias) {
-				zend_string_release(ce->trait_aliases[i]->alias);
+				ZSTR_RELEASE(ce->trait_aliases[i]->alias);
 			}
 
 			efree(ce->trait_aliases[i]);
@@ -223,15 +223,15 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		size_t i = 0;
 
 		while (ce->trait_precedences[i]) {
-			zend_string_release(ce->trait_precedences[i]->trait_method->method_name);
-			zend_string_release(ce->trait_precedences[i]->trait_method->class_name);
+			ZSTR_RELEASE(ce->trait_precedences[i]->trait_method->method_name);
+			ZSTR_RELEASE(ce->trait_precedences[i]->trait_method->class_name);
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
 				size_t j = 0;
 				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
 				while (cur_precedence->exclude_from_classes[j].class_name) {
-					zend_string_release(cur_precedence->exclude_from_classes[j].class_name);
+					ZSTR_RELEASE(cur_precedence->exclude_from_classes[j].class_name);
 					j++;
 				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
@@ -275,21 +275,21 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
-					zend_string_release(prop_info->name);
+					ZSTR_RELEASE(prop_info->name);
 					if (prop_info->doc_comment) {
-						zend_string_release(prop_info->doc_comment);
+						ZSTR_RELEASE(prop_info->doc_comment);
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
-			zend_string_release(ce->name);
+			ZSTR_RELEASE(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
-				zend_string_release(ce->info.user.doc_comment);
+				ZSTR_RELEASE(ce->info.user.doc_comment);
 			}
 
 			_destroy_zend_class_traits_info(ce);
@@ -317,7 +317,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			zend_string_release(ce->name);
+			ZSTR_RELEASE(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
@@ -362,7 +362,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			zend_string_release(op_array->vars[i]);
+			ZSTR_RELEASE(op_array->vars[i]);
 		}
 		efree(op_array->vars);
 	}
@@ -378,10 +378,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	efree(op_array->opcodes);
 
 	if (op_array->function_name) {
-		zend_string_release(op_array->function_name);
+		ZSTR_RELEASE(op_array->function_name);
 	}
 	if (op_array->doc_comment) {
-		zend_string_release(op_array->doc_comment);
+		ZSTR_RELEASE(op_array->doc_comment);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
@@ -406,10 +406,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 		for (i = 0 ; i < num_args; i++) {
 			if (arg_info[i].name) {
-				zend_string_release(arg_info[i].name);
+				ZSTR_RELEASE(arg_info[i].name);
 			}
 			if (arg_info[i].class_name) {
-				zend_string_release(arg_info[i].class_name);
+				ZSTR_RELEASE(arg_info[i].class_name);
 			}
 		}
 		efree(arg_info);

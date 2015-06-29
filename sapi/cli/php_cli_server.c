@@ -1581,12 +1581,12 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 	}
 	{
 		/* strip off the colon */
-		zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
+		zend_string *orig_header_name = ZSTR_INIT(client->current_header_name, client->current_header_name_len, 1);
 		char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
 		zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, value);
 		zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, value);
 		efree(lc_header_name);
-		zend_string_release(orig_header_name);
+		ZSTR_RELEASE(orig_header_name);
 	}
 
 	if (client->current_header_name_allocated) {
@@ -1775,7 +1775,7 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, NULL, 0);
 		client->addr_str = pestrndup(addr_str->val, addr_str->len, 1);
 		client->addr_str_len = addr_str->len;
-		zend_string_release(addr_str);
+		ZSTR_RELEASE(addr_str);
 	}
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = 0;
@@ -1897,14 +1897,14 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	ZSTR_FREE(escaped_request_uri);
 	return SUCCESS;
 
 fail:
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	ZSTR_FREE(escaped_request_uri);
 	return FAILURE;
 } /* }}} */
 
@@ -2211,7 +2211,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	if (server_sock == SOCK_ERR) {
 		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)", host, port, errstr ? errstr->val : "?");
 		if (errstr) {
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 		retval = FAILURE;
 		goto out;

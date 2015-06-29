@@ -1463,7 +1463,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			}
 
 			close_fp = 0;
-			opened = zend_string_init("[stream]", sizeof("[stream]") - 1, 0);
+			opened = ZSTR_INIT("[stream]", sizeof("[stream]") - 1, 0);
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
@@ -1648,7 +1648,7 @@ after_open_fp:
 		}
 
 		if (opened) {
-			zend_string_release(opened);
+			ZSTR_RELEASE(opened);
 		}
 
 		if (close_fp) {
@@ -1667,7 +1667,7 @@ after_open_fp:
 		}
 
 		if (opened) {
-			zend_string_release(opened);
+			ZSTR_RELEASE(opened);
 		}
 
 		if (temp) {
@@ -3914,7 +3914,7 @@ PHP_METHOD(Phar, getStub)
 
 	php_stream_rewind(fp);
 carry_on:
-	buf = zend_string_alloc(len, 0);
+	buf = ZSTR_ALLOC(len, 0);
 
 	if (len != php_stream_read(fp, buf->val, len)) {
 		if (fp != phar_obj->archive->fp) {
@@ -3922,7 +3922,7 @@ carry_on:
 		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"Unable to read stub");
-		zend_string_release(buf);
+		ZSTR_RELEASE(buf);
 		return;
 	}
 

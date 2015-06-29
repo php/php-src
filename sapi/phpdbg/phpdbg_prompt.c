@@ -1388,7 +1388,7 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 	} \
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
 		const char *file_char = zend_get_executed_filename(); \
-		zend_string *file = zend_string_init(file_char, strlen(file_char), 0); \
+		zend_string *file = ZSTR_INIT(file_char, strlen(file_char), 0); \
 		phpdbg_list_file(file, 3, zend_get_executed_lineno()-1, zend_get_executed_lineno()); \
 		efree(file); \
 	} \

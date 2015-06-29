@@ -75,7 +75,7 @@ PHP_FUNCTION(oci_define_by_name)
 	define = ecalloc(1,sizeof(php_oci_define));
 
 	//if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) {
-	if ((tmp_define = zend_hash_add_new_ptr(statement->defines, zend_string_init(name, name_len, 0), define)) != NULL) {
+	if ((tmp_define = zend_hash_add_new_ptr(statement->defines, ZSTR_INIT(name, name_len, 0), define)) != NULL) {
 		efree(define);
 		define = tmp_define;
 	} else {
@@ -1429,7 +1429,7 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL(row), &element);
 				} else { /* default to ASSOC */
-					zend_symtable_update(Z_ARRVAL(row), zend_string_init(columns[ i ]->name, columns[ i ]->name_len+1, 0), &element);
+					zend_symtable_update(Z_ARRVAL(row), ZSTR_INIT(columns[ i ]->name, columns[ i ]->name_len+1, 0), &element);
 				}
 			}
 
@@ -1459,7 +1459,7 @@ PHP_FUNCTION(oci_fetch_all)
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zend_string_init(columns[ i ]->name, columns[ i ]->name_len+1, 0), &tmp);
+				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), ZSTR_INIT(columns[ i ]->name, columns[ i ]->name_len+1, 0), &tmp);
 			}
 		}
 

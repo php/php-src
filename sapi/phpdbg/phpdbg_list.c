@@ -55,13 +55,13 @@ PHPDBG_LIST(lines) /* {{{ */
 	switch (param->type) {
 		case NUMERIC_PARAM: {
 			const char *char_file = phpdbg_current_file();
-			zend_string *file = zend_string_init(char_file, strlen(char_file), 0);
+			zend_string *file = ZSTR_INIT(char_file, strlen(char_file), 0);
 			phpdbg_list_file(file, param->num < 0 ? 1 - param->num : param->num, (param->num < 0 ? param->num : 0) + zend_get_executed_lineno(), 0);
 			efree(file);
 		} break;
 
 		case FILE_PARAM: {
-			zend_string *file = zend_string_init(param->file.name, strlen(param->file.name), 0);
+			zend_string *file = ZSTR_INIT(param->file.name, strlen(param->file.name), 0);
 			phpdbg_list_file(file, param->file.line, 0, 0);
 			efree(file);
 		} break;

@@ -175,7 +175,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 		next = (int32_t)slen;
 	}
 	assert(next <= slen && next >= cur);
-	res = zend_string_alloc(next - cur, 0);
+	res = ZSTR_ALLOC(next - cur, 0);
 
 	memcpy(res->val, &s[cur], res->len);
 	res->val[res->len] = '\0';

@@ -983,7 +983,7 @@ int php_oci_bind_post_exec(void *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-		Z_STR(bind->zval) = zend_string_extend(Z_STR(bind->zval), Z_STRLEN(bind->zval)+1, 0);
+		Z_STR(bind->zval) = ZSTR_EXTEND(Z_STR(bind->zval), Z_STRLEN(bind->zval)+1, 0);
 		Z_STRVAL(bind->zval)[ Z_STRLEN(bind->zval) ] = '\0';
 	} else if (Z_TYPE(bind->zval) == IS_ARRAY) {
 		int i;
@@ -1216,7 +1216,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		bindp = old_bind;
 		zval_ptr_dtor(&bindp->zval);
 	} else {
-		bindp = zend_hash_update_ptr(statement->binds, zend_string_init(name, name_len + 1, 0), &bind);
+		bindp = zend_hash_update_ptr(statement->binds, ZSTR_INIT(name, name_len + 1, 0), &bind);
 	}
 	
 	bindp->descriptor = oci_desc;
@@ -1575,7 +1575,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 		zend_hash_init(statement->binds, 13, NULL, php_oci_bind_hash_dtor, 0);
 	}
 
-	bindp = zend_hash_update_ptr(statement->binds, zend_string_init(name, name_len + 1, 0), bind);
+	bindp = zend_hash_update_ptr(statement->binds, ZSTR_INIT(name, name_len + 1, 0), bind);
 
 	bindp->descriptor = NULL;
 	bindp->statement = NULL;

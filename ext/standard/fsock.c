@@ -109,14 +109,14 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			zval_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		ZSTR_RELEASE(errstr);
 	}
 
 	php_stream_to_zval(stream, return_value);

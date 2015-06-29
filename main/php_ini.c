@@ -196,7 +196,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		ZSTR_RELEASE(Z_STR_P(zvalue));
 	}
 }
 /* Reset / free active_ini_sectin global */
@@ -239,7 +239,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				} else {
 					/* Store in active hash */
 					entry = zend_hash_update(active_hash, Z_STR_P(arg1), arg2);
-					Z_STR_P(entry) = zend_string_dup(Z_STR_P(entry), 1);
+					Z_STR_P(entry) = ZSTR_DUP(Z_STR_P(entry), 1);
 				}
 			}
 			break;
@@ -268,7 +268,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				} else {
 					entry = zend_hash_next_index_insert(Z_ARRVAL_P(find_arr), arg2);
 				}
-				Z_STR_P(entry) = zend_string_dup(Z_STR_P(entry), 1);
+				Z_STR_P(entry) = ZSTR_DUP(Z_STR_P(entry), 1);
 			}
 			break;
 
@@ -553,7 +553,7 @@ int php_init_config(void)
 					fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fh.handle.fp) {
 						fh.filename = expand_filepath(php_ini_file_name, NULL);
-						opened_path = zend_string_init(fh.filename, strlen(fh.filename), 0);
+						opened_path = ZSTR_INIT(fh.filename, strlen(fh.filename), 0);
 					}
 				}
 			}
@@ -595,10 +595,10 @@ int php_init_config(void)
 		{
 			zval tmp;
 
-			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
+			ZVAL_NEW_STR(&tmp, ZSTR_INIT(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
-				zend_string_release(opened_path);
+				ZSTR_RELEASE(opened_path);
 			}
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}

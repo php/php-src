@@ -824,7 +824,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
 		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
 		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release(zname);
+		ZSTR_RELEASE(zname);
 
 		return debug_info;
 	}
@@ -1216,7 +1216,7 @@ SPL_METHOD(Array, getIteratorClass)
 		return;
 	}
 
-	zend_string_addref(intern->ce_get_iterator->name);
+	ZSTR_INC_REFCOUNT(intern->ce_get_iterator->name);
 	RETURN_STR(intern->ce_get_iterator->name);
 }
 /* }}} */
@@ -1448,7 +1448,7 @@ exit:
 	/* A tricky way to pass "aht" by reference, copy back and cleanup */
 	GC_REFCOUNT(aht) = old_refcount;
 	efree(Z_REF(params[0]));
-	zend_string_free(Z_STR(function_name));
+	ZSTR_FREE(Z_STR(function_name));
 } /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \

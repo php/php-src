@@ -203,10 +203,10 @@ static zend_string *php_gethostbyaddr(char *ip)
 #endif
 
 	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
-		return zend_string_init(ip, strlen(ip), 0);
+		return ZSTR_INIT(ip, strlen(ip), 0);
 	}
 
-	return zend_string_init(hp->h_name, strlen(hp->h_name), 0);
+	return ZSTR_INIT(hp->h_name, strlen(hp->h_name), 0);
 }
 /* }}} */
 
@@ -275,13 +275,13 @@ static zend_string *php_gethostbyname(char *name)
 	hp = gethostbyname(name);
 
 	if (!hp || !*(hp->h_addr_list)) {
-		return zend_string_init(name, strlen(name), 0);
+		return ZSTR_INIT(name, strlen(name), 0);
 	}
 
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
 
 	address = inet_ntoa(in);
-	return zend_string_init(address, strlen(address), 0);
+	return ZSTR_INIT(address, strlen(address), 0);
 }
 /* }}} */
 
@@ -536,7 +536,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 				zend_string *tp;
 
 				add_assoc_string(subarray, "type", "TXT");
-				tp = zend_string_alloc(dlen, 0);
+				tp = ZSTR_ALLOC(dlen, 0);
 
 				array_init(&entries);
 

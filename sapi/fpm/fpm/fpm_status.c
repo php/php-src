@@ -127,7 +127,7 @@ int fpm_status_handle_request(void) /* {{{ */
 		}
 
 		/* full status ? */
-		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		_GET_str = ZSTR_INIT("_GET", sizeof("_GET")-1, 0);
 		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
@@ -378,7 +378,7 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		PUTS(buffer);
 		efree(buffer);
-		zend_string_release(_GET_str);
+		ZSTR_RELEASE(_GET_str);
 
 		if (short_post) {
 			PUTS(short_post);
@@ -463,7 +463,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				efree(buffer);
 
 				if (tmp_query_string) {
-					zend_string_free(tmp_query_string);
+					ZSTR_FREE(tmp_query_string);
 				}
 			}
 

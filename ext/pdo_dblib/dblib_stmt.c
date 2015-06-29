@@ -200,7 +200,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 	col = &stmt->columns[colno];
 	str = dbcolname(H->link, colno+1);
-	col->name =  zend_string_init(str, strlen(str), 0);
+	col->name =  ZSTR_INIT(str, strlen(str), 0);
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->param_type = PDO_PARAM_STR;
 

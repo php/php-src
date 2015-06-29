@@ -169,7 +169,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (message) {
-		zend_string_release(message);
+		ZSTR_RELEASE(message);
 	}
 
 	if (supp) {
@@ -878,7 +878,7 @@ static PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
-			add_next_index_str(return_value, zend_string_copy(dbh->def_stmt_ce->name));
+			add_next_index_str(return_value, ZSTR_COPY(dbh->def_stmt_ce->name));
 			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 				if (Z_REFCOUNTED(dbh->def_stmt_ctor_args)) Z_ADDREF(dbh->def_stmt_ctor_args);
 				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
@@ -1256,7 +1256,7 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 static void cls_method_dtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
-		zend_string_release(func->common.function_name);
+		ZSTR_RELEASE(func->common.function_name);
 	}
 	efree(func);
 }
@@ -1288,7 +1288,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	while (funcs->fname) {
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
-		ifunc->function_name = zend_string_init(funcs->fname, strlen(funcs->fname), 0);
+		ifunc->function_name = ZSTR_INIT(funcs->fname, strlen(funcs->fname), 0);
 		ifunc->scope = dbh_obj->std.ce;
 		ifunc->prototype = NULL;
 		if (funcs->flags) {
@@ -1337,7 +1337,7 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_init(method_name->val, method_name->len, 0);
+	lc_method_name = ZSTR_INIT(method_name->val, method_name->len, 0);
 	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 
 	if ((fbc = std_object_handlers.get_method(object, method_name, key)) == NULL) {
@@ -1355,7 +1355,7 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 	}
 
 out:
-	zend_string_release(lc_method_name);
+	ZSTR_RELEASE(lc_method_name);
 	return fbc;
 }
 

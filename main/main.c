@@ -654,7 +654,7 @@ PHPAPI void php_log_err(char *log_message)
 			php_ignore_value(write(fd, tmp, len));
 #endif
 			efree(tmp);
-			zend_string_free(error_time_str);
+			ZSTR_FREE(error_time_str);
 			close(fd);
 			PG(in_error_log) = 0;
 			return;
@@ -855,7 +855,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		spprintf(&message, 0, "%s: %s", origin, buffer);
 	}
 	if (replace_origin) {
-		zend_string_free(replace_origin);
+		ZSTR_FREE(replace_origin);
 	} else {
 		efree(origin);
 	}
@@ -876,7 +876,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		}
 	}
 	if (replace_buffer) {
-		zend_string_free(replace_buffer);
+		ZSTR_FREE(replace_buffer);
 	} else {
 		efree(buffer);
 	}
@@ -1099,7 +1099,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					if (type == E_ERROR || type == E_PARSE) {
 						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf->val, error_filename, error_lineno, STR_PRINT(append_string));
-						zend_string_free(buf);
+						ZSTR_FREE(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
@@ -1285,13 +1285,13 @@ PHP_FUNCTION(set_time_limit)
 
 	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
-	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
+	key = ZSTR_INIT("max_execution_time", sizeof("max_execution_time")-1, 0);
 	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
-	zend_string_release(key);
+	ZSTR_RELEASE(key);
 	efree(new_timeout_str);
 }
 /* }}} */
@@ -2427,7 +2427,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			if (expand_filepath(primary_file->filename, realfile)) {
-				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);
+				primary_file->opened_path = ZSTR_INIT(realfile, strlen(realfile), 0);
 				zend_hash_add_empty_element(&EG(included_files), primary_file->opened_path);
 			}
 		}
@@ -2567,7 +2567,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 				SG(request_info).auth_password = estrdup(pass);
 				ret = 0;
 			}
-			zend_string_free(user);
+			ZSTR_FREE(user);
 		}
 	}
 

@@ -193,7 +193,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr->val);
 		if (errstr) {
 			/* no mnd_ since we don't allocate it */
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 		DBG_RETURN(NULL);
 	}

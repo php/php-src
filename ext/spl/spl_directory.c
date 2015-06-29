@@ -601,7 +601,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 	path = spl_filesystem_object_get_pathname(intern, &path_len);
 	ZVAL_STRINGL(&tmp, path, path_len);
 	zend_symtable_update(rv, pnstr, &tmp);
-	zend_string_release(pnstr);
+	ZSTR_RELEASE(pnstr);
 
 	if (intern->file_name) {
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1);
@@ -613,7 +613,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 			ZVAL_STRINGL(&tmp, intern->file_name, intern->file_name_len);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
@@ -624,7 +624,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 			ZVAL_FALSE(&tmp);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 #endif
 		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1);
 		if (intern->u.dir.sub_path) {
@@ -633,24 +633,24 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 			ZVAL_EMPTY_STRING(&tmp);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 	}
 	if (intern->type == SPL_FS_FILE) {
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", sizeof("openMode")-1);
 		ZVAL_STRINGL(&tmp, intern->u.file.open_mode, intern->u.file.open_mode_len);
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 		stmp[1] = '\0';
 		stmp[0] = intern->u.file.delimiter;
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "delimiter", sizeof("delimiter")-1);
 		ZVAL_STRINGL(&tmp, stmp, 1);
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 		stmp[0] = intern->u.file.enclosure;
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "enclosure", sizeof("enclosure")-1);
 		ZVAL_STRINGL(&tmp, stmp, 1);
 		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release(pnstr);
+		ZSTR_RELEASE(pnstr);
 	}
 
 	return rv;
@@ -663,9 +663,9 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 
 	if (fsobj->u.dir.entry.d_name[0] == '\0' && fsobj->orig_path == NULL) {
 		zend_function *func;
-		zend_string *tmp = zend_string_init("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
+		zend_string *tmp = ZSTR_INIT("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
 		func = zend_get_std_object_handlers()->get_method(object, tmp, NULL);
-		zend_string_release(tmp);
+		ZSTR_RELEASE(tmp);
 		return func;
 	}
 
@@ -942,10 +942,10 @@ SPL_METHOD(SplFileInfo, getExtension)
 		assert(p > ret->val);
 		idx = (int)(p - ret->val);
 		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
-		zend_string_release(ret);
+		ZSTR_RELEASE(ret);
 		return;
 	} else {
-		zend_string_release(ret);
+		ZSTR_RELEASE(ret);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -970,9 +970,9 @@ SPL_METHOD(DirectoryIterator, getExtension)
 	if (p) {
 		idx = (int)(p - fname->val);
 		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
-		zend_string_release(fname);
+		ZSTR_RELEASE(fname);
 	} else {
-		zend_string_release(fname);
+		ZSTR_RELEASE(fname);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -2916,7 +2916,7 @@ SPL_METHOD(SplFileObject, fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_NEW_STR(return_value, zend_string_alloc(length, 0));
+	ZVAL_NEW_STR(return_value, ZSTR_ALLOC(length, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/

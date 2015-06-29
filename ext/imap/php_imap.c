@@ -1323,16 +1323,16 @@ PHP_FUNCTION(imap_append)
 		return;
 	}
 
-	regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
+	regex  = ZSTR_INIT("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
 
 	if (internal_date) {
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex))== NULL) {
-			zend_string_free(regex);
+			ZSTR_FREE(regex);
 			RETURN_FALSE;
 		}
 
-		zend_string_free(regex);
+		ZSTR_FREE(regex);
 		php_pcre_match_impl(pce, internal_date->val, internal_date->len, return_value, subpats, global,
 			0, regex_flags, start_offset);
 
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(imap_append)
 		}
 	}
 
-	zend_string_free(regex);
+	ZSTR_FREE(regex);
 	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -2979,7 +2979,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	out = zend_string_alloc(outlen, 0);
+	out = ZSTR_ALLOC(outlen, 0);
 
 	/* encode input string */
 	outp = (unsigned char*)out->val;
@@ -4453,7 +4453,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	}
 	address[0] = 0;
 	rfc822_write_address(address, addresslist);
-	return zend_string_init(address, strlen(address), 0);
+	return ZSTR_INIT(address, strlen(address), 0);
 }
 /* }}} */
 #endif

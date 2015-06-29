@@ -165,12 +165,12 @@ PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
 PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname) /* {{{ */
 {
 	zend_function *func = NULL;
-	zend_string *lfname = zend_string_alloc(strlen(fname), 0);
+	zend_string *lfname = ZSTR_ALLOC(strlen(fname), 0);
 	memcpy(lfname->val, zend_str_tolower_dup(fname, lfname->len), lfname->len + 1);
 
 	if (cname) {
 		zend_class_entry *ce;
-		zend_string *lcname = zend_string_alloc(strlen(cname), 0);
+		zend_string *lcname = ZSTR_ALLOC(strlen(cname), 0);
 		memcpy(lcname->val, zend_str_tolower_dup(cname, lcname->len), lcname->len + 1);
 		ce = zend_lookup_class(lcname);
 
@@ -379,7 +379,7 @@ int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry
 
 		efree(lc_free);
 	} else {
-		zend_string *str_name = zend_string_init(name, name_length, 0);
+		zend_string *str_name = ZSTR_INIT(name, name_length, 0);
 		*ce = zend_lookup_class(str_name);
 		efree(str_name);
 	}
@@ -681,7 +681,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 
 				class_name = Z_OBJ_HANDLER_P(zv, get_class_name)(Z_OBJ_P(zv));
 				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, class_name->len, class_name->val, Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
-				zend_string_release(class_name);
+				ZSTR_RELEASE(class_name);
 
 				element_dump_func = phpdbg_xml_object_property_dump;
 head_done:

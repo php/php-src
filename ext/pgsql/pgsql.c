@@ -3506,9 +3506,9 @@ PHP_FUNCTION(pg_lo_read)
 		buf_len = len < 0 ? 0 : len;
 	}
 
-	buf = zend_string_alloc(buf_len, 0);
+	buf = ZSTR_ALLOC(buf_len, 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf->val, buf->len))<0) {
-		zend_string_free(buf);
+		ZSTR_FREE(buf);
 		RETURN_FALSE;
 	}
 
@@ -4348,7 +4348,7 @@ PHP_FUNCTION(pg_escape_string)
 			break;
 	}
 
-	to = zend_string_alloc(from->len * 2, 0);
+	to = ZSTR_ALLOC(from->len * 2, 0);
 #ifdef HAVE_PQESCAPE_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4361,7 +4361,7 @@ PHP_FUNCTION(pg_escape_string)
 		to->len = PQescapeString(to->val, from->val, from->len);
 	}
 
-	to = zend_string_truncate(to, to->len, 0);
+	to = ZSTR_TRUNCATE(to, to->len, 0);
 	RETURN_NEW_STR(to);
 }
 /* }}} */
@@ -6048,10 +6048,10 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						else {
 							zend_string *str;
 							/* PostgreSQL ignores \0 */
-							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
+							str = ZSTR_ALLOC(Z_STRLEN_P(val) * 2, 0);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
-							str = zend_string_truncate(str, str->len, 0);
+							str = ZSTR_TRUNCATE(str, str->len, 0);
 							ZVAL_NEW_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1);
 						}

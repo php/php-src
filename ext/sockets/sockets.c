@@ -1145,7 +1145,7 @@ PHP_FUNCTION(socket_read)
 		RETURN_FALSE;
 	}
 
-	tmpbuf = zend_string_alloc(length, 0);
+	tmpbuf = ZSTR_ALLOC(length, 0);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
 		RETURN_FALSE;
@@ -1171,14 +1171,14 @@ PHP_FUNCTION(socket_read)
 			PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		}
 
-		zend_string_free(tmpbuf);
+		ZSTR_FREE(tmpbuf);
 		RETURN_FALSE;
 	} else if (!retval) {
-		zend_string_free(tmpbuf);
+		ZSTR_FREE(tmpbuf);
 		RETURN_EMPTY_STRING();
 	}
 
-	tmpbuf = zend_string_truncate(tmpbuf, retval, 0);
+	tmpbuf = ZSTR_TRUNCATE(tmpbuf, retval, 0);
 	tmpbuf->len = retval;
 	tmpbuf->val[tmpbuf->len] = '\0' ;
 
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(socket_recv)
 		RETURN_FALSE;
 	}
 
-	recv_buf = zend_string_alloc(len, 0);
+	recv_buf = ZSTR_ALLOC(len, 0);
 
 	if ((retval = recv(php_sock->bsd_socket, recv_buf->val, len, flags)) < 1) {
 		efree(recv_buf);
@@ -1691,7 +1691,7 @@ PHP_FUNCTION(socket_recvfrom)
 		RETURN_FALSE;
 	}
 
-	recv_buf = zend_string_alloc(arg3 + 1, 0);
+	recv_buf = ZSTR_ALLOC(arg3 + 1, 0);
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1701,7 +1701,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				ZSTR_FREE(recv_buf);
 				RETURN_FALSE;
 			}
 			recv_buf->len = retval;
@@ -1720,7 +1720,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin.sin_family = AF_INET;
 
 			if (arg6 == NULL) {
-				zend_string_free(recv_buf);
+				ZSTR_FREE(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
@@ -1728,7 +1728,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				ZSTR_FREE(recv_buf);
 				RETURN_FALSE;
 			}
 			recv_buf->len = retval;
@@ -1759,7 +1759,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				ZSTR_FREE(recv_buf);
 				RETURN_FALSE;
 			}
 			recv_buf->len = retval;

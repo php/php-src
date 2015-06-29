@@ -3044,14 +3044,14 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_handle), "ODBC-Link", le_conn, le_pconn))) {
 			RETURN_FALSE;
 		}
-		ptr = zend_string_alloc(len + 1, 0);
+		ptr = ZSTR_ALLOC(len + 1, 0);
 		if (mode == 0) {
 			strlcpy(ptr->val, conn->laststate, len+1);
 		} else {
 			strlcpy(ptr->val, conn->lasterrormsg, len+1);
 		}
 	} else {
-		ptr = zend_string_alloc(len, 0);
+		ptr = ZSTR_ALLOC(len, 0);
 		if (mode == 0) {
 			strlcpy(ptr->val, ODBCG(laststate), len+1);
 		} else {

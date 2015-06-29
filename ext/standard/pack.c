@@ -354,7 +354,7 @@ PHP_FUNCTION(pack)
 					   (str->len < arg_cp) ? str->len : arg_cp);
 
 				outputpos += arg;
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				break;
 			}
 
@@ -397,7 +397,7 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				break;
 			}
 

@@ -269,7 +269,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	bz_file = BZ2_bzopen(path_copy, mode);
 
 	if (opened_path && bz_file) {
-		*opened_path = zend_string_init(path_copy, strlen(path_copy), 0);
+		*opened_path = ZSTR_INIT(path_copy, strlen(path_copy), 0);
 	}
 
 #ifdef VIRTUAL_DIR
@@ -378,7 +378,7 @@ static PHP_FUNCTION(bzread)
 		php_error_docref(NULL, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
-	data = zend_string_alloc(len, 0);
+	data = ZSTR_ALLOC(len, 0);
 	data->len = php_stream_read(stream, data->val, data->len);
 	data->val[data->len] = '\0';
 
@@ -528,7 +528,7 @@ static PHP_FUNCTION(bzcompress)
 	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
 
 	/* Allocate the destination buffer */
-	dest = zend_string_alloc(dest_len, 0);
+	dest = ZSTR_ALLOC(dest_len, 0);
 
 	/* Handle the optional arguments */
 	if (argc > 1) {
@@ -541,7 +541,7 @@ static PHP_FUNCTION(bzcompress)
 
 	error = BZ2_bzBuffToBuffCompress(dest->val, &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
-		zend_string_free(dest);
+		ZSTR_FREE(dest);
 		RETURN_LONG(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,

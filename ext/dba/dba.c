@@ -863,7 +863,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			} else {
 				if (opened_path) {
 					info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
-					zend_string_release(opened_path);
+					ZSTR_RELEASE(opened_path);
 				}
 			}
 		}
@@ -877,7 +877,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 				/* now store the name of the lock */
 				info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
-				zend_string_release(opened_path);
+				ZSTR_RELEASE(opened_path);
 			}
 		}
 		if (!lock_dbf) {

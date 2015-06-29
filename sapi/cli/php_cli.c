@@ -427,7 +427,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
-	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value)-1, 1));\
+	ZVAL_NEW_STR(&tmp, ZSTR_INIT(value, sizeof(value)-1, 1));\
 	zend_hash_str_update(configuration_hash, name, sizeof(name)-1, &tmp);\
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
@@ -583,19 +583,19 @@ static void cli_register_file_handles(void) /* {{{ */
 
 	ZVAL_COPY_VALUE(&ic.value, &zin);
 	ic.flags = CONST_CS;
-	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = ZSTR_INIT("STDIN", sizeof("STDIN")-1, 1);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
 	ZVAL_COPY_VALUE(&oc.value, &zout);
 	oc.flags = CONST_CS;
-	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = ZSTR_INIT("STDOUT", sizeof("STDOUT")-1, 1);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
 	ZVAL_COPY_VALUE(&ec.value, &zerr);
 	ec.flags = CONST_CS;
-	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = ZSTR_INIT("STDERR", sizeof("STDERR")-1, 1);
 	ec.module_number = 0;
 	zend_register_constant(&ec);
 }

@@ -89,20 +89,20 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 	buffer = php_base64_encode((unsigned char*) str, str_len);
 	if (buffer->len < out_len) {
 		/* Too short of an encoded string generated */
-		zend_string_release(buffer);
+		ZSTR_RELEASE(buffer);
 		return FAILURE;
 	}
 	for (pos = 0; pos < out_len; pos++) {
 		if (buffer->val[pos] == '+') {
 			ret[pos] = '.';
 		} else if (buffer->val[pos] == '=') {
-			zend_string_free(buffer);
+			ZSTR_FREE(buffer);
 			return FAILURE;
 		} else {
 			ret[pos] = buffer->val[pos];
 		}
 	}
-	zend_string_free(buffer);
+	ZSTR_FREE(buffer);
 	return SUCCESS;
 }
 /* }}} */
@@ -265,7 +265,7 @@ PHP_FUNCTION(password_verify)
 	}
 
 	if (ret->len != hash_len || hash_len < 13) {
-		zend_string_free(ret);
+		ZSTR_FREE(ret);
 		RETURN_FALSE;
 	}
 
@@ -277,7 +277,7 @@ PHP_FUNCTION(password_verify)
 		status |= (ret->val[i] ^ hash[i]);
 	}
 
-	zend_string_free(ret);
+	ZSTR_FREE(ret);
 
 	RETURN_BOOL(status == 0);
 
@@ -345,7 +345,7 @@ PHP_FUNCTION(password_hash)
 				zend_string *tmp = zval_get_string(option_buffer);
 				buffer = estrndup(tmp->val, tmp->len);
 				buffer_len = tmp->len;
-				zend_string_release(tmp);
+				ZSTR_RELEASE(tmp);
 				break;
 			}
 			case IS_FALSE:
@@ -418,7 +418,7 @@ PHP_FUNCTION(password_hash)
 	efree(hash);
 
 	if (result->len < 13) {
-		zend_string_free(result);
+		ZSTR_FREE(result);
 		RETURN_FALSE;
 	}
 

@@ -547,13 +547,13 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	BEGIN(INITIAL);
 
 	if (file_handle->opened_path) {
-		compiled_filename = zend_string_copy(file_handle->opened_path);
+		compiled_filename = ZSTR_COPY(file_handle->opened_path);
 	} else {
-		compiled_filename = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
+		compiled_filename = ZSTR_INIT(file_handle->filename, strlen(file_handle->filename), 0);
 	}
 
 	zend_set_compiled_filename(compiled_filename);
-	zend_string_release(compiled_filename);
+	ZSTR_RELEASE(compiled_filename);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -647,13 +647,13 @@ zend_op_array *compile_filename(int type, zval *filename)
 	retval = zend_compile_file(&file_handle, type);
 	if (retval && file_handle.handle.stream.handle) {
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = zend_string_copy(Z_STR_P(filename));
+			file_handle.opened_path = opened_path = ZSTR_COPY(Z_STR_P(filename));
 		}
 
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
 
 		if (opened_path) {
-			zend_string_release(opened_path);
+			ZSTR_RELEASE(opened_path);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
@@ -672,7 +672,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
-	Z_STR_P(str) = zend_string_extend(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
+	Z_STR_P(str) = ZSTR_EXTEND(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
 	Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	memset(Z_STRVAL_P(str) + old_len, 0, ZEND_MMAP_AHEAD + 1);
 
@@ -701,9 +701,9 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	yy_scan_buffer(buf, (unsigned int)size);
 
-	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
+	new_compiled_filename = ZSTR_INIT(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename);
-	zend_string_release(new_compiled_filename);
+	ZSTR_RELEASE(new_compiled_filename);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
@@ -1953,7 +1953,7 @@ inline_char_handler:
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (doc_com) {
-		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
+		CG(doc_comment) = ZSTR_INIT(yytext, yyleng, 0);
 		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 

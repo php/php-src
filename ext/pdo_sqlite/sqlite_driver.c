@@ -534,10 +534,10 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", cbname->val);
-		zend_string_release(cbname);
+		ZSTR_RELEASE(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
+	ZSTR_RELEASE(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -604,16 +604,16 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", cbname->val);
-		zend_string_release(cbname);
+		ZSTR_RELEASE(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
+	ZSTR_RELEASE(cbname);
 	if (!zend_is_callable(fini_callback, 0, &cbname)) {
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", cbname->val);
-		zend_string_release(cbname);
+		ZSTR_RELEASE(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
+	ZSTR_RELEASE(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -664,10 +664,10 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", cbname->val);
-		zend_string_release(cbname);
+		ZSTR_RELEASE(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
+	ZSTR_RELEASE(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 

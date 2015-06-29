@@ -2087,7 +2087,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 		if (alloc_non_persistent) {
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-			connection->hash_key = zend_string_dup(hashed_details.s, 0);
+			connection->hash_key = ZSTR_DUP(hashed_details.s, 0);
 			connection->is_persistent = 0;
 #ifdef HAVE_OCI8_DTRACE
 			connection->client_id = NULL;
@@ -2097,7 +2097,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			if (connection == NULL) {
 				return NULL;
 			}
-			connection->hash_key = zend_string_dup(hashed_details.s, 1);
+			connection->hash_key = ZSTR_DUP(hashed_details.s, 1);
 			if (connection->hash_key == NULL) {
 				free(connection);
 				return NULL;
@@ -2109,7 +2109,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		}
 	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
-		connection->hash_key = zend_string_dup(hashed_details.s, 0);
+		connection->hash_key = ZSTR_DUP(hashed_details.s, 0);
 		connection->is_persistent = 0;
 #ifdef HAVE_OCI8_DTRACE
 		connection->client_id = NULL;
@@ -2845,7 +2845,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 
 	/* Populate key if passed */
 	if (hash_key && hash_key->val) {
-		session_pool->spool_hash_key = zend_string_dup(hash_key, 1);
+		session_pool->spool_hash_key = ZSTR_DUP(hash_key, 1);
 		if (session_pool->spool_hash_key == NULL) {
 			iserror = 1;
 			goto exit_create_spool;

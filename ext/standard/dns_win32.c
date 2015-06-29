@@ -219,7 +219,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
 
-				txt = zend_string_safe_alloc(txt_len, 2, 0, 0);
+				txt = ZSTR_SAFE_ALLOC(txt_len, 2, 0, 0);
 				txt_dst = txt->val;
 				for (i = 0; i < count; i++) {
 					size_t len = strlen(data_txt->pStringArray[i]);

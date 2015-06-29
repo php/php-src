@@ -136,10 +136,10 @@ PHP_FUNCTION(random_bytes)
 		RETURN_FALSE;
 	}
 
-	bytes = zend_string_alloc(size, 0);
+	bytes = ZSTR_ALLOC(size, 0);
 
 	if (php_random_bytes(bytes->val, size) == FAILURE) {
-		zend_string_release(bytes);
+		ZSTR_RELEASE(bytes);
 		RETURN_FALSE;
 	}
 

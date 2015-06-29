@@ -521,7 +521,7 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 			case E_PARSE:
 			case E_RECOVERABLE_ERROR: {
 				const char *file_char = zend_get_executed_filename();
-				zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
+				zend_string *file = ZSTR_INIT(file_char, strlen(file_char), 0);
 				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 				efree(file);
 
@@ -689,19 +689,19 @@ static void phpdbg_register_file_handles(void) /* {{{ */
 
 	ic.value = zin;
 	ic.flags = CONST_CS;
-	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
+	ic.name = ZSTR_INIT(ZEND_STRL("STDIN"), 0);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
 	oc.value = zout;
 	oc.flags = CONST_CS;
-	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
+	oc.name = ZSTR_INIT(ZEND_STRL("STDOUT"), 0);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
 	ec.value = zerr;
 	ec.flags = CONST_CS;
-	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
+	ec.name = ZSTR_INIT(ZEND_STRL("STDERR"), 0);
 	ec.module_number = 0;
 	zend_register_constant(&ec);
 }

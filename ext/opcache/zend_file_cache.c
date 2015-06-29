@@ -204,7 +204,7 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	zend_shared_alloc_register_xlat_entry(str, ret);
 	if (info->str_size + len > ((zend_string*)ZCG(mem))->len) {
 		size_t new_len = info->str_size + len;
-		ZCG(mem) = (void*)zend_string_realloc(
+		ZCG(mem) = (void*)ZSTR_REALLOC(
 			(zend_string*)ZCG(mem),
 			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
@@ -717,7 +717,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	mem = buf = emalloc(script->size);
 #endif
 
-	ZCG(mem) = zend_string_alloc(4096 - (_ZSTR_HEADER_SIZE + 1), 0);
+	ZCG(mem) = ZSTR_ALLOC(4096 - (_ZSTR_HEADER_SIZE + 1), 0);
 
 	zend_shared_alloc_init_xlat_table();
 	if (!in_shm) {
@@ -742,7 +742,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		ZSTR_RELEASE((zend_string*)ZCG(mem));
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -755,7 +755,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		write(fd, ((zend_string*)ZCG(mem))->val, info.str_size) != info.str_size
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		ZSTR_RELEASE((zend_string*)ZCG(mem));
 		efree(mem);
 		unlink(filename);
 		efree(filename);
@@ -763,7 +763,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	}
 #endif
 
-	zend_string_release((zend_string*)ZCG(mem));
+	ZSTR_RELEASE((zend_string*)ZCG(mem));
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);

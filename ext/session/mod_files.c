@@ -481,7 +481,7 @@ PS_READ_FUNC(files)
 		return SUCCESS;
 	}
 
-	*val = zend_string_alloc(sbuf.st_size, 0);
+	*val = ZSTR_ALLOC(sbuf.st_size, 0);
 
 #if defined(HAVE_PREAD)
 	n = pread(data->fd, (*val)->val, (*val)->len, 0);
@@ -514,7 +514,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
 		}
-		zend_string_release(*val);
+		ZSTR_RELEASE(*val);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
@@ -675,7 +675,7 @@ PS_CREATE_SID_FUNC(files)
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, sid->val) == SUCCESS) {
 			if (sid) {
-				zend_string_release(sid);
+				ZSTR_RELEASE(sid);
 				sid = NULL;
 			}
 			if (--maxfail < 0) {

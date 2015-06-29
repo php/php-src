@@ -453,7 +453,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 		if (data->temp_name) {
 			unlink(data->temp_name->val);
 			/* temporary streams are never persistent */
-			zend_string_release(data->temp_name);
+			ZSTR_RELEASE(data->temp_name);
 			data->temp_name = NULL;
 		}
 	} else {
@@ -958,7 +958,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 			case PHP_STREAM_PERSISTENT_SUCCESS:
 				if (opened_path) {
 					//TODO: avoid reallocation???
-					*opened_path = zend_string_init(realpath, strlen(realpath), 0);
+					*opened_path = ZSTR_INIT(realpath, strlen(realpath), 0);
 				}
 				/* fall through */
 
@@ -980,7 +980,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 
 		if (ret)	{
 			if (opened_path) {
-				*opened_path = zend_string_init(realpath, strlen(realpath), 0);
+				*opened_path = ZSTR_INIT(realpath, strlen(realpath), 0);
 			}
 			if (persistent_id) {
 				efree(persistent_id);
@@ -998,7 +998,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				r = do_fstat(self, 0);
 				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
 					if (opened_path) {
-						zend_string_release(*opened_path);
+						ZSTR_RELEASE(*opened_path);
 						*opened_path = NULL;
 					}
 					php_stream_close(ret);

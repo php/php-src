@@ -349,7 +349,7 @@ PHP_FUNCTION( transliterator_transliterate )
 				zend_string *message = intl_error_get_message( NULL );
 				php_error_docref0( NULL, E_WARNING, "Could not create "
 					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), message->val );
-				zend_string_free( message );
+				ZSTR_FREE( message );
 				ZVAL_UNDEF(&tmp_object);
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */
 				goto cleanup;

@@ -140,7 +140,7 @@ PHP_FUNCTION(stream_socket_client)
 		zend_string *quoted_host = php_addslashes(host, 0);
 
 		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr->val);
-		zend_string_release(quoted_host);
+		ZSTR_RELEASE(quoted_host);
 	}
 
 	if (hashkey) {
@@ -156,13 +156,13 @@ PHP_FUNCTION(stream_socket_client)
 			zval_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		ZSTR_RELEASE(errstr);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -221,13 +221,13 @@ PHP_FUNCTION(stream_socket_server)
 			zval_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			ZSTR_RELEASE(errstr);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		ZSTR_RELEASE(errstr);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -283,7 +283,7 @@ PHP_FUNCTION(stream_socket_accept)
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		ZSTR_RELEASE(errstr);
 	}
 }
 /* }}} */
@@ -371,7 +371,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_FALSE;
 	}
 
-	read_buf = zend_string_alloc(to_read, 0);
+	read_buf = ZSTR_ALLOC(to_read, 0);
 
 	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, (int)flags, NULL, NULL,
 			zremote ? &remote_addr : NULL
@@ -386,7 +386,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_NEW_STR(read_buf);
 	}
 
-	zend_string_free(read_buf);
+	ZSTR_FREE(read_buf);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -540,7 +540,7 @@ PHP_FUNCTION(stream_get_transports)
 	if ((stream_xport_hash = php_stream_xport_get_hash())) {
 		array_init(return_value);
 		ZEND_HASH_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
-			add_next_index_str(return_value, zend_string_copy(stream_xport));
+			add_next_index_str(return_value, ZSTR_COPY(stream_xport));
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		RETURN_FALSE;
@@ -563,7 +563,7 @@ PHP_FUNCTION(stream_get_wrappers)
 		array_init(return_value);
 		ZEND_HASH_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
 			if (stream_protocol) {
-				add_next_index_str(return_value, zend_string_copy(stream_protocol));
+				add_next_index_str(return_value, ZSTR_COPY(stream_protocol));
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {

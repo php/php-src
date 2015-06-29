@@ -421,20 +421,20 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
 							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i]);
-							key = zend_string_alloc(key_len, 0);
+							key = ZSTR_ALLOC(key_len, 0);
 							key->len = snprintf(key->val, key->len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
 							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];
 							key_len = Z_STRLEN_P(class_name) + sizeof("::") + Z_STRLEN(op_array->literals[i]);
-							key = zend_string_alloc(key_len, 0);
+							key = ZSTR_ALLOC(key_len, 0);
 							memcpy(key->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 							memcpy(key->val + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
 							memcpy(key->val + Z_STRLEN_P(class_name) + sizeof("::") - 1,
 								Z_STRVAL(op_array->literals[i]),
 								Z_STRLEN(op_array->literals[i]) + 1);
 						} else {
-							key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
+							key = ZSTR_INIT(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
 						}
 						key->h = zend_hash_func(key->val, key->len);
 						key->h += info[i].flags;
@@ -444,7 +444,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) &&
 						info[i].flags == info[Z_LVAL_P(pos)].flags) {
 
-						zend_string_release(key);
+						ZSTR_RELEASE(key);
 						map[i] = Z_LVAL_P(pos);
 						zval_dtor(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
@@ -458,7 +458,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						if (info[i].flags & LITERAL_MAY_MERGE) {
 							ZVAL_LONG(&zv, j);
 							zend_hash_add_new(&hash, key, &zv);
-							zend_string_release(key);
+							ZSTR_RELEASE(key);
 						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];

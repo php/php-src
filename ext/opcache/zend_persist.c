@@ -36,19 +36,19 @@
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
-			zend_string_release(str); \
+			ZSTR_RELEASE(str); \
 			str = new_str; \
 		} else { \
 	    	new_str = zend_accel_memdup((void*)str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
-			zend_string_release(str); \
+			ZSTR_RELEASE(str); \
 	    	str = new_str; \
-	    	zend_string_hash_val(str); \
+	    	ZSTR_HASH(str); \
 	    	GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
 		str = zend_accel_memdup(str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
-    	zend_string_hash_val(str); \
+    	ZSTR_HASH(str); \
 		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 	} while (0)
 #define zend_accel_store_interned_string(str) do { \
@@ -608,7 +608,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			}
 		} else {
 			if (!already_stored) {
-				zend_string_release(op_array->doc_comment);
+				ZSTR_RELEASE(op_array->doc_comment);
 			}
 			op_array->doc_comment = NULL;
 		}
@@ -681,7 +681,7 @@ static void zend_persist_property_info(zval *zv)
 			if (!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(prop->doc_comment, prop->doc_comment);
 			}
-			zend_string_release(prop->doc_comment);
+			ZSTR_RELEASE(prop->doc_comment);
 			prop->doc_comment = NULL;
 		}
 	}
@@ -728,7 +728,7 @@ static void zend_persist_class_entry(zval *zv)
 			} else {
 				if (!zend_shared_alloc_get_xlat_entry(ZEND_CE_DOC_COMMENT(ce))) {
 					zend_shared_alloc_register_xlat_entry(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT(ce));
-					zend_string_release(ZEND_CE_DOC_COMMENT(ce));
+					ZSTR_RELEASE(ZEND_CE_DOC_COMMENT(ce));
 				}
 				ZEND_CE_DOC_COMMENT(ce) = NULL;
 			}

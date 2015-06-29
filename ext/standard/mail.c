@@ -178,11 +178,11 @@ PHP_FUNCTION(mail)
 	}
 
 	if (headers_trimmed) {
-		zend_string_release(headers_trimmed);
+		ZSTR_RELEASE(headers_trimmed);
 	}
 
 	if (extra_cmd) {
-		zend_string_release(extra_cmd);
+		ZSTR_RELEASE(extra_cmd);
 	}
 	if (to_r != to) {
 		efree(to_r);
@@ -297,7 +297,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str->val, zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
-		zend_string_free(date_str);
+		ZSTR_FREE(date_str);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(tmp);
@@ -328,7 +328,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), f->val);
 		}
-		zend_string_release(f);
+		ZSTR_RELEASE(f);
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {

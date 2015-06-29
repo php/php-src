@@ -601,11 +601,11 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
         else
 		{
 #if PHP_MAJOR_VERSION >= 7
-			psKey = zend_string_init(pKey, keyLen, 1);
+			psKey = ZSTR_INIT(pKey, keyLen, 1);
             zend_alter_ini_entry_chars(psKey,
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);
-			zend_string_release(psKey);
+			ZSTR_RELEASE(psKey);
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
@@ -774,11 +774,11 @@ static int cli_main( int argc, char * argv[] )
 #endif
         for( ini = ini_defaults; *ini; ini+=2 ) {
 #if PHP_MAJOR_VERSION >= 7
-			psKey = zend_string_init(*ini, strlen( *ini ), 1);
+			psKey = ZSTR_INIT(*ini, strlen( *ini ), 1);
             zend_alter_ini_entry_chars(psKey,
                                 (char *)*(ini+1), strlen( *(ini+1) ),
                                 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-			zend_string_release(psKey);
+			ZSTR_RELEASE(psKey);
 #else
             zend_alter_ini_entry( (char *)*ini, strlen( *ini )+1,
                                 (char *)*(ini+1), strlen( *(ini+1) ),

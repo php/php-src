@@ -171,7 +171,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) str->val, str->len + 1);
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return SUCCESS;
 }
 

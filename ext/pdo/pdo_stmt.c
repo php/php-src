@@ -138,7 +138,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		if (!param->name) {
 			/* do the reverse; map the parameter number to the name */
 			if ((name = zend_hash_index_find_ptr(stmt->bound_param_map, param->paramno)) != NULL) {
-				param->name = zend_string_init(name, strlen(name), 0);
+				param->name = ZSTR_INIT(name, strlen(name), 0);
 				return 1;
 			}
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
@@ -279,7 +279,7 @@ static void param_dtor(zval *el) /* {{{ */
 	}
 
 	if (param->name) {
-		zend_string_release(param->name);
+		ZSTR_RELEASE(param->name);
 	}
 
 	if (!Z_ISUNDEF(param->parameter)) {
@@ -364,18 +364,18 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (param->name) {
 		if (is_param && param->name->val[0] != ':') {
-			zend_string *temp = zend_string_alloc(param->name->len + 1, 0);
+			zend_string *temp = ZSTR_ALLOC(param->name->len + 1, 0);
 			temp->val[0] = ':';
 			memmove(temp->val + 1, param->name->val, param->name->len + 1);
 			param->name = temp;
 		} else {
-			param->name = zend_string_init(param->name->val, param->name->len, 0);
+			param->name = ZSTR_INIT(param->name->val, param->name->len, 0);
 		}
 	}
 
 	if (is_param && !rewrite_name_to_position(stmt, param)) {
 		if (param->name) {
-			zend_string_release(param->name);
+			ZSTR_RELEASE(param->name);
 			param->name = NULL;
 		}
 		return 0;
@@ -389,7 +389,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
 				)) {
 			if (param->name) {
-				zend_string_release(param->name);
+				ZSTR_RELEASE(param->name);
 				param->name = NULL;
 			}
 			return 0;
@@ -1824,7 +1824,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 
 	/* add stock items */
 	col = &stmt->columns[colno];
-	add_assoc_str(return_value, "name", zend_string_copy(col->name));
+	add_assoc_str(return_value, "name", ZSTR_COPY(col->name));
 	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
 	add_assoc_long(return_value, "precision", col->precision);
 	if (col->param_type != PDO_PARAM_ZVAL) {
@@ -2027,7 +2027,7 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 		struct pdo_column_data *cols = stmt->columns;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			zend_string_release(cols[i].name);
+			ZSTR_RELEASE(cols[i].name);
 		}
 		efree(stmt->columns);
 		stmt->columns = NULL;
@@ -2216,7 +2216,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	zend_string *lc_method_name;
 	zend_object *object = *object_pp;
 
-	lc_method_name = zend_string_alloc(method_name->len, 0);
+	lc_method_name = ZSTR_ALLOC(method_name->len, 0);
 	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 
 	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
@@ -2242,7 +2242,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	}
 
 out:
-	zend_string_release(lc_method_name);
+	ZSTR_RELEASE(lc_method_name);
 	return fbc;
 }
 
@@ -2329,7 +2329,7 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 		for (i = 0; i < stmt->column_count; i++) {
 			if (cols[i].name) {
-				zend_string_release(cols[i].name);
+				ZSTR_RELEASE(cols[i].name);
 				cols[i].name = NULL;
 			}
 		}
@@ -2621,15 +2621,15 @@ static union _zend_function *row_method_get(
 	zend_function *fbc;
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_alloc(method_name->len, 0);
+	lc_method_name = ZSTR_ALLOC(method_name->len, 0);
 	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 
 	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
-		zend_string_release(lc_method_name);
+		ZSTR_RELEASE(lc_method_name);
 		return NULL;
 	}
 
-	zend_string_release(lc_method_name);
+	ZSTR_RELEASE(lc_method_name);
 	return fbc;
 }
 
@@ -2643,7 +2643,7 @@ static union _zend_function *row_get_ctor(zend_object *object)
 	static zend_internal_function ctor = {0};
 
 	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name = zend_string_init("__construct", sizeof("__construct") - 1, 0);
+	ctor.function_name = ZSTR_INIT("__construct", sizeof("__construct") - 1, 0);
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbrow_constructor);
 	ctor.fn_flags = ZEND_ACC_PUBLIC;
@@ -2653,7 +2653,7 @@ static union _zend_function *row_get_ctor(zend_object *object)
 
 static zend_string *row_get_classname(const zend_object *object)
 {
-	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
+	return ZSTR_INIT("PDORow", sizeof("PDORow") - 1, 0);
 }
 
 static int row_compare(zval *object1, zval *object2)

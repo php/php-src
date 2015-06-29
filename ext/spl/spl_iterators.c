@@ -1227,7 +1227,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	}
 	spl_recursive_tree_iterator_get_postfix(object, &postfix);
 
-	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix), 0);
+	str = ZSTR_ALLOC(Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix), 0);
 	ptr = str->val;
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
@@ -1281,7 +1281,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_tree_iterator_get_prefix(object, &prefix);
 	spl_recursive_tree_iterator_get_postfix(object, &postfix);
 
-	str = zend_string_alloc(Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix), 0);
+	str = ZSTR_ALLOC(Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix), 0);
 	ptr = str->val;
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
@@ -1545,7 +1545,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			intern->u.regex.mode = mode;
-			intern->u.regex.regex = zend_string_copy(regex);
+			intern->u.regex.regex = ZSTR_COPY(regex);
 
 			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(regex);
@@ -2095,7 +2095,7 @@ SPL_METHOD(RegexIterator, accept)
 	if (intern->u.regex.flags & REGIT_INVERTED) {
 		RETVAL_BOOL(Z_TYPE_P(return_value) != IS_TRUE);
 	}
-	zend_string_release(subject);
+	ZSTR_RELEASE(subject);
 } /* }}} */
 
 /* {{{ proto string RegexIterator::getRegex()
@@ -2319,7 +2319,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 			object->u.regex.pce->refcount--;
 		}
 		if (object->u.regex.regex) {
-			zend_string_release(object->u.regex.regex);
+			ZSTR_RELEASE(object->u.regex.regex);
 		}
 	}
 #endif

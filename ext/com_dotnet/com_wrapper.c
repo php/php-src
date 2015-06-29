@@ -467,16 +467,16 @@ static void generate_dispids(php_dispatchex *disp)
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
 				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
-				name = zend_string_init(namebuf, strlen(namebuf), 0);
+				name = ZSTR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
-				zend_string_addref(name);
+				ZSTR_INC_REFCOUNT(name);
 			}
 
 			zend_hash_move_forward_ex(Z_OBJPROP(disp->object), &pos);
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				ZSTR_RELEASE(name);
 				continue;
 			}
 
@@ -488,7 +488,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 		}
 	}
 
@@ -502,16 +502,16 @@ static void generate_dispids(php_dispatchex *disp)
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
 				snprintf(namebuf, sizeof(namebuf), "%d", pid);
-				name = zend_string_init(namebuf, strlen(namebuf), 0);
+				name = ZSTR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
-				zend_string_addref(name);
+				ZSTR_INC_REFCOUNT(name);
 			}
 
 			zend_hash_move_forward_ex(&Z_OBJCE(disp->object)->function_table, &pos);
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				ZSTR_RELEASE(name);
 				continue;
 			}
 
@@ -523,7 +523,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 		}
 	}
 }

@@ -42,7 +42,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent)
 			meta->def = NULL;
 		}
 		if (meta->sname) {
-			zend_string_release(meta->sname);
+			ZSTR_RELEASE(meta->sname);
 		}
 	}
 }
@@ -226,7 +226,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		memcpy(new_fields[i].root, orig_fields[i].root, new_fields[i].root_len);
 
 		if (orig_fields[i].sname) {
-			new_fields[i].sname = zend_string_copy(orig_fields[i].sname);
+			new_fields[i].sname = ZSTR_COPY(orig_fields[i].sname);
 			new_fields[i].name = new_fields[i].sname->val;
 			new_fields[i].name_length = new_fields[i].sname->len;
 		}

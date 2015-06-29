@@ -352,7 +352,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
     }
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return SUCCESS;
 }
 
@@ -440,7 +440,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 
 	docp->version = xmlStrdup((const xmlChar *) str->val);
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return SUCCESS;
 }
 
@@ -668,7 +668,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	docp->URL = xmlStrdup((const xmlChar *) str->val);
 
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 	return SUCCESS;
 }
 

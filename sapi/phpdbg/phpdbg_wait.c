@@ -217,7 +217,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		ZEND_HASH_FOREACH_PTR(&module_registry, mod) {
 			if (mod->name) {
 				zval value;
-				ZVAL_NEW_STR(&value, zend_string_init(mod->name, strlen(mod->name), 0));
+				ZVAL_NEW_STR(&value, ZSTR_INIT(mod->name, strlen(mod->name), 0));
 				zend_hash_next_index_insert(&zv_registry, &value);
 			}
 		} ZEND_HASH_FOREACH_END();

@@ -55,7 +55,7 @@ void zend_interned_strings_init(void)
 	CG(interned_strings).u.flags |= HASH_FLAG_INITIALIZED;
 
 	/* interned empty string */
-	str = zend_string_alloc(sizeof("")-1, 1);
+	str = ZSTR_ALLOC(sizeof("")-1, 1);
 	str->val[0] = '\000';
 	CG(empty_string) = zend_new_interned_string_int(str);
 #endif
@@ -87,14 +87,14 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 		return str;
 	}
 
-	h = zend_string_hash_val(str);
+	h = ZSTR_HASH(str);
 	nIndex = h | CG(interned_strings).nTableMask;
 	idx = HT_HASH(&CG(interned_strings), nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(&CG(interned_strings), idx);
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				return p->key;
 			}
 		}
@@ -182,7 +182,7 @@ static void zend_interned_strings_restore_int(void)
 
 		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
 		GC_REFCOUNT(p->key) = 1;
-		zend_string_free(p->key);
+		ZSTR_FREE(p->key);
 
 		nIndex = p->h | CG(interned_strings).nTableMask;
 		if (HT_HASH(&CG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {

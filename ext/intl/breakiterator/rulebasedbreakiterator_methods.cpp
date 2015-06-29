@@ -210,7 +210,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 		RETURN_FALSE;
 	}
 
-	zend_string *ret_rules = zend_string_alloc(rules_len, 0);
+	zend_string *ret_rules = ZSTR_ALLOC(rules_len, 0);
 	memcpy(ret_rules->val, rules, rules_len);
 	ret_rules->val[rules_len] = '\0';
 

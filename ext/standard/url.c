@@ -493,7 +493,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = zend_string_alloc(3 * len, 0);
+	start = ZSTR_ALLOC(3 * len, 0);
 	to = (unsigned char*)start->val;
 
 	while (from < end) {
@@ -524,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
+	start = ZSTR_TRUNCATE(start, to - (unsigned char*)start->val, 0);
 
 	return start;
 }
@@ -566,7 +566,7 @@ PHP_FUNCTION(urldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
+	out_str = ZSTR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_url_decode(out_str->val, out_str->len);
 
     RETURN_NEW_STR(out_str);
@@ -611,7 +611,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 	register int x, y;
 	zend_string *str;
 
-	str = zend_string_alloc(3 * len, 0);
+	str = ZSTR_ALLOC(3 * len, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
 		str->val[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC
@@ -631,7 +631,7 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 		}
 	}
 	str->val[y] = '\0';
-	str = zend_string_truncate(str, y, 0);
+	str = ZSTR_TRUNCATE(str, y, 0);
 
 	return str;
 }
@@ -673,7 +673,7 @@ PHP_FUNCTION(rawurldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
+	out_str = ZSTR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
 
     RETURN_NEW_STR(out_str);
@@ -754,7 +754,7 @@ PHP_FUNCTION(get_headers)
 		}
 		if (!format) {
 no_name_header:
-			add_next_index_str(return_value, zend_string_copy(Z_STR_P(hdr)));
+			add_next_index_str(return_value, ZSTR_COPY(Z_STR_P(hdr)));
 		} else {
 			char c;
 			char *s, *p;

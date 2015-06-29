@@ -190,17 +190,17 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t maxlen)
 {
 	size_t i, j;
-	zend_string *str = zend_string_alloc(len, 0);
+	zend_string *str = ZSTR_ALLOC(len, 0);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if (end < *p) {
-		zend_string_free(str);
+		ZSTR_FREE(str);
 		return NULL;
 	}
 
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
-			zend_string_free(str);
+			ZSTR_FREE(str);
 			return NULL;
 		}
 		if (**p != '\\') {
@@ -217,7 +217,7 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 				} else if (**p >= 'A' && **p <= 'F') {
 					ch = (ch << 4) + (**p -'A'+10);
 				} else {
-					zend_string_free(str);
+					ZSTR_FREE(str);
 					return NULL;
 				}
 			}
@@ -680,7 +680,7 @@ use_double:
 	}
 
 	if (*(YYCURSOR) != '"') {
-		zend_string_free(str);
+		ZSTR_FREE(str);
 		*p = YYCURSOR;
 		return 0;
 	}
@@ -767,7 +767,7 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	class_name = zend_string_init(str, len, 0);
+	class_name = ZSTR_INIT(str, len, 0);
 
 	do {
 		if(!unserialize_allowed_class(class_name, classes)) {
@@ -782,7 +782,7 @@ object ":" uiv ":" ["]	{
 		if (ce) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
-				zend_string_release(class_name);
+				ZSTR_RELEASE(class_name);
 				return 0;
 			}
 			break;
@@ -790,7 +790,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 
 		if (EG(exception)) {
-			zend_string_release(class_name);
+			ZSTR_RELEASE(class_name);
 			return 0;
 		}
 
@@ -809,7 +809,7 @@ object ":" uiv ":" ["]	{
 		if (call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL) != SUCCESS) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
-				zend_string_release(class_name);
+				ZSTR_RELEASE(class_name);
 				zval_ptr_dtor(&user_func);
 				zval_ptr_dtor(&args[0]);
 				return 0;
@@ -824,7 +824,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 		zval_ptr_dtor(&retval);
 		if (EG(exception)) {
-			zend_string_release(class_name);
+			ZSTR_RELEASE(class_name);
 			zval_ptr_dtor(&user_func);
 			zval_ptr_dtor(&args[0]);
 			return 0;
@@ -852,7 +852,7 @@ object ":" uiv ":" ["]	{
 		if (ret && incomplete_class) {
 			php_store_class_name(rval, class_name->val, len2);
 		}
-		zend_string_release(class_name);
+		ZSTR_RELEASE(class_name);
 		return ret;
 	}
 
@@ -861,7 +861,7 @@ object ":" uiv ":" ["]	{
 	if (incomplete_class) {
 		php_store_class_name(rval, class_name->val, len2);
 	}
-	zend_string_release(class_name);
+	ZSTR_RELEASE(class_name);
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }

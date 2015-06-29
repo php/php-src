@@ -700,7 +700,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 		if (S->H->fetch_table_names) {
 			cols[i].name = strpprintf(0, "%s.%s", S->fields[i].table, S->fields[i].name);
 		} else {
-			cols[i].name = zend_string_init(S->fields[i].name, S->fields[i].name_length, 0);
+			cols[i].name = ZSTR_INIT(S->fields[i].name, S->fields[i].name_length, 0);
 		}
 
 		cols[i].precision = S->fields[i].decimals;

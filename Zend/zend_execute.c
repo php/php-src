@@ -1263,7 +1263,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 
 	if (offset < 0) {
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
-		zend_string_release(Z_STR_P(str));
+		ZSTR_RELEASE(Z_STR_P(str));
 		if (result) {
 			ZVAL_NULL(result);
 		}
@@ -1273,12 +1273,12 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	old_str = Z_STR_P(str);
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
 		zend_long old_len = Z_STRLEN_P(str);
-		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
+		Z_STR_P(str) = ZSTR_EXTEND(Z_STR_P(str), offset + 1, 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (!Z_REFCOUNTED_P(str)) {
-		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		Z_STR_P(str) = ZSTR_INIT(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	}
 
@@ -1286,7 +1286,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 		zend_string *tmp = zval_get_string(value);
 
 		Z_STRVAL_P(str)[offset] = tmp->val[0];
-		zend_string_release(tmp);
+		ZSTR_RELEASE(tmp);
 	} else {
 		Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
 	}
@@ -1295,14 +1295,14 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	T(result->u.var).var = &T->str_offset.str;
 	*/
 
-	zend_string_release(old_str);
+	ZSTR_RELEASE(old_str);
 	if (result) {
 		zend_uchar c = (zend_uchar)Z_STRVAL_P(str)[offset];
 
 		if (CG(one_char_string)[c]) {
 			ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
 		} else {
-			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
+			ZVAL_NEW_STR(result, ZSTR_INIT(Z_STRVAL_P(str) + offset, 1, 0));
 		}
 	}
 }
@@ -1817,7 +1817,7 @@ try_string_offset:
 			if (CG(one_char_string)[c]) {
 				ZVAL_INTERNED_STR(result, CG(one_char_string)[c]);
 			} else {
-				ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(container) + offset, 1, 0));
+				ZVAL_NEW_STR(result, ZSTR_INIT(Z_STRVAL_P(container) + offset, 1, 0));
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {

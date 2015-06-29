@@ -932,7 +932,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 	if (urlencode) {
 		encoded = php_raw_url_encode(name, strlen(name));
 		smart_str_appendl(&url_app, encoded->val, encoded->len);
-		zend_string_free(encoded);
+		ZSTR_FREE(encoded);
 	} else {
 		smart_str_appends(&url_app, name);
 	}
@@ -940,7 +940,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 	if (urlencode) {
 		encoded = php_raw_url_encode(value, strlen(value));
 		smart_str_appendl(&url_app, encoded->val, encoded->len);
-		zend_string_free(encoded);
+		ZSTR_FREE(encoded);
 	} else {
 		smart_str_appends(&url_app, value);
 	}
@@ -1059,10 +1059,10 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 	if (urlencode) {
 		encoded = php_raw_url_encode(name, name_len);
 		smart_str_appendl(&sname, encoded->val, encoded->len);
-		zend_string_free(encoded);
+		ZSTR_FREE(encoded);
 		encoded = php_raw_url_encode(value, value_len);
 		smart_str_appendl(&svalue, encoded->val, encoded->len);
-		zend_string_free(encoded);
+		ZSTR_FREE(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
 		smart_str_appendl(&svalue, value, value_len);

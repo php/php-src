@@ -345,7 +345,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 			{
 				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				break;
 			}
 		default:
@@ -745,14 +745,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release(str);
+			ZSTR_RELEASE(str);
 			break;
 		default:
 			break;
@@ -858,7 +858,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, (xmlChar *) str->val);
 	xmlNodeSetContent(nodep, enc_str);
 	xmlFree(enc_str);
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 
 	return SUCCESS;
 }

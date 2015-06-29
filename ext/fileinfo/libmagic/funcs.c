@@ -458,7 +458,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	strncpy(ms->o.buf, res->val, res->len);
 	ms->o.buf[res->len] = '\0';
 
-	zend_string_release(res);
+	ZSTR_RELEASE(res);
 
 out:
 	(void)setlocale(LC_CTYPE, "");

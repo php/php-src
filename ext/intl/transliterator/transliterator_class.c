@@ -183,7 +183,7 @@ err:
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
 			php_error_docref( NULL, E_ERROR, "%s", err_msg->val );
-			zend_string_free( err_msg ); /* if it's changed into a warning */
+			ZSTR_FREE( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
 	}

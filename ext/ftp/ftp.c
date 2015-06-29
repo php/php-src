@@ -586,13 +586,13 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	}
 	/* copy out the dir from response */
 	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
-		return zend_string_init(dir, strlen(dir), 0);
+		return ZSTR_INIT(dir, strlen(dir), 0);
 	}
 	if ((end = strrchr(++mkd, '"')) == NULL) {
 		return NULL;
 	}
 	*end = 0;
-	ret = zend_string_init(mkd, end - mkd, 0);
+	ret = ZSTR_INIT(mkd, end - mkd, 0);
 	*end = '"';
 
 	return ret;
@@ -667,7 +667,7 @@ ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)
 	}
 
 	if (response) {
-		*response = zend_string_init(ftp->inbuf, strlen(ftp->inbuf), 0);
+		*response = ZSTR_INIT(ftp->inbuf, strlen(ftp->inbuf), 0);
 	}
 
 	if (ftp->resp < 200 || ftp->resp >= 300) {

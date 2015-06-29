@@ -32,7 +32,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 		return FAILURE;
 	}
 
-	duplicate = zend_string_init(new_value, new_value_length, 1);
+	duplicate = ZSTR_INIT(new_value, new_value_length, 1);
 
 	if (!ini_entry->on_modify
 			|| ini_entry->on_modify(ini_entry, duplicate,
@@ -40,7 +40,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 		ini_entry->value = duplicate;
 		ini_entry->modifiable = mode;
 	} else {
-		zend_string_release(duplicate);
+		ZSTR_RELEASE(duplicate);
 	}
 
 	return SUCCESS;

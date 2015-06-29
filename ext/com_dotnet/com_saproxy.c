@@ -335,7 +335,7 @@ static union _zend_function *saproxy_constructor_get(zend_object *object)
 
 static zend_string* saproxy_class_name_get(const zend_object *object)
 {
-	return zend_string_copy(php_com_saproxy_class_entry->name);
+	return ZSTR_COPY(php_com_saproxy_class_entry->name);
 }
 
 static int saproxy_objects_compare(zval *object1, zval *object2)

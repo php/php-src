@@ -42,7 +42,7 @@ static void incomplete_class_message(zval *object, int error_type)
 
 	if (class_name) {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
-		zend_string_release(class_name);
+		ZSTR_RELEASE(class_name);
 	} else {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
@@ -140,7 +140,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 	object_properties = Z_OBJPROP_P(object);
 
 	if ((val = zend_hash_str_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) != NULL && Z_TYPE_P(val) == IS_STRING) {
-		return zend_string_copy(Z_STR_P(val));
+		return ZSTR_COPY(Z_STR_P(val));
 	}
 
 	return NULL;

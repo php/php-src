@@ -179,7 +179,7 @@ typedef struct _zend_fcall_info_cache {
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
 		zend_string *cl_name;									\
-		cl_name = zend_string_init(class_name, class_name_len, 1);		\
+		cl_name = ZSTR_INIT(class_name, class_name_len, 1);		\
 		class_container.name = zend_new_interned_string(cl_name);	\
 		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	}
@@ -564,7 +564,7 @@ END_EXTERN_C()
 #define CHECK_NULL_PATH(p, l) (strlen(p) != l)
 
 #define ZVAL_STRINGL(z, s, l) do {				\
-		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
+		ZVAL_NEW_STR(z, ZSTR_INIT(s, l, 0));		\
 	} while (0)
 
 #define ZVAL_STRING(z, s) do {					\
@@ -573,15 +573,15 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_STR_LEN(z, l) do {					\
-		zend_string_set_len(Z_STR_P(z), l);		\
+		ZSTR_SET_LEN(Z_STR_P(z), l);		\
 	} while (0)
 
 #define ZVAL_STR_DEC_LEN(z) do {					\
-		zend_string_dec_len(Z_STR_P(z));		\
+		ZSTR_DEC_LEN(Z_STR_P(z));		\
 	} while (0)
 
 #define ZVAL_STR_INC_LEN(z) do {					\
-		zend_string_inc_len(Z_STR_P(z));		\
+		ZSTR_INC_LEN(Z_STR_P(z));		\
 	} while (0)
 
 #define ZVAL_EMPTY_STRING(z) do {				\
@@ -589,7 +589,7 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\
-		ZVAL_NEW_STR(z, zend_string_init(s, l, 1));		\
+		ZVAL_NEW_STR(z, ZSTR_INIT(s, l, 1));		\
 	} while (0)
 
 #define ZVAL_PSTRING(z, s) do {					\

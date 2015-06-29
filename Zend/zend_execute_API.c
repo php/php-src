@@ -545,7 +545,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
 			ZEND_ASSERT(EG(current_execute_data));
 			if (inline_change) {
-				zend_string_release(Z_STR_P(p));
+				ZSTR_RELEASE(Z_STR_P(p));
 			}
 			if (EG(scope) && EG(scope)->name) {
 				ZVAL_STR_COPY(p, EG(scope)->name);
@@ -570,7 +570,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
-						zend_string *s = zend_string_init(actual, actual_len, 0);
+						zend_string *s = ZSTR_INIT(actual, actual_len, 0);
 						Z_STR_P(p) = s;
 						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 					}
@@ -591,7 +591,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 						zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", save->val);
 					}
 					if (inline_change) {
-						zend_string_release(save);
+						ZSTR_RELEASE(save);
 					}
 					RESET_CONSTANT_VISITED(p);
 					return FAILURE;
@@ -603,14 +603,14 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 						Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
 							IS_STRING_EX : IS_INTERNED_STRING_EX;
 						if (save && save->val != actual) {
-							zend_string_release(save);
+							ZSTR_RELEASE(save);
 						}
 					}
 				}
 			}
 		} else {
 			if (inline_change) {
-				zend_string_release(Z_STR_P(p));
+				ZSTR_RELEASE(Z_STR_P(p));
 			}
 			ZVAL_COPY_VALUE(p, const_value);
 			if (Z_OPT_CONSTANT_P(p)) {
@@ -734,7 +734,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 				efree(error);
 			}
 			if (callable_name) {
-				zend_string_release(callable_name);
+				ZSTR_RELEASE(callable_name);
 			}
 			if (EG(current_execute_data) == &dummy_execute_data) {
 				EG(current_execute_data) = dummy_execute_data.prev_execute_data;
@@ -748,7 +748,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			zend_error(E_DEPRECATED, "%s", error);
 			efree(error);
 		}
-		zend_string_release(callable_name);
+		ZSTR_RELEASE(callable_name);
 	}
 
 	func = fci_cache->function_handler;
@@ -895,7 +895,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		zend_vm_stack_free_args(call);
 
 		if (func->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release(func->common.function_name);
+			ZSTR_RELEASE(func->common.function_name);
 		}
 		efree(func);
 
@@ -937,7 +937,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 		}
 
 		if (name->val[0] == '\\') {
-			lc_name = zend_string_alloc(name->len - 1, 0);
+			lc_name = ZSTR_ALLOC(name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, name->val + 1, name->len - 1);
 		} else {
 			lc_name = zend_string_tolower(name);
@@ -947,7 +947,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	if (ce) {
 		if (!key) {
-			zend_string_release(lc_name);
+			ZSTR_RELEASE(lc_name);
 		}
 		return ce;
 	}
@@ -957,7 +957,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	*/
 	if (!use_autoload || zend_is_compiling()) {
 		if (!key) {
-			zend_string_release(lc_name);
+			ZSTR_RELEASE(lc_name);
 		}
 		return NULL;
 	}
@@ -968,7 +968,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 			EG(autoload_func) = func;
 		} else {
 			if (!key) {
-				zend_string_release(lc_name);
+				ZSTR_RELEASE(lc_name);
 			}
 			return NULL;
 		}
@@ -978,7 +978,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	/* Verify class name before passing it to __autoload() */
 	if (strspn(name->val, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\") != name->len) {
 		if (!key) {
-			zend_string_release(lc_name);
+			ZSTR_RELEASE(lc_name);
 		}
 		return NULL;
 	}
@@ -990,7 +990,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 
 	if (zend_hash_add_empty_element(EG(in_autoload), lc_name) == NULL) {
 		if (!key) {
-			zend_string_release(lc_name);
+			ZSTR_RELEASE(lc_name);
 		}
 		return NULL;
 	}
@@ -1034,7 +1034,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	}
 	if (!key) {
-		zend_string_release(lc_name);
+		ZSTR_RELEASE(lc_name);
 	}
 	return ce;
 }
@@ -1086,7 +1086,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 	int retval;
 
 	if (retval_ptr) {
-		ZVAL_NEW_STR(&pv, zend_string_alloc(str_len + sizeof("return ;")-1, 1));
+		ZVAL_NEW_STR(&pv, ZSTR_ALLOC(str_len + sizeof("return ;")-1, 1));
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
@@ -1578,7 +1578,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 
 	if (execute_data) {
 		if (!execute_data->symbol_table) {
-			zend_ulong h = zend_string_hash_val(name);
+			zend_ulong h = ZSTR_HASH(name);
 			zend_op_array *op_array = &execute_data->func->op_array;
 
 			if (EXPECTED(op_array->last_var)) {

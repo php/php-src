@@ -169,8 +169,8 @@ static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch);
 void phpdbg_watch_HashTable_dtor(zval *ptr);
 
 static void phpdbg_free_watch(phpdbg_watchpoint_t *watch) {
-	zend_string_release(watch->str);
-	zend_string_release(watch->name_in_parent);	
+	ZSTR_RELEASE(watch->str);
+	ZSTR_RELEASE(watch->name_in_parent);	
 }
 
 static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch);
@@ -459,12 +459,12 @@ static int phpdbg_create_recursive_ht_watch(phpdbg_watchpoint_t *watch) {
 			++GC_REFCOUNT(key);
 		} else {
 			str_len = spprintf(&str, 0, "%lld", h);
-			new_watch->name_in_parent = zend_string_init(str, str_len, 0);
+			new_watch->name_in_parent = ZSTR_INIT(str, str_len, 0);
 			efree(str);
 		}
 
 		str_len = spprintf(&str, 0, "%.*s%s%s%s", (int) watch->str->len - 2, watch->str->val, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(new_watch->name_in_parent->val), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
-		new_watch->str = zend_string_init(str, str_len, 0);
+		new_watch->str = ZSTR_INIT(str, str_len, 0);
 		efree(str);
 
 		while (Z_TYPE_P(zv) == IS_INDIRECT) {
@@ -499,7 +499,7 @@ static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch) {
 		new_watch->name_in_parent = watch->name_in_parent;
 		++GC_REFCOUNT(new_watch->name_in_parent);
 		str_len = spprintf(&str, 0, "%.*s[]", (int) watch->str->len, watch->str->val);
-		new_watch->str = zend_string_init(str, str_len, 0);
+		new_watch->str = ZSTR_INIT(str, str_len, 0);
 		efree(str);
 
 		if (Z_TYPE_P(zvp) == IS_ARRAY) {
@@ -630,8 +630,8 @@ static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch) {
 static int phpdbg_watchpoint_parse_wrapper(char *name, size_t namelen, char *key, size_t keylen, HashTable *parent, zval *zv, int (*callback)(phpdbg_watchpoint_t *)) {
 	int ret;
 	phpdbg_watchpoint_t *watch = ecalloc(1, sizeof(phpdbg_watchpoint_t));
-	watch->str = zend_string_init(name, namelen, 0);
-	watch->name_in_parent = zend_string_init(key, keylen, 0);
+	watch->str = ZSTR_INIT(name, namelen, 0);
+	watch->name_in_parent = ZSTR_INIT(key, keylen, 0);
 	watch->parent_container = parent;
 	phpdbg_create_zval_watchpoint(zv, watch);
 
@@ -665,8 +665,8 @@ static int phpdbg_watchpoint_parse_step(char *name, size_t namelen, char *key, s
 
 	watch = ecalloc(1, sizeof(phpdbg_watchpoint_t));
 	watch->flags = PHPDBG_WATCH_IMPLICIT;
-	watch->str = zend_string_init(name, namelen, 0);
-	watch->name_in_parent = zend_string_init(key, keylen, 0);
+	watch->str = ZSTR_INIT(name, namelen, 0);
+	watch->name_in_parent = ZSTR_INIT(key, keylen, 0);
 	watch->parent_container = parent;
 	watch->parent = PHPDBG_G(watch_tmp);
 	phpdbg_create_zval_watchpoint(zv, watch);

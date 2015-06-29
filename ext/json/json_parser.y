@@ -67,7 +67,7 @@ int json_yydebug = 1;
 %type <pair> pair
 
 %destructor { zval_dtor(&$$); } <value>
-%destructor { zend_string_release($$.key); zval_dtor(&$$.val); } <pair>
+%destructor { ZSTR_RELEASE($$.key); zval_dtor(&$$.val); } <pair>
 
 %code {
 int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
@@ -256,8 +256,8 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_s
 	} else {
 		zval zkey;
 		if (key->len == 0) {
-			zend_string_release(key);
-			key = zend_string_init("_empty_", sizeof("_empty_") - 1, 0);
+			ZSTR_RELEASE(key);
+			key = ZSTR_INIT("_empty_", sizeof("_empty_") - 1, 0);
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL); 
@@ -266,7 +266,7 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zend_s
 			Z_DELREF_P(zvalue);
 		}
 	}
-	zend_string_release(key);
+	ZSTR_RELEASE(key);
 }
 
 void php_json_parser_array_init(zval *array)

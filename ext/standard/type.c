@@ -415,7 +415,7 @@ PHP_FUNCTION(is_callable)
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
 			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 		} else {
 			ZVAL_STR(callable_name, name);
 		}

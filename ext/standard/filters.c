@@ -1225,7 +1225,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 		*pretval_len = str->len;
 		memcpy(*pretval, str->val, str->len + 1);
-		zend_string_release(str);
+		ZSTR_RELEASE(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}

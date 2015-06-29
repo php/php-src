@@ -941,7 +941,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", php_function_name->val);
 		}
-		zend_string_release(php_function_name);
+		ZSTR_RELEASE(php_function_name);
 	} ZEND_HASH_FOREACH_END();
 
 	/* so we don't call the same callbacks ever again */

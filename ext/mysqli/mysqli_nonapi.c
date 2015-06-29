@@ -291,7 +291,7 @@ end:
 
 err:
 	if (mysql->hash_key) {
-		zend_string_release(mysql->hash_key);
+		ZSTR_RELEASE(mysql->hash_key);
 		mysql->hash_key = NULL;
 		mysql->persistent = FALSE;
 	}

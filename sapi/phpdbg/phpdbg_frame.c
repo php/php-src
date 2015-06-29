@@ -86,7 +86,7 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 
 	{
 		const char *file_chr = zend_get_executed_filename();
-		zend_string *file = zend_string_init(file_chr, strlen(file_chr), 0);
+		zend_string *file = ZSTR_INIT(file_chr, strlen(file_chr), 0);
 		phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 		efree(file);
 	}
@@ -207,7 +207,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 
 	Z_LVAL(startline) = zend_get_executed_lineno();
 	startfilename = zend_get_executed_filename();
-	Z_STR(startfile) = zend_string_init(startfilename, strlen(startfilename), 0);
+	Z_STR(startfile) = ZSTR_INIT(startfilename, strlen(startfilename), 0);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
 	tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position);
@@ -234,7 +234,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	phpdbg_xml("</backtrace>");
 
 	zval_dtor(&zbacktrace);
-	zend_string_release(Z_STR(startfile));
+	ZSTR_RELEASE(Z_STR(startfile));
 
 	PHPDBG_OUTPUT_BACKUP_RESTORE();
 } /* }}} */

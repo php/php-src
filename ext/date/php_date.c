@@ -1662,10 +1662,10 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
 	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
-	buf = zend_string_alloc(buf_len, 0);
+	buf = ZSTR_ALLOC(buf_len, 0);
 	while ((real_len = strftime(buf->val, buf_len, format, &ta)) == buf_len || real_len == 0) {
 		buf_len *= 2;
-		buf = zend_string_extend(buf, buf_len, 0);
+		buf = ZSTR_EXTEND(buf, buf_len, 0);
 		if (!--max_reallocs) {
 			break;
 		}
@@ -1684,10 +1684,10 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	if (real_len && real_len != buf_len) {
-		buf = zend_string_truncate(buf, real_len, 0);
+		buf = ZSTR_TRUNCATE(buf, real_len, 0);
 		RETURN_NEW_STR(buf);
 	}
-	zend_string_free(buf);
+	ZSTR_FREE(buf);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -2188,7 +2188,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
-				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+				zend_string *tmpstr = ZSTR_ALLOC(sizeof("UTC+05:00")-1, 0);
 				timelib_sll utc_offset = dateobj->time->z;
 
 				tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
@@ -2281,7 +2281,7 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 			ZVAL_STRING(&zv, tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+			zend_string *tmpstr = ZSTR_ALLOC(sizeof("UTC+05:00")-1, 0);
 
 			tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
 			tzobj->tzi.utc_offset > 0 ? '-' : '+',
@@ -3741,7 +3741,7 @@ PHP_FUNCTION(timezone_name_get)
 			RETURN_STRING(tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+			zend_string *tmpstr = ZSTR_ALLOC(sizeof("UTC+05:00")-1, 0);
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
 
 			tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
@@ -4116,7 +4116,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		if (z_arg) { \
 			zend_string *str = zval_get_string(z_arg); \
 			DATE_A64I((*intobj)->diff->member, str->val); \
-			zend_string_release(str); \
+			ZSTR_RELEASE(str); \
 		} else { \
 			(*intobj)->diff->member = -1LL; \
 		} \

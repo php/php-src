@@ -130,7 +130,7 @@ PS_READ_FUNC(user)
 
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) == IS_STRING) {
-			*val = zend_string_copy(Z_STR(retval));
+			*val = ZSTR_COPY(Z_STR(retval));
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);
@@ -187,7 +187,7 @@ PS_CREATE_SID_FUNC(user)
 
 		if (!Z_ISUNDEF(retval)) {
 			if (Z_TYPE(retval) == IS_STRING) {
-				id = zend_string_copy(Z_STR(retval));
+				id = ZSTR_COPY(Z_STR(retval));
 			}
 			zval_ptr_dtor(&retval);
 		} else {

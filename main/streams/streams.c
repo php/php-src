@@ -1077,7 +1077,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 		}
 	}
 
-	ret_buf = zend_string_alloc(tent_ret_len, 0);
+	ret_buf = ZSTR_ALLOC(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
 	 * data is guaranteedly buffered */
 	ret_buf->len = php_stream_read(stream, ret_buf->val, tent_ret_len);
@@ -1422,7 +1422,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	}
 
 	if (maxlen > 0) {
-		result = zend_string_alloc(maxlen, persistent);
+		result = ZSTR_ALLOC(maxlen, persistent);
 		ptr = result->val;
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
@@ -1436,7 +1436,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 			*ptr = '\0';
 			result->len = len;
 		} else {
-			zend_string_free(result);
+			ZSTR_FREE(result);
 			result = NULL;
 		}
 		return result;
@@ -1454,13 +1454,13 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		max_len = step;
 	}
 
-	result = zend_string_alloc(max_len, persistent);
+	result = ZSTR_ALLOC(max_len, persistent);
 	ptr = result->val;
 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			result = zend_string_extend(result, max_len + step, persistent);
+			result = ZSTR_EXTEND(result, max_len + step, persistent);
 			max_len += step;
 			ptr = result->val + len;
 		} else {
@@ -1468,10 +1468,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 	}
 	if (len) {
-		result = zend_string_truncate(result, len, persistent);
+		result = ZSTR_TRUNCATE(result, len, persistent);
 		result->val[len] = '\0';
 	} else {
-		zend_string_free(result);
+		ZSTR_FREE(result);
 		result = NULL;
 	}
 
@@ -2034,7 +2034,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
 		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
 		if (resolved_path) {
-			zend_string_release(resolved_path);
+			ZSTR_RELEASE(resolved_path);
 		}
 		return NULL;
 	}
@@ -2087,7 +2087,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
 				if (resolved_path) {
-					zend_string_release(resolved_path);
+					ZSTR_RELEASE(resolved_path);
 				}
 				return stream;
 			case PHP_STREAM_RELEASED:
@@ -2096,7 +2096,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				}
 				newstream->orig_path = pestrdup(path, persistent);
 				if (resolved_path) {
-					zend_string_release(resolved_path);
+					ZSTR_RELEASE(resolved_path);
 				}
 				return newstream;
 			default:
@@ -2126,7 +2126,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream");
 		if (opened_path && *opened_path) {
-			zend_string_release(*opened_path);
+			ZSTR_RELEASE(*opened_path);
 			*opened_path = NULL;
 		}
 	}
@@ -2137,7 +2137,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 #endif
 	if (resolved_path) {
-		zend_string_release(resolved_path);
+		ZSTR_RELEASE(resolved_path);
 	}
 	return stream;
 }
@@ -2289,7 +2289,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
-		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
+		vector[nfiles] = ZSTR_INIT(sdp.d_name, strlen(sdp.d_name), 0);
 
 		nfiles++;
 		if(vector_size < 10 || nfiles == 0) {

@@ -64,7 +64,7 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage) /* {{
 			return 1;
 		}
 		if (ini_entry->value != ini_entry->orig_value) {
-			zend_string_release(ini_entry->value);
+			ZSTR_RELEASE(ini_entry->value);
 		}
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->modifiable = ini_entry->orig_modifiable;
@@ -88,12 +88,12 @@ static void free_ini_entry(zval *zv) /* {{{ */
 {
 	zend_ini_entry *entry = (zend_ini_entry*)Z_PTR_P(zv);
 
-	zend_string_release(entry->name);
+	ZSTR_RELEASE(entry->name);
 	if (entry->value) {
-		zend_string_release(entry->value);
+		ZSTR_RELEASE(entry->value);
 	}
 	if (entry->orig_value) {
-		zend_string_release(entry->orig_value);
+		ZSTR_RELEASE(entry->orig_value);
 	}
 	free(entry);
 }
@@ -157,13 +157,13 @@ static void copy_ini_entry(zval *zv) /* {{{ */
 	Z_PTR_P(zv) = new_entry;
 	memcpy(new_entry, old_entry, sizeof(zend_ini_entry));
 	if (old_entry->name) {
-		new_entry->name = zend_string_init(old_entry->name->val, old_entry->name->len, 1);
+		new_entry->name = ZSTR_INIT(old_entry->name->val, old_entry->name->len, 1);
 	}
 	if (old_entry->value) {
-		new_entry->value = zend_string_init(old_entry->value->val, old_entry->value->len, 1);
+		new_entry->value = ZSTR_INIT(old_entry->value->val, old_entry->value->len, 1);
 	}
 	if (old_entry->orig_value) {
-		new_entry->orig_value = zend_string_init(old_entry->orig_value->val, old_entry->orig_value->len, 1);
+		new_entry->orig_value = ZSTR_INIT(old_entry->orig_value->val, old_entry->orig_value->len, 1);
 	}
 }
 /* }}} */
@@ -231,7 +231,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 	while (ini_entry->name) {
 		p = pemalloc(sizeof(zend_ini_entry), 1);
-		p->name = zend_string_init(ini_entry->name, ini_entry->name_length, 1);
+		p->name = ZSTR_INIT(ini_entry->name, ini_entry->name_length, 1);
 		p->on_modify = ini_entry->on_modify;
 		p->mh_arg1 = ini_entry->mh_arg1;
 		p->mh_arg2 = ini_entry->mh_arg2;
@@ -247,7 +247,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
 			if (p->name) {
-				zend_string_release(p->name);
+				ZSTR_RELEASE(p->name);
 			}
 			zend_unregister_ini_entries(module_number);
 			return FAILURE;
@@ -255,10 +255,10 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
             (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
 
-			p->value = zend_string_copy(Z_STR_P(default_value));
+			p->value = ZSTR_COPY(Z_STR_P(default_value));
 		} else {
 			p->value = ini_entry->value ?
-				zend_string_init(ini_entry->value, ini_entry->value_length, 1) : NULL;
+				ZSTR_INIT(ini_entry->value, ini_entry->value_length, 1) : NULL;
 
 			if (p->on_modify) {
 				p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP);
@@ -308,9 +308,9 @@ ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, si
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = ZSTR_INIT(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
-	zend_string_release(new_value);
+	ZSTR_RELEASE(new_value);
 	return ret;
 }
 /* }}} */
@@ -320,9 +320,9 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = ZSTR_INIT(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change);
-	zend_string_release(new_value);
+	ZSTR_RELEASE(new_value);
 	return ret;
 }
 /* }}} */
@@ -362,16 +362,16 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		zend_hash_add_ptr(EG(modified_ini_directives), name, ini_entry);
 	}
 
-	duplicate = zend_string_copy(new_value);
+	duplicate = ZSTR_COPY(new_value);
 
 	if (!ini_entry->on_modify
 		|| ini_entry->on_modify(ini_entry, duplicate, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
 		if (modified && ini_entry->orig_value != ini_entry->value) { /* we already changed the value, free the changed value */
-			zend_string_release(ini_entry->value);
+			ZSTR_RELEASE(ini_entry->value);
 		}
 		ini_entry->value = duplicate;
 	} else {
-		zend_string_release(duplicate);
+		ZSTR_RELEASE(duplicate);
 		return FAILURE;
 	}
 

@@ -703,7 +703,7 @@ ZEND_METHOD(exception, __toString)
 
 		if (Z_OBJCE_P(exception) == type_error_ce && strstr(message->val, ", called in ")) {
 			zend_string *real_message = zend_strpprintf(0, "%s and defined", message->val);
-			zend_string_release(message);
+			ZSTR_RELEASE(message);
 			message = real_message;
 		}
 
@@ -721,9 +721,9 @@ ZEND_METHOD(exception, __toString)
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		}
 
-		zend_string_release(prev_str);
-		zend_string_release(message);
-		zend_string_release(file);
+		ZSTR_RELEASE(prev_str);
+		ZSTR_RELEASE(message);
+		ZSTR_RELEASE(file);
 		zval_ptr_dtor(&trace);
 
 		exception = GET_PROPERTY(exception, "previous");
@@ -970,8 +970,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 
 		zend_error_helper(code? code : E_ERROR, file->val, line, "%s", message->val);
 
-		zend_string_release(file);
-		zend_string_release(message);
+		ZSTR_RELEASE(file);
+		ZSTR_RELEASE(message);
 	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -1002,7 +1002,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 				Z_OBJCE(zv)->name->val, ce_exception->name->val);
 
 			if (file) {
-				zend_string_release(file);
+				ZSTR_RELEASE(file);
 			}
 		}
 
@@ -1013,8 +1013,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		zend_error_va(severity, (file && file->len > 0) ? file->val : NULL, line,
 			"Uncaught %s\n  thrown", str->val);
 
-		zend_string_release(str);
-		zend_string_release(file);
+		ZSTR_RELEASE(str);
+		ZSTR_RELEASE(file);
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}

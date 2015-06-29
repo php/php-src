@@ -906,7 +906,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				IS_SLASH(str_key->val[from_len])) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
+				new_str_key = ZSTR_ALLOC(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
@@ -918,8 +918,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				entry->filename = estrndup(new_str_key->val, new_str_key->len);
 				entry->filename_len = new_str_key->len;
 
-				zend_string_release(str_key);
-				b->h = zend_string_hash_val(new_str_key);
+				ZSTR_RELEASE(str_key);
+				b->h = ZSTR_HASH(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -931,13 +931,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
+				new_str_key = ZSTR_ALLOC(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				zend_string_release(str_key);
-				b->h = zend_string_hash_val(new_str_key);
+				ZSTR_RELEASE(str_key);
+				b->h = ZSTR_HASH(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -949,13 +949,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
 				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
+				new_str_key = ZSTR_ALLOC(str_key->len + to_len - from_len, 0);
 				memcpy(new_str_key->val, resource_to->path + 1, to_len);
 				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
 				new_str_key->val[new_str_key->len] = 0;
 
-				zend_string_release(str_key);
-				b->h = zend_string_hash_val(new_str_key);
+				ZSTR_RELEASE(str_key);
+				b->h = ZSTR_HASH(new_str_key);
 				b->key = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();

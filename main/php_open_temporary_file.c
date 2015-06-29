@@ -164,7 +164,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 #endif
 
 	if (fd != -1 && opened_path_p) {
-		*opened_path_p = zend_string_init(opened_path, strlen(opened_path), 0);
+		*opened_path_p = ZSTR_INIT(opened_path, strlen(opened_path), 0);
 	}
 	efree(new_state.cwd);
 	return fd;

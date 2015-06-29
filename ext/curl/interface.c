@@ -1608,10 +1608,10 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 
 	if (type == CURLINFO_HEADER_OUT) {
 		if (ch->header.str) {
-			zend_string_release(ch->header.str);
+			ZSTR_RELEASE(ch->header.str);
 		}
 		if (buf_len > 0) {
-			ch->header.str = zend_string_init(buf, buf_len, 0);
+			ch->header.str = ZSTR_INIT(buf, buf_len, 0);
 		}
 	}
 
@@ -2244,7 +2244,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		{
 			zend_string *str = zval_get_string(zvalue);
 			int ret = php_curl_option_str(ch, option, str->val, str->len, 0);
-			zend_string_release(str);
+			ZSTR_RELEASE(str);
 			return ret;
 		}
 
@@ -2269,7 +2269,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			} else {
 				zend_string *str = zval_get_string(zvalue);
 				int ret = php_curl_option_str(ch, option, str->val, str->len, 0);
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				return ret;
 			}
 			break;
@@ -2280,7 +2280,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		{
 			zend_string *str = zval_get_string(zvalue);
 			int ret = php_curl_option_str(ch, option, str->val, str->len, 1);
-			zend_string_release(str);
+			ZSTR_RELEASE(str);
 			return ret;
 		}
 
@@ -2289,7 +2289,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		{
 			zend_string *str = zval_get_string(zvalue);
 			int ret = php_curl_option_url(ch, str->val, str->len);
-			zend_string_release(str);
+			ZSTR_RELEASE(str);
 			return ret;
 		}
 
@@ -2449,7 +2449,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			ZEND_HASH_FOREACH_VAL(ph, current) {
 				val = zval_get_string(current);
 				slist = curl_slist_append(slist, val->val);
-				zend_string_release(val);
+				ZSTR_RELEASE(val);
 				if (!slist) {
 					php_error_docref(NULL, E_WARNING, "Could not build curl_slist");
 					return 1;
@@ -2511,7 +2511,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					if (!string_key) {
 						string_key = zend_long_to_str(num_key);
 					} else {
-						zend_string_addref(string_key);
+						ZSTR_INC_REFCOUNT(string_key);
 					}
 
 					if (Z_TYPE_P(current) == IS_OBJECT &&
@@ -2551,7 +2551,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 							}
 						}
 
-						zend_string_release(string_key);
+						ZSTR_RELEASE(string_key);
 						continue;
 					}
 
@@ -2571,8 +2571,8 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						/* Not nice to convert between enums but we only have place for one error type */
 						error = (CURLcode)form_error;
 					}
-					zend_string_release(postval);
-					zend_string_release(string_key);
+					ZSTR_RELEASE(postval);
+					ZSTR_RELEASE(string_key);
 				} ZEND_HASH_FOREACH_END();
 
 				SAVE_CURL_ERROR(ch, error);
@@ -2591,7 +2591,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				/* with curl 7.17.0 and later, we can use COPYPOSTFIELDS, but we have to provide size before */
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, str->len);
 				error = curl_easy_setopt(ch->cp, CURLOPT_COPYPOSTFIELDS, str->val);
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 #else
 				char *post = NULL;
 				zend_string *str = zval_get_string(zvalue);
@@ -2601,7 +2601,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 
 				curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, str->len);
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 #endif
 			}
 			break;
@@ -2696,12 +2696,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			int ret;
 
 			if (str->len && php_check_open_basedir(str->val)) {
-				zend_string_release(str);
+				ZSTR_RELEASE(str);
 				return FAILURE;
 			}
 
 			ret = php_curl_option_str(ch, option, str->val, str->len, 0);
-			zend_string_release(str);
+			ZSTR_RELEASE(str);
 			return ret;
 		}
 
@@ -2820,7 +2820,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 {
 	smart_str_free(&ch->handlers->write->buf);
 	if (ch->header.str) {
-		zend_string_release(ch->header.str);
+		ZSTR_RELEASE(ch->header.str);
 		ch->header.str = NULL;
 	}
 
@@ -3008,7 +3008,7 @@ PHP_FUNCTION(curl_getinfo)
 		}
 #endif
 		if (ch->header.str) {
-			CAASTR("request_header", zend_string_copy(ch->header.str));
+			CAASTR("request_header", ZSTR_COPY(ch->header.str));
 		}
 	} else {
 		switch (option) {
@@ -3203,7 +3203,7 @@ static void _php_curl_close_ex(php_curl *ch)
 #endif
 	zval_ptr_dtor(&ch->handlers->std_err);
 	if (ch->header.str) {
-		zend_string_release(ch->header.str);
+		ZSTR_RELEASE(ch->header.str);
 	}
 
 	zval_ptr_dtor(&ch->handlers->write_header->stream);

@@ -52,7 +52,7 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		zend_string_release(buf);
+		ZSTR_RELEASE(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -81,7 +81,7 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
 		smart_str_appendl(soap_headers, (char*)buf->val, buf->len);
 		smart_str_append_const(soap_headers, "\r\n");
-		zend_string_release(buf);
+		ZSTR_RELEASE(buf);
 		smart_str_free(&auth);
 		return 1;
 	}
@@ -264,7 +264,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
  	 	if (stream) {
 			zend_string *http_headers = get_http_headers(stream);
 			if (http_headers) {
-				zend_string_free(http_headers);
+				ZSTR_FREE(http_headers);
 			} else {
 				php_stream_close(stream);
 				stream = NULL;
@@ -790,7 +790,7 @@ try_again:
 				smart_str_append_const(&soap_headers, "Authorization: Basic ");
 				smart_str_appendl(&soap_headers, (char*)buf->val, buf->len);
 				smart_str_append_const(&soap_headers, "\r\n");
-				zend_string_release(buf);
+				ZSTR_RELEASE(buf);
 				smart_str_free(&auth);
 			}
 		}
@@ -891,7 +891,7 @@ try_again:
 
 		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
 		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
-			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
+			add_property_str(this_ptr, "__last_response_headers", ZSTR_COPY(http_headers));
 		}
 
 		/* Check to see what HTTP status was sent */
@@ -922,7 +922,7 @@ try_again:
 
 			/* Try and get headers again */
 			if (http_status == 100) {
-				zend_string_release(http_headers);
+				ZSTR_RELEASE(http_headers);
 			}
 		}
 	} while (http_status == 100);
@@ -1053,7 +1053,7 @@ try_again:
 	if (!get_http_body(stream, http_close, http_headers->val, &http_body, &http_body_size)) {
 		if (request != buf) {efree(request);}
 		php_stream_close(stream);
-		zend_string_release(http_headers);
+		ZSTR_RELEASE(http_headers);
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL);
@@ -1081,7 +1081,7 @@ try_again:
 			php_url *new_url  = php_url_parse(loc);
 
 			if (new_url != NULL) {
-				zend_string_release(http_headers);
+				ZSTR_RELEASE(http_headers);
 				efree(http_body);
 				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
@@ -1189,7 +1189,7 @@ try_again:
 				phpurl = new_url;
 
 				efree(auth);
-				zend_string_release(http_headers);
+				ZSTR_RELEASE(http_headers);
 				efree(http_body);
 
 				goto try_again;
@@ -1220,7 +1220,7 @@ try_again:
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
 				add_soap_fault(this_ptr, "HTTP", "Didn't receive an xml document", NULL, err);
 				efree(content_type);
-				zend_string_release(http_headers);
+				ZSTR_RELEASE(http_headers);
 				efree(http_body);
 				return FALSE;
 			}
@@ -1247,7 +1247,7 @@ try_again:
 			ZVAL_STRINGL(&params[0], http_body, http_body_size);
 		} else {
 			efree(content_encoding);
-			zend_string_release(http_headers);
+			ZSTR_RELEASE(http_headers);
 			efree(http_body);
 			if (http_msg) {
 				efree(http_msg);
@@ -1265,7 +1265,7 @@ try_again:
 			zval_ptr_dtor(&params[0]);
 			zval_ptr_dtor(&func);
 			efree(content_encoding);
-			zend_string_release(http_headers);
+			ZSTR_RELEASE(http_headers);
 			efree(http_body);
 			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL);
 			if (http_msg) {
@@ -1282,7 +1282,7 @@ try_again:
 		efree(http_body);
 	}
 
-	zend_string_release(http_headers);
+	ZSTR_RELEASE(http_headers);
 
 	if (http_status >= 400) {
 		int error = 0;

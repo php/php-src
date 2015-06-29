@@ -50,7 +50,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 }
 
 %destructor { zend_ast_destroy($$); } <ast>
-%destructor { if ($$) zend_string_release($$); } <str>
+%destructor { if ($$) ZSTR_RELEASE($$); } <str>
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -947,12 +947,12 @@ expr_without_variable:
 	|	function returns_ref '(' parameter_list ')' lexical_vars return_type
 		backup_doc_comment '{' inner_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $8,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+				  ZSTR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $4, $6, $10, $7); }
 	|	T_STATIC function returns_ref '(' parameter_list ')' lexical_vars
 		return_type backup_doc_comment '{' inner_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | ZEND_ACC_STATIC, $2, $9,
-			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+			      ZSTR_INIT("{closure}", sizeof("{closure}") - 1, 0),
 			      $5, $7, $11, $8); }
 ;
 

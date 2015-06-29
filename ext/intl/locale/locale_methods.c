@@ -237,14 +237,14 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	if (locale_name->len == 0) {
 		default_locale = (char *)uloc_getDefault();
-		locale_name = zend_string_init(default_locale, strlen(default_locale), 0);
+		locale_name = ZSTR_INIT(default_locale, strlen(default_locale), 0);
 	}
 
-	ini_name = zend_string_init(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
+	ini_name = ZSTR_INIT(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
 	zend_alter_ini_entry(ini_name, locale_name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	zend_string_release(ini_name);
+	ZSTR_RELEASE(ini_name);
 	if (default_locale != NULL) {
-		zend_string_release(locale_name);
+		ZSTR_RELEASE(locale_name);
 	}
 
 	RETURN_TRUE;

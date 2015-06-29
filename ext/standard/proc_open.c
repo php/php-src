@@ -110,7 +110,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
 		size_t el_len = str->len;
-		zend_string_release(str);
+		ZSTR_RELEASE(str);
 
 		if (el_len == 0) {
 			continue;
@@ -162,7 +162,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			p += str->len + 1;
 		}
 next_element:
-		zend_string_release(str);
+		ZSTR_RELEASE(str);
 	} ZEND_HASH_FOREACH_END();
 
 	assert((uint)(p - env.envp) <= sizeenv);

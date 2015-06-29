@@ -576,12 +576,12 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	if (encoder == NULL) {
 		/* If no encoder function was specified, return the data as-is.
 		 */
-		str = zend_string_init(s, len, 0);
+		str = ZSTR_INIT(s, len, 0);
 		return str;
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	str = zend_string_alloc(len * 4, 0);
+	str = ZSTR_ALLOC(len * 4, 0);
 	str->len = 0;
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
@@ -604,7 +604,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 		s++;
 	}
 	str->val[str->len] = '\0';
-	str = zend_string_truncate(str, str->len, 0);
+	str = ZSTR_TRUNCATE(str, str->len, 0);
 	return str;
 }
 /* }}} */
@@ -626,11 +626,11 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 		/* If the target encoding was unknown, or no decoder function
 		 * was specified, return the UTF-8-encoded data as-is.
 		 */
-		str = zend_string_init((char *)s, len, 0);
+		str = ZSTR_INIT((char *)s, len, 0);
 		return str;
 	}
 
-	str = zend_string_alloc(len, 0);
+	str = ZSTR_ALLOC(len, 0);
 	str->len = 0;
 	while (pos < len) {
 		int status = FAILURE;
@@ -644,7 +644,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 	}
 	str->val[str->len] = '\0';
 	if (str->len < len) {
-		str = zend_string_truncate(str, str->len, 0);
+		str = ZSTR_TRUNCATE(str, str->len, 0);
 	}
 
 	return str;
@@ -742,7 +742,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 				attributes += 2;
 
-				zend_string_release(att);
+				ZSTR_RELEASE(att);
 			}
 			
 			xml_call_handler(parser, &parser->startElementHandler, parser->startElementPtr, 3, args, &retval);
@@ -780,7 +780,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 					atcnt++;
 					attributes += 2;
 
-					zend_string_release(att);
+					ZSTR_RELEASE(att);
 				}
 
 				if (atcnt) {
@@ -795,7 +795,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			}
 		}
 
-		zend_string_release(tag_name);
+		ZSTR_RELEASE(tag_name);
 	}
 }
 /* }}} */
@@ -839,7 +839,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			parser->lastwasopen = 0;
 		}
 
-		zend_string_release(tag_name);
+		ZSTR_RELEASE(tag_name);
 
 		if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
 			efree(parser->ltags[parser->level-1]);
@@ -892,10 +892,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					/* check if the current tag already has a value - if yes append to that! */
 					if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
 						int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+						Z_STR_P(myval) = ZSTR_EXTEND(Z_STR_P(myval), newlen, 0);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 								decoded_value->val, decoded_value->len + 1);
-						zend_string_release(decoded_value);
+						ZSTR_RELEASE(decoded_value);
 					} else {
 						add_assoc_str(parser->ctag, "value", decoded_value);
 					}
@@ -909,10 +909,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
 									int newlen = Z_STRLEN_P(myval) + decoded_value->len;
-									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+									Z_STR_P(myval) = ZSTR_EXTEND(Z_STR_P(myval), newlen, 0);
 									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
 											decoded_value->val, decoded_value->len + 1);
-									zend_string_release(decoded_value);
+									ZSTR_RELEASE(decoded_value);
 									return;
 								}
 							}
@@ -936,7 +936,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					}
 				}
 			} else {
-				zend_string_release(decoded_value);
+				ZSTR_RELEASE(decoded_value);
 			}
 		}
 	}

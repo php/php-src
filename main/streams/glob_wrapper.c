@@ -220,7 +220,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
 		if (opened_path) {
-			*opened_path = zend_string_init(path, strlen(path), 0);
+			*opened_path = ZSTR_INIT(path, strlen(path), 0);
 		}
 	}
 

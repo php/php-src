@@ -1069,7 +1069,7 @@ static zend_object *php_converter_clone_object(zval *object) {
 
 		err_msg = intl_error_get_message(&oldobj->error);
 		zend_throw_exception(NULL, err_msg->val, 0);
-		zend_string_release(err_msg);
+		ZSTR_RELEASE(err_msg);
 
 		return retval;
 	}

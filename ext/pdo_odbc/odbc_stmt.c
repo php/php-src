@@ -512,7 +512,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 									break;
 							}
 
-							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
+							ZVAL_NEW_STR(parameter, ZSTR_ALLOC(srclen, 0));
 							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
 							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
@@ -594,7 +594,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	colsize = displaysize;
 
 	col->maxlen = S->cols[colno].datalen = colsize;
-	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
+	col->name = ZSTR_INIT(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
 	/* returning data as a string */

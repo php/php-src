@@ -796,7 +796,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			return ret;
 		}
-		str = zend_string_alloc(strlen((char*)data->children->content) / 2, 0);
+		str = ZSTR_ALLOC(strlen((char*)data->children->content) / 2, 0);
 		for (i = j = 0; i < str->len; i++) {
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
@@ -844,7 +844,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		zend_string *tmp = zval_get_string(data);
 		str = estrndup(tmp->val, tmp->len);
 		new_len = tmp->len;
-		zend_string_release(tmp);
+		ZSTR_RELEASE(tmp);
 	}
 
 	if (SOAP_GLOBAL(encoding) != NULL) {
@@ -926,12 +926,12 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 	} else {
 		zend_string *tmp = zval_get_string(data);
 		str = php_base64_encode((unsigned char*) tmp->val, tmp->len);
-		zend_string_release(tmp);
+		ZSTR_RELEASE(tmp);
 	}
 
 	text = xmlNewTextLen(BAD_CAST(str->val), str->len);
 	xmlAddChild(ret, text);
-	zend_string_release(str);
+	ZSTR_RELEASE(str);
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);
@@ -1062,7 +1062,7 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 	} else {
 		zend_string *str = zend_long_to_str(zval_get_long(data));
 		xmlNodeSetContentLen(ret, BAD_CAST(str->val), str->len);
-		zend_string_release(str);
+		ZSTR_RELEASE(str);
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -3132,7 +3132,7 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 	} else {
 		zend_string *tmp = zval_get_string(data);
 		ret = xmlNewTextLen(BAD_CAST(tmp->val), tmp->len);
-		zend_string_release(tmp);
+		ZSTR_RELEASE(tmp);
 	}
 
 	ret->name = xmlStringTextNoenc;

@@ -445,7 +445,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno)
 	}
 
 	str = PQfname(S->result, colno);
-	cols[colno].name = zend_string_init(str, strlen(str), 0);
+	cols[colno].name = ZSTR_INIT(str, strlen(str), 0);
 	cols[colno].maxlen = PQfsize(S->result, colno);
 	cols[colno].precision = PQfmod(S->result, colno);
 	S->cols[colno].pgsql_type = PQftype(S->result, colno);

@@ -1153,7 +1153,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 {
 #ifdef MYSQLI_USE_MYSQLND
-	add_property_str(value, "name", zend_string_copy(field->sname));
+	add_property_str(value, "name", ZSTR_COPY(field->sname));
 #else
 	add_property_stringl(value, "name",(field->name ? field->name : ""), field->name_length);
 #endif
@@ -1966,9 +1966,9 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	newstr = zend_string_alloc(2 * escapestr_len, 0);
+	newstr = ZSTR_ALLOC(2 * escapestr_len, 0);
 	newstr->len = mysql_real_escape_string(mysql->mysql, newstr->val, escapestr, escapestr_len);
-	newstr = zend_string_truncate(newstr, newstr->len, 0);
+	newstr = ZSTR_TRUNCATE(newstr, newstr->len, 0);
 
 	RETURN_NEW_STR(newstr);
 }

@@ -187,7 +187,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
-			zend_string_release(file_basename);
+			ZSTR_RELEASE(file_basename);
 			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
@@ -199,7 +199,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		if (!ret) {
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
-				zend_string_release(file_basename);
+				ZSTR_RELEASE(file_basename);
 				CWD_STATE_FREE(new_state.cwd);
 			}
 			return 0;
@@ -216,13 +216,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, file_basename->val);
 	if (!len) {
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		ZSTR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		ZSTR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -234,7 +234,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	if (ZIP_OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(fullpath);
 		efree(file_dirname_fullpath);
-		zend_string_release(file_basename);
+		ZSTR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -264,7 +264,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 done:
 	efree(fullpath);
-	zend_string_release(file_basename);
+	ZSTR_RELEASE(file_basename);
 	efree(file_dirname_fullpath);
 	CWD_STATE_FREE(new_state.cwd);
 
@@ -654,14 +654,14 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if ((namelist_len == 1 && namelist[i]->val[0] == '.') ||
 				(namelist_len == 2 && namelist[i]->val[0] == '.' && namelist[i]->val[1] == '.')) {
-				zend_string_release(namelist[i]);
+				ZSTR_RELEASE(namelist[i]);
 				continue;
 			}
 
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %i, %i given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release(namelist[i]);
+				ZSTR_RELEASE(namelist[i]);
 				break;
 			}
 
@@ -669,24 +669,24 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if (0 != VCWD_STAT(fullpath, &s)) {
 				php_error_docref(NULL, E_WARNING, "Cannot read <%s>", fullpath);
-				zend_string_release(namelist[i]);
+				ZSTR_RELEASE(namelist[i]);
 				continue;
 			}
 
 			if (S_IFDIR == (s.st_mode & S_IFMT)) {
-				zend_string_release(namelist[i]);
+				ZSTR_RELEASE(namelist[i]);
 				continue;
 			}
 
 			matches = pcre_exec(re, NULL, namelist[i]->val, namelist[i]->len, 0, 0, ovector, 3);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (matches < 0) {
-				zend_string_release(namelist[i]);
+				ZSTR_RELEASE(namelist[i]);
 				continue;
 			}
 
 			add_next_index_string(return_value, fullpath);
-			zend_string_release(namelist[i]);
+			ZSTR_RELEASE(namelist[i]);
 		}
 		efree(namelist);
 	}
@@ -1282,14 +1282,14 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 	}
 
 	if (zr_rsrc->zf) {
-		buffer = zend_string_alloc(len, 0);
+		buffer = ZSTR_ALLOC(len, 0);
 		n = zip_fread(zr_rsrc->zf, buffer->val, buffer->len);
 		if (n > 0) {
 			buffer->val[n] = '\0';
 			buffer->len = n;
 			RETURN_NEW_STR(buffer);
 		} else {
-			zend_string_free(buffer);
+			ZSTR_FREE(buffer);
 			RETURN_EMPTY_STRING()
 		}
 	} else {
@@ -1695,7 +1695,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					entry_name_len = Z_STRLEN_P(zval_file);
 				}
 				if (basename) {
-					zend_string_release(basename);
+					ZSTR_RELEASE(basename);
 					basename = NULL;
 				}
 				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
@@ -2723,10 +2723,10 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	buffer = zend_string_alloc(len, 0);
+	buffer = ZSTR_ALLOC(len, 0);
 	n = zip_fread(zf, buffer->val, buffer->len);
 	if (n < 1) {
-		zend_string_free(buffer);
+		ZSTR_FREE(buffer);
 		RETURN_EMPTY_STRING();
 	}
 

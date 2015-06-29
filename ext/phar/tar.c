@@ -1019,7 +1019,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				if (str) {
 					len = str->len;
 					user_stub = estrndup(str->val, str->len);
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 				} else {
 					user_stub = NULL;
 					len = 0;

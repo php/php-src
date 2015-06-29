@@ -61,7 +61,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	efree(arguments);
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	zend_string_release(func->internal_function.function_name);
+	ZSTR_RELEASE(func->internal_function.function_name);
 	efree(func);
 #if ZEND_DEBUG
 	execute_data->func = NULL;
@@ -158,14 +158,14 @@ ZEND_METHOD(Closure, bind)
 			ce = NULL;
 		} else {
 			zend_string *class_name = zval_get_string(scope_arg);
-			if (zend_string_equals_literal(class_name, "static")) {
+			if (ZSTR_EQUALS_LITERAL(class_name, "static")) {
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", class_name->val);
-				zend_string_release(class_name);
+				ZSTR_RELEASE(class_name);
 				RETURN_NULL();
 			}
-			zend_string_release(class_name);
+			ZSTR_RELEASE(class_name);
 		}
 		if(ce && ce != closure->func.common.scope && ce->type == ZEND_INTERNAL_CLASS) {
 			/* rebinding to internal class is not allowed */
@@ -222,7 +222,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	invoke->internal_function.function_name = zend_string_init(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
+	invoke->internal_function.function_name = ZSTR_INIT(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
 	return invoke;
 }
 /* }}} */
@@ -246,11 +246,11 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 	zend_string *lc_name;
 
 	lc_name = zend_string_tolower(method);
-	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
-		zend_string_release(lc_name);
+	if (ZSTR_EQUALS_LITERAL(method, ZEND_INVOKE_FUNC_NAME)) {
+		ZSTR_RELEASE(lc_name);
 		return zend_get_closure_invoke_method(*object);
 	}
-	zend_string_release(lc_name);
+	ZSTR_RELEASE(lc_name);
 	return std_object_handlers.get_method(object, method, key);
 }
 /* }}} */
@@ -402,7 +402,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 			}
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 			arg_info++;
 		}
 		zend_hash_str_update(debug_info, "parameter", sizeof("parameter")-1, &val);

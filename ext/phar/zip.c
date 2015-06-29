@@ -241,7 +241,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 					mydata->metadata_len = 0;
 					/* if not valid serialized data, it is a regular string */
 
-					ZVAL_NEW_STR(&mydata->metadata, zend_string_init(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
+					ZVAL_NEW_STR(&mydata->metadata, ZSTR_INIT(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent));
 				}
 			} else {
 				ZVAL_UNDEF(&mydata->metadata);
@@ -529,7 +529,7 @@ foundit:
 				entry.metadata_len = 0;
 				/* if not valid serialized data, it is a regular string */
 
-				ZVAL_NEW_STR(&entry.metadata, zend_string_init(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
+				ZVAL_NEW_STR(&entry.metadata, ZSTR_INIT(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent));
 			}
 		} else {
 			ZVAL_UNDEF(&entry.metadata);
@@ -586,7 +586,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						zend_string_release(str);
+						ZSTR_RELEASE(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -618,7 +618,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						zend_string_release(str);
+						ZSTR_RELEASE(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -640,7 +640,7 @@ foundit:
 					if (str) {
 						entry.uncompressed_filesize = str->len;
 						actual_alias = estrndup(str->val, str->len);
-						zend_string_release(str);
+						ZSTR_RELEASE(str);
 					} else {
 						actual_alias = NULL;
 						entry.uncompressed_filesize = 0;
@@ -1274,7 +1274,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				if (str) {
 					len = str->len;
 					user_stub = estrndup(str->val, str->len);
-					zend_string_release(str);
+					ZSTR_RELEASE(str);
 				} else {
 					user_stub = NULL;
 					len = 0;

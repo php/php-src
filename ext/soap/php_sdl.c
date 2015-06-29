@@ -291,7 +291,7 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 						zval new_header;
 
 						rest += 2;
-						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
+						ZVAL_NEW_STR(&new_header, ZSTR_ALLOC(Z_STRLEN_P(header) - (rest - s), 0));
 						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
 						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
 						ZVAL_COPY(&ctx->old_header, header);

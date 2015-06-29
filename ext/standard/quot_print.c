@@ -96,7 +96,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
 		i--;
 	}
 
-	retval = zend_string_alloc(buf_size, 0);
+	retval = ZSTR_ALLOC(buf_size, 0);
 	i = length; p1 = str; p2 = (unsigned char*)retval->val;
 	decoded_len = 0;
 
@@ -152,7 +152,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 	char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
-	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
+	ret = ZSTR_SAFE_ALLOC(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
 	d = (unsigned char*)ret->val;
 
 	while (length--) {
@@ -187,7 +187,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 		}
 	}
 	*d = '\0';
-	ret = zend_string_truncate(ret, d - (unsigned char*)ret->val, 0);
+	ret = ZSTR_TRUNCATE(ret, d - (unsigned char*)ret->val, 0);
 	return ret;
 }
 /* }}} */
@@ -216,7 +216,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	}
 
 	str_in = arg1->val;
-	str_out = zend_string_alloc(arg1->len, 0);
+	str_out = ZSTR_ALLOC(arg1->len, 0);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':

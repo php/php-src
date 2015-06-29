@@ -43,7 +43,7 @@ PHP_FUNCTION(metaphone)
 		RETVAL_STR(result);
 	} else {
 		if (result) {
-			zend_string_free(result);
+			ZSTR_FREE(result);
 		}
 		RETURN_FALSE;
 	}
@@ -142,7 +142,7 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = zend_string_extend(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
+							*phoned_word = ZSTR_EXTEND(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
 						(*phoned_word)->val[p_idx++] = c; \
@@ -151,7 +151,7 @@ static char Lookahead(char *word, int how_far)
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = zend_string_extend(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
+								*phoned_word = ZSTR_EXTEND(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
 							} \
 							(*phoned_word)->val[p_idx] = '\0'; \
@@ -187,10 +187,10 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
 		max_buffer_len = word_len;
-		*phoned_word = zend_string_alloc(sizeof(char) * word_len + 1, 0);
+		*phoned_word = ZSTR_ALLOC(sizeof(char) * word_len + 1, 0);
 	} else {
 		max_buffer_len = max_phonemes;
-		*phoned_word = zend_string_alloc(sizeof(char) * max_phonemes + 1, 0);
+		*phoned_word = ZSTR_ALLOC(sizeof(char) * max_phonemes + 1, 0);
 	}
 
 

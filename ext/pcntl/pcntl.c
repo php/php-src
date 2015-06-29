@@ -902,7 +902,7 @@ PHP_FUNCTION(pcntl_exec)
 			if (!key) {
 				key = zend_long_to_str(key_num);
 			} else {
-				zend_string_addref(key);
+				ZSTR_INC_REFCOUNT(key);
 			}
 
 			convert_to_string_ex(element);
@@ -915,7 +915,7 @@ PHP_FUNCTION(pcntl_exec)
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 
 			/* Cleanup */
-			zend_string_release(key);
+			ZSTR_RELEASE(key);
 			envi++;
 			pair++;
 		} ZEND_HASH_FOREACH_END();
@@ -992,10 +992,10 @@ PHP_FUNCTION(pcntl_signal)
 	if (!zend_is_callable(handle, 0, &func_name)) {
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", func_name->val);
-		zend_string_release(func_name);
+		ZSTR_RELEASE(func_name);
 		RETURN_FALSE;
 	}
-	zend_string_release(func_name);
+	ZSTR_RELEASE(func_name);
 
 	/* Add the function name to our signal table */
 	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {

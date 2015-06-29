@@ -37,7 +37,7 @@ void free_zend_constant(zval *zv)
 		zval_internal_dtor(&c->value);
 	}
 	if (c->name) {
-		zend_string_release(c->name);
+		ZSTR_RELEASE(c->name);
 	}
 	pefree(c, c->flags & CONST_PERSISTENT);
 }
@@ -51,12 +51,12 @@ static void copy_zend_constant(zval *zv)
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
 	c = Z_PTR_P(zv);
-	c->name = zend_string_copy(c->name);
+	c->name = ZSTR_COPY(c->name);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	} else {
 		if (Z_TYPE(c->value) == IS_STRING) {
-			Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
+			Z_STR(c->value) = ZSTR_DUP(Z_STR(c->value), 1);
 		}
 	}
 }
@@ -167,7 +167,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 
 	ZVAL_NULL(&c.value);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = ZSTR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -178,7 +178,7 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zen
 
 	ZVAL_BOOL(&c.value, bval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = ZSTR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -189,7 +189,7 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 
 	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = ZSTR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -201,7 +201,7 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 
 	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = ZSTR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -211,9 +211,9 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 {
 	zend_constant c;
 
-	ZVAL_NEW_STR(&c.value, zend_string_init(strval, strlen, flags & CONST_PERSISTENT));
+	ZVAL_NEW_STR(&c.value, ZSTR_INIT(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = ZSTR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -243,7 +243,7 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 		haltname = zend_mangle_property_name(haltoff,
 			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
 		c = zend_hash_find_ptr(EG(zend_constants), haltname);
-		zend_string_free(haltname);
+		ZSTR_FREE(haltname);
 		return c;
 	} else {
 		return NULL;
@@ -313,12 +313,12 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	    colon > name && (*(colon - 1) == ':')) {
 		int class_name_len = colon - name - 1;
 		size_t const_name_len = name_len - class_name_len - 2;
-		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
+		zend_string *constant_name = ZSTR_INIT(colon + 1, const_name_len, 0);
 		char *lcname;
 		zval *ret_constant = NULL;
 		ALLOCA_FLAG(use_heap)
 
-		class_name = zend_string_init(name, class_name_len, 0);
+		class_name = ZSTR_INIT(name, class_name_len, 0);
 		lcname = do_alloca(class_name_len + 1, use_heap);
 		zend_str_tolower_copy(lcname, name, class_name_len);
 		if (!scope) {
@@ -363,16 +363,16 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
-					zend_string_release(class_name);
-					zend_string_free(constant_name);
+					ZSTR_RELEASE(class_name);
+					ZSTR_FREE(constant_name);
 					return NULL;
 				}
 			} else if (Z_ISREF_P(ret_constant)) {
 				ret_constant = Z_REFVAL_P(ret_constant);
 			}
 		}
-		zend_string_release(class_name);
-		zend_string_free(constant_name);
+		ZSTR_RELEASE(class_name);
+		ZSTR_FREE(constant_name);
 		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
 			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
 				return NULL;
@@ -478,14 +478,14 @@ ZEND_API int zend_register_constant(zend_constant *c)
 #endif
 
 	if (!(c->flags & CONST_CS)) {
-		lowercase_name = zend_string_alloc(c->name->len, c->flags & CONST_PERSISTENT);
+		lowercase_name = ZSTR_ALLOC(c->name->len, c->flags & CONST_PERSISTENT);
 		zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		name = lowercase_name;
 	} else {
 		char *slash = strrchr(c->name->val, '\\');
 		if (slash) {
-			lowercase_name = zend_string_init(c->name->val, c->name->len, c->flags & CONST_PERSISTENT);
+			lowercase_name = ZSTR_INIT(c->name->val, c->name->len, c->flags & CONST_PERSISTENT);
 			zend_str_tolower(lowercase_name->val, slash - c->name->val);
 			lowercase_name = zend_new_interned_string(lowercase_name);
 			name = lowercase_name;
@@ -504,14 +504,14 @@ ZEND_API int zend_register_constant(zend_constant *c)
 			&& memcmp(name->val, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
 		}
 		zend_error(E_NOTICE,"Constant %s already defined", name->val);
-		zend_string_release(c->name);
+		ZSTR_RELEASE(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);
 		}
 		ret = FAILURE;
 	}
 	if (lowercase_name) {
-		zend_string_release(lowercase_name);
+		ZSTR_RELEASE(lowercase_name);
 	}
 	return ret;
 }

@@ -72,7 +72,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	zend_string *dest;
 
 	/* encoded length is ~ 38% greater than the original */
-	dest = zend_string_alloc((size_t)ceil(src_len * 1.38) + 46, 0);
+	dest = ZSTR_ALLOC((size_t)ceil(src_len * 1.38) + 46, 0);
 	p = dest->val;
 	s = src;
 	e = src + src_len;
@@ -122,7 +122,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	*p++ = '\n';
 	*p = '\0';
 
-	dest = zend_string_truncate(dest, p - dest->val, 0);
+	dest = ZSTR_TRUNCATE(dest, p - dest->val, 0);
 	return dest;
 }
 /* }}} */
@@ -133,7 +133,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	char *s, *e, *p, *ee;
 	zend_string *dest;
 
-	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
+	dest = ZSTR_ALLOC((size_t) ceil(src_len * 0.75), 0);
 	p = dest->val;
 	s = src;
 	e = src + src_len;
@@ -190,7 +190,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	return dest;
 
 err:
-	zend_string_free(dest);
+	ZSTR_FREE(dest);
 
 	return NULL;
 }

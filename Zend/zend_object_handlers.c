@@ -450,12 +450,12 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 
 	if (prop_info_name->val[0] == 0) {
 		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
-		member = zend_string_init(prop_name, prop_name_len, 0);
+		member = ZSTR_INIT(prop_name, prop_name_len, 0);
 	} else {
-		member = zend_string_copy(prop_info_name);
+		member = ZSTR_COPY(prop_info_name);
 	}
 	property_info = zend_get_property_info(zobj->ce, member, 1);
-	zend_string_release(member);
+	ZSTR_RELEASE(member);
 	if (property_info == NULL) {
 		/* undefined public property */
 		if (class_name && class_name[0] != '*') {
@@ -830,7 +830,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				}
 			    if (EXPECTED((retval = zend_hash_find(zobj->properties, name)) != NULL)) {
 					if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-						zend_string_release(name);
+						ZSTR_RELEASE(name);
 					}
 					return retval;
 			    }
@@ -851,7 +851,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		zend_string_release(name);
+		ZSTR_RELEASE(name);
 	}
 	return retval;
 }
@@ -1055,9 +1055,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	//??? keep compatibility for "\0" characters
 	//??? see: Zend/tests/bug46238.phpt
 	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
-		func->function_name = zend_string_init(method_name->val, strlen(method_name->val), 0);
+		func->function_name = ZSTR_INIT(method_name->val, strlen(method_name->val), 0);
 	} else {
-		func->function_name = zend_string_copy(method_name);
+		func->function_name = ZSTR_COPY(method_name);
 	}
 
 	return (zend_function*)func;
@@ -1191,7 +1191,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = Z_FUNC_P(func);
 		} else {
 			if (UNEXPECTED(!key)) {
-				zend_string_release(lc_function_name);
+				ZSTR_RELEASE(lc_function_name);
 			}
 			if (ce->__call &&
 				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
@@ -1252,7 +1252,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	}
 
 	if (UNEXPECTED(!key)) {
-		zend_string_release(lc_function_name);
+		ZSTR_RELEASE(lc_function_name);
 	}
 
 	return fbc;
@@ -1505,7 +1505,7 @@ exit:
 
 zend_string *zend_std_object_get_class_name(const zend_object *zobj) /* {{{ */
 {
-	return zend_string_copy(zobj->ce->name);
+	return ZSTR_COPY(zobj->ce->name);
 }
 /* }}} */
 

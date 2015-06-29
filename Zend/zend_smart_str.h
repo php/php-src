@@ -67,7 +67,7 @@ do_smart_str_realloc:
 
 static zend_always_inline void smart_str_free(smart_str *str) {
 	if (str->s) {
-		zend_string_release(str->s);
+		ZSTR_RELEASE(str->s);
 		str->s = NULL;
 	}
 	str->a = 0;

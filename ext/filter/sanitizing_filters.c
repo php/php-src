@@ -87,7 +87,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		memset(tmp, 1, 32);
 	}
 */
-	str = zend_string_alloc(3 * Z_STRLEN_P(value), 0);
+	str = ZSTR_ALLOC(3 * Z_STRLEN_P(value), 0);
 	p = (unsigned char *) str->val;
 	s = (unsigned char *) Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);
@@ -120,7 +120,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	}
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = ZSTR_ALLOC(Z_STRLEN_P(value) + 1, 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
@@ -162,7 +162,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
+	buf = ZSTR_ALLOC(Z_STRLEN_P(value) + 1, 0);
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((*map)[str[i]]) {

@@ -151,7 +151,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	}
 
 	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
-	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
+	regex = ZSTR_INIT(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
 				  NULL, header, (int)strlen(header),
@@ -161,14 +161,14 @@ static zend_string *php_win32_mail_trim_header(char *header)
 				  NULL);
 
 	zval_ptr_dtor(&replace);
-	zend_string_release(regex);
+	ZSTR_RELEASE(regex);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
 	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
-	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
+	regex = ZSTR_INIT(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
 				   result, result->val, (int)result->len,
@@ -177,8 +177,8 @@ static zend_string *php_win32_mail_trim_header(char *header)
 				  -1,
 				  NULL);
 	zval_ptr_dtor(&replace);
-	zend_string_release(regex);
-	zend_string_release(result);
+	ZSTR_RELEASE(regex);
+	ZSTR_RELEASE(result);
 
 	return result2;
 #else
@@ -256,7 +256,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		}
 	} else {
 		if (headers_lc) {
-			zend_string_free(headers_lc);
+			ZSTR_FREE(headers_lc);
 		}
 		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 		return FAILURE;
@@ -269,7 +269,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_lc);
+			ZSTR_FREE(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
@@ -287,7 +287,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_lc);
+			ZSTR_FREE(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
@@ -620,19 +620,19 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			c = *e2;
 			*e2 = '\0';
 			if ((res = Post(p)) != SUCCESS) {
-				zend_string_free(data_cln);
+				ZSTR_FREE(data_cln);
 				return(res);
 			}
 			*e2 = c;
 			p = e2;
 		}
 		if ((res = Post(p)) != SUCCESS) {
-			zend_string_free(data_cln);
+			ZSTR_FREE(data_cln);
 			return(res);
 		}
 	}
 
-	zend_string_free(data_cln);
+	ZSTR_FREE(data_cln);
 
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
@@ -691,7 +691,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
 		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
-		zend_string_free(dt);
+		ZSTR_FREE(dt);
 	}
 
 	if (!headers_lc || !strstr(headers_lc, "from:")) {

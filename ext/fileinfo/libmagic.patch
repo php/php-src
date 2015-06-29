@@ -2307,7 +2307,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 -file_regerror(file_regex_t *rx, int rc, struct magic_set *ms)
 -{
 -	char errmsg[512];
-+	zend_string_release(res);
++	ZSTR_RELEASE(res);
  
 -	(void)regerror(rc, &rx->rx, errmsg, sizeof(errmsg));
 -	file_magerror(ms, "regex error %d for `%s', (%s)", rc, rx->pat,
@@ -3310,7 +3310,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -	if (rc) {
 -		file_regerror(&rx, rc, ms);
 +	(void)setlocale(LC_CTYPE, "C");
-+	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
++	pattern = ZSTR_INIT("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
 +	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
 +		rv = -1;
  	} else {
@@ -3319,7 +3319,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
  	}
 -	file_regfree(&rx);
-+	zend_string_release(pattern);
++	ZSTR_RELEASE(pattern);
 +	(void)setlocale(LC_CTYPE, "");
  	return rv;
  }
@@ -3460,7 +3460,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +	int i, j=0;
 +	zend_string *t;
 +
-+	t = zend_string_alloc(len * 2 + 4, 0);
++	t = ZSTR_ALLOC(len * 2 + 4, 0);
 +
 +	t->val[j++] = '~';
 +

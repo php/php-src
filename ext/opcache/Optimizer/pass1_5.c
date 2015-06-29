@@ -193,7 +193,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				last_op = next_op;
 				final_length += (requires_conversion? 1 : Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-				str = zend_string_alloc(final_length, 0);
+				str = ZSTR_ALLOC(final_length, 0);
 				str->len = final_length;
 				ptr = str->val;
 				ptr[final_length] = '\0';
@@ -207,7 +207,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else { /* ZEND_ADD_STRING */
 					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
-					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
+					ZSTR_RELEASE(Z_STR(ZEND_OP2_LITERAL(opline)));
 					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
 				}
 				next_op = opline + 1;
@@ -457,11 +457,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
 							MAKE_NOP(send1_opline);
 							MAKE_NOP(opline);
-							zend_string_release(lc_name);
+							ZSTR_RELEASE(lc_name);
 							break;
 						}
 					}
-					zend_string_release(lc_name);
+					ZSTR_RELEASE(lc_name);
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
 						"extension_loaded", sizeof("extension_loaded")-1) &&
@@ -472,7 +472,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
 							lc_name);
 
-					zend_string_release(lc_name);
+					ZSTR_RELEASE(lc_name);
 					if (!m) {
 						if (!PG(enable_dl)) {
 							break;
@@ -550,7 +550,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						"dirname", sizeof("dirname") - 1) &&
 					!zend_optimizer_is_disabled_func("dirname", sizeof("dirname") - 1) &&
 					IS_ABSOLUTE_PATH(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
-					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
+					zend_string *dirname = ZSTR_INIT(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
 					dirname->len = zend_dirname(dirname->val, dirname->len);
 					if (IS_ABSOLUTE_PATH(dirname->val, dirname->len)) {
 						zval t;
@@ -565,7 +565,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							break;
 						}
 					} else {
-						zend_string_release(dirname);
+						ZSTR_RELEASE(dirname);
 					}
 				}
 			}

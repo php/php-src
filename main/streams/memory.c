@@ -750,7 +750,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		ZVAL_COPY_VALUE(&ts->meta, &meta);
 	}
 	if (base64_comma) {
-		zend_string_free(base64_comma);
+		ZSTR_FREE(base64_comma);
 	} else {
 		efree(comma);
 	}

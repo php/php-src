@@ -190,7 +190,7 @@ phar_it:
 			}
 			stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
 			if (entry_str) {
-				zend_string_release(entry_str);
+				ZSTR_RELEASE(entry_str);
 			} else {
 				efree(name);
 			}
@@ -210,7 +210,7 @@ phar_it:
 			if (contents && contents->len > 0) {
 				RETVAL_STR(contents);
 			} else if (contents) {
-				zend_string_release(contents);
+				ZSTR_RELEASE(contents);
 				RETVAL_EMPTY_STRING();
 			} else {
 				RETVAL_FALSE;
@@ -308,7 +308,7 @@ notfound:
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
 		if (entry_str) {
-			zend_string_release(entry_str);
+			ZSTR_RELEASE(entry_str);
 		} else {
 			efree(name);
 		}
@@ -410,7 +410,7 @@ notfound:
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, mode, 0 | REPORT_ERRORS, NULL, context);
 		if (entry_str) {
-			zend_string_release(entry_str);
+			ZSTR_RELEASE(entry_str);
 		} else {
 			efree(name);
 		}

@@ -525,7 +525,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 	col->precision = scale;
 	col->maxlen = data_size;
-	col->name = zend_string_init((char *)colname, namelen, 0);
+	col->name = ZSTR_INIT((char *)colname, namelen, 0);
 
 	S->cols[colno].dtype = dtype;
 

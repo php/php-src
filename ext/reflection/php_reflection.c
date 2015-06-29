@@ -125,7 +125,7 @@ typedef struct _string {
 
 static void string_init(string *str)
 {
-	str->buf= zend_string_alloc(1024, 0);
+	str->buf= ZSTR_ALLOC(1024, 0);
 	str->alloced = 1024;
 	str->buf->val[0] = '\0';
 	str->buf->len = 0;
@@ -144,7 +144,7 @@ static string *string_printf(string *str, const char *format, ...)
 		if (str->alloced < nlen) {
 			size_t old_len = str->buf->len;
 			str->alloced = nlen;
-			str->buf = zend_string_extend(str->buf, str->alloced, 0);
+			str->buf = ZSTR_EXTEND(str->buf, str->alloced, 0);
 			str->buf->len = old_len;
 		}
 		memcpy(str->buf->val + str->buf->len, s_tmp, len + 1);
@@ -161,7 +161,7 @@ static string *string_write(string *str, char *buf, size_t len)
 	if (str->alloced < nlen) {
 		size_t old_len = str->buf->len;
 		str->alloced = nlen;
-		str->buf = zend_string_extend(str->buf, str->alloced, 0);
+		str->buf = ZSTR_EXTEND(str->buf, str->alloced, 0);
 		str->buf->len = old_len;
 	}
 	memcpy(str->buf->val + str->buf->len, buf, len);
@@ -180,7 +180,7 @@ static string *string_append(string *str, string *append)
 
 static void string_free(string *str)
 {
-	zend_string_release(str->buf);
+	ZSTR_RELEASE(str->buf);
 	str->alloced = 0;
 	str->buf = NULL;
 }
@@ -282,7 +282,7 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 		zend_function *copy_fptr;
 		copy_fptr = emalloc(sizeof(zend_function));
 		memcpy(copy_fptr, fptr, sizeof(zend_function));
-		copy_fptr->internal_function.function_name = zend_string_copy(fptr->internal_function.function_name);
+		copy_fptr->internal_function.function_name = ZSTR_COPY(fptr->internal_function.function_name);
 		return copy_fptr;
 	} else {
 		/* no copy needed */
@@ -296,7 +296,7 @@ static void _free_function(zend_function *fptr) /* {{{ */
 	if (fptr
 		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
-		zend_string_release(fptr->internal_function.function_name);
+		ZSTR_RELEASE(fptr->internal_function.function_name);
 		zend_free_trampoline(fptr);
 	}
 }
@@ -329,7 +329,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			break;
 		case REF_TYPE_DYNAMIC_PROPERTY:
 			prop_reference = (property_reference*)intern->ptr;
-			zend_string_release(prop_reference->prop.name);
+			ZSTR_RELEASE(prop_reference->prop.name);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_GENERATOR:
@@ -633,7 +633,7 @@ static void _const_string(string *str, char *name, zval *value, char *indent)
 	string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
 					indent, type, name, value_str->val);
 
-	zend_string_release(value_str);
+	ZSTR_RELEASE(value_str);
 }
 /* }}} */
 
@@ -725,7 +725,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			} else {
 				zend_string *zv_str = zval_get_string(&zv);
 				string_write(str, zv_str->val, zv_str->len);
-				zend_string_release(zv_str);
+				ZSTR_RELEASE(zv_str);
 			}
 			zval_ptr_dtor(&zv);
 		}
@@ -819,7 +819,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 			string_printf(str, ", inherits %s", fptr->common.scope->name->val);
 		} else if (fptr->common.scope->parent) {
 			lc_name_len = fptr->common.function_name->len;
-			lc_name = zend_string_alloc(lc_name_len, 0);
+			lc_name = ZSTR_ALLOC(lc_name_len, 0);
 			zend_str_tolower_copy(lc_name->val, fptr->common.function_name->val, lc_name_len);
 			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, lc_name)) != NULL) {
 				if (fptr->common.scope != overwrites->common.scope) {
@@ -1201,10 +1201,10 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 	zend_string *lcname;
 	struct _zend_module_entry *module;
 
-	lcname = zend_string_alloc(name_len, 0);
+	lcname = ZSTR_ALLOC(name_len, 0);
 	zend_str_tolower_copy(lcname->val, name_str, name_len);
 	module = zend_hash_find_ptr(&module_registry, lcname);
-	zend_string_free(lcname);
+	ZSTR_FREE(lcname);
 	if (!module) {
 		return;
 	}
@@ -2449,7 +2449,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position < 0 || (uint32_t)position >= num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release(fptr->common.function_name);
+					ZSTR_RELEASE(fptr->common.function_name);
 				}
 				zend_free_trampoline(fptr);
 			}
@@ -2488,7 +2488,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position == -1) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release(fptr->common.function_name);
+					ZSTR_RELEASE(fptr->common.function_name);
 				}
 				zend_free_trampoline(fptr);
 			}
@@ -2655,9 +2655,9 @@ ZEND_METHOD(reflection_parameter, getClass)
 		} else {
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION &&
 			    !(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-				zend_string *name = zend_string_init(class_name, class_name_len, 0);
+				zend_string *name = ZSTR_INIT(class_name, class_name_len, 0);
 				ce = zend_lookup_class(name);
-				zend_string_release(name);
+				ZSTR_RELEASE(name);
 			} else {
 				ce = zend_lookup_class(param->arg_info->class_name);
 			}
@@ -4259,7 +4259,7 @@ ZEND_METHOD(reflection_class, getProperty)
 		if (zend_hash_exists(Z_OBJ_HT(intern->obj)->get_properties(&intern->obj), name)) {
 			zend_property_info property_info_tmp;
 			property_info_tmp.flags = ZEND_ACC_IMPLICIT_PUBLIC;
-			property_info_tmp.name = zend_string_copy(name);
+			property_info_tmp.name = ZSTR_COPY(name);
 			property_info_tmp.doc_comment = NULL;
 			property_info_tmp.ce = ce;
 
@@ -4273,7 +4273,7 @@ ZEND_METHOD(reflection_class, getProperty)
 	str_name_len = name->len;
 	if ((tmp = strstr(name->val, "::")) != NULL) {
 		classname_len = tmp - name->val;
-		classname = zend_string_alloc(classname_len, 0);
+		classname = ZSTR_ALLOC(classname_len, 0);
 		zend_str_tolower_copy(classname->val, name->val, classname_len);
 		classname->val[classname_len] = '\0';
 		str_name_len = name->len - (classname_len + 2);
@@ -4284,10 +4284,10 @@ ZEND_METHOD(reflection_class, getProperty)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", classname->val);
 			}
-			zend_string_release(classname);
+			ZSTR_RELEASE(classname);
 			return;
 		}
-		zend_string_release(classname);
+		ZSTR_RELEASE(classname);
 
 		if (!instanceof_function(ce, ce2)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
@@ -4827,7 +4827,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 	array_init(return_value);
 
 	for (i=0; i < ce->num_interfaces; i++) {
-		add_next_index_str(return_value, zend_string_copy(ce->interfaces[i]->name));
+		add_next_index_str(return_value, ZSTR_COPY(ce->interfaces[i]->name));
 	}
 }
 /* }}} */
@@ -4871,7 +4871,7 @@ ZEND_METHOD(reflection_class, getTraitNames)
 	array_init(return_value);
 
 	for (i=0; i < ce->num_traits; i++) {
-		add_next_index_str(return_value, zend_string_copy(ce->traits[i]->name));
+		add_next_index_str(return_value, ZSTR_COPY(ce->traits[i]->name));
 	}
 }
 /* }}} */
@@ -4898,7 +4898,7 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 
 			if (ce->trait_aliases[i]->alias) {
 
-				mname = zend_string_alloc(cur_ref->ce->name->len + cur_ref->method_name->len + 2, 0);
+				mname = ZSTR_ALLOC(cur_ref->ce->name->len + cur_ref->method_name->len + 2, 0);
 				snprintf(mname->val, mname->len + 1, "%s::%s", cur_ref->ce->name->val, cur_ref->method_name->val);
 				add_assoc_str_ex(return_value, ce->trait_aliases[i]->alias->val, ce->trait_aliases[i]->alias->len, mname);
 			}
@@ -5783,7 +5783,7 @@ static int add_extension_class(zval *zv, int num_args, va_list args, zend_hash_k
 			zend_reflection_class_factory(ce, &zclass);
 			zend_hash_update(Z_ARRVAL_P(class_array), name, &zclass);
 		} else {
-			add_next_index_str(class_array, zend_string_copy(name));
+			add_next_index_str(class_array, ZSTR_COPY(name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -5878,7 +5878,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 			len += strlen(dep->version) + 1;
 		}
 
-		relation = zend_string_alloc(len, 0);
+		relation = ZSTR_ALLOC(len, 0);
 		snprintf(relation->val, relation->len + 1, "%s%s%s%s%s",
 						rel_type,
 						dep->rel ? " " : "",

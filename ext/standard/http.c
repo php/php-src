@@ -96,7 +96,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 				memcpy(p, ekey->val, ekey->len);
 				p += ekey->len;
-				zend_string_free(ekey);
+				ZSTR_FREE(ekey);
 
 				if (key_suffix) {
 					memcpy(p, key_suffix, key_suffix_len);
@@ -161,7 +161,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					ekey = php_url_encode(prop_name, prop_len);
 				}
 				smart_str_append(formstr, ekey);
-				zend_string_free(ekey);
+				ZSTR_FREE(ekey);
 			} else {
 				/* Numeric key */
 				if (num_prefix) {
@@ -180,7 +180,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
 						}
 						smart_str_append(formstr, ekey);
-						zend_string_free(ekey);
+						ZSTR_FREE(ekey);
 					}
 					break;
 				case IS_LONG:
@@ -211,8 +211,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 							ekey = php_url_encode(tmp->val, tmp->len);
 						}
 						smart_str_append(formstr, ekey);
-						zend_string_release(tmp);
-						zend_string_free(ekey);
+						ZSTR_RELEASE(tmp);
+						ZSTR_FREE(ekey);
 					}
 			}
 		}

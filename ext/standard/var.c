@@ -165,7 +165,7 @@ again:
 			myht = Z_OBJDEBUG_P(struc, is_temp);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
-			zend_string_release(class_name);
+			ZSTR_RELEASE(class_name);
 
 			if (myht) {
 				zend_ulong num;
@@ -333,7 +333,7 @@ again:
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0, Z_REFCOUNT_P(struc));
-		zend_string_release(class_name);
+		ZSTR_RELEASE(class_name);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				zval_object_property_dump(val, index, key, level);
@@ -413,8 +413,8 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		smart_str_append(buf, tmp_str);
 		smart_str_appendl(buf, "' => ", 5);
 
-		zend_string_free(ckey);
-		zend_string_free(tmp_str);
+		ZSTR_FREE(ckey);
+		ZSTR_FREE(tmp_str);
 	}
 	php_var_export_ex(zv, level + 2, buf);
 
@@ -432,12 +432,12 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		zend_string *pname_esc;
 
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
-		pname_esc = php_addcslashes(zend_string_init(prop_name, prop_name_len, 0), 1, "'\\", 2);
+		pname_esc = php_addcslashes(ZSTR_INIT(prop_name, prop_name_len, 0), 1, "'\\", 2);
 
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, pname_esc);
 		smart_str_appendc(buf, '\'');
-		zend_string_release(pname_esc);
+		ZSTR_RELEASE(pname_esc);
 	} else {
 		smart_str_append_long(buf, (zend_long) index);
 	}
@@ -485,8 +485,8 @@ again:
 			smart_str_append(buf, ztmp2);
 			smart_str_appendc(buf, '\'');
 
-			zend_string_free(ztmp);
-			zend_string_free(ztmp2);
+			ZSTR_FREE(ztmp);
+			ZSTR_FREE(ztmp2);
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
@@ -714,7 +714,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				if (Z_TYPE_P(d) == IS_INDIRECT) {
 					d = Z_INDIRECT_P(d);
 					if (Z_TYPE_P(d) == IS_UNDEF) {
-						zend_string_release(name);
+						ZSTR_RELEASE(name);
 						continue;
 					}
 				}
@@ -736,27 +736,27 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 								}
 							}
 							php_var_serialize_string(buf, priv_name->val, priv_name->len);
-							zend_string_free(priv_name);
+							ZSTR_FREE(priv_name);
 							php_var_serialize_intern(buf, d, var_hash);
 							break;
 						}
-						zend_string_free(priv_name);
+						ZSTR_FREE(priv_name);
 						prot_name = zend_mangle_property_name(
 								"*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 						if ((d = zend_hash_find(propers, prot_name)) != NULL) {
 							if (Z_TYPE_P(d) == IS_INDIRECT) {
 								d = Z_INDIRECT_P(d);
 								if (Z_TYPE_P(d) == IS_UNDEF) {
-									zend_string_free(prot_name);
+									ZSTR_FREE(prot_name);
 									break;
 								}
 							}
 							php_var_serialize_string(buf, prot_name->val, prot_name->len);
-							zend_string_free(prot_name);
+							ZSTR_FREE(prot_name);
 							php_var_serialize_intern(buf, d, var_hash);
 							break;
 						}
-						zend_string_free(prot_name);
+						ZSTR_FREE(prot_name);
 						php_var_serialize_string(buf, name->val, name->len);
 						php_var_serialize_intern(buf, nvalp, var_hash);
 						php_error_docref(NULL, E_NOTICE,
@@ -767,7 +767,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					php_var_serialize_intern(buf, nvalp, var_hash);
 				}
 			}
-			zend_string_release(name);
+			ZSTR_RELEASE(name);
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, '}');
@@ -1029,7 +1029,7 @@ PHP_FUNCTION(unserialize)
 				convert_to_string_ex(entry);
 				lcname = zend_string_tolower(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release(lcname);
+		        ZSTR_RELEASE(lcname);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
