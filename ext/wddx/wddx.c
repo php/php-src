@@ -720,13 +720,13 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 		ent.type = ST_STRING;
 		SET_STACK_VARNAME;
 
-		ZVAL_STR(&ent.data, STR_EMPTY_ALLOC());
+		ZVAL_STR(&ent.data, ZSTR_EMPTY_ALLOC());
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp((char *)name, EL_BINARY)) {
 		ent.type = ST_BINARY;
 		SET_STACK_VARNAME;
 
-		ZVAL_STR(&ent.data, STR_EMPTY_ALLOC());
+		ZVAL_STR(&ent.data, ZSTR_EMPTY_ALLOC());
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp((char *)name, EL_CHAR)) {
 		int i;

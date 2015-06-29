@@ -83,7 +83,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	uint idx;
 	Bucket *p;
 
-	if (IS_INTERNED(str)) {
+	if (ZSTR_IS_INTERNED(str)) {
 		return str;
 	}
 

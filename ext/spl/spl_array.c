@@ -278,7 +278,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
-	   offset_key = STR_EMPTY_ALLOC();
+	   offset_key = ZSTR_EMPTY_ALLOC();
 	   goto fetch_dim_string;
 	case IS_STRING:
 	   offset_key = Z_STR_P(offset);

@@ -646,7 +646,7 @@ static zend_string *php_tidy_file_to_mem(char *filename, zend_bool use_include_p
 		return NULL;
 	}
 	if ((data = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) == NULL) {
-		data = STR_EMPTY_ALLOC();
+		data = ZSTR_EMPTY_ALLOC();
 	}
 	php_stream_close(stream);
 
@@ -928,7 +928,7 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 			if (val) {
 				return (void *) zend_string_init(val, strlen(val), 0);
 			} else {
-				return (void *) STR_EMPTY_ALLOC();
+				return (void *) ZSTR_EMPTY_ALLOC();
 			}
 		}
 			break;

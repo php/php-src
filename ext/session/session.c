@@ -565,7 +565,7 @@ static void php_session_save_current_state(int write) /* {{{ */
 					}
 					zend_string_release(val);
 				} else {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC(), PS(gc_maxlifetime));
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
 				}
 			}
 

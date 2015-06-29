@@ -1115,7 +1115,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	if (allowed != NULL) {
 // TODO: reimplement to avoid reallocation ???
-		if (IS_INTERNED(allowed)) {
+		if (ZSTR_IS_INTERNED(allowed)) {
 			allowed_tags = estrndup(allowed->val, allowed->len);
 			allowed_tags_len = allowed->len;
 		} else {
@@ -1127,7 +1127,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
 // TODO: reimplement to avoid reallocation ???
-	if (allowed && IS_INTERNED(allowed)) {
+	if (allowed && ZSTR_IS_INTERNED(allowed)) {
 		efree(allowed_tags);
 	}
 

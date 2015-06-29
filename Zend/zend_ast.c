@@ -188,7 +188,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zval_dtor(offset);
 			break;
 		case IS_NULL:
-			zend_symtable_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), expr);
+			zend_symtable_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), expr);
 			break;
 		case IS_LONG:
 			zend_hash_index_update(Z_ARRVAL_P(result), Z_LVAL_P(offset), expr);

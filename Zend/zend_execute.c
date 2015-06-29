@@ -573,9 +573,9 @@ ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info
 	zend_string *key;
 	ALLOCA_FLAG(use_heap);
 
-	STR_ALLOCA_INIT(key, cur_arg_info->class_name, strlen(cur_arg_info->class_name), use_heap);
+	ZSTR_ALLOCA_INIT(key, cur_arg_info->class_name, strlen(cur_arg_info->class_name), use_heap);
 	*pce = zend_fetch_class(key, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
-	STR_ALLOCA_FREE(key, use_heap);
+	ZSTR_ALLOCA_FREE(key, use_heap);
 
 	*class_name = (*pce) ? (*pce)->name->val : (char*)cur_arg_info->class_name;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -1568,7 +1568,7 @@ str_index:
 	} else {
 		switch (Z_TYPE_P(dim)) {
 			case IS_NULL:
-				offset_key = STR_EMPTY_ALLOC();
+				offset_key = ZSTR_EMPTY_ALLOC();
 				goto str_index;
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));

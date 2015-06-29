@@ -135,7 +135,7 @@ zend_string * intl_error_get_message( intl_error* err )
 	zend_string *errMessage = 0;
 
 	if( !err && !( err = intl_g_error_get(  ) ) )
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
 

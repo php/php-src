@@ -413,7 +413,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int li
 	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		zend_string_hash_val(Z_STR_P(zv));
 		Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv));
-		if (IS_INTERNED(Z_STR_P(zv))) {
+		if (ZSTR_IS_INTERNED(Z_STR_P(zv))) {
 			Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 		}
 	}
@@ -725,10 +725,10 @@ void *zend_hash_find_ptr_lc(HashTable *ht, const char *str, size_t len) {
 	zend_string *lcname;
 	ALLOCA_FLAG(use_heap);
 
-	STR_ALLOCA_ALLOC(lcname, len, use_heap);
+	ZSTR_ALLOCA_ALLOC(lcname, len, use_heap);
 	zend_str_tolower_copy(lcname->val, str, len);
 	result = zend_hash_find_ptr(ht, lcname);
-	STR_ALLOCA_FREE(lcname, use_heap);
+	ZSTR_ALLOCA_FREE(lcname, use_heap);
 
 	return result;
 }
@@ -5717,7 +5717,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_hash_index_update(Z_ARRVAL_P(result), 1, value);
 					break;
 				case IS_NULL:
-					zend_hash_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), value);
+					zend_hash_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), value);
 					break;
 				default:
 					zend_error_noreturn(E_COMPILE_ERROR, "Illegal offset type");
