@@ -9,12 +9,12 @@ $b = array();
 try {
     $c = $a % $b;
     var_dump($c);
-} catch (Error $e) {
-	echo "Error: " . $e->getMessage() . "\n";
+} catch (Exception $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--	
-Error: Modulo by zero
+Exception: Division by zero
 Done
