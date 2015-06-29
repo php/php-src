@@ -1027,7 +1027,7 @@ PHP_FUNCTION(unserialize)
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
 				convert_to_string_ex(entry);
-				lcname = zend_string_tolower(Z_STR_P(entry));
+				lcname = ZSTR_TOLOWER(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
 		        ZSTR_RELEASE(lcname);
 			} ZEND_HASH_FOREACH_END();

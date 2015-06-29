@@ -1192,7 +1192,7 @@ static int same_name(zend_string *key, zend_string *name) /* {{{ */
 	if (key->len != name->len) {
 		return 0;
 	}
-	lcname = zend_string_tolower(name);
+	lcname = ZSTR_TOLOWER(name);
 	ret = memcmp(lcname->val, key->val, key->len) == 0;
 	ZSTR_RELEASE(lcname);
 	return ret;
@@ -1287,7 +1287,7 @@ ZEND_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 
-	lcname = zend_string_tolower(method_name);
+	lcname = ZSTR_TOLOWER(method_name);
 	if (zend_hash_exists(&ce->function_table, lcname)) {
 		ZSTR_RELEASE(lcname);
 		RETURN_TRUE;
@@ -1390,7 +1390,7 @@ ZEND_FUNCTION(class_exists)
 			lc_name = ZSTR_ALLOC(class_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, class_name->val + 1, class_name->len - 1);
 		} else {
-			lc_name = zend_string_tolower(class_name);
+			lc_name = ZSTR_TOLOWER(class_name);
 		}
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
@@ -1433,7 +1433,7 @@ ZEND_FUNCTION(interface_exists)
 			lc_name = ZSTR_ALLOC(iface_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, iface_name->val + 1, iface_name->len - 1);
 		} else {
-			lc_name = zend_string_tolower(iface_name);
+			lc_name = ZSTR_TOLOWER(iface_name);
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		ZSTR_RELEASE(lc_name);
@@ -1475,7 +1475,7 @@ ZEND_FUNCTION(trait_exists)
 			lc_name = ZSTR_ALLOC(trait_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, trait_name->val + 1, trait_name->len - 1);
 		} else {
-			lc_name = zend_string_tolower(trait_name);
+			lc_name = ZSTR_TOLOWER(trait_name);
 		}
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
@@ -1515,7 +1515,7 @@ ZEND_FUNCTION(function_exists)
 		lcname = ZSTR_ALLOC(name->len - 1, 0);
 		zend_str_tolower_copy(lcname->val, name->val + 1, name->len - 1);
 	} else {
-		lcname = zend_string_tolower(name);
+		lcname = ZSTR_TOLOWER(name);
 	}
 
 	func = zend_hash_find_ptr(EG(function_table), lcname);
@@ -2663,7 +2663,7 @@ ZEND_FUNCTION(extension_loaded)
 		return;
 	}
 
-	lcname = zend_string_tolower(extension_name);
+	lcname = ZSTR_TOLOWER(extension_name);
 	if (zend_hash_exists(&module_registry, lcname)) {
 		RETVAL_TRUE;
 	} else {
@@ -2687,7 +2687,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		return;
 	}
 	if (strncasecmp(extension_name->val, "zend", sizeof("zend"))) {
-		lcname = zend_string_tolower(extension_name);
+		lcname = ZSTR_TOLOWER(extension_name);
 	} else {
 		lcname = ZSTR_INIT("core", sizeof("core")-1, 0);
 	}

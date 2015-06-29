@@ -1171,7 +1171,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
 	} else {
-		lc_function_name = zend_string_tolower(function_name);
+		lc_function_name = ZSTR_TOLOWER(function_name);
 	}
 
 	if (function_name->len == ce->name->len && ce->constructor) {

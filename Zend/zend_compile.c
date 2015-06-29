@@ -457,7 +457,7 @@ static int zend_add_func_name_literal(zend_op_array *op_array, zend_string *name
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_tolower(name);
+	zend_string *lc_name = ZSTR_TOLOWER(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	return ret;
@@ -473,7 +473,7 @@ static int zend_add_ns_func_name_literal(zend_op_array *op_array, zend_string *n
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_tolower(name);
+	zend_string *lc_name = ZSTR_TOLOWER(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	/* Lowercased unqualfied name */
@@ -493,7 +493,7 @@ static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *nam
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_tolower(name);
+	zend_string *lc_name = ZSTR_TOLOWER(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	zend_alloc_cache_slot(ret);
@@ -521,7 +521,7 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		zend_add_literal_string(op_array, &tmp_name);
 
 		/* lowercased namespace name & lowercased constant name */
-		tmp_name = zend_string_tolower(name);
+		tmp_name = ZSTR_TOLOWER(name);
 		zend_add_literal_string(op_array, &tmp_name);
 
 		if (!unqualified) {
@@ -2954,7 +2954,7 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args) /* {{{ */
 	/* Lowercase constant name in a separate literal */
 	{
 		zval c;
-		zend_string *lcname = zend_string_tolower(name);
+		zend_string *lcname = ZSTR_TOLOWER(name);
 		ZVAL_NEW_STR(&c, lcname);
 		zend_add_literal(CG(active_op_array), &c);
 	}
@@ -2973,7 +2973,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	}
 
 	name = zend_ast_get_str(name_ast);
-	lcname = zend_string_tolower(name);
+	lcname = ZSTR_TOLOWER(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
 	if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
@@ -3192,7 +3192,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		zend_function *fbc;
 		zend_op *opline;
 
-		lcname = zend_string_tolower(Z_STR_P(name));
+		lcname = ZSTR_TOLOWER(Z_STR_P(name));
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 		if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
@@ -4488,7 +4488,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	op_array->scope = ce;
 	op_array->function_name = ZSTR_COPY(name);
 
-	lcname = zend_string_tolower(name);
+	lcname = ZSTR_TOLOWER(name);
 	lcname = zend_new_interned_string(lcname);
 
 	if (zend_hash_add_ptr(&ce->function_table, lcname, op_array) == NULL) {
@@ -4628,7 +4628,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	op_array->function_name = name = zend_prefix_with_ns(name);
 
-	lcname = zend_string_tolower(name);
+	lcname = ZSTR_TOLOWER(name);
 
 	if (FC(imports_function)) {
 		zend_string *import_name = zend_hash_find_ptr(FC(imports_function), lcname);
@@ -5027,12 +5027,12 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 		name = decl->name;
 		zend_assert_valid_class_name(name);
-		lcname = zend_string_tolower(name);
+		lcname = ZSTR_TOLOWER(name);
 		if (FC(current_namespace)) {
 			name = zend_prefix_with_ns(name);
 
 			ZSTR_RELEASE(lcname);
-			lcname = zend_string_tolower(name);
+			lcname = ZSTR_TOLOWER(name);
 		} else {
 			ZSTR_INC_REFCOUNT(name);
 		}
@@ -5299,7 +5299,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 		if (case_sensitive) {
 			lookup_name = ZSTR_COPY(new_name);
 		} else {
-			lookup_name = zend_string_tolower(new_name);
+			lookup_name = ZSTR_TOLOWER(new_name);
 		}
 
 		if (type == T_CLASS && zend_is_reserved_class_name(new_name)) {

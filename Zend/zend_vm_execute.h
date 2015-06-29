@@ -2133,7 +2133,7 @@ try_function_name:
 				lcname = ZSTR_ALLOC(Z_STRLEN_P(function_name) - 1, 0);
 				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
 			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
+				lcname = ZSTR_TOLOWER(Z_STR_P(function_name));
 			}
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
@@ -2591,7 +2591,7 @@ try_function_name:
 				lcname = ZSTR_ALLOC(Z_STRLEN_P(function_name) - 1, 0);
 				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
 			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
+				lcname = ZSTR_TOLOWER(Z_STR_P(function_name));
 			}
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
@@ -2850,7 +2850,7 @@ try_function_name:
 				lcname = ZSTR_ALLOC(Z_STRLEN_P(function_name) - 1, 0);
 				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
 			} else {
-				lcname = zend_string_tolower(Z_STR_P(function_name));
+				lcname = ZSTR_TOLOWER(Z_STR_P(function_name));
 			}
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));

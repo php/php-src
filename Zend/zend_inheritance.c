@@ -1035,7 +1035,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 	} else if (!strncmp(mname->val, ZEND_DEBUGINFO_FUNC_NAME, mname->len)) {
 		ce->__debugInfo = fe;
 	} else if (ce->name->len == mname->len) {
-		zend_string *lowercase_name = zend_string_tolower(ce->name);
+		zend_string *lowercase_name = ZSTR_TOLOWER(ce->name);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		if (!memcmp(mname->val, lowercase_name->val, mname->len)) {
 			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
@@ -1165,7 +1165,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
 				}
 
-				lcname = zend_string_tolower(alias->alias);
+				lcname = ZSTR_TOLOWER(alias->alias);
 				zend_add_trait_method(ce, alias->alias->val, lcname, &fn_copy, overriden);
 				ZSTR_RELEASE(lcname);
 
@@ -1255,7 +1255,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce);
 
 				/** Ensure that the preferred method is actually available. */
-				lcname = zend_string_tolower(cur_method_ref->method_name);
+				lcname = ZSTR_TOLOWER(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 												 lcname);
 				ZSTR_RELEASE(lcname);
@@ -1313,7 +1313,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				zend_check_trait_usage(ce, cur_method_ref->ce);
 
 				/** And, ensure that the referenced method is resolvable, too. */
-				lcname = zend_string_tolower(cur_method_ref->method_name);
+				lcname = ZSTR_TOLOWER(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 						lcname);
 				ZSTR_RELEASE(lcname);
@@ -1341,7 +1341,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 			while (precedences[i]->exclude_from_classes[j].ce) {
 				if (precedences[i]->exclude_from_classes[j].ce == trait) {
 					zend_string *lcname =
-						zend_string_tolower(precedences[i]->trait_method->method_name);
+						ZSTR_TOLOWER(precedences[i]->trait_method->method_name);
 					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
 						ZSTR_RELEASE(lcname);
 						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name->val, trait->name->val);
@@ -1551,7 +1551,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 						2) it is just a plain old inconsitency/typo/bug
 						   as in the case where alias is set. */
 
-					lc_method_name = zend_string_tolower(
+					lc_method_name = ZSTR_TOLOWER(
 						cur_alias->trait_method->method_name);
 					if (zend_hash_exists(&ce->function_table,
 										 lc_method_name)) {

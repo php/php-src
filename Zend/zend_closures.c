@@ -245,7 +245,7 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 {
 	zend_string *lc_name;
 
-	lc_name = zend_string_tolower(method);
+	lc_name = ZSTR_TOLOWER(method);
 	if (ZSTR_EQUALS_LITERAL(method, ZEND_INVOKE_FUNC_NAME)) {
 		ZSTR_RELEASE(lc_name);
 		return zend_get_closure_invoke_method(*object);

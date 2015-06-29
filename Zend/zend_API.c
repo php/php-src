@@ -3022,7 +3022,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		return 0;
 	}
 
-	lmname = zend_string_tolower(mname);
+	lmname = ZSTR_TOLOWER(mname);
 	if (strict_class &&
 	    fcc->calling_scope &&
 		ZSTR_EQUALS_LITERAL(lmname, ZEND_CONSTRUCTOR_FUNC_NAME)) {

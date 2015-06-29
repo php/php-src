@@ -940,7 +940,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 			lc_name = ZSTR_ALLOC(name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, name->val + 1, name->len - 1);
 		} else {
-			lc_name = zend_string_tolower(name);
+			lc_name = ZSTR_TOLOWER(name);
 		}
 	}
 

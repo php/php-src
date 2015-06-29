@@ -438,7 +438,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						"is_callable", sizeof("is_callable")) &&
 					!zend_optimizer_is_disabled_func("is_callable", sizeof("is_callable") - 1))) {
 					zend_internal_function *func;
-					zend_string *lc_name = zend_string_tolower(
+					zend_string *lc_name = ZSTR_TOLOWER(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
 
 					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL &&
@@ -467,7 +467,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						"extension_loaded", sizeof("extension_loaded")-1) &&
 					!zend_optimizer_is_disabled_func("extension_loaded", sizeof("extension_loaded") - 1)) {
 					zval t;
-					zend_string *lc_name = zend_string_tolower(
+					zend_string *lc_name = ZSTR_TOLOWER(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
 							lc_name);
