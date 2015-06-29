@@ -6,8 +6,6 @@ PHP                                                                        NEWS
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
   . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
     ArrayAccess object). (Laruence)
-  . Fixed bug #69957 (Three different ways of handling same error condition).
-    (Bob)
 
 - CLI server:
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)

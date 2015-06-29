@@ -1103,19 +1103,16 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG):
-				if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-					if (EG(current_execute_data) && !CG(in_compilation)) {
-						zend_error(E_ERROR | E_EXCEPTION, "Division by zero");
-					} else {
-						zend_error_noreturn(E_ERROR, "Division by zero");
-					}
+				if (Z_LVAL_P(op2) == 0) {
+					zend_error(E_WARNING, "Division by zero");
 					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
 					return SUCCESS;
-				} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
+				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 					/* Prevent overflow error/crash */
 					ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
 					return SUCCESS;
-				} else if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
+				}
+				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
 					ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
 				} else {
 					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
@@ -1123,34 +1120,22 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-					if (EG(current_execute_data) && !CG(in_compilation)) {
-						zend_error(E_ERROR | E_EXCEPTION, "Division by zero");
-					} else {
-						zend_error_noreturn(E_ERROR, "Division by zero");
-					}
+				if (Z_LVAL_P(op2) == 0) {
+					zend_error(E_WARNING, "Division by zero");
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
-					if (EG(current_execute_data) && !CG(in_compilation)) {
-						zend_error(E_ERROR | E_EXCEPTION, "Division by zero");
-					} else {
-						zend_error_noreturn(E_ERROR, "Division by zero");
-					}
+				if (Z_DVAL_P(op2) == 0) {
+					zend_error(E_WARNING, "Division by zero");
 				}
 				ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
-					if (EG(current_execute_data) && !CG(in_compilation)) {
-						zend_error(E_ERROR | E_EXCEPTION, "Division by zero");
-					} else {
-						zend_error_noreturn(E_ERROR, "Division by zero");
-					}
+				if (Z_DVAL_P(op2) == 0) {
+					zend_error(E_WARNING, "Division by zero");
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
@@ -1185,21 +1170,24 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 		zval_dtor(result);
 	}
 
-	if (UNEXPECTED(op2_lval == 0)) {
+	if (op2_lval == 0) {
 		/* modulus by zero */
 		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_error(E_ERROR | E_EXCEPTION, "Modulo by zero");
+			zend_throw_exception_ex(NULL, 0, "Division by zero");
 		} else {
-			zend_error_noreturn(E_ERROR, "Modulo by zero");
+			zend_error_noreturn(E_ERROR, "Division by zero");
 		}
 		ZVAL_UNDEF(result);
 		return FAILURE;
-	} else if (UNEXPECTED(op2_lval == -1)) {
-		/* Prevent overflow error/crash if op1 == LONG_MIN */
-		ZVAL_LONG(result, 0);
-	} else {
-		ZVAL_LONG(result, op1_lval % op2_lval);
 	}
+
+	if (op2_lval == -1) {
+		/* Prevent overflow error/crash if op1==LONG_MIN */
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+
+	ZVAL_LONG(result, op1_lval % op2_lval);
 	return SUCCESS;
 }
 /* }}} */
