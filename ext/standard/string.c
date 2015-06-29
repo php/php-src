@@ -2484,10 +2484,9 @@ PHP_FUNCTION(substr_replace)
 			 * of the string
 			 */
 			if (f < 0) {
-				if (-f > Z_STRLEN_P(str)) {
+				f = (zend_long)Z_STRLEN_P(str) + f;
+				if (f < 0) {
 					f = 0;
-				} else {
-					f = Z_STRLEN_P(str) + f;
 				}
 			} else if (f > Z_STRLEN_P(str)) {
 				f = Z_STRLEN_P(str);
@@ -2496,17 +2495,17 @@ PHP_FUNCTION(substr_replace)
 			 * needed to stop that many chars from the end of the string
 			 */
 			if (l < 0) {
-				l = (Z_STRLEN_P(str) - f) + l;
+				l = ((zend_long)Z_STRLEN_P(str) - f) + l;
 				if (l < 0) {
 					l = 0;
 				}
 			}
 
-			if (l > Z_STRLEN_P(str) || (l < 0 && -l > Z_STRLEN_P(str))) {
+			if (l > Z_STRLEN_P(str) || (l < 0 && (size_t)(-l) > Z_STRLEN_P(str))) {
 				l = Z_STRLEN_P(str);
 			}
 
-			if ((f + l) > Z_STRLEN_P(str)) {
+			if ((f + l) > (zend_long)Z_STRLEN_P(str)) {
 				l = Z_STRLEN_P(str) - f;
 			}
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
@@ -2563,12 +2562,11 @@ PHP_FUNCTION(substr_replace)
 					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
-						if (-f > orig_str->len) {
+						f = (zend_long)orig_str->len + f;
+						if (f < 0) {
 							f = 0;
-						} else {
-							f = orig_str->len + f;
 						}
-					} else if (f > orig_str->len) {
+					} else if (f > (zend_long)orig_str->len) {
 						f = orig_str->len;
 					}
 					from_idx++;
@@ -2578,12 +2576,11 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				f = Z_LVAL_P(from);
 				if (f < 0) {
-					if (-f > orig_str->len) {
+					f = (zend_long)orig_str->len + f;
+					if (f < 0) {
 						f = 0;
-					} else {
-						f = orig_str->len + f;
 					}
-				} else if (f > orig_str->len) {
+				} else if (f > (zend_long)orig_str->len) {
 					f = orig_str->len;
 				}
 			}
@@ -2615,7 +2612,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if ((f + l) > orig_str->len) {
+			if ((f + l) > (zend_long)orig_str->len) {
 				l = orig_str->len - f;
 			}
 
