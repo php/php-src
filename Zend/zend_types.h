@@ -23,6 +23,7 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_strict.h"
 #include "zend_portability.h"
 #include "zend_long.h"
 
@@ -134,7 +135,7 @@ struct _zval_struct {
 };
 
 struct _zend_refcounted {
-	uint32_t         refcount;			/* reference counter 32-bit */
+	uint32_t         _ZEND_PROTECTED_STRICT(zend_refcounted,refcount);	/* reference counter 32-bit */
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -143,14 +144,14 @@ struct _zend_refcounted {
 				uint16_t      gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
 		uint32_t type_info;
-	} u;
+	} _ZEND_PROTECTED_STRICT(zend_refcounted,u);
 };
 
 struct _zend_string {
-	zend_refcounted   gc;
-	zend_ulong        h;                /* hash value */
-	size_t            len;
-	char              val[1];
+	zend_refcounted   _ZEND_PROTECTED_STRICT(zend_string,gc);
+	zend_ulong        _ZEND_PROTECTED_STRICT(zend_string,h);                /* hash value */
+	size_t            _ZEND_PROTECTED_STRICT(zend_string,len);
+	char              _ZEND_PROTECTED_STRICT(zend_string,val)[1];
 };
 
 typedef struct _Bucket {
@@ -354,11 +355,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
-#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
-#define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
-#define GC_FLAGS(p)					((zend_refcounted*)(p))->u.v.flags
-#define GC_INFO(p)					((zend_refcounted*)(p))->u.v.gc_info
-#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->u.type_info
+#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,refcount)
+#define GC_TYPE(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.type
+#define GC_FLAGS(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.flags
+#define GC_INFO(p)					((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).v.gc_info
+#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->_ZEND_PROTECTED_STRICT(zend_refcounted,u).type_info
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
@@ -495,13 +496,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
-#define Z_STRVAL(zval)				Z_STR(zval)->val
+#define Z_STRVAL(zval)				ZSTR_VAL(Z_STR(zval))
 #define Z_STRVAL_P(zval_p)			Z_STRVAL(*(zval_p))
 
-#define Z_STRLEN(zval)				Z_STR(zval)->len
+#define Z_STRLEN(zval)				ZSTR_LEN(Z_STR(zval))
 #define Z_STRLEN_P(zval_p)			Z_STRLEN(*(zval_p))
 
-#define Z_STRHASH(zval)				Z_STR(zval)->h
+#define Z_STRHASH(zval)				ZSTR_HASH(Z_STR(zval))
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
 
 #define Z_ARR(zval)					(zval).value.arr

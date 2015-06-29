@@ -389,6 +389,38 @@ fi
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
 
+AC_ARG_ENABLE(api-checks,
+[  --enable-api-checks     Perform API compliance checks],[
+  ZEND_CORE_CHECK_API=$enableval
+],[
+  ZEND_CORE_CHECK_API=no
+])  
+
+if test "$ZEND_CORE_CHECK_API" = "yes"; then
+	AC_DEFINE(ZEND_CORE_CHECK_API, 1, [Perform API compliance checks])
+else
+	AC_DEFINE(ZEND_CORE_CHECK_API, 0, [Perform API compliance checks])
+fi
+
+AC_MSG_CHECKING(whether to perform API compliance checks)
+AC_MSG_RESULT($ZEND_CORE_CHECK_API)
+
+AC_ARG_ENABLE(strict-api,
+[  --enable-strict-api     Enforce strict API compliance],[
+  ZEND_CORE_STRICT_API=$enableval
+],[
+  ZEND_CORE_STRICT_API=no
+])  
+
+if test "$ZEND_CORE_STRICT_API" = "yes"; then
+	AC_DEFINE(ZEND_CORE_STRICT_API, 1, [Enforce strict API compliance])
+else
+	AC_DEFINE(ZEND_CORE_STRICT_API, 0, [Enforce strict API compliance])
+fi
+
+AC_MSG_CHECKING(whether to enforce strict API compliance)
+AC_MSG_RESULT($ZEND_CORE_STRICT_API)
+
 ])
 
 AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[

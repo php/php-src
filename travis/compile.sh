@@ -10,9 +10,15 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
+
+API_CHECK_OPT=''
+./configure --help | grep -- --enable-api-checks >/dev/null \
+	&& API_CHECK_OPT="--enable-api-checks"
+
 ./configure --quiet \
 $DEBUG \
 $TS \
+$API_CHECK_OPT \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
