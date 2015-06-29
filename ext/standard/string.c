@@ -2484,7 +2484,7 @@ PHP_FUNCTION(substr_replace)
 			 * of the string
 			 */
 			if (f < 0) {
-				if (f < 0 && -f > Z_STRLEN_P(str)) {
+				if (-f > Z_STRLEN_P(str)) {
 					f = 0;
 				} else {
 					f = Z_STRLEN_P(str) + f;
