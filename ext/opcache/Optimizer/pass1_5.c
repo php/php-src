@@ -376,9 +376,13 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
 					
 					if (zend_hash_find(EG(function_table), lc_name, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)) + 1,
-								(void *)&func) == SUCCESS &&
-							func->type == ZEND_INTERNAL_FUNCTION &&
-							func->module->type == MODULE_PERSISTENT) {
+								(void *)&func) == SUCCESS
+						 && func->type == ZEND_INTERNAL_FUNCTION
+						 && func->module->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && func->module->handle == NULL
+#endif
+						) {
 						zval t;
 						if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("is_callable") - 1 ||
 							   func->handler != ZEND_FN(display_disabled_function))	{
@@ -412,7 +416,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							ZVAL_BOOL(&t, 0);
 						}
 					} else {
-						if (m->type == MODULE_PERSISTENT) {
+						if (m->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && m->handle == NULL
+#endif
+						) {
 							ZVAL_BOOL(&t, 1);
 						} else {
 							break;
