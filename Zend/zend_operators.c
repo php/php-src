@@ -2413,20 +2413,20 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str) /* {{{ */
+ZEND_API zend_string* ZEND_FASTCALL ZSTR_TOLOWER(zend_string *str) /* {{{ */
 {
-	register unsigned char *p = (unsigned char*)str->val;
-	register unsigned char *end = p + str->len;
+	register unsigned char *p = (unsigned char*)ZSTR_VAL(str);
+	register unsigned char *end = p + ZSTR_LEN(str);
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = ZSTR_ALLOC(str->len, 0);
+			zend_string *res = ZSTR_ALLOC(ZSTR_LEN(str), 0);
 			register unsigned char *r;
 
-			if (p != (unsigned char*)str->val) {
-				memcpy(res->val, str->val, p - (unsigned char*)str->val);
+			if (p != (unsigned char*)ZSTR_VAL(str)) {
+				memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*)ZSTR_VAL(str));
 			}
-			r = p + (res->val - str->val);
+			r = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
 			while (p < end) {
 				*r = zend_tolower_ascii(*p);
 				p++;
