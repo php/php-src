@@ -2563,9 +2563,10 @@ PHP_FUNCTION(substr_replace)
 					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
-						f = orig_str->len + f;
-						if (f < 0) {
+						if (-f > orig_str->len) {
 							f = 0;
+						} else {
+							f = orig_str->len + f;
 						}
 					} else if (f > orig_str->len) {
 						f = orig_str->len;
@@ -2577,9 +2578,10 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				f = Z_LVAL_P(from);
 				if (f < 0) {
-					f = orig_str->len + f;
-					if (f < 0) {
+					if (-f > orig_str->len) {
 						f = 0;
+					} else {
+						f = orig_str->len + f;
 					}
 				} else if (f > orig_str->len) {
 					f = orig_str->len;
