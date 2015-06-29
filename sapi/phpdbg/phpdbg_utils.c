@@ -24,6 +24,7 @@
 #include "phpdbg.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
+#include "ext/standard/php_string.h"
 
 #if defined(HAVE_SYS_IOCTL_H)
 #	include "sys/ioctl.h"
@@ -756,3 +757,62 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 
 	return op->opcode == ZEND_CATCH;
 }
+
+char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
+{
+	char *decode = NULL;
+
+	switch (Z_TYPE_P(zv)) {
+		case IS_UNDEF:
+			decode = zend_strndup("", 0);
+			break;
+		case IS_NULL:
+			decode = zend_strndup(ZEND_STRL("null"));
+			break;
+		case IS_FALSE:
+			decode = zend_strndup(ZEND_STRL("false"));
+			break;
+		case IS_TRUE:
+			decode = zend_strndup(ZEND_STRL("true"));
+			break;
+		case IS_LONG:
+			asprintf(&decode, ZEND_ULONG_FMT, Z_LVAL_P(zv));
+			break;
+		case IS_DOUBLE:
+			asprintf(&decode, "%.*G", 14, Z_DVAL_P(zv));
+			break;
+		case IS_STRING: {
+			int i;
+			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"", 2);
+			for (i = 0; i < str->len; i++) {
+				if (str->val[i] < 32) {
+					str->val[i] = ' ';
+				}
+			}
+			asprintf(&decode, "\"%.*s\"%c", str->len <= maxlen - 2 ? (int) str->len : (maxlen - 3), str->val, str->len <= maxlen - 2 ? 0 : '+');
+			zend_string_release(str);
+			} break;
+		case IS_RESOURCE:
+			asprintf(&decode, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			break;
+		case IS_ARRAY:
+			asprintf(&decode, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));
+			break;
+		case IS_OBJECT: {
+			zend_string *str = Z_OBJCE_P(zv)->name;
+			asprintf(&decode, "%.*s%c", str->len <= maxlen ? (int) str->len : maxlen - 1, str->val, str->len <= maxlen ? 0 : '+');
+			break;
+		}
+		case IS_CONSTANT:
+			decode = zend_strndup(ZEND_STRL("<constant>"));
+			break;
+		case IS_CONSTANT_AST:
+			decode = zend_strndup(ZEND_STRL("<ast>"));
+			break;
+		default:
+			asprintf(&decode, "unknown type: %d", Z_TYPE_P(zv));
+			break;
+	}
+
+	return decode;
+} /* }}} */

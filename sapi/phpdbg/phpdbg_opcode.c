@@ -53,60 +53,8 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 
 		case IS_CONST: {
 			zval *literal = RT_CONSTANT(ops, *op);
-			switch (Z_TYPE_P(literal)) {
-				case IS_UNDEF:
-					decode = zend_strndup("", 0);
-					break;
-				case IS_NULL:
-					decode = zend_strndup(ZEND_STRL("null"));
-					break;
-				case IS_FALSE:
-					decode = zend_strndup(ZEND_STRL("false"));
-					break;
-				case IS_TRUE:
-					decode = zend_strndup(ZEND_STRL("true"));
-					break;
-				case IS_LONG:
-					asprintf(&decode, ZEND_ULONG_FMT, Z_LVAL_P(literal));
-					break;
-				case IS_DOUBLE:
-					asprintf(&decode, "%.*G", 14, Z_DVAL_P(literal));
-					break;
-				case IS_STRING: {
-					int i;
-					zend_string *str = php_addcslashes(Z_STR_P(literal), 0, "\\\"", 2);
-					for (i = 0; i < str->len; i++) {
-						if (str->val[i] < 32) {
-							str->val[i] = ' ';
-						}
-					}
-					asprintf(&decode, "\"%.*s\"%c", str->len <= 18 ? (int) str->len : 17, str->val, str->len <= 18 ? 0 : '+');
-					zend_string_release(str);
-					} break;
-				case IS_RESOURCE:
-					asprintf(&decode, "Rsrc #%d", Z_RES_HANDLE_P(literal));
-					break;
-				case IS_ARRAY:
-					asprintf(&decode, "array(%d)", zend_hash_num_elements(Z_ARR_P(literal)));
-					break;
-				case IS_OBJECT: {
-					zend_string *str = Z_OBJCE_P(literal)->name;
-					asprintf(&decode, "%.*s%c", str->len <= 18 ? (int) str->len : 18, str->val, str->len <= 18 ? 0 : '+');
-					} break;
-				case IS_CONSTANT:
-					decode = zend_strndup(ZEND_STRL("<constant>"));
-					break;
-				case IS_CONSTANT_AST:
-					decode = zend_strndup(ZEND_STRL("<ast>"));
-					break;
-				default:
-					asprintf(&decode, "unknown type: %d", Z_TYPE_P(literal));
-					break;
-			}
+			decode = phpdbg_short_zval_print(literal, 20);
 		} break;
-
-		case IS_UNUSED:
-			return NULL;
 	}
 	return decode;
 } /* }}} */
