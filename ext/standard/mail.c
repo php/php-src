@@ -227,7 +227,7 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 
-	if (!hdr) {
+	if (!hdr || !strlen(hdr)) {
 		return 0;
 	}
 
@@ -322,7 +322,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
-		if (headers != NULL) {
+		if (headers != NULL && *headers) {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), f->val, headers);
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), f->val);
