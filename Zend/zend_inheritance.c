@@ -568,7 +568,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		child->common.prototype->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_HAS_RETURN_TYPE)
 	)) {
 		if (UNEXPECTED(!zend_do_perform_implementation_check(child, child->common.prototype))) {
-			zend_string *method_prototype = zend_get_function_declaration(parent);
+			zend_string *method_prototype = zend_get_function_declaration(child->common.prototype);
 			zend_string *child_prototype = zend_get_function_declaration(child);
 			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", child_prototype->val, method_prototype->val);
 		}
