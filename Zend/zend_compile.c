@@ -5625,17 +5625,12 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 	binary_op_type fn = get_binary_op(opcode);
 
 	/* don't evaluate division by zero at compile-time */
-	if (opcode == ZEND_DIV) {
-		convert_scalar_to_number(op2);
-		if (Z_TYPE_P(op2) == IS_LONG) {
-			if (Z_LVAL_P(op2) == 0) {
-				return 0;
-			}
-		} else if (Z_TYPE_P(op2) == IS_DOUBLE) {
-			if (Z_DVAL_P(op2) == 0.0) {
-				return 0;
-			}
-		}
+	if ((opcode == ZEND_DIV || opcode == ZEND_MOD) &&
+	    zval_get_long(op2) == 0) {
+		return 0;
+	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
+	    zval_get_long(op2) < 0) {
+		return 0;
 	}
 
 	fn(result, op1, op2);
