@@ -225,7 +225,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 	size_t len;
 
-	if (!hdr) {
+	if (!hdr || !strlen(hdr)) {
 		return 0;
 	}
 
@@ -312,7 +312,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
-		if (headers != NULL) {
+		if (headers != NULL && *headers) {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s", php_getuid(TSRMLS_C), f);
@@ -420,7 +420,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
 #if PHP_SIGCHILD
 		if (sig_handler) {
-			signal(SIGCHLD, sig_handler);						
+			signal(SIGCHLD, sig_handler);
 		}
 #endif
 		MAIL_RET(0);

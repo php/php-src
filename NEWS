@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
+  . Fixed bug #69874 (Can't set empty additional_headers for mail()), regression
+    from fix to bug #68776. (Yasuo)
 
 11 Jun 2015 PHP 5.4.42
 
