@@ -92,7 +92,7 @@ PHP_ARG_WITH(ldap-sasl,for LDAP Cyrus SASL support,
 
 if test "$PHP_LDAP" != "no"; then
 
-  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared,,)
+  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared,,-DLDAP_DEPRECATED=1)
 
   if test "$PHP_LDAP" = "yes"; then
     for i in /usr/local /usr; do
