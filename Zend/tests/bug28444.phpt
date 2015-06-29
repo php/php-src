@@ -3,20 +3,17 @@ Bug #28444 (Cannot access undefined property for object with overloaded property
 --FILE--
 <?php
 
-function my_error_handler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
-}
-
-set_error_handler('my_error_handler');
-
 class Object
 {
 	public $x;
 
-	function __construct($x)
-	{
+	function __construct($x) {
 		$this->x = $x;
 	}
+
+    function __toString() {
+        return "Object";
+    }
 }
 
 class Overloaded
@@ -66,8 +63,7 @@ Overloaded::__set(y,3)
 int(3)
 Overloaded::__get(y)
 int(3)
-string(55) "Object of class Object could not be converted to string"
-Overloaded::__set(z,)
+Overloaded::__set(z,Object)
 object(Object)#%d (1) {
   ["x"]=>
   int(4)

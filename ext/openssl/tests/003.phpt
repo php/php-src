@@ -15,7 +15,11 @@ $b = 1;
 $c = new stdclass; 
 $d = new stdclass; 
 
-var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
+try {
+    var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
+} catch (Error $e) {
+    var_dump($e->getMessage());
+}
 var_dump($c);
 
 var_dump(openssl_pkcs7_decrypt($b, $b, $b, $b));
@@ -27,8 +31,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 string(57) "Object of class stdClass could not be converted to string"
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
 object(stdClass)#1 (0) {
 }
 string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"

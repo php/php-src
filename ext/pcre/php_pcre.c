@@ -1432,6 +1432,11 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 		convert_to_string_ex(regex);
 	}
 
+	/* Exception during to string conversion, abort */
+	if (UNEXPECTED(EG(exception))) {
+		return 0;
+	}
+
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(subject)));

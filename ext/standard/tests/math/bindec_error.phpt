@@ -23,7 +23,11 @@ bindec();
 bindec('01010101111',true);
 
 echo "Incorrect input\n";
-bindec(new classA());
+try {
+    bindec(new classA());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 *** Testing bindec() : error conditions ***
@@ -33,5 +37,4 @@ Warning: bindec() expects exactly 1 parameter, 0 given in %s on line %d
 
 Warning: bindec() expects exactly 1 parameter, 2 given in %s on line %d
 Incorrect input
-
-Catchable fatal error: Object of class classA could not be converted to string in %s on line %d
+Object of class classA could not be converted to string

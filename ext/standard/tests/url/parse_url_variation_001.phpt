@@ -69,7 +69,7 @@ $values = array(
 // loop through each element of the array for url
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( parse_url($value) );
 };
 
@@ -206,9 +206,8 @@ array(1) {
   ["path"]=>
   string(0) ""
 }
-Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
-Arg value  
+Arg value stdClass 
 Error: 2 - parse_url() expects parameter 1 to be string, object given, %s(70)
 NULL
 

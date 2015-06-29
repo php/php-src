@@ -1057,13 +1057,9 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 {
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 	zval                      *data;
-	zend_error_handling        error_handling;
 
 	data = iterator->funcs->get_current_data(iterator);
 
-	/* Replace exception handling so the catchable fatal error that is thrown when a class
-	 * without __toString is converted to string is converted into an exception. */
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 	if (data) {
 		ZVAL_DEREF(data);
 		if (Z_TYPE_P(data) == IS_ARRAY) {
@@ -1073,7 +1069,6 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 			convert_to_string(return_value);
 		}
 	}
-	zend_restore_error_handling(&error_handling);
 }
 
 static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object, zval *return_value)

@@ -230,8 +230,8 @@ try_again:
 #define convert_object_to_type(op, dst, ctype, conv_func)									\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE) {				\
-			zend_error(E_RECOVERABLE_ERROR,													\
+		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE && !EG(exception)) {		\
+			zend_error(E_EXCEPTION,															\
 				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
 			zend_get_type_by_const(ctype));													\
 		} 																					\
@@ -332,7 +332,6 @@ try_again:
 				if (Z_TYPE(dst) == IS_LONG) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
-
 					ZVAL_LONG(op, 1);
 				}
 				return;
@@ -544,7 +543,7 @@ try_again:
 			if (Z_TYPE(dst) == IS_STRING) {
 				ZVAL_COPY_VALUE(op, &dst);
 			} else {
-				ZVAL_NEW_STR(op, zend_string_init("Object", sizeof("Object")-1, 0));
+				ZVAL_EMPTY_STRING(op);
 			}
 			break;
 		}
@@ -815,22 +814,13 @@ try_again:
 			zend_error(E_NOTICE, "Array to string conversion");
 			return zend_string_init("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
-			zval tmp;
-			if (Z_OBJ_HT_P(op)->cast_object) {
-				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING) == SUCCESS) {
-					return Z_STR(tmp);
-				}
-			} else if (Z_OBJ_HT_P(op)->get) {
-				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp);
-				if (Z_TYPE_P(z) != IS_OBJECT) {
-					zend_string *str = zval_get_string(z);
-					zval_ptr_dtor(z);
-					return str;
-				}
-				zval_ptr_dtor(z);
+			zval dst;
+			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
+			if (Z_TYPE(dst) == IS_STRING) {
+				return Z_STR(dst);
+			} else {
+				return STR_EMPTY_ALLOC();
 			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name->val);
-			return STR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
@@ -1575,6 +1565,8 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 {
 	zval op1_copy, op2_copy;
 	int use_copy1 = 0, use_copy2 = 0;
+	int retval = SUCCESS;
+	zend_bool dtor_result = 0;
 
 	do {
 	 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_STRING)) {
@@ -1585,16 +1577,21 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT, concat_function);
 			use_copy1 = zend_make_printable_zval(op1, &op1_copy);
 			if (use_copy1) {
-				/* We have created a converted copy of op1. Therefore, op1 won't become the result so
-				 * we have to free it.
+				/* We have created a converted copy of op1. Therefore, op1 won't become the result
+				 * so we have to free it.
 				 */
 				if (result == op1) {
-					zval_dtor(op1);
+					dtor_result = 1;
 					if (UNEXPECTED(op1 == op2)) {
 						op2 = &op1_copy;
 					}
 				}
 				op1 = &op1_copy;
+
+				if (UNEXPECTED(EG(exception))) {
+					retval = FAILURE;
+					goto finish;
+				}
 			}
 		}
 	} while (0);
@@ -1608,6 +1605,10 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 			use_copy2 = zend_make_printable_zval(op2, &op2_copy);
 			if (use_copy2) {
 				op2 = &op2_copy;
+				if (UNEXPECTED(EG(exception))) {
+					retval = FAILURE;
+					goto finish;
+				}
 			}
 		}
 	} while (0);
@@ -1620,8 +1621,12 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 
 		if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 			zend_error(E_EXCEPTION | E_ERROR, "String size overflow");
-			ZVAL_FALSE(result);
-			return FAILURE;
+			retval = FAILURE;
+			goto finish;
+		}
+
+		if (dtor_result) {
+			zval_dtor(result);
 		}
 
 		if (result == op1 && Z_REFCOUNTED_P(result)) {
@@ -1641,13 +1646,14 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		result_str->val[result_len] = '\0';
 	}
 
+finish:
 	if (UNEXPECTED(use_copy1)) {
 		zval_dtor(op1);
 	}
 	if (UNEXPECTED(use_copy2)) {
 		zval_dtor(op2);
 	}
-	return SUCCESS;
+	return retval;
 }
 /* }}} */
 

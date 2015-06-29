@@ -61,9 +61,6 @@ $values = array(
 
       // unset data
       $unset_var,
-
-      // object data
-      new stdclass(),
 );
 
 // loop through each element of the array for gid
@@ -184,5 +181,4 @@ valid output
 
 Arg value  
 valid output
-
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Done

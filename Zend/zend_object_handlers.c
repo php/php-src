@@ -522,6 +522,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_STR(&tmp_member, zval_get_string(member));
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&tmp_member);
+			return &EG(uninitialized_zval);
+		}
+
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -615,6 +620,11 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_STR(&tmp_member, zval_get_string(member));
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&tmp_member);
+			return;
+		}
+
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -795,6 +805,10 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		name = Z_STR_P(member);
 	} else {
 		name = zval_get_string(member);
+		if (UNEXPECTED(EG(exception))) {
+			zend_string_release(name);
+			return NULL;
+		}
 	}
 
 #if DEBUG_OBJECT_HANDLERS
@@ -868,6 +882,11 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_STR(&tmp_member, zval_get_string(member));
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&tmp_member);
+			return;
+		}
+
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -1425,6 +1444,11 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_STR(&tmp_member, zval_get_string(member));
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&tmp_member);
+			return 0;
+		}
+
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -1517,31 +1541,19 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 	switch (type) {
 		case IS_STRING:
 			ce = Z_OBJCE_P(readobj);
-			if (ce->__tostring &&
-				(zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor(&retval);
-					EG(exception) = NULL;
-					zend_error_noreturn(E_ERROR, "Method %s::__toString() must not throw an exception", ce->name->val);
-					return FAILURE;
-				}
-				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
-					ZVAL_COPY_VALUE(writeobj, &retval);
-					return SUCCESS;
-				} else {
-					zval_ptr_dtor(&retval);
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
-					ZVAL_EMPTY_STRING(writeobj);
-					zend_error(E_RECOVERABLE_ERROR, "Method %s::__toString() must return a string value", ce->name->val);
-					return SUCCESS;
-				}
+			if (!ce->__tostring || !zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception)) {
+				return FAILURE;
 			}
-			return FAILURE;
+
+			if (UNEXPECTED(Z_TYPE(retval) != IS_STRING)) {
+				zval_ptr_dtor(&retval);
+				zend_error(E_EXCEPTION,
+					"Method %s::__toString() must return a string value", ce->name->val);
+				return FAILURE;
+			}
+
+			ZVAL_COPY_VALUE(writeobj, &retval);
+			return SUCCESS;
 		case _IS_BOOL:
 			ZVAL_BOOL(writeobj, 1);
 			return SUCCESS;

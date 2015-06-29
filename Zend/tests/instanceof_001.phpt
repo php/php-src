@@ -16,7 +16,11 @@ var_dump($c[0] instanceof stdClass);
 
 var_dump(@$inexistent instanceof stdClass);
 
-var_dump("$a" instanceof stdClass);
+try {
+    var_dump("$a" instanceof stdClass);
+} catch (Error $e) {
+    echo $e, "\n";
+}
 
 ?>
 --EXPECTF--
@@ -25,5 +29,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Error: Object of class stdClass could not be converted to string in %s:%d
+Stack trace:
+#0 {main}

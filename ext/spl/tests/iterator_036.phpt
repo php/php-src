@@ -19,4 +19,9 @@ test(new CachingIterator($ar, 0));
 ===DONE===
 --EXPECTF--	
 
-Fatal error: Method CachingIterator::__toString() must not throw an exception in %siterator_036.php on line %d
+Fatal error: Uncaught BadMethodCallException: CachingIterator does not fetch string value (see CachingIterator::__construct) in %s:%d
+Stack trace:
+#0 %s(%d): CachingIterator->__toString()
+#1 %s(%d): test(Object(CachingIterator))
+#2 {main}
+  thrown in %s on line %d
