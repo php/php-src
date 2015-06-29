@@ -74,10 +74,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				zval result;
 				int er;
 
-				if (opline->opcode == ZEND_DIV &&
-					Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-					Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) {
+				if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
+					zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
 					/* div by 0 */
+					break;
+				} else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
+					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
+					/* shift by negative number */
 					break;
 				}
 				er = EG(error_reporting);

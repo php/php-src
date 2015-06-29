@@ -988,10 +988,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			int er;
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-                  Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
-                 (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
-                  Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
+				if (RESULT_USED(opline)) {
+					SET_VAR_SOURCE(opline);
+				}
+                opline++;
+				continue;
+            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 				if (RESULT_USED(opline)) {
 					SET_VAR_SOURCE(opline);
 				}
