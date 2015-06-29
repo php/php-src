@@ -2427,7 +2427,7 @@ PHP_FUNCTION(substr_replace)
 	zval *from;
 	zval *len = NULL;
 	zval *repl;
-	zend_long l = 0; /* l and f should be size_t, however this needs much closer below logic investigation.*/
+	zend_long l = 0;
 	zend_long f;
 	int argc = ZEND_NUM_ARGS();
 	zend_string *result;
