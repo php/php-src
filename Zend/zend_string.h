@@ -15,8 +15,21 @@
    | Authors: Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
-
 /* $Id: $ */
+/*===========================================================================
+ The macros and functions defined below provide a complete API to access and
+ manipulate zend_string objects. Code shouldn't access any element
+ of the zend_string structure directly (names and structure organization
+ will change without prior notice). It you think a method is missing in the
+ API, please ask the PHP internals mailing list. If your request is approved,
+ the method will be implemented. Bypassing the API must be avoided
+ by all means and is unsupported.
+===========================================================================*/
+/*---------------------------------------------------------------------------
+ During an interim period, code written before this API was published still
+ access structure elements directly. This is temporary and this code is actively
+ migrated to comply with the API. New code should never bypass the API.
+---------------------------------------------------------------------------*/
 
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
@@ -35,7 +48,7 @@ void zend_interned_strings_dtor(void);
 
 END_EXTERN_C()
 
-/* Backwards compatibility */
+/*-- Backwards compatibility - Don't use old names when writing new code --*/
 
 #define IS_INTERNED(s)							ZSTR_IS_INTERNED(s)
 #define STR_EMPTY_ALLOC()						ZSTR_EMPTY_ALLOC()
@@ -72,6 +85,8 @@ END_EXTERN_C()
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
+/* The space taken by a zend_string structure, depending on the string length */
+
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
@@ -91,7 +106,6 @@ END_EXTERN_C()
 #define ZSTR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
 
 /*---*/
-
 static zend_always_inline char *ZSTR_VAL(zend_string *s)
 {
 	return (s)->val;
