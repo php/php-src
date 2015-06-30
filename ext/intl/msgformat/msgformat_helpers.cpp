@@ -413,12 +413,12 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
 		} else { //string; assumed to be in UTF-8
-			intl_stringFromChar(key, str_index->val, str_index->len, &err.code);
+			intl_stringFromChar(key, ZSTR_VAL(str_index), ZSTR_LEN(str_index), &err.code);
 
 			if (U_FAILURE(err.code)) {
 				char *message;
 				spprintf(&message, 0,
-					"Invalid UTF-8 data in argument key: '%s'", str_index->val);
+					"Invalid UTF-8 data in argument key: '%s'", ZSTR_VAL(str_index));
 				intl_errors_set(&err, err.code,	message, 1);
 				efree(message);
 				continue;

@@ -506,7 +506,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 
 	if (stmt->named_rewrite_template) {
 		/* magic/hack.
-		 * We pretend that the query was positional even if
+		 * We we pretend that the query was positional even if
 		 * it was named so that we fall into the
 		 * named rewrite case below.  Not too pretty,
 		 * but it works. */
@@ -575,7 +575,7 @@ safe:
 						zend_string *buf;
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
-						if (!stmt->dbh->methods->quoter(stmt->dbh, buf->val, buf->len, &plc->quoted, &plc->qlen,
+						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 								param->param_type)) {
 							/* bork */
 							ret = -1;

@@ -31,7 +31,7 @@ bool(true)
 bool(true)
 ok
 
-Fatal error: Uncaught EngineException: Cannot call abstract method Foo::bar() in %sbug63111.php:20
+Fatal error: Uncaught Error: Cannot call abstract method Foo::bar() in %sbug63111.php:20
 Stack trace:
 #0 {main}
   thrown in %sbug63111.php on line 20

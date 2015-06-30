@@ -54,10 +54,6 @@
 # endif
 #endif
 
-#ifndef S_IFLNK
-# define S_IFLNK 0120000
-#endif
-
 #ifdef NETWARE
 #include <fsio.h>
 #endif
@@ -87,14 +83,6 @@ cwd_state main_cwd_state; /* True global */
 #include <unistd.h>
 #else
 #include <direct.h>
-#endif
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
 #endif
 
 #ifdef TSRM_WIN32
@@ -565,6 +553,11 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 		return retval;
 	}
 #endif
+	if (!state->cwd) {
+		*length = 0;
+		return NULL;
+	}
+
 	*length = state->cwd_length;
 	return estrdup(state->cwd);
 }
@@ -584,6 +577,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 	if (length > size-1) {
 		efree(cwd);
 		errno = ERANGE; /* Is this OK? */
+		return NULL;
+	}
+	if (!cwd) {
 		return NULL;
 	}
 	memcpy(buf, cwd, length+1);

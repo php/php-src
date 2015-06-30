@@ -146,7 +146,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		}
 
 		ZEND_HASH_FOREACH_PTR(stmt->bound_param_map, name) {
-			if (strncmp(name, param->name->val, param->name->len + 1)) {
+			if (strncmp(name, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1)) {
 				position++;
 				continue;
 			}
@@ -209,7 +209,7 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 		/* if we are applying case conversions on column names, do so now */
 		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
-			char *s = stmt->columns[col].name->val;
+			char *s = ZSTR_VAL(stmt->columns[col].name);
 
 			switch (stmt->dbh->desired_case) {
 				case PDO_CASE_UPPER:
@@ -345,8 +345,8 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		int i;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			if (stmt->columns[i].name->len == param->name->len &&
-			    strncmp(stmt->columns[i].name->val, param->name->val, param->name->len + 1) == 0) {
+			if (ZSTR_LEN(stmt->columns[i].name) == ZSTR_LEN(param->name) &&
+			    strncmp(ZSTR_VAL(stmt->columns[i].name), ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1) == 0) {
 				param->paramno = i;
 				break;
 			}
@@ -356,20 +356,20 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
 			char *tmp;
-			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", param->name->val);
+			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
 			efree(tmp);
 		}
 	}
 
 	if (param->name) {
-		if (is_param && param->name->val[0] != ':') {
-			zend_string *temp = zend_string_alloc(param->name->len + 1, 0);
-			temp->val[0] = ':';
-			memmove(temp->val + 1, param->name->val, param->name->len + 1);
+		if (is_param && ZSTR_VAL(param->name)[0] != ':') {
+			zend_string *temp = zend_string_alloc(ZSTR_LEN(param->name) + 1, 0);
+			ZSTR_VAL(temp)[0] = ':';
+			memmove(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
 			param->name = temp;
 		} else {
-			param->name = zend_string_init(param->name->val, param->name->len, 0);
+			param->name = zend_string_init(ZSTR_VAL(param->name), ZSTR_LEN(param->name), 0);
 		}
 	}
 
@@ -2124,14 +2124,14 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		zend_string *key = NULL;
 		ZEND_HASH_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
 			if (key) {
-				php_stream_printf(out, "Key: Name: [%d] %.*s\n", key->len, key->len, key->val);
+				php_stream_printf(out, "Key: Name: [%d] %.*s\n", ZSTR_LEN(key), ZSTR_LEN(key), ZSTR_VAL(key));
 			} else {
 				php_stream_printf(out, "Key: Position #%pd:\n", num);
 			}
 
 			php_stream_printf(out, "paramno=%pd\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-					param->paramno, param->name? param->name->len : 0, param->name? param->name->len : 0,
-					param->name ? param->name->val : "",
+					param->paramno, param->name? ZSTR_LEN(param->name) : 0, param->name? ZSTR_LEN(param->name) : 0,
+					param->name ? ZSTR_VAL(param->name) : "",
 					param->is_param,
 					param->param_type);
 
@@ -2216,8 +2216,8 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	zend_string *lc_method_name;
 	zend_object *object = *object_pp;
 
-	lc_method_name = zend_string_alloc(method_name->len, 0);
-	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
+	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 
 	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
@@ -2506,8 +2506,8 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 			/* TODO: replace this with a hash of available column names to column
 			 * numbers */
 			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (stmt->columns[colno].name->len == Z_STRLEN_P(member) &&
-				    strncmp(stmt->columns[colno].name->val, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
+				if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
+				    strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
 					fetch_value(stmt, rv, colno, NULL);
 					//???
 					//Z_SET_REFCOUNT_P(rv, 0);
@@ -2566,8 +2566,8 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 		/* TODO: replace this with a hash of available column names to column
 		 * numbers */
 		for (colno = 0; colno < stmt->column_count; colno++) {
-			if (stmt->columns[colno].name->len == Z_STRLEN_P(member) &&
-			    strncmp(stmt->columns[colno].name->val, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
+			if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
+			    strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
 				return 1;
 			}
 		}
@@ -2621,8 +2621,8 @@ static union _zend_function *row_method_get(
 	zend_function *fbc;
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_alloc(method_name->len, 0);
-	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
+	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 
 	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
 		zend_string_release(lc_method_name);

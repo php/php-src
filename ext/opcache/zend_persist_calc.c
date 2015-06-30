@@ -31,8 +31,8 @@
 
 #define ADD_ARENA_SIZE(m)        ZCG(current_persistent_script)->arena_size += ZEND_ALIGNED_SIZE(m)
 
-# define ADD_STRING(str) \
-		ADD_DUP_SIZE((str), _STR_HEADER_SIZE + (str)->len + 1)
+# define ADD_STRING(str) ADD_DUP_SIZE((str), _ZSTR_STRUCT_SIZE(ZSTR_LEN(str)))
+
 # define ADD_INTERNED_STRING(str, do_free) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str); \

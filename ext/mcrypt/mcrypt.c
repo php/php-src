@@ -467,8 +467,8 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 	php_info_print_table_header(2, "mcrypt_filter support", "enabled");
 	php_info_print_table_row(2, "Version", LIBMCRYPT_VERSION);
 	php_info_print_table_row(2, "Api No", mcrypt_api_no);
-	php_info_print_table_row(2, "Supported ciphers", tmp1.s->val);
-	php_info_print_table_row(2, "Supported modes", tmp2.s->val);
+	php_info_print_table_row(2, "Supported ciphers", ZSTR_VAL(tmp1.s));
+	php_info_print_table_row(2, "Supported modes", ZSTR_VAL(tmp2.s));
 	smart_str_free(&tmp1);
 	smart_str_free(&tmp2);
 
@@ -1140,7 +1140,7 @@ static char *php_mcrypt_get_key_size_str(
 
 		smart_str_appends(&str, " supported");
 		smart_str_0(&str);
-		result = estrndup(str.s->val, str.s->len);
+		result = estrndup(ZSTR_VAL(str.s), ZSTR_LEN(str.s));
 		smart_str_free(&str);
 
 		return result;

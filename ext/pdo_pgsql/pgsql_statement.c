@@ -224,7 +224,7 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && !stmt->column_count) {
+	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
 		stmt->column_count = (int) PQnfields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
@@ -255,8 +255,8 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 			case PDO_PARAM_EVT_NORMALIZE:
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
-					if (param->name->val[0] == '$') {
-						ZEND_ATOL(param->paramno, param->name->val + 1);
+					if (ZSTR_VAL(param->name)[0] == '$') {
+						ZEND_ATOL(param->paramno, ZSTR_VAL(param->name) + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						char *namevar;
@@ -266,7 +266,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							ZEND_ATOL(param->paramno, namevar + 1);
 							param->paramno--;
 						} else {
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val);
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", ZSTR_VAL(param->name));
 							return 0;
 						}
 					}
@@ -301,8 +301,8 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				if (param->paramno >= 0) {
 					zval *parameter;
 
-					if (param->paramno >= zend_hash_num_elements(stmt->bound_param_map)) {
-						pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+					if (param->paramno >= zend_hash_num_elements(stmt->bound_params)) {
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 						return 0;
 					}
 
@@ -618,6 +618,12 @@ done:
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+
+	if (S->cols != NULL){
+		efree(S->cols);
+		S->cols = NULL;
+	}
 	return 1;
 }
 

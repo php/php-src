@@ -8,7 +8,7 @@ allow_url_include=1
 function test_parse_error($code) {
     try {
         require 'data://text/plain;base64,' . base64_encode($code);
-    } catch (ParseException $e) {
+    } catch (ParseError $e) {
         echo $e->getMessage(), " on line ", $e->getLine(), "\n";
     }
 }

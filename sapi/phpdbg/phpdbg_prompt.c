@@ -346,9 +346,12 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 {
 	if (!init_file && use_default) {
 		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
+		char *sys_ini;
 		int i;
 
-		phpdbg_try_file_init(PHPDBG_STRL(PHP_CONFIG_FILE_PATH "/" PHPDBG_INIT_FILENAME), 0);
+		asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH);
+		phpdbg_try_file_init(sys_ini, strlen(sys_ini), 0);
+		free(sys_ini);
 
 		if (!scan_dir) {
 			scan_dir = PHP_CONFIG_FILE_SCAN_DIR;
@@ -490,6 +493,7 @@ int phpdbg_skip_line_helper() /* {{{ */ {
 			 || opline->opcode == ZEND_GENERATOR_RETURN
 			 || opline->opcode == ZEND_EXIT
 			 || opline->opcode == ZEND_YIELD
+			 || opline->opcode == ZEND_YIELD_FROM
 			) {
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 				break;
@@ -534,6 +538,7 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_YIELD:
+			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 				return;
 		}
@@ -603,11 +608,11 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	fci.params = NULL;
 	fci.no_separation = 1;
 	if (zend_call_function(&fci, NULL) == SUCCESS) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ex->ce->name->val, Z_STRLEN(trace), Z_STRVAL(trace));
+		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ZSTR_VAL(ex->ce->name), Z_STRLEN(trace), Z_STRVAL(trace));
 
 		zval_ptr_dtor(&trace);
 	} else {
-		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ex->ce->name->val);
+		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ZSTR_VAL(ex->ce->name));
 	}
 
 	/* output useful information about address */
@@ -1440,6 +1445,9 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		/* check for uncaught exceptions */
 		if (exception && PHPDBG_G(handled_exception) != exception) {
 			zend_execute_data *prev_ex = execute_data;
+			zval zv, rv;
+			zend_string *file;
+			zend_long line;
 
 			do {
 				prev_ex = zend_generator_check_placeholder_frame(prev_ex);
@@ -1454,7 +1462,13 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			} while ((prev_ex = prev_ex->prev_execute_data));
 
 			PHPDBG_G(handled_exception) = exception;
-			phpdbg_error("exception", "name=\"%s\"", "Uncaught exception %s", exception->ce->name->val);
+
+			ZVAL_OBJ(&zv, exception);
+			file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
+			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
+
+			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught exception %s in %s on line %lld", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line);
+			zend_string_release(file);
 			DO_INTERACTIVE(1);
 		}
 ex_is_caught:
@@ -1559,7 +1573,7 @@ next:
 		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
 		     execute_data->opline->opcode == ZEND_DO_UCALL ||
 		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
-		    execute_data->func->type == ZEND_USER_FUNCTION) {
+		     execute_data->call->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
 		PHPDBG_G(vmret) = zend_vm_call_opcode_handler(execute_data);		

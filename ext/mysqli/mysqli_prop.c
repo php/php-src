@@ -41,7 +41,7 @@
 #define MYSQLI_GET_MYSQL(statusval) \
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \
@@ -52,7 +52,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 #define MYSQLI_GET_RESULT(statusval) \
 MYSQL_RES *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \
@@ -64,7 +64,7 @@ if (!obj->ptr) { \
 #define MYSQLI_GET_STMT(statusval) \
 MYSQL_STMT *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", obj->zo.ce->name->val);\
+	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
 	ZVAL_NULL(retval);\
 	return retval; \
 } else { \

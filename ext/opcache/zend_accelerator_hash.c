@@ -172,8 +172,8 @@ void* zend_accel_hash_find(zend_accel_hash *accel_hash, zend_string *key)
 {
 	return zend_accel_hash_find_ex(
 		accel_hash,
-		key->val,
-		key->len,
+		ZSTR_VAL(key),
+		ZSTR_LEN(key),
 		zend_string_hash_val(key),
 		1);
 }
@@ -185,8 +185,8 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, z
 {
 	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(
 		accel_hash,
-		key->val,
-		key->len,
+		ZSTR_VAL(key),
+		ZSTR_LEN(key),
 		zend_string_hash_val(key),
 		0);
 }

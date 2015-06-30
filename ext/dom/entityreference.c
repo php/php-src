@@ -45,7 +45,7 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMEntityReference::__construct(string name); */
+/* {{{ proto void DOMEntityReference::__construct(string name) */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id = getThis();

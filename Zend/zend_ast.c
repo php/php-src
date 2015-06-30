@@ -188,7 +188,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zval_dtor(offset);
 			break;
 		case IS_NULL:
-			zend_symtable_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), expr);
+			zend_symtable_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), expr);
 			break;
 		case IS_LONG:
 			zend_hash_index_update(Z_ARRVAL_P(result), Z_LVAL_P(offset), expr);
@@ -394,7 +394,12 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval tmp;
 
 				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
-				ZVAL_ZVAL(result, &tmp, 1, 1);
+				if (UNEXPECTED(Z_ISREF(tmp))) {
+					ZVAL_DUP(result, Z_REFVAL(tmp));
+				} else {
+					ZVAL_DUP(result, &tmp);
+				}
+				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
 				zval_dtor(&op2);
 			}
@@ -552,8 +557,8 @@ static void zend_ast_export_str(smart_str *str, zend_string *s)
 {
 	size_t i;
 
-	for (i = 0; i < s->len; i++) {
-		unsigned char c = s->val[i];
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		unsigned char c = ZSTR_VAL(s)[i];
 		if (c == '\'' || c == '\\') {
 			smart_str_appendc(str, '\\');
 			smart_str_appendc(str, c);
@@ -567,8 +572,8 @@ static void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
 {
 	size_t i;
 
-	for (i = 0; i < s->len; i++) {
-		unsigned char c = s->val[i];
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		unsigned char c = ZSTR_VAL(s)[i];
 		if (c < ' ') {
 			switch (c) {
 				case '\n':
@@ -874,7 +879,7 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 			break;
 		case IS_DOUBLE:
 			key = zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
-			smart_str_appendl(str, key->val, key->len);
+			smart_str_appendl(str, ZSTR_VAL(key), ZSTR_LEN(key));
 			zend_string_release(key);
 			break;
 		case IS_STRING:
@@ -1001,7 +1006,7 @@ tail_call:
 				smart_str_appendc(str, '&');
 			}
 			if (ast->kind != ZEND_AST_CLOSURE) {
-				smart_str_appendl(str, decl->name->val, decl->name->len);
+				smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
 			}
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, decl->child[0], 0, indent);
@@ -1038,7 +1043,7 @@ tail_call:
 				}
 				smart_str_appends(str, "class ");
 			}
-			smart_str_appendl(str, decl->name->val, decl->name->len);
+			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
 			if (decl->child[0]) {
 				smart_str_appends(str, " extends ");
 				zend_ast_export_ns_name(str, decl->child[0], 0, indent);
@@ -1149,9 +1154,6 @@ simple_list:
 		case ZEND_AST_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			break;
-		case ZEND_AST_RESOLVE_CLASS_NAME:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			APPEND_STR("::class");
 		case ZEND_AST_UNPACK:
 			smart_str_appends(str, "...");
 			ast = ast->child[0];

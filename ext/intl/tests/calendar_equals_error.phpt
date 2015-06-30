@@ -19,29 +19,29 @@ set_error_handler('eh');
 
 try {
 	var_dump($c->equals());
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->equals(new stdclass));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->equals(1, 2));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 
 try {
 	var_dump(intlcal_equals($c, array()));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_equals(1, $c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 

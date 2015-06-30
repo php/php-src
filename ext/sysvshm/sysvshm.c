@@ -268,7 +268,7 @@ PHP_FUNCTION(shm_put_var)
 	}
 
 	/* insert serialized variable into shared memory */
-	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? shm_var.s->val : NULL, shm_var.s? shm_var.s->len : 0);
+	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);
 
 	/* free string */
 	smart_str_free(&shm_var);

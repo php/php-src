@@ -480,15 +480,15 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
 
-	if (!new_value->len) {
+	if (!ZSTR_LEN(new_value)) {
 		DBA_G(default_hptr) = NULL;
 		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	}
 
-	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value->val); hptr++);
+	for (hptr = handler; hptr->name && strcasecmp(hptr->name, ZSTR_VAL(new_value)); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL, E_WARNING, "No such handler: %s", new_value->val);
+		php_error_docref(NULL, E_WARNING, "No such handler: %s", ZSTR_VAL(new_value));
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
@@ -547,7 +547,7 @@ PHP_MINFO_FUNCTION(dba)
  	php_info_print_table_row(2, "DBA support", "enabled");
 	if (handlers.s) {
 		smart_str_0(&handlers);
-		php_info_print_table_row(2, "Supported handlers", handlers.s->val);
+		php_info_print_table_row(2, "Supported handlers", ZSTR_VAL(handlers.s));
 		smart_str_free(&handlers);
 	} else {
 		php_info_print_table_row(2, "Supported handlers", "none");
@@ -862,7 +862,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				lock_file_mode = "a+b";
 			} else {
 				if (opened_path) {
-					info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 					zend_string_release(opened_path);
 				}
 			}
@@ -873,10 +873,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (lock_dbf) {
 					/* replace the path info with the real path of the opened file */
 					pefree(info->path, persistent);
-					info->path = pestrndup(opened_path->val, opened_path->len, persistent);
+					info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 				}
 				/* now store the name of the lock */
-				info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 				zend_string_release(opened_path);
 			}
 		}

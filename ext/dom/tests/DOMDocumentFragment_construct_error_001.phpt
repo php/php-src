@@ -9,7 +9,7 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 <?php
 try {
     $fragment = new DOMDocumentFragment("root");
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 ?>

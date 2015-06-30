@@ -55,7 +55,13 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	zval *p, *end;
 
 	if (object->properties) {
-		zend_array_destroy(object->properties);
+		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
+			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+				GC_REMOVE_FROM_BUFFER(object->properties);
+				GC_TYPE_INFO(object->properties) = IS_NULL | (GC_WHITE << 16);
+				zend_array_destroy(object->properties);
+			}
+		}
 	}
 	p = object->properties_table;
 	if (EXPECTED(object->ce->default_properties_count)) {
@@ -91,8 +97,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to private %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
+						ZSTR_VAL(ce->name),
+						EG(scope) ? ZSTR_VAL(EG(scope)->name) : "",
 						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -104,8 +110,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to protected %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
+						ZSTR_VAL(ce->name),
+						EG(scope) ? ZSTR_VAL(EG(scope)->name) : "",
 						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -163,7 +169,17 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			src++;
 			dst++;
 		} while (src != end);
+	} else if (old_object->properties && !old_object->ce->clone) {
+		/* fast copy */
+		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
+			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(old_object->properties)++;
+			}
+			new_object->properties = old_object->properties;
+			return;
+		}
 	}
+
 	if (old_object->properties &&
 	    EXPECTED(zend_hash_num_elements(old_object->properties))) {
 		zval *prop, new_prop;

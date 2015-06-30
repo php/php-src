@@ -128,6 +128,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	if (op_array->last_literal) {
+		cache_size = 0;
 		info = (literal_info*)zend_arena_calloc(&ctx->arena, op_array->last_literal, sizeof(literal_info));
 
 	    /* Mark literals of specific types */
@@ -286,6 +287,19 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_BIND_GLOBAL:
 					LITERAL_INFO(opline->op2.constant, LITERAL_GLOBAL, 0, 1, 1);
 					break;
+				case ZEND_RECV_INIT:
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, 1);
+					if (Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) != -1) {
+						Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
+				case ZEND_RECV:
+				case ZEND_VERIFY_RETURN_TYPE:
+					if (opline->op2.num != -1) {
+						opline->op2.num = cache_size;
+						cache_size += sizeof(void *);
+					}
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
@@ -319,7 +333,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 #endif
 
 		/* Merge equal constants */
-		j = 0; cache_size = 0;
+		j = 0;
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
@@ -331,15 +345,26 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
 				case IS_NULL:
-					if (l_null < 0) {
-						l_null = j;
+					/* Only checking MAY_MERGE for IS_NULL here 
+					 * is because only IS_NULL can be default value for class type hinting(RECV_INIT). */
+					if ((info[i].flags & LITERAL_MAY_MERGE)) {
+						if (l_null < 0) {
+							l_null = j;
+							if (i != j) {
+								op_array->literals[j] = op_array->literals[i];
+								info[j] = info[i];
+							}
+							j++;
+						}
+						map[i] = l_null;
+					} else {
+						map[i] = j;
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
 						j++;
 					}
-					map[i] = l_null;
 					break;
 				case IS_FALSE:
 					if (l_false < 0) {
@@ -397,22 +422,22 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						if (info[i].flags & LITERAL_EX_OBJ) {
 							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i]);
 							key = zend_string_alloc(key_len, 0);
-							key->len = snprintf(key->val, key->len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
+							ZSTR_LEN(key) = snprintf(ZSTR_VAL(key), ZSTR_LEN(key)-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
 							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];
 							key_len = Z_STRLEN_P(class_name) + sizeof("::") + Z_STRLEN(op_array->literals[i]);
 							key = zend_string_alloc(key_len, 0);
-							memcpy(key->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
-							memcpy(key->val + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
-							memcpy(key->val + Z_STRLEN_P(class_name) + sizeof("::") - 1,
+							memcpy(ZSTR_VAL(key), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+							memcpy(ZSTR_VAL(key) + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
+							memcpy(ZSTR_VAL(key) + Z_STRLEN_P(class_name) + sizeof("::") - 1,
 								Z_STRVAL(op_array->literals[i]),
 								Z_STRLEN(op_array->literals[i]) + 1);
 						} else {
 							key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
 						}
-						key->h = zend_hash_func(key->val, key->len);
-						key->h += info[i].flags;
+						ZSTR_H(key) = zend_hash_func(ZSTR_VAL(key), ZSTR_LEN(key));
+						ZSTR_H(key) += info[i].flags;
 					}
 					if ((info[i].flags & LITERAL_MAY_MERGE) &&
 						(pos = zend_hash_find(&hash, key)) != NULL &&

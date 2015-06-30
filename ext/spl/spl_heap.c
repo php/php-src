@@ -112,9 +112,7 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 		return FAILURE;
 	}
 
-	convert_to_long(&zresult);
-	*result = Z_LVAL(zresult);
-
+	*result = zval_get_long(&zresult);
 	zval_ptr_dtor(&zresult);
 
 	return SUCCESS;
@@ -249,9 +247,10 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userda
 	}
 
 	/* sifting up */
-	for (i = heap->count++; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata) < 0; i = (i-1)/2) {
+	for (i = heap->count; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata) < 0; i = (i-1)/2) {
 		heap->elements[i] = heap->elements[(i-1)/2];
 	}
+	heap->count++;
 
 	if (EG(exception)) {
 		/* exception thrown during comparison */
@@ -580,7 +579,7 @@ SPL_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed $value)
+/* {{{ proto bool SplHeap::insert(mixed value)
 	   Push $value on the heap */
 SPL_METHOD(SplHeap, insert)
 {
@@ -631,7 +630,7 @@ SPL_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed $value, mixed $priority)
+/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
@@ -695,10 +694,6 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value_out)) {
-		Z_ADDREF_P(value_out);
-	}
-
 	RETVAL_ZVAL(value_out, 1, 0);
 	zval_ptr_dtor(&value);
 }
@@ -741,7 +736,7 @@ SPL_METHOD(SplPriorityQueue, top)
 /* }}} */
 
 
-/* {{{ proto int SplPriorityQueue::setExtractFlags($flags)
+/* {{{ proto int SplPriorityQueue::setExtractFlags(int flags)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {

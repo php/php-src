@@ -195,7 +195,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
 
 				zend_ptr_stack_init_ex(&plist->free_links, 1);
-				zend_hash_str_update_mem(&EG(persistent_list), hash_key->val, hash_key->len, &le, sizeof(le));
+				zend_hash_str_update_mem(&EG(persistent_list), ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), &le, sizeof(le));
 			}
 		}
 	}
@@ -653,12 +653,12 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-		  		php_error_docref(NULL, E_WARNING, "[%d] Couldn't fetch %s", i, intern->zo.ce->name->val);
+		  		php_error_docref(NULL, E_WARNING, "[%d] Couldn't fetch %s", i, ZSTR_VAL(intern->zo.ce->name));
 				continue;
 		  	}
 			mysql = (MY_MYSQL*) my_res->ptr;
 			if (MYSQLI_STATUS_VALID && my_res->status < MYSQLI_STATUS_VALID) {
-				php_error_docref(NULL, E_WARNING, "Invalid object %d or resource %s", i, intern->zo.ce->name->val);
+				php_error_docref(NULL, E_WARNING, "Invalid object %d or resource %s", i, ZSTR_VAL(intern->zo.ce->name));
 				continue;
 			}
 			(*out_array)[current++] = mysql->mysql;
@@ -689,7 +689,7 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-		  		php_error_docref(NULL, E_WARNING, "[%d] Couldn't fetch %s", i, intern->zo.ce->name->val);
+		  		php_error_docref(NULL, E_WARNING, "[%d] Couldn't fetch %s", i, ZSTR_VAL(intern->zo.ce->name));
 				continue;
 		  	}
 			mysql = (MY_MYSQL *) my_res->ptr;
@@ -1055,7 +1055,7 @@ static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mo
 		char * name_esc = mysqli_escape_string_for_tx_name_in_comment(name);
 		char * query;
 		unsigned int query_len = spprintf(&query, 0, "START TRANSACTION%s %s",
-										  name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+										  name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
 
 		smart_str_free(&tmp_str);
 		if (name_esc) {

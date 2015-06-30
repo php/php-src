@@ -85,9 +85,17 @@
 # define ZEND_GCC_VERSION 0
 #endif
 
+/* Compatibility with non-clang compilers */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
 #if defined(ZEND_WIN32)
 # define ZEND_ASSUME(c)	__assume(c)
-#elif defined(__GNUC__) && PHP_HAVE_BUILTIN_EXPECT && ZEND_GCC_VERSION >= 4005
+#elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)
@@ -159,11 +167,6 @@ char *alloca();
 #   endif
 #  endif
 # endif
-#endif
-
-/* Compatibility with non-clang compilers */
-#ifndef __has_attribute
-# define __has_attribute(x) 0
 #endif
 
 #if ZEND_GCC_VERSION >= 2096
@@ -240,6 +243,19 @@ char *alloca();
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
+# define HAVE_ATTRIBUTE_WEAK
+#endif
+
+#if ZEND_GCC_VERSION >= 3001 || __has_builtin(__builtin_constant_p)
+# define HAVE_BUILTIN_CONSTANT_P
+#endif
+
+#ifdef HAVE_BUILTIN_CONSTANT_P
+# define ZEND_CONST_COND(_condition, _default) \
+	(__builtin_constant_p(_condition) ? (_condition) : (_default))
+#else
+# define ZEND_CONST_COND(_condition, _default) \
+	(_default)
 #endif
 
 #if ZEND_DEBUG

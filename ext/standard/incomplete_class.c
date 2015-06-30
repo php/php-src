@@ -41,7 +41,7 @@ static void incomplete_class_message(zval *object, int error_type)
 	class_name = php_lookup_class_name(object);
 
 	if (class_name) {
-		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
+		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, ZSTR_VAL(class_name));
 		zend_string_release(class_name);
 	} else {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");

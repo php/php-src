@@ -130,5 +130,18 @@ distclean: clean
 	fi
 	$(EGREP) define'.*include/php' $(top_srcdir)/configure | $(SED) 's/.*>//'|xargs rm -f
 
-.PHONY: all clean install distclean test
+prof-gen:
+	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-generate all
+
+prof-clean:
+	find . -name \*.lo -o -name \*.o | xargs rm -f
+	find . -name \*.la -o -name \*.a | xargs rm -f 
+	find . -name \*.so | xargs rm -f
+	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_MILTER_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
+
+prof-use:
+	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
+
+
+.PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:

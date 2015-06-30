@@ -19,33 +19,33 @@ set_error_handler('eh');
 
 try {
 	var_dump($c->isEquivalentTo(0));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->isEquivalentTo($c, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump($c->isEquivalentTo(1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
 	var_dump(intlcal_is_equivalent_to($c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_is_equivalent_to($c, 1));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
 	var_dump(intlcal_is_equivalent_to(1, $c));
-} catch (EngineException $ex) {
+} catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 

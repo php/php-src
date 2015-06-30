@@ -494,7 +494,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
 	start = zend_string_alloc(3 * len, 0);
-	to = (unsigned char*)start->val;
+	to = (unsigned char*)ZSTR_VAL(start);
 
 	while (from < end) {
 		c = *from++;
@@ -524,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
+	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
 
 	return start;
 }
@@ -546,7 +546,7 @@ PHP_FUNCTION(urlencode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_STR(php_url_encode(in_str->val, in_str->len));
+	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -566,8 +566,8 @@ PHP_FUNCTION(urldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
-	out_str->len = php_url_decode(out_str->val, out_str->len);
+	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
+	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
     RETURN_NEW_STR(out_str);
 }
@@ -613,24 +613,24 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 
 	str = zend_string_alloc(3 * len, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
-		str->val[y] = (unsigned char) s[x];
+		ZSTR_VAL(str)[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC
-		if ((str->val[y] < '0' && str->val[y] != '-' && str->val[y] != '.') ||
-			(str->val[y] < 'A' && str->val[y] > '9') ||
-			(str->val[y] > 'Z' && str->val[y] < 'a' && str->val[y] != '_') ||
-			(str->val[y] > 'z' && str->val[y] != '~')) {
-			str->val[y++] = '%';
-			str->val[y++] = hexchars[(unsigned char) s[x] >> 4];
-			str->val[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((ZSTR_VAL(str)[y] < '0' && ZSTR_VAL(str)[y] != '-' && ZSTR_VAL(str)[y] != '.') ||
+			(ZSTR_VAL(str)[y] < 'A' && ZSTR_VAL(str)[y] > '9') ||
+			(ZSTR_VAL(str)[y] > 'Z' && ZSTR_VAL(str)[y] < 'a' && ZSTR_VAL(str)[y] != '_') ||
+			(ZSTR_VAL(str)[y] > 'z' && ZSTR_VAL(str)[y] != '~')) {
+			ZSTR_VAL(str)[y++] = '%';
+			ZSTR_VAL(str)[y++] = hexchars[(unsigned char) s[x] >> 4];
+			ZSTR_VAL(str)[y] = hexchars[(unsigned char) s[x] & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(str->val[y]) && str->valchr("_-.~", str->val[y]) != NULL) {
-			str->val[y++] = '%';
-			str->val[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			str->val[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(ZSTR_VAL(str)[y]) && strchr("_-.~", ZSTR_VAL(str)[y]) != NULL) {
+			ZSTR_VAL(str)[y++] = '%';
+			ZSTR_VAL(str)[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
+			ZSTR_VAL(str)[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	str->val[y] = '\0';
+	ZSTR_VAL(str)[y] = '\0';
 	str = zend_string_truncate(str, y, 0);
 
 	return str;
@@ -653,7 +653,7 @@ PHP_FUNCTION(rawurlencode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_STR(php_raw_url_encode(in_str->val, in_str->len));
+	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -673,8 +673,8 @@ PHP_FUNCTION(rawurldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
-	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
+	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
+	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
     RETURN_NEW_STR(out_str);
 }

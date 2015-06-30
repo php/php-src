@@ -1812,29 +1812,29 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 
 	t = zend_string_alloc(len * 2 + 4, 0);
 
-	t->val[j++] = '~';
+	ZSTR_VAL(t)[j++] = '~';
 
 	for (i = 0; i < len; i++, j++) {
 		switch (val[i]) {
 			case '~':
-				t->val[j++] = '\\';
-				t->val[j] = '~';
+				ZSTR_VAL(t)[j++] = '\\';
+				ZSTR_VAL(t)[j] = '~';
 				break;
 			default:
-				t->val[j] = val[i];
+				ZSTR_VAL(t)[j] = val[i];
 				break;
 		}
 	}
-	t->val[j++] = '~';
+	ZSTR_VAL(t)[j++] = '~';
 
 	if (options & PCRE_CASELESS) 
-		t->val[j++] = 'i';
+		ZSTR_VAL(t)[j++] = 'i';
 
 	if (options & PCRE_MULTILINE)
-		t->val[j++] = 'm';
+		ZSTR_VAL(t)[j++] = 'm';
 
-	t->val[j]='\0';
-	t->len = j;
+	ZSTR_VAL(t)[j]='\0';
+	ZSTR_LEN(t) = j;
 
 	ZVAL_NEW_STR(pattern, t);
 }

@@ -9,7 +9,7 @@ $callback();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Array callback has to contain indices 0 and 1 in %s:%d
+Fatal error: Uncaught Error: Array callback has to contain indices 0 and 1 in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

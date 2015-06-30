@@ -9,7 +9,7 @@ Steve Seear <stevseea@php.net>
 try {
 	$a = new ReflectionFunction(array(1, 2, 3));
 	echo "exception not thrown.".PHP_EOL;
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
@@ -19,17 +19,17 @@ try {
 }
 try {
 	$a = new ReflectionFunction();
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction(1, 2);
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	$a = new ReflectionFunction([]);
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

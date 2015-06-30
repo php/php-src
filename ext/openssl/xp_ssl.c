@@ -255,7 +255,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init)
 							"SSL operation failed with code %d. %s%s",
 							err,
 							ebuf.s ? "OpenSSL Error messages:\n" : "",
-							ebuf.s ? ebuf.s->val : "");
+							ebuf.s ? ZSTR_VAL(ebuf.s) : "");
 					if (ebuf.s) {
 						smart_str_free(&ebuf);
 					}
@@ -313,7 +313,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 
 	fingerprint = php_openssl_x509_fingerprint(peer, method, 0);
 	if (fingerprint) {
-		result = strcasecmp(expected, fingerprint->val);
+		result = strcasecmp(expected, ZSTR_VAL(fingerprint));
 		zend_string_release(fingerprint);
 	}
 
@@ -350,7 +350,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
 				return 0;
 			}
-			if (php_x509_fingerprint_cmp(peer, key->val, Z_STRVAL_P(current)) != 0) {
+			if (php_x509_fingerprint_cmp(peer, ZSTR_VAL(key), Z_STRVAL_P(current)) != 0) {
 				return 0;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1389,7 +1389,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 				SSL_CTX_free(ctx);
 				return FAILURE;
 			} else {
-				sslsock->sni_certs[i].name = pestrdup(key->val, php_stream_is_persistent(stream));
+				sslsock->sni_certs[i].name = pestrdup(ZSTR_VAL(key), php_stream_is_persistent(stream));
 				sslsock->sni_certs[i].ctx = ctx;
 				++i;
 			}

@@ -74,10 +74,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				zval result;
 				int er;
 
-				if (opline->opcode == ZEND_DIV &&
-					Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-					Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) {
+				if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
+					zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
 					/* div by 0 */
+					break;
+				} else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
+					zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
+					/* shift by negative number */
 					break;
 				}
 				er = EG(error_reporting);
@@ -293,7 +296,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					/* for A::B */
 					if (op_array->scope &&
 						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						op_array->scope->name->val, Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						ZSTR_VAL(op_array->scope->name), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
 						ce = op_array->scope;
 					} else {
 						if ((ce = zend_hash_find_ptr(EG(class_table),
@@ -441,9 +444,13 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
 
-					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL &&
-							func->type == ZEND_INTERNAL_FUNCTION &&
-							func->module->type == MODULE_PERSISTENT) {
+					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL
+						 && func->type == ZEND_INTERNAL_FUNCTION
+						 && func->module->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && func->module->handle == NULL
+#endif
+						) {
 						zval t;
 						if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("is_callable") - 1 ||
 								func->handler != ZEND_FN(display_disabled_function)) {
@@ -480,7 +487,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							ZVAL_FALSE(&t);
 						}
 					} else {
-						if (m->type == MODULE_PERSISTENT) {
+						if (m->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+						 && m->handle == NULL
+#endif
+						) {
 							ZVAL_TRUE(&t);
 						} else {
 							break;
@@ -551,8 +562,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					!zend_optimizer_is_disabled_func("dirname", sizeof("dirname") - 1) &&
 					IS_ABSOLUTE_PATH(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
 					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
-					dirname->len = zend_dirname(dirname->val, dirname->len);
-					if (IS_ABSOLUTE_PATH(dirname->val, dirname->len)) {
+					ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+					if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
 						zval t;
 
 						ZVAL_STR(&t, dirname);

@@ -1662,9 +1662,15 @@ TEST $file
 	}
 
 	$env['REDIRECT_STATUS'] = '1';
-	$env['QUERY_STRING']    = $query_string;
-	$env['PATH_TRANSLATED'] = $test_file;
-	$env['SCRIPT_FILENAME'] = $test_file;
+	if (empty($env['QUERY_STRING'])) {
+		$env['QUERY_STRING']    = $query_string;
+	}
+	if (empty($env['PATH_TRANSLATED'])) {
+		$env['PATH_TRANSLATED'] = $test_file;
+	}
+	if (empty($env['SCRIPT_FILENAME'])) {
+		$env['SCRIPT_FILENAME'] = $test_file;
+	}
 
 	if (array_key_exists('COOKIE', $section_text)) {
 		$env['HTTP_COOKIE'] = trim($section_text['COOKIE']);
@@ -1745,12 +1751,17 @@ TEST $file
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
-		save_text($tmp_post, $post);
 		$content_length = strlen($post);
+		save_text($tmp_post, $post);
 
 		$env['REQUEST_METHOD'] = 'POST';
-		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
-		$env['CONTENT_LENGTH'] = $content_length;
+		if (empty($env['CONTENT_TYPE'])) {
+			$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		}
+
+		if (empty($env['CONTENT_LENGTH'])) {
+			$env['CONTENT_LENGTH'] = $content_length;
+		}
 
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 

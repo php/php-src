@@ -213,7 +213,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 		if (error_string) {
 			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
-			php_error_docref(NULL, E_WARNING, "%s", (*error_string)->val);
+			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
 			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
 		}
@@ -221,7 +221,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	} else if (res == NULL) {
 		if (error_string) {
 			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo failed (null result pointer) errno=%d", errno);
-			php_error_docref(NULL, E_WARNING, "%s", (*error_string)->val);
+			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
 			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
 		}
@@ -255,7 +255,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		if (host_info == NULL) {
 			if (error_string) {
 				error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
-				php_error_docref(NULL, E_WARNING, "%s", (*error_string)->val);
+				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 			} else {
 				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
 			}
@@ -567,7 +567,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 
 	if (n == 0) {
 		if (errstr) {
-			php_error_docref(NULL, E_WARNING, "Failed to resolve `%s': %s", tmp, errstr->val);
+			php_error_docref(NULL, E_WARNING, "Failed to resolve `%s': %s", tmp, ZSTR_VAL(errstr));
 			zend_string_release(errstr);
 		}
 		goto out;

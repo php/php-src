@@ -9,18 +9,18 @@ class C {
 
 try {
 	new ReflectionProperty();
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
 	new ReflectionProperty('C::p');
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 try {
 	new ReflectionProperty('C', 'p', 'x');
-} catch (TypeException $re) {
+} catch (TypeError $re) {
 	echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 

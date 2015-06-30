@@ -28,4 +28,17 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars);
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags);
 void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags);
 
+typedef struct _phpdbg_oplog_entry phpdbg_oplog_entry;
+struct _phpdbg_oplog_entry {
+	phpdbg_oplog_entry *next;
+	zend_op_array *op_array;
+	zend_op *op;
+};
+
+typedef struct _phpdbg_oplog_list phpdbg_oplog_list;
+struct _phpdbg_oplog_list {
+	phpdbg_oplog_list *prev;
+	phpdbg_oplog_entry *start;
+};
+
 #endif /* PHPDBG_OPCODE_H */

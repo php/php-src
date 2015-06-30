@@ -186,8 +186,8 @@ int main() {
       AC_DEFINE([ICONV_BROKEN_IGNORE],1,[Whether iconv supports IGNORE])
     ],[
       AC_MSG_RESULT(no, cross-compiling)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
-      AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports IGNORE])
+      PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
+      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
     ])
 
     AC_MSG_CHECKING([if your cpp allows macro usage in include lines])

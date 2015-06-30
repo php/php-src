@@ -91,7 +91,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 			if (param->is_param) {
 
 				if (param->paramno == -1) {
-					param->paramno = sqlite3_bind_parameter_index(S->stmt, param->name->val) - 1;
+					param->paramno = sqlite3_bind_parameter_index(S->stmt, ZSTR_VAL(param->name)) - 1;
 				}
 
 				switch (PDO_PARAM_TYPE(param->param_type)) {

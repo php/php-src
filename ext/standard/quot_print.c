@@ -97,7 +97,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
 	}
 
 	retval = zend_string_alloc(buf_size, 0);
-	i = length; p1 = str; p2 = (unsigned char*)retval->val;
+	i = length; p1 = str; p2 = (unsigned char*)ZSTR_VAL(retval);
 	decoded_len = 0;
 
 	while (i > 0 && *p1 != '\0') {
@@ -138,7 +138,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
 	}
 
 	*p2 = '\0';
-	retval->len = decoded_len;
+	ZSTR_LEN(retval) = decoded_len;
 	return retval;
 }
 /* }}} */
@@ -153,7 +153,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 	zend_string *ret;
 
 	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
-	d = (unsigned char*)ret->val;
+	d = (unsigned char*)ZSTR_VAL(ret);
 
 	while (length--) {
 		if (((c = *str++) == '\015') && (*str == '\012') && length > 0) {
@@ -187,7 +187,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 		}
 	}
 	*d = '\0';
-	ret = zend_string_truncate(ret, d - (unsigned char*)ret->val, 0);
+	ret = zend_string_truncate(ret, d - (unsigned char*)ZSTR_VAL(ret), 0);
 	return ret;
 }
 /* }}} */
@@ -210,13 +210,13 @@ PHP_FUNCTION(quoted_printable_decode)
 		return;
 	}
 
-	if (arg1->len == 0) {
+	if (ZSTR_LEN(arg1) == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-	str_in = arg1->val;
-	str_out = zend_string_alloc(arg1->len, 0);
+	str_in = ZSTR_VAL(arg1);
+	str_out = zend_string_alloc(ZSTR_LEN(arg1), 0);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
@@ -224,7 +224,7 @@ PHP_FUNCTION(quoted_printable_decode)
 				isxdigit((int) str_in[i + 1]) &&
 				isxdigit((int) str_in[i + 2]))
 			{
-				str_out->val[j++] = (php_hex2int((int) str_in[i + 1]) << 4)
+				ZSTR_VAL(str_out)[j++] = (php_hex2int((int) str_in[i + 1]) << 4)
 						+ php_hex2int((int) str_in[i + 2]);
 				i += 3;
 			} else  /* check for soft line break according to RFC 2045*/ {
@@ -246,16 +246,16 @@ PHP_FUNCTION(quoted_printable_decode)
 					i += k + 1;
 				}
 				else {
-					str_out->val[j++] = str_in[i++];
+					ZSTR_VAL(str_out)[j++] = str_in[i++];
 				}
 			}
 			break;
 		default:
-			str_out->val[j++] = str_in[i++];
+			ZSTR_VAL(str_out)[j++] = str_in[i++];
 		}
 	}
-	str_out->val[j] = '\0';
-	str_out->len = j;
+	ZSTR_VAL(str_out)[j] = '\0';
+	ZSTR_LEN(str_out) = j;
 
 	RETVAL_NEW_STR(str_out);
 }
@@ -271,11 +271,11 @@ PHP_FUNCTION(quoted_printable_encode)
 		return;
 	}
 
-	if (!str->len) {
+	if (!ZSTR_LEN(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	new_str = php_quot_print_encode((unsigned char *)str->val, (size_t)str->len);
+	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), (size_t)ZSTR_LEN(str));
 	RETURN_STR(new_str);
 }
 /* }}} */

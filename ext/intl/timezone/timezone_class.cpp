@@ -248,7 +248,7 @@ static zend_object *TimeZone_clone_obj(zval *object)
 			intl_errors_set_custom_msg(TIMEZONE_ERROR_P(to_orig),
 				"Could not clone IntlTimeZone", 0);
 			err_msg = intl_error_get_message(TIMEZONE_ERROR_P(to_orig));
-			zend_throw_exception(NULL, err_msg->val, 0);
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 			zend_string_free(err_msg);
 		} else {
 			to_new->utimezone = newTimeZone;

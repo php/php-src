@@ -315,7 +315,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fcc.object = Z_OBJ_P(object);
 
 		if (zend_call_function(&fci, &fcc) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name->val, uwrap->ce->constructor->common.function_name->val);
+			php_error_docref(NULL, E_WARNING, "Could not execute %s::%s()", ZSTR_VAL(uwrap->ce->name), ZSTR_VAL(uwrap->ce->constructor->common.function_name));
 			zval_dtor(object);
 			ZVAL_UNDEF(object);
 		} else {
@@ -497,8 +497,8 @@ PHP_FUNCTION(stream_wrapper_register)
 	}
 
 	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
-	uwrap->protoname = estrndup(protocol->val, protocol->len);
-	uwrap->classname = estrndup(classname->val, classname->len);
+	uwrap->protoname = estrndup(ZSTR_VAL(protocol), ZSTR_LEN(protocol));
+	uwrap->classname = estrndup(ZSTR_VAL(classname), ZSTR_LEN(classname));
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
@@ -506,19 +506,19 @@ PHP_FUNCTION(stream_wrapper_register)
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
 	if ((uwrap->ce = zend_lookup_class(classname)) != NULL) {
-		if (php_register_url_stream_wrapper_volatile(protocol->val, &uwrap->wrapper) == SUCCESS) {
+		if (php_register_url_stream_wrapper_volatile(ZSTR_VAL(protocol), &uwrap->wrapper) == SUCCESS) {
 			RETURN_TRUE;
 		} else {
 			/* We failed.  But why? */
 			if (zend_hash_exists(php_stream_get_url_stream_wrappers_hash(), protocol)) {
-				php_error_docref(NULL, E_WARNING, "Protocol %s:// is already defined.", protocol->val);
+				php_error_docref(NULL, E_WARNING, "Protocol %s:// is already defined.", ZSTR_VAL(protocol));
 			} else {
 				/* Hash doesn't exist so it must have been an invalid protocol scheme */
-				php_error_docref(NULL, E_WARNING, "Invalid protocol scheme specified. Unable to register wrapper class %s to %s://", classname->val, protocol->val);
+				php_error_docref(NULL, E_WARNING, "Invalid protocol scheme specified. Unable to register wrapper class %s to %s://", ZSTR_VAL(classname), ZSTR_VAL(protocol));
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "class '%s' is undefined", classname->val);
+		php_error_docref(NULL, E_WARNING, "class '%s' is undefined", ZSTR_VAL(classname));
 	}
 
 	zend_list_delete(rsrc);
@@ -561,20 +561,20 @@ PHP_FUNCTION(stream_wrapper_restore)
 
 	global_wrapper_hash = php_stream_get_url_stream_wrappers_hash_global();
 	if (php_stream_get_url_stream_wrappers_hash() == global_wrapper_hash) {
-		php_error_docref(NULL, E_NOTICE, "%s:// was never changed, nothing to restore", protocol->val);
+		php_error_docref(NULL, E_NOTICE, "%s:// was never changed, nothing to restore", ZSTR_VAL(protocol));
 		RETURN_TRUE;
 	}
 
 	if ((wrapper = zend_hash_find_ptr(global_wrapper_hash, protocol)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "%s:// never existed, nothing to restore", protocol->val);
+		php_error_docref(NULL, E_WARNING, "%s:// never existed, nothing to restore", ZSTR_VAL(protocol));
 		RETURN_FALSE;
 	}
 
 	/* A failure here could be okay given that the protocol might have been merely unregistered */
-	php_unregister_url_stream_wrapper_volatile(protocol->val);
+	php_unregister_url_stream_wrapper_volatile(ZSTR_VAL(protocol));
 
-	if (php_register_url_stream_wrapper_volatile(protocol->val, wrapper) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Unable to restore original %s:// wrapper", protocol->val);
+	if (php_register_url_stream_wrapper_volatile(ZSTR_VAL(protocol), wrapper) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Unable to restore original %s:// wrapper", ZSTR_VAL(protocol));
 		RETURN_FALSE;
 	}
 

@@ -121,7 +121,7 @@ typedef unsigned __int64  uint64_t;
 #include <strings.h>
 #endif
 
-#if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+#if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
 typedef int64_t timelib_long;
 typedef uint64_t timelib_ulong;
 # define TIMELIB_LONG_MAX INT64_MAX

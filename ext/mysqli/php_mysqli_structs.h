@@ -259,12 +259,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
 		RETURN_NULL();\
 	}\
 }
@@ -273,12 +273,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));\
   		return;\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
 		return;\
 	}\
 }
@@ -288,7 +288,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
 	if (!(__ptr)->mysql) { \
 		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
 		RETURN_NULL(); \
 	} \
 }
@@ -298,7 +298,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
 	if (!(__ptr)->stmt) { \
 		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
 		RETURN_NULL();\
 	} \
 }

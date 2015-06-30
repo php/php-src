@@ -22,7 +22,7 @@ var_dump( finfo_open( 'foobar' ) );
 
 try {
     var_dump( new finfo('foobar') );
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 

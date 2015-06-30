@@ -1,17 +1,15 @@
 --TEST--
 Testing xpath() with invalid XML
---SKIPIF--
-<?php PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 --FILE--
 <?php
-$xml = simplexml_load_string("XXXXXXX^",$x,0x6000000000000001);
+// gracefully recover from parsing of invalid XML; not available in PHP
+const XML_PARSE_RECOVER = 1;
+
+// we're not interested in checking concrete warnings regarding invalid XML
+$xml = @simplexml_load_string("XXXXXXX^", 'SimpleXMLElement', XML_PARSE_RECOVER);
+  
+// $xml is supposed to hold a SimpleXMLElement, but not FALSE/NULL
 var_dump($xml->xpath("BBBB"));
---EXPECTF--
-Notice: Undefined variable: x in %s on line %d
-
-Warning: simplexml_load_string() expects parameter 3 to be integer, float given in %s on line %d
-
-Fatal error: Uncaught EngineException: Call to a member function xpath() on null in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+?>
+--EXPECT--
+bool(false)

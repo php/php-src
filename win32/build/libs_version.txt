@@ -1,7 +1,7 @@
 bz2-1.0.6
 cclient-2007f
 freetype-2.5.5
-icu-54.1
+icu-55.1
 jpeglib-9a
 libcurl-7.40.0
 libiconv-1.14
@@ -11,6 +11,6 @@ libpng-1.5.18
 libpq-9.4.1
 libssh2-1.5.0
 libtidy-20090406
-libxslt-1.1.27
+libxslt-1.1.28
 libxml-2.9.2
-openssl-1.0.1m
+openssl-1.0.2a

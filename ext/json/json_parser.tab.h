@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 2.6.5.  */
 
 /* Bison interface for Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
-
+   
+      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-# define YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-/* Debug traces.  */
+#ifndef YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+# define YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+/* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -40,21 +40,22 @@
 extern int php_json_yydebug;
 #endif
 
-/* Token type.  */
+/* Tokens.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
-    PHP_JSON_T_NUL = 258,
-    PHP_JSON_T_TRUE = 259,
-    PHP_JSON_T_FALSE = 260,
-    PHP_JSON_T_INT = 261,
-    PHP_JSON_T_DOUBLE = 262,
-    PHP_JSON_T_STRING = 263,
-    PHP_JSON_T_ESTRING = 264,
-    PHP_JSON_T_EOI = 265,
-    PHP_JSON_T_ERROR = 266
-  };
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     PHP_JSON_T_NUL = 258,
+     PHP_JSON_T_TRUE = 259,
+     PHP_JSON_T_FALSE = 260,
+     PHP_JSON_T_INT = 261,
+     PHP_JSON_T_DOUBLE = 262,
+     PHP_JSON_T_STRING = 263,
+     PHP_JSON_T_ESTRING = 264,
+     PHP_JSON_T_EOI = 265,
+     PHP_JSON_T_ERROR = 266
+   };
 #endif
 /* Tokens.  */
 #define PHP_JSON_T_NUL 258
@@ -67,10 +68,10 @@ extern int php_json_yydebug;
 #define PHP_JSON_T_EOI 265
 #define PHP_JSON_T_ERROR 266
 
-/* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
-union YYSTYPE
+
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE
 {
 
 
@@ -81,15 +82,26 @@ union YYSTYPE
 	} pair;
 
 
-};
 
-typedef union YYSTYPE YYSTYPE;
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
 
-
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int php_json_yyparse (void *YYPARSE_PARAM);
+#else
+int php_json_yyparse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
 int php_json_yyparse (php_json_parser *parser);
+#else
+int php_json_yyparse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_PHP_JSON_YY_HOME_JAKUB_PROG_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */

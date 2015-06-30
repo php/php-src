@@ -607,7 +607,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	data_cln = php_str_to_str(data, strlen(data), PHP_WIN32_MAIL_DOT_PATTERN, sizeof(PHP_WIN32_MAIL_DOT_PATTERN) - 1,
 					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1);
 	if (!data_cln) {
-		data_cln = STR_EMPTY_ALLOC();
+		data_cln = ZSTR_EMPTY_ALLOC();
 	}
 
 	/* send message contents in 1024 chunks */

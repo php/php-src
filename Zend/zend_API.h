@@ -68,9 +68,9 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
 #define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_MN(classname##_##name))
 
-#define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 
-#define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 #define ZEND_RAW_NAMED_FE(zend_name, name, arg_info) ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
 
 #define ZEND_NAMED_FE(zend_name, name, arg_info)	ZEND_FENTRY(zend_name, name, arg_info, 0)
@@ -552,9 +552,9 @@ END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(str) \
-	if ((str)->val[(str)->len] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", (str)->val); }
+	if (ZSTR_VAL(str)[ZSTR_LEN(str)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", ZSTR_VAL(str)); }
 #define CHECK_ZVAL_STRING_REL(str) \
-	if ((str)->val[(str)->len] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (str)->val ZEND_FILE_LINE_RELAY_CC); }
+	if (ZSTR_VAL(str)[ZSTR_LEN(str)] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", ZSTR_VAL(str) ZEND_FILE_LINE_RELAY_CC); }
 #else
 #define CHECK_ZVAL_STRING(z)
 #define CHECK_ZVAL_STRING_REL(z)
@@ -573,7 +573,7 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_EMPTY_STRING(z) do {				\
-		ZVAL_INTERNED_STR(z, STR_EMPTY_ALLOC());		\
+		ZVAL_INTERNED_STR(z, ZSTR_EMPTY_ALLOC());		\
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\
@@ -593,20 +593,17 @@ END_EXTERN_C()
 		zval *__z = (z);						\
 		zval *__zv = (zv);						\
 		if (EXPECTED(!Z_ISREF_P(__zv))) {		\
-			ZVAL_COPY_VALUE(__z, __zv);			\
-		} else {                                \
-			ZVAL_COPY_VALUE(__z,                \
-				Z_REFVAL_P(__zv));				\
-		}										\
-		if (copy) {								\
-			zval_opt_copy_ctor(__z);			\
-	    }										\
-		if (dtor) {								\
-			if (!copy) {						\
-				ZVAL_NULL(__zv);				\
+			if (copy && !dtor) {				\
+				ZVAL_COPY(__z, __zv);			\
+			} else {							\
+				ZVAL_COPY_VALUE(__z, __zv);		\
 			}									\
-			zval_ptr_dtor(__zv);				\
-	    }										\
+		} else {								\
+			ZVAL_COPY(__z, Z_REFVAL_P(__zv));	\
+			if (dtor || !copy) {				\
+				zval_ptr_dtor(__zv);			\
+			}									\
+		}										\
 	} while (0)
 
 #define RETVAL_BOOL(b)					ZVAL_BOOL(return_value, b)
@@ -644,18 +641,6 @@ END_EXTERN_C()
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
-
-#define RETVAL_ZVAL_FAST(z) do {      \
-	zval *_z = (z);                   \
-	if (Z_ISREF_P(_z)) {              \
-		RETVAL_ZVAL(_z, 1, 0);        \
-	} else {                          \
-		zval_ptr_dtor(return_value);  \
-		ZVAL_COPY(return_value, _z);  \
-	}                                 \
-} while (0)
-
-#define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
@@ -933,7 +918,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 		Z_PARAM_PROLOGUE(separate); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
-				_error = (_ce)->name->val; \
+				_error = ZSTR_VAL((_ce)->name); \
 				error_code = ZPP_ERROR_WRONG_CLASS; \
 				break; \
 			} else { \
@@ -1141,8 +1126,8 @@ static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size
 		*dest = NULL;
 		*dest_len = 0;
 	} else {
-		*dest = str->val;
-		*dest_len = str->len;
+		*dest = ZSTR_VAL(str);
+		*dest_len = ZSTR_LEN(str);
 	}
 	return 1;
 }
@@ -1150,7 +1135,7 @@ static zend_always_inline int zend_parse_arg_string(zval *arg, char **dest, size
 static zend_always_inline int zend_parse_arg_path_str(zval *arg, zend_string **dest, int check_null)
 {
 	if (!zend_parse_arg_str(arg, dest, check_null) ||
-	    (*dest && UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len)))) {
+	    (*dest && UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest))))) {
 		return 0;
 	}
 	return 1;
@@ -1167,8 +1152,8 @@ static zend_always_inline int zend_parse_arg_path(zval *arg, char **dest, size_t
 		*dest = NULL;
 		*dest_len = 0;
 	} else {
-		*dest = str->val;
-		*dest_len = str->len;
+		*dest = ZSTR_VAL(str);
+		*dest_len = ZSTR_LEN(str);
 	}
 	return 1;
 }

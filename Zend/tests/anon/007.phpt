@@ -18,6 +18,6 @@ namespace lone {
     new Outer();
 }
 --EXPECTF--
-object(lone\class@%s)#2 (0) {
+object(class@%s)#2 (0) {
 }
 

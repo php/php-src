@@ -235,7 +235,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 		RETURN_FALSE;
 	}
 
-	if (locale_name->len == 0) {
+	if (ZSTR_LEN(locale_name) == 0) {
 		default_locale = (char *)uloc_getDefault();
 		locale_name = zend_string_init(default_locale, strlen(default_locale), 0);
 	}

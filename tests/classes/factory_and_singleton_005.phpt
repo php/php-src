@@ -16,7 +16,7 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught EngineException: Call to protected test::__destruct() from context '' in %sfactory_and_singleton_005.php:%d
+Fatal error: Uncaught Error: Call to protected test::__destruct() from context '' in %sfactory_and_singleton_005.php:%d
 Stack trace:
 #0 {main}
   thrown in %sfactory_and_singleton_005.php on line %d

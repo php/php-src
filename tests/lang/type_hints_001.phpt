@@ -23,7 +23,7 @@ type_hint_foo($bar);
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught TypeException: Argument 1 passed to type_hint_foo() must be an instance of Foo, instance of Bar given, called in %s on line 16 and defined in %s:9
+Fatal error: Uncaught TypeError: Argument 1 passed to type_hint_foo() must be an instance of Foo, instance of Bar given, called in %s on line 16 and defined in %s:9
 Stack trace:
 #0 %s(%d): type_hint_foo(Object(Bar))
 #1 {main}

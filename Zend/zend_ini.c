@@ -157,13 +157,13 @@ static void copy_ini_entry(zval *zv) /* {{{ */
 	Z_PTR_P(zv) = new_entry;
 	memcpy(new_entry, old_entry, sizeof(zend_ini_entry));
 	if (old_entry->name) {
-		new_entry->name = zend_string_init(old_entry->name->val, old_entry->name->len, 1);
+		new_entry->name = zend_string_init(ZSTR_VAL(old_entry->name), ZSTR_LEN(old_entry->name), 1);
 	}
 	if (old_entry->value) {
-		new_entry->value = zend_string_init(old_entry->value->val, old_entry->value->len, 1);
+		new_entry->value = zend_string_init(ZSTR_VAL(old_entry->value), ZSTR_LEN(old_entry->value), 1);
 	}
 	if (old_entry->orig_value) {
-		new_entry->orig_value = zend_string_init(old_entry->orig_value->val, old_entry->orig_value->len, 1);
+		new_entry->orig_value = zend_string_init(ZSTR_VAL(old_entry->orig_value), ZSTR_LEN(old_entry->orig_value), 1);
 	}
 }
 /* }}} */
@@ -195,7 +195,7 @@ static int ini_key_compare(const void *a, const void *b) /* {{{ */
 	} else if (!s->key) { /* s is numeric, f is not */
 		return 1;
 	} else { /* both strings */
-		return zend_binary_strcasecmp(f->key->val, f->key->len, s->key->val, s->key->len);
+		return zend_binary_strcasecmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
 	}
 }
 /* }}} */
@@ -425,9 +425,9 @@ ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ 
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
 		if (orig && ini_entry->modified) {
-			return (ini_entry->orig_value ? ZEND_STRTOL(ini_entry->orig_value->val, NULL, 0) : 0);
+			return (ini_entry->orig_value ? ZEND_STRTOL(ZSTR_VAL(ini_entry->orig_value), NULL, 0) : 0);
 		} else {
-			return (ini_entry->value      ? ZEND_STRTOL(ini_entry->value->val, NULL, 0)      : 0);
+			return (ini_entry->value      ? ZEND_STRTOL(ZSTR_VAL(ini_entry->value), NULL, 0)      : 0);
 		}
 	}
 
@@ -442,9 +442,9 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ *
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
 		if (orig && ini_entry->modified) {
-			return (double) (ini_entry->orig_value ? zend_strtod(ini_entry->orig_value->val, NULL) : 0.0);
+			return (double) (ini_entry->orig_value ? zend_strtod(ZSTR_VAL(ini_entry->orig_value), NULL) : 0.0);
 		} else {
-			return (double) (ini_entry->value      ? zend_strtod(ini_entry->value->val, NULL)      : 0.0);
+			return (double) (ini_entry->value      ? zend_strtod(ZSTR_VAL(ini_entry->value), NULL)      : 0.0);
 		}
 	}
 
@@ -463,9 +463,9 @@ ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_b
 		}
 
 		if (orig && ini_entry->modified) {
-			return ini_entry->orig_value ? ini_entry->orig_value->val : NULL;
+			return ini_entry->orig_value ? ZSTR_VAL(ini_entry->orig_value) : NULL;
 		} else {
-			return ini_entry->value ? ini_entry->value->val : NULL;
+			return ini_entry->value ? ZSTR_VAL(ini_entry->value) : NULL;
 		}
 	} else {
 		if (exists) {
@@ -545,14 +545,14 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 	}
 
 	if (tmp_value) {
-		if (tmp_value->len == 4 && strcasecmp(tmp_value->val, "true") == 0) {
+		if (ZSTR_LEN(tmp_value) == 4 && strcasecmp(ZSTR_VAL(tmp_value), "true") == 0) {
 			value = 1;
-		} else if (tmp_value->len == 3 && strcasecmp(tmp_value->val, "yes") == 0) {
+		} else if (ZSTR_LEN(tmp_value) == 3 && strcasecmp(ZSTR_VAL(tmp_value), "yes") == 0) {
 			value = 1;
-		} else if (tmp_value->len == 2 && strcasecmp(tmp_value->val, "on") == 0) {
+		} else if (ZSTR_LEN(tmp_value) == 2 && strcasecmp(ZSTR_VAL(tmp_value), "on") == 0) {
 			value = 1;
 		} else {
-			value = atoi(tmp_value->val);
+			value = atoi(ZSTR_VAL(tmp_value));
 		}
 	} else {
 		value = 0;
@@ -571,9 +571,9 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 	char *value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -598,9 +598,9 @@ ZEND_INI_DISP(display_link_numbers) /* {{{ */
 	char *value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -629,17 +629,17 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 	p = (zend_bool *) (base+(size_t) mh_arg1);
 
-	if (new_value->len == 2 && strcasecmp("on", new_value->val) == 0) {
+	if (ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) {
 		*p = (zend_bool) 1;
 	}
-	else if (new_value->len == 3 && strcasecmp("yes", new_value->val) == 0) {
+	else if (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) {
 		*p = (zend_bool) 1;
 	}
-	else if (new_value->len == 4 && strcasecmp("true", new_value->val) == 0) {
+	else if (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) {
 		*p = (zend_bool) 1;
 	}
 	else {
-		*p = (zend_bool) atoi(new_value->val);
+		*p = (zend_bool) atoi(ZSTR_VAL(new_value));
 	}
 	return SUCCESS;
 }
@@ -658,7 +658,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	*p = zend_atol(new_value->val, (int)new_value->len);
+	*p = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
 	return SUCCESS;
 }
 /* }}} */
@@ -674,7 +674,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	tmp = zend_atol(new_value->val, (int)new_value->len);
+	tmp = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
 	if (tmp < 0) {
 		return FAILURE;
 	}
@@ -699,7 +699,7 @@ ZEND_API ZEND_INI_MH(OnUpdateReal) /* {{{ */
 
 	p = (double *) (base+(size_t) mh_arg1);
 
-	*p = zend_strtod(new_value->val, NULL);
+	*p = zend_strtod(ZSTR_VAL(new_value), NULL);
 	return SUCCESS;
 }
 /* }}} */
@@ -717,7 +717,7 @@ ZEND_API ZEND_INI_MH(OnUpdateString) /* {{{ */
 
 	p = (char **) (base+(size_t) mh_arg1);
 
-	*p = new_value ? new_value->val : NULL;
+	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -733,13 +733,13 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	if (new_value && !new_value->val[0]) {
+	if (new_value && !ZSTR_VAL(new_value)[0]) {
 		return FAILURE;
 	}
 
 	p = (char **) (base+(size_t) mh_arg1);
 
-	*p = new_value ? new_value->val : NULL;
+	*p = new_value ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */

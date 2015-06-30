@@ -70,7 +70,7 @@ MySQLPDOTest::skip();
 		try {
 			if (NULL !== ($db = @new PDO($dsn, $user, $pass, 'wrong type')))
 				printf("[001] Expecting NULL got %s/%s\n", gettype($db), $db);
-		} catch (TypeException $e) {
+		} catch (TypeError $e) {
 		}
 
 		if (!is_object($db = new PDO($dsn, $user, $pass, array())))

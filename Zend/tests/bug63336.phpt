@@ -2,7 +2,7 @@
 Bug #63336 (invalid E_NOTICE error occur)
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_WARNING );
+error_reporting(E_ALL & ~E_WARNING);
 define("TEST", "123");
 class Base {
     const DUMMY = "XXX";
@@ -17,6 +17,6 @@ class Child extends Base {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of Child::foo() should be compatible with Base::foo($var = TEST, $more = NULL) in %sbug63336.php on line %d
+Warning: Declaration of Child::foo($var = TEST, array $more = Array) should be compatible with Base::foo($var = TEST, $more = NULL) in %sbug63336.php on line %d
 
-Warning: Declaration of Child::bar() should be compatible with Base::bar($more = self::DUMMY) in %sbug63336.php on line %d
+Warning: Declaration of Child::bar($var, $more = self::DUMMY) should be compatible with Base::bar($more = self::DUMMY) in %sbug63336.php on line %d

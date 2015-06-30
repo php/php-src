@@ -214,6 +214,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_DTOR		0x4000
 #define ZEND_ACC_CLONE		0x8000
 
+/* method flag used by Closure::__invoke() */
+#define ZEND_ACC_USER_ARG_INFO 0x80
+
 /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
 
@@ -236,6 +239,8 @@ typedef struct _zend_try_catch_element {
 
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
+
+#define ZEND_ACC_NO_RT_ARENA          0x80000
 
 /* call through user function trampoline. e.g. __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
@@ -391,7 +396,7 @@ typedef struct _zend_internal_function {
 	struct _zend_module_entry *module;
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name->val : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
@@ -700,10 +705,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
-
-/* Functions for a null terminated pointer list, used for traits parsing and compilation */
-void zend_init_list(void *result, void *item);
-void zend_add_to_list(void *result, void *item);
 
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);

@@ -34,52 +34,31 @@ static zend_object *zend_generator_create(zend_class_entry *class_type);
 static void zend_generator_cleanup_unfinished_execution(zend_generator *generator) /* {{{ */
 {
 	zend_execute_data *execute_data = generator->execute_data;
-	zend_op_array *op_array = &execute_data->func->op_array;
 
 	if (generator->send_target) {
-		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
+		Z_TRY_DELREF_P(generator->send_target);
 		generator->send_target = NULL;
 	}
 
-	/* Manually free loop variables, as execution couldn't reach their
-	 * SWITCH_FREE / FREE opcodes. */
-	{
-		/* -1 required because we want the last run opcode, not the
-		 * next to-be-run one. */
-		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
+	if (execute_data->opline != execute_data->func->op_array.opcodes) {
+		/* -1 required because we want the last run opcode, not the next to-be-run one. */
+		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
-		int i;
-		for (i = 0; i < op_array->last_brk_cont; ++i) {
-			zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
+		/* There may be calls to zend_vm_stack_free_call_frame(), which modifies the VM stack
+		 * globals, so need to load/restore those. */
+		zend_vm_stack original_stack = EG(vm_stack);
+		original_stack->top = EG(vm_stack_top);
+		EG(vm_stack_top) = generator->stack->top;
+		EG(vm_stack_end) = generator->stack->end;
+		EG(vm_stack) = generator->stack;
 
-			if (brk_cont->start < 0) {
-				continue;
-			} else if ((uint32_t)brk_cont->start > op_num) {
-				break;
-			} else if (brk_cont->brk >= 0 && (uint32_t)brk_cont->brk > op_num) {
-				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
+		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
 
-				if (brk_opline->opcode == ZEND_FREE) {
-					zval *var = EX_VAR(brk_opline->op1.var);
-					zval_ptr_dtor_nogc(var);
-				} else if (brk_opline->opcode == ZEND_FE_FREE) {
-					zval *var = EX_VAR(brk_opline->op1.var);
-					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-						zend_hash_iterator_del(Z_FE_ITER_P(var));
-					}
-					zval_ptr_dtor_nogc(var);
-				}
-			}
-		}
-	}
-
-	/* If yield was used as a function argument there may be active
-	 * method calls those objects need to be freed */
-	while (execute_data->call) {
-		if (ZEND_CALL_INFO(execute_data->call) & ZEND_CALL_RELEASE_THIS) {
-			OBJ_RELEASE(Z_OBJ(execute_data->call->This));
-		}
-		execute_data->call = execute_data->call->prev_execute_data;
+		generator->stack = EG(vm_stack);
+		generator->stack->top = EG(vm_stack_top);
+		EG(vm_stack_top) = original_stack->top;
+		EG(vm_stack_end) = original_stack->end;
+		EG(vm_stack) = original_stack;
 	}
 }
 /* }}} */
@@ -176,8 +155,10 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	if (finally_op_num) {
 		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 
-		Z_OBJ_P(fast_call) = NULL;
+		Z_OBJ_P(fast_call) = EG(exception);
+		EG(exception) = NULL;
 		fast_call->u2.lineno = (uint32_t)-1;
+
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator);
@@ -817,7 +798,10 @@ ZEND_METHOD(Generator, current)
 
 	root = zend_generator_get_current(generator);
 	if (Z_TYPE(root->value) != IS_UNDEF) {
-		RETURN_ZVAL_FAST(&root->value);
+		zval *value = &root->value;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 }
 /* }}} */
@@ -838,7 +822,10 @@ ZEND_METHOD(Generator, key)
 
 	root = zend_generator_get_current(generator);
 	if (Z_TYPE(root->key) != IS_UNDEF) {
-		RETURN_ZVAL_FAST(&root->key);
+		zval *key = &root->key;
+
+		ZVAL_DEREF(key);
+		ZVAL_COPY(return_value, key);
 	}
 }
 /* }}} */
@@ -861,7 +848,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send(mixed $value)
+/* {{{ proto mixed Generator::send(mixed value)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -892,12 +879,15 @@ ZEND_METHOD(Generator, send)
 
 	root = zend_generator_get_current(generator);
 	if (Z_TYPE(root->value) != IS_UNDEF) {
-		RETURN_ZVAL_FAST(&root->value);
+		zval *value = &root->value;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::throw(Exception $exception)
+/* {{{ proto mixed Generator::throw(Exception exception)
  * Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {
@@ -923,7 +913,10 @@ ZEND_METHOD(Generator, throw)
 
 		root = zend_generator_get_current(generator);
 		if (Z_TYPE(root->value) != IS_UNDEF) {
-			RETURN_ZVAL_FAST(&root->value);
+			zval *value = &root->value;
+
+			ZVAL_DEREF(value);
+			ZVAL_COPY(return_value, value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
@@ -1021,7 +1014,10 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 	root = zend_generator_get_current(generator);
 
 	if (Z_TYPE(root->key) != IS_UNDEF) {
-		ZVAL_ZVAL(key, &root->key, 1, 0);
+		zval *zv = &root->key;
+
+		ZVAL_DEREF(zv);
+		ZVAL_COPY(key, zv);
 	} else {
 		ZVAL_NULL(key);
 	}

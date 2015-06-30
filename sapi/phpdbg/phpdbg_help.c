@@ -378,7 +378,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-n**                          Disable default php.ini" CR
 "  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
-"  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
 "  **-i**      **-i**my.init           Set .phpdbginit file" CR
 "  **-I**                          Ignore default .phpdbginit" CR

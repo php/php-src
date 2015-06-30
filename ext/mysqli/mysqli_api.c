@@ -41,24 +41,24 @@
 static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const uint32_t mode)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
 	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
 	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
 	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
@@ -122,7 +122,7 @@ static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, co
 		size_t query_len;
 
 		query_len = spprintf(&query, 0,
-				(commit? "COMMIT%s %s":"ROLLBACK%s %s"), name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+				(commit? "COMMIT%s %s":"ROLLBACK%s %s"), name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
 		smart_str_free(&tmp_str);
 		if (name_esc) {
 			efree(name_esc);
@@ -315,7 +315,7 @@ end:
 #endif
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed,....]) U
+/* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed ...])
    Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
@@ -580,7 +580,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 #endif
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var, [,mixed, ...]) U
+/* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var [,mixed ...])
    Bind variables to a prepared statement for result storage */
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
@@ -790,7 +790,7 @@ PHP_FUNCTION(mysqli_data_seek)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_debug(string debug) U
+/* {{{ proto void mysqli_debug(string debug)
 */
 PHP_FUNCTION(mysqli_debug)
 {
@@ -1137,7 +1137,7 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 /* }}} */
 
-/* {{{ proto mixed mysqli_stmt_fetch(object stmt) U
+/* {{{ proto mixed mysqli_stmt_fetch(object stmt)
    Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_stmt_fetch)
 {
@@ -1967,8 +1967,8 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	newstr = zend_string_alloc(2 * escapestr_len, 0);
-	newstr->len = mysql_real_escape_string(mysql->mysql, newstr->val, escapestr, escapestr_len);
-	newstr = zend_string_truncate(newstr, newstr->len, 0);
+	ZSTR_LEN(newstr) = mysql_real_escape_string(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len);
+	newstr = zend_string_truncate(newstr, ZSTR_LEN(newstr), 0);
 
 	RETURN_NEW_STR(newstr);
 }
@@ -2235,7 +2235,7 @@ PHP_FUNCTION(mysqli_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher]) U
+/* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher])
 */
 PHP_FUNCTION(mysqli_ssl_set)
 {
@@ -2507,7 +2507,7 @@ PHP_FUNCTION(mysqli_stmt_result_metadata)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_store_result(stmt)
+/* {{{ proto bool mysqli_stmt_store_result(object stmt)
 */
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
@@ -2576,7 +2576,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_store_result(object link [, flags])
+/* {{{ proto object mysqli_store_result(object link [, int flags])
    Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
 {

@@ -14,7 +14,7 @@ eval('class A { function test() { } } class B extends A { function test($a) { } 
 
 ?>
 --EXPECTF--
-string(60) "Declaration of B::test() should be compatible with A::test()"
+string(62) "Declaration of B::test($a) should be compatible with A::test()"
 string(%d) "%s(%d) : eval()'d code"
 
 Notice: Undefined variable: undefined in %s on line %d

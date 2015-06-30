@@ -406,10 +406,10 @@ typedef struct {
 
 /* {{{ main prototypes */
 
-void php_oci_column_hash_dtor(void *data);
-void php_oci_define_hash_dtor(void *data);
-void php_oci_bind_hash_dtor(void *data);
-void php_oci_descriptor_flush_hash_dtor(void *data);
+void php_oci_column_hash_dtor(zval *data);
+void php_oci_define_hash_dtor(zval *data);
+void php_oci_bind_hash_dtor(zval *data);
+void php_oci_descriptor_flush_hash_dtor(zval *data);
 void php_oci_connection_descriptors_free(php_oci_connection *connection);
 sb4 php_oci_error(OCIError *err_p, sword status);
 sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf);
@@ -483,13 +483,13 @@ php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, z
 int php_oci_statement_execute(php_oci_statement *statement, ub4 mode);
 int php_oci_statement_cancel(php_oci_statement *statement);
 void php_oci_statement_free(php_oci_statement *statement);
-int php_oci_bind_pre_exec(void *data, void *result);
-int php_oci_bind_post_exec(void *data);
+int php_oci_bind_pre_exec(zval *data, void *result);
+int php_oci_bind_post_exec(zval *data);
 int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long maxlength, ub2 type);
 sb4 php_oci_bind_in_callback(dvoid *ictxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp);
 sb4 php_oci_bind_out_callback(dvoid *octxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data);
-int php_oci_cleanup_pre_fetch(void *data);
+int php_oci_cleanup_pre_fetch(zval *data);
 int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type);
 int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows);
 int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type);

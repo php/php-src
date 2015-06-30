@@ -1750,7 +1750,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
 				*message = zend_string_init(stats_header->message, stats_header->message_len, 0);
-				DBG_INF((*message)->val);
+				DBG_INF(ZSTR_VAL(*message));
 			}
 			PACKET_FREE(stats_header);
 		} while (0);
@@ -2665,24 +2665,24 @@ static void
 MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
 	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
 	}
 
 	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
 	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
-		if (str->s && str->s->len) {
+		if (str->s && ZSTR_LEN(str->s)) {
 			smart_str_appendl(str, " ", sizeof(" ") - 1);
 		}
 		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
@@ -2756,7 +2756,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name);
 
 				query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
-										name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+										name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);
@@ -2803,12 +2803,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 					smart_str_free(&tmp_str);
 					break;
 				} else if (mode & TRANS_START_READ_WRITE) {
-					if (tmp_str.s && tmp_str.s->len) {
+					if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
 				} else if (mode & TRANS_START_READ_ONLY) {
-					if (tmp_str.s && tmp_str.s->len) {
+					if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
 						smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
 					}
 					smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
@@ -2819,7 +2819,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 			{
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name);
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
+				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", name_esc? name_esc:"", tmp_str.s? ZSTR_VAL(tmp_str.s):"");
 				smart_str_free(&tmp_str);
 				if (name_esc) {
 					mnd_efree(name_esc);

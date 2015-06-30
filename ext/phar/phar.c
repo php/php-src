@@ -50,28 +50,28 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	zend_bool old, ini;
 
-	if (entry->name->len == sizeof("phar.readonly")-1) {
+	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
 	}
 
-	if (new_value->len == 2 && !strcasecmp("on", new_value->val)) {
+	if (ZSTR_LEN(new_value) == 2 && !strcasecmp("on", ZSTR_VAL(new_value))) {
 		ini = (zend_bool) 1;
 	}
-	else if (new_value->len == 3 && !strcasecmp("yes", new_value->val)) {
+	else if (ZSTR_LEN(new_value) == 3 && !strcasecmp("yes", ZSTR_VAL(new_value))) {
 		ini = (zend_bool) 1;
 	}
-	else if (new_value->len == 4 && !strcasecmp("true", new_value->val)) {
+	else if (ZSTR_LEN(new_value) == 4 && !strcasecmp("true", ZSTR_VAL(new_value))) {
 		ini = (zend_bool) 1;
 	}
 	else {
-		ini = (zend_bool) atoi(new_value->val);
+		ini = (zend_bool) atoi(ZSTR_VAL(new_value));
 	}
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
-		if (entry->name->len == sizeof("phar.readonly")-1) {
+		if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 			PHAR_G(readonly_orig) = ini;
 		} else {
 			PHAR_G(require_hash_orig) = ini;
@@ -80,7 +80,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		return FAILURE;
 	}
 
-	if (entry->name->len == sizeof("phar.readonly")-1) {
+	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
 		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags)) {
 			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
@@ -183,7 +183,7 @@ finish_error:
 
 ZEND_INI_MH(phar_ini_cache_list) /* {{{ */
 {
-	PHAR_G(cache_list) = new_value->val;
+	PHAR_G(cache_list) = ZSTR_VAL(new_value);
 
 	if (stage == ZEND_INI_STAGE_STARTUP) {
 		phar_split_cache_list();
@@ -1339,8 +1339,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, &actual);
 
 	if (actual) {
-		fname = actual->val;
-		fname_len = actual->len;
+		fname = ZSTR_VAL(actual);
+		fname_len = ZSTR_LEN(actual);
 	}
 
 	if (fp) {
@@ -1514,8 +1514,8 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 	}
 
 	if (actual) {
-		fname = actual->val;
-		fname_len = actual->len;
+		fname = ZSTR_VAL(actual);
+		fname_len = ZSTR_LEN(actual);
 	}
 
 	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error);
@@ -1962,16 +1962,16 @@ woohoo:
 				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
 				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
 			) {
-				if (str_key->len > (uint) filename_len) {
+				if (ZSTR_LEN(str_key) > (uint) filename_len) {
 					continue;
 				}
 
-				if (!memcmp(filename, str_key->val, str_key->len) && ((uint)filename_len == str_key->len
-					|| filename[str_key->len] == '/' || filename[str_key->len] == '\0')) {
+				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
 						break;
 					}
-					*ext_str = filename + (str_key->len - pphar->ext_len);
+					*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 					goto woohoo;
 				}
 			}
@@ -1981,16 +1981,16 @@ woohoo:
 					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
 					zend_hash_move_forward(&cached_phars)
 				) {
-					if (str_key->len > (uint) filename_len) {
+					if (ZSTR_LEN(str_key) > (uint) filename_len) {
 						continue;
 					}
 
-					if (!memcmp(filename, str_key->val, str_key->len) && ((uint)filename_len == str_key->len
-						|| filename[str_key->len] == '/' || filename[str_key->len] == '\0')) {
+					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 						if (NULL == (pphar = zend_hash_get_current_data_ptr(&cached_phars))) {
 							break;
 						}
-						*ext_str = filename + (str_key->len - pphar->ext_len);
+						*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 						goto woohoo;
 					}
 				}
@@ -2303,8 +2303,8 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 	}
 
 	if (actual) {
-		fname = actual->val;
-		fname_len = actual->len;
+		fname = ZSTR_VAL(actual);
+		fname_len = ZSTR_LEN(actual);
 	}
 
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
@@ -2582,8 +2582,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				return EOF;
 			}
 			free_user_stub = 1;
-			user_stub = suser_stub->val;
-			len = suser_stub->len;
+			user_stub = ZSTR_VAL(suser_stub);
+			len = ZSTR_LEN(suser_stub);
 		} else {
 			free_user_stub = 0;
 		}
@@ -2723,7 +2723,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		}
 
 		/* 32 bits for filename length, length of filename, manifest + metadata, and add 1 for trailing / if a directory */
-		offset += 4 + entry->filename_len + sizeof(entry_buffer) + (entry->metadata_str.s ? entry->metadata_str.s->len : 0) + (entry->is_dir ? 1 : 0);
+		offset += 4 + entry->filename_len + sizeof(entry_buffer) + (entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0) + (entry->is_dir ? 1 : 0);
 
 		/* compress and rehash as necessary */
 		if ((oldfile && !entry->is_modified) || entry->is_dir) {
@@ -2849,7 +2849,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		phar->alias_len = 0;
 	}
 
-	manifest_len = offset + phar->alias_len + sizeof(manifest) + (main_metadata_str.s ? main_metadata_str.s->len : 0);
+	manifest_len = offset + phar->alias_len + sizeof(manifest) + (main_metadata_str.s ? ZSTR_LEN(main_metadata_str.s) : 0);
 	phar_set_32(manifest, manifest_len);
 	/* Hack - see bug #65028, add padding byte to the end of the manifest */
 	if(manifest[0] == '\r' || manifest[0] == '\n') {
@@ -2888,9 +2888,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	phar->alias_len = restore_alias_len;
 
-	phar_set_32(manifest, main_metadata_str.s ? main_metadata_str.s->len : 0);
-	if (4 != php_stream_write(newfile, manifest, 4) || ((main_metadata_str.s ? main_metadata_str.s->len : 0)
-	&& main_metadata_str.s->len != php_stream_write(newfile, main_metadata_str.s->val, main_metadata_str.s->len))) {
+	phar_set_32(manifest, main_metadata_str.s ? ZSTR_LEN(main_metadata_str.s) : 0);
+	if (4 != php_stream_write(newfile, manifest, 4) || ((main_metadata_str.s ? ZSTR_LEN(main_metadata_str.s) : 0)
+	&& ZSTR_LEN(main_metadata_str.s) != php_stream_write(newfile, ZSTR_VAL(main_metadata_str.s), ZSTR_LEN(main_metadata_str.s)))) {
 		smart_str_free(&main_metadata_str);
 
 		if (closeoldfile) {
@@ -2964,11 +2964,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
 		phar_set_32(entry_buffer+12, entry->crc32);
 		phar_set_32(entry_buffer+16, entry->flags);
-		phar_set_32(entry_buffer+20, entry->metadata_str.s ? entry->metadata_str.s->len : 0);
+		phar_set_32(entry_buffer+20, entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0);
 
 		if (sizeof(entry_buffer) != php_stream_write(newfile, entry_buffer, sizeof(entry_buffer))
 		|| (entry->metadata_str.s &&
-		    entry->metadata_str.s->len != php_stream_write(newfile, entry->metadata_str.s->val, entry->metadata_str.s->len))) {
+		    ZSTR_LEN(entry->metadata_str.s) != php_stream_write(newfile, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s)))) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}

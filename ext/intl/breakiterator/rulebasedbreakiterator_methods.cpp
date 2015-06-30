@@ -66,7 +66,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
 			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
-				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "");
+				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "");
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1);
 			efree(msg);
@@ -211,8 +211,8 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	}
 
 	zend_string *ret_rules = zend_string_alloc(rules_len, 0);
-	memcpy(ret_rules->val, rules, rules_len);
-	ret_rules->val[rules_len] = '\0';
+	memcpy(ZSTR_VAL(ret_rules), rules, rules_len);
+	ZSTR_VAL(ret_rules)[rules_len] = '\0';
 
 	RETURN_STR(ret_rules);
 }

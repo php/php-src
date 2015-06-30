@@ -548,11 +548,11 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 
 		if (stream) {
 			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
-				BIO * bio = BIO_new_mem_buf(key_str->val, key_str->len);
+				BIO * bio = BIO_new_mem_buf(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
-				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
+				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
 				zend_string_release(key_str);
 			}
 			php_stream_close(stream);

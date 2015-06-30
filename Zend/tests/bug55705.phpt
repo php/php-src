@@ -6,7 +6,7 @@ function f(callable $c) {}
 f();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeException: Argument 1 passed to f() must be callable, none given, called in %s on line 3 and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to f() must be callable, none given, called in %s on line 3 and defined in %s:%d
 Stack trace:
 #0 %s(%d): f()
 #1 {main}

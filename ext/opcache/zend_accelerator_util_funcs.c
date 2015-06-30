@@ -27,10 +27,10 @@
 
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
-# define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
+# define accel_xlat_set(old, new)	zend_hash_index_add_new_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	(zend_hash_str_add_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new))
+# define accel_xlat_set(old, new)	(zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new))
 # define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new)))
 #endif
 
@@ -373,18 +373,8 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		prop_info = ARENA_REALLOC(Z_PTR(p->val));
 		ZVAL_PTR(&q->val, prop_info);
 
-		if (prop_info->ce == old_ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
-			/* Copy constructor */
-			if (prop_info->doc_comment) {
-				if (ZCG(accel_directives).load_comments) {
-					prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
-				} else {
-					prop_info->doc_comment = NULL;
-				}
-			}
-			prop_info->ce = ARENA_REALLOC(prop_info->ce);
-		} else if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
-		           (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+		if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
+		    (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
 			prop_info->ce = ARENA_REALLOC(prop_info->ce);
 		}
 	}
@@ -446,13 +436,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
 	} else {
 		ce->interfaces = NULL;
-	}
-	if (ZEND_CE_DOC_COMMENT(ce)) {
-		if (ZCG(accel_directives).load_comments) {
-			ZEND_CE_DOC_COMMENT(ce) = zend_string_dup(ZEND_CE_DOC_COMMENT(ce), 0);
-		} else {
-			ZEND_CE_DOC_COMMENT(ce) =  NULL;
-		}
 	}
 
 	if (ce->parent) {
@@ -551,7 +534,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
 				t = zend_hash_update(target, p->key, &p->val);
 			} else {
@@ -573,11 +556,11 @@ failure:
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
-				   function1->common.function_name->val,
-				   function2->op_array.filename->val,
+				   ZSTR_VAL(function1->common.function_name),
+				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -595,7 +578,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
 				zend_hash_update_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
 			} else {
@@ -617,11 +600,11 @@ failure:
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
-				   function1->common.function_name->val,
-				   function2->op_array.filename->val,
+				   ZSTR_VAL(function1->common.function_name),
+				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -639,7 +622,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key - ignore and wait for runtime */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
@@ -660,7 +643,7 @@ failure:
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(ce1->info.user.filename);
 	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ce1->name->val);
+	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 }
 
 #ifdef __SSE2__
@@ -730,9 +713,9 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_string *name;
 			char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
-			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, persistent_script->full_path->val, persistent_script->full_path->len, 0);
+			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->full_path), ZSTR_LEN(persistent_script->full_path), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0);
+				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
 			}
 			zend_string_release(name);
 		}

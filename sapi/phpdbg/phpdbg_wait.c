@@ -36,7 +36,7 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 
 
 static int phpdbg_dearm_autoglobals(zend_auto_global *auto_global) {
-	if (auto_global->name->len != sizeof("GLOBALS") - 1 || memcmp(auto_global->name->val, "GLOBALS", sizeof("GLOBALS") - 1)) {
+	if (ZSTR_LEN(auto_global->name) != sizeof("GLOBALS") - 1 || memcmp(ZSTR_VAL(auto_global->name), "GLOBALS", sizeof("GLOBALS") - 1)) {
 		auto_global->armed = 0;
 	}
 

@@ -27,7 +27,7 @@ ok
 Deprecated: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
 
-Fatal error: Uncaught EngineException: Cannot call constructor in %s:%d
+Fatal error: Uncaught Error: Cannot call constructor in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

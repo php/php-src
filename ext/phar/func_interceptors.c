@@ -150,7 +150,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			}
 			if (use_include_path) {
 				if ((entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
-					name = entry_str->val;
+					name = ZSTR_VAL(entry_str);
 					goto phar_it;
 				} else {
 					/* this file is not in the phar, use the original path */
@@ -207,7 +207,7 @@ phar_it:
 
 			/* uses mmap if possible */
 			contents = php_stream_copy_to_mem(stream, maxlen, 0);
-			if (contents && contents->len > 0) {
+			if (contents && ZSTR_LEN(contents) > 0) {
 				RETVAL_STR(contents);
 			} else if (contents) {
 				zend_string_release(contents);
@@ -278,7 +278,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -379,7 +379,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -428,18 +428,6 @@ skip_phar:
 	return;
 }
 /* }}} */
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
-#endif
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
-#endif
-#ifndef S_ISLNK
-#define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
-#endif
-
-#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
 
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)

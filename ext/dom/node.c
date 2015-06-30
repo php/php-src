@@ -344,7 +344,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_PI_NODE:
 			{
 				zend_string *str = zval_get_string(newval);
-				xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
+				xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 				zend_string_release(str);
 				break;
 			}
@@ -721,7 +721,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 			}
 			str = zval_get_string(newval);
-			prefix = str->val;
+			prefix = ZSTR_VAL(str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
 				if (strURI == NULL ||
@@ -855,7 +855,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	}
 
 	str = zval_get_string(newval);
-	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, (xmlChar *) str->val);
+	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, (xmlChar *) ZSTR_VAL(str));
 	xmlNodeSetContent(nodep, enc_str);
 	xmlFree(enc_str);
 	zend_string_release(str);
@@ -1746,7 +1746,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
-						xmlXPathRegisterNs(ctxp, (xmlChar *) prefix->val, (xmlChar *) Z_STRVAL_P(tmpns));
+						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
