@@ -434,8 +434,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		(close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0);
 #endif
 
-	/* make sure everything is saved */
-	_php_stream_flush(stream, 1);
+	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN) {
+		/* make sure everything is saved */
+		_php_stream_flush(stream, 1);
+	}
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
 	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && stream->res) {
@@ -1205,6 +1207,8 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
 	}
 
+	stream->flags &= ~PHP_STREAM_FLAG_WAS_WRITTEN;
+
 	if (stream->ops->flush) {
 		ret = stream->ops->flush(stream);
 	}
@@ -1214,15 +1218,23 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
 {
+	size_t bytes;
+
 	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
 		return 0;
 	}
 
 	if (stream->writefilters.head) {
-		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL);
+		bytes = _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL);
 	} else {
-		return _php_stream_write_buffer(stream, buf, count);
+		bytes = _php_stream_write_buffer(stream, buf, count);
 	}
+
+	if (bytes) {
+		stream->flags |= PHP_STREAM_FLAG_WAS_WRITTEN;
+	}
+
+	return bytes;
 }
 
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
