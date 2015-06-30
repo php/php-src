@@ -1189,7 +1189,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					  // Emit array of labels of opcode handlers and code for
 					  // zend_opcode_handlers initialization
 						$prolog = $m[1];
-						out($f,$prolog."if (execute_data == NULL) {\n");
+						out($f,$prolog."if (UNEXPECTED(execute_data == NULL)) {\n");
 						out($f,$prolog."\tstatic const void* labels[] = {\n");
 						gen_labels($f, $spec, $kind, $prolog."\t\t");
 						out($f,$prolog."\t};\n");
