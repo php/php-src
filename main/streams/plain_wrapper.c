@@ -170,8 +170,8 @@ static php_stream *_php_stream_fopen_from_fd_int(int fd, const char *mode, const
 	self->is_process_pipe = 0;
 	self->temp_name = NULL;
 	self->fd = fd;
-#ifndef PHP_WIN32
-	is_pipe_blocking = 0;
+#ifdef PHP_WIN32
+	self->is_pipe_blocking = 0;
 #endif
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, persistent_id, mode);
@@ -189,8 +189,8 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	self->is_process_pipe = 0;
 	self->temp_name = NULL;
 	self->fd = fileno(file);
-#ifndef PHP_WIN32
-	is_pipe_blocking = 0;
+#ifdef PHP_WIN32
+	self->is_pipe_blocking = 0;
 #endif
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
@@ -318,8 +318,8 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->is_process_pipe = 1;
 	self->fd = fileno(file);
 	self->temp_name = NULL;
-#ifndef PHP_WIN32
-	is_pipe_blocking = 0;
+#ifdef PHP_WIN32
+	self->is_pipe_blocking = 0;
 #endif
 
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
