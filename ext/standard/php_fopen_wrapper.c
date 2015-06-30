@@ -180,6 +180,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	char *p, *token, *pathdup;
 	zend_long max_memory;
 	FILE *file = NULL;
+#ifdef PHP_WIN32
+	int pipe_requested = 0;
+#endif
 
 	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
@@ -257,6 +260,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDIN_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strcasecmp(path, "stdout")) {
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_out = 0;
@@ -270,6 +276,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDOUT_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strcasecmp(path, "stderr")) {
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_err = 0;
@@ -283,6 +292,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		} else {
 			fd = dup(STDERR_FILENO);
 		}
+#ifdef PHP_WIN32
+		pipe_requested = 1;
+#endif
 	} else if (!strncasecmp(path, "fd/", 3)) {
 		const char *start;
 		char       *end;
@@ -403,15 +415,13 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	}
 
 #ifdef PHP_WIN32
-		{
-			if (stream && context) {
-				zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
-				if (blocking_pipes) {
-					convert_to_long(blocking_pipes);
-					php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
-				}
-			}
+	if (pipe_requested && stream && context) {
+		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
+		if (blocking_pipes) {
+			convert_to_long(blocking_pipes);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
 		}
+	}
 #endif
 	return stream;
 }
