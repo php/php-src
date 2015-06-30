@@ -19,7 +19,7 @@ $s = fgets($in);
 ?>';
 file_put_contents($fl, $test_content);
 
-$descriptorspec = array(0 => array("pipe", "r"),1 => array("pipe", "w"), 2 => array("file", "error-output.txt", "a"));
+$descriptorspec = array(0 => array("pipe", "r"),1 => array("pipe", "w"));
 $pipes = array();
 
 $process = proc_open(PHP_BINARY.' -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
