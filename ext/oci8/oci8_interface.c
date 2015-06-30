@@ -55,6 +55,7 @@ PHP_FUNCTION(oci_define_by_name)
 	zend_long type = 0;
 	php_oci_statement *statement;
 	php_oci_define *define, *tmp_define;
+	zend_string *zvtmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
 		return;
@@ -74,12 +75,15 @@ PHP_FUNCTION(oci_define_by_name)
 
 	define = ecalloc(1,sizeof(php_oci_define));
 
-	//if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) {
-	if ((tmp_define = zend_hash_add_new_ptr(statement->defines, zend_string_init(name, name_len, 0), define)) != NULL) {
+	/* if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) { */
+	zvtmp = zend_string_init(name, name_len, 0);
+	if ((tmp_define = zend_hash_add_new_ptr(statement->defines, zvtmp, define)) != NULL) {
 		efree(define);
+		zend_string_release(zvtmp);
 		define = tmp_define;
 	} else {
 		efree(define);
+		zend_string_release(zvtmp);
 		RETURN_FALSE;
 	}
 
@@ -1429,7 +1433,10 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL(row), &element);
 				} else { /* default to ASSOC */
-					zend_symtable_update(Z_ARRVAL(row), zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0), &element);
+					zend_string *zvtmp;
+					zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
+					zend_symtable_update(Z_ARRVAL(row), zvtmp, &element);
+					zend_string_release(zvtmp);
 				}
 			}
 
@@ -1456,10 +1463,13 @@ PHP_FUNCTION(oci_fetch_all)
 			}
 		} else { /* default to ASSOC */
 			for (i = 0; i < statement->ncolumns; i++) {
+				zend_string *zvtmp;
 				columns[ i ] = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 				
 				array_init(&tmp);
-				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0), &tmp);
+				zvtmp = zend_string_init(columns[ i ]->name, columns[ i ]->name_len, 0);
+				outarrs[ i ] = zend_symtable_update(Z_ARRVAL_P(array), zvtmp, &tmp);
+				zend_string_release(zvtmp);
 			}
 		}
 
@@ -1657,7 +1667,7 @@ go_out:
 	if (errcode) {
 		array_init(return_value);
 		add_assoc_long(return_value, "code", errcode);
-		// TODO: avoid reallocation ???
+		/* TODO: avoid reallocation ??? */
 		add_assoc_string(return_value, "message", (char*) errbuf);
 		efree(errbuf);
 		add_assoc_long(return_value, "offset", error_offset);

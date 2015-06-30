@@ -589,7 +589,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 			outcol = (php_oci_out_column *) ecalloc(1, sizeof(php_oci_out_column));
 			
 			if ((outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol)) == NULL) {
-				efree(statement->columns);
+				FREE_HASHTABLE(statement->columns);
 				/* out of memory */
 				return 1;
 			}
@@ -875,17 +875,17 @@ void php_oci_statement_free(php_oci_statement *statement)
 
 	if (statement->columns) {
 		zend_hash_destroy(statement->columns);
-		efree(statement->columns);
+		FREE_HASHTABLE(statement->columns);
 	}
 
 	if (statement->binds) {
 		zend_hash_destroy(statement->binds);
-		efree(statement->binds);
+		FREE_HASHTABLE(statement->binds);
 	}
 
 	if (statement->defines) {
 		zend_hash_destroy(statement->defines);
-		efree(statement->defines);
+		FREE_HASHTABLE(statement->defines);
 	}
 
 	if (statement->parent_stmtid) {
@@ -1210,12 +1210,15 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		zend_hash_init(statement->binds, 13, NULL, php_oci_bind_hash_dtor, 0);
 	}
 
-	memset((void*)&bind,0,sizeof(php_oci_bind));
 	if ((old_bind = zend_hash_str_find_ptr(statement->binds, name, name_len)) != NULL) {
 		bindp = old_bind;
 		zval_ptr_dtor(&bindp->zval);
 	} else {
-		bindp = zend_hash_update_ptr(statement->binds, zend_string_init(name, name_len + 1, 0), &bind);
+		zend_string *zvtmp;
+		zvtmp = zend_string_init(name, name_len + 1, 0);
+		bindp = (php_oci_bind *) ecalloc(1, sizeof(php_oci_bind));
+		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
+		zend_string_release(zvtmp);
 	}
 	
 	bindp->descriptor = oci_desc;
@@ -1223,7 +1226,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	bindp->parent_statement = statement;
 	ZVAL_COPY(&bindp->zval, var);
 	bindp->type = type;
-	Z_ADDREF_P(var);
+	Z_TRY_ADDREF_P(var);
 	
 	PHP_OCI_CALL_RETURN(errstatus,
 		OCIBindByName,
@@ -1407,10 +1410,12 @@ sb4 php_oci_bind_out_callback(
 	} else {
 		convert_to_string(val);
 		zval_dtor(val);
-		
-		//Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		//Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
-		// XXX is this right?
+
+#if 0		
+		Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
+		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
+		/* XXX is this right? */
+#endif		
 		ZVAL_STRINGL(val, NULL, Z_STRLEN(phpbind->zval) + 1);
 
 		/* XXX we assume that zend-zval len has 4 bytes */
@@ -1524,6 +1529,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 {
 	php_oci_bind *bind, *bindp;
 	sword errstatus;
+	zend_string *zvtmp;
 
 	convert_to_array(var);
 
@@ -1574,7 +1580,9 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 		zend_hash_init(statement->binds, 13, NULL, php_oci_bind_hash_dtor, 0);
 	}
 
-	bindp = zend_hash_update_ptr(statement->binds, zend_string_init(name, name_len + 1, 0), bind);
+	zvtmp = zend_string_init(name, name_len + 1, 0);
+	bindp = zend_hash_update_ptr(statement->binds, zvtmp, bind);
+	zend_string_release(zvtmp);
 
 	bindp->descriptor = NULL;
 	bindp->statement = NULL;

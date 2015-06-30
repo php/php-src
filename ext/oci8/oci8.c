@@ -1562,8 +1562,8 @@ void php_oci_bind_hash_dtor(zval *data)
 	if (bind->array.indicators) {
 		efree(bind->array.indicators);
 	}
-
-	zval_ptr_dtor(&bind->zval);
+	efree(bind);
+	/*zval_ptr_dtor(&bind->zval); */
 }
 /* }}} */
 
@@ -1590,6 +1590,8 @@ void php_oci_column_hash_dtor(zval *data)
 	if (column->name) {
 		efree(column->name);
 	}
+
+	efree(column);
 }
 /* }}} */
 
