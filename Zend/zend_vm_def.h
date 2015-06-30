@@ -1489,7 +1489,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -2732,7 +2732,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 		if (OP1_TYPE != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (OP2_TYPE == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -2742,7 +2742,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 		if (OP2_TYPE != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (OP1_TYPE == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);

@@ -469,7 +469,7 @@ static void generate_dispids(php_dispatchex *disp)
 				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
 				name = ZSTR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
-				ZSTR_INC_REFCOUNT(name);
+				ZSTR_ADDREF(name);
 			}
 
 			zend_hash_move_forward_ex(Z_OBJPROP(disp->object), &pos);
@@ -504,7 +504,7 @@ static void generate_dispids(php_dispatchex *disp)
 				snprintf(namebuf, sizeof(namebuf), "%d", pid);
 				name = ZSTR_INIT(namebuf, strlen(namebuf), 0);
 			} else {
-				ZSTR_INC_REFCOUNT(name);
+				ZSTR_ADDREF(name);
 			}
 
 			zend_hash_move_forward_ex(&Z_OBJCE(disp->object)->function_table, &pos);

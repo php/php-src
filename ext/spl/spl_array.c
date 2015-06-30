@@ -1216,7 +1216,7 @@ SPL_METHOD(Array, getIteratorClass)
 		return;
 	}
 
-	ZSTR_INC_REFCOUNT(intern->ce_get_iterator->name);
+	ZSTR_ADDREF(intern->ce_get_iterator->name);
 	RETURN_STR(intern->ce_get_iterator->name);
 }
 /* }}} */

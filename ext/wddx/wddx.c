@@ -302,7 +302,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 			if (key == NULL) {
 				key = zend_long_to_str(idx);
 			} else {
-				ZSTR_INC_REFCOUNT(key);
+				ZSTR_ADDREF(key);
 			}
 			if (php_set_session_var(key, ent, NULL)) {
 				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);

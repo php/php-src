@@ -902,7 +902,7 @@ PHP_FUNCTION(pcntl_exec)
 			if (!key) {
 				key = zend_long_to_str(key_num);
 			} else {
-				ZSTR_INC_REFCOUNT(key);
+				ZSTR_ADDREF(key);
 			}
 
 			convert_to_string_ex(element);

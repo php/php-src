@@ -37,9 +37,9 @@ static zend_property_info *zend_duplicate_property_info(zend_property_info *prop
 
 	new_property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
-	ZSTR_INC_REFCOUNT(new_property_info->name);
+	ZSTR_ADDREF(new_property_info->name);
 	if (new_property_info->doc_comment) {
-		ZSTR_INC_REFCOUNT(new_property_info->doc_comment);
+		ZSTR_ADDREF(new_property_info->doc_comment);
 	}
 	return new_property_info;
 }
@@ -49,7 +49,7 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 {
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
-	ZSTR_INC_REFCOUNT(new_property_info->name);
+	ZSTR_ADDREF(new_property_info->name);
 	return new_property_info;
 }
 /* }}} */
@@ -68,7 +68,7 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 		}
 		if (EXPECTED(new_function->common.function_name)) {
-			ZSTR_INC_REFCOUNT(new_function->common.function_name);
+			ZSTR_ADDREF(new_function->common.function_name);
 		}
 	} else {
 		if (func->op_array.refcount) {
@@ -190,7 +190,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		} else if (!strcasecmp(class_name, "self") && fe->common.scope) {
 			fe_class_name = ZSTR_COPY(fe->common.scope->name);
 		} else if (fe_class_name) {
-			ZSTR_INC_REFCOUNT(fe_class_name);
+			ZSTR_ADDREF(fe_class_name);
 		} else {
 			fe_class_name = ZSTR_INIT(class_name, strlen(class_name), 0);
 		}
@@ -207,7 +207,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		} else if (!strcasecmp(class_name, "self") && proto->common.scope) {
 			proto_class_name = ZSTR_COPY(proto->common.scope->name);
 		} else if (proto_class_name) {
-			ZSTR_INC_REFCOUNT(proto_class_name);
+			ZSTR_ADDREF(proto_class_name);
 		} else {
 			proto_class_name = ZSTR_INIT(class_name, strlen(class_name), 0);
 		}

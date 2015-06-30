@@ -87,7 +87,7 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 static zend_string *zend_new_interned_string_safe(zend_string *str) /* {{{ */ {
 	zend_string *interned_str;
 
-	ZSTR_INC_REFCOUNT(str);
+	ZSTR_ADDREF(str);
 	interned_str = zend_new_interned_string(str);
 	if (str != interned_str) {
 		return interned_str;
@@ -816,7 +816,7 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 		if (name->val[0] == '\\') {
 			name = ZSTR_INIT(name->val + 1, name->len - 1, 0);
 		} else {
-			ZSTR_INC_REFCOUNT(name);
+			ZSTR_ADDREF(name);
 		}
 		/* Ensure that \self, \parent and \static are not used */
 		if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
@@ -987,7 +987,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
 		if (function->common.function_name) {
-			ZSTR_INC_REFCOUNT(function->common.function_name);
+			ZSTR_ADDREF(function->common.function_name);
 		}
 	}
 }
@@ -4243,7 +4243,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 				zend_assert_valid_class_name(class_name);
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
-				ZSTR_INC_REFCOUNT(class_name);
+				ZSTR_ADDREF(class_name);
 			}
 
 			arg_info->type_hint = IS_OBJECT;
@@ -5034,7 +5034,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			ZSTR_RELEASE(lcname);
 			lcname = ZSTR_TOLOWER(name);
 		} else {
-			ZSTR_INC_REFCOUNT(name);
+			ZSTR_ADDREF(name);
 		}
 
 		if (FC(imports)) {
@@ -5352,7 +5352,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		ZSTR_INC_REFCOUNT(old_name);
+		ZSTR_ADDREF(old_name);
 		if (!zend_hash_add_ptr(current_import, lookup_name, old_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
 				"is already in use", zend_get_use_type_str(type), old_name->val, new_name->val);
@@ -6717,7 +6717,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
 		class_name = zend_resolve_class_name_ast(class_ast);
 	} else {
-		ZSTR_INC_REFCOUNT(class_name);
+		ZSTR_ADDREF(class_name);
 	}
 
 	Z_STR(result) = zend_concat3(

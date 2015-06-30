@@ -478,7 +478,7 @@ static void accel_use_shm_interned_strings(void)
 
 		auto_global = (zend_auto_global*)Z_PTR(p->val);;
 
-		ZSTR_INC_REFCOUNT(auto_global->name);
+		ZSTR_ADDREF(auto_global->name);
 		auto_global->name = accel_new_interned_string(auto_global->name);
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key);

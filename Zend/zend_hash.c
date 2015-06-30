@@ -525,7 +525,7 @@ add_to_hash:
 	p = ht->arData + idx;
 	p->key = key;
 	if (!ZSTR_IS_INTERNED(key)) {
-		ZSTR_INC_REFCOUNT(key);
+		ZSTR_ADDREF(key);
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		ZSTR_HASH(key);
 	}
@@ -600,7 +600,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_new(HashTable *ht, const char *s
 {
 	zend_string *key = ZSTR_INIT(str, len, ht->u.flags & HASH_FLAG_PERSISTENT);
 	zval *ret = _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
-	ZSTR_DEC_REFCOUNT(key);
+	ZSTR_DELREF(key);
 	return ret;
 }
 
@@ -1626,7 +1626,7 @@ static zend_always_inline int zend_array_dup_element(HashTable *source, HashTabl
 
 		q->key = p->key;
 		if (!static_keys && q->key) {
-			ZSTR_INC_REFCOUNT(q->key);
+			ZSTR_ADDREF(q->key);
 		}
 
 		nIndex = q->h | target->nTableMask;

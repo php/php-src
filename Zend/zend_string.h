@@ -46,8 +46,8 @@ END_EXTERN_C()
 #define ZSTR_HASH(zstr)				ZSTR_HASH(zstr) 
 #define zend_string_forget_hash_val(zstr)		ZSTR_FORGET_HASH(zstr) 
 #define zend_string_refcount(zstr)				ZSTR_REFCOUNT(zstr)
-#define zend_string_addref(zstr)				ZSTR_INC_REFCOUNT(zstr)
-#define zend_string_delref(zstr)				ZSTR_DEC_REFCOUNT(zstr)
+#define zend_string_addref(zstr)				ZSTR_ADDREF(zstr)
+#define zend_string_delref(zstr)				ZSTR_DELREF(zstr)
 #define zend_string_alloc(len, persistent)		ZSTR_ALLOC(len, persistent)
 #define zend_string_safe_alloc(n, m, l, p)		ZSTR_SAFE_ALLOC(n, m, l, p)
 #define zend_string_init(zstr, len, persistent)	ZSTR_INIT(zstr, len, persistent)
@@ -107,38 +107,17 @@ static zend_always_inline void ZSTR_SET_LEN(zend_string *s, size_t len)
 	(s)->len = len;
 }
 
-static zend_always_inline void ZSTR_DEC_LEN(zend_string *s)
-{
-	ZEND_ASSERT((s)->len > 0);
-	(s)->len--;
-}
-
-static zend_always_inline void ZSTR_INC_LEN(zend_string *s)
-{
-	(s)->len++;
-}
-
-static zend_always_inline void _ZSTR_SET_HASH(zend_string *s, zend_ulong h)
-{
-	(s)->h = h;
-}
-
-static zend_always_inline zend_ulong _ZSTR_HASH_ELT(const zend_string *s)
-{
-	return (s)->h;
-}
-
 static zend_always_inline zend_ulong ZSTR_HASH(zend_string *s)
 {
-	if (!_ZSTR_HASH_ELT(s)) {
-		_ZSTR_SET_HASH(s, zend_hash_func(ZSTR_VAL(s), ZSTR_LEN(s)));
+	if (! s->h) {
+		s->h = zend_hash_func(ZSTR_VAL(s), ZSTR_LEN(s));
 	}
-	return _ZSTR_HASH_ELT(s);
+	return s->h;
 }
 
 static zend_always_inline void ZSTR_FORGET_HASH(zend_string *s)
 {
-	_ZSTR_SET_HASH(s, 0);
+	s->h = 0;
 }
 
 static zend_always_inline uint32_t ZSTR_REFCOUNT(const zend_string *s)
@@ -149,7 +128,7 @@ static zend_always_inline uint32_t ZSTR_REFCOUNT(const zend_string *s)
 	return 1;
 }
 
-static zend_always_inline uint32_t ZSTR_INC_REFCOUNT(zend_string *s)
+static zend_always_inline uint32_t ZSTR_ADDREF(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		return ++GC_REFCOUNT(s);
@@ -157,7 +136,7 @@ static zend_always_inline uint32_t ZSTR_INC_REFCOUNT(zend_string *s)
 	return 1;
 }
 
-static zend_always_inline uint32_t ZSTR_DEC_REFCOUNT(zend_string *s)
+static zend_always_inline uint32_t ZSTR_DELREF(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		return --GC_REFCOUNT(s);

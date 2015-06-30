@@ -572,18 +572,6 @@ END_EXTERN_C()
 		ZVAL_STRINGL(z, _s, strlen(_s));		\
 	} while (0)
 
-#define ZVAL_STR_LEN(z, l) do {					\
-		ZSTR_SET_LEN(Z_STR_P(z), l);		\
-	} while (0)
-
-#define ZVAL_STR_DEC_LEN(z) do {					\
-		ZSTR_DEC_LEN(Z_STR_P(z));		\
-	} while (0)
-
-#define ZVAL_STR_INC_LEN(z) do {					\
-		ZSTR_INC_LEN(Z_STR_P(z));		\
-	} while (0)
-
 #define ZVAL_EMPTY_STRING(z) do {				\
 		ZVAL_INTERNED_STR(z, ZSTR_EMPTY_ALLOC());		\
 	} while (0)

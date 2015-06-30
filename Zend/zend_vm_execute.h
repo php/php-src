@@ -5142,7 +5142,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -5654,7 +5654,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CONST_H
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -5664,7 +5664,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CONST_H
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -7111,7 +7111,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -7626,7 +7626,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -9447,7 +9447,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -9457,7 +9457,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -11282,7 +11282,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -11292,7 +11292,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -31418,7 +31418,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -32264,7 +32264,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -32274,7 +32274,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -33691,7 +33691,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -34637,7 +34637,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -37406,7 +37406,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -37416,7 +37416,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -40014,7 +40014,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -40024,7 +40024,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -41942,7 +41942,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -42296,7 +42296,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CONST == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -42306,7 +42306,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 		if (IS_CONST != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -42970,7 +42970,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -43393,7 +43393,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		ZSTR_INC_REFCOUNT(name);
+		ZSTR_ADDREF(name);
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(varname, BP_VAR_R);
@@ -44493,7 +44493,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if (IS_CV == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -44503,7 +44503,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 		if (IS_CV != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);
@@ -45657,7 +45657,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op1_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op2_str);
+					ZSTR_ADDREF(op2_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
 				ZSTR_RELEASE(op1_str);
@@ -45667,7 +45667,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			if (UNEXPECTED(op2_str->len == 0)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-					ZSTR_INC_REFCOUNT(op1_str);
+					ZSTR_ADDREF(op1_str);
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
 				ZSTR_RELEASE(op2_str);

@@ -2511,7 +2511,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					if (!string_key) {
 						string_key = zend_long_to_str(num_key);
 					} else {
-						ZSTR_INC_REFCOUNT(string_key);
+						ZSTR_ADDREF(string_key);
 					}
 
 					if (Z_TYPE_P(current) == IS_OBJECT &&

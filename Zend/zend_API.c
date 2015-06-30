@@ -3011,7 +3011,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		/* Try to fetch find static method of given class. */
 		mlen = Z_STRLEN_P(callable);
 		mname = Z_STR_P(callable);
-		ZSTR_INC_REFCOUNT(mname);
+		ZSTR_ADDREF(mname);
 		ftable = &ce_org->function_table;
 		fcc->calling_scope = ce_org;
 	} else {
