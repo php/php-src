@@ -121,7 +121,7 @@ typedef struct {
 	unsigned is_process_pipe:1;	/* use pclose instead of fclose */
 	unsigned is_pipe:1;			/* don't try and seek */
 	unsigned cached_fstat:1;	/* sb is valid */
-	unsigned _reserved:29;
+	unsigned is_pipe_blocking;
 
 	int lock_flag;			/* stores the lock state */
 	zend_string *temp_name;	/* if non-null, this is the path to a temporary file that
@@ -170,6 +170,9 @@ static php_stream *_php_stream_fopen_from_fd_int(int fd, const char *mode, const
 	self->is_process_pipe = 0;
 	self->temp_name = NULL;
 	self->fd = fd;
+#ifndef PHP_WIN32
+	is_pipe_blocking = 0;
+#endif
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, persistent_id, mode);
 }
@@ -186,6 +189,9 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	self->is_process_pipe = 0;
 	self->temp_name = NULL;
 	self->fd = fileno(file);
+#ifndef PHP_WIN32
+	is_pipe_blocking = 0;
+#endif
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
@@ -312,6 +318,9 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->is_process_pipe = 1;
 	self->fd = fileno(file);
 	self->temp_name = NULL;
+#ifndef PHP_WIN32
+	is_pipe_blocking = 0;
+#endif
 
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 	stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
@@ -356,7 +365,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 #ifdef PHP_WIN32
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-		if (self->is_pipe || self->is_process_pipe) {
+		if ((self->is_pipe || self->is_process_pipe) && !self->is_pipe_blocking) {
 			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
 			int retry = 0;
 			DWORD avail_read = 0;
@@ -832,6 +841,12 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				}
 			}
 
+#ifdef PHP_WIN32
+		case PHP_STREAM_OPTION_PIPE_BLOCKING:
+			data->is_pipe_blocking = value;
+			return PHP_STREAM_OPTION_RETURN_OK;
+#endif
+
 		default:
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
@@ -1004,6 +1019,11 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 					php_stream_close(ret);
 					return NULL;
 				}
+			}
+
+			if (options & STREAM_USE_BLOCKING_PIPE) {
+				php_stdio_stream_data *self = (php_stdio_stream_data*)ret->abstract;
+				self->is_pipe_blocking = 1;
 			}
 #endif
 

@@ -400,6 +400,15 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		if (stream == NULL) {
 			close(fd);
 		}
+#ifdef PHP_WIN32
+		{
+			zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
+			if (blocking_pipes) {
+				convert_to_long(blocking_pipes);
+				php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+			}
+		}
+#endif
 	}
 
 	return stream;
