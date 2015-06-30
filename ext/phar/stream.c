@@ -346,6 +346,9 @@ phar_stub:
  */
 static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 {
+	/* for some reasons phar needs to be flushed even if there is no write going on */
+	phar_stream_flush(stream);
+
 	phar_entry_delref((phar_entry_data *)stream->abstract);
 
 	return 0;
@@ -437,7 +440,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 	php_stream_seek(data->fp, data->position, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
-		return -1;
+		return 0;
 	}
 	data->position = php_stream_tell(data->fp);
 	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
