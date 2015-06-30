@@ -6760,8 +6760,8 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMPVAR|UNUSED|CV, ANY)
 		FREE_OP1();
 	}
 #endif
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	zend_throw_death_exception();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
@@ -7202,6 +7202,10 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
+
+	if (EG(exception) && !instanceof_function(EG(exception)->ce, zend_ce_throwable)) {
+		finally_op_num = 0;
+	}
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);

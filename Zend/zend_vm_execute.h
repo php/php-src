@@ -1505,6 +1505,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 
 	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 
+	if (EG(exception) && !instanceof_function(EG(exception)->ce, zend_ce_throwable)) {
+		finally_op_num = 0;
+	}
+
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
 
@@ -4029,8 +4033,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_O
 
 	}
 #endif
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	zend_throw_death_exception();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -23030,8 +23034,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_
 
 	}
 #endif
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	zend_throw_death_exception();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op_type binary_op ZEND_OPCODE_HANDLER_ARGS_DC)
@@ -29745,8 +29749,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCO
 
 	}
 #endif
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	zend_throw_death_exception();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -41089,8 +41093,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_TMPVAR_HANDLER(ZEND_
 		zval_ptr_dtor_nogc(free_op1);
 	}
 #endif
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+	zend_throw_death_exception();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

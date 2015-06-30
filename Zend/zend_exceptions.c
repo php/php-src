@@ -37,6 +37,7 @@ static zend_class_entry *error_exception_ce;
 static zend_class_entry *error_ce;
 static zend_class_entry *parse_error_ce;
 static zend_class_entry *type_error_ce;
+static zend_class_entry death_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
@@ -141,8 +142,10 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 		if (exception && Z_OBJCE_P(exception) == parse_error_ce) {
 			return;
 		}
-		if(EG(exception)) {
+		if (EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
+			EG(exception) = NULL;
+			return;
 		}
 		zend_error_noreturn(E_CORE_ERROR, "Exception thrown without a stack frame");
 	}
@@ -165,7 +168,6 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 ZEND_API void zend_clear_exception(void) /* {{{ */
 {
 	if (EG(prev_exception)) {
-
 		OBJ_RELEASE(EG(prev_exception));
 		EG(prev_exception) = NULL;
 	}
@@ -178,6 +180,25 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 #if ZEND_DEBUG
 	EG(opline_before_exception) = NULL;
 #endif
+}
+/* }}} */
+
+ZEND_API void zend_throw_death_exception(void) /* {{{ */
+{
+	zval ex;
+	object_init_ex(&ex, &death_exception_ce);
+
+	if (EG(prev_exception)) {
+		OBJ_RELEASE(EG(prev_exception));
+	}
+	if (EG(exception)) {
+		OBJ_RELEASE(EG(exception));
+	} else {
+		EG(opline_before_exception) = EG(current_execute_data)->opline;
+		EG(current_execute_data)->opline = EG(exception_op);
+	}
+
+	EG(exception) = Z_OBJ(ex);
 }
 /* }}} */
 
@@ -816,7 +837,7 @@ void zend_register_default_exception(void) /* {{{ */
 	default_exception_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
-	default_exception_ce = zend_register_internal_class_ex(&ce, NULL);
+	default_exception_ce = zend_register_internal_class(&ce);
 	default_exception_ce->create_object = zend_default_exception_new;
 	zend_class_implements(default_exception_ce, 1, zend_ce_throwable);
 
@@ -834,7 +855,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED);
 
 	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
-	error_ce = zend_register_internal_class_ex(&ce, NULL);
+	error_ce = zend_register_internal_class(&ce);
 	error_ce->create_object = zend_default_exception_new;
 	zend_class_implements(error_ce, 1, zend_ce_throwable);
 
@@ -853,6 +874,11 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
 	type_error_ce = zend_register_internal_class_ex(&ce, error_ce);
 	type_error_ce->create_object = zend_default_exception_new;
+
+	/* purely internal, no need to register that */
+	INIT_CLASS_ENTRY(death_exception_ce, "DeathException", NULL);
+	death_exception_ce.type = ZEND_INTERNAL_CLASS;
+	death_exception_ce.ce_flags = ZEND_ACC_CONSTANTS_UPDATED;
 }
 /* }}} */
 
@@ -958,11 +984,12 @@ static void zend_error_helper(int type, const char *filename, const uint lineno,
 	va_end(va);
 }
 
-/* This function doesn't return if it uses E_ERROR */
-ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
+/* This function doesn't return if it was handled with E_ERROR */
+ZEND_API int zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
+	int retval = FAILURE;
 
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
@@ -1021,10 +1048,13 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		zend_string_release(str);
 		zend_string_release(file);
 	} else {
-		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
+		/* technical exceptions, ignore them */
+		retval = SUCCESS;
 	}
 
 	OBJ_RELEASE(ex);
+
+	return retval;
 }
 /* }}} */
 
