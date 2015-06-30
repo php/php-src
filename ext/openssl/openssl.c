@@ -1538,8 +1538,8 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	s = zend_string_alloc(strlen(spkac) + strlen(spkstr), 0);
-	sprintf(s->val, "%s%s", spkac, spkstr);
-	s->len = strlen(s->val);
+	sprintf(ZSTR_VAL(s), "%s%s", spkac, spkstr);
+	ZSTR_LEN(s) = strlen(ZSTR_VAL(s));
 
 	RETVAL_STR(s);
 	goto cleanup;
@@ -1556,7 +1556,7 @@ cleanup:
 		efree(spkstr);
 	}
 
-	if (s && s->len <= 0) {
+	if (s && ZSTR_LEN(s) <= 0) {
 		RETVAL_FALSE;
 	}
 
@@ -1798,8 +1798,8 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_b
 		ret = zend_string_init((char*)md, n, 0);
 	} else {
 		ret = zend_string_alloc(n * 2, 0);
-		make_digest_ex(ret->val, md, n);
-		ret->val[n * 2] = '\0';
+		make_digest_ex(ZSTR_VAL(ret), md, n);
+		ZSTR_VAL(ret)[n * 2] = '\0';
 	}
 
 	return ret;
@@ -2663,7 +2663,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 				convert_to_string_ex(item);
 
-				nid = OBJ_txt2nid(strindex->val);
+				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
 								(unsigned char*)Z_STRVAL_P(item), -1, -1, 0))
@@ -2676,7 +2676,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 						return FAILURE;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", strindex->val);
+					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -2735,14 +2735,14 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 				convert_to_string_ex(item);
 
-				nid = OBJ_txt2nid(strindex->val);
+				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)Z_STRVAL_P(item), -1, -1, 0)) {
 						php_error_docref(NULL, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_P(item));
 						return FAILURE;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", strindex->val);
+					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
 				}
 			} ZEND_HASH_FOREACH_END();
 			for (i = 0; i < sk_CONF_VALUE_num(attr_sk); i++) {
@@ -3511,9 +3511,9 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 #define OPENSSL_PKEY_GET_BN(_type, _name) do {							\
 		if (pkey->pkey._type->_name != NULL) {							\
 			int len = BN_num_bytes(pkey->pkey._type->_name);			\
-			zend_string *str = zend_string_alloc(len, 0);						\
-			BN_bn2bin(pkey->pkey._type->_name, (unsigned char*)str->val);	\
-			str->val[len] = 0;                                          \
+			zend_string *str = zend_string_alloc(len, 0);				\
+			BN_bn2bin(pkey->pkey._type->_name, (unsigned char*)ZSTR_VAL(str));	\
+			ZSTR_VAL(str)[len] = 0;										\
 			add_assoc_str(&_type, #_name, str);							\
 		}																\
 	} while (0)
@@ -4020,8 +4020,8 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	out_buffer = zend_string_alloc(key_length, 0);
 
-	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)out_buffer->val) == 1) {
-		out_buffer->val[key_length] = 0;
+	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)ZSTR_VAL(out_buffer)) == 1) {
+		ZSTR_VAL(out_buffer)[key_length] = 0;
 		RETURN_NEW_STR(out_buffer);
 	} else {
 		zend_string_release(out_buffer);
@@ -4249,7 +4249,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 			convert_to_string_ex(zcertval);
 
 			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", strindex->val, Z_STRVAL_P(zcertval));
+				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), Z_STRVAL_P(zcertval));
 			} else {
 				BIO_printf(outfile, "%s\n", Z_STRVAL_P(zcertval));
 			}
@@ -4353,7 +4353,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 			convert_to_string_ex(hval);
 
 			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", strindex->val, Z_STRVAL_P(hval));
+				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), Z_STRVAL_P(hval));
 			} else {
 				BIO_printf(outfile, "%s\n", Z_STRVAL_P(hval));
 			}
@@ -4489,7 +4489,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 		case EVP_PKEY_RSA2:
 			successful =  (RSA_private_encrypt((int)data_len,
 						(unsigned char *)data,
-						(unsigned char *)cryptedbuf->val,
+						(unsigned char *)ZSTR_VAL(cryptedbuf),
 						pkey->pkey.rsa,
 						(int)padding) == cryptedlen);
 			break;
@@ -4499,7 +4499,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf->val[cryptedlen] = '\0';
+		ZSTR_VAL(cryptedbuf)[cryptedlen] = '\0';
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
@@ -4555,7 +4555,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 					(int)padding);
 			if (cryptedlen != -1) {
 				cryptedbuf = zend_string_alloc(cryptedlen, 0);
-				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
+				memcpy(ZSTR_VAL(cryptedbuf), crypttemp, cryptedlen);
 				successful = 1;
 			}
 			break;
@@ -4567,7 +4567,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf->val[cryptedlen] = '\0';
+		ZSTR_VAL(cryptedbuf)[cryptedlen] = '\0';
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
@@ -4617,7 +4617,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 		case EVP_PKEY_RSA2:
 			successful = (RSA_public_encrypt((int)data_len,
 						(unsigned char *)data,
-						(unsigned char *)cryptedbuf->val,
+						(unsigned char *)ZSTR_VAL(cryptedbuf),
 						pkey->pkey.rsa,
 						(int)padding) == cryptedlen);
 			break;
@@ -4628,7 +4628,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf->val[cryptedlen] = '\0';
+		ZSTR_VAL(cryptedbuf)[cryptedlen] = '\0';
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
@@ -4684,7 +4684,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 					(int)padding);
 			if (cryptedlen != -1) {
 				cryptedbuf = zend_string_alloc(cryptedlen, 0);
-				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
+				memcpy(ZSTR_VAL(cryptedbuf), crypttemp, cryptedlen);
 				successful = 1;
 			}
 			break;
@@ -4698,7 +4698,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 
 	if (successful) {
 		zval_dtor(crypted);
-		cryptedbuf->val[cryptedlen] = '\0';
+		ZSTR_VAL(cryptedbuf)[cryptedlen] = '\0';
 		ZVAL_NEW_STR(crypted, cryptedbuf);
 		cryptedbuf = NULL;
 		RETVAL_TRUE;
@@ -4779,10 +4779,10 @@ PHP_FUNCTION(openssl_sign)
 
 	EVP_SignInit(&md_ctx, mdtype);
 	EVP_SignUpdate(&md_ctx, data, data_len);
-	if (EVP_SignFinal (&md_ctx, (unsigned char*)sigbuf->val, &siglen, pkey)) {
+	if (EVP_SignFinal (&md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, pkey)) {
 		zval_dtor(signature);
-		sigbuf->val[siglen] = '\0';
-		sigbuf->len = siglen;
+		ZSTR_VAL(sigbuf)[siglen] = '\0';
+		ZSTR_LEN(sigbuf) = siglen;
 		ZVAL_NEW_STR(signature, sigbuf);
 		RETVAL_TRUE;
 	} else {
@@ -5122,17 +5122,17 @@ PHP_FUNCTION(openssl_digest)
 
 	EVP_DigestInit(&md_ctx, mdtype);
 	EVP_DigestUpdate(&md_ctx, (unsigned char *)data, data_len);
-	if (EVP_DigestFinal (&md_ctx, (unsigned char *)sigbuf->val, &siglen)) {
+	if (EVP_DigestFinal (&md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
-			sigbuf->val[siglen] = '\0';
-			sigbuf->len = siglen;
+			ZSTR_VAL(sigbuf)[siglen] = '\0';
+			ZSTR_LEN(sigbuf) = siglen;
 			RETVAL_STR(sigbuf);
 		} else {
 			int digest_str_len = siglen * 2;
 			zend_string *digest_str = zend_string_alloc(digest_str_len, 0);
 
-			make_digest_ex(digest_str->val, (unsigned char*)sigbuf->val, siglen);
-			digest_str->val[digest_str_len] = '\0';
+			make_digest_ex(ZSTR_VAL(digest_str), (unsigned char*)ZSTR_VAL(sigbuf), siglen);
+			ZSTR_VAL(digest_str)[digest_str_len] = '\0';
 			zend_string_release(sigbuf);
 			RETVAL_STR(digest_str);
 		}
@@ -5230,19 +5230,19 @@ PHP_FUNCTION(openssl_encrypt)
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
 	if (data_len > 0) {
-		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, (int)data_len);
+		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	}
 	outlen = i;
-	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
+	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
-			outbuf->val[outlen] = '\0';
-			outbuf->len = outlen;
+			ZSTR_VAL(outbuf)[outlen] = '\0';
+			ZSTR_LEN(outbuf) = outlen;
 			RETVAL_STR(outbuf);
 		} else {
 			zend_string *base64_str;
 
-			base64_str = php_base64_encode((unsigned char*)outbuf->val, outlen);
+			base64_str = php_base64_encode((unsigned char*)ZSTR_VAL(outbuf), outlen);
 			zend_string_release(outbuf);
 			RETVAL_STR(base64_str);
 		}
@@ -5299,8 +5299,8 @@ PHP_FUNCTION(openssl_decrypt)
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			RETURN_FALSE;
 		}
-		data_len = base64_str->len;
-		data = base64_str->val;
+		data_len = ZSTR_LEN(base64_str);
+		data = ZSTR_VAL(base64_str);
 	}
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
@@ -5325,12 +5325,12 @@ PHP_FUNCTION(openssl_decrypt)
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, (int)data_len);
+	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	outlen = i;
-	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
+	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
-		outbuf->val[outlen] = '\0';
-		outbuf->len = outlen;
+		ZSTR_VAL(outbuf)[outlen] = '\0';
+		ZSTR_LEN(outbuf) = outlen;
 		RETVAL_STR(outbuf);
 	} else {
 		zend_string_release(outbuf);
@@ -5401,11 +5401,11 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
 
 	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
-	len = DH_compute_key((unsigned char*)data->val, pub, pkey->pkey.dh);
+	len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, pkey->pkey.dh);
 
 	if (len >= 0) {
-		data->len = len;
-		data->val[len] = 0;
+		ZSTR_LEN(data) = len;
+		ZSTR_VAL(data)[len] = 0;
 		RETVAL_STR(data);
 	} else {
 		zend_string_release(data);
@@ -5451,7 +5451,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_FALSE;
 	}
 #else
-	if ((strong_result = RAND_pseudo_bytes((unsigned char*)buffer->val, buffer_length)) < 0) {
+	if ((strong_result = RAND_pseudo_bytes((unsigned char*)ZSTR_VAL(buffer), buffer_length)) < 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_FALSE(zstrong_result_returned);
@@ -5460,7 +5460,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 #endif
 
-	buffer->val[buffer_length] = 0;
+	ZSTR_VAL(buffer)[buffer_length] = 0;
 	RETVAL_STR(buffer);
 
 	if (zstrong_result_returned) {

@@ -65,7 +65,7 @@ static int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 	zend_string *new_str;
 
 	new_str = php_escape_html_entities((unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
-	written = php_output_write(new_str->val, new_str->len);
+	written = php_output_write(ZSTR_VAL(new_str), ZSTR_LEN(new_str));
 	zend_string_free(new_str);
 	return written;
 }
@@ -115,9 +115,9 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 						php_info_print(", ");
 					}
 					if (!sapi_module.phpinfo_as_text) {
-						php_info_print_html_esc(key->val, key->len);
+						php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
 					} else {
-						php_info_print(key->val);
+						php_info_print(ZSTR_VAL(key));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -142,8 +142,8 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 		if (!sapi_module.phpinfo_as_text) {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
-			php_strtolower(url_name->val, url_name->len);
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", url_name->val, zend_module->name);
+			php_strtolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
+			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
 		} else {
@@ -214,9 +214,9 @@ static void php_print_gpcse_array(char *name, uint name_length)
 
 			if (string_key != NULL) {
 				if (!sapi_module.phpinfo_as_text) {
-					php_info_print_html_esc(string_key->val, string_key->len);
+					php_info_print_html_esc(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 				} else {
-					php_info_print(string_key->val);
+					php_info_print(ZSTR_VAL(string_key));
 				}
 			} else {
 				php_info_printf(ZEND_ULONG_FMT, num_key);
@@ -862,7 +862,7 @@ PHPAPI void php_print_info(int flag)
 		}
 		php_info_print_box_end();
 		php_info_print_table_start();
-		php_info_print_table_row(2, "System", php_uname->val);
+		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
 		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
 #ifdef COMPILER
 		php_info_print_table_row(2, "Compiler", COMPILER);

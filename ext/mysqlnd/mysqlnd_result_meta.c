@@ -227,8 +227,8 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 
 		if (orig_fields[i].sname) {
 			new_fields[i].sname = zend_string_copy(orig_fields[i].sname);
-			new_fields[i].name = new_fields[i].sname->val;
-			new_fields[i].name_length = new_fields[i].sname->len;
+			new_fields[i].name = ZSTR_VAL(new_fields[i].sname);
+			new_fields[i].name_length = ZSTR_LEN(new_fields[i].sname);
 		}
 
 		if (orig_fields[i].org_name && orig_fields[i].org_name != mysqlnd_empty_string) {

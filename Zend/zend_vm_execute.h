@@ -12999,14 +12999,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
-		len += rope[i]->len;
+		len += ZSTR_LEN(rope[i]);
 	}
 	ret = EX_VAR(opline->result.var);
 	ZVAL_STR(ret, zend_string_alloc(len, 0));
 	target = Z_STRVAL_P(ret);
 	for (i = 0; i <= opline->extended_value; i++) {
-		memcpy(target, rope[i]->val, rope[i]->len);
-		target += rope[i]->len;
+		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
+		target += ZSTR_LEN(rope[i]);
 		zend_string_release(rope[i]);
 	}
 	*target = '\0';
@@ -14283,14 +14283,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
-		len += rope[i]->len;
+		len += ZSTR_LEN(rope[i]);
 	}
 	ret = EX_VAR(opline->result.var);
 	ZVAL_STR(ret, zend_string_alloc(len, 0));
 	target = Z_STRVAL_P(ret);
 	for (i = 0; i <= opline->extended_value; i++) {
-		memcpy(target, rope[i]->val, rope[i]->len);
-		target += rope[i]->len;
+		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
+		target += ZSTR_LEN(rope[i]);
 		zend_string_release(rope[i]);
 	}
 	*target = '\0';
@@ -14796,14 +14796,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
-		len += rope[i]->len;
+		len += ZSTR_LEN(rope[i]);
 	}
 	ret = EX_VAR(opline->result.var);
 	ZVAL_STR(ret, zend_string_alloc(len, 0));
 	target = Z_STRVAL_P(ret);
 	for (i = 0; i <= opline->extended_value; i++) {
-		memcpy(target, rope[i]->val, rope[i]->len);
-		target += rope[i]->len;
+		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
+		target += ZSTR_LEN(rope[i]);
 		zend_string_release(rope[i]);
 	}
 	*target = '\0';

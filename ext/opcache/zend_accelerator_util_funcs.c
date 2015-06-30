@@ -534,7 +534,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
 				t = zend_hash_update(target, p->key, &p->val);
 			} else {
@@ -556,11 +556,11 @@ failure:
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
-				   function1->common.function_name->val,
-				   function2->op_array.filename->val,
+				   ZSTR_VAL(function1->common.function_name),
+				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -578,7 +578,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
 				zend_hash_update_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
 			} else {
@@ -600,11 +600,11 @@ failure:
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
 		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
-				   function1->common.function_name->val,
-				   function2->op_array.filename->val,
+				   ZSTR_VAL(function1->common.function_name),
+				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
@@ -622,7 +622,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			if (EXPECTED(p->key->len > 0) && EXPECTED(p->key->val[0] == 0)) {
+			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key - ignore and wait for runtime */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
@@ -643,7 +643,7 @@ failure:
 	CG(in_compilation) = 1;
 	zend_set_compiled_filename(ce1->info.user.filename);
 	CG(zend_lineno) = ce1->info.user.line_start;
-	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ce1->name->val);
+	zend_error(E_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 }
 
 #ifdef __SSE2__
@@ -713,9 +713,9 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_string *name;
 			char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
-			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, persistent_script->full_path->val, persistent_script->full_path->len, 0);
+			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->full_path), ZSTR_LEN(persistent_script->full_path), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_long_constant(name->val, name->len, persistent_script->compiler_halt_offset, CONST_CS, 0);
+				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
 			}
 			zend_string_release(name);
 		}

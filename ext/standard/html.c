@@ -951,7 +951,7 @@ static void traverse_for_entities(
 	lim = old + oldlen; /* terminator address */
 	assert(*lim == '\0');
 
-	for (p = old, q = ret->val; p < lim;) {
+	for (p = old, q = ZSTR_VAL(ret); p < lim;) {
 		unsigned code, code2 = 0;
 		const char *next = NULL; /* when set, next > p, otherwise possible inf loop */
 
@@ -1040,7 +1040,7 @@ invalid_code:
 	}
 
 	*q = '\0';
-	ret->len = (size_t)(q - ret->val);
+	ZSTR_LEN(ret) = (size_t)(q - ZSTR_VAL(ret));
 }
 /* }}} */
 
@@ -1118,8 +1118,8 @@ PHPAPI zend_string *php_unescape_html_entities(unsigned char *old, size_t oldlen
 		goto empty_source;
 	}
 	ret = zend_string_alloc(new_size, 0);
-	ret->val[0] = '\0';
-	ret->len = oldlen;
+	ZSTR_VAL(ret)[0] = '\0';
+	ZSTR_LEN(ret) = oldlen;
 	retlen = oldlen;
 	if (retlen == 0) {
 		goto empty_source;
@@ -1298,7 +1298,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 			if (flags & ENT_HTML_IGNORE_ERRORS) {
 				continue;
 			} else if (flags & ENT_HTML_SUBSTITUTE_ERRORS) {
-				memcpy(&replaced->val[len], replacement, replacement_len);
+				memcpy(&ZSTR_VAL(replaced)[len], replacement, replacement_len);
 				len += replacement_len;
 				continue;
 			} else {
@@ -1335,10 +1335,10 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 			}
 
 			if (rep != NULL) {
-				replaced->val[len++] = '&';
-				memcpy(&replaced->val[len], rep, rep_len);
+				ZSTR_VAL(replaced)[len++] = '&';
+				memcpy(&ZSTR_VAL(replaced)[len], rep, rep_len);
 				len += rep_len;
-				replaced->val[len++] = ';';
+				ZSTR_VAL(replaced)[len++] = ';';
 			} else {
 				/* we did not find an entity for this char.
 				 * check for its validity, if its valid pass it unchanged */
@@ -1372,16 +1372,16 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 				}
 pass_char_through:
 				if (mbseqlen > 1) {
-					memcpy(replaced->val + len, mbsequence, mbseqlen);
+					memcpy(ZSTR_VAL(replaced) + len, mbsequence, mbseqlen);
 					len += mbseqlen;
 				} else {
-					replaced->val[len++] = mbsequence[0];
+					ZSTR_VAL(replaced)[len++] = mbsequence[0];
 				}
 			}
 		} else { /* this_char == '&' */
 			if (double_encode) {
 encode_amp:
-				memcpy(&replaced->val[len], "&amp;", sizeof("&amp;") - 1);
+				memcpy(&ZSTR_VAL(replaced)[len], "&amp;", sizeof("&amp;") - 1);
 				len += sizeof("&amp;") - 1;
 			} else { /* no double encode */
 				/* check if entity is valid */
@@ -1424,16 +1424,16 @@ encode_amp:
 					replaced = zend_string_safe_realloc(replaced, maxlen, 1, ent_len + 128, 0);
 					maxlen += ent_len + 128;
 				}
-				replaced->val[len++] = '&';
-				memcpy(&replaced->val[len], &old[cursor], ent_len);
+				ZSTR_VAL(replaced)[len++] = '&';
+				memcpy(&ZSTR_VAL(replaced)[len], &old[cursor], ent_len);
 				len += ent_len;
-				replaced->val[len++] = ';';
+				ZSTR_VAL(replaced)[len++] = ';';
 				cursor += ent_len + 1;
 			}
 		}
 	}
-	replaced->val[len] = '\0';
-	replaced->len = len;
+	ZSTR_VAL(replaced)[len] = '\0';
+	ZSTR_LEN(replaced) = len;
 
 	return replaced;
 }
@@ -1466,7 +1466,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	if (!hint_charset) {
 		default_charset = get_default_charset();
 	}
-	replaced = php_escape_html_entities_ex((unsigned char*)str->val, str->len, all, (int) flags, (hint_charset ? hint_charset->val : default_charset), double_encode);
+	replaced = php_escape_html_entities_ex((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset), double_encode);
 	RETVAL_STR(replaced);
 }
 /* }}} */
@@ -1548,7 +1548,7 @@ PHP_FUNCTION(html_entity_decode)
 	if (!hint_charset) {
 		default_charset = get_default_charset();
 	}
-	replaced = php_unescape_html_entities((unsigned char*)str->val, str->len, 1 /*all*/, (int)quote_style, (hint_charset ? hint_charset->val : default_charset));
+	replaced = php_unescape_html_entities((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), 1 /*all*/, (int)quote_style, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset));
 
 	if (replaced) {
 		RETURN_STR(replaced);

@@ -177,8 +177,8 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	assert(next <= slen && next >= cur);
 	res = zend_string_alloc(next - cur, 0);
 
-	memcpy(res->val, &s[cur], res->len);
-	res->val[res->len] = '\0';
+	memcpy(ZSTR_VAL(res), &s[cur], ZSTR_LEN(res));
+	ZSTR_VAL(res)[ZSTR_LEN(res)] = '\0';
 
 	ZVAL_STR(&zoi_bit->zoi_cur.current, res);
 }
@@ -249,14 +249,14 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 	ALLOCA_FLAG(use_heap);
 
 	if (key == NULL) {
-		ZSTR_ALLOCA_ALLOC(lc_method_name, method->len, use_heap);
-		zend_str_tolower_copy(lc_method_name->val, method->val, method->len);
+		ZSTR_ALLOCA_ALLOC(lc_method_name, ZSTR_LEN(method), use_heap);
+		zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method), ZSTR_LEN(method));
 	} else {
 		lc_method_name = Z_STR_P(key);
 	}
 
-	if (method->len == sizeof("getrulestatus") - 1
-			&& memcmp("getrulestatus", lc_method_name->val, lc_method_name->len) == 0) {
+	if (ZSTR_LEN(method) == sizeof("getrulestatus") - 1
+			&& memcmp("getrulestatus", ZSTR_VAL(lc_method_name), ZSTR_LEN(lc_method_name)) == 0) {
 		IntlIterator_object *obj = php_intl_iterator_fetch_object(*object_ptr);
 		if (obj->iterator && !Z_ISUNDEF(obj->iterator->data)) {
 			zval *break_iter_zv = &obj->iterator->data;

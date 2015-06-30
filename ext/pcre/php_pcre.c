@@ -281,14 +281,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #if HAVE_SETLOCALE
 		if (pce->locale == BG(locale_string) ||
 		    (pce->locale && BG(locale_string) &&
-		     pce->locale->len == BG(locale_string)->len &&
-		     !memcmp(pce->locale->val, BG(locale_string)->val, pce->locale->len)) ||
+		     ZSTR_LEN(pce->locale) == ZSTR_LEN(BG(locale_string)) &&
+		     !memcmp(ZSTR_VAL(pce->locale), ZSTR_VAL(BG(locale_string)), ZSTR_LEN(pce->locale))) ||
 		    (!pce->locale &&
-		     BG(locale_string)->len == 1 &&
-		     BG(locale_string)->val[0] == 'C') ||
+		     ZSTR_LEN(BG(locale_string)) == 1 &&
+		     ZSTR_VAL(BG(locale_string))[0] == 'C') ||
 		    (!BG(locale_string) &&
-		     pce->locale->len == 1 &&
-		     pce->locale->val[0] == 'C')) {
+		     ZSTR_LEN(pce->locale) == 1 &&
+		     ZSTR_VAL(pce->locale)[0] == 'C')) {
 			return pce;
 		}
 #else
@@ -296,14 +296,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 	}
 
-	p = regex->val;
+	p = ZSTR_VAL(regex);
 
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
 	if (*p == 0) {
 		php_error_docref(NULL, E_WARNING,
-						 p < regex->val + regex->len ? "Null byte in regex" : "Empty regular expression");
+						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
 		return NULL;
 	}
 
@@ -350,7 +350,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	if (*pp == 0) {
-		if (pp < regex->val + regex->len) {
+		if (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
 			php_error_docref(NULL,E_WARNING, "Null byte in regex");
 		} else if (start_delimiter == end_delimiter) {
 			php_error_docref(NULL,E_WARNING, "No ending delimiter '%c' found", delimiter);
@@ -368,7 +368,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */
-	while (pp < regex->val + regex->len) {
+	while (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
 		switch (*pp++) {
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE_CASELESS;		break;
@@ -411,7 +411,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 #if HAVE_SETLOCALE
 	if (BG(locale_string) &&
-	    (BG(locale_string)->len != 1 || BG(locale_string)->val[0] != 'C')) {
+	    (ZSTR_LEN(BG(locale_string)) != 1 || ZSTR_VAL(BG(locale_string))[0] != 'C')) {
 		tables = pcre_maketables();
 	}
 #endif
@@ -477,7 +477,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.locale = BG(locale_string) ?
 		((GC_FLAGS(BG(locale_string)) & IS_STR_PERSISTENT) ?
 			zend_string_copy(BG(locale_string)) :
-			zend_string_init(BG(locale_string)->val, BG(locale_string)->len, 1)) :
+			zend_string_init(ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)), 1)) :
 		NULL;
 	new_entry.tables = tables;
 #endif
@@ -504,9 +504,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * See bug #63180
 	 */
 	if (!ZSTR_IS_INTERNED(regex) || !(GC_FLAGS(regex) & IS_STR_PERMANENT)) {
-		zend_string *str = zend_string_init(regex->val, regex->len, 1);
+		zend_string *str = zend_string_init(ZSTR_VAL(regex), ZSTR_LEN(regex), 1);
 		GC_REFCOUNT(str) = 0; /* will be incremented by zend_hash_update_mem() */
-		str->h = regex->h;
+		ZSTR_H(str) = ZSTR_H(regex);
 		regex = str;
 	}
 
@@ -606,7 +606,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	}
 
 	pce->refcount++;
-	php_pcre_match_impl(pce, subject->val, (int)subject->len, return_value, subpats,
+	php_pcre_match_impl(pce, ZSTR_VAL(subject), (int)ZSTR_LEN(subject), return_value, subpats,
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset);
 	pce->refcount--;
 }
@@ -1203,11 +1203,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				}
 
 				/* copy the part of the string before the match */
-				memcpy(&result->val[result_len], piece, match-piece);
+				memcpy(&ZSTR_VAL(result)[result_len], piece, match-piece);
 				result_len += (int)(match-piece);
 
 				/* copy replacement and backrefs */
-				walkbuf = result->val + result_len;
+				walkbuf = ZSTR_VAL(result) + result_len;
 
 				walk = replace;
 				walk_last = 0;
@@ -1232,12 +1232,12 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				}
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
-				result_len += (int)(walkbuf - (result->val + result_len));
+				result_len += (int)(walkbuf - (ZSTR_VAL(result) + result_len));
 			} else {
 				/* Use custom function to get replacement string and its length. */
 				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark);
 				ZEND_ASSERT(eval_result);
-				new_len += (int)eval_result->len;
+				new_len += (int)ZSTR_LEN(eval_result);
 				if (new_len >= alloc_len) {
 					alloc_len = alloc_len + 2 * new_len;
 					if (result == NULL) {
@@ -1247,15 +1247,15 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					}
 				}
 				/* copy the part of the string before the match */
-				memcpy(&result->val[result_len], piece, match-piece);
+				memcpy(ZSTR_VAL(result) + result_len, piece, match-piece);
 				result_len += (int)(match-piece);
 
 				/* copy replacement and backrefs */
-				walkbuf = result->val + result_len;
+				walkbuf = ZSTR_VAL(result) + result_len;
 
 				/* If using custom function, copy result to the buffer and clean up. */
-				memcpy(walkbuf, eval_result->val, eval_result->len);
-				result_len += (int)eval_result->len;
+				memcpy(walkbuf, ZSTR_VAL(eval_result), ZSTR_LEN(eval_result));
+				result_len += (int)ZSTR_LEN(eval_result);
 				zend_string_release(eval_result);
 			}
 
@@ -1272,7 +1272,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + unit_len;
-				memcpy(&result->val[result_len], piece, unit_len);
+				memcpy(ZSTR_VAL(result) + result_len, piece, unit_len);
 				result_len += unit_len;
 			} else {
 				if (!result && subject_str) {
@@ -1289,10 +1289,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 					}
 				}
 				/* stick that last bit of string on our output */
-				memcpy(&result->val[result_len], piece, subject_len - start_offset);
+				memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - start_offset);
 				result_len += subject_len - start_offset;
-				result->val[result_len] = '\0';
-				result->len = result_len;
+				ZSTR_VAL(result)[result_len] = '\0';
+				ZSTR_LEN(result) = result_len;
 				break;
 			}
 		} else {
@@ -1379,8 +1379,8 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 			   for further replacements. */
 			if ((result = php_pcre_replace(regex_str,
 										   subject_str,
-										   subject_str->val,
-										   (int)subject_str->len,
+										   ZSTR_VAL(subject_str),
+										   (int)ZSTR_LEN(subject_str),
 										   replace_value,
 										   is_callable_replace,
 										   limit,
@@ -1400,8 +1400,8 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	} else {
 		result = php_pcre_replace(Z_STR_P(regex),
 								  subject_str,
-								  subject_str->val,
-								  (int)subject_str->len,
+								  ZSTR_VAL(subject_str),
+								  (int)ZSTR_LEN(subject_str),
 								  replace,
 								  is_callable_replace,
 								  limit,
@@ -1535,7 +1535,7 @@ static PHP_FUNCTION(preg_replace_callback)
 #endif
 
 	if (!zend_is_callable(replace, 0, &callback_name)) {
-		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", callback_name->val);
+		php_error_docref(NULL, E_WARNING, "Requires argument 2, '%s', to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		ZVAL_COPY(return_value, subject);
 		return;
@@ -1586,7 +1586,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 		}		
 
 		if (!zend_is_callable(replace, 0, &callback_name)) {
-			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", callback_name->val);
+			php_error_docref(NULL, E_WARNING, "'%s' is not a valid callback", ZSTR_VAL(callback_name));
 			zend_string_release(callback_name);
 			zval_ptr_dtor(&regex);
 			zval_ptr_dtor(return_value);
@@ -1692,7 +1692,7 @@ static PHP_FUNCTION(preg_split)
 	}
 
 	pce->refcount++;
-	php_pcre_split_impl(pce, subject->val, (int)subject->len, return_value, (int)limit_val, flags);
+	php_pcre_split_impl(pce, ZSTR_VAL(subject), (int)ZSTR_LEN(subject), return_value, (int)limit_val, flags);
 	pce->refcount--;
 }
 /* }}} */
@@ -1922,7 +1922,7 @@ static PHP_FUNCTION(preg_quote)
 	out_str = zend_string_safe_alloc(4, in_str_len, 0, 0);
 
 	/* Go through the string and quote necessary characters */
-	for (p = in_str, q = out_str->val; p != in_str_end; p++) {
+	for (p = in_str, q = ZSTR_VAL(out_str); p != in_str_end; p++) {
 		c = *p;
 		switch(c) {
 			case '.':
@@ -1966,7 +1966,7 @@ static PHP_FUNCTION(preg_quote)
 	*q = '\0';
 
 	/* Reallocate string and return it */
-	out_str = zend_string_truncate(out_str, q - out_str->val, 0);
+	out_str = zend_string_truncate(out_str, q - ZSTR_VAL(out_str), 0);
 	RETURN_NEW_STR(out_str);
 }
 /* }}} */
@@ -2050,8 +2050,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
-		count = pcre_exec(pce->re, extra, subject_str->val,
-						  (int)subject_str->len, 0,
+		count = pcre_exec(pce->re, extra, ZSTR_VAL(subject_str),
+						  (int)ZSTR_LEN(subject_str), 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */

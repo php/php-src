@@ -120,7 +120,7 @@ static zend_object *BreakIterator_clone_obj(zval *object)
 			intl_errors_set_custom_msg(BREAKITER_ERROR_P(bio_orig),
 				"Could not clone BreakIterator", 0);
 			err_msg = intl_error_get_message(BREAKITER_ERROR_P(bio_orig));
-			zend_throw_exception(NULL, err_msg->val, 0);
+			zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 			zend_string_free(err_msg);
 		} else {
 			bio_new->biter = new_biter;

@@ -1068,7 +1068,7 @@ static zend_object *php_converter_clone_object(zval *object) {
 		THROW_UFAILURE(oldobj, "ucnv_safeClone", error);
 
 		err_msg = intl_error_get_message(&oldobj->error);
-		zend_throw_exception(NULL, err_msg->val, 0);
+		zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
 		zend_string_release(err_msg);
 
 		return retval;

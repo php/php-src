@@ -84,7 +84,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	char *lc_pattern;
 
 	res = zend_string_safe_alloc(Z_STRLEN_P(pattern), 2, 4, persistent);
-	t = res->val;
+	t = ZSTR_VAL(res);
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
@@ -130,7 +130,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	t[j++] = '~';
 
 	t[j]=0;
-	res->len = j;
+	ZSTR_LEN(res) = j;
 	Z_STR_P(pattern) = res;
 	efree(lc_pattern);
 }
@@ -180,7 +180,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));
 				}
 				new_key = zend_string_dup(Z_STR_P(arg1), persistent);
-				zend_str_tolower(new_key->val, new_key->len);
+				zend_str_tolower(ZSTR_VAL(new_key), ZSTR_LEN(new_key));
 				zend_hash_update(Z_ARRVAL(bdata->current_section), new_key, &new_property);
 				zend_string_release(new_key);
 			}
@@ -296,7 +296,7 @@ PHP_INI_MH(OnChangeBrowscap)
 		if (bdata->filename[0] != '\0') {
 			browscap_bdata_dtor(bdata, 0);
 		}
-		if (VCWD_REALPATH(new_value->val, bdata->filename) == NULL) {
+		if (VCWD_REALPATH(ZSTR_VAL(new_value), bdata->filename) == NULL) {
 			return FAILURE;
 		}
 		return SUCCESS;

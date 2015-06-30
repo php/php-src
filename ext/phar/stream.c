@@ -629,7 +629,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
-			if ((int)str_key->len >= internal_file_len || strncmp(str_key->val, internal_file, str_key->len)) {
+			if ((int)ZSTR_LEN(str_key) >= internal_file_len || strncmp(ZSTR_VAL(str_key), internal_file, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
 				char *test;
@@ -642,7 +642,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 				if (!entry->tmp || !entry->is_mounted) {
 					goto free_resource;
 				}
-				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + str_key->len);
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + ZSTR_LEN(str_key));
 				if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 					efree(test);
 					continue;
@@ -902,21 +902,21 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			str_key = b->key;
 			entry = Z_PTR(b->val);
 			if (!entry->is_deleted &&
-				str_key->len > from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				IS_SLASH(str_key->val[from_len])) {
+				ZSTR_LEN(str_key) > from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				IS_SLASH(ZSTR_VAL(str_key)[from_len])) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
 				// TODO: avoid reallocation (make entry->filename zend_string*)
-				entry->filename = estrndup(new_str_key->val, new_str_key->len);
-				entry->filename_len = new_str_key->len;
+				entry->filename = estrndup(ZSTR_VAL(new_str_key), ZSTR_LEN(new_str_key));
+				entry->filename_len = ZSTR_LEN(new_str_key);
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
@@ -927,14 +927,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->virtual_dirs, b) {
 			str_key = b->key;
-			if (str_key->len >= from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
+			if (ZSTR_LEN(str_key) >= from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
@@ -945,14 +945,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->mounted_dirs, b) {
 			str_key = b->key;
-			if (str_key->len >= from_len &&
-				memcmp(str_key->val, resource_from->path+1, from_len) == 0 &&
-				(str_key->len == from_len || IS_SLASH(str_key->val[from_len]))) {
+			if (ZSTR_LEN(str_key) >= from_len &&
+				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
+				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
-				new_str_key = zend_string_alloc(str_key->len + to_len - from_len, 0);
-				memcpy(new_str_key->val, resource_to->path + 1, to_len);
-				memcpy(new_str_key->val + to_len, str_key->val + from_len, str_key->len - from_len);
-				new_str_key->val[new_str_key->len] = 0;
+				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
+				memcpy(ZSTR_VAL(new_str_key), resource_to->path + 1, to_len);
+				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
+				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);

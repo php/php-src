@@ -3852,7 +3852,7 @@ PHP_FUNCTION(constant)
 		}
 		zval_copy_ctor(return_value);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", const_name->val);
+		php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
 		RETURN_NULL();
 	}
 }
@@ -4281,7 +4281,7 @@ PHP_FUNCTION(getopt)
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
 			zend_string *arg_str = zval_get_string(entry);
 
-			argv[pos++] = estrdup(arg_str->val);
+			argv[pos++] = estrdup(ZSTR_VAL(arg_str));
 
 			zend_string_release(arg_str);
 		} ZEND_HASH_FOREACH_END();
@@ -4315,7 +4315,7 @@ PHP_FUNCTION(getopt)
 			zend_string *arg_str = zval_get_string(entry);
 
 			opts->need_param = 0;
-			opts->opt_name = estrdup(arg_str->val);
+			opts->opt_name = estrdup(ZSTR_VAL(arg_str));
 			len = (int)strlen(opts->opt_name);
 			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
@@ -4560,7 +4560,7 @@ static int add_config_entry_cb(zval *entry, int num_args, va_list args, zend_has
 
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if (hash_key->key) {
-			add_assoc_str_ex(retval, hash_key->key->val, hash_key->key->len, zend_string_copy(Z_STR_P(entry)));
+			add_assoc_str_ex(retval, ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key), zend_string_copy(Z_STR_P(entry)));
 		} else {
 			add_index_str(retval, hash_key->h, zend_string_copy(Z_STR_P(entry)));
 		}
@@ -4904,7 +4904,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name)) {
 		if (function_name) {
-			php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
+			php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
 			zend_string_release(function_name);
 		} else {
 			php_error(E_WARNING, "(Registered shutdown functions) Unable to call - function does not exist");
@@ -4954,7 +4954,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 						&& (method = zend_hash_index_find(Z_ARRVAL_P(function), 1)) != NULL
 						&& Z_TYPE_P(obj) == IS_OBJECT
 						&& Z_TYPE_P(method) == IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Unable to call %s::%s() - function does not exist", Z_OBJCE_P(obj)->name->val, Z_STRVAL_P(method));
+				php_error_docref(NULL, E_WARNING, "Unable to call %s::%s() - function does not exist", ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(method));
 			} else {
 				php_error_docref(NULL, E_WARNING, "Unable to call tick function");
 			}
@@ -5047,7 +5047,7 @@ PHP_FUNCTION(register_shutdown_function)
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, &callback_name)) {
 		if (callback_name) {
-			php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
+			php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", ZSTR_VAL(callback_name));
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid shutdown callback passed");
 		}
@@ -5269,7 +5269,7 @@ static int php_ini_get_option(zval *zv, int num_args, va_list args, zend_hash_ke
 	}
 
 	if (hash_key->key == NULL ||
-		hash_key->key->val[0] != 0
+		ZSTR_VAL(hash_key->key)[0] != 0
 	) {
 		if (details) {
 			array_init(&option);
@@ -5356,7 +5356,7 @@ PHP_FUNCTION(ini_set)
 		return;
 	}
 
-	old_value = zend_ini_string(varname->val, (int)varname->len, 0);
+	old_value = zend_ini_string(ZSTR_VAL(varname), (int)ZSTR_LEN(varname), 0);
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
@@ -5368,13 +5368,13 @@ PHP_FUNCTION(ini_set)
 #define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, (int)var_len, ini, sizeof(ini))
 	/* open basedir check */
 	if (PG(open_basedir)) {
-		if (_CHECK_PATH(varname->val, varname->len, "error_log") ||
-			_CHECK_PATH(varname->val, varname->len, "java.class.path") ||
-			_CHECK_PATH(varname->val, varname->len, "java.home") ||
-			_CHECK_PATH(varname->val, varname->len, "mail.log") ||
-			_CHECK_PATH(varname->val, varname->len, "java.library.path") ||
-			_CHECK_PATH(varname->val, varname->len, "vpopmail.directory")) {
-			if (php_check_open_basedir(new_value->val)) {
+		if (_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "error_log") ||
+			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.class.path") ||
+			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.home") ||
+			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "mail.log") ||
+			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "java.library.path") ||
+			_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "vpopmail.directory")) {
+			if (php_check_open_basedir(ZSTR_VAL(new_value))) {
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
@@ -5661,7 +5661,7 @@ PHP_FUNCTION(register_tick_function)
 
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
 		efree(tick_fe.arguments);
-		php_error_docref(NULL, E_WARNING, "Invalid tick callback '%s' passed", function_name->val);
+		php_error_docref(NULL, E_WARNING, "Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
 		zend_string_release(function_name);
 		RETURN_FALSE;
 	} else if (function_name) {

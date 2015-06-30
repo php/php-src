@@ -58,7 +58,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, idx, key, zdata) {
 		/* handling for private & protected object properties */
 		if (key) {
-			if (key->val[0] == '\0' && type != NULL) {
+			if (ZSTR_VAL(key)[0] == '\0' && type != NULL) {
 				const char *tmp;
 
 				zend_object *zobj = Z_OBJ_P(type);
@@ -68,8 +68,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				}
 				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
 			} else {
-				prop_name = key->val;
-				prop_len = key->len;
+				prop_name = ZSTR_VAL(key);
+				prop_len = ZSTR_LEN(key);
 			}
 		} else {
 			prop_name = NULL;
@@ -85,7 +85,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
 				}
-				newprefix_len = key_suffix_len + ekey->len + key_prefix_len + 3 /* %5B */;
+				newprefix_len = key_suffix_len + ZSTR_LEN(ekey) + key_prefix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
 
@@ -94,8 +94,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					p += key_prefix_len;
 				}
 
-				memcpy(p, ekey->val, ekey->len);
-				p += ekey->len;
+				memcpy(p, ZSTR_VAL(ekey), ZSTR_LEN(ekey));
+				p += ZSTR_LEN(ekey);
 				zend_string_free(ekey);
 
 				if (key_suffix) {
@@ -206,9 +206,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						zend_string *ekey;
 						zend_string *tmp = zval_get_string(zdata);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(tmp->val, tmp->len);
+							ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 						} else {
-							ekey = php_url_encode(tmp->val, tmp->len);
+							ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 						}
 						smart_str_append(formstr, ekey);
 						zend_string_release(tmp);

@@ -153,10 +153,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 
 	if (mode == INTL_IDN_TO_ASCII) {
 		len = uidna_nameToASCII_UTF8(uts46, domain, domain_len,
-				buffer->val, buffer_capac, &info, &status);
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	} else {
 		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
-				buffer->val, buffer_capac, &info, &status);
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode) == FAILURE) {
@@ -168,8 +168,8 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		php_error_docref(NULL, E_ERROR, "ICU returned an unexpected length");
 	}
 
-	buffer->val[len] = '\0';
-	buffer->len = len;
+	ZSTR_VAL(buffer)[len] = '\0';
+	ZSTR_LEN(buffer) = len;
 
 	if (info.errors == 0) {
 		RETVAL_STR(buffer);

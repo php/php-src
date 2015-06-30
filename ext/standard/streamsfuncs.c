@@ -108,7 +108,7 @@ PHP_FUNCTION(stream_socket_client)
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
-		spprintf(&hashkey, 0, "stream_socket_client__%s", host->val);
+		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(host));
 	}
 
 	/* prepare the timeout value for use */
@@ -129,7 +129,7 @@ PHP_FUNCTION(stream_socket_client)
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
-	stream = php_stream_xport_create(host->val, host->len, REPORT_ERRORS,
+	stream = php_stream_xport_create(ZSTR_VAL(host), ZSTR_LEN(host), REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
@@ -139,7 +139,7 @@ PHP_FUNCTION(stream_socket_client)
 		/* host might contain binary characters */
 		zend_string *quoted_host = php_addslashes(host, 0);
 
-		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 		zend_string_release(quoted_host);
 	}
 
@@ -209,7 +209,7 @@ PHP_FUNCTION(stream_socket_server)
 			NULL, NULL, context, &errstr, &err);
 
 	if (stream == NULL) {
-		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 	}
 
 	if (stream == NULL)	{
@@ -278,7 +278,7 @@ PHP_FUNCTION(stream_socket_accept)
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
-		php_error_docref(NULL, E_WARNING, "accept failed: %s", errstr ? errstr->val : "Unknown error");
+		php_error_docref(NULL, E_WARNING, "accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		RETVAL_FALSE;
 	}
 
@@ -373,7 +373,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	read_buf = zend_string_alloc(to_read, 0);
 
-	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, (int)flags, NULL, NULL,
+	recvd = php_stream_xport_recvfrom(stream, ZSTR_VAL(read_buf), to_read, (int)flags, NULL, NULL,
 			zremote ? &remote_addr : NULL
 			);
 
@@ -381,8 +381,8 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		if (zremote) {
 			ZVAL_STR(zremote, remote_addr);
 		}
-		read_buf->val[recvd] = '\0';
-		read_buf->len = recvd;
+		ZSTR_VAL(read_buf)[recvd] = '\0';
+		ZSTR_LEN(read_buf) = recvd;
 		RETURN_NEW_STR(read_buf);
 	}
 
@@ -869,7 +869,7 @@ static int parse_context_options(php_stream_context *context, zval *options)
 
 		    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
 				if (okey) {
-					php_stream_context_set_option(context, wkey->val, okey->val, oval);
+					php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);
 				}
 			} ZEND_HASH_FOREACH_END();
 

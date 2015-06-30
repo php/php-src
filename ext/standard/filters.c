@@ -274,7 +274,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 		}
 	}
 
-	if (php_strip_tags_filter_ctor(inst, tags_ss.s->val, tags_ss.s->len, persistent) != SUCCESS) {
+	if (php_strip_tags_filter_ctor(inst, ZSTR_VAL(tags_ss.s), ZSTR_LEN(tags_ss.s), persistent) != SUCCESS) {
 		smart_str_free(&tags_ss);
 		pefree(inst, persistent);
 		return NULL;
@@ -1219,12 +1219,12 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
 		zend_string *str = zval_get_string(tmpval);
 
-		if (NULL == (*pretval = pemalloc(str->len + 1, persistent))) {
+		if (NULL == (*pretval = pemalloc(ZSTR_LEN(str) + 1, persistent))) {
 			return PHP_CONV_ERR_ALLOC;
 		}
 
-		*pretval_len = str->len;
-		memcpy(*pretval, str->val, str->len + 1);
+		*pretval_len = ZSTR_LEN(str);
+		memcpy(*pretval, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 		zend_string_release(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;

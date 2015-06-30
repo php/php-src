@@ -296,7 +296,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					/* for A::B */
 					if (op_array->scope &&
 						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						op_array->scope->name->val, Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						ZSTR_VAL(op_array->scope->name), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
 						ce = op_array->scope;
 					} else {
 						if ((ce = zend_hash_find_ptr(EG(class_table),
@@ -562,8 +562,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					!zend_optimizer_is_disabled_func("dirname", sizeof("dirname") - 1) &&
 					IS_ABSOLUTE_PATH(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
 					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
-					dirname->len = zend_dirname(dirname->val, dirname->len);
-					if (IS_ABSOLUTE_PATH(dirname->val, dirname->len)) {
+					ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+					if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
 						zval t;
 
 						ZVAL_STR(&t, dirname);

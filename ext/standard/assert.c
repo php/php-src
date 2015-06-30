@@ -63,17 +63,17 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_UNDEF(&ASSERTG(callback));
 		}
-		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || new_value->len)) {
+		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || ZSTR_LEN(new_value))) {
 			ZVAL_STR_COPY(&ASSERTG(callback), new_value);
 		}
 	} else {
 		if (ASSERTG(cb)) {
 			pefree(ASSERTG(cb), 1);
 		}
-		if (new_value && new_value->len) {
-			ASSERTG(cb) = pemalloc(new_value->len + 1, 1);
-			memcpy(ASSERTG(cb), new_value->val, new_value->len);
-			ASSERTG(cb)[new_value->len] = '\0';
+		if (new_value && ZSTR_LEN(new_value)) {
+			ASSERTG(cb) = pemalloc(ZSTR_LEN(new_value) + 1, 1);
+			memcpy(ASSERTG(cb), ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+			ASSERTG(cb)[ZSTR_LEN(new_value)] = '\0';
 		} else {
 			ASSERTG(cb) = NULL;
 		}
@@ -183,7 +183,7 @@ PHP_FUNCTION(assert)
 				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
 				zend_string *str = zval_get_string(description);
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, str->val, myeval);
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
 				zend_string_release(str);
 			}
 			if (ASSERTG(bail)) {
@@ -251,7 +251,7 @@ PHP_FUNCTION(assert)
 			zend_throw_exception_object(description);
 		} else {
 			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_error_ce, str->val, E_ERROR);
+			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
 			zend_string_release(str);
 		}
 	} else if (ASSERTG(warning)) {
@@ -264,9 +264,9 @@ PHP_FUNCTION(assert)
 		} else {
 			zend_string *str = zval_get_string(description);
 			if (myeval) {
-				php_error_docref(NULL, E_WARNING, "%s: \"%s\" failed", str->val, myeval);
+				php_error_docref(NULL, E_WARNING, "%s: \"%s\" failed", ZSTR_VAL(str), myeval);
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s failed", str->val);
+				php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
 		}

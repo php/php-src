@@ -247,7 +247,7 @@ IC_METHOD(charName) {
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
 	buffer = zend_string_alloc(buffer_len, 0);
 	error = U_ZERO_ERROR;
-	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, buffer->val, buffer->len + 1, &error);
+	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
 		zend_string_free(buffer);
 		INTL_CHECK_STATUS(error, "Failure getting character name");

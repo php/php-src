@@ -118,11 +118,11 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(subject, subject_len);
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
-		MAIL_ASCIIZ_CHECK(headers->val, headers->len);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(headers), ZSTR_LEN(headers));
 		headers_trimmed = php_trim(headers, NULL, 0, 2);
 	}
 	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK(extra_cmd->val, extra_cmd->len);
+		MAIL_ASCIIZ_CHECK(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
 	}
 
 	if (to_len > 0) {
@@ -168,10 +168,10 @@ PHP_FUNCTION(mail)
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(extra_cmd->val);
+		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_trimmed ? headers_trimmed->val : NULL, extra_cmd ? extra_cmd->val : NULL)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed ? ZSTR_VAL(headers_trimmed) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -294,7 +294,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str->val, zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
+		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
 		zend_string_free(date_str);
 
@@ -323,9 +323,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), f->val, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), f->val);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
 		zend_string_release(f);
 	}

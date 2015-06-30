@@ -1326,7 +1326,7 @@ PHP_FUNCTION(imageloadfont)
 		return;
 	}
 
-	stream = php_stream_open_wrapper(file->val, "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(ZSTR_VAL(file), "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -2333,8 +2333,8 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		/* needs to be malloc (persistent) - GD will free() it later */
-		pstr = pestrndup(buff->val, buff->len, 1);
-		io_ctx = gdNewDynamicCtxEx(buff->len, pstr, 0);
+		pstr = pestrndup(ZSTR_VAL(buff), ZSTR_LEN(buff), 1);
+		io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(buff), pstr, 0);
 		if (!io_ctx) {
 			pefree(pstr, 1);
 			zend_string_release(buff);
@@ -2635,7 +2635,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		fclose(tmp);
-		VCWD_UNLINK((const char *)path->val); /* make sure that the temporary file is removed */
+		VCWD_UNLINK((const char *)ZSTR_VAL(path)); /* make sure that the temporary file is removed */
 		zend_string_release(path);
 	}
 	RETURN_TRUE;
@@ -3859,7 +3859,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 			if (key == NULL) {
 				continue;
 			}
-			if (strcmp("linespacing", key->val) == 0) {
+			if (strcmp("linespacing", ZSTR_VAL(key)) == 0) {
 				strex.flags |= gdFTEX_LINESPACE;
 				strex.linespacing = zval_get_double(item);
 			}

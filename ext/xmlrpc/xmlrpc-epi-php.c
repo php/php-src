@@ -406,7 +406,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 						options->xmlrpc_out.version = xmlrpc_version_simple;
 					} else if (!strcmp(Z_STRVAL_P(val), VERSION_VALUE_SOAP11)) {
 						options->xmlrpc_out.version = xmlrpc_version_soap_1_1;
-					} else { /* if(!strcmp((*val)->value.str.val, VERSION_VALUE_AUTO)) { */
+					} else { /* if(!strcmp(Z_STRVAL_P(val), VERSION_VALUE_AUTO)) { */
 						options->b_auto_version = 1;
 					}
 				}
@@ -575,7 +575,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 									efree(num_str);
 								}
 							} else {
-								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key->val, pIter, depth++));
+								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(ZSTR_VAL(my_key), pIter, depth++));
 							}
 							if (ht) {
 								ht->u.v.nApplyCount--;
@@ -921,25 +921,25 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 
 				if (xData) {
 					if (!XMLRPC_ServerAddIntrospectionData(server, xData)) {
-						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", php_function_name->val);
+						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", ZSTR_VAL(php_function_name));
 					}
 					XMLRPC_CleanupValue(xData);
 				} else {
 					/* could not create description */
 					if (err.xml_elem_error.parser_code) {
 						php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()",
-								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, php_function_name->val);
+								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, ZSTR_VAL(php_function_name));
 					} else {
-						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name->val);
+						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s()", ZSTR_VAL(php_function_name));
 					}
 				}
 				zval_ptr_dtor(&retval);
 			} else {
 				/* user func failed */
-				php_error_docref(NULL, E_WARNING, "Error calling user introspection callback: %s()", php_function_name->val);
+				php_error_docref(NULL, E_WARNING, "Error calling user introspection callback: %s()", ZSTR_VAL(php_function_name));
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", php_function_name->val);
+			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", ZSTR_VAL(php_function_name));
 		}
 		zend_string_release(php_function_name);
 	} ZEND_HASH_FOREACH_END();

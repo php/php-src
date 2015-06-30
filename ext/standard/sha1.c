@@ -46,7 +46,7 @@ PHP_FUNCTION(sha1)
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (unsigned char *) arg->val, arg->len);
+	PHP_SHA1Update(&context, (unsigned char *) ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 20);

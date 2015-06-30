@@ -347,7 +347,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		if (docp->encoding != NULL) {
 			xmlFree((xmlChar *)docp->encoding);
 		}
-		docp->encoding = xmlStrdup((const xmlChar *) str->val);
+		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
     } else {
 		php_error_docref(NULL, E_WARNING, "Invalid Document Encoding");
     }
@@ -438,7 +438,7 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 
 	str = zval_get_string(newval);
 
-	docp->version = xmlStrdup((const xmlChar *) str->val);
+	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
 	zend_string_release(str);
 	return SUCCESS;
@@ -666,7 +666,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 
 	str = zval_get_string(newval);
 
-	docp->URL = xmlStrdup((const xmlChar *) str->val);
+	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
 	zend_string_release(str);
 	return SUCCESS;
@@ -2223,11 +2223,11 @@ PHP_METHOD(domdocument, registerNodeClass)
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 		if (dom_set_doc_classmap(intern->document, basece, ce) == FAILURE) {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be registered.", ce->name->val);
+			php_error_docref(NULL, E_ERROR, "Class %s could not be registered.", ZSTR_VAL(ce->name));
 		}
 		RETURN_TRUE;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Class %s is not derived from %s.", ce->name->val, basece->name->val);
+		php_error_docref(NULL, E_ERROR, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	}
 
 	RETURN_FALSE;

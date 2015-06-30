@@ -350,8 +350,8 @@ PHP_FUNCTION(pack)
 				zend_string *str = zval_get_string(&argv[currentarg++]);
 
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
-				memcpy(&output[outputpos], str->val,
-					   (str->len < arg_cp) ? str->len : arg_cp);
+				memcpy(&output[outputpos], ZSTR_VAL(str),
+					   (ZSTR_LEN(str) < arg_cp) ? ZSTR_LEN(str) : arg_cp);
 
 				outputpos += arg;
 				zend_string_release(str);
@@ -364,12 +364,12 @@ PHP_FUNCTION(pack)
 				int first = 1;
 
 				zend_string *str = zval_get_string(&argv[currentarg++]);
-				char *v = str->val;
+				char *v = ZSTR_VAL(str);
 
 				outputpos--;
-				if(arg > str->len) {
+				if(arg > ZSTR_LEN(str)) {
 					php_error_docref(NULL, E_WARNING, "Type %c: not enough characters in string", code);
-					arg = str->len;
+					arg = ZSTR_LEN(str);
 				}
 
 				while (arg-- > 0) {
@@ -568,10 +568,10 @@ PHP_FUNCTION(unpack)
 		return;
 	}
 
-	format = formatarg->val;
-	formatlen = formatarg->len;
-	input = inputarg->val;
-	inputlen = inputarg->len;
+	format = ZSTR_VAL(formatarg);
+	formatlen = ZSTR_LEN(formatarg);
+	input = ZSTR_VAL(inputarg);
+	inputlen = ZSTR_LEN(inputarg);
 	inputpos = 0;
 
 	array_init(return_value);

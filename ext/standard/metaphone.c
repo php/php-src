@@ -39,7 +39,7 @@ PHP_FUNCTION(metaphone)
 		return;
 	}
 
-	if (metaphone((unsigned char *)str->val, str->len, phones, &result, 1) == 0) {
+	if (metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1) == 0) {
 		RETVAL_STR(result);
 	} else {
 		if (result) {
@@ -145,8 +145,8 @@ static char Lookahead(char *word, int how_far)
 							*phoned_word = zend_string_extend(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
-						(*phoned_word)->val[p_idx++] = c; \
-						(*phoned_word)->len = p_idx; \
+						ZSTR_VAL(*phoned_word)[p_idx++] = c; \
+						ZSTR_LEN(*phoned_word) = p_idx; \
 					}
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
@@ -154,8 +154,8 @@ static char Lookahead(char *word, int how_far)
 								*phoned_word = zend_string_extend(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
 							} \
-							(*phoned_word)->val[p_idx] = '\0'; \
-							(*phoned_word)->len = p_idx; \
+							ZSTR_VAL(*phoned_word)[p_idx] = '\0'; \
+							ZSTR_LEN(*phoned_word) = p_idx; \
 						}
 /* How long is the phoned word? */
 #define Phone_Len	(p_idx)

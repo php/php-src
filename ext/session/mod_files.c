@@ -227,24 +227,24 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
        data->lastkey and reopen when it is needed. */
-	ps_files_open(data, key->val);
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
 
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (val->len < data->st_size) {
+	if (ZSTR_LEN(val) < data->st_size) {
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
 #if defined(HAVE_PWRITE)
-	n = pwrite(data->fd, val->val, val->len, 0);
+	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
 	{
-		unsigned int to_write = val->len > UINT_MAX ? UINT_MAX : (unsigned int)val->len;
-		char *buf = val->val;
+		unsigned int to_write = ZSTR_LEN(val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(val);
+		char *buf = ZSTR_VAL(val);
 		int wrote;
 
 		do {
@@ -252,16 +252,16 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 
 			n += wrote;
 			buf = wrote > -1 ? buf + wrote : 0;
-			to_write = wrote > -1 ? (val->len - n > UINT_MAX ? UINT_MAX : (unsigned int)(val->len - n)): 0;
+			to_write = wrote > -1 ? (ZSTR_LEN(val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(val) - n)): 0;
 
 		} while(wrote > 0);
 	}
 #else
-	n = write(data->fd, val->val, val->len);
+	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
 #endif
 #endif
 
-	if (n != val->len) {
+	if (n != ZSTR_LEN(val)) {
 		if (n == -1) {
 			php_error_docref(NULL, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		} else {
@@ -465,7 +465,7 @@ PS_READ_FUNC(files)
 	zend_stat_t sbuf;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key->val);
+	ps_files_open(data, ZSTR_VAL(key));
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -484,13 +484,13 @@ PS_READ_FUNC(files)
 	*val = zend_string_alloc(sbuf.st_size, 0);
 
 #if defined(HAVE_PREAD)
-	n = pread(data->fd, (*val)->val, (*val)->len, 0);
+	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
 	{
-		unsigned int to_read = (*val)->len > UINT_MAX ? UINT_MAX : (unsigned int)(*val)->len;
-		char *buf = (*val)->val;
+		unsigned int to_read = ZSTR_LEN(*val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(*val);
+		char *buf = ZSTR_VAL(*val);
 		int read_in;
 
 		do {
@@ -498,13 +498,13 @@ PS_READ_FUNC(files)
 
 			n += read_in;
 			buf = read_in > -1 ? buf + read_in : 0;
-			to_read = read_in > -1 ? ((*val)->len - n > UINT_MAX ? UINT_MAX : (unsigned int)((*val)->len - n)): 0;
+			to_read = read_in > -1 ? (ZSTR_LEN(*val) - n > UINT_MAX ? UINT_MAX : (unsigned int)(ZSTR_LEN(*val) - n)): 0;
 
 		} while(read_in > 0);
 
 	}
 #else
-	n = read(data->fd, (*val)->val, (*val)->len);
+	n = read(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val));
 #endif
 #endif
 
@@ -561,7 +561,7 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	int ret;
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key->val)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
 		return FAILURE;
 	}
 
@@ -596,7 +596,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key->val)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
 		return FAILURE;
 	}
 
@@ -673,7 +673,7 @@ PS_CREATE_SID_FUNC(files)
 		}
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
-		if (data && ps_files_key_exists(data, sid->val) == SUCCESS) {
+		if (data && ps_files_key_exists(data, ZSTR_VAL(sid)) == SUCCESS) {
 			if (sid) {
 				zend_string_release(sid);
 				sid = NULL;
@@ -701,7 +701,7 @@ PS_VALIDATE_SID_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	return ps_files_key_exists(data, key->val);
+	return ps_files_key_exists(data, ZSTR_VAL(key));
 }
 
 /*

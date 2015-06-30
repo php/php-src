@@ -102,14 +102,14 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ 
 	}
 
 	zend_hash_move_forward(data);
-	to_read = MIN(str_key->len, count);
+	to_read = MIN(ZSTR_LEN(str_key), count);
 
-	if (to_read == 0 || count < str_key->len) {
+	if (to_read == 0 || count < ZSTR_LEN(str_key)) {
 		return 0;
 	}
 
 	memset(buf, 0, sizeof(php_stream_dirent));
-	memcpy(((php_stream_dirent *) buf)->d_name, str_key->val, to_read);
+	memcpy(((php_stream_dirent *) buf)->d_name, ZSTR_VAL(str_key), to_read);
 	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
 
 	return sizeof(php_stream_dirent);
@@ -160,7 +160,7 @@ static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
 
 	f = (Bucket *) a;
 	s = (Bucket *) b;
-	result = zend_binary_strcmp(f->key->val, f->key->len, s->key->val, s->key->len);
+	result = zend_binary_strcmp(ZSTR_VAL(f->key), ZSTR_LEN(f->key), ZSTR_VAL(s->key), ZSTR_LEN(s->key));
 
 	if (result < 0) {
 		return -1;
@@ -203,9 +203,9 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 			break;
 		}
 
-		keylen = str_key->len;
+		keylen = ZSTR_LEN(str_key);
 		if (keylen <= (uint)dirlen) {
-			if (keylen < (uint)dirlen || !strncmp(str_key->val, dir, dirlen)) {
+			if (keylen < (uint)dirlen || !strncmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -215,7 +215,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 
 		if (*dir == '/') {
 			/* root directory */
-			if (keylen >= sizeof(".phar")-1 && !memcmp(str_key->val, ".phar", sizeof(".phar")-1)) {
+			if (keylen >= sizeof(".phar")-1 && !memcmp(ZSTR_VAL(str_key), ".phar", sizeof(".phar")-1)) {
 				/* do not add any magic entries to this directory */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
@@ -223,28 +223,28 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 				continue;
 			}
 
-			if (NULL != (found = (char *) memchr(str_key->val, '/', keylen))) {
+			if (NULL != (found = (char *) memchr(ZSTR_VAL(str_key), '/', keylen))) {
 				/* the entry has a path separator and is a subdirectory */
-				entry = (char *) safe_emalloc(found - str_key->val, 1, 1);
-				memcpy(entry, str_key->val, found - str_key->val);
-				keylen = found - str_key->val;
+				entry = (char *) safe_emalloc(found - ZSTR_VAL(str_key), 1, 1);
+				memcpy(entry, ZSTR_VAL(str_key), found - ZSTR_VAL(str_key));
+				keylen = found - ZSTR_VAL(str_key);
 				entry[keylen] = '\0';
 			} else {
 				entry = (char *) safe_emalloc(keylen, 1, 1);
-				memcpy(entry, str_key->val, keylen);
+				memcpy(entry, ZSTR_VAL(str_key), keylen);
 				entry[keylen] = '\0';
 			}
 
 			goto PHAR_ADD_ENTRY;
 		} else {
-			if (0 != memcmp(str_key->val, dir, dirlen)) {
+			if (0 != memcmp(ZSTR_VAL(str_key), dir, dirlen)) {
 				/* entry in directory not found */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
 				continue;
 			} else {
-				if (str_key->val[dirlen] != '/') {
+				if (ZSTR_VAL(str_key)[dirlen] != '/') {
 					if (SUCCESS != zend_hash_move_forward(manifest)) {
 						break;
 					}
@@ -253,7 +253,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 			}
 		}
 
-		save = str_key->val;
+		save = ZSTR_VAL(str_key);
 		save += dirlen + 1; /* seek to just past the path separator */
 
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
@@ -385,7 +385,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT !=
 					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
-				if (str_key->len > (uint)i_len && 0 == memcmp(str_key->val, internal_file, i_len)) {
+				if (ZSTR_LEN(str_key) > (uint)i_len && 0 == memcmp(ZSTR_VAL(str_key), internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
@@ -614,9 +614,9 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->manifest, &str_key, &unused);
 			zend_hash_move_forward(&phar->manifest)
 		) {
-			if (str_key->len > path_len &&
-				memcmp(str_key->val, resource->path+1, path_len) == 0 &&
-				IS_SLASH(str_key->val[path_len])) {
+			if (ZSTR_LEN(str_key) > path_len &&
+				memcmp(ZSTR_VAL(str_key), resource->path+1, path_len) == 0 &&
+				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
@@ -631,9 +631,9 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->virtual_dirs, &str_key, &unused);
 			zend_hash_move_forward(&phar->virtual_dirs)) {
 
-			if (str_key->len > path_len &&
-				memcmp(str_key->val, resource->path+1, path_len) == 0 &&
-				IS_SLASH(str_key->val[path_len])) {
+			if (ZSTR_LEN(str_key) > path_len &&
+				memcmp(ZSTR_VAL(str_key), resource->path+1, path_len) == 0 &&
+				IS_SLASH(ZSTR_VAL(str_key)[path_len])) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);

@@ -254,7 +254,7 @@ std:
 			return PHP_JSON_T_ESTRING;
 		}
 		str = zend_string_alloc(len, 0);
-		str->val[len] = '\0';
+		ZSTR_VAL(str)[len] = '\0';
 		ZVAL_STR(&s->value, str);
 		if (s->str_esc) {
 			s->pstr = (php_json_ctype *) Z_STRVAL(s->value);

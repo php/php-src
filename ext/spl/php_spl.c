@@ -66,8 +66,8 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
 	zend_class_entry *ce;
 
 	if (!autoload) {
-		zend_string *lc_name = zend_string_alloc(name->len, 0);
-		zend_str_tolower_copy(lc_name->val, name->val, name->len);
+		zend_string *lc_name = zend_string_alloc(ZSTR_LEN(name), 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name), ZSTR_LEN(name));
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_free(lc_name);
@@ -75,7 +75,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
  		ce = zend_lookup_class(name);
  	}
  	if (ce == NULL) {
-		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", name->val, autoload ? " and could not be loaded" : "");
+		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
 		return NULL;
 	}
 
@@ -255,7 +255,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	zval result;
 	int ret;
 
-	class_file_len = (int)spprintf(&class_file, 0, "%s%.*s", lc_name->val, ext_len, ext);
+	class_file_len = (int)spprintf(&class_file, 0, "%s%.*s", ZSTR_VAL(lc_name), ext_len, ext);
 
 #if DEFAULT_SLASH != '\\'
 	{
@@ -319,12 +319,12 @@ PHP_FUNCTION(spl_autoload)
 		pos = SPL_DEFAULT_FILE_EXTENSIONS;
 		pos_len = sizeof(SPL_DEFAULT_FILE_EXTENSIONS) - 1;
 	} else {
-		pos = file_exts->val;
-		pos_len = (int)file_exts->len;
+		pos = ZSTR_VAL(file_exts);
+		pos_len = (int)ZSTR_LEN(file_exts);
 	}
 
-	lc_name = zend_string_alloc(class_name->len, 0);
-	zend_str_tolower_copy(lc_name->val, class_name->val, class_name->len);
+	lc_name = zend_string_alloc(ZSTR_LEN(class_name), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
@@ -354,9 +354,9 @@ PHP_FUNCTION(spl_autoload)
 		if (ex &&
 		    ex->opline->opcode != ZEND_FETCH_CLASS &&
 		    ex->opline->opcode != ZEND_NEW) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0, "Class %s could not be loaded", class_name->val);
+			zend_throw_exception_ex(spl_ce_LogicException, 0, "Class %s could not be loaded", ZSTR_VAL(class_name));
 		} else {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be loaded", class_name->val);
+			php_error_docref(NULL, E_ERROR, "Class %s could not be loaded", ZSTR_VAL(class_name));
 		}
 	}
 } /* }}} */
@@ -420,9 +420,9 @@ PHP_FUNCTION(spl_autoload_call)
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
 		lc_name = zend_string_alloc(Z_STRLEN_P(class_name), 0);
-		zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 		ZEND_HASH_FOREACH_STR_KEY_PTR(SPL_G(autoload_functions), func_name, alfi) {
-			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL);
+			zend_call_method(Z_ISUNDEF(alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, ZSTR_VAL(func_name), ZSTR_LEN(func_name), retval, 1, class_name, NULL);
 			zend_exception_save();
 			if (retval) {
 				zval_ptr_dtor(retval);
@@ -494,7 +494,7 @@ PHP_FUNCTION(spl_autoload_register)
 				RETURN_FALSE;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING) {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Function '%s' not %s (%s)", func_name->val, alfi.func_ptr ? "callable" : "found", error);
+					zend_throw_exception_ex(spl_ce_LogicException, 0, "Function '%s' not %s (%s)", ZSTR_VAL(func_name), alfi.func_ptr ? "callable" : "found", error);
 				}
 				if (error) {
 					efree(error);
@@ -532,14 +532,14 @@ PHP_FUNCTION(spl_autoload_register)
 		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
 			ZVAL_COPY(&alfi.closure, zcallable);
 
-			lc_name = zend_string_alloc(func_name->len + sizeof(uint32_t), 0);
-			zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
-			memcpy(lc_name->val + func_name->len, &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
-			lc_name->val[lc_name->len] = '\0';
+			lc_name = zend_string_alloc(ZSTR_LEN(func_name) + sizeof(uint32_t), 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(func_name), &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
+			ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 		} else {
 			ZVAL_UNDEF(&alfi.closure);
-			lc_name = zend_string_alloc(func_name->len, 0);
-			zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
+			lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
 		}
 		zend_string_release(func_name);
 
@@ -552,9 +552,9 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
-			memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
-			lc_name->val[lc_name->len] = '\0';
+			lc_name = zend_string_extend(lc_name, ZSTR_LEN(lc_name) + sizeof(uint32_t), 0);
+			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(lc_name) - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
+			ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 			ZVAL_OBJ(&alfi.obj, obj_ptr);
 			Z_ADDREF(alfi.obj);
 		} else {
@@ -641,18 +641,18 @@ PHP_FUNCTION(spl_autoload_unregister)
 	}
 
 	if (Z_TYPE_P(zcallable) == IS_OBJECT) {
-		lc_name = zend_string_alloc(func_name->len + sizeof(uint32_t), 0);
-		zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
-		memcpy(lc_name->val + func_name->len, &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
-		lc_name->val[lc_name->len] = '\0';
+		lc_name = zend_string_alloc(ZSTR_LEN(func_name) + sizeof(uint32_t), 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+		memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(func_name), &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
+		ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 	} else {
-		lc_name = zend_string_alloc(func_name->len, 0);
-		zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
+		lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
 	}
 	zend_string_release(func_name);
 
 	if (SPL_G(autoload_functions)) {
-		if (lc_name->len == sizeof("spl_autoload_call") - 1 && !strcmp(lc_name->val, "spl_autoload_call")) {
+		if (ZSTR_LEN(lc_name) == sizeof("spl_autoload_call") - 1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload_call")) {
 			/* remove all */
 			zend_hash_destroy(SPL_G(autoload_functions));
 			FREE_HASHTABLE(SPL_G(autoload_functions));
@@ -663,13 +663,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			if (success != SUCCESS && obj_ptr) {
-				lc_name = zend_string_extend(lc_name, lc_name->len + sizeof(uint32_t), 0);
-				memcpy(lc_name->val + lc_name->len - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
-				lc_name->val[lc_name->len] = '\0';
+				lc_name = zend_string_extend(lc_name, ZSTR_LEN(lc_name) + sizeof(uint32_t), 0);
+				memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(lc_name) - sizeof(uint32_t), &obj_ptr->handle, sizeof(uint32_t));
+				ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			}
 		}
-	} else if (lc_name->len == sizeof("spl_autoload")-1 && !strcmp(lc_name->val, "spl_autoload")) {
+	} else if (ZSTR_LEN(lc_name) == sizeof("spl_autoload")-1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload")) {
 		/* register single spl_autoload() */
 		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
 
@@ -725,7 +725,7 @@ PHP_FUNCTION(spl_autoload_functions)
 				add_next_index_str(&tmp, zend_string_copy(alfi->func_ptr->common.function_name));
 				add_next_index_zval(return_value, &tmp);
 			} else {
-				if (strncmp(alfi->func_ptr->common.function_name->val, "__lambda_func", sizeof("__lambda_func") - 1)) {
+				if (strncmp(ZSTR_VAL(alfi->func_ptr->common.function_name), "__lambda_func", sizeof("__lambda_func") - 1)) {
 					add_next_index_str(return_value, zend_string_copy(alfi->func_ptr->common.function_name));
 				} else {
 					add_next_index_str(return_value, zend_string_copy(key));

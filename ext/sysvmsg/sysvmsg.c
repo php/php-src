@@ -422,9 +422,9 @@ PHP_FUNCTION(msg_send)
 
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = safe_emalloc(msg_var.s->len, 1, sizeof(struct php_msgbuf));
-		memcpy(messagebuffer->mtext, msg_var.s->val, msg_var.s->len + 1);
-		message_len = msg_var.s->len;
+		messagebuffer = safe_emalloc(ZSTR_LEN(msg_var.s), 1, sizeof(struct php_msgbuf));
+		memcpy(messagebuffer->mtext, ZSTR_VAL(msg_var.s), ZSTR_LEN(msg_var.s) + 1);
+		message_len = ZSTR_LEN(msg_var.s);
 		smart_str_free(&msg_var);
 	} else {
 		char *p;

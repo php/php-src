@@ -318,7 +318,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		if (NULL == (fdat->ce = zend_lookup_class(fdat->classname))) {
 			php_error_docref(NULL, E_WARNING,
 					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
-					filtername, fdat->classname->val);
+					filtername, ZSTR_VAL(fdat->classname));
 			return NULL;
 		}
 	}
@@ -567,12 +567,12 @@ PHP_FUNCTION(stream_filter_register)
 
 	RETVAL_FALSE;
 
-	if (!filtername->len) {
+	if (!ZSTR_LEN(filtername)) {
 		php_error_docref(NULL, E_WARNING, "Filter name cannot be empty");
 		return;
 	}
 
-	if (!classname->len) {
+	if (!ZSTR_LEN(classname)) {
 		php_error_docref(NULL, E_WARNING, "Class name cannot be empty");
 		return;
 	}
@@ -586,7 +586,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername->val, &user_filter_factory) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(ZSTR_VAL(filtername), &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

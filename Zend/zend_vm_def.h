@@ -2863,14 +2863,14 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV)
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
-		len += rope[i]->len;
+		len += ZSTR_LEN(rope[i]);
 	}
 	ret = EX_VAR(opline->result.var);
 	ZVAL_STR(ret, zend_string_alloc(len, 0));
 	target = Z_STRVAL_P(ret);
 	for (i = 0; i <= opline->extended_value; i++) {
-		memcpy(target, rope[i]->val, rope[i]->len);
-		target += rope[i]->len;
+		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
+		target += ZSTR_LEN(rope[i]);
 		zend_string_release(rope[i]);
 	}
 	*target = '\0';

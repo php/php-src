@@ -337,7 +337,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
-		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", obj->std.ce->name->val);
+		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
 	}
 
 	if (hnd) {

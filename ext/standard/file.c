@@ -656,11 +656,11 @@ PHP_FUNCTION(file_put_contents)
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
 					zend_string *str = zval_get_string(tmp);
-					if (str->len) {
-						numbytes += str->len;
-						bytes_written = php_stream_write(stream, str->val, str->len);
-						if (bytes_written != str->len) {
-							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
+					if (ZSTR_LEN(str)) {
+						numbytes += ZSTR_LEN(str);
+						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
+						if (bytes_written != ZSTR_LEN(str)) {
+							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
 							ret_ok = 0;
 							zend_string_release(str);
 							break;
@@ -743,8 +743,8 @@ PHP_FUNCTION(file)
 	array_init(return_value);
 
 	if ((target_buf = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
-		s = target_buf->val;
-		e = target_buf->val + target_buf->len;
+		s = ZSTR_VAL(target_buf);
+		e = ZSTR_VAL(target_buf) + ZSTR_LEN(target_buf);
 
 		if (!(p = (char*)php_stream_locate_eol(stream, target_buf))) {
 			p = e;
@@ -767,7 +767,7 @@ parse_eol:
 		} else {
 			do {
 				int windows_eol = 0;
-				if (p != target_buf->val && eol_marker == '\n' && *(p - 1) == '\r') {
+				if (p != ZSTR_VAL(target_buf) && eol_marker == '\n' && *(p - 1) == '\r') {
 					windows_eol++;
 				}
 				if (skip_blank_lines && !(p-s-windows_eol)) {
@@ -812,13 +812,13 @@ PHP_FUNCTION(tempnam)
 	}
 
 	p = php_basename(prefix, prefix_len, NULL, 0);
-	if (p->len > 64) {
-		p->val[63] = '\0';
+	if (ZSTR_LEN(p) > 64) {
+		ZSTR_VAL(p)[63] = '\0';
 	}
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, 1)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
@@ -1116,11 +1116,11 @@ PHPAPI PHP_FUNCTION(fgetss)
 	if (allowed != NULL) {
 // TODO: reimplement to avoid reallocation ???
 		if (ZSTR_IS_INTERNED(allowed)) {
-			allowed_tags = estrndup(allowed->val, allowed->len);
-			allowed_tags_len = allowed->len;
+			allowed_tags = estrndup(ZSTR_VAL(allowed), ZSTR_LEN(allowed));
+			allowed_tags_len = ZSTR_LEN(allowed);
 		} else {
-			allowed_tags = allowed->val;
-			allowed_tags_len = allowed->len;
+			allowed_tags = ZSTR_VAL(allowed);
+			allowed_tags_len = ZSTR_LEN(allowed);
 		}
 	}
 
@@ -1823,7 +1823,7 @@ quit_loop:
 }
 /* }}} */
 
-#define FPUTCSV_FLD_CHK(c) memchr(field_str->val, c, field_str->len)
+#define FPUTCSV_FLD_CHK(c) memchr(ZSTR_VAL(field_str), c, ZSTR_LEN(field_str))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
    Format line as CSV and write to file pointer */
@@ -1908,8 +1908,8 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 			FPUTCSV_FLD_CHK('\t') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
-			char *ch = field_str->val;
-			char *end = ch + field_str->len;
+			char *ch = ZSTR_VAL(field_str);
+			char *end = ch + ZSTR_LEN(field_str);
 			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
@@ -1938,7 +1938,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);
 
-	ret = php_stream_write(stream, csvline.s->val, csvline.s->len);
+	ret = php_stream_write(stream, ZSTR_VAL(csvline.s), ZSTR_LEN(csvline.s));
 
 	smart_str_free(&csvline);
 

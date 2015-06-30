@@ -222,7 +222,7 @@ PHP_METHOD(sqlite3, exec)
 		return;
 	}
 
-	if (sqlite3_exec(db_obj->db, sql->val, NULL, NULL, &errtext) != SQLITE_OK) {
+	if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "%s", errtext);
 		sqlite3_free(errtext);
 		RETURN_FALSE;
@@ -433,8 +433,8 @@ PHP_METHOD(sqlite3, escapeString)
 		return;
 	}
 
-	if (sql->len) {
-		ret = sqlite3_mprintf("%q", sql->val);
+	if (ZSTR_LEN(sql)) {
+		ret = sqlite3_mprintf("%q", ZSTR_VAL(sql));
 		if (ret) {
 			RETVAL_STRING(ret);
 			sqlite3_free(ret);
@@ -464,7 +464,7 @@ PHP_METHOD(sqlite3, prepare)
 		return;
 	}
 
-	if (!sql->len) {
+	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
 	}
 
@@ -473,7 +473,7 @@ PHP_METHOD(sqlite3, prepare)
 	stmt_obj->db_obj = db_obj;
 	ZVAL_COPY(&stmt_obj->db_obj_zval, object);
 
-	errcode = sqlite3_prepare_v2(db_obj->db, sql->val, sql->len, &(stmt_obj->stmt), NULL);
+	errcode = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to prepare statement: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
 		zval_dtor(return_value);
@@ -510,13 +510,13 @@ PHP_METHOD(sqlite3, query)
 		return;
 	}
 
-	if (!sql->len) {
+	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
 	}
 
 	/* If there was no return value then just execute the query */
 	if (!USED_RET()) {
-		if (sqlite3_exec(db_obj->db, sql->val, NULL, NULL, &errtext) != SQLITE_OK) {
+		if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
@@ -528,7 +528,7 @@ PHP_METHOD(sqlite3, query)
 	stmt_obj->db_obj = db_obj;
 	ZVAL_COPY(&stmt_obj->db_obj_zval, object);
 
-	return_code = sqlite3_prepare_v2(db_obj->db, sql->val, sql->len, &(stmt_obj->stmt), NULL);
+	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (return_code != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to prepare statement: %d, %s", return_code, sqlite3_errmsg(db_obj->db));
 		zval_ptr_dtor(&stmt);
@@ -616,20 +616,20 @@ PHP_METHOD(sqlite3, querySingle)
 		return;
 	}
 
-	if (!sql->len) {
+	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
 	}
 
 	/* If there was no return value then just execute the query */
 	if (!USED_RET()) {
-		if (sqlite3_exec(db_obj->db, sql->val, NULL, NULL, &errtext) != SQLITE_OK) {
+		if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
 			php_sqlite3_error(db_obj, "%s", errtext);
 			sqlite3_free(errtext);
 		}
 		return;
 	}
 
-	return_code = sqlite3_prepare_v2(db_obj->db, sql->val, sql->len, &stmt, NULL);
+	return_code = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &stmt, NULL);
 	if (return_code != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to prepare statement: %d, %s", return_code, sqlite3_errmsg(db_obj->db));
 		RETURN_FALSE;
@@ -908,7 +908,7 @@ PHP_METHOD(sqlite3, createFunction)
 	}
 
 	if (!zend_is_callable(callback_func, 0, &callback_name)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
+		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
@@ -958,14 +958,14 @@ PHP_METHOD(sqlite3, createAggregate)
 	}
 
 	if (!zend_is_callable(step_callback, 0, &callback_name)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
+		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
 	zend_string_release(callback_name);
 
 	if (!zend_is_callable(fini_callback, 0, &callback_name)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
+		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
@@ -1015,7 +1015,7 @@ PHP_METHOD(sqlite3, createCollation)
 	}
 
 	if (!zend_is_callable(callback_func, 0, &callback_name)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name->val);
+		php_sqlite3_error(db_obj, "Not a valid callback function %s", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}
@@ -1360,17 +1360,17 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 
 	/* We need a : prefix to resolve a name to a parameter number */
 	if (param->name) {
-		if (param->name->val[0] != ':') {
+		if (ZSTR_VAL(param->name)[0] != ':') {
 			/* pre-increment for character + 1 for null */
-			zend_string *temp = zend_string_alloc(param->name->len + 1, 0);
-			temp->val[0] = ':';
-			memmove(temp->val + 1, param->name->val, param->name->len + 1);
+			zend_string *temp = zend_string_alloc(ZSTR_LEN(param->name) + 1, 0);
+			ZSTR_VAL(temp)[0] = ':';
+			memmove(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
 			param->name = temp;
 		} else {
-			param->name = zend_string_init(param->name->val, param->name->len, 0);
+			param->name = zend_string_init(ZSTR_VAL(param->name), ZSTR_LEN(param->name), 0);
 		}
 		/* do lookup*/
-		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, param->name->val);
+		param->param_number = sqlite3_bind_parameter_index(stmt->stmt, ZSTR_VAL(param->name));
 	}
 
 	if (param->param_number < 1) {
@@ -1527,7 +1527,7 @@ PHP_METHOD(sqlite3stmt, execute)
 						buffer = Z_STR_P(parameter);
 					}
 
-					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, buffer->val, buffer->len, SQLITE_TRANSIENT);
+					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
 
 					if (stream) {
 						zend_string_release(buffer);
@@ -1606,14 +1606,14 @@ PHP_METHOD(sqlite3stmt, __construct)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 	zend_restore_error_handling(&error_handling);
 
-	if (!sql->len) {
+	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
 	}
 
 	stmt_obj->db_obj = db_obj;
 	ZVAL_COPY(&stmt_obj->db_obj_zval, db_zval);
 
-	errcode = sqlite3_prepare_v2(db_obj->db, sql->val, sql->len, &(stmt_obj->stmt), NULL);
+	errcode = sqlite3_prepare_v2(db_obj->db, ZSTR_VAL(sql), ZSTR_LEN(sql), &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to prepare statement: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
 		zval_dtor(return_value);

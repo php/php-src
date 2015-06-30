@@ -1292,23 +1292,23 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)tmpbuf->val[0])) {
+	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 
 	/* find decimal point, if expected */
 	if (dec) {
-		dp = strpbrk(tmpbuf->val, ".,");
+		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
 	} else {
 		dp = NULL;
 	}
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = (int)(dp - tmpbuf->val);
+		integral = (int)(dp - ZSTR_VAL(tmpbuf));
 	} else {
 		/* no decimal point was found */
-		integral = (int)tmpbuf->len;
+		integral = (int)ZSTR_LEN(tmpbuf);
 	}
 
 	/* allow for thousand separators */
@@ -1332,8 +1332,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 	res = zend_string_alloc(reslen, 0);
 
-	s = tmpbuf->val + tmpbuf->len - 1;
-	t = res->val + reslen;
+	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
+	t = ZSTR_VAL(res) + reslen;
 	*t-- = '\0';
 
 	/* copy the decimal places.
@@ -1365,9 +1365,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* copy the numbers before the decimal point, adding thousand
 	 * separator every three digits */
-	while (s >= tmpbuf->val) {
+	while (s >= ZSTR_VAL(tmpbuf)) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf->val) {
+		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1378,7 +1378,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		*t-- = '-';
 	}
 
-	res->len = reslen;
+	ZSTR_LEN(res) = reslen;
 	zend_string_release(tmpbuf);
 	return res;
 }

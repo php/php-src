@@ -109,7 +109,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	/* first, we have to get the size of all the elements in the hash */
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
-		size_t el_len = str->len;
+		size_t el_len = ZSTR_LEN(str);
 		zend_string_release(str);
 
 		if (el_len == 0) {
@@ -119,10 +119,10 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		sizeenv += el_len + 1;
 
 		if (string_key) {
-			if (string_key->len == 0) {
+			if (ZSTR_LEN(string_key) == 0) {
 				continue;
 			}
-			sizeenv += string_key->len + 1;
+			sizeenv += ZSTR_LEN(string_key) + 1;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -134,19 +134,19 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
 
-		if (str->len == 0) {
+		if (ZSTR_LEN(str) == 0) {
 			goto next_element;
 		}
 
 		if (string_key) {
-			if (string_key->len == 0) {
+			if (ZSTR_LEN(string_key) == 0) {
 				goto next_element;
 			}
 
-			l = string_key->len + str->len + 2;
-			memcpy(p, string_key->val, string_key->len);
+			l = ZSTR_LEN(string_key) + ZSTR_LEN(str) + 2;
+			memcpy(p, ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 			strncat(p, "=", 1);
-			strncat(p, str->val, str->len);
+			strncat(p, ZSTR_VAL(str), ZSTR_LEN(str));
 
 #ifndef PHP_WIN32
 			*ep = p;
@@ -154,12 +154,12 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += l;
 		} else {
-			memcpy(p, str->val, str->len);
+			memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
 #ifndef PHP_WIN32
 			*ep = p;
 			++ep;
 #endif
-			p += str->len + 1;
+			p += ZSTR_LEN(str) + 1;
 		}
 next_element:
 		zend_string_release(str);

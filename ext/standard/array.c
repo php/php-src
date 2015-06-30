@@ -417,7 +417,7 @@ static int php_array_natural_general_compare(const void *a, const void *b, int f
 	zend_string *str1 = zval_get_string(&f->val);
 	zend_string *str2 = zval_get_string(&s->val);
 
-	int result = strnatcmp_ex(str1->val, str1->len, str2->val, str2->len, fold_case);
+	int result = strnatcmp_ex(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2), fold_case);
 
 	zend_string_release(str1);
 	zend_string_release(str2);
@@ -1497,7 +1497,7 @@ PHP_FUNCTION(extract)
 			var_exists = zend_hash_exists_ind(symbol_table, var_name);
 		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
 			zend_string *str = zend_long_to_str(num_key);
-			php_prefix_varname(&final_name, prefix, str->val, str->len, 1);
+			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
 			zend_string_release(str);
 		} else {
 			continue;
@@ -1510,10 +1510,10 @@ PHP_FUNCTION(extract)
 
 			case EXTR_OVERWRITE:
 				/* GLOBALS protection */
-				if (var_exists && var_name->len == sizeof("GLOBALS")-1 && !strcmp(var_name->val, "GLOBALS")) {
+				if (var_exists && ZSTR_LEN(var_name) == sizeof("GLOBALS")-1 && !strcmp(ZSTR_VAL(var_name), "GLOBALS")) {
 					break;
 				}
-				if (var_exists && var_name->len == sizeof("this")-1  && !strcmp(var_name->val, "this") && EG(scope) && EG(scope)->name->len != 0) {
+				if (var_exists && ZSTR_LEN(var_name) == sizeof("this")-1  && !strcmp(ZSTR_VAL(var_name), "this") && EG(scope) && ZSTR_LEN(EG(scope)->name) != 0) {
 					break;
 				}
 				ZVAL_STR_COPY(&final_name, var_name);
@@ -1521,26 +1521,26 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_IF_EXISTS:
 				if (var_exists) {
-					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1);
+					php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				}
 				break;
 
 			case EXTR_PREFIX_SAME:
-				if (!var_exists && var_name->len != 0) {
+				if (!var_exists && ZSTR_LEN(var_name) != 0) {
 					ZVAL_STR_COPY(&final_name, var_name);
 				}
 				/* break omitted intentionally */
 
 			case EXTR_PREFIX_ALL:
-				if (Z_TYPE(final_name) == IS_NULL && var_name->len != 0) {
-					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1);
+				if (Z_TYPE(final_name) == IS_NULL && ZSTR_LEN(var_name) != 0) {
+					php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
 				if (Z_TYPE(final_name) == IS_NULL) {
-					if (!php_valid_var_name(var_name->val, var_name->len)) {
-						php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1);
+					if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+						php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 					} else {
 						ZVAL_STR_COPY(&final_name, var_name);
 					}
@@ -3076,7 +3076,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv)
 		zend_string *key = zval_get_string(name);
 
 		if (!Z_OBJ_HANDLER_P(data, has_property) || Z_OBJ_HANDLER_P(data, has_property)(data, name, 1, NULL)) {
-			prop = zend_read_property(Z_OBJCE_P(data), data, key->val, key->len, 1, rv);
+			prop = zend_read_property(Z_OBJCE_P(data), data, ZSTR_VAL(key), ZSTR_LEN(key), 1, rv);
 		}
 		zend_string_release(key);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {

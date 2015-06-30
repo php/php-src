@@ -185,7 +185,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		smart_str parse_error_str;
 		parse_error_str = intl_parse_error_to_string( &parse_error );
 		spprintf( &msg, 0, "transliterator_create_from_rules: unable to "
-			"create ICU transliterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "" );
+			"create ICU transliterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "" );
 		smart_str_free( &parse_error_str );
 		if( msg != NULL )
 		{
@@ -348,7 +348,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			{
 				zend_string *message = intl_error_get_message( NULL );
 				php_error_docref0( NULL, E_WARNING, "Could not create "
-					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), message->val );
+					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), ZSTR_VAL(message) );
 				zend_string_free( message );
 				ZVAL_UNDEF(&tmp_object);
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */

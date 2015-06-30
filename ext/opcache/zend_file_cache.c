@@ -202,14 +202,14 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	len = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	ret = (void*)(info->str_size | Z_UL(1));
 	zend_shared_alloc_register_xlat_entry(str, ret);
-	if (info->str_size + len > ((zend_string*)ZCG(mem))->len) {
+	if (info->str_size + len > ZSTR_LEN((zend_string*)ZCG(mem))) {
 		size_t new_len = info->str_size + len;
 		ZCG(mem) = (void*)zend_string_realloc(
 			(zend_string*)ZCG(mem),
 			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
 	}
-	memcpy(((zend_string*)ZCG(mem))->val + info->str_size, str, len);
+	memcpy(ZSTR_VAL((zend_string*)ZCG(mem)) + info->str_size, str, len);
 	info->str_size += len;
 	return ret;
 }
@@ -677,12 +677,12 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	void *mem, *buf;
 
 	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + script->full_path->len + sizeof(SUFFIX));
+	filename = emalloc(len + 33 + ZSTR_LEN(script->full_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
 	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, script->full_path->val, script->full_path->len);
-	memcpy(filename + len + 33 + script->full_path->len, SUFFIX, sizeof(SUFFIX));
+	memcpy(filename + len + 33, ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path));
+	memcpy(filename + len + 33 + ZSTR_LEN(script->full_path), SUFFIX, sizeof(SUFFIX));
 
 	if (zend_file_cache_mkdir(filename, len) != SUCCESS) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
@@ -730,14 +730,14 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (signed char*)((zend_string*)ZCG(mem))->val, info.str_size);
+	info.checksum = zend_adler32(info.checksum, (signed char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
 
 #ifndef ZEND_WIN32
 	vec[0].iov_base = &info;
 	vec[0].iov_len = sizeof(info);
 	vec[1].iov_base = buf;
 	vec[1].iov_len = script->size;
-	vec[2].iov_base = ((zend_string*)ZCG(mem))->val;
+	vec[2].iov_base = ZSTR_VAL((zend_string*)ZCG(mem));
 	vec[2].iov_len = info.str_size;
 
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
@@ -1177,12 +1177,12 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + full_path->len + sizeof(SUFFIX));
+	filename = emalloc(len + 33 + ZSTR_LEN(full_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
 	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, full_path->val, full_path->len);
-	memcpy(filename + len + 33 + full_path->len, SUFFIX, sizeof(SUFFIX));
+	memcpy(filename + len + 33, ZSTR_VAL(full_path), ZSTR_LEN(full_path));
+	memcpy(filename + len + 33 + ZSTR_LEN(full_path), SUFFIX, sizeof(SUFFIX));
 
 	fd = open(filename, O_RDONLY | O_BINARY);
 	if (fd < 0) {
@@ -1316,7 +1316,7 @@ use_process_mem:
 	if (cache_it) {
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 
-		zend_accel_hash_update(&ZCSG(hash), script->full_path->val, script->full_path->len, 0, script);
+		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path), 0, script);
 
 		zend_shared_alloc_unlock();
 		zend_arena_release(&CG(arena), checkpoint);
@@ -1332,12 +1332,12 @@ void zend_file_cache_invalidate(zend_string *full_path)
 	char *filename;
 
 	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + full_path->len + sizeof(SUFFIX));
+	filename = emalloc(len + 33 + ZSTR_LEN(full_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
 	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, full_path->val, full_path->len);
-	memcpy(filename + len + 33 + full_path->len, SUFFIX, sizeof(SUFFIX));
+	memcpy(filename + len + 33, ZSTR_VAL(full_path), ZSTR_LEN(full_path));
+	memcpy(filename + len + 33 + ZSTR_LEN(full_path), SUFFIX, sizeof(SUFFIX));
 
 	unlink(filename);
 	efree(filename);

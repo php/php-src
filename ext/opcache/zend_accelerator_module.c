@@ -112,7 +112,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	memsize = atoi(new_value->val);
+	memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
 		const char *new_new_value = "8";
@@ -148,7 +148,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (zend_long *) (base + (size_t)mh_arg1);
-	size = atoi(new_value->val);
+	size = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
 	if (size < MIN_ACCEL_FILES || size > MAX_ACCEL_FILES) {
@@ -192,7 +192,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
 	p = (double *) (base + (size_t)mh_arg1);
-	percentage = atoi(new_value->val);
+	percentage = atoi(ZSTR_VAL(new_value));
 
 	if (percentage <= 0 || percentage > 50) {
 		const char *new_new_value = "5";
@@ -228,10 +228,10 @@ static ZEND_INI_MH(OnEnable)
 #endif
 
 		p = (zend_bool *) (base+(size_t) mh_arg1);
-		if ((new_value->len == 2 && strcasecmp("on", new_value->val) == 0) ||
-		    (new_value->len == 3 && strcasecmp("yes", new_value->val) == 0) ||
-		    (new_value->len == 4 && strcasecmp("true", new_value->val) == 0) ||
-			atoi(new_value->val) != 0) {
+		if ((ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) ||
+		    (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) ||
+		    (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) ||
+			atoi(ZSTR_VAL(new_value)) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
 		} else {
@@ -246,18 +246,18 @@ static ZEND_INI_MH(OnEnable)
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
-		if (!new_value->len) {
+		if (!ZSTR_LEN(new_value)) {
 			new_value = NULL;
 		} else {
 			zend_stat_t buf;
 
-		    if (!IS_ABSOLUTE_PATH(new_value->val, new_value->len) ||
-			    zend_stat(new_value->val, &buf) != 0 ||
+		    if (!IS_ABSOLUTE_PATH(ZSTR_VAL(new_value), ZSTR_LEN(new_value)) ||
+			    zend_stat(ZSTR_VAL(new_value), &buf) != 0 ||
 			    !S_ISDIR(buf.st_mode) ||
 #ifndef ZEND_WIN32
-				access(new_value->val, R_OK | W_OK | X_OK) != 0) {
+				access(ZSTR_VAL(new_value), R_OK | W_OK | X_OK) != 0) {
 #else
-				_access(new_value->val, 06) != 0) {
+				_access(ZSTR_VAL(new_value), 06) != 0) {
 #endif
 				zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache must be a full path of accessable directory.\n");
 				new_value = NULL;
@@ -316,13 +316,13 @@ static int filename_is_in_cache(zend_string *filename)
 	char *key;
 	int key_length;
 
-	key = accel_make_persistent_key(filename->val, filename->len, &key_length);
+	key = accel_make_persistent_key(ZSTR_VAL(filename), ZSTR_LEN(filename), &key_length);
 	if (key != NULL) {
 		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		if (persistent_script && !persistent_script->corrupted) {
 			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 
-			handle.filename = filename->val;
+			handle.filename = ZSTR_VAL(filename);
 			handle.type = ZEND_HANDLE_FILENAME;
 
 			if (ZCG(accel_directives).validate_timestamps) {
