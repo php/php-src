@@ -30,7 +30,6 @@ for($i = 0; $i < 10; $i++){
 
 	$t0 = microtime(1);
 	$s = fgets($pipes[1]);
-	fflush($pipes[1]);
 	$t1 = microtime(1);
 
 	echo $s;		
