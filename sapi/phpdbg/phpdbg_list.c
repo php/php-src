@@ -129,10 +129,10 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 	char resolved_path_buf[MAXPATHLEN];
 	const char *abspath;
 
-	if (VCWD_REALPATH(filename->val, resolved_path_buf)) {
+	if (VCWD_REALPATH(ZSTR_VAL(filename), resolved_path_buf)) {
 		abspath = resolved_path_buf;
 	} else {
-		abspath = filename->val;
+		abspath = ZSTR_VAL(filename);
 	}
 
 	if (!(data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), abspath, strlen(abspath)))) {
@@ -181,7 +181,7 @@ void phpdbg_list_function(const zend_function *fbc) /* {{{ */
 	const zend_op_array *ops;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
-		phpdbg_error("list", "type=\"internalfunction\" function=\"%s\"", "The function requested (%s) is not user defined", fbc->common.function_name->val);
+		phpdbg_error("list", "type=\"internalfunction\" function=\"%s\"", "The function requested (%s) is not user defined", ZSTR_VAL(fbc->common.function_name));
 		return;
 	}
 
@@ -235,7 +235,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake = {{0}};
 	zend_op_array *ret;
-	char *filename = (char *)(file->opened_path ? file->opened_path->val : file->filename);
+	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 	uint line;
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];

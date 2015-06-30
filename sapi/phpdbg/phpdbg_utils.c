@@ -167,12 +167,12 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 {
 	zend_function *func = NULL;
 	zend_string *lfname = zend_string_alloc(strlen(fname), 0);
-	memcpy(lfname->val, zend_str_tolower_dup(fname, lfname->len), lfname->len + 1);
+	memcpy(ZSTR_VAL(lfname), zend_str_tolower_dup(fname, ZSTR_LEN(lfname)), ZSTR_LEN(lfname) + 1);
 
 	if (cname) {
 		zend_class_entry *ce;
 		zend_string *lcname = zend_string_alloc(strlen(cname), 0);
-		memcpy(lcname->val, zend_str_tolower_dup(cname, lcname->len), lcname->len + 1);
+		memcpy(ZSTR_VAL(lcname), zend_str_tolower_dup(cname, ZSTR_LEN(lcname)), ZSTR_LEN(lcname) + 1);
 		ce = zend_lookup_class(lcname);
 
 		efree(lcname);
@@ -457,8 +457,8 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 					char *name;
 					char *keyname = estrndup(last_index, index_len);
 					if (strkey) {
-						key = strkey->val;
-						keylen = strkey->len;
+						key = ZSTR_VAL(strkey);
+						keylen = ZSTR_LEN(strkey);
 					} else {
 						keylen = spprintf(&key, 0, "%llu", numkey);
 					}
@@ -573,7 +573,7 @@ static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong 
 
 	phpdbg_try_access {
 		if (key) { /* string key */
-			phpdbg_xml(" name=\"%.*s\"", key->len, key->val);
+			phpdbg_xml(" name=\"%.*s\"", ZSTR_LEN(key), ZSTR_VAL(key));
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\"", num);
 		}
@@ -607,7 +607,7 @@ static int phpdbg_xml_object_property_dump(zval *zv, zend_string *key, zend_ulon
 					phpdbg_xml(" class=\"%s\" protection=\"private\"", class_name);
 				}
 			} else {
-				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", key->len, key->val);
+				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", ZSTR_LEN(key), ZSTR_VAL(key));
 			}
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\" protection=\"public\"", num);
@@ -681,7 +681,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				}
 
 				class_name = Z_OBJ_HANDLER_P(zv, get_class_name)(Z_OBJ_P(zv));
-				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, class_name->len, class_name->val, Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
+				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, ZSTR_LEN(class_name), ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
 				zend_string_release(class_name);
 
 				element_dump_func = phpdbg_xml_object_property_dump;
@@ -784,12 +784,12 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 		case IS_STRING: {
 			int i;
 			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"", 2);
-			for (i = 0; i < str->len; i++) {
-				if (str->val[i] < 32) {
-					str->val[i] = ' ';
+			for (i = 0; i < ZSTR_LEN(str); i++) {
+				if (ZSTR_VAL(str)[i] < 32) {
+					ZSTR_VAL(str)[i] = ' ';
 				}
 			}
-			asprintf(&decode, "\"%.*s\"%c", str->len <= maxlen - 2 ? (int) str->len : (maxlen - 3), str->val, str->len <= maxlen - 2 ? 0 : '+');
+			asprintf(&decode, "\"%.*s\"%c", ZSTR_LEN(str) <= maxlen - 2 ? (int) ZSTR_LEN(str) : (maxlen - 3), ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen - 2 ? 0 : '+');
 			zend_string_release(str);
 			} break;
 		case IS_RESOURCE:
@@ -800,7 +800,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_OBJECT: {
 			zend_string *str = Z_OBJCE_P(zv)->name;
-			asprintf(&decode, "%.*s%c", str->len <= maxlen ? (int) str->len : maxlen - 1, str->val, str->len <= maxlen ? 0 : '+');
+			asprintf(&decode, "%.*s%c", ZSTR_LEN(str) <= maxlen ? (int) ZSTR_LEN(str) : maxlen - 1, ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
 			break;
 		}
 		case IS_CONSTANT:

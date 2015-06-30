@@ -1412,7 +1412,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		ldap_mods[i]->mod_type = NULL;
 
 		if (zend_hash_get_current_key(Z_ARRVAL_P(entry), &attribute, &index) == HASH_KEY_IS_STRING) {
-			ldap_mods[i]->mod_type = estrndup(attribute->val, attribute->len);
+			ldap_mods[i]->mod_type = estrndup(ZSTR_VAL(attribute), ZSTR_LEN(attribute));
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
 			/* Free allocated memory */
@@ -1696,9 +1696,9 @@ PHP_FUNCTION(ldap_modify_batch)
 
 				/* is this a valid entry? */
 				if (
-					!_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_ATTRIB) &&
-					!_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_MODTYPE) &&
-					!_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_VALUES)
+					!_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_ATTRIB) &&
+					!_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_MODTYPE) &&
+					!_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_VALUES)
 				) {
 					php_error_docref(NULL, E_WARNING, "The only allowed keys in entries of the modifications array are '" LDAP_MODIFY_BATCH_ATTRIB "', '" LDAP_MODIFY_BATCH_MODTYPE "' and '" LDAP_MODIFY_BATCH_VALUES "'");
 					RETURN_FALSE;
@@ -1708,7 +1708,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				modinfo = fetched;
 
 				/* does the value type match the key? */
-				if (_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_ATTRIB)) {
+				if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_ATTRIB)) {
 					if (Z_TYPE_P(modinfo) != IS_STRING) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must be a string");
 						RETURN_FALSE;
@@ -1719,7 +1719,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 				}
-				else if (_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_MODTYPE)) {
+				else if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_MODTYPE)) {
 					if (Z_TYPE_P(modinfo) != IS_LONG) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_MODTYPE "' value must be a long");
 						RETURN_FALSE;
@@ -1751,7 +1751,7 @@ PHP_FUNCTION(ldap_modify_batch)
 						}
 					}
 				}
-				else if (_ldap_str_equal_to_const(modkey->val, modkey->len, LDAP_MODIFY_BATCH_VALUES)) {
+				else if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_VALUES)) {
 					if (Z_TYPE_P(modinfo) != IS_ARRAY) {
 						php_error_docref(NULL, E_WARNING, "A '" LDAP_MODIFY_BATCH_VALUES "' value must be an array");
 						RETURN_FALSE;
@@ -2614,7 +2614,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, &callback_name)) {
-		php_error_docref(NULL, E_WARNING, "Two arguments expected for '%s' to be a valid callback", callback_name->val);
+		php_error_docref(NULL, E_WARNING, "Two arguments expected for '%s' to be a valid callback", ZSTR_VAL(callback_name));
 		zend_string_release(callback_name);
 		RETURN_FALSE;
 	}

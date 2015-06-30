@@ -57,7 +57,7 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	return phpdbg_eol_global_update(new_value->val);
+	return phpdbg_eol_global_update(ZSTR_VAL(new_value));
 }
 
 PHP_INI_BEGIN()
@@ -287,7 +287,7 @@ static PHP_FUNCTION(phpdbg_exec)
 		zend_stat_t sb;
 		zend_bool result = 1;
 
-		if (VCWD_STAT(exec->val, &sb) != FAILURE) {
+		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
 					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
@@ -295,8 +295,8 @@ static PHP_FUNCTION(phpdbg_exec)
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = estrndup(exec->val, exec->len);
-				PHPDBG_G(exec_len) = exec->len;
+				PHPDBG_G(exec) = estrndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {
 					ZVAL_TRUE(return_value);
@@ -503,7 +503,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					if (last_scope == NULL) {
 						fn_name = zend_string_copy(last_function);
 					} else {
-						fn_name = strpprintf(last_function->len + last_scope->name->len + 2, "%.*s::%.*s", last_function->len, last_function->val, last_scope->name->len, last_scope->name->val);
+						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_function), ZSTR_VAL(last_function), ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name));
 					}
 					fn_buf = zend_hash_find(Z_ARR_P(return_value), fn_name);
 					if (!fn_buf) {

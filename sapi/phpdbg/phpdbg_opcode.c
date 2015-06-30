@@ -34,7 +34,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 	switch (type &~ EXT_TYPE_UNUSED) {
 		case IS_CV: {
 			zend_string *var = ops->vars[EX_VAR_TO_NUM(op->var)];
-			asprintf(&decode, "$%.*s%c", var->len <= 19 ? (int) var->len : 18, var->val, var->len <= 19 ? 0 : '+');
+			asprintf(&decode, "$%.*s%c", ZSTR_LEN(var) <= 19 ? (int) ZSTR_LEN(var) : 18, ZSTR_VAL(var), ZSTR_LEN(var) <= 19 ? 0 : '+');
 		} break;
 
 		case IS_VAR:
@@ -158,7 +158,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
 			   decode,
-			   execute_data->func->op_array.filename ? execute_data->func->op_array.filename->val : "unknown");
+			   execute_data->func->op_array.filename ? ZSTR_VAL(execute_data->func->op_array.filename) : "unknown");
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
@@ -167,7 +167,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
 				decode,
-				execute_data->func->op_array.filename ? execute_data->func->op_array.filename->val : "unknown");
+				execute_data->func->op_array.filename ? ZSTR_VAL(execute_data->func->op_array.filename) : "unknown");
 		}
 
 		if (decode) {

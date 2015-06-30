@@ -546,7 +546,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
 
-	php_cli_server_client_send_through(client, buffer.s->val, buffer.s->len);
+	php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 
 	smart_str_free(&buffer);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -595,8 +595,8 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 	if (hash_key->key) {
 		char *real_key, *key;
 		uint i;
-		key = estrndup(hash_key->key->val, hash_key->key->len);
-		for(i=0; i<hash_key->key->len; i++) {
+		key = estrndup(ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key));
+		for(i=0; i<ZSTR_LEN(hash_key->key); i++) {
 			if (key[i] == '-') {
 				key[i] = '_';
 			} else {
@@ -1773,8 +1773,8 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 		zend_string *addr_str = 0;
 
 		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, NULL, 0);
-		client->addr_str = pestrndup(addr_str->val, addr_str->len, 1);
-		client->addr_str_len = addr_str->len;
+		client->addr_str = pestrndup(ZSTR_VAL(addr_str), ZSTR_LEN(addr_str), 1);
+		client->addr_str_len = ZSTR_LEN(addr_str);
 		zend_string_release(addr_str);
 	}
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
@@ -1832,7 +1832,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, escaped_request_uri->val);
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, ZSTR_VAL(escaped_request_uri));
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
@@ -1852,11 +1852,11 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 	{
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + escaped_request_uri->len + 3 + strlen(status_string) + 1);
+		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, escaped_request_uri->val);
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
@@ -1884,7 +1884,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
-		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 		if (!chunk) {
 			smart_str_free(&buffer);
 			goto fail;
@@ -1974,7 +1974,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		smart_str_append_unsigned_ex(&buffer, client->request.sb.st_size, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
-		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
 		if (!chunk) {
 			smart_str_free(&buffer);
 			php_cli_server_log_response(client, 500, NULL);
@@ -2212,7 +2212,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
 	if (server_sock == SOCK_ERR) {
-		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)", host, port, errstr ? errstr->val : "?");
+		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
 		if (errstr) {
 			zend_string_release(errstr);
 		}

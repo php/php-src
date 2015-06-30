@@ -265,14 +265,14 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 			zend_string *str;
 
 			if (OP1_TYPE != IS_CONST) {
-				if (UNEXPECTED(op1_str->len == 0)) {
+				if (UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 					ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
 					FREE_OP1();
 					break;
 				}
 			}
 			if (OP2_TYPE != IS_CONST) {
-				if (UNEXPECTED(op2_str->len == 0)) {
+				if (UNEXPECTED(ZSTR_LEN(op2_str) == 0)) {
 					ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
 					FREE_OP1();
 					break;
@@ -280,16 +280,16 @@ ZEND_VM_HANDLER(8, ZEND_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 			}
 			if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_CV &&
 			    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
-			    size_t len = op1_str->len;
+			    size_t len = ZSTR_LEN(op1_str);
 
-				str = zend_string_realloc(op1_str, len + op2_str->len, 0);
-				memcpy(str->val + len, op2_str->val, op2_str->len+1);
+				str = zend_string_realloc(op1_str, len + ZSTR_LEN(op2_str), 0);
+				memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 				break;
 			} else {
-				str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-				memcpy(str->val, op1_str->val, op1_str->len);
-				memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+				str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
+				memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
+				memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 				ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 			}
 		} else {
@@ -1452,14 +1452,14 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMPVAR|CV, ANY)
 	if (Z_TYPE_P(z) == IS_STRING) {
 		zend_string *str = Z_STR_P(z);
 
-		if (str->len != 0) {
-			zend_write(str->val, str->len);
+		if (ZSTR_LEN(str) != 0) {
+			zend_write(ZSTR_VAL(str), ZSTR_LEN(str));
 		}
 	} else {
 		zend_string *str = _zval_get_string_func(z);
 
-		if (str->len != 0) {
-			zend_write(str->val, str->len);
+		if (ZSTR_LEN(str) != 0) {
+			zend_write(ZSTR_VAL(str), ZSTR_LEN(str));
 		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(z) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(z, BP_VAR_R);
 		}
@@ -1506,7 +1506,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
@@ -1533,7 +1533,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 				
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
@@ -1558,13 +1558,13 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable: %s", name->val);
+					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable: %s", name->val);
+					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
 					/* break missing intentionally */
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
@@ -1578,13 +1578,13 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 				switch (type) {
 					case BP_VAR_R:
 					case BP_VAR_UNSET:
-						zend_error(E_NOTICE,"Undefined variable: %s", name->val);
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
 						/* break missing intentionally */
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval);
 						break;
 					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined variable: %s", name->val);
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
 						/* break missing intentionally */
 					case BP_VAR_W:
 						ZVAL_NULL(retval);
@@ -2728,7 +2728,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	}
 	do {
 		if (OP1_TYPE != IS_CONST) {
-			if (UNEXPECTED(op1_str->len == 0)) {
+			if (UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 				if (OP2_TYPE == IS_CONST) {
 					zend_string_addref(op2_str);
 				}
@@ -2738,7 +2738,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 			}
 		}
 		if (OP2_TYPE != IS_CONST) {
-			if (UNEXPECTED(op2_str->len == 0)) {
+			if (UNEXPECTED(ZSTR_LEN(op2_str) == 0)) {
 				if (OP1_TYPE == IS_CONST) {
 					zend_string_addref(op1_str);
 				}
@@ -2747,9 +2747,9 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 				break;
 			}
 		}
-		str = zend_string_alloc(op1_str->len + op2_str->len, 0);
-		memcpy(str->val, op1_str->val, op1_str->len);
-		memcpy(str->val + op1_str->len, op2_str->val, op2_str->len+1);
+		str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
+		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
+		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (OP1_TYPE != IS_CONST) {
 			zend_string_release(op1_str);
@@ -3012,7 +3012,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", obj->ce->name->val, Z_STRVAL_P(function_name));
+				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
 			}
 			FREE_OP2();
 			FREE_OP1();
@@ -3110,7 +3110,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
 			}
 			FREE_OP2();
 			HANDLE_EXCEPTION();
@@ -3133,7 +3133,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 			HANDLE_EXCEPTION();
 		}
 		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -3150,14 +3150,14 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 				zend_error(
 					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically",
-					fbc->common.scope->name->val, fbc->common.function_name->val);
+					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			} else {
 				/* An internal function assumes $this is present and won't check that.
 				 * So PHP would crash by allowing the call. */
 				zend_error(
 					E_EXCEPTION | E_ERROR,
 					"Non-static method %s::%s() cannot be called statically",
-					fbc->common.scope->name->val, fbc->common.function_name->val);
+					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -3254,7 +3254,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", called_scope->name->val, mname->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
 				}
 				zend_string_release(lcname);
 				zend_string_release(mname);
@@ -3269,12 +3269,12 @@ ZEND_VM_C_LABEL(try_function_name):
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
-						fbc->common.scope->name->val, fbc->common.function_name->val);
+						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				} else {
 					zend_error(
 						E_EXCEPTION | E_ERROR,
 						"Non-static method %s::%s() cannot be called statically",
-						fbc->common.scope->name->val, fbc->common.function_name->val);
+						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
@@ -3282,7 +3282,7 @@ ZEND_VM_C_LABEL(try_function_name):
 		} else {
 			if (Z_STRVAL_P(function_name)[0] == '\\') {
 				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
-				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
+				zend_str_tolower_copy(ZSTR_VAL(lcname), Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
 			} else {
 				lcname = zend_string_tolower(Z_STR_P(function_name));
 			}
@@ -3352,7 +3352,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", called_scope->name->val, Z_STRVAL_P(method));
+					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
 				}
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3361,12 +3361,12 @@ ZEND_VM_C_LABEL(try_function_name):
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
-						fbc->common.scope->name->val, fbc->common.function_name->val);
+						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				} else {
 					zend_error(
 						E_EXCEPTION | E_ERROR,
 						"Non-static method %s::%s() cannot be called statically",
-						fbc->common.scope->name->val, fbc->common.function_name->val);
+						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
@@ -3378,7 +3378,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", object->ce->name->val, Z_STRVAL_P(method));
+					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
 				}
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3452,7 +3452,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 			/* This is the only soft error is_callable() can generate */
 			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
-				func->common.scope->name->val, func->common.function_name->val);
+				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -3648,9 +3648,9 @@ ZEND_VM_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? fbc->common.scope->name->val : "",
+				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 				fbc->common.scope ? "::" : "",
-				fbc->common.function_name->val);
+				ZSTR_VAL(fbc->common.function_name));
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
@@ -3722,14 +3722,14 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? fbc->common.scope->name->val : "",
+				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 				fbc->common.scope ? "::" : "",
-				fbc->common.function_name->val);
+				ZSTR_VAL(fbc->common.function_name));
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
@@ -4488,7 +4488,7 @@ ZEND_VM_C_LABEL(send_again):
 				FREE_OP1();
 				if (!EG(exception)) {
 					zend_throw_exception_ex(
-						NULL, 0, "Object of type %s did not create an Iterator", ce->name->val
+						NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name)
 					);
 				}
 				HANDLE_EXCEPTION();
@@ -4534,9 +4534,9 @@ ZEND_VM_C_LABEL(send_again):
 					zend_error(
 						E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 						" by unpacking a Traversable, passing by-value instead", arg_num,
-						EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+						EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 						EX(call)->func->common.scope ? "::" : "",
-						EX(call)->func->common.function_name->val
+						ZSTR_VAL(EX(call)->func->common.function_name)
 					);
 				}
 
@@ -4636,9 +4636,9 @@ ZEND_VM_C_LABEL(send_array):
 
 						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 							arg_num,
-							EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 							EX(call)->func->common.scope ? "::" : "",
-							EX(call)->func->common.function_name->val);
+							ZSTR_VAL(EX(call)->func->common.function_name));
 
 						if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
 							OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
@@ -4694,9 +4694,9 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 
 				zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
 					opline->op2.num,
-					EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
+					EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
 					EX(call)->func->common.scope ? "::" : "",
-					EX(call)->func->common.function_name->val);
+					ZSTR_VAL(EX(call)->func->common.function_name));
 
 				if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
 					OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
@@ -5051,7 +5051,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error(E_EXCEPTION | E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
+			zend_error(E_EXCEPTION | E_ERROR, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 		} else {
 			zend_error(E_EXCEPTION | E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -5064,7 +5064,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (UNEXPECTED(ce != EG(scope))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name->val, EG(scope) ? EG(scope)->name->val : "");
+				zend_error(E_EXCEPTION | E_ERROR, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
@@ -5072,7 +5072,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name->val, EG(scope) ? EG(scope)->name->val : "");
+				zend_error(E_EXCEPTION | E_ERROR, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
@@ -5477,7 +5477,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 
 					if (failure_retval) {
 						/* do nothing, file already included */
-					} else if (SUCCESS == zend_stream_open(resolved_path->val, &file_handle)) {
+					} else if (SUCCESS == zend_stream_open(ZSTR_VAL(resolved_path), &file_handle)) {
 
 						if (!file_handle.opened_path) {
 							file_handle.opened_path = zend_string_copy(resolved_path);
@@ -5853,7 +5853,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				FREE_OP1();
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
+					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
 				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
@@ -6004,7 +6004,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 					FREE_OP1();
 				}
 				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
+					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
 				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
@@ -6151,7 +6151,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 			if (opline->result_type == IS_TMP_VAR) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (p->key->val[0]) {
+				} else if (ZSTR_VAL(p->key)[0]) {
 					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
 				} else {
 					const char *class_name, *prop_name;
@@ -6342,7 +6342,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 			if (opline->result_type == IS_TMP_VAR) {
 				if (UNEXPECTED(!p->key)) {
 					ZVAL_LONG(EX_VAR(opline->result.var), p->h);
-				} else if (p->key->val[0]) {
+				} else if (ZSTR_VAL(p->key)[0]) {
 					ZVAL_STR_COPY(EX_VAR(opline->result.var), p->key);
 				} else {
 					const char *class_name, *prop_name;
@@ -7125,7 +7125,7 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 	}
 
 	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name->val, iface->name->val);
+		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 	}
 	zend_do_implement_interface(ce, iface);
 
@@ -7151,7 +7151,7 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
 			ZEND_VM_NEXT_OPCODE();
 		}
 		if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
-			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name->val, trait->name->val);
+			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ZSTR_VAL(ce->name), ZSTR_VAL(trait->name));
 		}
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), trait);
 	}
@@ -7550,7 +7550,7 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ce->name->val);
+					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
 				HANDLE_EXCEPTION();
 			}
@@ -7700,10 +7700,10 @@ ZEND_VM_HANDLER(168, ZEND_BIND_GLOBAL, CV, CONST)
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 	        (EXPECTED(p->key == Z_STR_P(varname)) ||
-	         (EXPECTED(p->h == Z_STR_P(varname)->h) &&
+	         (EXPECTED(p->h == ZSTR_H(Z_STR_P(varname))) &&
 	          EXPECTED(p->key != NULL) &&
-	          EXPECTED(p->key->len == Z_STRLEN_P(varname)) &&
-	          EXPECTED(memcmp(p->key->val, Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
+	          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname)) &&
+	          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
 
 			value = &EG(symbol_table).arData[idx].val;
 			ZEND_VM_C_GOTO(check_indirect);
@@ -7790,7 +7790,7 @@ ZEND_VM_C_LABEL(try_strlen):
 
 				ZVAL_COPY(&tmp, value);
 				if (zend_parse_arg_str_weak(&tmp, &str)) {
-					ZVAL_LONG(EX_VAR(opline->result.var), str->len);
+					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
 				}
@@ -7818,8 +7818,8 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 		if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ce->name->len != sizeof("__PHP_Incomplete_Class") - 1) ||
-			    EXPECTED(memcmp(ce->name->val, "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
+			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}
 		} else if (UNEXPECTED(Z_TYPE_P(value) == IS_RESOURCE)) {

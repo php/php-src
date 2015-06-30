@@ -842,9 +842,9 @@ int pass_two_wrapper(zval *el)
 
 int print_class(zend_class_entry *class_entry)
 {
-	printf("Class %s:\n", class_entry->name->val);
+	printf("Class %s:\n", ZSTR_VAL(class_entry->name));
 	zend_hash_apply(&class_entry->function_table, pass_two_wrapper);
-	printf("End of class %s.\n\n", class_entry->name->val);
+	printf("End of class %s.\n\n", ZSTR_VAL(class_entry->name));
 	return 0;
 }
 

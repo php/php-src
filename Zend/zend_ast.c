@@ -557,8 +557,8 @@ static void zend_ast_export_str(smart_str *str, zend_string *s)
 {
 	size_t i;
 
-	for (i = 0; i < s->len; i++) {
-		unsigned char c = s->val[i];
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		unsigned char c = ZSTR_VAL(s)[i];
 		if (c == '\'' || c == '\\') {
 			smart_str_appendc(str, '\\');
 			smart_str_appendc(str, c);
@@ -572,8 +572,8 @@ static void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
 {
 	size_t i;
 
-	for (i = 0; i < s->len; i++) {
-		unsigned char c = s->val[i];
+	for (i = 0; i < ZSTR_LEN(s); i++) {
+		unsigned char c = ZSTR_VAL(s)[i];
 		if (c < ' ') {
 			switch (c) {
 				case '\n':
@@ -879,7 +879,7 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 			break;
 		case IS_DOUBLE:
 			key = zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
-			smart_str_appendl(str, key->val, key->len);
+			smart_str_appendl(str, ZSTR_VAL(key), ZSTR_LEN(key));
 			zend_string_release(key);
 			break;
 		case IS_STRING:
@@ -1006,7 +1006,7 @@ tail_call:
 				smart_str_appendc(str, '&');
 			}
 			if (ast->kind != ZEND_AST_CLOSURE) {
-				smart_str_appendl(str, decl->name->val, decl->name->len);
+				smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
 			}
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, decl->child[0], 0, indent);
@@ -1043,7 +1043,7 @@ tail_call:
 				}
 				smart_str_appends(str, "class ");
 			}
-			smart_str_appendl(str, decl->name->val, decl->name->len);
+			smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
 			if (decl->child[0]) {
 				smart_str_appends(str, " extends ");
 				zend_ast_export_ns_name(str, decl->child[0], 0, indent);

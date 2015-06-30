@@ -608,11 +608,11 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	fci.params = NULL;
 	fci.no_separation = 1;
 	if (zend_call_function(&fci, NULL) == SUCCESS) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ex->ce->name->val, Z_STRLEN(trace), Z_STRVAL(trace));
+		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ZSTR_VAL(ex->ce->name), Z_STRLEN(trace), Z_STRVAL(trace));
 
 		zval_ptr_dtor(&trace);
 	} else {
-		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ex->ce->name->val);
+		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ZSTR_VAL(ex->ce->name));
 	}
 
 	/* output useful information about address */
@@ -1467,7 +1467,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
 			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 
-			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught exception %s in %s on line %lld", exception->ce->name->val, file->val, line);
+			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught exception %s in %s on line %lld", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line);
 			zend_string_release(file);
 			DO_INTERACTIVE(1);
 		}

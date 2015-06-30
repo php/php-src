@@ -69,7 +69,7 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 	if (!new_value) {
 		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
 	} else {
-		EG(error_reporting) = atoi(new_value->val);
+		EG(error_reporting) = atoi(ZSTR_VAL(new_value));
 	}
 	return SUCCESS;
 }
@@ -95,7 +95,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 	if (!zend_multibyte_get_functions()) {
 		return SUCCESS;
 	}
-	return zend_multibyte_set_script_encoding_by_string(new_value ? new_value->val : NULL, new_value ? new_value->len : 0);
+	return zend_multibyte_set_script_encoding_by_string(new_value ? ZSTR_VAL(new_value) : NULL, new_value ? ZSTR_LEN(new_value) : 0);
 }
 /* }}} */
 
@@ -112,7 +112,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	val = zend_atol(new_value->val, (int)new_value->len);
+	val = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -199,7 +199,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 					}
 				}
 			} else {
-				ZEND_WRITE_EX(string_key->val, string_key->len);
+				ZEND_WRITE_EX(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 			}
 		} else {
 			char key[25];
@@ -231,7 +231,7 @@ static void print_flat_hash(HashTable *ht) /* {{{ */
 		}
 		ZEND_PUTS("[");
 		if (string_key) {
-			ZEND_WRITE(string_key->val, string_key->len);
+			ZEND_WRITE(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 		} else {
 			zend_printf(ZEND_ULONG_FMT, num_key);
 		}
@@ -261,10 +261,10 @@ ZEND_API size_t zend_print_zval(zval *expr, int indent) /* {{{ */
 ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent) /* {{{ */
 {
 	zend_string *str = zval_get_string(expr);
-	size_t len = str->len;
+	size_t len = ZSTR_LEN(str);
 
 	if (len != 0) {
-		write_func(str->val, len);
+		write_func(ZSTR_VAL(str), len);
 	}
 
 	zend_string_release(str);
@@ -293,7 +293,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 		{
 			HashTable *properties = NULL;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
-			zend_printf("%s Object (", class_name->val);
+			zend_printf("%s Object (", ZSTR_VAL(class_name));
 			zend_string_release(class_name);
 
 			if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
@@ -348,7 +348,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				int is_temp;
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
-				ZEND_PUTS_EX(class_name->val);
+				ZEND_PUTS_EX(ZSTR_VAL(class_name));
 				zend_string_release(class_name);
 
 				ZEND_PUTS_EX(" Object\n");
@@ -1121,7 +1121,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 		case E_USER_DEPRECATED:
 		case E_RECOVERABLE_ERROR:
 			if (zend_is_compiling()) {
-				error_filename = zend_get_compiled_filename()->val;
+				error_filename = ZSTR_VAL(zend_get_compiled_filename());
 				error_lineno = zend_get_compiled_lineno();
 			} else if (zend_is_executing()) {
 				error_filename = zend_get_executed_filename();
@@ -1435,7 +1435,7 @@ ZEND_API char *zend_make_compiled_string_description(const char *name) /* {{{ */
 	char *compiled_string_description;
 
 	if (zend_is_compiling()) {
-		cur_filename = zend_get_compiled_filename()->val;
+		cur_filename = ZSTR_VAL(zend_get_compiled_filename());
 		cur_lineno = zend_get_compiled_lineno();
 	} else if (zend_is_executing()) {
 		cur_filename = zend_get_executed_filename();

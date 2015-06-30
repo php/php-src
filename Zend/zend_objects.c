@@ -97,8 +97,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to private %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
+						ZSTR_VAL(ce->name),
+						EG(scope) ? ZSTR_VAL(EG(scope)->name) : "",
 						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -110,8 +110,8 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
 						"Call to protected %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
+						ZSTR_VAL(ce->name),
+						EG(scope) ? ZSTR_VAL(EG(scope)->name) : "",
 						EG(current_execute_data) ? "" : " during shutdown ignored");
 					return;
 				}

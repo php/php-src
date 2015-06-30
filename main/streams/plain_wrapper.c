@@ -207,7 +207,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 			stream->wrapper = &php_plain_files_wrapper;
-			stream->orig_path = estrndup(opened_path->val, opened_path->len);
+			stream->orig_path = estrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path));
 
 			self->temp_name = opened_path;
 			self->lock_flag = LOCK_UN;
@@ -451,7 +451,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 			return 0; /* everything should be closed already -> success */
 		}
 		if (data->temp_name) {
-			unlink(data->temp_name->val);
+			unlink(ZSTR_VAL(data->temp_name));
 			/* temporary streams are never persistent */
 			zend_string_release(data->temp_name);
 			data->temp_name = NULL;
@@ -1469,8 +1469,8 @@ not_relative_path:
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
-		const char *exec_fname = exec_filename->val;
-		size_t exec_fname_length = exec_filename->len;
+		const char *exec_fname = ZSTR_VAL(exec_filename);
+		size_t exec_fname_length = ZSTR_LEN(exec_filename);
 
 		while ((--exec_fname_length < SIZE_MAX) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname_length<=0) {

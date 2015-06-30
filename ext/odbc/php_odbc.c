@@ -526,9 +526,9 @@ static PHP_INI_DISP(display_link_nums)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -550,9 +550,9 @@ static PHP_INI_DISP(display_defPW)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -580,9 +580,9 @@ static PHP_INI_DISP(display_binmode)
 	char *value;
 	
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -610,9 +610,9 @@ static PHP_INI_DISP(display_lrl)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -635,9 +635,9 @@ static PHP_INI_DISP(display_cursortype)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -3046,16 +3046,16 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 		ptr = zend_string_alloc(len + 1, 0);
 		if (mode == 0) {
-			strlcpy(ptr->val, conn->laststate, len+1);
+			strlcpy(ZSTR_VAL(ptr), conn->laststate, len+1);
 		} else {
-			strlcpy(ptr->val, conn->lasterrormsg, len+1);
+			strlcpy(ZSTR_VAL(ptr), conn->lasterrormsg, len+1);
 		}
 	} else {
 		ptr = zend_string_alloc(len, 0);
 		if (mode == 0) {
-			strlcpy(ptr->val, ODBCG(laststate), len+1);
+			strlcpy(ZSTR_VAL(ptr), ODBCG(laststate), len+1);
 		} else {
-			strlcpy(ptr->val, ODBCG(lasterrormsg), len+1);
+			strlcpy(ZSTR_VAL(ptr), ODBCG(lasterrormsg), len+1);
 		}
 	}
 	RETVAL_STR(ptr);

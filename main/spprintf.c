@@ -145,8 +145,8 @@
 		((smart_string *)(xbuf))->len += (count); \
 	} else { \
 		smart_str_alloc(((smart_str *)(xbuf)), (count), 0); \
-		memset(((smart_str *)(xbuf))->s->val + ((smart_str *)(xbuf))->s->len, (ch), (count)); \
-		((smart_str *)(xbuf))->s->len += (count); \
+		memset(ZSTR_VAL(((smart_str *)(xbuf))->s) + ZSTR_LEN(((smart_str *)(xbuf))->s), (ch), (count)); \
+		ZSTR_LEN(((smart_str *)(xbuf))->s) += (count); \
 	} \
 } while (0);
 
@@ -741,7 +741,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 'n':
-					*(va_arg(ap, int *)) = is_char? (int)((smart_string *)xbuf)->len : (int)((smart_str *)xbuf)->s->len;
+					*(va_arg(ap, int *)) = is_char? (int)((smart_string *)xbuf)->len : (int)ZSTR_LEN(((smart_str *)xbuf)->s);
 					goto skip_output;
 
 					/*
@@ -883,8 +883,8 @@ PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) 
 
 	xbuf_format_converter(&buf, 0, format, ap);
 
-	if (max_len && buf.s && buf.s->len > max_len) {
-		buf.s->len = max_len;
+	if (max_len && buf.s && ZSTR_LEN(buf.s) > max_len) {
+		ZSTR_LEN(buf.s) = max_len;
 	}
 	smart_str_0(&buf);
 

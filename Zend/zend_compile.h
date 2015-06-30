@@ -396,7 +396,7 @@ typedef struct _zend_internal_function {
 	struct _zend_module_entry *module;
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name->val : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */

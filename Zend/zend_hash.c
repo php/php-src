@@ -421,8 +421,8 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		} else if (EXPECTED(p->h == h) &&
 		     EXPECTED(p->key) &&
-		     EXPECTED(p->key->len == key->len) &&
-		     EXPECTED(memcmp(p->key->val, key->val, key->len) == 0)) {
+		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key)) &&
+		     EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
@@ -444,8 +444,8 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (p->key->len == len)
-			 && !memcmp(p->key->val, str, len)) {
+			 && (ZSTR_LEN(p->key) == len)
+			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
@@ -529,7 +529,7 @@ add_to_hash:
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_hash_val(key);
 	}
-	p->h = h = key->h;
+	p->h = h = ZSTR_H(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
@@ -986,8 +986,8 @@ ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 		if ((p->key == key) ||
 			(p->h == h &&
 		     p->key &&
-		     p->key->len == key->len &&
-		     memcmp(p->key->val, key->val, key->len) == 0)) {
+		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
+		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
@@ -1017,8 +1017,8 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 		if ((p->key == key) ||
 			(p->h == h &&
 		     p->key &&
-		     p->key->len == key->len &&
-		     memcmp(p->key->val, key->val, key->len) == 0)) {
+		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
+		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -1060,8 +1060,8 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (p->key->len == len)
-			 && !memcmp(p->key->val, str, len)) {
+			 && (ZSTR_LEN(p->key) == len)
+			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -1103,8 +1103,8 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, siz
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (p->key->len == len)
-			 && !memcmp(p->key->val, str, len)) {
+			 && (ZSTR_LEN(p->key) == len)
+			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
@@ -2231,11 +2231,11 @@ static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *
 					return p1->h > p2->h ? 1 : -1;
 				}
 			} else if (p1->key != NULL && p2->key != NULL) { /* string indices */
-				if (p1->key->len != p2->key->len) {
-					return p1->key->len > p2->key->len ? 1 : -1;
+				if (ZSTR_LEN(p1->key) != ZSTR_LEN(p2->key)) {
+					return ZSTR_LEN(p1->key) > ZSTR_LEN(p2->key) ? 1 : -1;
 				}
 
-				result = memcmp(p1->key->val, p2->key->val, p1->key->len);
+				result = memcmp(ZSTR_VAL(p1->key), ZSTR_VAL(p2->key), ZSTR_LEN(p1->key));
 				if (result != 0) {
 					return result;
 				}

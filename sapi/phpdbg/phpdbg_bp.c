@@ -284,7 +284,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 
 				phpdbg_debug("Compare against loaded %s\n", file);
 
-				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(file->val, file->len, path_str, broken)) == NULL))) {
+				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(ZSTR_VAL(file), ZSTR_LEN(file), path_str, broken)) == NULL))) {
 					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(broken, line_num);
 					break;
 				}
@@ -308,9 +308,9 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 
 PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht) /* {{{ */
 {
-	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, cur->val, cur->len, filelen > cur->len ? file[filelen - cur->len - 1] : '?', filelen > cur->len ? memcmp(file + filelen - cur->len, cur->val, cur->len) : 0);
+	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, ZSTR_VAL(cur), ZSTR_LEN(cur), filelen > ZSTR_LEN(cur) ? file[filelen - ZSTR_LEN(cur) - 1] : '?', filelen > ZSTR_LEN(cur) ? memcmp(file + filelen - ZSTR_LEN(cur), ZSTR_VAL(cur), ZSTR_LEN(cur)) : 0);
 
-	if (((cur->len < filelen && file[filelen - cur->len - 1] == '/') || filelen == cur->len) && !memcmp(file + filelen - cur->len, cur->val, cur->len)) {
+	if (((ZSTR_LEN(cur) < filelen && file[filelen - ZSTR_LEN(cur) - 1] == '/') || filelen == ZSTR_LEN(cur)) && !memcmp(file + filelen - ZSTR_LEN(cur), ZSTR_VAL(cur), ZSTR_LEN(cur))) {
 		phpdbg_breakfile_t *brake, new_brake;
 		HashTable *master;
 
@@ -529,7 +529,7 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 			zend_execute_data *execute_data = EG(current_execute_data);
 			do {
 				zend_op_array *op_array = &execute_data->func->op_array;
-				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == op_array->filename->len && !memcmp(op_array->filename->val, new_break->class_name, new_break->class_len)) {
+				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == ZSTR_LEN(op_array->filename) && !memcmp(ZSTR_VAL(op_array->filename), new_break->class_name, new_break->class_len)) {
 					if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
 						return SUCCESS;
 					} else {
@@ -848,7 +848,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_
 	phpdbg_breakbase_t *brake;
 	size_t path_len;
 	char realpath[MAXPATHLEN];
-	const char *path = op_array->filename->val;
+	const char *path = ZSTR_VAL(op_array->filename);
 
 	if (VCWD_REALPATH(path, realpath)) {
 		path = realpath;
@@ -889,8 +889,8 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *f
 	}
 
 	if (ops->function_name) {
-		fname = ops->function_name->val;
-		flen = ops->function_name->len;
+		fname = ZSTR_VAL(ops->function_name);
+		flen = ZSTR_LEN(ops->function_name);
 	} else {
 		fname = "main";
 		flen = 4;
@@ -905,8 +905,8 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *o
 	phpdbg_breakbase_t *brake = NULL;
 
 	if ((class_table = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name))) {
-		size_t lcname_len = ops->function_name->len;
-		char *lcname = zend_str_tolower_dup(ops->function_name->val, lcname_len);
+		size_t lcname_len = ZSTR_LEN(ops->function_name);
+		char *lcname = zend_str_tolower_dup(ZSTR_VAL(ops->function_name), lcname_len);
 
 		brake = zend_hash_str_find_ptr(class_table, lcname, lcname_len);
 
@@ -955,8 +955,8 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 				const char *str = NULL;
 				size_t len = 0L;
 				zend_op_array *ops = (zend_op_array*)function;
-				str = ops->function_name ? ops->function_name->val : "main";
-				len = ops->function_name ? ops->function_name->len : strlen(str);
+				str = ops->function_name ? ZSTR_VAL(ops->function_name) : "main";
+				len = ops->function_name ? ZSTR_LEN(ops->function_name) : strlen(str);
 
 				if (len == param->len && memcmp(param->str, str, len) == SUCCESS) {
 					return param->type == STR_PARAM || execute_data->opline - ops->opcodes == param->num;
@@ -986,10 +986,10 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 				zend_op_array *ops = (zend_op_array*) function;
 
 				if (ops->scope) {
-					size_t lengths[2] = { strlen(param->method.class), ops->scope->name->len };
+					size_t lengths[2] = { strlen(param->method.class), ZSTR_LEN(ops->scope->name) };
 					if (lengths[0] == lengths[1] && memcmp(param->method.class, ops->scope->name, lengths[0]) == SUCCESS) {
 						lengths[0] = strlen(param->method.name);
-						lengths[1] = ops->function_name->len;
+						lengths[1] = ZSTR_LEN(ops->function_name);
 
 						if (lengths[0] == lengths[1] && memcmp(param->method.name, ops->function_name, lengths[0]) == SUCCESS) {
 							return param->type == METHOD_PARAM || (execute_data->opline - ops->opcodes) == param->num;

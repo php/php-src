@@ -278,14 +278,14 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	ALLOCA_FLAG(use_heap)
 
 	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		char *lcname = do_alloca(name->len + 1, use_heap);
-		zend_str_tolower_copy(lcname, name->val, name->len);
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, name->len)) != NULL) {
+		char *lcname = do_alloca(ZSTR_LEN(name) + 1, use_heap);
+		zend_str_tolower_copy(lcname, ZSTR_VAL(name), ZSTR_LEN(name));
+		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, ZSTR_LEN(name))) != NULL) {
 			if (c->flags & CONST_CS) {
 				c = NULL;
 			}
 		} else {
-			c = zend_get_special_constant(name->val, name->len);
+			c = zend_get_special_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 		}
 		free_alloca(lcname, use_heap);
 	}
@@ -299,8 +299,8 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	const char *colon;
 	zend_class_entry *ce = NULL;
 	zend_string *class_name;
-	const char *name = cname->val;
-	size_t name_len = cname->len;
+	const char *name = ZSTR_VAL(cname);
+	size_t name_len = ZSTR_LEN(cname);
 
 	/* Skip leading \\ */
 	if (name[0] == '\\') {
@@ -362,7 +362,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
+					zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 					zend_string_release(class_name);
 					zend_string_free(constant_name);
 					return NULL;
@@ -478,15 +478,15 @@ ZEND_API int zend_register_constant(zend_constant *c)
 #endif
 
 	if (!(c->flags & CONST_CS)) {
-		lowercase_name = zend_string_alloc(c->name->len, c->flags & CONST_PERSISTENT);
-		zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
+		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
+		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ZSTR_VAL(c->name), ZSTR_LEN(c->name));
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		name = lowercase_name;
 	} else {
-		char *slash = strrchr(c->name->val, '\\');
+		char *slash = strrchr(ZSTR_VAL(c->name), '\\');
 		if (slash) {
-			lowercase_name = zend_string_init(c->name->val, c->name->len, c->flags & CONST_PERSISTENT);
-			zend_str_tolower(lowercase_name->val, slash - c->name->val);
+			lowercase_name = zend_string_init(ZSTR_VAL(c->name), ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
+			zend_str_tolower(ZSTR_VAL(lowercase_name), slash - ZSTR_VAL(c->name));
 			lowercase_name = zend_new_interned_string(lowercase_name);
 			name = lowercase_name;
 		} else {
@@ -495,15 +495,15 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	}
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
-	if ((c->name->len == sizeof("__COMPILER_HALT_OFFSET__")-1
-		&& !memcmp(name->val, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
+	if ((ZSTR_LEN(c->name) == sizeof("__COMPILER_HALT_OFFSET__")-1
+		&& !memcmp(ZSTR_VAL(name), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
 		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL) {
 
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
-		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")-1
-			&& memcmp(name->val, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
+		if (ZSTR_VAL(c->name)[0] == '\0' && ZSTR_LEN(c->name) > sizeof("\0__COMPILER_HALT_OFFSET__")-1
+			&& memcmp(ZSTR_VAL(name), "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
 		}
-		zend_error(E_NOTICE,"Constant %s already defined", name->val);
+		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);

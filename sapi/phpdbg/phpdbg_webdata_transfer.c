@@ -167,8 +167,8 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len) {
 		PHP_VAR_SERIALIZE_INIT(var_hash);
 		php_var_serialize(&buf, &array, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
-		*msg = buf.s->val;
-		*len = buf.s->len;
+		*msg = ZSTR_VAL(buf.s);
+		*len = ZSTR_LEN(buf.s);
 	}
 
 	zval_dtor(&array);

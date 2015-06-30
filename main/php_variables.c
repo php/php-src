@@ -293,8 +293,8 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof)
 {
 	uint64_t max_vars = PG(max_input_vars);
 
-	vars->ptr = vars->str.s->val;
-	vars->end = vars->str.s->val + vars->str.s->len;
+	vars->ptr = ZSTR_VAL(vars->str.s);
+	vars->end = ZSTR_VAL(vars->str.s) + ZSTR_LEN(vars->str.s);
 	while (add_post_var(arr, vars, eof)) {
 		if (++vars->cnt > max_vars) {
 			php_error_docref(NULL, E_WARNING,
@@ -306,7 +306,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof)
 	}
 
 	if (!eof) {
-		memmove(vars->str.s->val, vars->ptr, vars->str.s->len = vars->end - vars->ptr);
+		memmove(ZSTR_VAL(vars->str.s), vars->ptr, ZSTR_LEN(vars->str.s) = vars->end - vars->ptr);
 	}
 	return SUCCESS;
 }
@@ -640,8 +640,8 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 				Z_ADDREF_P(src_entry);
 			}
 			if (string_key) {
-				if (!globals_check || string_key->len != sizeof("GLOBALS") - 1
-						|| memcmp(string_key->val, "GLOBALS", sizeof("GLOBALS") - 1)) {
+				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
+						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
 					zend_hash_update(dest, string_key, src_entry);
 				} else if (Z_REFCOUNTED_P(src_entry)) {
 					Z_DELREF_P(src_entry);

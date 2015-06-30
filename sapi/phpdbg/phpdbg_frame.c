@@ -148,7 +148,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 					if (func->type == ZEND_INTERNAL_FUNCTION) {
 						arg_name = (char *)((zend_internal_arg_info *)&arginfo[j])->name;
 					} else {
-						arg_name = arginfo[j].name->val;
+						arg_name = ZSTR_VAL(arginfo[j].name);
 					}
 				}
 

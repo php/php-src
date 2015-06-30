@@ -120,7 +120,7 @@ PHPDBG_INFO(constants) /* {{{ */
 		phpdbg_out("Address            Refs    Type      Constant\n");
 		ZEND_HASH_FOREACH_PTR(&consts, data) {
 
-#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("constant", "address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %.*s" msg, &data->value, Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, zend_zval_type_name(&data->value), data->name->len, data->name->val, ##__VA_ARGS__)
+#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("constant", "address=\"%p\" refcount=\"%d\" type=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %.*s" msg, &data->value, Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, zend_zval_type_name(&data->value), ZSTR_LEN(data->name), ZSTR_VAL(data->name), ##__VA_ARGS__)
 
 			switch (Z_TYPE(data->value)) {
 				case IS_STRING:
@@ -156,7 +156,7 @@ PHPDBG_INFO(constants) /* {{{ */
 static int phpdbg_arm_auto_global(zend_auto_global *auto_global) {
 	if (auto_global->armed) {
 		if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-			phpdbg_notice("variableinfo", "unreachable=\"%.*s\"", "Cannot show information about superglobal variable %.*s", auto_global->name->len, auto_global->name->val);
+			phpdbg_notice("variableinfo", "unreachable=\"%.*s\"", "Cannot show information about superglobal variable %.*s", ZSTR_LEN(auto_global->name), ZSTR_VAL(auto_global->name));
 		} else {
 			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
 		}
@@ -210,7 +210,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("variableinfo", "file=\"%s\" num=\"%d\"", "Variables in %s (%d)", ops->filename->val, zend_hash_num_elements(&vars));
+				phpdbg_notice("variableinfo", "file=\"%s\" num=\"%d\"", "Variables in %s (%d)", ZSTR_VAL(ops->filename), zend_hash_num_elements(&vars));
 			} else {
 				phpdbg_notice("variableinfo", "opline=\"%p\" num=\"%d\"", "Variables @ %p (%d)", ops, zend_hash_num_elements(&vars));
 			}
@@ -221,7 +221,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 		phpdbg_out("Address            Refs    Type      Variable\n");
 		ZEND_HASH_FOREACH_STR_KEY_VAL(&vars, var, data) {
 			phpdbg_try_access {
-#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNT_P(data), zend_zval_type_name(data), Z_ISREF_P(data) ? "&": "", var->len, var->val, ##__VA_ARGS__)
+#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%.*s\" " attrs, "%-18p %-7d %-9s %s$%.*s" msg, data, Z_REFCOUNT_P(data), zend_zval_type_name(data), Z_ISREF_P(data) ? "&": "", ZSTR_LEN(var), ZSTR_VAL(var), ##__VA_ARGS__)
 
 				switch (Z_TYPE_P(data)) {
 					case IS_RESOURCE:
@@ -300,7 +300,7 @@ PHPDBG_INFO(literal) /* {{{ */
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("literalinfo", "file=\"%s\" num=\"%d\"", "Literal Constants in %s (%d)", ops->filename->val, count);
+				phpdbg_notice("literalinfo", "file=\"%s\" num=\"%d\"", "Literal Constants in %s (%d)", ZSTR_VAL(ops->filename), count);
 			} else {
 				phpdbg_notice("literalinfo", "opline=\"%p\" num=\"%d\"", "Literal Constants @ %p (%d)", ops, count);
 			}
@@ -359,7 +359,7 @@ static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
 	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
 
-	phpdbg_writeln("class", "type=\"%s\" flags=\"%s\" name=\"%.*s\" methodcount=\"%d\"", "%s %s %.*s (%d)", visibility, type, ce->name->len, ce->name->val, zend_hash_num_elements(&ce->function_table));
+	phpdbg_writeln("class", "type=\"%s\" flags=\"%s\" name=\"%.*s\" methodcount=\"%d\"", "%s %s %.*s (%d)", visibility, type, ZSTR_LEN(ce->name), ZSTR_VAL(ce->name), zend_hash_num_elements(&ce->function_table));
 } /* }}} */
 
 PHPDBG_INFO(classes) /* {{{ */
@@ -397,7 +397,7 @@ PHPDBG_INFO(classes) /* {{{ */
 		}
 
 		if (ce->info.user.filename) {
-			phpdbg_writeln("classsource", "file=\"%s\" line=\"%u\"", "|---- in %s on line %u", ce->info.user.filename->val, ce->info.user.line_start);
+			phpdbg_writeln("classsource", "file=\"%s\" line=\"%u\"", "|---- in %s on line %u", ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
 		} else {
 			phpdbg_writeln("classsource", "", "|---- no source code");
 		}
@@ -430,10 +430,10 @@ PHPDBG_INFO(funcs) /* {{{ */
 	ZEND_HASH_FOREACH_PTR(&functions, zf) {
 		zend_op_array *op_array = &zf->op_array;
 
-		phpdbg_write("function", "name=\"%s\"", "|-------- %s", op_array->function_name ? op_array->function_name->val : "{main}");
+		phpdbg_write("function", "name=\"%s\"", "|-------- %s", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}");
 
 		if (op_array->filename) {
-			phpdbg_writeln("functionsource", "file=\"%s\" line=\"%d\"", " in %s on line %d", op_array->filename->val, op_array->line_start);
+			phpdbg_writeln("functionsource", "file=\"%s\" line=\"%d\"", " in %s on line %d", ZSTR_VAL(op_array->filename), op_array->line_start);
 		} else {
 			phpdbg_writeln("functionsource", "", " (no source code)");
 		}

@@ -831,8 +831,8 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 		readptr = (char*)stream->readbuf + stream->readpos;
 		avail = stream->writepos - stream->readpos;
 	} else {
-		readptr = buf->val;
-		avail = buf->len;
+		readptr = ZSTR_VAL(buf);
+		avail = ZSTR_LEN(buf);
 	}
 
 	/* Look for EOL */
@@ -1082,13 +1082,13 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 	ret_buf = zend_string_alloc(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
 	 * data is guaranteedly buffered */
-	ret_buf->len = php_stream_read(stream, ret_buf->val, tent_ret_len);
+	ZSTR_LEN(ret_buf) = php_stream_read(stream, ZSTR_VAL(ret_buf), tent_ret_len);
 
 	if (found_delim) {
 		stream->readpos += delim_len;
 		stream->position += delim_len;
 	}
-	ret_buf->val[ret_buf->len] = '\0';
+	ZSTR_VAL(ret_buf)[ZSTR_LEN(ret_buf)] = '\0';
 	return ret_buf;
 }
 
@@ -1435,7 +1435,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 
 	if (maxlen > 0) {
 		result = zend_string_alloc(maxlen, persistent);
-		ptr = result->val;
+		ptr = ZSTR_VAL(result);
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
 			if (!ret) {
@@ -1446,7 +1446,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 		if (len) {
 			*ptr = '\0';
-			result->len = len;
+			ZSTR_LEN(result) = len;
 		} else {
 			zend_string_free(result);
 			result = NULL;
@@ -1467,21 +1467,21 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	}
 
 	result = zend_string_alloc(max_len, persistent);
-	ptr = result->val;
+	ptr = ZSTR_VAL(result);
 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
 			result = zend_string_extend(result, max_len + step, persistent);
 			max_len += step;
-			ptr = result->val + len;
+			ptr = ZSTR_VAL(result) + len;
 		} else {
 			ptr += ret;
 		}
 	}
 	if (len) {
 		result = zend_string_truncate(result, len, persistent);
-		result->val[len] = '\0';
+		ZSTR_VAL(result)[len] = '\0';
 	} else {
 		zend_string_free(result);
 		result = NULL;
@@ -2033,7 +2033,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (options & USE_PATH) {
 		resolved_path = zend_resolve_path(path, (int)strlen(path));
 		if (resolved_path) {
-			path = resolved_path->val;
+			path = ZSTR_VAL(resolved_path);
 			/* we've found this file, don't re-check include_path or run realpath */
 			options |= STREAM_ASSUME_REALPATH;
 			options &= ~USE_PATH;
@@ -2253,7 +2253,7 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
  */
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b)
 {
-	return strcoll((*a)->val, (*b)->val);
+	return strcoll(ZSTR_VAL(*a), ZSTR_VAL(*b));
 }
 /* }}} */
 
@@ -2261,7 +2261,7 @@ PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string 
  */
 PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b)
 {
-	return strcoll((*b)->val, (*a)->val);
+	return strcoll(ZSTR_VAL(*b), ZSTR_VAL(*a));
 }
 /* }}} */
 

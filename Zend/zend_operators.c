@@ -158,7 +158,7 @@ try_again:
 				zend_string *str;
 
 				str = Z_STR_P(op);
-				if ((Z_TYPE_INFO_P(op)=is_numeric_string(str->val, str->len, &Z_LVAL_P(op), &Z_DVAL_P(op), 1)) == 0) {
+				if ((Z_TYPE_INFO_P(op)=is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &Z_LVAL_P(op), &Z_DVAL_P(op), 1)) == 0) {
 					ZVAL_LONG(op, 0);
 				}
 				zend_string_release(str);
@@ -232,7 +232,7 @@ try_again:
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE) {				\
 			zend_error(E_RECOVERABLE_ERROR,													\
-				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
+				"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
 			zend_get_type_by_const(ctype));													\
 		} 																					\
 	} else if (Z_OBJ_HT_P(op)->get) {														\
@@ -313,7 +313,7 @@ try_again:
 			{
 				zend_string *str = Z_STR_P(op);
 
-				ZVAL_LONG(op, ZEND_STRTOL(str->val, NULL, base));
+				ZVAL_LONG(op, ZEND_STRTOL(ZSTR_VAL(str), NULL, base));
 				zend_string_release(str);
 			}
 			break;
@@ -373,7 +373,7 @@ try_again:
 			{
 				zend_string *str = Z_STR_P(op);
 
-				ZVAL_DOUBLE(op, zend_strtod(str->val, NULL));
+				ZVAL_DOUBLE(op, zend_strtod(ZSTR_VAL(str), NULL));
 				zend_string_release(str);
 			}
 			break;
@@ -453,8 +453,8 @@ try_again:
 			{
 				zend_string *str = Z_STR_P(op);
 
-				if (str->len == 0
-					|| (str->len == 1 && str->val[0] == '0')) {
+				if (ZSTR_LEN(str) == 0
+					|| (ZSTR_LEN(str) == 1 && ZSTR_VAL(str)[0] == '0')) {
 					ZVAL_FALSE(op);
 				} else {
 					ZVAL_TRUE(op);
@@ -829,7 +829,7 @@ try_again:
 				}
 				zval_ptr_dtor(z);
 			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name->val);
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
 			return ZSTR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
@@ -1344,9 +1344,9 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 
 		str = zend_string_alloc(Z_STRLEN_P(longer), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] = Z_STRVAL_P(longer)[i] | Z_STRVAL_P(shorter)[i];
+			ZSTR_VAL(str)[i] = Z_STRVAL_P(longer)[i] | Z_STRVAL_P(shorter)[i];
 		}
-		memcpy(str->val + i, Z_STRVAL_P(longer) + i, Z_STRLEN_P(longer) - i + 1);
+		memcpy(ZSTR_VAL(str) + i, Z_STRVAL_P(longer) + i, Z_STRLEN_P(longer) - i + 1);
 		if (result==op1) {
 			zend_string_release(Z_STR_P(result));
 		}
@@ -1411,9 +1411,9 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 
 		str = zend_string_alloc(Z_STRLEN_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] = Z_STRVAL_P(shorter)[i] & Z_STRVAL_P(longer)[i];
+			ZSTR_VAL(str)[i] = Z_STRVAL_P(shorter)[i] & Z_STRVAL_P(longer)[i];
 		}
-		str->val[i] = 0;
+		ZSTR_VAL(str)[i] = 0;
 		if (result==op1) {
 			zend_string_release(Z_STR_P(result));
 		}
@@ -1478,9 +1478,9 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 
 		str = zend_string_alloc(Z_STRLEN_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] = Z_STRVAL_P(shorter)[i] ^ Z_STRVAL_P(longer)[i];
+			ZSTR_VAL(str)[i] = Z_STRVAL_P(shorter)[i] ^ Z_STRVAL_P(longer)[i];
 		}
-		str->val[i] = 0;
+		ZSTR_VAL(str)[i] = 0;
 		if (result==op1) {
 			zend_string_release(Z_STR_P(result));
 		}
@@ -1629,7 +1629,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 			result_str = zend_string_extend(Z_STR_P(result), result_len, 0);
 		} else {
 			result_str = zend_string_alloc(result_len, 0);
-			memcpy(result_str->val, Z_STRVAL_P(op1), op1_len);
+			memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
 		}
 
 		/* This has to happen first to account for the cases where result == op1 == op2 and
@@ -1637,8 +1637,8 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		 * point to the new string. The first op2_len bytes of result will still be the same. */
 		ZVAL_NEW_STR(result, result_str);
 
-		memcpy(result_str->val + op1_len, Z_STRVAL_P(op2), op2_len);
-		result_str->val[result_len] = '\0';
+		memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
+		ZSTR_VAL(result_str)[result_len] = '\0';
 	}
 
 	if (UNEXPECTED(use_copy1)) {
@@ -1657,9 +1657,9 @@ ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend
 	zend_string *str2 = zval_get_string(op2);
 
 	if (case_insensitive) {
-		ZVAL_LONG(result, zend_binary_strcasecmp_l(str1->val, str1->len, str2->val, str1->len));
+		ZVAL_LONG(result, zend_binary_strcasecmp_l(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1)));
 	} else {
-		ZVAL_LONG(result, zend_binary_strcmp(str1->val, str1->len, str2->val, str2->len));
+		ZVAL_LONG(result, zend_binary_strcmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2)));
 	}
 
 	zend_string_release(str1);
@@ -1681,7 +1681,7 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2) /* {{{ 
 		zend_string *str1 = zval_get_string(op1);
 		zend_string *str2 = zval_get_string(op2);
 
-		ZVAL_LONG(result, zend_binary_strcmp(str1->val, str1->len, str2->val, str2->len));
+		ZVAL_LONG(result, zend_binary_strcmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2)));
 
 		zend_string_release(str1);
 		zend_string_release(str2);
@@ -1703,7 +1703,7 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2) /*
 		zend_string *str1 = zval_get_string(op1);
 		zend_string *str2 = zval_get_string(op2);
 
-		ZVAL_LONG(result, zend_binary_strcasecmp_l(str1->val, str1->len, str2->val, str1->len));
+		ZVAL_LONG(result, zend_binary_strcasecmp_l(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1)));
 
 		zend_string_release(str1);
 		zend_string_release(str2);
@@ -1718,7 +1718,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2) 
 	zend_string *str1 = zval_get_string(op1);
 	zend_string *str2 = zval_get_string(op2);
 
-	ZVAL_LONG(result, strcoll(str1->val, str2->val));
+	ZVAL_LONG(result, strcoll(ZSTR_VAL(str1), ZSTR_VAL(str2)));
 
 	zend_string_release(str1);
 	zend_string_release(str2);
@@ -2186,17 +2186,17 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (carry) {
 		t = zend_string_alloc(Z_STRLEN_P(str)+1, 0);
-		memcpy(t->val + 1, Z_STRVAL_P(str), Z_STRLEN_P(str));
-		t->val[Z_STRLEN_P(str) + 1] = '\0';
+		memcpy(ZSTR_VAL(t) + 1, Z_STRVAL_P(str), Z_STRLEN_P(str));
+		ZSTR_VAL(t)[Z_STRLEN_P(str) + 1] = '\0';
 		switch (last) {
 			case NUMERIC:
-				t->val[0] = '1';
+				ZSTR_VAL(t)[0] = '1';
 				break;
 			case UPPER_CASE:
-				t->val[0] = 'A';
+				ZSTR_VAL(t)[0] = 'A';
 				break;
 			case LOWER_CASE:
-				t->val[0] = 'a';
+				ZSTR_VAL(t)[0] = 'a';
 				break;
 		}
 		zend_string_free(Z_STR_P(str));
@@ -2359,7 +2359,7 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 		if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL) == SUCCESS) {
 			return Z_TYPE(tmp) == IS_TRUE;
 		}
-		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
+		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", ZSTR_VAL(Z_OBJ_P(op)->ce->name));
 	} else if (Z_OBJ_HT_P(op)->get) {
 		int result;
 		zval rv;
@@ -2419,18 +2419,18 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str) /* {{{ */
 {
-	register unsigned char *p = (unsigned char*)str->val;
-	register unsigned char *end = p + str->len;
+	register unsigned char *p = (unsigned char*)ZSTR_VAL(str);
+	register unsigned char *end = p + ZSTR_LEN(str);
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = zend_string_alloc(str->len, 0);
+			zend_string *res = zend_string_alloc(ZSTR_LEN(str), 0);
 			register unsigned char *r;
 
-			if (p != (unsigned char*)str->val) {
-				memcpy(res->val, str->val, p - (unsigned char*)str->val);
+			if (p != (unsigned char*)ZSTR_VAL(str)) {
+				memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*)ZSTR_VAL(str));
 			}
-			r = p + (res->val - str->val);
+			r = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
 			while (p < end) {
 				*r = zend_tolower_ascii(*p);
 				p++;
@@ -2693,7 +2693,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 /* }}} */
 
 ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
-    return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
+    return is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, -1, NULL);
 }
 /* }}} */
 
