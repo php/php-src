@@ -4368,7 +4368,7 @@ ZEND_VM_C_LABEL(send_again):
 
 		zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, zend_hash_num_elements(ht));
 
-		if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+		if (!(OP1_TYPE & (IS_CONST|IS_TMP_VAR)) && Z_IMMUTABLE_P(args)) {
 			uint32_t i;
 			int separate = 0;
 
@@ -4546,7 +4546,7 @@ ZEND_VM_C_LABEL(send_array):
 		ht = Z_ARRVAL_P(args);
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
 
-		if (OP1_TYPE != IS_CONST && OP1_TYPE != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
+		if (!(OP1_TYPE & (IS_CONST|IS_TMP_VAR)) && Z_IMMUTABLE_P(args)) {
 			int separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
