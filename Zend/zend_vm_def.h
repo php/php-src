@@ -3237,6 +3237,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			
 			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
 			
+			object = NULL;
 			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(called_scope == NULL)) {
 				zend_string_release(lcname);
