@@ -399,9 +399,6 @@ END_EXTERN_C()
 #define PHP_STREAM_OPTION_READ_BUFFER	2
 #define PHP_STREAM_OPTION_WRITE_BUFFER	3
 
-/* Enable/disable blocking reads on anonymous pipes on Windows. */
-#define PHP_STREAM_OPTION_PIPE_BLOCKING 4
-
 #define PHP_STREAM_BUFFER_NONE	0	/* unbuffered */
 #define PHP_STREAM_BUFFER_LINE	1	/* line buffered */
 #define PHP_STREAM_BUFFER_FULL	2	/* fully buffered */
@@ -412,6 +409,9 @@ END_EXTERN_C()
 
 /* set or release lock on a stream */
 #define PHP_STREAM_OPTION_LOCKING		6
+
+/* Enable/disable blocking reads on anonymous pipes on Windows. */
+#define PHP_STREAM_OPTION_PIPE_BLOCKING 7
 
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1
