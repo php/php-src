@@ -1520,7 +1520,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_php_sapi_name, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_php_uname, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_php_uname, 0, 0, 0)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_php_ini_scanned_files, 0)
