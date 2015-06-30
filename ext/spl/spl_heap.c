@@ -694,7 +694,8 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	RETVAL_ZVAL(value_out, 1, 0);
+	ZVAL_DEREF(value_out);
+	ZVAL_COPY(return_value, value_out);
 	zval_ptr_dtor(&value);
 }
 /* }}} */
@@ -731,7 +732,8 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	RETURN_ZVAL(value_out, 1, 0);
+	ZVAL_DEREF(value_out);
+	ZVAL_COPY(return_value, value_out);
 }
 /* }}} */
 
@@ -844,7 +846,8 @@ SPL_METHOD(SplHeap, top)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -1032,7 +1035,8 @@ SPL_METHOD(SplHeap, current)
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
-		RETURN_ZVAL(element, 1, 0);
+		ZVAL_DEREF(element);
+		ZVAL_COPY(return_value, element);
 	}
 }
 /* }}} */
@@ -1058,7 +1062,8 @@ SPL_METHOD(SplPriorityQueue, current)
 			RETURN_NULL();
 		}
 
-		RETURN_ZVAL(data, 1, 0);
+		ZVAL_DEREF(data);
+		ZVAL_COPY(return_value, data);
 	}
 }
 /* }}} */

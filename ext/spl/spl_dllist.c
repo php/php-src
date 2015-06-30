@@ -654,7 +654,8 @@ SPL_METHOD(SplDoublyLinkedList, top)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -677,7 +678,8 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -795,10 +797,12 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		RETURN_ZVAL(&element->data, 1, 0);
+		zval *value = &element->data;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-		return;
 	}
 } /* }}} */
 
@@ -1117,7 +1121,10 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
-		RETURN_ZVAL(&element->data, 1, 0);
+		zval *value = &element->data;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 }
 /* }}} */

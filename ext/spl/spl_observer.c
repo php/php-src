@@ -485,7 +485,10 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	if (!element) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
 	} else {
-		RETURN_ZVAL(&element->inf, 1, 0);
+		zval *value = &element->inf;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 } /* }}} */
 
