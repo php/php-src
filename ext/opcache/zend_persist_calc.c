@@ -242,7 +242,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->T_liveliness) {
-		ADD_DUP_SIZE(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last - 1]);
+		ADD_DUP_SIZE(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last]);
 	}
 
 	if (op_array->vars) {

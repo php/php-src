@@ -864,7 +864,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	var_live_info **TsTop = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
 	var_live_info **Ts = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
 	int i, op_live_total = 0;
-	uint32_t *info, info_off = op_array->last;
+	uint32_t *info, info_off = op_array->last + 1;
 	op_var_info *opTsTop = zend_arena_alloc(&arena, sizeof(op_var_info) * (op_array->last + 1));
 	op_var_info **opTs = zend_arena_alloc(&arena, sizeof(op_var_info *) * (op_array->last + 1));
 
@@ -952,7 +952,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		} while ((T = T->next));
 	}
 
-	info = emalloc(op_live_total * sizeof(uint32_t) + op_array->last * sizeof(uint32_t));
+	info = emalloc(op_live_total * sizeof(uint32_t) + (op_array->last + 1) * sizeof(uint32_t));
 
 	for (i = 0; i < op_array->last; i++) {
 		op_var_info *opT = &opTsTop[i];
@@ -961,10 +961,11 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			opT = NULL;
 		}
 		while (opT) {
-			info[info_off++] = op_array->last_var + opT->T;
+			info[info_off++] = op_array->last_var + 1 + opT->T;
 			opT = opT->next;
 		}
 	}
+	info[i] = info_off;
 
 	zend_arena_destroy(arena);
 

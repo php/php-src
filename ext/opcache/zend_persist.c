@@ -619,7 +619,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->T_liveliness) {
-		zend_accel_store(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last - 1]);
+		zend_accel_store(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last]);
 	}
 
 	if (op_array->vars) {
