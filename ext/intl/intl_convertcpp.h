@@ -23,8 +23,8 @@
 #error Should be included only in C++ Files
 #endif
 
-#include <zend_types.h>
 #include <unicode/unistr.h>
+#include <zend_types.h>
 
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 
