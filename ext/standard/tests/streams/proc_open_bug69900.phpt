@@ -46,23 +46,23 @@ proc_close($process);
 ===DONE===
 --EXPECTF--
 hello0
-fgets() took %d.%dms
+fgets() took %d%sms
 hello1
-fgets() took 0.%dms
+fgets() took 0%sms
 hello2
-fgets() took 0.%dms
+fgets() took 0%sms
 hello3
-fgets() took 0.%dms
+fgets() took 0%sms
 hello4
-fgets() took 0.%dms
+fgets() took 0%sms
 hello5
-fgets() took 0.%dms
+fgets() took 0%sms
 hello6
-fgets() took 0.%dms
+fgets() took 0%sms
 hello7
-fgets() took 0.%dms
+fgets() took 0%sms
 hello8
-fgets() took 0.%dms
+fgets() took 0%sms
 hello9
-fgets() took 0.%dms
+fgets() took 0%sms
 ===DONE===
