@@ -1694,7 +1694,7 @@ static int mysqli_options_get_option_zval_type(int option)
 	switch (option) {
 #ifdef MYSQLI_USE_MYSQLND
 #if PHP_MAJOR_VERSION == 6
-		/* PHP-7 doesn't supprt unicode yet ??? */
+		/* PHP-7 doesn't supprt unicode */
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
