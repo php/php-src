@@ -99,16 +99,14 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 #else
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
-MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno)
+MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 {
 	MYSQLI_WARNING *w;
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_DUP(&w->reason, (zval *)reason);
+	ZVAL_COPY(&w->reason, reason);
 	convert_to_string(&w->reason);
-
-	//????ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
 
 	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
 
