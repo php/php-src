@@ -580,7 +580,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
-		    start_op = get_next_op_number(op_array);
+			start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array);
 			opline->opcode = ZEND_FAST_CALL;
@@ -853,13 +853,20 @@ typedef struct _var_live_info {
 	uint32_t end;
 } var_live_info;
 
+typedef struct _op_var_info {
+	struct _op_var_info *next;
+	uint32_t T;
+} op_var_info;
+
 ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 {
-	zend_arena *arena = zend_arena_create((sizeof(var_live_info) + 2 * sizeof(var_live_info *)) * op_array->T + sizeof(zend_op *) * op_array->last);
+	zend_arena *arena = zend_arena_create((sizeof(var_live_info) + sizeof(op_var_info) + 2 * sizeof(var_live_info *)) * op_array->T + (sizeof(op_var_info) + sizeof(op_var_info *) + sizeof(zend_op *)) * (op_array->last + 1));
 	var_live_info **TsTop = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
 	var_live_info **Ts = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
 	int i, op_live_total = 0;
 	uint32_t *info, info_off = op_array->last;
+	op_var_info *opTsTop = zend_arena_alloc(&arena, sizeof(op_var_info) * (op_array->last + 1));
+	op_var_info **opTs = zend_arena_alloc(&arena, sizeof(op_var_info *) * (op_array->last + 1));
 
 	for (i = 0; i < op_array->T; i++) {
 		TsTop[i] = Ts[i] = zend_arena_alloc(&arena, sizeof(var_live_info));
@@ -867,15 +874,26 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		Ts[i]->start = Ts[i]->end = -1;
 	}
 
+	for (i = 0; i <= op_array->last; i++) {
+		opTs[i] = &opTsTop[i];
+		opTs[i]->T = -1;
+		opTs[i]->next = NULL;
+	}
+
 	zend_op *end_op = op_array->opcodes + op_array->last;
 	zend_op *cur_op = op_array->opcodes;
 	for (; cur_op < end_op; cur_op++) {
 		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
 		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)
-		 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD) {
+		 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD
+		 && cur_op->opcode != ZEND_BOOL && cur_op->opcode != ZEND_JMPZ_EX && cur_op->opcode != ZEND_JMPNZ_EX
+		 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
+		 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
+		 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
+		 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
 			var_live_info *T = Ts[cur_op->result.var];
 			if (~T->end) {
-				T = Ts[i] = T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
+				T = Ts[cur_op->result.var] = T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
 				T->next = NULL;
 				T->start = T->end = -1;
 			}
@@ -891,42 +909,60 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
 		 && cur_op->opcode != ZEND_FE_FREE
 		 && cur_op->opcode != ZEND_ROPE_ADD && cur_op->opcode != ZEND_ROPE_END) {
-			Ts[cur_op->op1.var]->end = cur_op - op_array->opcodes;
-			if (cur_op->opcode == ZEND_OP_DATA) {
-				Ts[cur_op->op1.var]->end--;
+			var_live_info *T = Ts[cur_op->op1.var];
+			if (~T->start) {
+				T->end = cur_op - op_array->opcodes;
+				if (cur_op->opcode == ZEND_OP_DATA) {
+					T->end--;
+				}
 			}
 		}
 		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)) {
-			Ts[cur_op->op2.var]->end = cur_op - op_array->opcodes;
-			if (cur_op->opcode == ZEND_OP_DATA) {
-				Ts[cur_op->op2.var]->end--;
+			var_live_info *T = Ts[cur_op->op2.var];
+			if (~T->start) {
+				T->end = cur_op - op_array->opcodes;
+				if (cur_op->opcode == ZEND_OP_DATA) {
+					T->end--;
+				}
 			}
 		}
 	}
 
-	for (i = 0; i < op_array->last; i++) {
+	for (i = 0; i < op_array->T; i++) {
 		int j;
-		for (j = 0; j < op_array->T; j++) {
-			var_live_info *T = TsTop[j];
-			do {
-				op_live_total += i > T->start && i < T->end;
-			} while ((T = T->next));
+		var_live_info *T = TsTop[i];
+		if (!~T->start) {
+			continue;
 		}
+
+		do {
+			ZEND_ASSERT(~T->end);
+
+			for (j = T->start + 1; j < T->end; j++) {
+				if (op_array->opcodes[j].opcode != ZEND_THROW) {
+					op_var_info *opT = opTs[j];
+					if (~opT->T) {
+						opT = opTs[j] = opT->next = zend_arena_alloc(&arena, sizeof(op_var_info));
+						opT->next = NULL;
+					}
+					opT->T = i;
+					op_live_total++;
+				}
+			}
+		} while ((T = T->next));
 	}
 
 	info = emalloc(op_live_total * sizeof(uint32_t) + op_array->last * sizeof(uint32_t));
+
 	for (i = 0; i < op_array->last; i++) {
-		uint32_t j;
+		op_var_info *opT = &opTsTop[i];
 		info[i] = info_off;
-		if (op_array->opcodes[i].opcode != ZEND_THROW) {
-			for (j = 0; j < op_array->T; j++) {
-				var_live_info *T = TsTop[j];
-				do {
-					if (i > T->start && i < T->end) {
-						info[info_off++] = op_array->last_var + j;
-					}
-				} while ((T = T->next));
-			}
+		if (!~opT->T) {
+			opT = NULL;
+		}
+		while (opT) {
+			info[info_off++] = op_array->last_var + opT->T;
+			opT = opT->next;
 		}
 	}
 
