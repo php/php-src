@@ -1103,40 +1103,24 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG):
-				if (Z_LVAL_P(op2) == 0) {
-					zend_error(E_WARNING, "Division by zero");
-					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
-					return SUCCESS;
-				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
-					/* Prevent overflow error/crash */
-					ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
-					return SUCCESS;
-				}
-				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
-					ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
-				} else {
+				/* prevent crashes (arithmetic exception) */
+				if (UNEXPECTED(Z_LVAL_P(op2) == 0 || (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) || Z_LVAL_P(op1) % Z_LVAL_P(op2) != 0)) {
 					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
+					return SUCCESS;
+				} else {
+					ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
 				}
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				if (Z_LVAL_P(op2) == 0) {
-					zend_error(E_WARNING, "Division by zero");
-				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				if (Z_DVAL_P(op2) == 0) {
-					zend_error(E_WARNING, "Division by zero");
-				}
 				ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				if (Z_DVAL_P(op2) == 0) {
-					zend_error(E_WARNING, "Division by zero");
-				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
 				return SUCCESS;
 

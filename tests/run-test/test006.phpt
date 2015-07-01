@@ -3,7 +3,7 @@ Error messages are shown
 --FILE--
 <?php
 // If this test fails ask the developers of run-test.php
-$error = 1 / 0;
+ini_set("zend.assertions", -1);
 ?>
 --EXPECTREGEX--
-.*Division by zero.*
+.*enabled or disabled.*
