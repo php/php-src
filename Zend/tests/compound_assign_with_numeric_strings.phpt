@@ -11,7 +11,7 @@ $n = "-1";
 try {
     $n <<= $n;
     var_dump($n);
-} catch (Exception $e) {
+} catch (Throwable $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -23,7 +23,7 @@ $n = "-1";
 try {
   $n >>= $n;
   var_dump($n);
-} catch (Exception $e) {
+} catch (Throwable $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -31,7 +31,7 @@ $n = "0";
 try{
   $n %= $n;
   var_dump($n);
-} catch (Exception $e) {
+} catch (Throwable $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -46,5 +46,5 @@ int(0)
 
 Exception: Bit shift by negative number
 
-Exception: Division by zero
+Exception: Modulo by zero
 int(0)

@@ -1157,7 +1157,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 	if (op2_lval == 0) {
 		/* modulus by zero */
 		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(NULL, 0, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 		} else {
 			zend_error_noreturn(E_ERROR, "Division by zero");
 		}

@@ -1467,16 +1467,16 @@ PHP_FUNCTION(intdiv)
 	}
 
 	if (divisor == 0) {
-		zend_throw_exception_ex(NULL, 0, "Division by zero");
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 		return;
 	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash
+		/* Prevent overflow error/crash ... really should not happen:
 		   We don't return a float here as that violates function contract */
-		zend_throw_exception_ex(NULL, 0, "Division of PHP_INT_MIN by -1 is not an integer");
+		zend_error(E_ERROR | E_EXCEPTION, "Division of PHP_INT_MIN by -1 is not an integer");
 		return;
 	}
 
-	RETURN_LONG(numerator/divisor);
+	RETURN_LONG(numerator / divisor);
 }
 /* }}} */
 

@@ -64,16 +64,16 @@ try {
 float(INF)
 
 Variable mod
-Type: Exception
-Message: Division by zero
+Type: DivisionByZeroError
+Message: Modulo by zero
 float(INF)
 
 Literal mod
-Type: Exception
-Message: Division by zero
+Type: DivisionByZeroError
+Message: Modulo by zero
 float(INF)
 
 Double mod
-Type: Exception
-Message: Division by zero
+Type: DivisionByZeroError
+Message: Modulo by zero
 
