@@ -115,7 +115,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-int php_tag_find(char *tag, size_t len, char *set);
+int php_tag_find(char *tag, size_t len, const char *set);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -4451,26 +4451,15 @@ PHP_FUNCTION(strip_tags)
 	}
 
 	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
-	if (allow != NULL) {
-		convert_to_string_ex(allow);
-// TODO: reimplement to avoid reallocation ???
-		if (!Z_REFCOUNTED_P(allow)) {
-			allowed_tags = estrndup(Z_STRVAL_P(allow), Z_STRLEN_P(allow));
-			allowed_tags_len = Z_STRLEN_P(allow);
-		} else {
-			allowed_tags = Z_STRVAL_P(allow);
-			allowed_tags_len = Z_STRLEN_P(allow);
-		}
+	if (allow) {
+		convert_to_string(allow);
+		allowed_tags = Z_STRVAL_P(allow);
+		allowed_tags_len = Z_STRLEN_P(allow);
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
 	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), NULL, allowed_tags, allowed_tags_len, 0);
-
-// TODO: reimplement to avoid reallocation ???
-	if (allow && !Z_REFCOUNTED_P(allow)) {
-		efree(allowed_tags);
-	}
-	RETURN_STR(buf);
+	RETURN_NEW_STR(buf);
 }
 /* }}} */
 
@@ -4608,7 +4597,7 @@ PHP_FUNCTION(parse_str)
  * 0 start tag
  * 1 first non-whitespace char seen
  */
-int php_tag_find(char *tag, size_t len, char *set) {
+int php_tag_find(char *tag, size_t len, const char *set) {
 	char c, *n, *t;
 	int state=0, done=0;
 	char *norm;
@@ -4663,7 +4652,7 @@ int php_tag_find(char *tag, size_t len, char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len) /* {{{ */
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
@@ -4689,13 +4678,14 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, char *allow,
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, depth=0, in_q = 0;
 	int state = 0;
 	size_t pos, i = 0;
 	char *allow_free = NULL;
+	const char *allow_actual;
 
 	if (stateptr)
 		state = *stateptr;
@@ -4707,12 +4697,8 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *all
 	rp = rbuf;
 	br = 0;
 	if (allow) {
-//???		if (ZSTR_IS_INTERNED(allow)) {
-//???			allow_free = allow = zend_str_tolower_dup(allow, allow_len);
-//???		} else {
-			allow_free = NULL;
-			php_strtolower(allow, allow_len);
-//???		}
+		allow_free = zend_str_tolower_dup_ex(allow, allow_len);
+		allow_actual = allow_free ? allow_free : allow;
 		tbuf = emalloc(PHP_TAG_BUF_SIZE + 1);
 		tp = tbuf;
 	} else {
@@ -4804,7 +4790,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *all
 							}
 							*(tp++) = '>';
 							*tp='\0';
-							if (php_tag_find(tbuf, tp-tbuf, allow)) {
+							if (php_tag_find(tbuf, tp-tbuf, allow_actual)) {
 								memcpy(rp, tbuf, tp-tbuf);
 								rp += tp-tbuf;
 							}

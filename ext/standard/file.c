@@ -1084,11 +1084,10 @@ PHPAPI PHP_FUNCTION(fgetss)
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
 	php_stream *stream;
-	zend_string *allowed = NULL;
 	char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|lS", &fd, &bytes, &allowed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ls", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1113,23 +1112,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		RETURN_FALSE;
 	}
 
-	if (allowed != NULL) {
-// TODO: reimplement to avoid reallocation ???
-		if (ZSTR_IS_INTERNED(allowed)) {
-			allowed_tags = estrndup(ZSTR_VAL(allowed), ZSTR_LEN(allowed));
-			allowed_tags_len = ZSTR_LEN(allowed);
-		} else {
-			allowed_tags = ZSTR_VAL(allowed);
-			allowed_tags_len = ZSTR_LEN(allowed);
-		}
-	}
-
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-// TODO: reimplement to avoid reallocation ???
-	if (allowed && ZSTR_IS_INTERNED(allowed)) {
-		efree(allowed_tags);
-	}
 
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL(retval, retval_len);

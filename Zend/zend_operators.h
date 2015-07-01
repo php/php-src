@@ -340,6 +340,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2);
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup(const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length);
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str);
 
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(zval *s1, zval *s2);

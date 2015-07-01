@@ -2417,6 +2417,34 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 }
 /* }}} */
 
+ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length) /* {{{ */
+{
+	register const unsigned char *p = (const unsigned char*)source;
+	register const unsigned char *end = p + length;
+
+	while (p < end) {
+		if (*p != zend_tolower_ascii(*p)) {
+			char *res = (char*)emalloc(length + 1);
+			register unsigned char *r;
+
+			if (p != (const unsigned char*)source) {
+				memcpy(res, source, p - (const unsigned char*)source);
+			}
+			r = (unsigned char*)p + (res - source);
+			while (p < end) {
+				*r = zend_tolower_ascii(*p);
+				p++;
+				r++;
+			}
+			*r = '\0';
+			return res;
+		}
+		p++;
+	}
+	return NULL;
+}
+/* }}} */
+
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str) /* {{{ */
 {
 	register unsigned char *p = (unsigned char*)ZSTR_VAL(str);
