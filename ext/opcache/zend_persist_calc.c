@@ -241,6 +241,10 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
+	if (op_array->T_liveliness) {
+		ADD_DUP_SIZE(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last - 1]);
+	}
+
 	if (op_array->vars) {
 		int i;
 

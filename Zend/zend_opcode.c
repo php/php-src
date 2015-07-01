@@ -65,6 +65,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->vars = NULL;
 
 	op_array->T = 0;
+	op_array->T_liveliness = NULL;
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename();
@@ -389,9 +390,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->try_catch_array) {
 		efree(op_array->try_catch_array);
 	}
+	if (op_array->T_liveliness) {
+		efree(op_array->T_liveliness);
+	}
 	if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
-		efree(op_array->T_liveliness);
 	}
 	if (op_array->arg_info) {
 		int32_t num_args = op_array->num_args;

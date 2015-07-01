@@ -618,6 +618,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
+	if (op_array->T_liveliness) {
+		zend_accel_store(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last - 1]);
+	}
+
 	if (op_array->vars) {
 		if (already_stored) {
 			persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->vars);
