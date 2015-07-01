@@ -41,9 +41,13 @@ fclose($pipes[1]);
 
 proc_close($process);
 
-@unlink($fl);
 ?>
 ===DONE===
+--CLEAN--
+<?php
+$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
+@unlink($fl);
+?>
 --EXPECTF--
 hello0
 fgets() took %d%sms
