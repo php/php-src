@@ -541,7 +541,6 @@ static void php_soap_prepare_globals()
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncNs, 0, NULL, NULL, 1);
-//???	defEncNs.flags |= HASH_FLAG_BIG_DATA;
 
 	i = 0;
 	do {
@@ -1822,12 +1821,10 @@ PHP_METHOD(SoapServer, handle)
 				}
 				if (Z_TYPE(h->retval) == IS_OBJECT &&
 				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
-//???					zval *headerfault = NULL;
 					zval *tmp;
 
 					if ((tmp = zend_hash_str_find(Z_OBJPROP(h->retval), "headerfault", sizeof("headerfault")-1)) != NULL &&
 					    Z_TYPE_P(tmp) != IS_NULL) {
-//???						headerfault = tmp;
 					}
 					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h);
@@ -2158,15 +2155,12 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
 			int buffer_len;
-//???			zval outbuf, outbuflen;
 #ifdef va_copy
 			va_list argcopy;
 #endif
 			zend_object **old_objects;
 			int old = PG(display_errors);
 
-//???			INIT_ZVAL(outbuf);
-//???			INIT_ZVAL(outbuflen);
 #ifdef va_copy
 			va_copy(argcopy, args);
 			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
@@ -2243,8 +2237,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			} else {
 				int buffer_len;
 				zval outbuflen;
-
-//???				INIT_ZVAL(outbuflen);
 
 #ifdef va_copy
 				va_copy(argcopy, args);
@@ -2464,12 +2456,6 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-//???			zval *class_map;
-//???
-//???			MAKE_STD_ZVAL(class_map);
-//???			MAKE_COPY_ZVAL(tmp, class_map);
-//???			Z_DELREF_P(class_map);
-//???
 			add_property_zval(this_ptr, "_classmap", tmp);
 		}
 
@@ -3825,7 +3811,6 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		zval *data;
 		int i = 0;
 		zend_string *param_name;
-//???
 		zend_ulong param_index = i;
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {

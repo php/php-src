@@ -527,9 +527,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
-					//???
 					value = sxe_get_value(value, &zval_copy);
-					//INIT_PZVAL(value);
 					new_value = 1;
 					break;
 				}
@@ -704,7 +702,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 	}
 
 	ZVAL_COPY_VALUE(&sxe->tmp, &ret);
-	//???? Z_SET_ISREF_P(return_value);
 
 	return &sxe->tmp;
 }
@@ -1836,8 +1833,6 @@ static int cast_object(zval *object, int type, char *contents)
 	} else {
 		ZVAL_NULL(object);
 	}
-	//???? Z_SET_REFCOUNT_P(object, 1);
-	//Z_UNSET_ISREF_P(object);
 
 	switch (type) {
 		case IS_STRING:
