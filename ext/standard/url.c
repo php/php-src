@@ -110,7 +110,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue) {
+				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
 					goto parse_port;
 				} else {
 					goto just_path;
