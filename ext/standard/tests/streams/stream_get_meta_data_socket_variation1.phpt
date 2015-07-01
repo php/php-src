@@ -38,9 +38,11 @@ var_dump(stream_get_meta_data($client));
 ?>
 --EXPECTF--
 Write some data:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -57,9 +59,11 @@ array(7) {
 
 
 Read a line from the client, causing data to be buffered:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -76,9 +80,11 @@ array(7) {
 
 
 Read 3 bytes of data from the client:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -95,9 +101,11 @@ array(7) {
 
 
 Close the server side socket and read the remaining data from the client:
-array(7) {
+array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>

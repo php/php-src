@@ -42,11 +42,13 @@ unlink($filename);
 ?>
 --EXPECTF--
 Write some data to the file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -67,11 +69,13 @@ array(9) {
 Read a line of the file, causing data to be buffered:
 string(15) "a line of data
 "
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -90,11 +94,13 @@ array(9) {
 
 
 Read 20 bytes from the file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>
@@ -113,11 +119,13 @@ array(9) {
 
 
 Read entire file:
-array(9) {
+array(10) {
   ["wrapper_type"]=>
   string(9) "plainfile"
   ["stream_type"]=>
   string(5) "STDIO"
+  ["fd"]=>
+  int(%d)
   ["mode"]=>
   string(2) "w+"
   ["unread_bytes"]=>

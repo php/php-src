@@ -24,6 +24,7 @@
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_filestat.h"
+#include "ext/standard/php_fopen_wrappers.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
@@ -476,6 +477,7 @@ PHP_FUNCTION(stream_get_meta_data)
 {
 	zval *arg1;
 	php_stream *stream;
+	int tmp_fd;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
 		return;
@@ -492,6 +494,10 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label);
 	}
 	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label);
+
+	if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&tmp_fd, 0) && tmp_fd != -1) {
+		add_assoc_long(return_value, "fd", tmp_fd);
+	}
 
 	add_assoc_string(return_value, "mode", stream->mode);
 

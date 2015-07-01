@@ -60,6 +60,8 @@ bool(true)
 bool(true)
 
 ------ stream_set_blocking - 1: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(0)
 ptrparam:
@@ -71,6 +73,8 @@ bool(true)
 bool(true)
 
 ------ stream_set_blocking - 2: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(1)
 ptrparam:
@@ -82,6 +86,8 @@ bool(true)
 bool(false)
 
 ------ stream_set_blocking - 3: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(0)
 ptrparam:
@@ -94,10 +100,14 @@ bool(true)
 
 ------ stream_set_blocking - 4: -------
 
+Warning: stream_get_meta_data(): test_wrapper_base::stream_cast is not implemented! in %s
+
 Warning: stream_set_blocking(): test_wrapper_base::stream_set_option is not implemented! in %s
 bool(false)
 
 ------ stream_set_write_buffer - 1: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(0)
 ptrparam:
@@ -109,6 +119,8 @@ bool(true)
 int(0)
 
 ------ stream_set_write_buffer - 2: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(2)
 ptrparam:
@@ -120,6 +132,8 @@ bool(true)
 int(0)
 
 ------ stream_set_write_buffer - 3: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(2)
 ptrparam:
@@ -131,6 +145,8 @@ bool(true)
 int(-1)
 
 ------ stream_set_timeout - 1: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(10)
 ptrparam:
@@ -142,6 +158,8 @@ bool(true)
 bool(true)
 
 ------ stream_set_timeout - 2: -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 value:
 int(11)
 ptrparam:

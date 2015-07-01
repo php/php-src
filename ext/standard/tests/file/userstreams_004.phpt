@@ -43,16 +43,30 @@ bool(true)
 ------ stream_lock not implemented: -------
 
 Warning: flock(): test_wrapper_base::stream_lock is not implemented! in %s
+
+Warning: stream_get_meta_data(): test_wrapper_base::stream_cast is not implemented! in %s
 bool(false)
 ------ fclock(LOCK_SH): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
 ------ fclock(LOCK_SH|LOCK_NB): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
 ------ fclock(LOCK_EX): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
 ------ fclock(LOCK_EX|LOCK_NB): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
 ------ fclock(LOCK_UN): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
 ------ fclock(LOCK_UN|LOCK_NB): -------
+
+Warning: stream_get_meta_data(): test_wrapper::stream_cast is not implemented! in %s
 bool(true)
