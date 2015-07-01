@@ -600,7 +600,7 @@ PHP_FUNCTION(mcrypt_generic)
 	char *data;
 	size_t data_len;
 	php_mcrypt *pm;
-	char* data_s;
+	zend_string* data_str;
 	int block_size, data_size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &mcryptind, &data, &data_len) == FAILURE) {
@@ -621,21 +621,20 @@ PHP_FUNCTION(mcrypt_generic)
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
 		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
-		data_s = emalloc(data_size + 1);
-		memset(data_s, 0, data_size);
-		memcpy(data_s, data, data_len);
+		data_str = zend_string_alloc(data_size, 0);
+		memset(ZSTR_VAL(data_str), 0, data_size);
+		memcpy(ZSTR_VAL(data_str), data, data_len);
 	} else { /* It's not a block algorithm */
 		data_size = (int)data_len;
-		data_s = emalloc(data_size + 1);
-		memset(data_s, 0, data_size);
-		memcpy(data_s, data, data_len);
+		data_str = zend_string_alloc(data_size, 0);
+		memset(ZSTR_VAL(data_str), 0, data_size);
+		memcpy(ZSTR_VAL(data_str), data, data_len);
 	}
 
-	mcrypt_generic(pm->td, data_s, data_size);
-	data_s[data_size] = '\0';
+	mcrypt_generic(pm->td, ZSTR_VAL(data_str), data_size);
+	ZSTR_VAL(data_str)[data_size] = '\0';
 
-	RETVAL_STRINGL(data_s, data_size);
-	efree(data_s);
+	RETVAL_NEW_STR(data_str);
 }
 /* }}} */
 
