@@ -29,7 +29,7 @@
 #include "mysqli_priv.h"
 
 /* Define these in the PHP7 tree to make merging easy process */
-#define Zzend_string_dupLICATE (1<<0)
+#define ZSTR_DUPLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
 
 #define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s))
@@ -59,9 +59,9 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 
 	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
 
-	ZVAL_UTF8_STRING(&(w->reason), reason, Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 
@@ -108,7 +108,7 @@ MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 	ZVAL_COPY(&w->reason, reason);
 	convert_to_string(&w->reason);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  Zzend_string_dupLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 
