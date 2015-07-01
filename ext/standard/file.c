@@ -999,6 +999,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
+	zend_string *str;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &res, &len) == FAILURE) {
@@ -1011,37 +1012,33 @@ PHPAPI PHP_FUNCTION(fgets)
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
-			goto exit_failed;
+			if (buf) {
+				efree(buf);
+			}
+			RETURN_FALSE;
 		}
+		// TODO: avoid reallocation ???
+		RETVAL_STRINGL(buf, line_len);
+		efree(buf);
 	} else if (argc > 1) {
 		if (len <= 0) {
 			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
-		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
-			goto exit_failed;
+		str = zend_string_alloc(len, 0);
+		if (php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len) == NULL) {
+			zend_string_free(str);
+			RETURN_FALSE;
 		}
-	}
-
-	/* resize buffer if it's much larger than the result.
-	 * Only needed if the user requested a buffer size. */
-//??	if (argc > 1 && line_len < len / 2) {
-//???
-		ZVAL_STRINGL(return_value, buf, line_len);
-		efree(buf);
-//??	} else {
-//???
-//???		ZVAL_STRINGL(return_value, buf, line_len);
-//???	efree(buf);
-//???	}
-	return;
-
-exit_failed:
-	RETVAL_FALSE;
-	if (buf) {
-		efree(buf);
+		/* resize buffer if it's much larger than the result.
+		 * Only needed if the user requested a buffer size. */
+		if (line_len < len / 2) {
+			str = zend_string_truncate(str, line_len, 0);
+		} else {
+			ZSTR_LEN(str) = line_len;
+		}
+		RETURN_NEW_STR(str);
 	}
 }
 /* }}} */
