@@ -863,22 +863,23 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 
 	for (i = 0; i < op_array->T; i++) {
 		TsTop[i] = Ts[i] = zend_arena_alloc(&arena, sizeof(var_live_info));
-		memset(Ts[i], 0, sizeof(var_live_info));
+		Ts[i]->next = NULL;
+		Ts[i]->start = Ts[i]->end = -1;
 	}
 
 	zend_op *end_op = op_array->opcodes + op_array->last;
 	zend_op *cur_op = op_array->opcodes;
 	for (; cur_op < end_op; cur_op++) {
-
 		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
 		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)
 		 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD) {
 			var_live_info *T = Ts[cur_op->result.var];
-			if (T->end) {
-				T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
-				memset(T = T->next, 0, sizeof(var_live_info));
+			if (~T->end) {
+				T = Ts[i] = T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
+				T->next = NULL;
+				T->start = T->end = -1;
 			}
-			if (T->start == 0) {
+			if (!~T->start) {
 				/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
 				if (cur_op->opcode == ZEND_NEW) {
 					T->start = cur_op->op2.opline_num - 1;
