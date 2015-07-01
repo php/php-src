@@ -265,21 +265,15 @@ PHP_FUNCTION( transliterator_list_ids )
 	array_init( return_value );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
-		char *el_char = NULL;
-		size_t el_len   = 0;
+		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
 
-		intl_convert_utf16_to_utf8( &el_char, &el_len, elem, elem_len, &status );
-
-		if( U_FAILURE( status ) )
+		if( !el )
 		{
-			efree( el_char );
 			break;
 		}
 		else
 		{
-		    // TODO: avoid reallocation ???
-			add_next_index_stringl( return_value, el_char, el_len);
-			efree(el_char);
+			add_next_index_str( return_value, el);
 		}
 	}
 	uenum_close( en );

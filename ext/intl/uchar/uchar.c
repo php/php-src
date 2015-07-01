@@ -533,9 +533,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 	UChar32 cp;
 	zval *zcp;
 	UChar *closure;
-	char *ret;
+	zend_string *u8str;
 	int32_t closure_len;
-	size_t ret_len;
 	UErrorCode error = U_ZERO_ERROR;
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
@@ -556,11 +555,10 @@ IC_METHOD(getFC_NFKC_Closure) {
 	}
 
 	error = U_ZERO_ERROR;
-	intl_convert_utf16_to_utf8(&ret, &ret_len, closure, closure_len, &error);
+	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
 	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
-	RETVAL_STRINGL(ret, ret_len);
-	efree(ret);
+	RETVAL_NEW_STR(u8str);
 }
 /* }}} */
 

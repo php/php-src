@@ -23,10 +23,11 @@
 #error Should be included only in C++ Files
 #endif
 
+#include <zend_types.h>
 #include <unicode/unistr.h>
 
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 
-int intl_charFromString(const UnicodeString &from, char **res, size_t *res_len, UErrorCode *status);
+zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status);
 
 #endif /* INTL_CONVERTCPP_H */

@@ -36,8 +36,8 @@ int transliterator_object_construct( zval *object,
 {
 	const UChar           *ustr_id;
 	int32_t               ustr_id_len;
-	char                  *str_id;
-	size_t                str_id_len;
+	zend_string           *u8str;
+	zval                  tmp;
 	Transliterator_object *to;
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
@@ -49,15 +49,16 @@ int transliterator_object_construct( zval *object,
 	to->utrans = utrans;
 
 	ustr_id = utrans_getUnicodeID( utrans, &ustr_id_len );
-	intl_convert_utf16_to_utf8( &str_id, &str_id_len, ustr_id, (int ) ustr_id_len, status );
-	if( U_FAILURE( *status ) )
+	u8str = intl_convert_utf16_to_utf8(ustr_id, (int ) ustr_id_len, status );
+	if( !u8str )
 	{
 		return FAILURE;
 	}
 
-	zend_update_property_stringl(Transliterator_ce_ptr, object,
-		"id", sizeof( "id" ) - 1, str_id, str_id_len );
-	efree( str_id );
+	ZVAL_NEW_STR(&tmp, u8str);
+	zend_update_property(Transliterator_ce_ptr, object,
+		"id", sizeof( "id" ) - 1, &tmp );
+	GC_REFCOUNT(u8str)--;
 	return SUCCESS;
 }
 /* }}} */

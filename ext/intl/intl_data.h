@@ -84,15 +84,13 @@ typedef struct _intl_data {
 
 #define INTL_METHOD_RETVAL_UTF8(obj, ustring, ulen, free_it)									\
 {																								\
-	char *u8value;																				\
-	size_t u8len;																				\
-	intl_convert_utf16_to_utf8(&u8value, &u8len, ustring, ulen, &INTL_DATA_ERROR_CODE((obj)));	\
+	zend_string *u8str;																			\
+	u8str = intl_convert_utf16_to_utf8(ustring, ulen, &INTL_DATA_ERROR_CODE((obj)));			\
 	if((free_it)) {																				\
 		efree(ustring);																			\
 	}																							\
 	INTL_METHOD_CHECK_STATUS((obj), "Error converting value to UTF-8");							\
-	RETVAL_STRINGL(u8value, u8len);																\
-	efree(u8value);																				\
+	RETVAL_NEW_STR(u8str);																		\
 }
 
 #define INTL_MAX_LOCALE_LEN 80

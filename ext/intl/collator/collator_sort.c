@@ -549,8 +549,8 @@ PHP_FUNCTION( collator_get_sort_key )
 	size_t           str_len  = 0;
 	UChar*           ustr     = NULL;
 	int32_t          ustr_len = 0;
-	uint8_t*         key     = NULL;
 	int              key_len = 0;
+	zend_string*     key_str;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -597,20 +597,19 @@ PHP_FUNCTION( collator_get_sort_key )
 
 	/* ucol_getSortKey is exception in that the key length includes the
 	 * NUL terminator*/
-	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, NULL, 0);
 	if(!key_len) {
 		efree( ustr );
 		RETURN_FALSE;
 	}
-	key = emalloc(key_len);
-	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, key_len);
+	key_str = zend_string_alloc(key_len, 0);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, (uint8_t*)ZSTR_VAL(key_str), key_len);
 	efree( ustr );
 	if(!key_len) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL((char *)key, key_len - 1);
-	//????
-	efree(key);
+	ZSTR_LEN(key_str) = key_len - 1;
+	RETVAL_NEW_STR(key_str);
 }
 /* }}} */
 

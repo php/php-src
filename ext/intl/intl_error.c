@@ -246,11 +246,10 @@ void intl_register_IntlException_class( void )
 
 smart_str intl_parse_error_to_string( UParseError* pe )
 {
-	smart_str  ret = {0};
-	char       *buf;
-	size_t     u8len;
-	UErrorCode status;
-	int        any = 0;
+	smart_str    ret = {0};
+	zend_string *u8str;
+	UErrorCode   status;
+	int          any = 0;
 
 	assert( pe != NULL );
 
@@ -277,14 +276,14 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, ", " );
 
 		smart_str_appends( &ret, "after \"" );
-		intl_convert_utf16_to_utf8( &buf, &u8len, pe->preContext, -1, &status );
-		if( U_FAILURE( status ) )
+		u8str = intl_convert_utf16_to_utf8(pe->preContext, -1, &status );
+		if( !u8str )
 		{
 			smart_str_appends( &ret, "(could not convert parser error pre-context to UTF-8)" );
 		}
 		else {
-			smart_str_appendl( &ret, buf, u8len );
-			efree( buf );
+			smart_str_append( &ret, u8str );
+			zend_string_release( u8str );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
@@ -296,15 +295,15 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, ", " );
 
 		smart_str_appends( &ret, "before or at \"" );
-		intl_convert_utf16_to_utf8( &buf, &u8len, pe->postContext, -1, &status );
-		if( U_FAILURE( status ) )
+		u8str = intl_convert_utf16_to_utf8(pe->postContext, -1, &status );
+		if( !u8str )
 		{
 			smart_str_appends( &ret, "(could not convert parser error post-context to UTF-8)" );
 		}
 		else
 		{
-			smart_str_appendl( &ret, buf, u8len );
-			efree( buf );
+			smart_str_append( &ret, u8str );
+			zend_string_release( u8str );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
