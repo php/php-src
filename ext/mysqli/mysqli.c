@@ -354,11 +354,6 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 
 	if (hnd) {
 		hnd->write_func(obj, value);
-		/* ???
-		if (! PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) == 0) {
-			Z_ADDREF_P(value);
-			zval_ptr_dtor(&value);
-		} */
 	} else {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
