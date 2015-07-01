@@ -961,7 +961,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			opT = NULL;
 		}
 		while (opT) {
-			info[info_off++] = op_array->last_var + 1 + opT->T;
+			info[info_off++] = op_array->last_var + opT->T;
 			opT = opT->next;
 		}
 	}
