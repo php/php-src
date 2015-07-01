@@ -1403,6 +1403,34 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 				break;
 			}
 
+			if (block->op2_to == block->follow_to) {
+				/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
+
+				if (last_op->op1_type == IS_VAR) {
+					zend_op **Tsource = cfg->Tsource;
+					zend_op *src = VAR_SOURCE(last_op->op1);
+
+					if (src &&
+					    src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_DIM_R &&
+					    src->opcode != ZEND_FETCH_OBJ_R) {
+						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+						MAKE_NOP(last_op);
+						block->op2_to = NULL;
+						break;
+					}
+				}
+				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					last_op->opcode = ZEND_FREE;
+					last_op->op2.num = 0;
+					block->op2_to = NULL;
+				} else {
+					MAKE_NOP(last_op);
+					block->op2_to = NULL;
+				}
+				break;
+			}
+
 			if (block->op2_to) {
 				zend_uchar same_type = ZEND_OP1_TYPE(last_op);
 				uint32_t same_var = VAR_NUM_EX(last_op->op1);
