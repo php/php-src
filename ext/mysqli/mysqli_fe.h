@@ -68,6 +68,7 @@ PHP_FUNCTION(mysqli_get_warnings);
 PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
+PHP_FUNCTION(mysqli_init_method);
 PHP_FUNCTION(mysqli_kill);
 PHP_FUNCTION(mysqli_link_construct);
 PHP_FUNCTION(mysqli_set_local_infile_default);
