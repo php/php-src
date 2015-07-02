@@ -5065,7 +5065,7 @@ static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
 	zval			*array;
 	zend_fcall_info		fci = empty_fcall_info;
 	zend_fcall_info_cache	fci_cache = empty_fcall_info_cache;
-	zval			args[1];
+	zval			args[2];
 	zval			retval;
 	int			result = !stop_value;
 	zend_ulong		num_key;
@@ -5077,17 +5077,23 @@ static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
 	}
 
 	fci.retval = &retval;
-	fci.param_count = 1;
+	fci.param_count = 2;
 	fci.no_separation = 0;
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		int call_res;
 
 		ZVAL_COPY(&args[0], operand);
+		if (string_key) {
+			ZVAL_STR_COPY(&args[1], string_key);
+		} else {
+			ZVAL_LONG(&args[1], num_key);
+		}
 		fci.params = args;
 
 		call_res = zend_call_function(&fci, &fci_cache);
 		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&args[1]);
 		result = call_res == SUCCESS ? zend_is_true(&retval) : 0;
 
 		if (result == stop_value) {
