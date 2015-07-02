@@ -2118,8 +2118,12 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (Z_STRLEN_P(str) == 0) {
 		zend_string_release(Z_STR_P(str));
-		Z_STR_P(str) = zend_string_init("1", sizeof("1")-1, 0);
-		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		if (CG(one_char_string)['1']) {
+			ZVAL_INTERNED_STR(str, CG(one_char_string)['1']);
+		} else {
+			Z_STR_P(str) = zend_string_init("1", sizeof("1")-1, 0);
+			Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		}
 		return;
 	}
 
