@@ -4393,7 +4393,7 @@ PHP_FUNCTION(nl2br)
 	}
 
 	if (repl_cnt == 0) {
-		RETURN_STRINGL(ZSTR_VAL(str), ZSTR_LEN(str));
+		RETURN_STR_COPY(str);
 	}
 
 	{
