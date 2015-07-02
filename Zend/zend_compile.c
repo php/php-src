@@ -4397,10 +4397,21 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
-					} else if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a %s type hint can only be %s or NULL",
-							zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
+					} else switch (arg_info->type_hint) {
+						case IS_DOUBLE:
+							if (Z_TYPE(default_node.u.constant) != IS_DOUBLE && Z_TYPE(default_node.u.constant) != IS_LONG) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with a float type hint can only be float, integer, or NULL");
+							}
+							break;
+							
+						default:
+							if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with a %s type hint can only be %s or NULL",
+									zend_get_type_by_const(arg_info->type_hint), zend_get_type_by_const(arg_info->type_hint));
+							}
+							break;
 					}
 				}
 			}
