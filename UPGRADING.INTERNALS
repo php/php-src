@@ -18,6 +18,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   p. TSRM changes
   q. gc_collect_cycles() is now hookable
   r. PDO uses size_t for lengths
+  u. Streams changes
 
 2. Build system changes
   a. Unix build system changes
@@ -210,6 +211,10 @@ changes. See: https://wiki.php.net/phpng-upgrading
      Instead of reallocation and copying string on each ZEND_ADD_STRING/VAR/CAHR,
      collect all the strings and then allocate and construct the resulting string once.
 
+  u. Streams changes
+     - It is possible to do blocking reads on Windows pipes. It can be done either
+       using context stream option PHP_STREAM_OPTION_PIPE_BLOCKING or 
+       adding STREAM_USE_BLOCKING_PIPE when opening the stream.
 
 ========================
 2. Build system changes

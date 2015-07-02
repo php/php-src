@@ -606,14 +606,24 @@ Other
     unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]]);
 
 - proc_open():
-  The maximum number of pipes used by proc_open() was previously limited by
+  . The maximum number of pipes used by proc_open() was previously limited by
   hardcoded value of 16. This limit is now removed and the number of pipes is
   effectively limited by the amount of memory available to PHP.
+  . New Windows only configuration option "blocking_pipes" can be used to
+  force blocking reads on child process pipes. This covers several
+  edge cases in CLI usage however can lead to dead locks. Also, this
+  correlates with the new stream context options for pipes.
 
 - array_column():
   The function now supports an array of objects as well as two-dimensional
   arrays. Only public properties are considered, and objects that make use of
   __get() for dynamic properties must also implement __isset().
+
+- stream_context_create()
+  It accepts now a Windows only configuration 
+  array("pipe" => array("blocking" => <boolean>))  which forces blocking reads
+  on pipes. This option should be used carefully because due to the
+  platform restrictions dead locks on pipe buffers are possible.
 
 ========================================
 6. New Functions
