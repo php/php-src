@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
     (Cameron Porter)
 
+- ODBC:
+  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
+    columns). (cmb)
+
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
     openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
