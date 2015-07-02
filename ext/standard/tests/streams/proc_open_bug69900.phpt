@@ -33,7 +33,7 @@ for($i = 0; $i < 10; $i++){
 	$t1 = microtime(1);
 
 	echo $s;		
-	echo "fgets() took ", (($t1 - $t0)*1000), "ms\n";
+	echo "fgets() took ", (($t1 - $t0)*1000 > 1 ? 'more' : 'less'), " than 1 ms\n";
 }
 
 fclose($pipes[0]);
@@ -48,25 +48,25 @@ proc_close($process);
 $fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
 @unlink($fl);
 ?>
---EXPECTF--
+--EXPECT--
 hello0
-fgets() took %d%sms
+fgets() took more than 1 ms
 hello1
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello2
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello3
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello4
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello5
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello6
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello7
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello8
-fgets() took 0%sms
+fgets() took less than 1 ms
 hello9
-fgets() took 0%sms
+fgets() took less than 1 ms
 ===DONE===
