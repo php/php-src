@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Improved zend_string API (Francois Laupretre)
   . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
     ArrayAccess object). (Laruence)
+  . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
 
 - CLI server:
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
@@ -18,7 +19,7 @@ PHP                                                                        NEWS
 
 - JSON
   . Fixed bug #62010 (json_decode produces invalid byte-sequences).
-	(Jakub Zelenka)
+    (Jakub Zelenka)
 
 - OCI8:
   . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
