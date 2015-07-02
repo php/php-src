@@ -797,7 +797,11 @@ try_again:
 		case IS_FALSE:
 			return ZSTR_EMPTY_ALLOC();
 		case IS_TRUE:
-			return zend_string_init("1", 1, 0);
+			if (CG(one_char_string)['1']) {
+				return CG(one_char_string)['1'];
+			} else {
+				return zend_string_init("1", 1, 0);
+			}
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len;
