@@ -5060,59 +5060,59 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
-static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int until_bool)
+static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
 {
-	zval *input;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	zval **args[1];
-	zval *retval;
-	zval **element;
-	HashTable *htbl;
-	HashPosition pos;
-	int result = !until_bool;
+	zval					*array;
+	zend_fcall_info			fci = empty_fcall_info;
+	zend_fcall_info_cache	fci_cache = empty_fcall_info_cache;
+	zval					args[1];
+	zval					retval;
+	int						result = !stop_value;
+	zend_ulong				num_key;
+	zend_string				*string_key;
+	zval					*operand;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af", &input, &fci, &fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "af", &array, &fci, &fci_cache) == FAILURE) {
 		return;
 	}
 
-	fci.retval_ptr_ptr = &retval;
+	fci.retval = &retval;
 	fci.param_count = 1;
 	fci.no_separation = 0;
 
-	htbl = Z_ARRVAL_P(input);
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
+		int call_res;
 
-	zend_hash_internal_pointer_reset_ex(htbl, &pos);
-	while (zend_hash_get_current_data_ex(htbl, (void **)&element, &pos) == SUCCESS) {
-		args[0] = element;
+		ZVAL_COPY(&args[0], operand);
 		fci.params = args;
 
-		if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-			result = zend_is_true(retval);
-			zval_ptr_dtor(&retval);
-		} else {
-			result = 0;
-		}
+		call_res = zend_call_function(&fci, &fci_cache);
+		zval_ptr_dtor(&args[0]);
+		result = call_res == SUCCESS ? zend_is_true(&retval) : 0;
 
-		if (result == until_bool) {
+		if (result == stop_value) {
 			break;
 		}
-
-		zend_hash_move_forward_ex(htbl, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	RETURN_BOOL(result);
 }
 
-PHP_FUNCTION(array_all)
+/* {{{ proto bool array_every(array input, mixed predicate)
+   Determines whether the predicate holds for all elements in the array. */
+PHP_FUNCTION(array_every)
 {
 	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
+/* {{{ proto array array_filter(array input, mixed predicate)
+   Determines whether the predicate holds for at least one element in the array. */
 PHP_FUNCTION(array_some)
 {
 	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
 /* {{{ proto mixed array_reduce(array input, mixed callback [, mixed initial])
    Iteratively reduce the array to a single value via the callback. */
