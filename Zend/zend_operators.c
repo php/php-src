@@ -1167,7 +1167,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 		if (EG(current_execute_data) && !CG(in_compilation)) {
 			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 		} else {
-			zend_error_noreturn(E_ERROR, "Division by zero");
+			zend_error_noreturn(E_ERROR, "Modulo by zero");
 		}
 		ZVAL_UNDEF(result);
 		return FAILURE;
@@ -1518,7 +1518,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(NULL, 0, "Bit shift by negative number");
+				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
@@ -1549,7 +1549,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(NULL, 0, "Bit shift by negative number");
+				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}

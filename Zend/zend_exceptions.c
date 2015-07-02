@@ -31,6 +31,7 @@
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
+ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 
 static zend_class_entry *default_exception_ce;
@@ -855,8 +856,12 @@ void zend_register_default_exception(void) /* {{{ */
 	type_error_ce = zend_register_internal_class_ex(&ce, error_ce);
 	type_error_ce->create_object = zend_default_exception_new;
 
+	INIT_CLASS_ENTRY(ce, "ArithmeticError", NULL);
+	zend_ce_arithmetic_error = zend_register_internal_class_ex(&ce, error_ce);
+	zend_ce_arithmetic_error->create_object = zend_default_exception_new;
+
 	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", NULL);
-	zend_ce_division_by_zero_error = zend_register_internal_class_ex(&ce, error_ce);
+	zend_ce_division_by_zero_error = zend_register_internal_class_ex(&ce, zend_ce_arithmetic_error);
 	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
 }
 /* }}} */

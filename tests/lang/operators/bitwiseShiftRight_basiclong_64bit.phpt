@@ -27,7 +27,7 @@ foreach ($longVals as $longVal) {
 	  echo "--- testing: $longVal >> $otherVal ---\n";
       try {
         var_dump($longVal>>$otherVal);
-      } catch (Exception $e) {
+      } catch (Throwable $e) {
         echo "Exception: " . $e->getMessage() . "\n";
       }
    }
@@ -38,7 +38,7 @@ foreach ($otherVals as $otherVal) {
 	  echo "--- testing: $otherVal >> $longVal ---\n";
 	  try {
         var_dump($otherVal>>$longVal);
-      } catch (Exception $e) {
+      } catch (Throwable $e) {
         echo "Exception: " . $e->getMessage() . "\n";
       }
    }
