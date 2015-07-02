@@ -506,7 +506,11 @@ try_again:
 			break;
 		}
 		case IS_TRUE:
-			ZVAL_NEW_STR(op, zend_string_init("1", 1, 0));
+			if (CG(one_char_string)['1']) {
+				ZVAL_INTERNED_STR(op, CG(one_char_string)['1']);
+			} else {
+				ZVAL_NEW_STR(op, zend_string_init("1", 1, 0));
+			}
 			break;
 		case IS_STRING:
 			break;
