@@ -18,6 +18,8 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   p. TSRM changes
   q. gc_collect_cycles() is now hookable
   r. PDO uses size_t for lengths
+  s. Resource API changes
+  t. Optimized strings concatenation.
   u. Streams changes
 
 2. Build system changes
