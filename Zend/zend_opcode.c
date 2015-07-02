@@ -65,6 +65,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->vars = NULL;
 
 	op_array->T = 0;
+	op_array->T_liveliness = NULL;
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename();
@@ -389,6 +390,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->try_catch_array) {
 		efree(op_array->try_catch_array);
 	}
+	if (op_array->T_liveliness) {
+		efree(op_array->T_liveliness);
+	}
 	if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
 	}
@@ -576,7 +580,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
-		    start_op = get_next_op_number(op_array);
+			start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array);
 			opline->opcode = ZEND_FAST_CALL;
@@ -751,6 +755,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+
+	op_array->T_liveliness = generate_var_liveliness_info(op_array);
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -838,6 +845,133 @@ ZEND_API int pass_two(zend_op_array *op_array)
 int pass_two_wrapper(zval *el)
 {
 	return pass_two((zend_op_array *) Z_PTR_P(el));
+}
+
+typedef struct _var_live_info {
+	struct _var_live_info *next;
+	uint32_t start;
+	uint32_t end;
+} var_live_info;
+
+typedef struct _op_var_info {
+	struct _op_var_info *next;
+	uint32_t T;
+} op_var_info;
+
+ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
+{
+	zend_arena *arena = zend_arena_create((sizeof(var_live_info) + sizeof(op_var_info) + 2 * sizeof(var_live_info *)) * op_array->T + (sizeof(op_var_info) + sizeof(op_var_info *) + sizeof(zend_op *)) * (op_array->last + 1));
+	var_live_info **TsTop = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
+	var_live_info **Ts = zend_arena_alloc(&arena, sizeof(var_live_info *) * op_array->T);
+	int i, op_live_total = 0;
+	uint32_t *info, info_off = op_array->last + 1;
+	op_var_info *opTsTop = zend_arena_alloc(&arena, sizeof(op_var_info) * (op_array->last + 1));
+	op_var_info **opTs = zend_arena_alloc(&arena, sizeof(op_var_info *) * (op_array->last + 1));
+
+	for (i = 0; i < op_array->T; i++) {
+		TsTop[i] = Ts[i] = zend_arena_alloc(&arena, sizeof(var_live_info));
+		Ts[i]->next = NULL;
+		Ts[i]->start = Ts[i]->end = -1;
+	}
+
+	for (i = 0; i <= op_array->last; i++) {
+		opTs[i] = &opTsTop[i];
+		opTs[i]->T = -1;
+		opTs[i]->next = NULL;
+	}
+
+	zend_op *end_op = op_array->opcodes + op_array->last;
+	zend_op *cur_op = op_array->opcodes;
+	for (; cur_op < end_op; cur_op++) {
+		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
+		 && cur_op->opcode != ZEND_BOOL && cur_op->opcode != ZEND_JMPZ_EX && cur_op->opcode != ZEND_JMPNZ_EX
+		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)) {
+			var_live_info *T = Ts[cur_op->result.var];
+			if (~T->end) {
+				T = Ts[cur_op->result.var] = T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
+				T->next = NULL;
+				T->start = T->end = -1;
+			}
+			if (!~T->start
+			 && cur_op->opcode != ZEND_CASE /* exception for opcache, is anyway bool */
+			 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD
+			 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
+			 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
+			 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
+			 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+				/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
+				if (cur_op->opcode == ZEND_NEW) {
+					T->start = cur_op->op2.opline_num - 1;
+				} else {
+					T->start = cur_op - op_array->opcodes;
+				}
+			}
+		}
+		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
+		 && cur_op->opcode != ZEND_FE_FREE
+		 && cur_op->opcode != ZEND_ROPE_ADD && cur_op->opcode != ZEND_ROPE_END) {
+			var_live_info *T = Ts[cur_op->op1.var];
+			if (~T->start) {
+				T->end = cur_op - op_array->opcodes;
+				if (cur_op->opcode == ZEND_OP_DATA) {
+					T->end--;
+				}
+			}
+		}
+		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)) {
+			var_live_info *T = Ts[cur_op->op2.var];
+			if (~T->start) {
+				T->end = cur_op - op_array->opcodes;
+				if (cur_op->opcode == ZEND_OP_DATA) {
+					T->end--;
+				}
+			}
+		}
+	}
+
+	for (i = 0; i < op_array->T; i++) {
+		int j;
+		var_live_info *T = TsTop[i];
+
+		do {
+			if (!~T->start) {
+				continue;
+			}
+
+			ZEND_ASSERT(~T->end);
+
+			for (j = T->start + 1; j < T->end; j++) {
+				if (op_array->opcodes[j].opcode != ZEND_THROW) {
+					op_var_info *opT = opTs[j];
+					if (~opT->T) {
+						opT = opTs[j] = opT->next = zend_arena_alloc(&arena, sizeof(op_var_info));
+						opT->next = NULL;
+					}
+					opT->T = i;
+					op_live_total++;
+				}
+			}
+		} while ((T = T->next));
+	}
+
+	info = emalloc(op_live_total * sizeof(uint32_t) + (op_array->last + 1) * sizeof(uint32_t));
+
+	for (i = 0; i < op_array->last; i++) {
+		op_var_info *opT = &opTsTop[i];
+		info[i] = info_off;
+		if (!~opT->T) {
+			opT = NULL;
+		}
+		while (opT) {
+			info[info_off++] = op_array->last_var + opT->T;
+			opT = opT->next;
+		}
+	}
+	info[i] = info_off;
+
+	zend_arena_destroy(arena);
+
+	return info;
 }
 
 int print_class(zend_class_entry *class_entry)

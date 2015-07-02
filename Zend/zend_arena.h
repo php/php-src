@@ -33,7 +33,7 @@ struct _zend_arena {
 
 static zend_always_inline zend_arena* zend_arena_create(size_t size)
 {
-	zend_arena *arena = (zend_arena*)emalloc(size);
+	zend_arena *arena = (zend_arena*)emalloc(size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena)));
 
 	arena->ptr = (char*) arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena));
 	arena->end = (char*) arena + size;
