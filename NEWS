@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
   . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
 
+- ODBC:
+  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
+    columns). (cmb)
+
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error “key values mismatch” after 
     openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
