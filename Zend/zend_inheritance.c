@@ -178,7 +178,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		zend_string *fe_class_name, *proto_class_name;
 		const char *class_name;
 
-		if (fe->type == ZEND_INTERNAL_FUNCTION) {				
+		if (fe->type == ZEND_INTERNAL_FUNCTION) {
 			fe_class_name = NULL;
 			class_name = ((zend_internal_arg_info*)fe_arg_info)->class_name;
 		} else {
@@ -195,7 +195,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 			fe_class_name = zend_string_init(class_name, strlen(class_name), 0);
 		}
 
-		if (proto->type == ZEND_INTERNAL_FUNCTION) {				
+		if (proto->type == ZEND_INTERNAL_FUNCTION) {
 			proto_class_name = NULL;
 			class_name = ((zend_internal_arg_info*)proto_arg_info)->class_name;
 		} else {
@@ -374,6 +374,8 @@ static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zen
 	} else if (arg_info->type_hint) {
 		if (arg_info->type_hint == IS_LONG) {
 			smart_str_appendl(str, "int", 3);
+		} else if (arg_info->type_hint == _IS_BOOL) {
+			smart_str_appendl(str, "bool", 4);
 		} else {
 			const char *type_name = zend_get_type_by_const(arg_info->type_hint);
 			smart_str_appends(str, type_name);
