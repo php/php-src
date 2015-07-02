@@ -2689,11 +2689,12 @@ ZEND_FUNCTION(get_extension_funcs)
 	}
 	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
 		lcname = zend_string_tolower(extension_name);
+		module = zend_hash_find_ptr(&module_registry, lcname);
+		zend_string_release(lcname);
 	} else {
-		lcname = zend_string_init("core", sizeof("core")-1, 0);
+		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
 	}
-	module = zend_hash_find_ptr(&module_registry, lcname);
-	zend_string_release(lcname);
+
 	if (!module) {
 		RETURN_FALSE;
 	}
