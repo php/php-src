@@ -5062,15 +5062,15 @@ PHP_FUNCTION(array_product)
 
 static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
 {
-	zval					*array;
-	zend_fcall_info			fci = empty_fcall_info;
+	zval			*array;
+	zend_fcall_info		fci = empty_fcall_info;
 	zend_fcall_info_cache	fci_cache = empty_fcall_info_cache;
-	zval					args[1];
-	zval					retval;
-	int						result = !stop_value;
-	zend_ulong				num_key;
-	zend_string				*string_key;
-	zval					*operand;
+	zval			args[1];
+	zval			retval;
+	int			result = !stop_value;
+	zend_ulong		num_key;
+	zend_string		*string_key;
+	zval			*operand;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "af", &array, &fci, &fci_cache) == FAILURE) {
 		return;
