@@ -98,29 +98,28 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
 		ISC_STATUS stat;
-		char *bl_data;
+		zend_string *bl_data;
 		unsigned long cur_len;
 		unsigned short seg_len;
 
-		bl_data = safe_emalloc(1, max_len, 1);
+		bl_data = zend_string_alloc(max_len, 0);
 
 		for (cur_len = stat = 0; (stat == 0 || stat == isc_segment) && cur_len < max_len; cur_len += seg_len) {
 
 			unsigned short chunk_size = (max_len-cur_len) > USHRT_MAX ? USHRT_MAX
 				: (unsigned short)(max_len-cur_len);
 
-			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, chunk_size, &bl_data[cur_len]);
+			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, chunk_size, &ZSTR_VAL(bl_data)[cur_len]);
 		}
 
-		bl_data[cur_len] = '\0';
 		if (IB_STATUS[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
-			efree(bl_data);
+			zend_string_free(bl_data);
 			_php_ibase_error();
 			return FAILURE;
 		}
-		// TODO: avoid double reallocation???
-		RETVAL_STRINGL(bl_data, cur_len);
-		efree(bl_data);
+		ZSTR_VAL(bl_data)[cur_len] = '\0';
+		ZSTR_LEN(bl_data) = cur_len;
+		RETVAL_NEW_STR(bl_data);
 	} else { /* null blob */
 		RETVAL_EMPTY_STRING(); /* empty string */
 	}
