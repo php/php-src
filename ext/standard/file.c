@@ -1012,9 +1012,6 @@ PHPAPI PHP_FUNCTION(fgets)
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
-			if (buf) {
-				efree(buf);
-			}
 			RETURN_FALSE;
 		}
 		// TODO: avoid reallocation ???
