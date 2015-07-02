@@ -1218,8 +1218,11 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 	IS_CONSISTENT(ht);
 	HT_ASSERT(GC_REFCOUNT(ht) <= 1);
 
-	if (ht->nNumUsed) {
+	/* break possible cycles */
+	GC_REMOVE_FROM_BUFFER(ht);
+	GC_TYPE_INFO(ht) = IS_NULL | (GC_WHITE << 16);
 
+	if (ht->nNumUsed) {
 		/* In some rare cases destructors of regular arrays may be changed */
 		if (UNEXPECTED(ht->pDestructor != ZVAL_PTR_DTOR)) {
 			zend_hash_destroy(ht);

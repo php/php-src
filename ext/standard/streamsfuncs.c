@@ -656,10 +656,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	} ZEND_HASH_FOREACH_END();
 
 	/* destroy old array and add new one */
-	zend_hash_destroy(Z_ARRVAL_P(stream_array));
-	GC_REMOVE_FROM_BUFFER(Z_ARR_P(stream_array));
-	efree(Z_ARR_P(stream_array));
-
+	zend_array_destroy(Z_ARR_P(stream_array));
 	Z_ARR_P(stream_array) = Z_ARR(new_array);
 
 	return ret;
@@ -700,12 +697,10 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 
 	if (ret > 0) {
 		/* destroy old array and add new one */
-		zend_hash_destroy(Z_ARRVAL_P(stream_array));
-		efree(Z_ARR_P(stream_array));
+		zend_array_destroy(Z_ARR_P(stream_array));
 		Z_ARR_P(stream_array) = Z_ARR(new_array);
 	} else {
-		zend_hash_destroy(Z_ARRVAL(new_array));
-		efree(Z_ARR(new_array));
+		zend_array_destroy(Z_ARR(new_array));
 	}
 
 	return ret;
@@ -1020,7 +1015,7 @@ PHP_FUNCTION(stream_context_set_params)
    Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
 {
-	zval *zcontext, options;
+	zval *zcontext;
 	php_stream_context *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zcontext) == FAILURE) {

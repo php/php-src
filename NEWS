@@ -3,9 +3,9 @@ PHP                                                                        NEWS
 09 Jul 2015, PHP 7.0.0 Beta 1
 
 - Core:
-  . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
+  . Fixed bug #69521 (Segfault in gc_collect_cycles()).
+    (arjen at react dot com, Laruence)
   . Improved zend_string API (Francois Laupretre)
-  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
   . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
     ArrayAccess object). (Laruence)
 
@@ -35,6 +35,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #69952 (Data integrity issues accessing superglobals by
     reference). (Bob)
+
+- Standard:
+  . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
+  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
