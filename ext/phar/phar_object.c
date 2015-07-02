@@ -934,24 +934,22 @@ PHP_METHOD(Phar, interceptFileFuncs)
  */
 PHP_METHOD(Phar, createDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *stub, *error;
+	char *index = NULL, *webindex = NULL, *error;
+	zend_string *stub;
 	size_t index_len = 0, webindex_len = 0;
-	size_t stub_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		return;
 	}
 
-	stub = phar_create_default_stub(index, webindex, &stub_len, &error);
+	stub = phar_create_default_stub(index, webindex, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 		return;
 	}
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(stub, stub_len);
-	efree(stub);
+	RETURN_NEW_STR(stub);
 }
 /* }}} */
 
@@ -2909,10 +2907,10 @@ PHP_METHOD(Phar, setStub)
  */
 PHP_METHOD(Phar, setDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
+	char *index = NULL, *webindex = NULL, *error = NULL;
+	zend_string *stub = NULL;
 	size_t index_len = 0, webindex_len = 0;
 	int created_stub = 0;
-	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (phar_obj->archive->is_data) {
@@ -2942,13 +2940,13 @@ PHP_METHOD(Phar, setDefaultStub)
 	}
 
 	if (!phar_obj->archive->is_tar && !phar_obj->archive->is_zip) {
-		stub = phar_create_default_stub(index, webindex, &stub_len, &error);
+		stub = phar_create_default_stub(index, webindex, &error);
 
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "%s", error);
 			efree(error);
 			if (stub) {
-				efree(stub);
+				zend_string_free(stub);
 			}
 			RETURN_FALSE;
 		}
@@ -2960,10 +2958,10 @@ PHP_METHOD(Phar, setDefaultStub)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		return;
 	}
-	phar_flush(phar_obj->archive, stub, stub_len, 1, &error);
+	phar_flush(phar_obj->archive, stub ? ZSTR_VAL(stub) : 0, stub ? ZSTR_LEN(stub) : 0, 1, &error);
 
 	if (created_stub) {
-		efree(stub);
+		zend_string_free(stub);
 	}
 
 	if (error) {

@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len)
+static inline zend_string* phar_get_stub(const char *index_php, const char *web, const int name_len, const int web_len)
 {
 	static const char newstub0[] = "<?php\n\n$web = '";
 	static const char newstub1_0[] = "';\n\nif (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {\nPhar::interceptFileFuncs();\nset_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());\nPhar::webPhar(null, $web);\ninclude 'phar://' . __FILE__ . '/' . Extract_Phar::START;\nreturn;\n}\n\nif (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST'))) {\nExtract_Phar::go(true);\n$mimes = array(\n'phps' => 2,\n'c' => 'text/plain',\n'cc' => 'text/plain',\n'cpp' => 'text/plain',\n'c++' => 'text/plain',\n'dtd' => 'text/plain',\n'h' => 'text/plain',\n'log' => 'text/plain',\n'rng' => 'text/plain',\n'txt' => 'text/plain',\n'xsd' => 'text/plain',\n'php' => 1,\n'inc' => 1,\n'avi' => 'video/avi',\n'bmp' => 'image/bmp',\n'css' => 'text/css',\n'gif' => 'image/gif',\n'htm' => 'text/html',\n'html' => 'text/html',\n'htmls' => 'text/html',\n'ico' => 'image/x-ico',\n'jpe' => 'image/jpeg',\n'jpg' => 'image/jpeg',\n'jpeg' => 'image/jpeg',\n'js' => 'application/x-javascript',\n'midi' => 'audio/midi',\n'mid' => 'audio/midi',\n'mod' => 'audio/mod',\n'mov' => 'movie/quicktime',\n'mp3' => 'audio/mp3',\n'mpg' => 'video/mpeg',\n'mpeg' => 'video/mpeg',\n'pdf' => 'application/pdf',\n'png' => 'image/png',\n'swf' => 'application/shockwave-flash',\n'tif' => 'image/tiff',\n'tiff' => 'image/tiff',\n'wav' => 'audio/wav',\n'xbm' => 'image/xbm',\n'xml' => 'text/xml',\n);\n\nheader(\"Cache-Control: no-cache, must-revalidate\");\nheader(\"Pragma: no-cache\");\n\n$basename = basename(__FILE__);\nif (!strpos($_SERVER['REQUEST_URI'], $basename)) {\nchdir(Extract_Phar::$temp);\ninclude $web;\nreturn;\n}\n$pt = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], $basename) + strlen($basename));\nif (!$pt || $pt == '/') {\n$pt = $web;\nheader('HTTP/1.1 301 Moved Permanently');\nheader('Location: ' . $_SERVER['REQUEST_URI'] . '/' . $pt);\nexit;\n}\n$a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);\nif (!$a || strlen(dirname($a)) < strlen(";
@@ -30,5 +30,5 @@ static inline void phar_get_stub(const char *index_php, const char *web, size_t 
 
 	static const int newstub_len = 6665;
 
-	*len = spprintf(stub, name_len + web_len + newstub_len, "%s%s%s%s%s%s%d%s%s%s", newstub0, web, newstub1_0, newstub1_1, index_php, newstub2, name_len + web_len + newstub_len, newstub3_0, newstub3_1, newstub3_2);
+	return strpprintf(name_len + web_len + newstub_len, "%s%s%s%s%s%s%d%s%s%s", newstub0, web, newstub1_0, newstub1_1, index_php, newstub2, name_len + web_len + newstub_len, newstub3_0, newstub3_1, newstub3_2);
 }
