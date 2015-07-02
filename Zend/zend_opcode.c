@@ -884,20 +884,21 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	zend_op *cur_op = op_array->opcodes;
 	for (; cur_op < end_op; cur_op++) {
 		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
-		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)
-		 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD
 		 && cur_op->opcode != ZEND_BOOL && cur_op->opcode != ZEND_JMPZ_EX && cur_op->opcode != ZEND_JMPNZ_EX
-		 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
-		 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
-		 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
-		 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)) {
 			var_live_info *T = Ts[cur_op->result.var];
 			if (~T->end) {
 				T = Ts[cur_op->result.var] = T->next = zend_arena_alloc(&arena, sizeof(var_live_info));
 				T->next = NULL;
 				T->start = T->end = -1;
 			}
-			if (!~T->start) {
+			if (!~T->start
+			 && cur_op->opcode != ZEND_CASE /* exception for opcache, is anyway bool */
+			 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD
+			 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
+			 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
+			 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
+			 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
 				/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
 				if (cur_op->opcode == ZEND_NEW) {
 					T->start = cur_op->op2.opline_num - 1;
@@ -931,11 +932,12 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	for (i = 0; i < op_array->T; i++) {
 		int j;
 		var_live_info *T = TsTop[i];
-		if (!~T->start) {
-			continue;
-		}
 
 		do {
+			if (!~T->start) {
+				continue;
+			}
+
 			ZEND_ASSERT(~T->end);
 
 			for (j = T->start + 1; j < T->end; j++) {
