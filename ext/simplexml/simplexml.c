@@ -2285,7 +2285,7 @@ SXE_METHOD(__construct)
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
-		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0);
+		zend_throw_exception(zend_exception_ce, "String could not be parsed as XML", 0);
 		return;
 	}
 
