@@ -26,6 +26,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   a. Unix build system changes
   b. Windows build system changes
 
+3. Module changes
 
 ================
 0. Wiki Examples
