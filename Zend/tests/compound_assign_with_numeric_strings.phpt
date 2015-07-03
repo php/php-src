@@ -11,7 +11,7 @@ $n = "-1";
 try {
     $n <<= $n;
     var_dump($n);
-} catch (Throwable $e) {
+} catch (ArithmeticError $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -23,7 +23,7 @@ $n = "-1";
 try {
   $n >>= $n;
   var_dump($n);
-} catch (Throwable $e) {
+} catch (ArithmeticError $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 
@@ -31,7 +31,7 @@ $n = "0";
 try{
   $n %= $n;
   var_dump($n);
-} catch (Throwable $e) {
+} catch (DivisionByZeroError $e) {
 	echo "\nException: " . $e->getMessage() . "\n";
 }
 

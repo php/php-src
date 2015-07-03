@@ -9,7 +9,7 @@ $b = array();
 try {
     $c = $a % $b;
     var_dump($c);
-} catch (Throwable $e) {
+} catch (DivisionByZeroError $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 
