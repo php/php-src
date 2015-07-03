@@ -211,6 +211,25 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+
+	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {
+		zend_throw_error(exception_ce, message);
+	} else {
+		zend_error(E_ERROR, message);
+	}
+
+	efree(message);
+	va_end(va);
+}
+/* }}} */
+
 void shutdown_destructors(void) /* {{{ */
 {
 	if (CG(unclean_shutdown)) {
@@ -526,13 +545,6 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
 #define RESET_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) &= ~IS_VISITED_CONSTANT
-
-#define THROW_OR_ERROR(fetch_type, ce, message, ...)               \
-	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {                 \
-		zend_throw_error(ce, message, ##__VA_ARGS__); \
-	} else {                                                       \
-		zend_error(E_ERROR, message, ##__VA_ARGS__);               \
-	}
 
 ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_class_entry *scope) /* {{{ */
 {
@@ -1321,22 +1333,22 @@ check_fetch_type:
 	switch (fetch_sub_type) {
 		case ZEND_FETCH_CLASS_SELF:
 			if (UNEXPECTED(!EG(scope))) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Cannot access self:: when no class scope is active")
+				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access self:: when no class scope is active");
 			}
 			return EG(scope);
 		case ZEND_FETCH_CLASS_PARENT:
 			if (UNEXPECTED(!EG(scope))) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Cannot access parent:: when no class scope is active");
+				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access parent:: when no class scope is active");
 				return NULL;
 			}
 			if (UNEXPECTED(!EG(scope)->parent)) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Cannot access parent:: when current class scope has no parent");
+				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Cannot access static:: when no class scope is active");
+				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access static:: when no class scope is active");
 				return NULL;
 			}
 			return ce;
@@ -1354,11 +1366,11 @@ check_fetch_type:
 	} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
 		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
 			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
 			} else if (fetch_sub_type == ZEND_FETCH_CLASS_TRAIT) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
 			} else {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
 			}
 		}
 		return NULL;
@@ -1376,11 +1388,11 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *
 	} else if ((ce = zend_lookup_class_ex(class_name, key, 1)) == NULL) {
 		if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
 			if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
 			} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
 			} else {
-				THROW_OR_ERROR(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
 			}
 		}
 		return NULL;
