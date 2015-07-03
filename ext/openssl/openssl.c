@@ -1613,7 +1613,7 @@ PHP_FUNCTION(openssl_spki_export)
 
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
-	BIO *out = BIO_new(BIO_s_mem());
+	BIO *out = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
 		return;
@@ -1640,8 +1640,13 @@ PHP_FUNCTION(openssl_spki_export)
 		goto cleanup;
 	}
 
-	out = BIO_new_fp(stdout, BIO_NOCLOSE);
-	PEM_write_bio_PUBKEY(out, pkey);
+	out = BIO_new(BIO_s_mem());
+	if (out && PEM_write_bio_PUBKEY(out, pkey))  {
+		BUF_MEM *bio_buf;
+
+		BIO_get_mem_ptr(out, &bio_buf);
+		RETVAL_STRINGL((char *)bio_buf->data, bio_buf->length, 0);
+	}
 	goto cleanup;
 
 cleanup:
