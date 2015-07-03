@@ -883,22 +883,32 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	zend_op *end_op = op_array->opcodes + op_array->last;
 	zend_op *cur_op = op_array->opcodes;
 	for (; cur_op < end_op; cur_op++) {
-		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR)) && !(cur_op->result_type & EXT_TYPE_UNUSED)
-		 && cur_op->opcode != ZEND_BOOL && cur_op->opcode != ZEND_JMPZ_EX && cur_op->opcode != ZEND_JMPNZ_EX
-		 && (cur_op->opcode != ZEND_QM_ASSIGN || (cur_op + 1)->opcode != ZEND_JMP)) {
+		if ((cur_op->result_type & (IS_VAR | IS_TMP_VAR))
+		 && !(cur_op->result_type & EXT_TYPE_UNUSED)
+		 && cur_op->opcode != ZEND_BOOL           /* why ??? */
+		 && cur_op->opcode != ZEND_JMPZ_EX        /* why ??? */
+		 && cur_op->opcode != ZEND_JMPNZ_EX       /* why ??? */
+		 && (cur_op->opcode != ZEND_QM_ASSIGN
+		     || (cur_op + 1)->opcode != ZEND_JMP) /* why ??? */
+		 && cur_op->opcode != ZEND_CASE           /* ??? exception for opcache, is anyway bool */
+		 && cur_op->opcode != ZEND_FE_RESET_R     /* FOREACH TMP is handled using brk_cont_array */
+		 && cur_op->opcode != ZEND_FE_RESET_RW    /* FOREACH TMP is handled using brk_cont_array */
+		 && cur_op->opcode != ZEND_ROPE_ADD       /* the following opocodes reuse TMP created before */
+		 && cur_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+		 && cur_op->opcode != ZEND_FAST_CALL      /* passes fast_call */
+		 && cur_op->opcode != ZEND_FETCH_CLASS    /* the following opcodes pass class_entry */
+		 && cur_op->opcode != ZEND_DECLARE_CLASS
+		 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS
+		 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
+		 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS
+		 && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
 			var_live_info *T = Ts[cur_op->result.var];
 			if (~T->end) {
 				T = Ts[cur_op->result.var] = T->next = zend_arena_alloc(&CG(arena), sizeof(var_live_info));
 				T->next = NULL;
 				T->start = T->end = -1;
 			}
-			if (!~T->start
-			 && cur_op->opcode != ZEND_CASE /* exception for opcache, is anyway bool */
-			 && cur_op->opcode != ZEND_ROPE_ADD /* reuses TMP created in ROPE_INIT */
-			 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
-			 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
-			 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
-			 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+			if (!~T->start) {
 				/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
 				if (cur_op->opcode == ZEND_NEW) {
 					T->start = cur_op->op2.opline_num - 1;
@@ -908,8 +918,20 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			}
 		}
 		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
-		 && cur_op->opcode != ZEND_FE_FREE
-		 && cur_op->opcode != ZEND_ROPE_ADD) {
+		 && cur_op->opcode != ZEND_FE_FETCH_R     /* FOREACH TMP is handled using brk_cont_array */
+		 && cur_op->opcode != ZEND_FE_FETCH_RW    /* FOREACH TMP is handled using brk_cont_array */
+		 && cur_op->opcode != ZEND_FE_FREE        /* FOREACH TMP is handled using brk_cont_array */
+		 && cur_op->opcode != ZEND_ROPE_ADD       /* the following opcodes don't free TMP */
+		 && cur_op->opcode != ZEND_CASE
+		 && cur_op->opcode != ZEND_FETCH_LIST
+		 && cur_op->opcode != ZEND_FAST_RET       /* uses fast_call */
+		 && cur_op->opcode != ZEND_NEW            /* the following opcodes use class_entry */
+		 && cur_op->opcode != ZEND_INIT_STATIC_METHOD_CALL
+		 && cur_op->opcode != ZEND_FETCH_CONSTANT
+		 && cur_op->opcode != ZEND_ADD_INTERFACE
+		 && cur_op->opcode != ZEND_ADD_TRAIT
+		 && cur_op->opcode != ZEND_BIND_TRAITS
+		 && cur_op->opcode != ZEND_VERIFY_ABSTRACT_CLASS) {
 			var_live_info *T = Ts[cur_op->op1.var];
 			if (~T->start) {
 				T->end = cur_op - op_array->opcodes;
@@ -918,7 +940,16 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 				}
 			}
 		}
-		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)) {
+		if ((cur_op->op2_type & (IS_VAR | IS_TMP_VAR))
+		 && cur_op->opcode != ZEND_FETCH_R        /* the following opcodes use class_entry */
+		 && cur_op->opcode != ZEND_FETCH_W
+		 && cur_op->opcode != ZEND_FETCH_RW
+		 && cur_op->opcode != ZEND_FETCH_IS
+		 && cur_op->opcode != ZEND_FETCH_FUNC_ARG
+		 && cur_op->opcode != ZEND_FETCH_UNSET
+		 && cur_op->opcode != ZEND_UNSET_VAR
+		 && cur_op->opcode != ZEND_ISSET_ISEMPTY_VAR
+		 && cur_op->opcode != ZEND_INSTANCEOF) {
 			var_live_info *T = Ts[cur_op->op2.var];
 			if (~T->start) {
 				T->end = cur_op - op_array->opcodes;
