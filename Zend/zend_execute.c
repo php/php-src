@@ -2386,7 +2386,7 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 {
 	int i;
 
-	if (op_num < EX(func)->op_array.last) {
+	if (EX(func)->op_array.T_liveliness && op_num < EX(func)->op_array.last) {
 		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
 		uint32_t *until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num + 1];
 		while (off < until) {

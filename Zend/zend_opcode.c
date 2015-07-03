@@ -954,6 +954,11 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		} while ((T = T->next));
 	}
 
+	if (!op_live_total) {
+		zend_arena_release(&CG(arena), checkpoint);
+		return NULL;
+	}
+
 	info = emalloc(op_live_total * sizeof(uint32_t) + (op_array->last + 1) * sizeof(uint32_t));
 
 	for (i = 0; i < op_array->last; i++) {
