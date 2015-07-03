@@ -683,7 +683,7 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapFault class */
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, soap_fault_functions);
-	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_exception_ce);
+	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
 	/* Register SoapParam class */
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_PARAM_CLASSNAME, soap_param_functions);
@@ -1495,10 +1495,10 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 	ZVAL_OBJ(&exception_object, EG(exception));
 	if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
 		soap_server_fault_ex(function, &exception_object, NULL);
-	} else if (instanceof_function(Z_OBJCE(exception_object), zend_error_ce)) {
+	} else if (instanceof_function(Z_OBJCE(exception_object), zend_ce_error)) {
 		if (service->send_errors) {
 			zval rv;
-			zend_string *msg = zval_get_string(zend_read_property(zend_error_ce, &exception_object, "message", sizeof("message")-1, 0, &rv));
+			zend_string *msg = zval_get_string(zend_read_property(zend_ce_error, &exception_object, "message", sizeof("message")-1, 0, &rv));
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", ZSTR_VAL(msg), NULL, NULL);
 			zend_string_release(msg);
 		} else {
@@ -2582,13 +2582,13 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
 			ret = FALSE;
 		} else if (Z_TYPE_P(response) != IS_STRING) {
-			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_error_ce)) {
+			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
 				zval rv;
 				zend_string *msg;
 				zval exception_object;
 
 				ZVAL_OBJ(&exception_object, EG(exception));
-				msg = zval_get_string(zend_read_property(zend_error_ce, &exception_object, "message", sizeof("message")-1, 0, &rv));
+				msg = zval_get_string(zend_read_property(zend_ce_error, &exception_object, "message", sizeof("message")-1, 0, &rv));
 				/* change class */
 				EG(exception)->ce = soap_fault_class_entry;
 				set_soap_fault(&exception_object, NULL, "Client", ZSTR_VAL(msg), NULL, NULL, NULL);
@@ -3280,7 +3280,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	}
 
 	add_property_string(obj, "faultstring", fault_string ? fault_string : "");
-	zend_update_property_string(zend_exception_ce, obj, "message", sizeof("message")-1, (fault_string ? fault_string : ""));
+	zend_update_property_string(zend_ce_exception, obj, "message", sizeof("message")-1, (fault_string ? fault_string : ""));
 
 	if (fault_code != NULL) {
 		int soap_version = SOAP_GLOBAL(soap_version);

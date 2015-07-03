@@ -54,7 +54,7 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 	va_end(arg);
 
 	if (db_obj && db_obj->exception) {
-		zend_throw_exception(zend_exception_ce, message, 0);
+		zend_throw_exception(zend_ce_exception, message, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	}
@@ -111,7 +111,7 @@ PHP_METHOD(sqlite3, open)
 	}
 
 	if (db_obj->initialised) {
-		zend_throw_exception(zend_exception_ce, "Already initialised DB Object", 0);
+		zend_throw_exception(zend_ce_exception, "Already initialised DB Object", 0);
 	}
 
 	if (strlen(filename) != filename_len) {
@@ -119,20 +119,20 @@ PHP_METHOD(sqlite3, open)
 	}
 	if (memcmp(filename, ":memory:", sizeof(":memory:")) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
-			zend_throw_exception(zend_exception_ce, "Unable to expand filepath", 0);
+			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
 			return;
 		}
 
 #if PHP_API_VERSION < 20100412
 		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			zend_throw_exception_ex(zend_exception_ce, 0, "safe_mode prohibits opening %s", fullpath);
+			zend_throw_exception_ex(zend_ce_exception, 0, "safe_mode prohibits opening %s", fullpath);
 			efree(fullpath);
 			return;
 		}
 #endif
 
 		if (php_check_open_basedir(fullpath)) {
-			zend_throw_exception_ex(zend_exception_ce, 0, "open_basedir prohibits opening %s", fullpath);
+			zend_throw_exception_ex(zend_ce_exception, 0, "open_basedir prohibits opening %s", fullpath);
 			efree(fullpath);
 			return;
 		}
@@ -145,7 +145,7 @@ PHP_METHOD(sqlite3, open)
 #else
 	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
 #endif
-		zend_throw_exception_ex(zend_exception_ce, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
+		zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
 		if (fullpath) {
 			efree(fullpath);
 		}
@@ -155,7 +155,7 @@ PHP_METHOD(sqlite3, open)
 #if SQLITE_HAS_CODEC
 	if (encryption_key_len > 0) {
 		if (sqlite3_key(db_obj->db, encryption_key, encryption_key_len) != SQLITE_OK) {
-			zend_throw_exception_ex(zend_exception_ce, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
+			zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
 			return;
 		}
 	}
@@ -1807,7 +1807,7 @@ PHP_METHOD(sqlite3result, finalize)
    __constructor for SQLite3Result. */
 PHP_METHOD(sqlite3result, __construct)
 {
-	zend_throw_exception(zend_exception_ce, "SQLite3Result cannot be directly instantiated", 0);
+	zend_throw_exception(zend_ce_exception, "SQLite3Result cannot be directly instantiated", 0);
 }
 /* }}} */
 

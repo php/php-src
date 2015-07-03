@@ -237,8 +237,8 @@ void intl_register_IntlException_class( void )
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		zend_exception_ce );
-	IntlException_ce_ptr->create_object = zend_exception_ce->create_object;
+		zend_ce_exception );
+	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
 }
 
 smart_str intl_parse_error_to_string( UParseError* pe )

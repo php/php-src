@@ -358,7 +358,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_ce);
+	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
 	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 /*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 

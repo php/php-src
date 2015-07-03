@@ -1090,7 +1090,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						zval tmp, *msg, rv;
 
 						ZVAL_OBJ(&tmp, EG(exception));
-						msg = zend_read_property(zend_exception_ce, &tmp, "message", sizeof("message")-1, 0, &rv);
+						msg = zend_read_property(zend_ce_exception, &tmp, "message", sizeof("message")-1, 0, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;

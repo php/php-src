@@ -1820,7 +1820,7 @@ PHP_METHOD(snmp, __construct)
 		case SNMP_VERSION_3:
 			break;
 		default:
-			zend_throw_exception(zend_exception_ce, "Unknown SNMP protocol version", 0);
+			zend_throw_exception(zend_ce_exception, "Unknown SNMP protocol version", 0);
 			return;
 	}
 
@@ -2419,7 +2419,7 @@ PHP_MINIT_FUNCTION(snmp)
 #ifdef HAVE_SPL
 	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
 #else
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_exception_ce);
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_ce_exception);
 #endif
 
 	return SUCCESS;

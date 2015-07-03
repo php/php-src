@@ -606,7 +606,7 @@ PHP_MINIT_FUNCTION(mysqli)
 #ifdef HAVE_SPL
 	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
 #else
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_ce);
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_ce_exception);
 #endif
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
@@ -1302,7 +1302,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_throw_exception(zend_exception_ce, "Parameter ctor_params must be an array", 0);
+					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
 					return;
 				}
 			}
@@ -1314,7 +1314,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_exception_ce, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
+				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -1322,7 +1322,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_exception_ce, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}
 	}
 }

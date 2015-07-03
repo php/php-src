@@ -1124,7 +1124,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
 	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
-	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_exception_ce);
+	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 }
 /* }}} */
 

@@ -1118,7 +1118,7 @@ static spl_other_handler phar_spl_foreign_handler = {
 PHP_METHOD(Phar, __construct)
 {
 #if !HAVE_SPL
-	zend_throw_exception_ex(zend_exception_ce, 0, "Cannot instantiate Phar object without SPL extension");
+	zend_throw_exception_ex(zend_ce_exception, 0, "Cannot instantiate Phar object without SPL extension");
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	size_t fname_len, alias_len = 0;
@@ -5295,7 +5295,7 @@ void phar_object_init(void) /* {{{ */
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
-	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_exception_ce);
+	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
 #if HAVE_SPL
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
