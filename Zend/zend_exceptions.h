@@ -27,6 +27,11 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_throwable;
+extern ZEND_API zend_class_entry *zend_exception_ce;
+extern ZEND_API zend_class_entry *zend_error_exception_ce;
+extern ZEND_API zend_class_entry *zend_error_ce;
+extern ZEND_API zend_class_entry *zend_parse_error_ce;
+extern ZEND_API zend_class_entry *zend_type_error_ce;
 extern ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 extern ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 
@@ -39,14 +44,16 @@ ZEND_API void zend_throw_exception_internal(zval *exception);
 void zend_register_default_exception(void);
 
 ZEND_API zend_class_entry *zend_get_exception_base(zval *object);
+
+/* Deprecated - Use zend_exception_ce directly instead */
 ZEND_API zend_class_entry *zend_exception_get_default(void);
+
+/* Deprecated - Use zend_error_exception_ce directly instead */
 ZEND_API zend_class_entry *zend_get_error_exception(void);
-ZEND_API zend_class_entry *zend_get_error(void);
-ZEND_API zend_class_entry *zend_get_parse_error(void);
-ZEND_API zend_class_entry *zend_get_type_error(void);
+
 ZEND_API void zend_register_default_classes(void);
 
-/* exception_ce   NULL or zend_exception_get_default() or a derived class
+/* exception_ce   NULL, zend_exception_ce, zend_error_ce, or a derived class
  * message        NULL or the message of the exception */
 ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code);
 ZEND_API zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...);

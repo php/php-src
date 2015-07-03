@@ -882,7 +882,7 @@ void zenderror(const char *error) /* {{{ */
 		return;
 	}
 
-	zend_throw_exception(zend_get_parse_error(), error, E_PARSE);
+	zend_throw_exception(zend_parse_error_ce, error, E_PARSE);
 }
 /* }}} */
 
@@ -1059,7 +1059,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			va_start(args, format);
 #endif
 			zend_vspprintf(&message, 0, format, args);
-			zend_throw_exception(zend_get_error(), message, type);
+			zend_throw_exception(zend_error_ce, message, type);
 			efree(message);
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 			va_end(args);
@@ -1318,7 +1318,7 @@ ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_get_type_error(), message, E_ERROR);
+	zend_throw_exception(zend_type_error_ce, message, E_ERROR);
 	efree(message);
 	va_end(va);
 } /* }}} */
@@ -1331,7 +1331,7 @@ ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *fo
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 	if (throw_exception) {
-		zend_throw_exception(zend_get_type_error(), message, E_ERROR);
+		zend_throw_exception(zend_type_error_ce, message, E_ERROR);
 	} else {
 		zend_error(E_WARNING, message);
 	}

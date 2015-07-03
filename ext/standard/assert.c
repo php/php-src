@@ -114,7 +114,7 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_get_error());
+	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_error_ce);
 
 	return SUCCESS;
 }
