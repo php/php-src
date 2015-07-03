@@ -1645,7 +1645,7 @@ PHP_FUNCTION(openssl_spki_export)
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(out, &bio_buf);
-		RETVAL_STRINGL((char *)bio_buf->data, bio_buf->length, 0);
+		RETVAL_STRINGL((char *)bio_buf->data, bio_buf->length, 1);
 	}
 	goto cleanup;
 
