@@ -280,9 +280,12 @@ changes. See: https://wiki.php.net/phpng-upgrading
       as documented in the OpenSSL FAQ https://www.openssl.org/support/faq.html#PROG2
       to properly work on Windows. While this primarily affects the OpenSSL
       functionality, the shim needs to be included into the executable file
-      which loads the extension DLL, not into the extension DLL itself. Thus, this
-      primarily affects any WAMP or other redistributions bundling the official
-      PHP releaze zipballs or building from sources. The applink shim is already
-      integrated with all the PHP executables from the official distribution
+      which loads the extension DLL, not into the extension DLL itself. Alternatively
+      it can be compiled and linked with the main program as a separate object file.
+      More information and explanation in the linked OpenSSL FAQ.
+
+      Thus, this primarily affects any WAMP or other redistributions bundling the
+      official PHP release zipballs or building from sources. The applink shim is
+      already integrated with all the PHP executables from the official distribution
       starting with 7.0.0beta1.
 
