@@ -1049,25 +1049,6 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_stack delayed_oplines_stack;
 	zend_array *symbol_table;
 
-	if (type & E_EXCEPTION) {
-		type &= ~E_EXCEPTION;
-		//TODO: we can't convert compile-time errors to exceptions yet???
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			char *message = NULL;
-
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-			va_start(args, format);
-#endif
-			zend_vspprintf(&message, 0, format, args);
-			zend_throw_exception(zend_ce_error, message, type);
-			efree(message);
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-			va_end(args);
-#endif
-			return;
-		}
-	}
-
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		zend_execute_data *ex;
@@ -1310,6 +1291,31 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 /* }}} */
 # endif
 #endif
+
+ZEND_API void zend_throw_error(zend_class_entry *exception_ce, int type, const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+	
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+
+	if (type & E_EXCEPTION) {
+		type = E_ERROR; // Convert to E_ERROR if unable to throw.
+		//TODO: we can't convert compile-time errors to exceptions yet???
+		if (EG(current_execute_data) && !CG(in_compilation)) {
+			zend_throw_exception(exception_ce, message, type);
+			efree(message);
+			va_end(va);
+			return;
+		}
+	}
+	
+	zend_error(type, message);
+	efree(message);
+	va_end(va);
+}
+/* }}} */
 
 ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 {

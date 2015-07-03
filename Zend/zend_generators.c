@@ -265,7 +265,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 static zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_error(E_EXCEPTION | E_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
+	zend_throw_error(zend_ce_error, E_EXCEPTION, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
 
 	return NULL;
 }
@@ -637,7 +637,7 @@ ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
 
 try_again:
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot resume an already running generator");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot resume an already running generator");
 		return;
 	}
 

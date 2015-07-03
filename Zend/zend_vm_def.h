@@ -721,7 +721,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
@@ -730,7 +730,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an object");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_OP2();
 		HANDLE_EXCEPTION();
@@ -785,13 +785,13 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
@@ -817,7 +817,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 		var_ptr = Z_INDIRECT(rv);
 
 		if (UNEXPECTED(var_ptr == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use assign-op operators with overloaded objects nor string offsets");
 			FREE_OP2();
 			FREE_OP(free_op_data1);
 			FREE_OP1_VAR_PTR();
@@ -860,7 +860,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|CV, CONST|TMPVAR|CV, binary_
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use assign-op operators with overloaded objects nor string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1118,7 +1118,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1126,7 +1126,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1200,7 +1200,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1208,7 +1208,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1276,7 +1276,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1323,7 +1323,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1370,7 +1370,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1410,7 +1410,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(var_ptr == NULL)) {
 		SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot increment/decrement overloaded objects nor string offsets");
 		HANDLE_EXCEPTION();
 	}
 
@@ -1506,7 +1506,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
@@ -1533,7 +1533,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 				
 				/* check if static properties were destoyed */
 				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
@@ -1684,7 +1684,7 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1707,7 +1707,7 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		HANDLE_EXCEPTION();
 	}
 	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE);
@@ -1745,14 +1745,14 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUS
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
         if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
-            zend_error(E_EXCEPTION | E_ERROR, "Cannot use temporary expression in write context");
+            zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use temporary expression in write context");
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP1();
 			HANDLE_EXCEPTION();
         }
 		container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 			FREE_UNFETCHED_OP2();
 			HANDLE_EXCEPTION();
 		}
@@ -1764,7 +1764,7 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUS
 		FREE_OP1_VAR_PTR();
 	} else {
 		if (OP2_TYPE == IS_UNUSED) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use [] for reading");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use [] for reading");
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP1();
 			HANDLE_EXCEPTION();
@@ -1788,7 +1788,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1814,7 +1814,7 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1888,12 +1888,12 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an object");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1920,12 +1920,12 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an object");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -1951,7 +1951,7 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2028,18 +2028,18 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|CV, CONST|TMPV
 		container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 		if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use temporary expression in write context");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use temporary expression in write context");
 			FREE_OP2();
 			FREE_OP1_VAR_PTR();
 			HANDLE_EXCEPTION();
 		}
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an object");
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
@@ -2066,7 +2066,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2074,7 +2074,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an object");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an object");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2144,7 +2144,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2152,7 +2152,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2179,7 +2179,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|CV)
 	object_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use string offset as an array");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use string offset as an array");
 		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
@@ -2228,7 +2228,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
 				if (OP2_TYPE == IS_UNUSED) {
-					zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "[] operator not supported for strings");
 					FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
 					FREE_OP1_VAR_PTR();
 					HANDLE_EXCEPTION();
@@ -2313,7 +2313,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	value_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (OP2_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot create references to/from string offsets nor overloaded objects");
 		FREE_UNFETCHED_OP1();
 		HANDLE_EXCEPTION();
 	}
@@ -2334,14 +2334,14 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot create references to/from string offsets nor overloaded objects");
 		FREE_OP2_VAR_PTR();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot assign by reference to overloaded object");
 		FREE_OP2_VAR_PTR();
 		FREE_OP1_VAR_PTR();
 		HANDLE_EXCEPTION();
@@ -2916,7 +2916,7 @@ ZEND_VM_C_LABEL(try_class_name):
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Class name must be a valid object or a string");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Class name must be a valid object or a string");
 		}
 
 		FREE_OP2();
@@ -2956,7 +2956,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Method name must be a string");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Method name must be a string");
 			FREE_OP2();
 			FREE_UNFETCHED_OP1();
 			HANDLE_EXCEPTION();
@@ -2966,7 +2966,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 	object = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(object) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -2986,7 +2986,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
-				zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
 				FREE_OP2();
 				FREE_OP1();
 				HANDLE_EXCEPTION();
@@ -3002,7 +3002,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Object does not support method calls");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Object does not support method calls");
 			FREE_OP2();
 			FREE_OP1();
 			HANDLE_EXCEPTION();
@@ -3012,7 +3012,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|CV, CONST|TMPVAR
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((OP2_TYPE == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
 			}
 			FREE_OP2();
 			FREE_OP1();
@@ -3068,7 +3068,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 				HANDLE_EXCEPTION();
 			}
 			if (UNEXPECTED(ce == NULL)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
 				HANDLE_EXCEPTION();
 			}
 			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce);
@@ -3097,7 +3097,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
-				zend_error(E_EXCEPTION | E_ERROR, "Function name must be a string");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Function name must be a string");
 				FREE_OP2();
 				HANDLE_EXCEPTION();
  			}
@@ -3110,7 +3110,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
 			}
 			FREE_OP2();
 			HANDLE_EXCEPTION();
@@ -3129,11 +3129,11 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call constructor");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot call constructor");
 			HANDLE_EXCEPTION();
 		}
 		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot call private %s::__construct()", ZSTR_VAL(ce->name));
 			HANDLE_EXCEPTION();
 		}
 		fbc = ce->constructor;
@@ -3154,8 +3154,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 			} else {
 				/* An internal function assumes $this is present and won't check that.
 				 * So PHP would crash by allowing the call. */
-				zend_error(
-					E_EXCEPTION | E_ERROR,
+				zend_throw_error(
+					zend_ce_error,
+					E_EXCEPTION,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				HANDLE_EXCEPTION();
@@ -3193,7 +3194,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST)
 		function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
 			SAVE_OPLINE();
-			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 			HANDLE_EXCEPTION();
 		} else {
 			fbc = Z_FUNC_P(func);
@@ -3254,7 +3255,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
 				}
 				zend_string_release(lcname);
 				zend_string_release(mname);
@@ -3271,8 +3272,9 @@ ZEND_VM_C_LABEL(try_function_name):
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				} else {
-					zend_error(
-						E_EXCEPTION | E_ERROR,
+					zend_throw_error(
+						zend_ce_error,
+						E_EXCEPTION,
 						"Non-static method %s::%s() cannot be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 					FREE_OP2();
@@ -3287,7 +3289,7 @@ ZEND_VM_C_LABEL(try_function_name):
 				lcname = zend_string_tolower(Z_STR_P(function_name));
 			}
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 				zend_string_release(lcname);
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3318,21 +3320,21 @@ ZEND_VM_C_LABEL(try_function_name):
 		method = zend_hash_index_find(Z_ARRVAL_P(function_name), 1);
 
 		if (!obj || !method) {
-			zend_error(E_EXCEPTION | E_ERROR, "Array callback has to contain indices 0 and 1");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Array callback has to contain indices 0 and 1");
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 
 		ZVAL_DEREF(obj);
 		if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
-			zend_error(E_EXCEPTION | E_ERROR, "First array member is not a valid class name or object");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "First array member is not a valid class name or object");
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 
 		ZVAL_DEREF(method);
 		if (Z_TYPE_P(method) != IS_STRING) {
-			zend_error(E_EXCEPTION | E_ERROR, "Second array member is not a valid method");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Second array member is not a valid method");
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
@@ -3352,7 +3354,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
 				}
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3363,8 +3365,9 @@ ZEND_VM_C_LABEL(try_function_name):
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 				} else {
-					zend_error(
-						E_EXCEPTION | E_ERROR,
+					zend_throw_error(
+						zend_ce_error,
+						E_EXCEPTION,
 						"Non-static method %s::%s() cannot be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 					FREE_OP2();
@@ -3378,7 +3381,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_error(E_EXCEPTION | E_ERROR, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
 				}
 				FREE_OP2();
 				HANDLE_EXCEPTION();
@@ -3402,7 +3405,7 @@ ZEND_VM_C_LABEL(try_function_name):
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
 		}
-		zend_error(E_EXCEPTION | E_ERROR, "Function name must be a string");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Function name must be a string");
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -3487,7 +3490,7 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 		func_name++;
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(func_name))) == NULL)) {
 			SAVE_OPLINE();
-			zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 			HANDLE_EXCEPTION();
 		} else {
 			fbc = Z_FUNC_P(func);
@@ -3519,7 +3522,7 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		fbc = CACHED_PTR(Z_CACHE_SLOT_P(fname));
 	} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(fname))) == NULL)) {
 	    SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(fname));
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to undefined function %s()", Z_STRVAL_P(fname));
 		HANDLE_EXCEPTION();
 	} else {
 		fbc = Z_FUNC_P(func);
@@ -3722,7 +3725,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
@@ -3847,7 +3850,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot call overloaded function for non-object");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot call overloaded function for non-object");
 #if 0
 			//TODO: implement clean exit ???
 			zend_vm_stack_free_args(call);
@@ -4041,7 +4044,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 		retval_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(retval_ptr == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot return string offsets by reference");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot return string offsets by reference");
 			HANDLE_EXCEPTION();
 		}
 
@@ -4139,7 +4142,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "Can only throw objects");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Can only throw objects");
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
@@ -4237,7 +4240,7 @@ ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 ZEND_VM_C_LABEL(send_val_by_ref):
 		SAVE_OPLINE();
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot pass parameter %d by reference", opline->op2.num);
 		FREE_UNFETCHED_OP1();
 		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 		ZVAL_UNDEF(arg);
@@ -4342,7 +4345,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 	varptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Only variables can be passed by reference");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Only variables can be passed by reference");
 		HANDLE_EXCEPTION();
 	}
 
@@ -4451,7 +4454,7 @@ ZEND_VM_C_LABEL(send_again):
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 			if (name) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot unpack array with string keys");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot unpack array with string keys");
 				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
@@ -4521,7 +4524,7 @@ ZEND_VM_C_LABEL(send_again):
 					}
 
 					if (Z_TYPE(key) == IS_STRING) {
-						zend_error(E_EXCEPTION | E_ERROR,
+						zend_throw_error(zend_ce_error, E_EXCEPTION,
 							"Cannot unpack Traversable with string keys");
 						zend_string_release(Z_STR(key));
 						ZEND_VM_C_GOTO(unpack_iter_dtor);
@@ -5021,7 +5024,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	obj = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(obj) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		HANDLE_EXCEPTION();
 	}
 
@@ -5040,7 +5043,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_ERROR, "__clone method called on non-object");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "__clone method called on non-object");
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
@@ -5051,9 +5054,9 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error(E_EXCEPTION | E_ERROR, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Trying to clone an uncloneable object");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Trying to clone an uncloneable object");
 		}
 		FREE_OP1();
 		HANDLE_EXCEPTION();
@@ -5064,7 +5067,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (UNEXPECTED(ce != EG(scope))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
@@ -5072,7 +5075,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {
-				zend_error(E_EXCEPTION | E_ERROR, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(ce->name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
@@ -5116,7 +5119,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
-				zend_error(E_EXCEPTION | E_ERROR, "Undefined constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Undefined constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -5153,7 +5156,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 						HANDLE_EXCEPTION();
 					}
 					if (UNEXPECTED(ce == NULL)) {
-						zend_error(E_EXCEPTION | E_ERROR, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
+						zend_throw_error(zend_ce_error, E_EXCEPTION, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op1)));
 						HANDLE_EXCEPTION();
 					}
 					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce);
@@ -5182,7 +5185,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 					CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce, value);
 				}
 			} else {
-				zend_error(E_EXCEPTION | E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Undefined class constant '%s'", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 				HANDLE_EXCEPTION();
 			}
 		} while (0);
@@ -5210,7 +5213,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(expr_ptr == NULL)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot create references to/from string offsets");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot create references to/from string offsets");
 			zend_array_destroy(Z_ARRVAL_P(EX_VAR(opline->result.var)));
 			HANDLE_EXCEPTION();
 		}
@@ -5620,7 +5623,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMPVAR|CV, UNUSED|CONST|VAR)
 					HANDLE_EXCEPTION();
 				}
 				if (UNEXPECTED(ce == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Class '%s' not found", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 					if (OP1_TYPE != IS_CONST) {
 						zend_string_release(Z_STR(tmp));
 					}
@@ -5657,12 +5660,12 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -5730,12 +5733,12 @@ ZEND_VM_C_LABEL(num_index_dim):
 		}
 		if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use object as array");
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
 		} else if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot unset string offsets");
 		}
 	} while (0);
 
@@ -5755,12 +5758,12 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot unset string offsets");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot unset string offsets");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -6560,7 +6563,7 @@ ZEND_VM_HANDLER(115, ZEND_ISSET_ISEMPTY_DIM_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|T
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -6697,7 +6700,7 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_OBJ_P(container) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Using $this when not in object context");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Using $this when not in object context");
 		FREE_UNFETCHED_OP2();
 		HANDLE_EXCEPTION();
 	}
@@ -7364,7 +7367,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot yield from finally in a force-closed generator");
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot yield from finally in a force-closed generator");
 		FREE_UNFETCHED_OP2();
 		FREE_UNFETCHED_OP1();
 		HANDLE_EXCEPTION();
@@ -7399,7 +7402,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				zval *value_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
 				if (OP1_TYPE == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
-					zend_error(E_EXCEPTION | E_ERROR, "Cannot yield string offsets by reference");
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot yield string offsets by reference");
 					FREE_UNFETCHED_OP2();
 					HANDLE_EXCEPTION();
 				}
@@ -7530,13 +7533,13 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 
 			if (Z_ISUNDEF(new_gen->retval)) {
 				if (UNEXPECTED(zend_generator_get_current(new_gen) == generator)) {
-					zend_error(E_ERROR | E_EXCEPTION, "Impossible to yield from the Generator being currently run");
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Impossible to yield from the Generator being currently run");
 					HANDLE_EXCEPTION();
 				} else {
 					zend_generator_yield_from(generator, new_gen);
 				}
 			} else if (UNEXPECTED(new_gen->execute_data == NULL)) {
-				zend_error(E_ERROR | E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
+				zend_throw_error(zend_ce_error, E_EXCEPTION, "Generator passed to yield from was aborted without proper return and is unable to continue");
 				HANDLE_EXCEPTION();
 			} else {
 				if (RETURN_VALUE_USED(opline)) {
@@ -7550,7 +7553,7 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 
 			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
 				if (!EG(exception)) {
-					zend_error(E_ERROR | E_EXCEPTION, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
 				}
 				HANDLE_EXCEPTION();
 			}
@@ -7567,7 +7570,7 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 			ZVAL_OBJ(&generator->values, &iter->std);
 		}
 	} else {
-		zend_error(E_ERROR | E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
@@ -7887,7 +7890,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 	fetch_type = opline->extended_value;
 
 	if (UNEXPECTED(EG(scope) == NULL)) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use \"%s\" when no class scope is active",
+		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use \"%s\" when no class scope is active",
 			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
 			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
 		HANDLE_EXCEPTION();
@@ -7899,7 +7902,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, ANY, ANY)
 			break;
 		case ZEND_FETCH_CLASS_PARENT:
 			if (UNEXPECTED(EG(scope)->parent == NULL)) {
-				zend_error(E_EXCEPTION | E_ERROR,
+				zend_throw_error(zend_ce_error, E_EXCEPTION,
 					"Cannot use \"parent\" when current class scope has no parent");
 				HANDLE_EXCEPTION();
 			}

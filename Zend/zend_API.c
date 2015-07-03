@@ -245,7 +245,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid callback, %s",
 			class_name, space, get_active_function_name(), num, error);
 	} else {
-		zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
+		zend_throw_error(zend_ce_error, severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
 			class_name, space, get_active_function_name(), num, error);
 	}
 	efree(error);
@@ -710,7 +710,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					break;
 				} else {
 					if (is_callable_error) {
-						*severity = E_EXCEPTION | E_ERROR;
+						*severity = E_EXCEPTION;
 						zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
 						efree(is_callable_error);
 						return "";
@@ -1273,11 +1273,11 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 {
 	if (UNEXPECTED(class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
 		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
 		} else {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
 		}
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
@@ -3104,7 +3104,7 @@ get_function_via_handler:
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					retval = 0;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					return 0;
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
@@ -3115,7 +3115,7 @@ get_function_via_handler:
 					verb = "should not";
 				} else {
 					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-					severity = E_EXCEPTION | E_ERROR;
+					severity = E_EXCEPTION;
 					verb = "cannot";
 				}
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
@@ -3127,7 +3127,7 @@ get_function_via_handler:
 						retval = 0;
 					}
 				} else if (retval) {
-					zend_error(severity, "Non-static method %s::%s() %s be called statically", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name), verb);
+					zend_throw_error(zend_ce_error, severity, "Non-static method %s::%s() %s be called statically", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name), verb);
 				}
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
