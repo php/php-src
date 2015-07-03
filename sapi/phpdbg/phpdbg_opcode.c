@@ -24,6 +24,7 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
+#include "zend_smart_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -123,6 +124,44 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 		decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars);
 		break;
 	}
+
+#if 1
+	if (ops->T_liveliness) {
+		uint32_t *var = ops->T_liveliness + ops->T_liveliness[op - ops->opcodes];
+		uint32_t *end = ops->T_liveliness + ops->T_liveliness[op - ops->opcodes + 1];
+
+		if (var != end) {
+			smart_str str = {0};
+
+			smart_str_appends(&str, "; [@");
+			smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
+			while (++var != end) {
+				smart_str_appends(&str, ", @");
+				smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
+			}
+			smart_str_appendc(&str, ']');
+			smart_str_0(&str);
+
+			asprintf(&decode[0],
+				"%-20s %-20s %-20s%-20s",
+				decode[1] ? decode[1] : "",
+				decode[2] ? decode[2] : "",
+				decode[3] ? decode[3] : "",
+				ZSTR_VAL(str.s));
+
+			smart_str_free(&str);
+
+			if (decode[1])
+				free(decode[1]);
+			if (decode[2])
+				free(decode[2]);
+			if (decode[3])
+				free(decode[3]);
+
+			return decode[0];
+		}
+	}
+#endif
 
 	asprintf(&decode[0],
 		"%-20s %-20s %-20s",
