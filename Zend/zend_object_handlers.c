@@ -304,9 +304,9 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
 		if (!silent) {
 			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access empty property");
+				zend_throw_error(zend_ce_error, "Cannot access empty property");
 			} else {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access property started with '\\0'");
+				zend_throw_error(zend_ce_error, "Cannot access property started with '\\0'");
 			}
 		}
 		return ZEND_WRONG_PROPERTY_OFFSET;
@@ -360,7 +360,7 @@ exit_dynamic:
 	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
 		/* Information was available, but we were denied access.  Error out. */
 		if (!silent) {
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_throw_error(zend_ce_error, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
 		}
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
@@ -382,9 +382,9 @@ ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_s
 	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0')) {
 		if (!silent) {
 			if (ZSTR_LEN(member) == 0) {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access empty property");
+				zend_throw_error(zend_ce_error, "Cannot access empty property");
 			} else {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access property started with '\\0'");
+				zend_throw_error(zend_ce_error, "Cannot access property started with '\\0'");
 			}
 		}
 		return ZEND_WRONG_PROPERTY_INFO;
@@ -431,7 +431,7 @@ exit_dynamic:
 	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
 		/* Information was available, but we were denied access.  Error out. */
 		if (!silent) {
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_throw_error(zend_ce_error, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
 		}
 		return ZEND_WRONG_PROPERTY_INFO;
 	}
@@ -578,11 +578,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access empty property");
+					zend_throw_error(zend_ce_error, "Cannot access empty property");
 					retval = &EG(uninitialized_zval);
 					goto exit;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access property started with '\\0'");
+					zend_throw_error(zend_ce_error, "Cannot access property started with '\\0'");
 					retval = &EG(uninitialized_zval);
 					goto exit;
 				}
@@ -664,10 +664,10 @@ found:
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access empty property");
+					zend_throw_error(zend_ce_error, "Cannot access empty property");
 					goto exit;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access property started with '\\0'");
+					zend_throw_error(zend_ce_error, "Cannot access property started with '\\0'");
 					goto exit;
 				}
 			}
@@ -721,13 +721,13 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 
 		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 			if (UNEXPECTED(!EG(exception))) {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Undefined offset for object of type %s used as array", ZSTR_VAL(ce->name));
+				zend_throw_error(zend_ce_error, "Undefined offset for object of type %s used as array", ZSTR_VAL(ce->name));
 			}
 			return NULL;
 		}
 		return rv;
 	} else {
-		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+		zend_throw_error(zend_ce_error, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 		return NULL;
 	}
 }
@@ -748,7 +748,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /*
 		zend_call_method_with_2_params(object, ce, NULL, "offsetset", NULL, offset, value);
 		zval_ptr_dtor(offset);
 	} else {
-		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+		zend_throw_error(zend_ce_error, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
 }
 /* }}} */
@@ -777,7 +777,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 		}
 		zval_ptr_dtor(offset);
 	} else {
-		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+		zend_throw_error(zend_ce_error, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 		return 0;
 	}
 	return result;
@@ -914,10 +914,10 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access empty property");
+					zend_throw_error(zend_ce_error, "Cannot access empty property");
 					goto exit;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access property started with '\\0'");
+					zend_throw_error(zend_ce_error, "Cannot access property started with '\\0'");
 					goto exit;
 				}
 			}
@@ -940,7 +940,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 		zend_call_method_with_1_params(object, ce, NULL, "offsetunset", NULL, offset);
 		zval_ptr_dtor(offset);
 	} else {
-		zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+		zend_throw_error(zend_ce_error, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
 }
 /* }}} */
@@ -1115,7 +1115,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 			if (zobj->ce->__call) {
 				fbc = zend_get_user_call_function(zobj->ce, method_name);
 			} else {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(zend_ce_error, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1142,7 +1142,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name);
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					zend_throw_error(zend_ce_error, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 					fbc = NULL;
 				}
 			}
@@ -1235,7 +1235,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(zend_ce_error, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1246,7 +1246,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name);
 			} else {
-				zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+				zend_throw_error(zend_ce_error, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(function_name), EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
 				fbc = NULL;
 			}
 		}
@@ -1271,7 +1271,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 	if (UNEXPECTED(!zend_verify_property_access(property_info, ce))) {
 		if (!silent) {
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+			zend_throw_error(zend_ce_error, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 		}
 		return NULL;
 	}
@@ -1291,7 +1291,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 undeclared_property:
 		if (!silent) {
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+			zend_throw_error(zend_ce_error, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 		}
 		ret = NULL;
 	}
@@ -1302,7 +1302,7 @@ undeclared_property:
 
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
 {
-	zend_throw_error(zend_ce_error, E_EXCEPTION, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+	zend_throw_error(zend_ce_error, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 	return 0;
 }
 /* }}} */
@@ -1319,10 +1319,10 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 			 */
 			if (UNEXPECTED(constructor->common.scope != EG(scope))) {
 				if (EG(scope)) {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+					zend_throw_error(zend_ce_error, "Call to private %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
 					constructor = NULL;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+					zend_throw_error(zend_ce_error, "Call to private %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
 					constructor = NULL;
 				}
 			}
@@ -1333,10 +1333,10 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 			 */
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), EG(scope)))) {
 				if (EG(scope)) {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
+					zend_throw_error(zend_ce_error, "Call to protected %s::%s() from context '%s'", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name), ZSTR_VAL(EG(scope)->name));
 					constructor = NULL;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
+					zend_throw_error(zend_ce_error, "Call to protected %s::%s() from invalid context", ZSTR_VAL(constructor->common.scope->name), ZSTR_VAL(constructor->common.function_name));
 					constructor = NULL;
 				}
 			}

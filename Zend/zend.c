@@ -1292,26 +1292,21 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 # endif
 #endif
 
-ZEND_API void zend_throw_error(zend_class_entry *exception_ce, int type, const char *format, ...) /* {{{ */
+ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
-	
+
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 
-	if (type & E_EXCEPTION) {
-		type = E_ERROR; // Convert to E_ERROR if unable to throw.
-		//TODO: we can't convert compile-time errors to exceptions yet???
-		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception(exception_ce, message, type);
-			efree(message);
-			va_end(va);
-			return;
-		}
+	// TODO: we can't convert compile-time errors to exceptions yet???
+	if (EG(current_execute_data) && !CG(in_compilation)) {
+		zend_throw_exception(exception_ce, message, E_ERROR);
+	} else {
+		zend_error(E_ERROR, message);
 	}
-	
-	zend_error(type, message);
+
 	efree(message);
 	va_end(va);
 }

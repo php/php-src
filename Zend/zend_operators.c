@@ -907,7 +907,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+					zend_throw_error(zend_ce_error, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -960,7 +960,7 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+					zend_throw_error(zend_ce_error, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1007,7 +1007,7 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+					zend_throw_error(zend_ce_error, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1095,7 +1095,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 					}
 					converted = 1;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+					zend_throw_error(zend_ce_error, "Unsupported operand types");
 					return FAILURE;
 				}
 		}
@@ -1144,7 +1144,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+					zend_throw_error(zend_ce_error, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1294,7 +1294,7 @@ try_again:
 		default:
 			ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BW_NOT);
 
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "Unsupported operand types");
+			zend_throw_error(zend_ce_error, "Unsupported operand types");
 			return FAILURE;
 	}
 }
@@ -1611,7 +1611,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		zend_string *result_str;
 
 		if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
-			zend_throw_error(zend_ce_error, E_EXCEPTION, "String size overflow");
+			zend_throw_error(zend_ce_error, "String size overflow");
 			ZVAL_FALSE(result);
 			return FAILURE;
 		}
