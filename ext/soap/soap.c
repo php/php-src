@@ -2130,7 +2130,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
 
-	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets || (error_num & E_EXCEPTION)) {
+	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets) {
 		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		return;
 	}
