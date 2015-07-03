@@ -36,6 +36,13 @@ var_dump(array_every([1, 2, 3], function($item, $key) {
 	return true;
 }));
 
+echo "\n*** Testing third argument to predicate ***\n";
+
+var_dump(array_every([1, 2, 3], function($item, $key, $array) {
+	var_dump($array);
+	return true;
+}));
+
 echo "\n*** Testing edge cases ***\n";
 
 var_dump(array_every(array(), 'is_int_ex'));
@@ -64,6 +71,33 @@ int(1)
 int(0)
 int(1)
 int(2)
+bool(true)
+
+*** Testing third argument to predicate ***
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
 bool(true)
 
 *** Testing edge cases ***
