@@ -2390,7 +2390,33 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
 		uint32_t *until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num + 1];
 		while (off < until) {
-			zval_ptr_dtor_nogc(ZEND_CALL_VAR_NUM(execute_data, *(off++)));
+			uint32_t var = *(off++);
+
+			if (var & ZEND_LIVE_ROPE) {
+				/* free incomplete rope */
+				zend_string **rope = (zend_string **) EX_VAR(var & ~ZEND_LIVE_ROPE);
+				zend_op *last = EX(func)->op_array.opcodes + op_num;
+				while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
+					ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
+					last--;
+				}
+				if (last->opcode == ZEND_ROPE_INIT) {
+					zend_string_release(*rope);
+				} else {
+					int j = last->extended_value;
+					do {
+						zend_string_release(rope[j]);
+					} while (j--);
+				}
+			} else if (var & ZEND_LIVE_SILENCE) {
+				/* restore previous error_reporting value */
+				var = var & ~ZEND_LIVE_SILENCE;
+				if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(var)) != 0) {
+					EG(error_reporting) = Z_LVAL_P(EX_VAR(var));
+				}
+			} else {
+				zval_ptr_dtor_nogc(EX_VAR(var));
+			}
 		}
 	}
 
@@ -2527,26 +2553,6 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
 					zval_ptr_dtor_nogc(var);
-				} else if (brk_opline->opcode == ZEND_ROPE_END) {
-					zend_string **rope = (zend_string **) EX_VAR(brk_opline->op1.var);
-					zend_op *last = EX(func)->op_array.opcodes + op_num;
-					while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
-						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
-						last--;
-					}
-					if (last->opcode == ZEND_ROPE_INIT) {
-						zend_string_release(*rope);
-					} else {
-						int j = last->extended_value;
-						do {
-							zend_string_release(rope[j]);
-						} while (j--);
-					}
-				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
-					/* restore previous error_reporting value */
-					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
-						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
-					}
 				}
 			}
 		}

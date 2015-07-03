@@ -328,6 +328,9 @@ typedef struct _zend_internal_function_info {
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
+#define ZEND_LIVE_ROPE    (1 << 0)
+#define ZEND_LIVE_SILENCE (1 << 1)
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;

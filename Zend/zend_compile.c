@@ -6265,10 +6265,8 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
-	uint32_t begin_opline_num, end_opline_num;
 	zend_brk_cont_element *brk_cont_element;
 
-	begin_opline_num = get_next_op_number(CG(active_op_array));
 	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
 
 	if (expr_ast->kind == ZEND_AST_VAR) {
@@ -6279,15 +6277,7 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 		zend_compile_expr(result, expr_ast);
 	}
 
-	end_opline_num = get_next_op_number(CG(active_op_array));
 	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
-
-	/* Store BEGIN_SILENCE/END_SILENCE pair to restore previous
-	 * EG(error_reporting) value on exception */
-	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
-	brk_cont_element->start = begin_opline_num;
-	brk_cont_element->cont = brk_cont_element->brk = end_opline_num;
-	brk_cont_element->parent = -1;
 }
 /* }}} */
 
@@ -6615,10 +6605,6 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		zend_brk_cont_element *info = get_next_brk_cont_element(CG(active_op_array));
-		info->start = rope_init_lineno;
-		info->parent = CG(context).current_brk_cont;
-		info->cont = info->brk = opline - CG(active_op_array)->opcodes;
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;

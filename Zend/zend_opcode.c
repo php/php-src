@@ -855,7 +855,7 @@ typedef struct _var_live_info {
 
 typedef struct _op_var_info {
 	struct _op_var_info *next;
-	uint32_t T;
+	uint32_t var;
 } op_var_info;
 
 ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
@@ -876,7 +876,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 
 	for (i = 0; i <= op_array->last; i++) {
 		opTs[i] = &opTsTop[i];
-		opTs[i]->T = -1;
+		opTs[i]->var = -1;
 		opTs[i]->next = NULL;
 	}
 
@@ -894,7 +894,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			}
 			if (!~T->start
 			 && cur_op->opcode != ZEND_CASE /* exception for opcache, is anyway bool */
-			 && cur_op->opcode != ZEND_ROPE_INIT && cur_op->opcode != ZEND_ROPE_ADD
+			 && cur_op->opcode != ZEND_ROPE_ADD /* reuses TMP created in ROPE_INIT */
 			 && cur_op->opcode != ZEND_FAST_CALL && cur_op->opcode != ZEND_FAST_RET
 			 && cur_op->opcode != ZEND_FETCH_CLASS && cur_op->opcode != ZEND_DECLARE_CLASS
 			 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
@@ -909,7 +909,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		}
 		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
 		 && cur_op->opcode != ZEND_FE_FREE
-		 && cur_op->opcode != ZEND_ROPE_ADD && cur_op->opcode != ZEND_ROPE_END) {
+		 && cur_op->opcode != ZEND_ROPE_ADD) {
 			var_live_info *T = Ts[cur_op->op1.var];
 			if (~T->start) {
 				T->end = cur_op - op_array->opcodes;
@@ -943,11 +943,16 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			for (j = T->start + 1; j < T->end; j++) {
 				if (op_array->opcodes[j].opcode != ZEND_THROW) {
 					op_var_info *opT = opTs[j];
-					if (~opT->T) {
+					if (~opT->var) {
 						opT = opTs[j] = opT->next = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
 						opT->next = NULL;
 					}
-					opT->T = i;
+					opT->var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + i);;
+					if (op_array->opcodes[T->end].opcode == ZEND_ROPE_END) {
+						opT->var |= ZEND_LIVE_ROPE;
+					} else if (op_array->opcodes[T->end].opcode == ZEND_END_SILENCE) {
+						opT->var |= ZEND_LIVE_SILENCE;
+					}
 					op_live_total++;
 				}
 			}
@@ -964,11 +969,11 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	for (i = 0; i < op_array->last; i++) {
 		op_var_info *opT = &opTsTop[i];
 		info[i] = info_off;
-		if (!~opT->T) {
+		if (!~opT->var) {
 			opT = NULL;
 		}
 		while (opT) {
-			info[info_off++] = op_array->last_var + opT->T;
+			info[info_off++] = opT->var;
 			opT = opT->next;
 		}
 	}
