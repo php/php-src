@@ -275,3 +275,14 @@ changes. See: https://wiki.php.net/phpng-upgrading
     - More documentation can be found in ext/session/mod_files.c as comments.
       mod_files.c may be used as reference implementation.
  
+  Openssl:
+    - several ext/openssl functions require the inclusion of the applink shim
+      as documented in the OpenSSL FAQ https://www.openssl.org/support/faq.html#PROG2
+      to properly work on Windows. While this primarily affects the OpenSSL
+      functionality, the shim needs to be included into the executable file
+      which loads the extension DLL, not into the extension DLL itself. Thus, this
+      primarily affects any WAMP or other redistributions bundling the official
+      PHP releaze zipballs or building from sources. The applink shim is already
+      integrated with all the PHP executables from the official distribution
+      starting with 7.0.0beta1.
+
