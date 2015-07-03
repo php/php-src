@@ -16,6 +16,6 @@ echo "Alive\n";
 ?>
 --EXPECTF--
 
-int(1)
+int(0)
 string(%d) "Call to a member function method() on null"
 Alive

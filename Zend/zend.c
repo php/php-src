@@ -1302,7 +1302,7 @@ ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *forma
 
 	// TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		zend_throw_exception(exception_ce, message, E_ERROR);
+		zend_throw_exception(exception_ce, message, 0);
 	} else {
 		zend_error(E_ERROR, message);
 	}
