@@ -38,9 +38,7 @@ int zend_load_extension(const char *path)
 #else
 		fprintf(stderr, "Failed loading %s\n", path);
 		/* See http://support.microsoft.com/kb/190351 */
-#ifdef ZEND_WIN32
 		fflush(stderr);
-#endif
 #endif
 		return FAILURE;
 	}
