@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     reference). (Bob)
 
 - Standard:
+  . Fixed bug #69983 (get_browser fails with user agent of null).
+    (Kalle, cmb, Laruence)
   . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
