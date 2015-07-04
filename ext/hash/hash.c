@@ -485,6 +485,12 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
+static inline void php_hash_hmac_continue(unsigned char *final, const php_hash_ops *ops, void *start_context, void *context, const unsigned char *data, const zend_long data_size) {
+	ops->hash_copy(ops, start_context, context);
+	ops->hash_update(context, data, data_size);
+	ops->hash_final(final, context);
+}
+
 static void php_hash_do_hash_hmac(
 	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, zend_bool raw_output, bool isfilename
 ) /* {{{ */ {
@@ -974,12 +980,12 @@ PHP_FUNCTION(hash_pbkdf2)
 {
 	zend_string *returnval, *algo;
 	char *salt, *pass = NULL;
-	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
+	unsigned char *computed_salt, *digest, *temp, *result, *K = NULL;
 	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
 	size_t pass_len, salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
-	void *context;
+	void *context, *inner_context, *outer_context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lb", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
 		RETURN_THROWS();
@@ -1006,18 +1012,29 @@ PHP_FUNCTION(hash_pbkdf2)
 		RETURN_THROWS();
 	}
 
+	/* inner_context: hash of the key block ^ 0x36
+	 * outer_context: hash of the key block ^ 0x5c
+	 * context: misc scratch hashing context */
+	inner_context = php_hash_alloc_context(ops);
+	outer_context = php_hash_alloc_context(ops);
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context);
 
-	K1 = emalloc(ops->block_size);
-	K2 = emalloc(ops->block_size);
+	K = emalloc(ops->block_size);
 	digest = emalloc(ops->digest_size);
 	temp = emalloc(ops->digest_size);
 
 	/* Setup Keys that will be used for all hmac rounds */
-	php_hash_hmac_prep_key(K1, ops, context, (unsigned char *) pass, pass_len);
-	/* Convert K1 to opad -- 0x6A = 0x36 ^ 0x5C */
-	php_hash_string_xor_char(K2, K1, 0x6A, ops->block_size);
+	php_hash_hmac_prep_key(K, ops, context, (unsigned char *) pass, pass_len);
+
+	ops->hash_init(inner_context);
+	ops->hash_update(inner_context, K, ops->block_size);
+
+	/* Convert K from ipad to opad -- 0x6A = 0x36 ^ 0x5C */
+	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+
+	ops->hash_init(outer_context);
+	ops->hash_update(outer_context, K, ops->block_size);
 
 	/* Setup Main Loop to build a long enough result */
 	if (length == 0) {
@@ -1047,8 +1064,8 @@ PHP_FUNCTION(hash_pbkdf2)
 		computed_salt[salt_len + 2] = (unsigned char) ((i & 0xFF00) >> 8);
 		computed_salt[salt_len + 3] = (unsigned char) (i & 0xFF);
 
-		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (zend_long) salt_len + 4);
-		php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+		php_hash_hmac_continue(digest, ops, inner_context, context, computed_salt, (zend_long) salt_len + 4);
+		php_hash_hmac_continue(digest, ops, outer_context, context, digest, ops->digest_size);
 		/* } */
 
 		/* temp = digest */
@@ -1060,8 +1077,8 @@ PHP_FUNCTION(hash_pbkdf2)
 		 */
 		for (j = 1; j < iterations; j++) {
 			/* digest = hash_hmac(digest, password) { */
-			php_hash_hmac_round(digest, ops, context, K1, digest, ops->digest_size);
-			php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+			php_hash_hmac_continue(digest, ops, inner_context, context, digest, ops->digest_size);
+			php_hash_hmac_continue(digest, ops, outer_context, context, digest, ops->digest_size);
 			/* } */
 			/* temp ^= digest */
 			php_hash_string_xor(temp, temp, digest, ops->digest_size);
@@ -1070,12 +1087,15 @@ PHP_FUNCTION(hash_pbkdf2)
 		memcpy(result + ((i - 1) * ops->digest_size), temp, ops->digest_size);
 	}
 	/* Zero potentially sensitive variables */
-	ZEND_SECURE_ZERO(K1, ops->block_size);
-	ZEND_SECURE_ZERO(K2, ops->block_size);
+	ZEND_SECURE_ZERO(K, ops->block_size);
 	ZEND_SECURE_ZERO(computed_salt, salt_len + 4);
-	efree(K1);
-	efree(K2);
+	ZEND_SECURE_ZERO(inner_context, ops->context_size);
+	ZEND_SECURE_ZERO(outer_context, ops->context_size);
+	ZEND_SECURE_ZERO(context, ops->context_size);
+	efree(K);
 	efree(computed_salt);
+	efree(inner_context);
+	efree(outer_context);
 	efree(context);
 	efree(digest);
 	efree(temp);
