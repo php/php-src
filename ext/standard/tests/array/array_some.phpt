@@ -7,6 +7,11 @@ Test array_some() function
 	Description: Iterate array and stop based on return value of callback
 */
 
+function is_int_ex($nr)
+{
+	return is_int($nr);
+}
+
 echo "\n*** Testing not enough or wrong arguments ***\n";
 
 var_dump(array_some());
@@ -15,8 +20,8 @@ var_dump(array_some([]));
 
 echo "\n*** Testing basic functionality ***\n";
 
-var_dump(array_some(array('hello', 'world'), 'is_int'));
-var_dump(array_some(array('hello', 1, 2, 3), 'is_int'));
+var_dump(array_some(array('hello', 'world'), 'is_int_ex'));
+var_dump(array_some(array('hello', 1, 2, 3), 'is_int_ex'));
 $iterations = 0;
 var_dump(array_some(array('hello', 1, 2, 3), function($item) use (&$iterations) {
 	++$iterations;
@@ -26,7 +31,7 @@ var_dump($iterations);
 
 echo "\n*** Testing edge cases ***\n";
 
-var_dump(array_some(array(), 'is_int'));
+var_dump(array_some(array(), 'is_int_ex'));
 
 echo "\nDone";
 ?> 
