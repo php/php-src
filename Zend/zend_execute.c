@@ -2385,6 +2385,41 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
 	int i;
+
+	if (EX(func)->op_array.T_liveliness && op_num < EX(func)->op_array.last) {
+		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
+		uint32_t *until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num + 1];
+		while (off < until) {
+			uint32_t var = *(off++);
+
+			if (var & ZEND_LIVE_ROPE) {
+				/* free incomplete rope */
+				zend_string **rope = (zend_string **) EX_VAR(var & ~ZEND_LIVE_ROPE);
+				zend_op *last = EX(func)->op_array.opcodes + op_num;
+				while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
+					ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
+					last--;
+				}
+				if (last->opcode == ZEND_ROPE_INIT) {
+					zend_string_release(*rope);
+				} else {
+					int j = last->extended_value;
+					do {
+						zend_string_release(rope[j]);
+					} while (j--);
+				}
+			} else if (var & ZEND_LIVE_SILENCE) {
+				/* restore previous error_reporting value */
+				var = var & ~ZEND_LIVE_SILENCE;
+				if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(var)) != 0) {
+					EG(error_reporting) = Z_LVAL_P(EX_VAR(var));
+				}
+			} else {
+				zval_ptr_dtor_nogc(EX_VAR(var));
+			}
+		}
+	}
+
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
@@ -2511,34 +2546,13 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 			if (!catch_op_num || catch_op_num >= brk_cont->brk) {
 				zend_op *brk_opline = &EX(func)->op_array.opcodes[brk_cont->brk];
 
-				if (brk_opline->opcode == ZEND_FREE) {
-					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-				} else if (brk_opline->opcode == ZEND_FE_FREE) {
+				/* ZEND_FREE opcodes are handled by temporary variable freeing */
+				if (brk_opline->opcode == ZEND_FE_FREE) {
 					zval *var = EX_VAR(brk_opline->op1.var);
 					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
 					zval_ptr_dtor_nogc(var);
-				} else if (brk_opline->opcode == ZEND_ROPE_END) {
-					zend_string **rope = (zend_string **) EX_VAR(brk_opline->op1.var);
-					zend_op *last = EX(func)->op_array.opcodes + op_num;
-					while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
-						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
-						last--;
-					}
-					if (last->opcode == ZEND_ROPE_INIT) {
-						zend_string_release(*rope);
-					} else {
-						int j = last->extended_value;
-						do {
-							zend_string_release(rope[j]);
-						} while (j--);
-					}
-				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
-					/* restore previous error_reporting value */
-					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
-						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
-					}
 				}
 			}
 		}

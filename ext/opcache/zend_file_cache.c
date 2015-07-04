@@ -464,6 +464,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		SERIALIZE_STR(op_array->doc_comment);
 		SERIALIZE_PTR(op_array->try_catch_array);
 		SERIALIZE_PTR(op_array->prototype);
+		SERIALIZE_PTR(op_array->T_liveliness);
 	}
 }
 
@@ -987,6 +988,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
+		UNSERIALIZE_PTR(op_array->T_liveliness);
 	}
 }
 

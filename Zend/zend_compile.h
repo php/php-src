@@ -328,6 +328,9 @@ typedef struct _zend_internal_function_info {
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
+#define ZEND_LIVE_ROPE    (1 << 0)
+#define ZEND_LIVE_SILENCE (1 << 1)
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
@@ -351,6 +354,7 @@ struct _zend_op_array {
 	int last_var;
 	uint32_t T;
 	zend_string **vars;
+	uint32_t *T_liveliness;
 
 	int last_brk_cont;
 	int last_try_catch;
@@ -727,6 +731,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
