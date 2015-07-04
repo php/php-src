@@ -1980,7 +1980,7 @@ static int zend_check_symbol(zval *pz)
 	if (Z_TYPE_P(pz) > 10) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {

@@ -1749,7 +1749,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	register char *end = path + len - 1;
 	unsigned int len_adjust = 0;
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	/* Note that on Win32 CWD is per drive (heritage from CP/M).
 	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
 	 */

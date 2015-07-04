@@ -72,7 +72,7 @@ static void zend_handle_sigsegv(int dummy) /* {{{ */
 				zend_get_executed_filename(),
 				zend_get_executed_lineno());
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 	}
