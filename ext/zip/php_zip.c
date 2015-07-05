@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "zend_exceptions.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
@@ -590,7 +591,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	globfree(&globbuf);
 	return globbuf.gl_pathc;
 #else
-	php_error_docref(NULL, E_ERROR, "Glob support is not available");
+	zend_throw_error(zend_ce_error, "Glob support is not available");
 	return 0;
 #endif  /* HAVE_GLOB */
 }

@@ -250,7 +250,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 			elements = 1;
 		} else if (!member) {
 			/* This happens when the user did: $sxe[]->foo = $value */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
 			return NULL;
 		}
 		name = NULL;
@@ -277,7 +277,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		if (!member && node && node->parent &&
 		    node->parent->type == XML_DOCUMENT_NODE) {
 			/* This happens when the user did: $sxe[]->foo = $value */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
 			return NULL;
 		}
 	}
@@ -459,7 +459,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
 			return FAILURE;
 		}
 	} else {
@@ -498,7 +498,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			 * and could also be E_PARSE, but we use this only during parsing
 			 * and this is during runtime.
 			 */
-			php_error_docref(NULL, E_ERROR, "Cannot create unnamed attribute");
+			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
 			return FAILURE;
 		}
 		if (attribs && !node && sxe->iter.type == SXE_ITER_ELEMENT) {
@@ -571,7 +571,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 		if (elements) {
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (node->type == XML_ATTRIBUTE_NODE) {
-					php_error_docref(NULL, E_ERROR, "Cannot create duplicate attribute");
+					zend_throw_error(zend_ce_error, "Cannot create duplicate attribute");
 					return FAILURE;
 				}
 

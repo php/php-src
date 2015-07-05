@@ -31,6 +31,7 @@
 #include "php_openssl.h"
 
 /* PHP Includes */
+#include "zend_exceptions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_fopen_wrappers.h"
@@ -1795,7 +1796,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_b
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
-		php_error_docref(NULL, E_ERROR, "Could not generate signature");
+		zend_throw_error(zend_ce_error, "Could not generate signature");
 		return NULL;
 	}
 

@@ -787,7 +787,10 @@ static HashTable *spl_array_get_properties(zval *object) /* {{{ */
 	HashTable *result;
 
 	if (intern->nApplyCount > 1) {
-		php_error_docref(NULL, E_ERROR, "Nesting level too deep - recursive dependency?");
+		zend_throw_error(zend_ce_error, "Nesting level too deep - recursive dependency?");
+		ALLOC_HASHTABLE(result);
+		ZEND_INIT_SYMTABLE(result);
+		return result;
 	}
 
 	intern->nApplyCount++;

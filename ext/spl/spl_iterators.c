@@ -1392,7 +1392,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 	ZVAL_STRING(&func, method, 0);
 	if (!zend_is_callable(&func, 0, &method)) {
-		php_error_docref(NULL, E_ERROR, "Method %s::%s() does not exist", intern->inner.ce->name, method);
+		zend_throw_error(zend_ce_error, "Method %s::%s() does not exist", intern->inner.ce->name, method);
 		return FAILURE;
 	}
 
@@ -1413,7 +1413,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 		success = SUCCESS;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Unable to call %s::%s()", intern->inner.ce->name, method);
+		zend_throw_error(zend_ce_error, "Unable to call %s::%s()", intern->inner.ce->name, method);
 		success = FAILURE;
 	}
 
@@ -1641,13 +1641,6 @@ SPL_METHOD(dual_it, getInnerIterator)
 	}
 } /* }}} */
 
-static inline void spl_dual_it_require(spl_dual_it_object *intern)
-{
-	if (!intern->inner.iterator) {
-		php_error_docref(NULL, E_ERROR, "The inner constructor wasn't initialized with an iterator instance");
-	}
-}
-
 static inline void spl_dual_it_free(spl_dual_it_object *intern)
 {
 	if (intern->inner.iterator && intern->inner.iterator->funcs->invalidate_current) {
@@ -1720,8 +1713,9 @@ static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free)
 {
 	if (do_free) {
 		spl_dual_it_free(intern);
-	} else {
-		spl_dual_it_require(intern);
+	} else if (!intern->inner.iterator) {
+		zend_throw_error(zend_ce_error, "The inner constructor wasn't initialized with an iterator instance");
+		return;
 	}
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);
 	intern->current.pos++;

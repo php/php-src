@@ -196,7 +196,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
 			if (!intern->file_name) {
-				php_error_docref(NULL, E_ERROR, "Object not initialized");
+				zend_throw_error(zend_ce_error, "Object not initialized");
 			}
 			break;
 		case SPL_FS_DIR:
@@ -359,8 +359,8 @@ static zend_object *spl_filesystem_object_clone(zval *zobject)
 			intern->u.dir.index = index;
 			break;
 		case SPL_FS_FILE:
-			php_error_docref(NULL, E_ERROR, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
-			break;
+			zend_throw_error(zend_ce_error, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
+			return NULL;
 	}
 
 	intern->file_class = source->file_class;

@@ -6,4 +6,8 @@ spl_autoload_register();
 new ThisClassDoesNotExistEverFoo();
 ?>
 --EXPECTF--
-Fatal error: spl_autoload(): Class ThisClassDoesNotExistEverFoo could not be loaded in %s on line 3
+Fatal error: Uncaught Error: Class ThisClassDoesNotExistEverFoo could not be loaded in %s:%d
+Stack trace:
+#0 %s(%d): spl_autoload('ThisClassDoesNo...')
+#1 {main}
+  thrown in %s on line %d

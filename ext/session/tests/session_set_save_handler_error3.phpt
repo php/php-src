@@ -34,11 +34,14 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 
-Warning: Uncaught Exception: Do something bad..! in %s:%d
+Fatal error: Uncaught Exception: Do something bad..! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
 #1 %s(%d): session_start()
 #2 {main}
-  thrown in %s on line %d
 
-Fatal error: session_start(): Failed to initialize storage module: %s in %ssession_set_save_handler_error3.php on line %d
+Next Error: Failed to initialize storage module: user (path: ) in %s:%d
+Stack trace:
+#0 %s(%d): session_start()
+#1 {main}
+  thrown in %s on line %d

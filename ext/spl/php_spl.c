@@ -356,7 +356,7 @@ PHP_FUNCTION(spl_autoload)
 		    ex->opline->opcode != ZEND_NEW) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0, "Class %s could not be loaded", ZSTR_VAL(class_name));
 		} else {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be loaded", ZSTR_VAL(class_name));
+			zend_throw_error(zend_ce_error, "Class %s could not be loaded", ZSTR_VAL(class_name));
 		}
 	}
 } /* }}} */

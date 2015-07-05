@@ -28,6 +28,7 @@
 
 #if HAVE_MBREGEX
 
+#include "zend_exceptions.h"
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
@@ -943,8 +944,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				/* do eval */
 				if (zend_eval_stringl(ZSTR_VAL(eval_buf.s), ZSTR_LEN(eval_buf.s), &v, description) == FAILURE) {
 					efree(description);
-					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
-					/* zend_error() does not return in this case */
+					zend_throw_error(zend_ce_error, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
+					onig_region_free(regs, 0);
+					RETVAL_EMPTY_STRING();
 				}
 
 				/* result of eval */

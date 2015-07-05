@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "zend_exceptions.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
@@ -123,7 +124,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
 		pdo_odbc_pool_on = SQL_CP_OFF;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		zend_throw_error(zend_ce_error, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
 		return FAILURE;
 	}
 

@@ -1822,8 +1822,9 @@ PHP_FUNCTION(ldap_modify_batch)
 				oper = LDAP_MOD_REPLACE;
 				break;
 			default:
-				php_error_docref(NULL, E_ERROR, "Unknown and uncaught modification type.");
-				RETURN_FALSE;
+				zend_throw_error(zend_ce_error, "Unknown and uncaught modification type.");
+				RETVAL_FALSE;
+				goto cleanup;
 		}
 
 		/* fill in the basic info */
@@ -1868,7 +1869,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	} else RETVAL_TRUE;
 
 	/* clean up */
-	{
+	cleanup: {
 		for (i = 0; i < num_mods; i++) {
 			/* attribute */
 			efree(ldap_mods[i]->mod_type);

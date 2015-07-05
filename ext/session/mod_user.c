@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_session.h"
+#include "zend_exceptions.h"
 #include "mod_user.h"
 
 ps_module ps_mod_user = {
@@ -191,12 +192,12 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			php_error_docref(NULL, E_ERROR, "No session id returned by function");
+			zend_throw_error(zend_ce_error, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			php_error_docref(NULL, E_ERROR, "Session id must be a string");
+			zend_throw_error(zend_ce_error, "Session id must be a string");
 			return NULL;
 		}
 

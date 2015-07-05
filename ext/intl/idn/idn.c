@@ -27,6 +27,7 @@
 
 #include <unicode/uidna.h>
 #include <unicode/ustring.h>
+#include "zend_exceptions.h"
 #include "ext/standard/php_string.h"
 
 #include "intl_error.h"
@@ -165,7 +166,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		RETURN_FALSE;
 	}
 	if (len >= 255) {
-		php_error_docref(NULL, E_ERROR, "ICU returned an unexpected length");
+		zend_throw_error(zend_ce_error, "ICU returned an unexpected length");
+		uidna_close(uts46);
+		zend_string_free(buffer);
+		RETURN_FALSE;
 	}
 
 	ZSTR_VAL(buffer)[len] = '\0';

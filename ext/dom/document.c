@@ -2223,11 +2223,13 @@ PHP_METHOD(domdocument, registerNodeClass)
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 		if (dom_set_doc_classmap(intern->document, basece, ce) == FAILURE) {
-			php_error_docref(NULL, E_ERROR, "Class %s could not be registered.", ZSTR_VAL(ce->name));
+			zend_throw_error(zend_ce_error, "Class %s could not be registered.", ZSTR_VAL(ce->name));
+			RETURN_FALSE;
 		}
 		RETURN_TRUE;
 	} else {
-		php_error_docref(NULL, E_ERROR, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
+		zend_throw_error(zend_ce_error, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
+		RETURN_FALSE;
 	}
 
 	RETURN_FALSE;
