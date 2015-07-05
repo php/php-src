@@ -2296,7 +2296,9 @@ no_copy:
 		zend_hash_destroy(&(phar->manifest));
 		zend_hash_destroy(&(phar->mounted_dirs));
 		zend_hash_destroy(&(phar->virtual_dirs));
-		php_stream_close(phar->fp);
+		if (phar->fp) {
+			php_stream_close(phar->fp);
+		}
 		efree(phar->fname);
 		efree(phar);
 		return NULL;
