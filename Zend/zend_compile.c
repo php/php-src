@@ -5074,7 +5074,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		name = zend_new_interned_string(name);
 		lcname = zend_new_interned_string(lcname);
 	} else {
-		lcname = name = zend_generate_anon_class_name(decl->lex_pos);
+		name = zend_generate_anon_class_name(decl->lex_pos);
+		lcname = zend_string_copy(name); /* this normally is an interned string, except with opcache. We need a proper copy here or opcache will fail with use after free. */
 	}
 
 	ce->type = ZEND_USER_CLASS;
