@@ -487,25 +487,39 @@ mysqlnd_switch_to_ssl_if_needed(
 	}
 
 #ifdef MYSQLND_SSL_SUPPORTED
-	if ((greet_packet->server_capabilities & CLIENT_SSL) && (mysql_flags & CLIENT_SSL)) {
-		zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
-		DBG_INF("Switching to SSL");
-		if (!PACKET_WRITE(auth_packet, conn)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			conn->m->send_close(conn);
-			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-			goto end;
-		}
+	if (mysql_flags & CLIENT_SSL) {
+		zend_bool server_has_ssl = (greet_packet->server_capabilities & CLIENT_SSL)? TRUE:FALSE;
+		if (server_has_ssl == FALSE) {
+			goto close_conn;
+		} else {
+			zend_bool verify = mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? TRUE:FALSE;
+			DBG_INF("Switching to SSL");
+			if (!PACKET_WRITE(auth_packet, conn)) {
+				goto close_conn;
+			}
 
-		conn->net->data->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
+			conn->net->data->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
 
-		if (FAIL == conn->net->data->m.enable_ssl(conn->net)) {
-			goto end;
+			if (FAIL == conn->net->data->m.enable_ssl(conn->net)) {
+				goto end;
+			}
 		}
+	}
+#else
+	auth_packet->client_flags &= ~CLIENT_SSL;
+	if (!PACKET_WRITE(auth_packet, conn)) {
+		goto close_conn;
 	}
 #endif
 	ret = PASS;
 end:
+	PACKET_FREE(auth_packet);
+	DBG_RETURN(ret);
+
+close_conn:
+	CONN_SET_STATE(conn, CONN_QUIT_SENT);
+	conn->m->send_close(conn TSRMLS_CC);
+	SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	PACKET_FREE(auth_packet);
 	DBG_RETURN(ret);
 }
