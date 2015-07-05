@@ -860,16 +860,15 @@ typedef struct _op_var_info {
 
 ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 {
+	uint32_t i, op_live_total = 0;
 	void *checkpoint = zend_arena_checkpoint(CG(arena));
-	var_live_info **TsTop = zend_arena_alloc(&CG(arena), sizeof(var_live_info *) * op_array->T);
-	var_live_info **Ts = zend_arena_alloc(&CG(arena), sizeof(var_live_info *) * op_array->T);
-	int i, op_live_total = 0;
 	uint32_t *info, info_off = op_array->last + 1;
+	var_live_info **Ts = zend_arena_alloc(&CG(arena), sizeof(var_live_info *) * op_array->T);
 	op_var_info *opTsTop = zend_arena_alloc(&CG(arena), sizeof(op_var_info) * (op_array->last + 1));
 	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * (op_array->last + 1));
 
 	for (i = 0; i < op_array->T; i++) {
-		TsTop[i] = Ts[i] = zend_arena_alloc(&CG(arena), sizeof(var_live_info));
+		Ts[i] = zend_arena_alloc(&CG(arena), sizeof(var_live_info));
 		Ts[i]->next = NULL;
 		Ts[i]->start = Ts[i]->end = -1;
 	}
@@ -903,12 +902,13 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS
 		 && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
 			var_live_info *T = Ts[cur_op->result.var];
-			if (~T->end) {
-				T = Ts[cur_op->result.var] = T->next = zend_arena_alloc(&CG(arena), sizeof(var_live_info));
-				T->next = NULL;
+			if (T->end != -1) {
+				Ts[cur_op->result.var] = zend_arena_alloc(&CG(arena), sizeof(var_live_info));
+				Ts[cur_op->result.var]->next = T;
+				T = Ts[cur_op->result.var];
 				T->start = T->end = -1;
 			}
-			if (!~T->start) {
+			if (T->start == -1) {
 				/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
 				if (cur_op->opcode == ZEND_NEW) {
 					T->start = cur_op->op2.opline_num - 1;
@@ -933,7 +933,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		 && cur_op->opcode != ZEND_BIND_TRAITS
 		 && cur_op->opcode != ZEND_VERIFY_ABSTRACT_CLASS) {
 			var_live_info *T = Ts[cur_op->op1.var];
-			if (~T->start) {
+			if (T->start != -1) {
 				T->end = cur_op - op_array->opcodes;
 				if (cur_op->opcode == ZEND_OP_DATA) {
 					T->end--;
@@ -951,7 +951,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		 && cur_op->opcode != ZEND_ISSET_ISEMPTY_VAR
 		 && cur_op->opcode != ZEND_INSTANCEOF) {
 			var_live_info *T = Ts[cur_op->op2.var];
-			if (~T->start) {
+			if (T->start != -1) {
 				T->end = cur_op - op_array->opcodes;
 				if (cur_op->opcode == ZEND_OP_DATA) {
 					T->end--;
@@ -962,7 +962,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 
 	for (i = 0; i < op_array->T; i++) {
 		int j;
-		var_live_info *T = TsTop[i];
+		var_live_info *T = Ts[i];
 
 		do {
 			if (!~T->start) {
@@ -974,7 +974,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			for (j = T->start + 1; j < T->end; j++) {
 				if (op_array->opcodes[j].opcode != ZEND_THROW) {
 					op_var_info *opT = opTs[j];
-					if (~opT->var) {
+					if (opT->var != -1) {
 						opT = opTs[j] = opT->next = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
 						opT->next = NULL;
 					}
