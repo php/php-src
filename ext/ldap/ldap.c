@@ -2660,6 +2660,7 @@ static zend_string* php_ldap_do_escape(const zend_bool *map, const char *value, 
 
 	ZSTR_VAL(ret)[p] = '\0';
 	ZSTR_LEN(ret) = p;
+	return ret;
 }
 
 static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const int charslen, char escape)
