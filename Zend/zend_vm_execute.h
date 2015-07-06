@@ -12999,7 +12999,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 			}
 			rope[opline->extended_value] = _zval_get_string_func(var);
 
-			CHECK_EXCEPTION();
+			if (UNEXPECTED(EG(exception))) {
+				for (i = 0; i <= opline->extended_value; i++) {
+					zend_string_release(rope[i]);
+				}
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
@@ -14283,7 +14288,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 			}
 			rope[opline->extended_value] = _zval_get_string_func(var);
 
-			CHECK_EXCEPTION();
+			if (UNEXPECTED(EG(exception))) {
+				for (i = 0; i <= opline->extended_value; i++) {
+					zend_string_release(rope[i]);
+				}
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
@@ -14796,7 +14806,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 			}
 			rope[opline->extended_value] = _zval_get_string_func(var);
 			zval_ptr_dtor_nogc(free_op2);
-			CHECK_EXCEPTION();
+			if (UNEXPECTED(EG(exception))) {
+				for (i = 0; i <= opline->extended_value; i++) {
+					zend_string_release(rope[i]);
+				}
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {
