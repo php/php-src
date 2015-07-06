@@ -24,6 +24,8 @@
 #include <math.h>
 
 #include "php.h"
+#include "zend_exceptions.h"
+#include "../spl/spl_exceptions.h"
 #include "php_random.h"
 
 #if PHP_WIN32
@@ -79,7 +81,7 @@ static int php_random_bytes(void *bytes, size_t size)
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		zend_throw_exception(spl_ce_RuntimeException, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF
@@ -95,7 +97,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		fd = open("/dev/urandom", O_RDONLY);
 #endif
 		if (fd < 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot open source device");
+			zend_throw_exception(spl_ce_RuntimeException, "Cannot open source device", 0);
 			return FAILURE;
 		}
 
@@ -111,7 +113,7 @@ static int php_random_bytes(void *bytes, size_t size)
 	}
 
 	if (read_bytes < size) {
-		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		zend_throw_exception(spl_ce_RuntimeException, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #endif
