@@ -1,3 +1,37 @@
+To ease testing LDAP-Setups we've created a vagrant-setup.
+
+Prerequisits:
+=============
+
+You will need vagrant on your box. Get it from https://www.vagrantup.com
+
+Usage:
+======
+
+To use it follow these steps:
+
+* Download the Vagrantfile from https://gist.githubusercontent.com/heiglandreas/5b87a19b78c630b62537/raw/Vagrantfile to any directory you like.
+* Go to that directory and run "vagrant up"
+
+Now you will have a virtual machine up and running on IP-Address 192.168.10.33 listening on port 369 for incomming LDAP-connections. The machine is already configured to execute the LDAP-Tests
+
+The next step is to go into the PHP-Source-directory. Configure and make the source as appropriate.
+
+Before running the LDAP-Tests you need to set some environment-variables:
+
+export LDAP_TEST_PASSWD="password"
+export LDAP_TEST_BASE="ou=extldap,dc=nodomain"
+export LDAP_TEST_USER="dc=admin,dc=nodomain"
+export LDAP_TEST_HOST=192.168.33.10
+
+Now you can run the test-suite by calling "make test". To test only the LDAP-Tests, run "make test TESTS=ext/ldap"
+
+CAVEAT: The current setup does not (yet) test secure connections. 
+
+
+========
+OLD README
+
 Most tests here relies on the availability of an LDAP server configured with TLS.
 
 Client/Server configuration:
