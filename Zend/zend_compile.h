@@ -109,15 +109,36 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
+typedef struct _zend_brk_cont_element {
+	int start;
+	int cont;
+	int brk;
+	int parent;
+} zend_brk_cont_element;
+
+typedef struct _zend_label {
+	int brk_cont;
+	uint32_t opline_num;
+} zend_label;
+
+typedef struct _zend_try_catch_element {
+	uint32_t try_op;
+	uint32_t catch_op;  /* ketchup! */
+	uint32_t finally_op;
+	uint32_t finally_end;
+} zend_try_catch_element;
+
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
 	int        vars_size;
 	int        literals_size;
-	int        current_brk_cont;
 	int        backpatch_count;
 	int        in_finally;
 	uint32_t   fast_call_var;
+	int        current_brk_cont;
+	int        last_brk_cont;
+    zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
 } zend_oparray_context;
 
@@ -162,26 +183,6 @@ struct _zend_op {
 	zend_uchar op2_type;
 	zend_uchar result_type;
 };
-
-
-typedef struct _zend_brk_cont_element {
-	int start;
-	int cont;
-	int brk;
-	int parent;
-} zend_brk_cont_element;
-
-typedef struct _zend_label {
-	int brk_cont;
-	uint32_t opline_num;
-} zend_label;
-
-typedef struct _zend_try_catch_element {
-	uint32_t try_op;
-	uint32_t catch_op;  /* ketchup! */
-	uint32_t finally_op;
-	uint32_t finally_end;
-} zend_try_catch_element;
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
@@ -358,9 +359,8 @@ struct _zend_op_array {
 	zend_string **vars;
 	uint32_t *T_liveliness;
 
-	int last_brk_cont;
+	//TODO: improve layout ???
 	int last_try_catch;
-	zend_brk_cont_element *brk_cont_array;
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */

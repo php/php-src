@@ -340,29 +340,11 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				 */
 				case ZEND_FREE:
 				case ZEND_CASE: {
-					zend_op *m, *n;
-					int brk = op_array->last_brk_cont;
-					zend_bool in_switch = 0;
-					while (brk--) {
-						if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
-								op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
-							in_switch = 1;
-							break;
-						}
-					}
+					zend_op *m = opline;
+					zend_op *end = op_array->opcodes + op_array->last;
 
-					if (!in_switch) {
-						ZEND_ASSERT(opline->opcode == ZEND_FREE);
-						MAKE_NOP(opline);
-						zval_dtor(val);
-						return 1;
-					}
-
-					m = opline;
-					n = op_array->opcodes + op_array->brk_cont_array[brk].brk + 1;
-					while (m < n) {
-						if (ZEND_OP1_TYPE(m) == type &&
-								ZEND_OP1(m).var == var) {
+					while (m < end) {
+						if (ZEND_OP1_TYPE(m) == type && ZEND_OP1(m).var == var) {
 							if (m->opcode == ZEND_CASE) {
 								zval old_val;
 								ZVAL_COPY_VALUE(&old_val, val);
@@ -371,6 +353,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 								ZVAL_COPY_VALUE(val, &old_val);
 							} else if (m->opcode == ZEND_FREE) {
 								MAKE_NOP(m);
+								break;
 							} else {
 								ZEND_ASSERT(0);
 							}

@@ -459,7 +459,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 
 		SERIALIZE_STR(op_array->function_name);
 		SERIALIZE_STR(op_array->filename);
-		SERIALIZE_PTR(op_array->brk_cont_array);
 		SERIALIZE_PTR(op_array->scope);
 		SERIALIZE_STR(op_array->doc_comment);
 		SERIALIZE_PTR(op_array->try_catch_array);
@@ -983,7 +982,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 
 		UNSERIALIZE_STR(op_array->function_name);
 		UNSERIALIZE_STR(op_array->filename);
-		UNSERIALIZE_PTR(op_array->brk_cont_array);
 		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_PTR(op_array->try_catch_array);

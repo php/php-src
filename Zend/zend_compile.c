@@ -210,16 +210,21 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
-	CG(context).current_brk_cont = -1;
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
+	CG(context).current_brk_cont = -1;
+	CG(context).last_brk_cont = 0;
+	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 }
 /* }}} */
 
 void zend_oparray_context_end(zend_oparray_context *prev_context) /* {{{ */
 {
+	if (CG(context).brk_cont_array) {
+		efree(CG(context).brk_cont_array);
+	}
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);
@@ -562,7 +567,7 @@ static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
 	zend_brk_cont_element *brk_cont_element;
 	int parent = CG(context).current_brk_cont;
 
-	CG(context).current_brk_cont = CG(active_op_array)->last_brk_cont;
+	CG(context).current_brk_cont = CG(context).last_brk_cont;
 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
 	brk_cont_element->parent = parent;
 
@@ -580,7 +585,7 @@ static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
 static inline void zend_end_loop(int cont_addr) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element
-		= &CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont];
+		= &CG(context).brk_cont_array[CG(context).current_brk_cont];
 	brk_cont_element->cont = cont_addr;
 	brk_cont_element->brk = get_next_op_number(CG(active_op_array));
 	CG(context).current_brk_cont = brk_cont_element->parent;
@@ -914,7 +919,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 			}
 			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
-		current = op_array->brk_cont_array[current].parent;
+		current = CG(context).brk_cont_array[current].parent;
 	}
 
 	if (distance == 0) {
@@ -3614,12 +3619,12 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 					depth, depth == 1 ? "" : "s");
 			}
 
-			if (nest_level > 1 && CG(active_op_array)->brk_cont_array[array_offset].start >= 0) {
+			if (nest_level > 1 && CG(context).brk_cont_array[array_offset].start >= 0) {
 				generate_free_loop_var(loop_var);
 				loop_var--;
 			}
 
-			array_offset = CG(active_op_array)->brk_cont_array[array_offset].parent;
+			array_offset = CG(context).brk_cont_array[array_offset].parent;
 		} while (--nest_level > 0);
 	}
 	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);

@@ -117,13 +117,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 			}
 		}
 
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_brk_cont; j++) {
-			op_array->brk_cont_array[j].brk -= shiftlist[op_array->brk_cont_array[j].brk];
-			op_array->brk_cont_array[j].cont -= shiftlist[op_array->brk_cont_array[j].cont];
-			op_array->brk_cont_array[j].start -= shiftlist[op_array->brk_cont_array[j].start];
-		}
-
 		/* update try/catch array */
 		for (j = 0; j < op_array->last_try_catch; j++) {
 			op_array->try_catch_array[j].try_op -= shiftlist[op_array->try_catch_array[j].try_op];

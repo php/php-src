@@ -590,10 +590,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->arg_info = arg_info;
 	}
 
-	if (op_array->brk_cont_array) {
-		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
-	}
-
 	if (op_array->scope) {
 		op_array->scope = zend_shared_alloc_get_xlat_entry(op_array->scope);
 	}
