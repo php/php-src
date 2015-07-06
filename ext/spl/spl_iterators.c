@@ -1391,10 +1391,6 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	intern = Z_SPLDUAL_IT_P(getThis());
 
 	ZVAL_STRING(&func, method, 0);
-	if (!zend_is_callable(&func, 0, &method)) {
-		zend_throw_error(zend_ce_error, "Method %s::%s() does not exist", intern->inner.ce->name, method);
-		return FAILURE;
-	}
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (zend_ulong) *p;

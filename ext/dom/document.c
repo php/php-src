@@ -2221,17 +2221,11 @@ PHP_METHOD(domdocument, registerNodeClass)
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-
-		if (dom_set_doc_classmap(intern->document, basece, ce) == FAILURE) {
-			zend_throw_error(zend_ce_error, "Class %s could not be registered.", ZSTR_VAL(ce->name));
-			RETURN_FALSE;
-		}
+		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
-	} else {
-		zend_throw_error(zend_ce_error, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
-		RETURN_FALSE;
 	}
-
+	
+	zend_throw_error(zend_ce_error, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }
 /* }}} */

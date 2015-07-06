@@ -946,7 +946,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					efree(description);
 					zend_throw_error(zend_ce_error, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
 					onig_region_free(regs, 0);
-					RETVAL_EMPTY_STRING();
+					smart_str_free(&out_buf);
+					smart_str_free(&eval_buf);
+					RETURN_FALSE;
 				}
 
 				/* result of eval */

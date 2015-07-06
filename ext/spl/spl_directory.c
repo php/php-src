@@ -196,7 +196,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
 			if (!intern->file_name) {
-				zend_throw_error(zend_ce_error, "Object not initialized");
+				php_error_docref(NULL, E_ERROR, "Object not initialized");
 			}
 			break;
 		case SPL_FS_DIR:

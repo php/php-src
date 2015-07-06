@@ -1824,6 +1824,8 @@ PHP_FUNCTION(ldap_modify_batch)
 			default:
 				zend_throw_error(zend_ce_error, "Unknown and uncaught modification type.");
 				RETVAL_FALSE;
+				efree(ldap_mods[i]);
+				num_mods = i;
 				goto cleanup;
 		}
 

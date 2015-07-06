@@ -481,7 +481,7 @@ static void php_session_initialize(void) /* {{{ */
 	zend_string *val = NULL;
 
 	if (!PS(mod)) {
-		zend_throw_error(zend_ce_error, "No storage module chosen - failed to initialize session");
+		php_error_docref(NULL, E_ERROR, "No storage module chosen - failed to initialize session");
 		return;
 	}
 
@@ -489,7 +489,7 @@ static void php_session_initialize(void) /* {{{ */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
-		zend_throw_error(zend_ce_error, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		php_error_docref(NULL, E_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return;
 	}
 
@@ -1830,7 +1830,7 @@ static PHP_FUNCTION(session_set_save_handler)
 				add_next_index_zval(&PS(mod_user_names).names[i], obj);
 				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 			} else {
-				zend_throw_error(zend_ce_error, "Session handler's function table is corrupt");
+				php_error_docref(NULL, E_ERROR, "Session handler's function table is corrupt");
 				RETURN_FALSE;
 			}
 

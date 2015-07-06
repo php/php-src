@@ -251,7 +251,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		} else if (!member) {
 			/* This happens when the user did: $sxe[]->foo = $value */
 			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
-			return NULL;
+			return &EG(uninitialized_zval);
 		}
 		name = NULL;
 	} else {
@@ -278,7 +278,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		    node->parent->type == XML_DOCUMENT_NODE) {
 			/* This happens when the user did: $sxe[]->foo = $value */
 			zend_throw_error(zend_ce_error, "Cannot create unnamed attribute");
-			return NULL;
+			return &EG(uninitialized_zval);
 		}
 	}
 
@@ -572,6 +572,9 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (node->type == XML_ATTRIBUTE_NODE) {
 					zend_throw_error(zend_ce_error, "Cannot create duplicate attribute");
+					if (new_value) {
+						zval_ptr_dtor(value);
+					}
 					return FAILURE;
 				}
 

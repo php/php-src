@@ -3701,6 +3701,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
 		zend_throw_error(zend_ce_error, "Timezone initialization failed");
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -5019,7 +5020,7 @@ static zval *date_period_read_property(zval *object, zval *member, int type, voi
 	zval *zv;
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
 		zend_throw_error(zend_ce_error, "Retrieval of DatePeriod properties for modification is unsupported");
-		return NULL;
+		return &EG(uninitialized_zval);
 	}
 
 	Z_OBJPROP_P(object); /* build properties hash table */
