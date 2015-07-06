@@ -19,7 +19,8 @@ var_dump(ini_get('track_errors'));
 ini_set('display_errors', 0);
 var_dump(ini_get('display_errors'));
 var_dump($php_errormsg);
-ini_set("zend.assertions", -1);
+$zero = 0;
+$error = 1 / $zero;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
@@ -29,4 +30,4 @@ string(1) "0"
 string(1) "1"
 string(1) "0"
 NULL
-string(%d) "%senabled or disabled%s"
+string(%d) "%sivision by zer%s"

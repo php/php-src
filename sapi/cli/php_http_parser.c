@@ -326,7 +326,8 @@ size_t php_http_parser_execute (php_http_parser *parser,
                             const char *data,
                             size_t len)
 {
-  char c, ch;
+  char ch;
+  signed char c;
   const char *p = data, *pe;
   size_t to_read;
 

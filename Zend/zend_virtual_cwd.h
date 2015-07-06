@@ -42,7 +42,7 @@
 #define VIRTUAL_DIR
 #endif
 
-#ifndef TSRM_WIN32
+#ifndef ZEND_WIN32
 #include <unistd.h>
 #else
 #include <direct.h>
@@ -52,7 +52,7 @@
 #include <errno.h>
 #endif
 
-#ifdef TSRM_WIN32
+#ifdef ZEND_WIN32
 #include "readdir.h"
 #include <sys/utime.h>
 /* mode_t isn't defined on Windows */
@@ -117,7 +117,7 @@ typedef unsigned short mode_t;
 #define CWD_EXPORTS
 #endif
 
-#ifdef TSRM_WIN32
+#ifdef ZEND_WIN32
 #	ifdef CWD_EXPORTS
 #		define CWD_API __declspec(dllexport)
 #	else
@@ -129,7 +129,7 @@ typedef unsigned short mode_t;
 #	define CWD_API
 #endif
 
-#ifdef TSRM_WIN32
+#ifdef ZEND_WIN32
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
@@ -172,7 +172,7 @@ CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
-#if defined(TSRM_WIN32)
+#if defined(ZEND_WIN32)
 /* these are not defined in win32 headers */
 #ifndef W_OK
 #define W_OK 0x02
@@ -192,7 +192,7 @@ CWD_API int virtual_access(const char *pathname, int mode);
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32) && !defined(NETWARE)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link);
 #endif
 
@@ -219,7 +219,7 @@ typedef struct _realpath_cache_bucket {
 	int                            path_len;
 	int                            realpath_len;
 	int                            is_dir;
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	unsigned char                  is_rvalid;
 	unsigned char                  is_readable;
 	unsigned char                  is_wvalid;
@@ -280,7 +280,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
@@ -296,7 +296,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_CREAT(path, mode) creat(path, mode)
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
-#if defined(TSRM_WIN32)
+#if defined(ZEND_WIN32)
 # define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0 ? -1 : 0)
 #else
 # define VCWD_RENAME(oldname, newname) rename(oldname, newname)
@@ -311,7 +311,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
-#if defined(TSRM_WIN32)
+#if defined(ZEND_WIN32)
 #define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
 #else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
@@ -320,7 +320,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path)
 
 #if HAVE_UTIME
-# ifdef TSRM_WIN32
+# ifdef ZEND_WIN32
 #  define VCWD_UTIME(path, time) win32_utime(path, time)
 # else
 #  define VCWD_UTIME(path, time) utime(path, time)
@@ -328,7 +328,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)

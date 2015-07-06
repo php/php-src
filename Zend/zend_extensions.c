@@ -35,12 +35,10 @@ int zend_load_extension(const char *path)
 	if (!handle) {
 #ifndef ZEND_WIN32
 		fprintf(stderr, "Failed loading %s:  %s\n", path, DL_ERROR());
-/* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
-		fflush(stderr);
-#endif
 #else
 		fprintf(stderr, "Failed loading %s\n", path);
+		/* See http://support.microsoft.com/kb/190351 */
+		fflush(stderr);
 #endif
 		return FAILURE;
 	}
@@ -56,7 +54,7 @@ int zend_load_extension(const char *path)
 	if (!extension_version_info || !new_extension) {
 		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 		DL_UNLOAD(handle);
@@ -73,7 +71,7 @@ int zend_load_extension(const char *path)
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 			fflush(stderr);
 #endif
 			DL_UNLOAD(handle);
@@ -89,7 +87,7 @@ int zend_load_extension(const char *path)
 					new_extension->URL,
 					new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 			fflush(stderr);
 #endif
 			DL_UNLOAD(handle);
@@ -100,7 +98,7 @@ int zend_load_extension(const char *path)
 		fprintf(stderr, "Cannot load %s - it was built with configuration %s, whereas running engine is %s\n",
 					new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 		DL_UNLOAD(handle);
@@ -108,7 +106,7 @@ int zend_load_extension(const char *path)
 	} else if (zend_get_extension(new_extension->name)) {
 		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 		DL_UNLOAD(handle);
@@ -119,7 +117,7 @@ int zend_load_extension(const char *path)
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	fflush(stderr);
 #endif
 	return FAILURE;

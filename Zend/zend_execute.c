@@ -1955,7 +1955,7 @@ static int zend_check_symbol(zval *pz)
 	if (Z_TYPE_P(pz) > 10) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
@@ -2359,8 +2359,6 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 
 static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
-	int i;
-
 	if (EX(func)->op_array.T_liveliness && op_num < EX(func)->op_array.last) {
 		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
 		uint32_t *until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num + 1];

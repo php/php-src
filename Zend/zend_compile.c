@@ -1754,7 +1754,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	register char *end = path + len - 1;
 	unsigned int len_adjust = 0;
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	/* Note that on Win32 CWD is per drive (heritage from CP/M).
 	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
 	 */
@@ -5079,7 +5079,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		name = zend_new_interned_string(name);
 		lcname = zend_new_interned_string(lcname);
 	} else {
-		lcname = name = zend_generate_anon_class_name(decl->lex_pos);
+		name = zend_generate_anon_class_name(decl->lex_pos);
+		lcname = zend_string_copy(name); /* this normally is an interned string, except with opcache. We need a proper copy here or opcache will fail with use after free. */
 	}
 
 	ce->type = ZEND_USER_CLASS;
@@ -5641,9 +5642,11 @@ static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode
 	binary_op_type fn = get_binary_op(opcode);
 
 	/* don't evaluate division by zero at compile-time */
-	if (opcode == ZEND_MOD && zval_get_long(op2) == 0) {
+	if ((opcode == ZEND_DIV || opcode == ZEND_MOD) &&
+	    zval_get_long(op2) == 0) {
 		return 0;
-	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
+	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
+	    zval_get_long(op2) < 0) {
 		return 0;
 	}
 

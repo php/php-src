@@ -1657,9 +1657,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSERT_CHECK_SPEC_HANDLER(ZEND
 
 	if (EG(assertions) <= 0) {
 		zend_op *target = OP_JMP_ADDR(opline, opline->op2);
-
-		if (RETURN_VALUE_USED(target-1)) {
-			ZVAL_TRUE(EX_VAR((target-1)->result.var));
+		zend_op *result = target - 1;
+		SKIP_EXT_OPLINE(result);
+		if (RETURN_VALUE_USED(result)) {
+			ZVAL_TRUE(EX_VAR(result->result.var));
 		}
 		ZEND_VM_JMP(target);
 	} else {

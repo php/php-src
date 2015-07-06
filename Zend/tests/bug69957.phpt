@@ -61,16 +61,21 @@ try {
 
 ?>
 --EXPECTF--
+Warning: Division by zero in %sbug69957.php on line %d
 float(INF)
 
 Variable mod
 Type: DivisionByZeroError
 Message: Modulo by zero
+
+Warning: Division by zero in %sbug69957.php on line %d
 float(INF)
 
 Literal mod
 Type: DivisionByZeroError
 Message: Modulo by zero
+
+Warning: Division by zero in %sbug69957.php on line %d
 float(INF)
 
 Double mod
