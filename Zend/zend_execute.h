@@ -355,6 +355,13 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 		(slot)[1] = (ptr); \
 	} while (0)
 
+#define SKIP_EXT_OPLINE(opline) do { \
+		while (UNEXPECTED((opline)->opcode <= ZEND_TICKS \
+			&& (opline)->opcode >= ZEND_EXT_STMT)) {     \
+			(opline)--;                                  \
+		}                                                \
+	} while (0)
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
