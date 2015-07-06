@@ -762,7 +762,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
 			opline->opcode == ZEND_IS_NOT_EQUAL ||
-			opline->opcode == ZEND_CASE) {
+			/* CASE variable will be deleted later by FREE, so we can't optimize it */
+			(opline->opcode == ZEND_CASE && (ZEND_OP1_TYPE(opline) & (IS_CONST|IS_CV)))) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
 				 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
