@@ -941,7 +941,14 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			/* if one lands here, some opcode range isn't properly terminated or part of the exceptions */
 			ZEND_ASSERT(T->end != (uint32_t) -1);
 
-			for (j = T->start + 1; j < T->end; j++) {
+			j = T->start + 1;
+			if (op_array->opcodes[j].opcode == ZEND_FE_FETCH_R
+			 || op_array->opcodes[j].opcode == ZEND_FE_FETCH_RW) {
+			 	/* On exception FE_FETCH destroys loop vatriable itself */
+				j++;
+			}
+			
+			for (; j < T->end; j++) {
 				op_var_info *opT = opTs[j];
 				if (opT->var != (uint32_t) -1) {
 					opTs[j] = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
