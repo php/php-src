@@ -31,7 +31,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 {
 	char *decode = NULL;
 
-	switch (type &~ EXT_TYPE_UNUSED) {
+	switch (type) {
 		case IS_CV: {
 			zend_string *var = ops->vars[EX_VAR_TO_NUM(op->var)];
 			asprintf(&decode, "$%.*s%c", ZSTR_LEN(var) <= 19 ? (int) ZSTR_LEN(var) : 18, ZSTR_VAL(var), ZSTR_LEN(var) <= 19 ? 0 : '+');
