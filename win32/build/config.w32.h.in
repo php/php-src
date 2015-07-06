@@ -183,5 +183,3 @@
 
 #define HAVE_GETRUSAGE
 
-#define HAVE_LDAP_CONTROL_FIND 1
-
