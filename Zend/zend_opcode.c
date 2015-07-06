@@ -895,9 +895,7 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 				T->start = T->end = -1;
 			}
 			if (T->start == -1 /* we need the exceptions *here* and not around the whole branch, else temporary ranges may be accidentally reused. If any of these opcodes reuses a temporary, we must mark the previous range as definitely terminated first */
-			 && cur_op->opcode != ZEND_CASE           /* ??? exception for opcache, is anyway bool */
-			 && cur_op->opcode != ZEND_FE_RESET_R     /* FOREACH TMP is handled using brk_cont_array */
-			 && cur_op->opcode != ZEND_FE_RESET_RW    /* FOREACH TMP is handled using brk_cont_array */
+			 && cur_op->opcode != ZEND_CASE           /* exception for opcache, it might nowhere use the temporary (anyway bool, so no need to free) */
 			 && cur_op->opcode != ZEND_ROPE_ADD       /* the following opcodes reuse TMP created before */
 			 && cur_op->opcode != ZEND_ADD_ARRAY_ELEMENT
 			 && cur_op->opcode != ZEND_FAST_CALL      /* passes fast_call */
@@ -916,9 +914,6 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			}
 		}
 		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
-		 && cur_op->opcode != ZEND_FE_FETCH_R     /* FOREACH TMP is handled using brk_cont_array */
-		 && cur_op->opcode != ZEND_FE_FETCH_RW    /* FOREACH TMP is handled using brk_cont_array */
-		 && cur_op->opcode != ZEND_FE_FREE        /* FOREACH TMP is handled using brk_cont_array */
 		 && cur_op->opcode != ZEND_ROPE_ADD) {    /* the following opcodes don't free TMP */
 			var_live_info *T = Ts[cur_op->op1.var];
 			if (T->start != (uint32_t) -1) {
@@ -952,21 +947,21 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			ZEND_ASSERT(T->end != (uint32_t) -1);
 
 			for (j = T->start + 1; j < T->end; j++) {
-				if (op_array->opcodes[j].opcode != ZEND_THROW) {
-					op_var_info *opT = opTs[j];
-					if (opT->var != (uint32_t) -1) {
-						opTs[j] = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
-						opTs[j]->next = opT;
-						opT = opTs[j];
-					}
-					opT->var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + i);;
-					if (op_array->opcodes[T->end].opcode == ZEND_ROPE_END) {
-						opT->var |= ZEND_LIVE_ROPE;
-					} else if (op_array->opcodes[T->end].opcode == ZEND_END_SILENCE) {
-						opT->var |= ZEND_LIVE_SILENCE;
-					}
-					op_live_total++;
+				op_var_info *opT = opTs[j];
+				if (opT->var != (uint32_t) -1) {
+					opTs[j] = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
+					opTs[j]->next = opT;
+					opT = opTs[j];
 				}
+				opT->var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + i);;
+				if (op_array->opcodes[T->end].opcode == ZEND_ROPE_END) {
+					opT->var |= ZEND_LIVE_ROPE;
+				} else if (op_array->opcodes[T->end].opcode == ZEND_END_SILENCE) {
+					opT->var |= ZEND_LIVE_SILENCE;
+				} else if (op_array->opcodes[T->end].opcode == ZEND_FE_FREE) {
+					opT->var |= ZEND_LIVE_LOOP;
+				}
+				op_live_total++;
 			}
 		} while ((T = T->next));
 	}
