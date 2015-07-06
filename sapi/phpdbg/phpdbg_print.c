@@ -55,7 +55,6 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 	switch (method->type) {
 		case ZEND_USER_FUNCTION: {
 			zend_op_array* op_array = &(method->op_array);
-			HashTable vars;
 
 			if (op_array) {
 				zend_op *opline = &(op_array->opcodes[0]);
@@ -81,9 +80,8 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 						op_array->last);
 				}
 
-				zend_hash_init(&vars, op_array->last, NULL, NULL, 0);
 				do {
-					char *decode = phpdbg_decode_opline(op_array, opline, &vars);
+					char *decode = phpdbg_decode_opline(op_array, opline);
 					if (decode != NULL) {
 						phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" opcode=\"%s\" op=\"%s\"", " L%-4u #%-5u %-23s %s",
 							opline->lineno,
@@ -96,7 +94,6 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 					}
 					opline++;
 				} while (opcode++ < end);
-				zend_hash_destroy(&vars);
 			}
 		} break;
 
