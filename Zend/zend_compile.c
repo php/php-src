@@ -1974,6 +1974,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
+		case ZEND_JMP_SET:
 			opline->op2.opline_num = opnum_target;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -5989,7 +5990,7 @@ static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast) /* 
 	zend_ast *false_ast = ast->child[2];
 
 	znode cond_node, false_node;
-	zend_op *opline_jmp_set, *opline_qm_assign;
+	zend_op *opline_qm_assign;
 	uint32_t opnum_jmp_set;
 
 	ZEND_ASSERT(ast->child[1] == NULL);
@@ -6001,10 +6002,10 @@ static void zend_compile_shorthand_conditional(znode *result, zend_ast *ast) /* 
 
 	zend_compile_expr(&false_node, false_ast);
 
-	opline_jmp_set = &CG(active_op_array)->opcodes[opnum_jmp_set];
-	opline_jmp_set->op2.opline_num = get_next_op_number(CG(active_op_array)) + 1;
 	opline_qm_assign = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &false_node, NULL);
 	SET_NODE(opline_qm_assign->result, result);
+
+	zend_update_jump_target_to_next(opnum_jmp_set);
 }
 /* }}} */
 
@@ -6015,8 +6016,8 @@ void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *false_ast = ast->child[2];
 
 	znode cond_node, true_node, false_node;
-	zend_op *opline_qm_assign1, *opline_qm_assign2;
-	uint32_t opnum_jmpz, opnum_jmp, opnum_qm_assign1;
+	zend_op *opline_qm_assign2;
+	uint32_t opnum_jmpz, opnum_jmp;
 
 	if (!true_ast) {
 		zend_compile_shorthand_conditional(result, ast);
@@ -6029,7 +6030,6 @@ void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&true_node, true_ast);
 
-	opnum_qm_assign1 = get_next_op_number(CG(active_op_array));
 	zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &true_node, NULL);
 
 	opnum_jmp = zend_emit_jump(0);
@@ -6038,8 +6038,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&false_node, false_ast);
 
-	opline_qm_assign1 = &CG(active_op_array)->opcodes[opnum_qm_assign1];
-	opline_qm_assign2 = zend_emit_op(NULL, opline_qm_assign1->opcode, &false_node, NULL);
+	opline_qm_assign2 = zend_emit_op(NULL, ZEND_QM_ASSIGN, &false_node, NULL);
 	SET_NODE(opline_qm_assign2->result, result);
 
 	zend_update_jump_target_to_next(opnum_jmp);
