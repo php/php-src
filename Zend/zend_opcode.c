@@ -751,7 +751,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		CG(context).literals_size = op_array->last_literal;
 	}
 
-	op_array->T_liveliness = generate_var_liveliness_info(op_array);
+	zend_generate_var_liveliness_info(op_array);
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
@@ -889,9 +889,9 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 	return count;
 }
 
-ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
+static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_bool done_pass_two)
 {
-	uint32_t i, op_live_total = 0;
+	uint32_t i, op_live_total = 0, var;
 	void *checkpoint = zend_arena_checkpoint(CG(arena));
 	uint32_t *info, info_off = op_array->last + 1;
 	uint32_t *Tstart = zend_arena_alloc(&CG(arena), sizeof(uint32_t) * op_array->T);
@@ -919,25 +919,42 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 		 && cur_op->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
 		 && cur_op->opcode != ZEND_DECLARE_ANON_CLASS
 		 && cur_op->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+			if (done_pass_two) {
+				var = EX_VAR_TO_NUM(cur_op->result.var) - op_array->last_var;
+			} else {
+				var = cur_op->result.var;
+			}
 			/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
 			if (cur_op->opcode == ZEND_NEW) {
-				Tstart[cur_op->result.var] = cur_op->op2.opline_num - 1;
+				Tstart[var] = cur_op->op2.opline_num - 1;
 			} else {
-				Tstart[cur_op->result.var] = cur_op - op_array->opcodes;
+				Tstart[var] = cur_op - op_array->opcodes;
 			}
 		}
-		if ((cur_op->op1_type & (IS_VAR | IS_TMP_VAR))
-		 && Tstart[cur_op->op1.var] != (uint32_t)-1
-		 && cur_op->opcode != ZEND_ROPE_ADD /* the following opcodes don't free TMP */
-		 && cur_op->opcode != ZEND_FETCH_LIST
-		 && cur_op->opcode != ZEND_CASE
-		 && cur_op->opcode != ZEND_FE_FETCH_R
-		 && cur_op->opcode != ZEND_FE_FETCH_RW) {
-			op_live_total += liveliness_kill_var(op_array, cur_op, cur_op->op1.var, Tstart, opTs);
+		if (cur_op->op1_type & (IS_VAR | IS_TMP_VAR)) {
+			if (done_pass_two) {
+				var = EX_VAR_TO_NUM(cur_op->op1.var) - op_array->last_var;
+			} else {
+				var = cur_op->op1.var;
+			}
+			if (Tstart[var] != (uint32_t)-1
+			 && cur_op->opcode != ZEND_ROPE_ADD /* the following opcodes don't free TMP */
+			 && cur_op->opcode != ZEND_FETCH_LIST
+			 && cur_op->opcode != ZEND_CASE
+			 && cur_op->opcode != ZEND_FE_FETCH_R
+			 && cur_op->opcode != ZEND_FE_FETCH_RW) {
+				op_live_total += liveliness_kill_var(op_array, cur_op, var, Tstart, opTs);
+			}
 		}
-		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)
-		 && Tstart[cur_op->op2.var] != (uint32_t)-1) {
-			op_live_total += liveliness_kill_var(op_array, cur_op, cur_op->op2.var, Tstart, opTs);
+		if (cur_op->op2_type & (IS_VAR | IS_TMP_VAR)) {
+			if (done_pass_two) {
+				var = EX_VAR_TO_NUM(cur_op->op2.var) - op_array->last_var;
+			} else {
+				var = cur_op->op2.var;
+			}
+			if (Tstart[var] != (uint32_t)-1) {
+				op_live_total += liveliness_kill_var(op_array, cur_op, var, Tstart, opTs);
+			}
 		}
 	}
 
@@ -965,8 +982,20 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
-
 	return info;
+}
+
+ZEND_API void zend_generate_var_liveliness_info(zend_op_array *op_array)
+{
+	op_array->T_liveliness = generate_var_liveliness_info_ex(op_array, 0);
+}
+
+ZEND_API void zend_regenerate_var_liveliness_info(zend_op_array *op_array)
+{
+	if (op_array->T_liveliness) {
+		efree(op_array->T_liveliness);
+	}
+	op_array->T_liveliness = generate_var_liveliness_info_ex(op_array, 1);
 }
 
 int print_class(zend_class_entry *class_entry)

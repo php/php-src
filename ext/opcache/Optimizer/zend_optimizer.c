@@ -458,14 +458,23 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_11 & OPTIMIZATION_LEVEL) {
 		zend_optimizer_compact_literals(op_array, ctx);
 	}
+
+	if ((ZEND_OPTIMIZER_PASS_1
+		|ZEND_OPTIMIZER_PASS_2
+		|ZEND_OPTIMIZER_PASS_3
+		|ZEND_OPTIMIZER_PASS_4
+		|ZEND_OPTIMIZER_PASS_5
+		|ZEND_OPTIMIZER_PASS_9
+		|ZEND_OPTIMIZER_PASS_10
+		|ZEND_OPTIMIZER_PASS_11) & OPTIMIZATION_LEVEL) {
+		zend_regenerate_var_liveliness_info(op_array);
+	}
 }
 
 static void zend_accel_optimize(zend_op_array      *op_array,
                                 zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
-
-	efree(op_array->T_liveliness);
 
 	/* Revert pass_two() */
 	opline = op_array->opcodes;
@@ -512,39 +521,15 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 	/* Do actual optimizations */
 	zend_optimize(op_array, ctx);
 
-	opline = op_array->opcodes;
-	end = opline + op_array->last;
-	while (opline < end) {
-		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = EX_VAR_TO_NUM(opline->op1.var) - op_array->last_var;
-		}
-		if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = EX_VAR_TO_NUM(opline->op2.var) - op_array->last_var;
-		}
-		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = EX_VAR_TO_NUM(opline->result.var) - op_array->last_var;
-		}
-		opline++;
-	}
-
-	op_array->T_liveliness = generate_var_liveliness_info(op_array);
-
 	/* Redo pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
-		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, opline->op1.var + op_array->last_var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
-		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, opline->op2.var + op_array->last_var);
-		}
-		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, opline->result.var + op_array->last_var);
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:
