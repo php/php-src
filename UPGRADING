@@ -255,10 +255,10 @@ Changes to integer handling
   ignored. As such $i previously held the value 7, because the last two digits
   were silently discarded.
 
-* Bitwise shifts by negative numbers will now throw a warning and return false:
+* Bitwise shifts by negative numbers will now throw an ArithmeticError:
 
-      var_dump(1 >> -1); // bool(false)
-      // Warning: Bit shift by negative number
+      var_dump(1 >> -1);
+      // ArithmeticError: Bit shift by negative number
 
 * Left bitwise shifts by a number of bits beyond the bit width of an integer
   will always result in 0:
