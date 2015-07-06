@@ -1418,9 +1418,6 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 {
 	zend_bool original_in_execution = PHPDBG_G(in_execution);
-	HashTable vars;
-
-	zend_hash_init(&vars, execute_data->func->op_array.last, NULL, NULL, 0);
 
 	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) && !(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
 		zend_bailout();
@@ -1531,7 +1528,7 @@ ex_is_caught:
 		}
 
 		/* not while in conditionals */
-		phpdbg_print_opline_ex(execute_data, &vars, 0);
+		phpdbg_print_opline_ex(execute_data, 0);
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && (PHPDBG_G(flags) & PHPDBG_STEP_OPCODE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
@@ -1581,7 +1578,6 @@ next:
 
 		if (PHPDBG_G(vmret) != 0) {
 			if (PHPDBG_G(vmret) < 0) {
-				zend_hash_destroy(&vars);
 				PHPDBG_G(in_execution) = original_in_execution;
 				return;
 			} else {
