@@ -87,7 +87,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{
 	switch (op->opcode) {
 	/* TODO: ZEND_FAST_CALL, ZEND_FAST_RET op2 */
 	case ZEND_JMPZNZ:
-		asprintf(&decode[2], "J%u or J%" PRIu32, op->op2.opline_num, op->extended_value);
+		asprintf(&decode[2], "J%u or J%" PRIu32, OP_JMP_ADDR(op, op->op2) - ops->opcodes, ZEND_OFFSET_TO_OPLINE(op, op->extended_value) - ops->opcodes);
 		break;
 
 	case ZEND_JMPZ:
