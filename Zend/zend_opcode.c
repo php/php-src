@@ -853,6 +853,10 @@ typedef struct _op_var_info {
 	uint32_t var;
 } op_var_info;
 
+/* The following liveliness analyzing algorithm assumes that
+ * 1) temporary variables are defined before use
+ * 2) they have linear live-ranges without "holes"
+ */
 ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 {
 	uint32_t i, op_live_total = 0;
@@ -942,9 +946,10 @@ ZEND_API uint32_t *generate_var_liveliness_info(zend_op_array *op_array)
 			ZEND_ASSERT(T->end != (uint32_t) -1);
 
 			j = T->start + 1;
-			if (op_array->opcodes[j].opcode == ZEND_FE_FETCH_R
+			if (op_array->opcodes[j].opcode == ZEND_OP_DATA
+			 || op_array->opcodes[j].opcode == ZEND_FE_FETCH_R
 			 || op_array->opcodes[j].opcode == ZEND_FE_FETCH_RW) {
-			 	/* On exception FE_FETCH destroys loop vatriable itself */
+				/* On exception TMP variable is destroyed by current opcode */
 				j++;
 			}
 			
