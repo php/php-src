@@ -2522,7 +2522,8 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 				} else if (brk_opline->opcode == ZEND_ROPE_END) {
 					zend_string **rope = (zend_string **) EX_VAR(brk_opline->op1.var);
 					zend_op *last = EX(func)->op_array.opcodes + op_num;
-					while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
+					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
+							|| last->result.var != brk_opline->op1.var) {
 						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
 						last--;
 					}
