@@ -70,6 +70,14 @@
 #define PHP_LDAP_ESCAPE_FILTER 0x01
 #define PHP_LDAP_ESCAPE_DN     0x02
 
+#ifndef HAVE_LDAP_CONTROL_FIND
+LDAPControl *ldap_control_find( const char *oid, LDAPControl **ctrls, LDAPControl ***nextctrlp)
+{
+  assert(nextctrlp == NULL);
+  return ldap_find_control(oid, ctrls);
+}
+#endif
+
 typedef struct {
 	LDAP *link;
 #if defined(HAVE_3ARG_SETREBINDPROC)
