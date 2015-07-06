@@ -359,7 +359,9 @@ struct _zend_op_array {
 	zend_string **vars;
 	uint32_t *T_liveliness;
 
-	//TODO: improve layout ???
+	void **run_time_cache;
+	int  cache_size;
+
 	int last_try_catch;
 	zend_try_catch_element *try_catch_array;
 
@@ -374,9 +376,6 @@ struct _zend_op_array {
 
 	int last_literal;
 	zval *literals;
-
-	int  cache_size;
-	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
