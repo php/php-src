@@ -923,8 +923,8 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 	zend_op      *opline, *end;
 	uint32_t      var, i, op_live_total = 0;
 	uint32_t     *info, info_off = op_array->last + 1;
-	uint32_t     *Tstart = zend_arena_alloc(&CG(arena), sizeof(uint32_t) * op_array->T);
 	void         *checkpoint = zend_arena_checkpoint(CG(arena));
+	uint32_t     *Tstart = zend_arena_alloc(&CG(arena), sizeof(uint32_t) * op_array->T);
 	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * op_array->last);
 
 	memset(Tstart, -1, sizeof(uint32_t) * op_array->T);
