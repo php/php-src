@@ -12,6 +12,11 @@ PHP                                                                        NEWS
     ArrayAccess object). (Laruence)
   . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
   . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
+  . Fixed bug #62210 (Exceptions can leak temporary variables. As a part of
+    the fix serious refactoring was done. op_array->brk_cont_array was removed,
+    and replaced with more general and speed efficient op_array->T_liveliness.
+    ZEND_GOTO opcode is always replaced by ZEND_JMP at compile time).
+    (Bob, Dmitry, Laruence)
 
 - CLI server:
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)

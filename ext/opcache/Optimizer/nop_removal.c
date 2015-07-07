@@ -44,14 +44,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
 
-		/* GOTO target is unresolved yet. We can't optimize. */
-		if (opline->opcode == ZEND_GOTO &&
-			Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
-			/* TODO: in general we can avoid this restriction */
-			FREE_ALLOCA(shiftlist);
-			return;
-		}
-
 		/* Kill JMP-over-NOP-s */
 		if (opline->opcode == ZEND_JMP && ZEND_OP1(opline).opline_num > i) {
 			/* check if there are only NOPs under the branch */
@@ -85,7 +77,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 		for (opline = op_array->opcodes; opline<end; opline++) {
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -115,13 +106,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 					opline->extended_value -= shiftlist[opline->extended_value];
 					break;
 			}
-		}
-
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_brk_cont; j++) {
-			op_array->brk_cont_array[j].brk -= shiftlist[op_array->brk_cont_array[j].brk];
-			op_array->brk_cont_array[j].cont -= shiftlist[op_array->brk_cont_array[j].cont];
-			op_array->brk_cont_array[j].start -= shiftlist[op_array->brk_cont_array[j].start];
 		}
 
 		/* update try/catch array */

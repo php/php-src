@@ -386,7 +386,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -459,11 +458,11 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 
 		SERIALIZE_STR(op_array->function_name);
 		SERIALIZE_STR(op_array->filename);
-		SERIALIZE_PTR(op_array->brk_cont_array);
 		SERIALIZE_PTR(op_array->scope);
 		SERIALIZE_STR(op_array->doc_comment);
 		SERIALIZE_PTR(op_array->try_catch_array);
 		SERIALIZE_PTR(op_array->prototype);
+		SERIALIZE_PTR(op_array->T_liveliness);
 	}
 }
 
@@ -913,7 +912,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -982,11 +980,11 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 
 		UNSERIALIZE_STR(op_array->function_name);
 		UNSERIALIZE_STR(op_array->filename);
-		UNSERIALIZE_PTR(op_array->brk_cont_array);
 		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
 		UNSERIALIZE_PTR(op_array->prototype);
+		UNSERIALIZE_PTR(op_array->T_liveliness);
 	}
 }
 

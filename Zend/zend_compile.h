@@ -109,15 +109,36 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
+typedef struct _zend_brk_cont_element {
+	int start;
+	int cont;
+	int brk;
+	int parent;
+} zend_brk_cont_element;
+
+typedef struct _zend_label {
+	int brk_cont;
+	uint32_t opline_num;
+} zend_label;
+
+typedef struct _zend_try_catch_element {
+	uint32_t try_op;
+	uint32_t catch_op;  /* ketchup! */
+	uint32_t finally_op;
+	uint32_t finally_end;
+} zend_try_catch_element;
+
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
 	int        vars_size;
 	int        literals_size;
-	int        current_brk_cont;
 	int        backpatch_count;
 	int        in_finally;
 	uint32_t   fast_call_var;
+	int        current_brk_cont;
+	int        last_brk_cont;
+	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
 } zend_oparray_context;
 
@@ -162,26 +183,6 @@ struct _zend_op {
 	zend_uchar op2_type;
 	zend_uchar result_type;
 };
-
-
-typedef struct _zend_brk_cont_element {
-	int start;
-	int cont;
-	int brk;
-	int parent;
-} zend_brk_cont_element;
-
-typedef struct _zend_label {
-	int brk_cont;
-	uint32_t opline_num;
-} zend_label;
-
-typedef struct _zend_try_catch_element {
-	uint32_t try_op;
-	uint32_t catch_op;  /* ketchup! */
-	uint32_t finally_op;
-	uint32_t finally_end;
-} zend_try_catch_element;
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
@@ -328,6 +329,11 @@ typedef struct _zend_internal_function_info {
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
+#define ZEND_LIVE_ROPE    1
+#define ZEND_LIVE_SILENCE 2
+#define ZEND_LIVE_LOOP    3
+#define ZEND_LIVE_MASK    3
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
@@ -351,10 +357,12 @@ struct _zend_op_array {
 	int last_var;
 	uint32_t T;
 	zend_string **vars;
+	uint32_t *T_liveliness;
 
-	int last_brk_cont;
+	void **run_time_cache;
+	int  cache_size;
+
 	int last_try_catch;
-	zend_brk_cont_element *brk_cont_array;
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
@@ -368,9 +376,6 @@ struct _zend_op_array {
 
 	int last_literal;
 	zval *literals;
-
-	int  cache_size;
-	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -712,7 +717,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -727,6 +732,8 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API void zend_generate_var_liveliness_info(zend_op_array *op_array);
+ZEND_API void zend_regenerate_var_liveliness_info(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
@@ -951,6 +958,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_GOTO 253
 #define ZEND_BRK 254
 #define ZEND_CONT 255
 

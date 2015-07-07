@@ -123,10 +123,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
-			case ZEND_GOTO:
-				/* would not optimize GOTOs - we cannot really know where it jumps,
-				 * so these optimizations are too dangerous */
-				return 0;
 			case ZEND_FAST_CALL:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				if (opline->extended_value) {
@@ -195,65 +191,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			START_BLOCK_OP(op_array->try_catch_array[i].try_op);
 			START_BLOCK_OP(op_array->try_catch_array[i].catch_op);
 			blocks[op_array->try_catch_array[i].try_op].protected = 1;
-		}
-	}
-	/* Currently, we don't optimize op_arrays with BRK/CONT/GOTO opcodes,
-	 * but, we have to keep brk_cont_array to avoid memory leaks during
-	 * exception handling */
-	if (op_array->last_brk_cont) {
-		int i, j;
-
-		j = 0;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			if (op_array->brk_cont_array[i].start >= 0 &&
-			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-				int parent = op_array->brk_cont_array[i].parent;
-
-				while (parent >= 0 &&
-				       op_array->brk_cont_array[parent].start < 0 &&
-				       (op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FE_FREE ||
-					     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode != ZEND_ROPE_END ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_END_SILENCE)) {
-					parent = op_array->brk_cont_array[parent].parent;
-				}
-				op_array->brk_cont_array[i].parent = parent;
-				j++;
-			}
-		}
-		if (j) {
-			cfg->loop_start = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_cont  = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_brk   = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			j = 0;
-			for (i = 0; i< op_array->last_brk_cont; i++) {
-				if (op_array->brk_cont_array[i].start >= 0 &&
-				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-					if (i != j) {
-						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
-					}
-					cfg->loop_start[j] = &blocks[op_array->brk_cont_array[j].start];
-					cfg->loop_cont[j]  = &blocks[op_array->brk_cont_array[j].cont];
-					cfg->loop_brk[j]   = &blocks[op_array->brk_cont_array[j].brk];
-					START_BLOCK_OP(op_array->brk_cont_array[j].start);
-					START_BLOCK_OP(op_array->brk_cont_array[j].cont);
-					START_BLOCK_OP(op_array->brk_cont_array[j].brk);
-					blocks[op_array->brk_cont_array[j].start].protected = 1;
-					blocks[op_array->brk_cont_array[j].brk].protected = 1;
-					j++;
-				}
-			}
-			op_array->last_brk_cont = j;
-		} else {
-			efree(op_array->brk_cont_array);
-			op_array->brk_cont_array = NULL;
-			op_array->last_brk_cont = 0;
 		}
 	}
 
@@ -522,16 +459,6 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 
 	/* Walk thorough all paths */
 	zend_access_path(start, ctx);
-
-	/* Add brk/cont paths */
-	if (op_array->last_brk_cont) {
-		int i;
-		for (i=0; i< op_array->last_brk_cont; i++) {
-			zend_access_path(cfg->loop_start[i], ctx);
-			zend_access_path(cfg->loop_cont[i], ctx);
-			zend_access_path(cfg->loop_brk[i], ctx);
-		}
-	}
 
 	/* Add exception paths */
 	if (op_array->last_try_catch) {
@@ -1194,16 +1121,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			}
 		}
 		op_array->last_try_catch = j;
-	}
-
-	/* adjust loop jump targets */
-	if (op_array->last_brk_cont) {
-		int i;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			op_array->brk_cont_array[i].start = cfg->loop_start[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].cont = cfg->loop_cont[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].brk = cfg->loop_brk[i]->start_opline - new_opcodes;
-		}
 	}
 
     /* adjust jump targets */
