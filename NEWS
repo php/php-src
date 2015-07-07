@@ -1,11 +1,20 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015 PHP 5.4.43
+09 Jul 2015 PHP 5.4.43
 
 - Core:
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
   . Fixed bug #69874 (Can't set empty additional_headers for mail()), regression
     from fix to bug #68776. (Yasuo)
+
+- Mysqlnd:
+  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM) (CVE-2015-3152).
+    (Andrey)
+
+- Phar:
+  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file). (Stas)
+  . Fixed bug #69923 (Buffer overflow and stack smashing error in 
+    phar_fix_filepath). (Stas)
 
 11 Jun 2015 PHP 5.4.42
 
