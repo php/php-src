@@ -882,7 +882,7 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 			var_offset |= ZEND_LIVE_LOOP;
 		}
 
-	    if (opTs[start]) {
+		if (opTs[start]) {
 			if (opTs[start-1] == opTs[start]) {
 				op_var_info *opT = opTs[start];
 				do {
@@ -906,9 +906,9 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 			if (opTs[j-1]->next == opTs[j]) {
 				opTs[j] = opTs[j-1];
 			} else {
-			    if (opTs[j]) {
+				if (opTs[j]) {
 					count++;
-			    } else {
+				} else {
 					count += 2;
 				}
 				new_opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
@@ -926,43 +926,39 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 {
 	zend_op      *opline, *end;
 	uint32_t      var, i, op_live_total = 0;
-	uint32_t     *info, info_off = op_array->last + 1;
+	uint32_t     *info, info_off = op_array->last;
 	uint32_t     *Tstart = zend_arena_alloc(&CG(arena), sizeof(uint32_t) * op_array->T);
 	void         *checkpoint = zend_arena_checkpoint(CG(arena));
 	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * op_array->last);
 
 	memset(Tstart, -1, sizeof(uint32_t) * op_array->T);
-	memset(opTs, 0, sizeof(op_var_info *) * (op_array->last + 1));
+	memset(opTs, 0, sizeof(op_var_info *) * op_array->last);
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	do {
 		if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
-			&& !((opline)->result_type & EXT_TYPE_UNUSED)
-			/* the following opcodes are used in inline branching
-			 * (and anyway always bool, so no need to free) and may
-			 * not be defined depending on the taken branch */
-			&& opline->opcode != ZEND_BOOL
-			&& opline->opcode != ZEND_JMPZ_EX
-			&& opline->opcode != ZEND_JMPNZ_EX
-			/* these two consecutive ops appear on ternary,
-			 * the result of true branch is undefined for false branch */
-			&& (opline->opcode != ZEND_QM_ASSIGN || (opline + 1)->opcode != ZEND_JMP)
-			/* exception for opcache, it might nowhere use the temporary
-			 * (anyway bool, so no need to free) */
-			&& opline->opcode != ZEND_CASE
-			/* the following opcodes reuse TMP created before */
-			&& opline->opcode != ZEND_ROPE_ADD
-			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
-			/* passes fast_call */
-			&& opline->opcode != ZEND_FAST_CALL
-			/* the following opcodes pass class_entry */
-			&& opline->opcode != ZEND_FETCH_CLASS
-			&& opline->opcode != ZEND_DECLARE_CLASS
-			&& opline->opcode != ZEND_DECLARE_INHERITED_CLASS
-			&& opline->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
-			&& opline->opcode != ZEND_DECLARE_ANON_CLASS
-			&& opline->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+		 && !((opline)->result_type & EXT_TYPE_UNUSED)
+		 /* the following opcodes are used in inline branching (and anyway always bool, so no need to free) and may not be defined depending on the taken branch */
+		 && opline->opcode != ZEND_BOOL
+		 && opline->opcode != ZEND_JMPZ_EX
+		 && opline->opcode != ZEND_JMPNZ_EX
+		 /* these two consecutive ops appear on ternary, the result of true branch is undefined for false branch */
+		 && (opline->opcode != ZEND_QM_ASSIGN || (opline + 1)->opcode != ZEND_JMP)
+		 /* exception for opcache, it might nowhere use the temporary (anyway bool, so no need to free) */
+		 && opline->opcode != ZEND_CASE
+		 /* the following opcodes reuse TMP created before */
+		 && opline->opcode != ZEND_ROPE_ADD
+		 && opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+		 /* passes fast_call */
+		 && opline->opcode != ZEND_FAST_CALL
+		 /* the following opcodes pass class_entry */
+		 && opline->opcode != ZEND_FETCH_CLASS
+		 && opline->opcode != ZEND_DECLARE_CLASS
+		 && opline->opcode != ZEND_DECLARE_INHERITED_CLASS
+		 && opline->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
+		 && opline->opcode != ZEND_DECLARE_ANON_CLASS
+		 && opline->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
 			if (done_pass_two) {
 				var = EX_VAR_TO_NUM(opline->result.var) - op_array->last_var;
 			} else {
@@ -981,13 +977,13 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 			} else {
 				var = opline->op1.var;
 			}
-			if (Tstart[var] != (uint32_t)-1
-				/* the following opcodes don't free TMP */
-				&& opline->opcode != ZEND_ROPE_ADD
-				&& opline->opcode != ZEND_FETCH_LIST
-				&& opline->opcode != ZEND_CASE
-				&& opline->opcode != ZEND_FE_FETCH_R
-				&& opline->opcode != ZEND_FE_FETCH_RW) {
+			if (Tstart[var] != (uint32_t) -1
+			 /* the following opcodes don't free TMP */
+			 && opline->opcode != ZEND_ROPE_ADD
+			 && opline->opcode != ZEND_FETCH_LIST
+			 && opline->opcode != ZEND_CASE
+			 && opline->opcode != ZEND_FE_FETCH_R
+			 && opline->opcode != ZEND_FE_FETCH_RW) {
 				op_live_total += liveliness_kill_var(op_array, opline, var, Tstart, opTs);
 			}
 		}
@@ -997,7 +993,7 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 			} else {
 				var = opline->op2.var;
 			}
-			if (Tstart[var] != (uint32_t)-1) {
+			if (Tstart[var] != (uint32_t) -1) {
 				op_live_total += liveliness_kill_var(op_array, opline, var, Tstart, opTs);
 			}
 		}
@@ -1006,14 +1002,14 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 #if ZEND_DEBUG
 	/* Check that all TMP variable live-ranges are closed */
 	for (i = 0; i < op_array->T; i++) {
-		ZEND_ASSERT(Tstart[i] == (uint32_t)-1);
+		ZEND_ASSERT(Tstart[i] == (uint32_t) -1);
 	}
 #endif
 
 	if (!op_live_total) {
 		info = NULL;
 	} else {
-		info = emalloc((op_array->last + 1 + op_live_total) * sizeof(uint32_t));
+		info = emalloc((op_array->last + op_live_total) * sizeof(uint32_t));
 
 		for (i = 0; i < op_array->last; i++) {
 			if (!opTs[i]) {
@@ -1027,11 +1023,10 @@ static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_b
 					info[info_off++] = opT->var;
 					opT = opT->next;
 				}
-				info[info_off++] = (uint32_t)-1;
+				info[info_off++] = (uint32_t) -1;
 			}
 		}
-		info[op_array->last] = info_off;
-		ZEND_ASSERT(info_off == op_array->last + 1 + op_live_total);
+		ZEND_ASSERT(info_off == op_array->last + op_live_total);
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);
