@@ -2524,7 +2524,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 	DBG_RETURN(ret);
 oom:
 	SET_OOM_ERROR(*conn->error_info);
-	conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);	
+	conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);
 end:
 	DBG_RETURN(FAIL);
 }
