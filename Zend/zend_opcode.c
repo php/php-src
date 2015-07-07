@@ -923,7 +923,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * op_array->last);
 
 	memset(Tstart, -1, sizeof(uint32_t) * op_array->T);
-	memset(opTs, 0, sizeof(op_var_info *) * (op_array->last + 1));
+	memset(opTs, 0, sizeof(op_var_info *) * op_array->last);
 
 	zend_op *end_op = op_array->opcodes + op_array->last;
 	zend_op *cur_op = op_array->opcodes;
