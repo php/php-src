@@ -1996,9 +1996,10 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 }
 /* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, zend_bool compress) /* {{{ */
 {
 	const char *oldname = NULL;
+	phar_archive_data *phar = *sphar;
 	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
@@ -2108,6 +2109,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 				pphar->fp = phar->fp;
 				phar->fp = NULL;
 				phar_destroy_phar_data(phar);
+				*sphar = NULL;
 				phar = pphar;
 				phar->refcount++;
 				newpath = oldpath;
@@ -2290,17 +2292,19 @@ no_copy:
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len);
 	} ZEND_HASH_FOREACH_END();
 
-	if ((ret = phar_rename_archive(phar, ext, 0))) {
+	if ((ret = phar_rename_archive(&phar, ext, 0))) {
 		return ret;
 	} else {
-		zend_hash_destroy(&(phar->manifest));
-		zend_hash_destroy(&(phar->mounted_dirs));
-		zend_hash_destroy(&(phar->virtual_dirs));
-		if (phar->fp) {
-			php_stream_close(phar->fp);
+		if(phar != NULL) {
+			zend_hash_destroy(&(phar->manifest));
+			zend_hash_destroy(&(phar->mounted_dirs));
+			zend_hash_destroy(&(phar->virtual_dirs));
+			if (phar->fp) {
+				php_stream_close(phar->fp);
+			}
+			efree(phar->fname);
+			efree(phar);
 		}
-		efree(phar->fname);
-		efree(phar);
 		return NULL;
 	}
 }
