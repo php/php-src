@@ -876,7 +876,7 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 			var_offset |= ZEND_LIVE_LOOP;
 		}
 
-	    if (opTs[start]) {
+		if (opTs[start]) {
 			if (start > 0 && opTs[start-1] == opTs[start]) {
 				op_var_info *opT = opTs[start];
 				do {
