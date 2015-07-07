@@ -501,7 +501,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
 					case ZEND_JMP:
-					case ZEND_GOTO:
 					case ZEND_FAST_CALL:
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_DECLARE_ANON_INHERITED_CLASS:

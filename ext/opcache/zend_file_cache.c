@@ -386,7 +386,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -913,7 +912,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:

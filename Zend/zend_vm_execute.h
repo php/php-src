@@ -2227,13 +2227,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CONST_HANDLER(Z
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-	zend_op *target = OP_JMP_ADDR(opline, opline->op1);
-
-	SAVE_OPLINE();
-
-	i_cleanup_unfinished_execution(execute_data, opline - EX(func)->op_array.opcodes, target - EX(func)->op_array.opcodes);
-	ZEND_VM_JMP(target);
+	zend_error_noreturn(E_ERROR, "GOTO must be resolved at compile-time.");
+	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_INTERFACE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

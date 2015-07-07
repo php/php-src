@@ -4863,13 +4863,8 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMPVAR|CV, ANY)
 
 ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 {
-	USE_OPLINE
-	zend_op *target = OP_JMP_ADDR(opline, opline->op1);
-
-	SAVE_OPLINE();
-
-	i_cleanup_unfinished_execution(execute_data, opline - EX(func)->op_array.opcodes, target - EX(func)->op_array.opcodes);
-	ZEND_VM_JMP(target);
+	zend_error_noreturn(E_ERROR, "GOTO must be resolved at compile-time.");
+	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
