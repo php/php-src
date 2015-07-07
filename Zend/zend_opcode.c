@@ -918,7 +918,7 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 	return count;
 }
 
-static uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_bool done_pass_two)
+static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_array *op_array, zend_bool done_pass_two)
 {
 	zend_op      *opline, *end;
 	uint32_t      var, i, op_live_total = 0;
