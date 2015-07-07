@@ -19,5 +19,3 @@ Warning: unregister_tick_function(): Unable to delete tick function executed at 
 Done
 hello
 Warning: unregister_tick_function(): Unable to delete tick function executed at the moment in %s on line %d
-hello
-Warning: unregister_tick_function(): Unable to delete tick function executed at the moment in %s on line %d
