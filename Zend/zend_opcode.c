@@ -875,12 +875,40 @@ static zend_always_inline uint32_t liveliness_kill_var(zend_op_array *op_array, 
 		} else if (op_array->opcodes[end].opcode == ZEND_FE_FREE) {
 			var_offset |= ZEND_LIVE_LOOP;
 		}
-		for (j = start; j < end; j++) {
-			op_var_info *newOpTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
-			newOpTs->next = opTs[j];
-			newOpTs->var = var_offset;
-			opTs[j] = newOpTs;
-			count++;
+
+	    if (opTs[start]) {
+			if (start > 0 && opTs[start-1] == opTs[start]) {
+				op_var_info *opT = opTs[start];
+				do {
+					count++;
+					opT = opT->next;
+				} while (opT);
+				count += 2;
+			} else {
+				count++;
+			}
+		} else {
+			count += 2;
+		}
+		op_var_info *newOpTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
+		newOpTs->next = opTs[start];
+		newOpTs->var = var_offset;
+		opTs[start] = newOpTs;
+
+		for (j = start + 1; j < end; j++) {
+			if (opTs[j-1]->next == opTs[j]) {
+				opTs[j] = opTs[j-1];
+			} else {
+			    if (opTs[j]) {
+					count++;
+			    } else {
+					count += 2;
+				}
+				op_var_info *newOpTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info));
+				newOpTs->next = opTs[j];
+				newOpTs->var = var_offset;
+				opTs[j] = newOpTs;
+			}
 		}
 	}
 	return count;
@@ -892,7 +920,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 	void *checkpoint = zend_arena_checkpoint(CG(arena));
 	uint32_t *info, info_off = op_array->last + 1;
 	uint32_t *Tstart = zend_arena_alloc(&CG(arena), sizeof(uint32_t) * op_array->T);
-	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * (op_array->last + 1));
+	op_var_info **opTs = zend_arena_alloc(&CG(arena), sizeof(op_var_info *) * op_array->last);
 
 	memset(Tstart, -1, sizeof(uint32_t) * op_array->T);
 	memset(opTs, 0, sizeof(op_var_info *) * (op_array->last + 1));
@@ -965,17 +993,25 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 	if (!op_live_total) {
 		info = NULL;
 	} else {
-		info = emalloc(op_live_total * sizeof(uint32_t) + (op_array->last + 1) * sizeof(uint32_t));
+		info = emalloc((op_array->last + 1 + op_live_total) * sizeof(uint32_t));
 
 		for (i = 0; i < op_array->last; i++) {
-			op_var_info *opT = opTs[i];
-			info[i] = info_off;
-			while (opT) {
-				info[info_off++] = opT->var;
-				opT = opT->next;
+			if (!opTs[i]) {
+				info[i] = (uint32_t)-1;
+			} else if (i > 0 && opTs[i-1] == opTs[i]) {
+				info[i] = info[i-1];
+			} else {
+				op_var_info *opT = opTs[i];
+				info[i] = info_off;
+				while (opT) {
+					info[info_off++] = opT->var;
+					opT = opT->next;
+				}
+				info[info_off++] = (uint32_t)-1;
 			}
 		}
-		info[i] = info_off;
+		info[op_array->last] = info_off;
+		ZEND_ASSERT(info_off == op_array->last + 1 + op_live_total);
 	}
 
 	zend_arena_release(&CG(arena), checkpoint);

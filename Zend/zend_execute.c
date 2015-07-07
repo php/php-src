@@ -2359,23 +2359,22 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 
 static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
-	if (EX(func)->op_array.T_liveliness && op_num < EX(func)->op_array.last) {
+	if (EX(func)->op_array.T_liveliness
+	 && op_num < EX(func)->op_array.last
+	 && EX(func)->op_array.T_liveliness[op_num] != (uint32_t) - 1) {
 		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
-		uint32_t *until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num + 1];
 		uint32_t *catch_off = NULL;
-		uint32_t *catch_until = NULL;
+		uint32_t var = *off;
 
 		if (catch_op_num) {
 			catch_off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[catch_op_num];
-			catch_until = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[catch_op_num + 1];
 		}
 
-		while (off < until) {
-			uint32_t var = *(off++);
-
+		do {
 			/* we should be safe to assume that all temporaries at catch_op_num will be present at op_num too, in same order */
-			if (catch_off < catch_until && *catch_off == var) {
+			if (catch_off && *catch_off == var) {
 				catch_off++;
+				var = *(++off);
 				continue;
 			}
 
@@ -2416,7 +2415,8 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 			} else {
 				zval_ptr_dtor_nogc(EX_VAR(var));
 			}
-		}
+			var = *(++off);
+		} while (var != (uint32_t)-1);
 	}
 
 	if (UNEXPECTED(EX(call))) {

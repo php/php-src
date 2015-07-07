@@ -116,15 +116,15 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 
 #if 1
 	if (ops->T_liveliness) {
-		uint32_t *var = ops->T_liveliness + ops->T_liveliness[op - ops->opcodes];
-		uint32_t *end = ops->T_liveliness + ops->T_liveliness[op - ops->opcodes + 1];
+		uint32_t *var = ops->T_liveliness + (op - ops->opcodes);
 
-		if (var != end) {
+		if (*var != (uint32_t)-1) {
 			smart_str str = {0};
 
+			var = ops->T_liveliness + (*var);
 			smart_str_appends(&str, "; [@");
 			smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
-			while (++var != end) {
+			while (*(++var) != (uint32_t)-1) {
 				smart_str_appends(&str, ", @");
 				smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
 			}
