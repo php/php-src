@@ -570,6 +570,13 @@ Other
     and ReflectionFunctionAbstract::getReturnType() methods both return an
     instance of ReflectionType.
 
+- Stream:
+  . New Windows only stream context options was added to allow blocking reads
+    on pipes. To enable it, pass array("pipe" => array("blocking" => true))
+    when creating the stream context. Be aware, that this option can under
+    circumstances cause dead locks on the pipe buffer. However it can be useful
+    in several CLI use case scenarios.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
