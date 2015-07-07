@@ -90,7 +90,6 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
 	if (bytes <= 0) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
 		zend_bailout();
-		return 0;
 	}
 
 	return bytes;

@@ -729,11 +729,15 @@ readline:
 				PHPDBG_G(last_was_newline) = 1;
 			}
 
-			if (!cmd) {
-				goto readline;
-			}
-
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+				if (!cmd) {
+					if (feof(PHPDBG_G(io)[PHPDBG_STDIN].ptr)) {
+						PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+						zend_bailout();
+					}
+					goto readline;
+				}
+
 				add_history(cmd);
 			}
 #endif
