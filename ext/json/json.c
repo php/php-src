@@ -92,6 +92,68 @@ static const zend_function_entry json_serializable_interface[] = {
 };
 /* }}} */
 
+#include "ext/session/php_session.h"
+
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+/* {{{ PS_SERIALIZER_ENCODE_FUNC
+ */
+PS_SERIALIZER_ENCODE_FUNC(json)
+{
+	smart_str buf = {0};
+
+	php_json_encode_zval(&buf, Z_REFVAL(PS(http_session_vars)), 0);
+
+	return buf.s;
+}
+/* }}} */
+
+/* {{{ PS_SERIALIZER_DECODE_FUNC
+ */
+PS_SERIALIZER_DECODE_FUNC(json)
+{
+	zval retval;
+	zval *ent;
+	zend_string *key;
+	zend_ulong idx;
+	int ret = SUCCESS;
+
+	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
+	zend_long options = PHP_JSON_OBJECT_AS_ARRAY;
+
+	if (vallen == 0) {
+		return SUCCESS;
+	}
+
+	ZVAL_UNDEF(&retval);
+
+	php_json_decode_ex(&retval, val, vallen, options, depth);
+
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE) {
+		ret = FAILURE;
+	}
+
+	if (ret == SUCCESS) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(retval), idx, key, ent) {
+			if (key == NULL) {
+				key = zend_long_to_str(idx);
+			} else {
+				zend_string_addref(key);
+			}
+			if (php_set_session_var(key, ent, NULL)) {
+				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);
+			}
+			PS_ADD_VAR(key);
+			zend_string_release(key);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	zval_ptr_dtor(&retval);
+
+	return ret;
+}
+/* }}} */
+#endif
+
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
@@ -126,6 +188,12 @@ static PHP_MINIT_FUNCTION(json)
 
 	REGISTER_LONG_CONSTANT("JSON_OBJECT_AS_ARRAY",		PHP_JSON_OBJECT_AS_ARRAY,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_BIGINT_AS_STRING",		PHP_JSON_BIGINT_AS_STRING,		CONST_CS | CONST_PERSISTENT);
+
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+	php_session_register_serializer("json",
+									PS_SERIALIZER_ENCODE_NAME(json),
+									PS_SERIALIZER_DECODE_NAME(json));
+#endif
 
 	return SUCCESS;
 }
