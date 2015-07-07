@@ -2361,12 +2361,12 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 {
 	if (EX(func)->op_array.T_liveliness
 	 && op_num < EX(func)->op_array.last
-	 && EX(func)->op_array.T_liveliness[op_num] != (uint32_t) - 1) {
+	 && EX(func)->op_array.T_liveliness[op_num] != (uint32_t)-1) {
 		uint32_t *off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[op_num];
 		uint32_t *catch_off = NULL;
 		uint32_t var = *off;
 
-		if (catch_op_num) {
+		if (catch_op_num && EX(func)->op_array.T_liveliness[catch_op_num] != (uint32_t)-1) {
 			catch_off = EX(func)->op_array.T_liveliness + EX(func)->op_array.T_liveliness[catch_op_num];
 		}
 
