@@ -163,9 +163,13 @@ PHP_FUNCTION(random_int)
 		return;
 	}
 
-	if (min >= max) {
-		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
-		RETURN_FALSE;
+	if (min > max) {
+		zend_throw_exception(NULL, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (min == max) {
+		RETURN_LONG(min);
 	}
 
 	umax = max - min;
