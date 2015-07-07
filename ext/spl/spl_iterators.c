@@ -380,9 +380,11 @@ next_step:
 					}
 				}
 			}
-			iterator->funcs->dtor(iterator TSRMLS_CC);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
+			if (object->level > 0) {
+				iterator->funcs->dtor(iterator TSRMLS_CC);
+				zval_ptr_dtor(&object->iterators[object->level].zobject);
+				object->level--;
+			}
 		} else {
 			return; /* done completeley */
 		}
