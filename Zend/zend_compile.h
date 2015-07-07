@@ -110,10 +110,10 @@ typedef struct _zend_declarables {
 } zend_declarables;
 
 typedef struct _zend_brk_cont_element {
-	int start;
 	int cont;
 	int brk;
 	int parent;
+	znode loop_var;
 } zend_brk_cont_element;
 
 typedef struct _zend_label {

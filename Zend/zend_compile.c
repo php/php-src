@@ -289,7 +289,6 @@ void zend_file_context_end(zend_file_context *prev_context) /* {{{ */
 
 void zend_init_compiler_data_structures(void) /* {{{ */
 {
-	zend_stack_init(&CG(loop_var_stack), sizeof(znode));
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
@@ -322,7 +321,6 @@ void init_compiler(void) /* {{{ */
 
 void shutdown_compiler(void) /* {{{ */
 {
-	zend_stack_destroy(&CG(loop_var_stack));
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_hash_destroy(&CG(const_filenames));
@@ -571,14 +569,10 @@ static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
 	CG(context).current_brk_cont = CG(context).last_brk_cont;
 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
 	brk_cont_element->parent = parent;
-
-	if (loop_var) {
-		zend_stack_push(&CG(loop_var_stack), loop_var);
-		brk_cont_element->start = get_next_op_number(CG(active_op_array));
+	if (loop_var && (loop_var->op_type & (IS_TMP_VAR|IS_VAR))) {
+		brk_cont_element->loop_var = *loop_var;
 	} else {
-		/* The start field is used to free temporary variables in case of exceptions.
-		 * We won't try to free something of we don't have loop variable.  */
-		brk_cont_element->start = -1;
+		brk_cont_element->loop_var.op_type = IS_UNUSED;
 	}
 }
 /* }}} */
@@ -590,10 +584,6 @@ static inline void zend_end_loop(int cont_addr) /* {{{ */
 	brk_cont_element->cont = cont_addr;
 	brk_cont_element->brk = get_next_op_number(CG(active_op_array));
 	CG(context).current_brk_cont = brk_cont_element->parent;
-
-	if (brk_cont_element->start >= 0) {
-		zend_stack_del_top(&CG(loop_var_stack));
-	}
 }
 /* }}} */
 
@@ -882,24 +872,15 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 
 static zend_bool zend_is_call(zend_ast *ast);
 
-static int generate_free_loop_var(znode *var) /* {{{ */
+static void generate_free_loop_var(znode *var) /* {{{ */
 {
-	switch (var->op_type) {
-		case IS_UNUSED:
-			/* Stack separator on function boundary, stop applying */
-			return 1;
-		case IS_VAR:
-		case IS_TMP_VAR:
-		{
-			zend_op *opline = get_next_op(CG(active_op_array));
+	if (var->op_type != IS_UNUSED) {
+		zend_op *opline = get_next_op(CG(active_op_array));
 
-			opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
-			SET_NODE(opline->op1, var);
-			SET_UNUSED(opline->op2);
-		}
+		opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
+		SET_NODE(opline->op1, var);
+		SET_UNUSED(opline->op2);
 	}
-
-	return 0;
 }
 /* }}} */
 
@@ -3462,7 +3443,12 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 
 static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 {
-	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
+	int array_offset = CG(context).current_brk_cont;
+	while (array_offset != -1) {
+		zend_brk_cont_element *brk_cont = &CG(context).brk_cont_array[array_offset];
+		generate_free_loop_var(&brk_cont->loop_var);
+		array_offset = brk_cont->parent;
+	}
 }
 /* }}} */
 
@@ -3564,7 +3550,6 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	} else {
 		int array_offset = CG(context).current_brk_cont;
 		zend_long nest_level = depth;
-		znode *loop_var = zend_stack_top(&CG(loop_var_stack));
 
 		do {
 			if (array_offset == -1) {
@@ -3573,9 +3558,8 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 					depth, depth == 1 ? "" : "s");
 			}
 
-			if (nest_level > 1 && CG(context).brk_cont_array[array_offset].start >= 0) {
-				generate_free_loop_var(loop_var);
-				loop_var--;
+			if (nest_level > 1) {
+				generate_free_loop_var(&CG(context).brk_cont_array[array_offset].loop_var);
 			}
 
 			array_offset = CG(context).brk_cont_array[array_offset].parent;
@@ -3592,7 +3576,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 	zend_label *dest;
 	int current, distance, free_vars;
 	zval *label;
-	znode *loop_var = NULL;
 
 	if (pass2_opline) {
 		label = RT_CONSTANT(op_array, pass2_opline->op2);
@@ -3613,7 +3596,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 
 			current = CG(context).current_brk_cont;
 			while (current != -1) {
-				if (CG(context).brk_cont_array[current].start >= 0) {
+				if (CG(context).brk_cont_array[current].loop_var.op_type != IS_UNUSED) {
 					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 				}
 				current = CG(context).brk_cont_array[current].parent;
@@ -3633,9 +3616,6 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 	} else {
 		current = CG(context).current_brk_cont;
 	}
-	if (!pass2_opline) {
-		loop_var = zend_stack_top(&CG(loop_var_stack));
-	}
 	for (distance = 0, free_vars = 0; current != dest->brk_cont; distance++) {
 		if (current == -1) {
 			if (pass2_opline) {
@@ -3645,12 +3625,11 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 			}
 			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
-		if (CG(context).brk_cont_array[current].start >= 0) {
+		if (CG(context).brk_cont_array[current].loop_var.op_type != IS_UNUSED) {
 			if (pass2_opline) {
 				free_vars++;
 			} else {
-				generate_free_loop_var(loop_var);
-				loop_var--;
+				generate_free_loop_var(&CG(context).brk_cont_array[current].loop_var);
 			}
 		}
 		current = CG(context).brk_cont_array[current].parent;
@@ -3660,30 +3639,18 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 		if (free_vars) {
 			current = pass2_opline->extended_value;
 			while (current != dest->brk_cont) {
-				if (CG(context).brk_cont_array[current].start >= 0) {
+				if (CG(context).brk_cont_array[current].loop_var.op_type != IS_UNUSED) {
 					zend_op *brk_opline = &op_array->opcodes[CG(context).brk_cont_array[current].brk];
 
-					if (brk_opline->opcode == ZEND_FREE) {
-						(pass2_opline - free_vars)->opcode = ZEND_FREE;
-						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
-						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
-							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
-						} else {
-							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
-							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
-						}
-						free_vars--;
-					} else if (brk_opline->opcode == ZEND_FE_FREE) {
-						(pass2_opline - free_vars)->opcode = ZEND_FE_FREE;
-						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
-						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
-							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
-						} else {
-							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
-							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
-						}
-						free_vars--;
+					(pass2_opline - free_vars)->opcode = brk_opline->opcode;
+					(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+						(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+					} else {
+						(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+						ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
 					}
+					free_vars--;
 				}
 				current = CG(context).brk_cont_array[current].parent;
 			}
@@ -4801,14 +4768,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		opline_ext->lineno = decl->start_lineno;
 	}
 
-	{
-		/* Push a separator to the loop variable stack */
-		znode dummy_var;
-		dummy_var.op_type = IS_UNUSED;
-
-		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
-	}
-
 	zend_compile_params(params_ast, return_type_ast);
 	if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
@@ -4825,9 +4784,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	pass_two(CG(active_op_array));
 	zend_oparray_context_end(&orig_oparray_context);
-
-	/* Pop the loop variable stack separator */
-	zend_stack_del_top(&CG(loop_var_stack));
 
 	CG(active_op_array) = orig_op_array;
 }
