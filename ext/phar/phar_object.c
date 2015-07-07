@@ -2129,6 +2129,7 @@ static zval *phar_rename_archive(phar_archive_data **sphar, char *ext, zend_bool
 				phar_destroy_phar_data(phar TSRMLS_CC);
 				*sphar = NULL;
 				phar = *pphar;
+				*sphar = NULL;
 				phar->refcount++;
 				newpath = oldpath;
 				goto its_ok;
