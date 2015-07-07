@@ -32,6 +32,7 @@
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
+#include "zend_vm.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -3606,7 +3607,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 			current = CG(context).current_brk_cont;
 			while (current != -1) {
 				if (CG(context).brk_cont_array[current].start >= 0) {
-					zend_emit_op(NULL, ZEND_NOP, NULL, label_node);
+					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 				}
 				current = CG(context).brk_cont_array[current].parent;
 			}
@@ -3658,13 +3659,24 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 					if (brk_opline->opcode == ZEND_FREE) {
 						(pass2_opline - free_vars)->opcode = ZEND_FREE;
 						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
-						(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
 					} else if (brk_opline->opcode == ZEND_FE_FREE) {
 						(pass2_opline - free_vars)->opcode = ZEND_FE_FREE;
 						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
-						(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
 					}
-					free_vars--;
 				}
 				current = CG(context).brk_cont_array[current].parent;
 			}
