@@ -950,6 +950,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 			/* the following opcodes reuse TMP created before */
 			&& opline->opcode != ZEND_ROPE_ADD
 			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+			&& opline->opcode != ZEND_SEPARATE
 			/* passes fast_call */
 			&& opline->opcode != ZEND_FAST_CALL
 			/* the following opcodes pass class_entry */
@@ -980,6 +981,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 			if (Tstart[var] != (uint32_t)-1
 				/* the following opcodes don't free TMP */
 				&& opline->opcode != ZEND_ROPE_ADD
+				&& opline->opcode != ZEND_SEPARATE
 				&& opline->opcode != ZEND_FETCH_LIST
 				&& opline->opcode != ZEND_CASE
 				&& opline->opcode != ZEND_FE_FETCH_R
