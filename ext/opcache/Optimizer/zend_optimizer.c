@@ -467,7 +467,7 @@ static void zend_optimize(zend_op_array      *op_array,
 		|ZEND_OPTIMIZER_PASS_9
 		|ZEND_OPTIMIZER_PASS_10
 		|ZEND_OPTIMIZER_PASS_11) & OPTIMIZATION_LEVEL) {
-		zend_regenerate_var_liveliness_info(op_array);
+		zend_generate_var_liveliness_info(op_array);
 	}
 }
 
