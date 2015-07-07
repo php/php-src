@@ -1296,11 +1296,20 @@ ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *forma
 {
 	va_list va;
 	char *message = NULL;
+	
+	if (exception_ce) {
+		if (!instanceof_function(exception_ce, zend_ce_error)) {
+			zend_error(E_NOTICE, "Error exceptions must be derived from Error");
+			exception_ce = zend_ce_error;
+		}
+	} else {
+		exception_ce = zend_ce_error;
+	}
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 
-	// TODO: we can't convert compile-time errors to exceptions yet???
+	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
 		zend_throw_exception(exception_ce, message, 0);
 	} else {
