@@ -2073,7 +2073,7 @@ static int php_check_dots(const char *element, int n) /* {{{ */
  */
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 {
-	char newpath[MAXPATHLEN];
+	char *newpath;
 	int newpath_len;
 	char *ptr;
 	char *tok;
@@ -2081,8 +2081,10 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 
 	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
 		newpath_len = PHAR_G(cwd_len);
+		newpath = emalloc(strlen(path) + newpath_len + 1);
 		memcpy(newpath, PHAR_G(cwd), newpath_len);
 	} else {
+		newpath = emalloc(strlen(path) + 2);
 		newpath[0] = '/';
 		newpath_len = 1;
 	}
@@ -2105,6 +2107,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 				if (*tok == '.') {
 					efree(path);
 					*new_len = 1;
+					efree(newpath);
 					return estrndup("/", 1);
 				}
 				break;
@@ -2112,9 +2115,11 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 				if (tok[0] == '.' && tok[1] == '.') {
 					efree(path);
 					*new_len = 1;
+					efree(newpath);
 					return estrndup("/", 1);
 				}
 		}
+		efree(newpath);
 		return path;
 	}
 
@@ -2163,7 +2168,8 @@ last_time:
 
 	efree(path);
 	*new_len = newpath_len;
-	return estrndup(newpath, newpath_len);
+	newpath[newpath_len] = '\0';
+	return erealloc(newpath, newpath_len + 1);
 }
 /* }}} */
 
