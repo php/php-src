@@ -48,6 +48,10 @@
 #	include <arpa/inet.h>
 #endif /* }}} */
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 int phpdbg_startup_run = 0;
 
@@ -57,7 +61,7 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	return phpdbg_eol_global_update(new_value->val);
+	return phpdbg_eol_global_update(ZSTR_VAL(new_value));
 }
 
 PHP_INI_BEGIN()
@@ -287,7 +291,7 @@ static PHP_FUNCTION(phpdbg_exec)
 		zend_stat_t sb;
 		zend_bool result = 1;
 
-		if (VCWD_STAT(exec->val, &sb) != FAILURE) {
+		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
 					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
@@ -295,8 +299,8 @@ static PHP_FUNCTION(phpdbg_exec)
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = estrndup(exec->val, exec->len);
-				PHPDBG_G(exec_len) = exec->len;
+				PHPDBG_G(exec) = estrndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {
 					ZVAL_TRUE(return_value);
@@ -503,7 +507,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					if (last_scope == NULL) {
 						fn_name = zend_string_copy(last_function);
 					} else {
-						fn_name = strpprintf(last_function->len + last_scope->name->len + 2, "%.*s::%.*s", last_function->len, last_function->val, last_scope->name->len, last_scope->name->val);
+						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_function), ZSTR_VAL(last_function), ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name));
 					}
 					fn_buf = zend_hash_find(Z_ARR_P(return_value), fn_name);
 					if (!fn_buf) {
@@ -894,7 +898,6 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	/* phpdbg options */
 	{'q', 0, "no banner"},
 	{'v', 0, "disable quietness"},
-	{'s', 0, "enable stepping"},
 	{'b', 0, "boring colours"},
 	{'i', 1, "specify init"},
 	{'I', 0, "ignore init"},
@@ -1168,7 +1171,6 @@ int main(int argc, char **argv) /* {{{ */
 	long cleaning = -1;
 	zend_bool quit_immediately = 0;
 	zend_bool remote = 0;
-	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;
 	char *address;
@@ -1223,7 +1225,6 @@ phpdbg_main:
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
-	step = 0;
 	sapi_name = NULL;
 	if (settings) {
 		exec = settings->exec;
@@ -1316,10 +1317,6 @@ phpdbg_main:
 
 			case 'v': /* set quietness off */
 				flags &= ~PHPDBG_IS_QUIET;
-			break;
-
-			case 's': /* set stepping on */
-				step = 1;
 			break;
 
 			case 'E': /* stepping through eval on */
@@ -1675,11 +1672,6 @@ phpdbg_main:
 				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
-		}
-
-		/* step from here, not through init */
-		if (step) {
-			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
 		phpdbg_fully_started = 1;

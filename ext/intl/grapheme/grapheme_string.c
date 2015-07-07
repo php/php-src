@@ -370,11 +370,11 @@ PHP_FUNCTION(grapheme_strripos)
    Returns part of a string */
 PHP_FUNCTION(grapheme_substr)
 {
-	char *str, *sub_str;
+	char *str;
+	zend_string *u8_sub_str;
 	UChar *ustr;
 	size_t str_len;
 	int32_t ustr_len;
-	size_t sub_str_len;
 	zend_long lstart = 0, length = 0;
 	int32_t start = 0;
 	int iter_val;
@@ -413,6 +413,7 @@ PHP_FUNCTION(grapheme_substr)
 
 	if ( grapheme_ascii_check((unsigned char *)str, str_len) >= 0 ) {
 		int32_t asub_str_len;
+		char *sub_str;
 		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
 
 		if ( NULL == sub_str ) {
@@ -486,34 +487,26 @@ PHP_FUNCTION(grapheme_substr)
 
 		/* no length supplied or length is too big, return the rest of the string */
 
-		sub_str = NULL;
-		sub_str_len = 0;
 		status = U_ZERO_ERROR;
-		intl_convert_utf16_to_utf8(&sub_str, &sub_str_len, ustr + sub_str_start_pos, ustr_len - sub_str_start_pos, &status);
+		u8_sub_str = intl_convert_utf16_to_utf8(ustr + sub_str_start_pos, ustr_len - sub_str_start_pos, &status);
 
 		if (ustr) {
 			efree( ustr );
 		}
 		ubrk_close( bi );
 
-		if ( U_FAILURE( status ) ) {
+		if ( !u8_sub_str ) {
 			/* Set global error code. */
 			intl_error_set_code( NULL, status );
 
 			/* Set error messages. */
 			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
 
-			if (sub_str) {
-				efree( sub_str );
-			}
-
 			RETURN_FALSE;
 		}
 
 		/* return the allocated string, not a duplicate */
-		RETVAL_STRINGL(sub_str, sub_str_len);
-		//???
-		efree(sub_str);
+		RETVAL_NEW_STR(u8_sub_str);
 		return;
 	}
 
@@ -570,30 +563,23 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_FALSE;
 	}
 
-	sub_str = NULL;
 	status = U_ZERO_ERROR;
-	intl_convert_utf16_to_utf8(&sub_str, &sub_str_len, ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
+	u8_sub_str = intl_convert_utf16_to_utf8(ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
 
 	efree( ustr );
 
-	if ( U_FAILURE( status ) ) {
+	if ( !u8_sub_str ) {
 		/* Set global error code. */
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
 
-		if ( NULL != sub_str )
-			efree( sub_str );
-
 		RETURN_FALSE;
 	}
 
 	 /* return the allocated string, not a duplicate */
-	RETVAL_STRINGL(sub_str, sub_str_len);
-	//????
-	efree(sub_str);
-
+	RETVAL_NEW_STR(u8_sub_str);
 }
 /* }}} */
 

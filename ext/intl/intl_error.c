@@ -135,7 +135,7 @@ zend_string * intl_error_get_message( intl_error* err )
 	zend_string *errMessage = 0;
 
 	if( !err && !( err = intl_g_error_get(  ) ) )
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
 
@@ -232,25 +232,21 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 
 void intl_register_IntlException_class( void )
 {
-	zend_class_entry ce,
-					 *default_exception_ce;
-
-	default_exception_ce = zend_exception_get_default(  );
-
+	zend_class_entry ce;
+	
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		default_exception_ce );
-	IntlException_ce_ptr->create_object = default_exception_ce->create_object;
+		zend_ce_exception );
+	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
 }
 
 smart_str intl_parse_error_to_string( UParseError* pe )
 {
-	smart_str  ret = {0};
-	char       *buf;
-	size_t     u8len;
-	UErrorCode status;
-	int        any = 0;
+	smart_str    ret = {0};
+	zend_string *u8str;
+	UErrorCode   status;
+	int          any = 0;
 
 	assert( pe != NULL );
 
@@ -277,14 +273,14 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, ", " );
 
 		smart_str_appends( &ret, "after \"" );
-		intl_convert_utf16_to_utf8( &buf, &u8len, pe->preContext, -1, &status );
-		if( U_FAILURE( status ) )
+		u8str = intl_convert_utf16_to_utf8(pe->preContext, -1, &status );
+		if( !u8str )
 		{
 			smart_str_appends( &ret, "(could not convert parser error pre-context to UTF-8)" );
 		}
 		else {
-			smart_str_appendl( &ret, buf, u8len );
-			efree( buf );
+			smart_str_append( &ret, u8str );
+			zend_string_release( u8str );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
@@ -296,15 +292,15 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, ", " );
 
 		smart_str_appends( &ret, "before or at \"" );
-		intl_convert_utf16_to_utf8( &buf, &u8len, pe->postContext, -1, &status );
-		if( U_FAILURE( status ) )
+		u8str = intl_convert_utf16_to_utf8(pe->postContext, -1, &status );
+		if( !u8str )
 		{
 			smart_str_appends( &ret, "(could not convert parser error post-context to UTF-8)" );
 		}
 		else
 		{
-			smart_str_appendl( &ret, buf, u8len );
-			efree( buf );
+			smart_str_append( &ret, u8str );
+			zend_string_release( u8str );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;

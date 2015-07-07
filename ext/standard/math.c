@@ -1081,7 +1081,7 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 	zend_ulong value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	value = Z_LVAL_P(arg);
@@ -1108,7 +1108,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
@@ -1119,7 +1119,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 		/* Don't try to convert +/- infinity */
 		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
 			php_error_docref(NULL, E_WARNING, "Number too large");
-			return STR_EMPTY_ALLOC();
+			return ZSTR_EMPTY_ALLOC();
 		}
 
 		end = ptr = buf + sizeof(buf) - 1;
@@ -1292,23 +1292,23 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)tmpbuf->val[0])) {
+	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 
 	/* find decimal point, if expected */
 	if (dec) {
-		dp = strpbrk(tmpbuf->val, ".,");
+		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
 	} else {
 		dp = NULL;
 	}
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = (int)(dp - tmpbuf->val);
+		integral = (int)(dp - ZSTR_VAL(tmpbuf));
 	} else {
 		/* no decimal point was found */
-		integral = (int)tmpbuf->len;
+		integral = (int)ZSTR_LEN(tmpbuf);
 	}
 
 	/* allow for thousand separators */
@@ -1332,8 +1332,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 	res = zend_string_alloc(reslen, 0);
 
-	s = tmpbuf->val + tmpbuf->len - 1;
-	t = res->val + reslen;
+	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
+	t = ZSTR_VAL(res) + reslen;
 	*t-- = '\0';
 
 	/* copy the decimal places.
@@ -1365,9 +1365,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* copy the numbers before the decimal point, adding thousand
 	 * separator every three digits */
-	while (s >= tmpbuf->val) {
+	while (s >= ZSTR_VAL(tmpbuf)) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf->val) {
+		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1378,7 +1378,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		*t-- = '-';
 	}
 
-	res->len = reslen;
+	ZSTR_LEN(res) = reslen;
 	zend_string_release(tmpbuf);
 	return res;
 }
@@ -1467,16 +1467,16 @@ PHP_FUNCTION(intdiv)
 	}
 
 	if (divisor == 0) {
-		zend_throw_exception_ex(NULL, 0, "Division by zero");
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 		return;
 	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash
+		/* Prevent overflow error/crash ... really should not happen:
 		   We don't return a float here as that violates function contract */
-		zend_throw_exception_ex(NULL, 0, "Division of PHP_INT_MIN by -1 is not an integer");
+		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
 		return;
 	}
 
-	RETURN_LONG(numerator/divisor);
+	RETURN_LONG(numerator / divisor);
 }
 /* }}} */
 

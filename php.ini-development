@@ -976,6 +976,10 @@ cli_server.color = On
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
 
+;Enables or disables JIT compilation of patterns. This requires the PCRE
+;library to be compiled with JIT support.
+;pcre.jit=1
+
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
 ; http://php.net/pdo-odbc.connection-pooling

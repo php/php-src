@@ -48,7 +48,7 @@ mysqlnd_minfo_print_hash(zval *values)
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
 		convert_to_string(values_entry);
-		php_info_print_table_row(2, string_key->val, Z_STRVAL_P(values_entry));
+		php_info_print_table_row(2, ZSTR_VAL(string_key), Z_STRVAL_P(values_entry));
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -154,12 +154,12 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		smart_str tmp_str = {0};
 		mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_loaded_plugins, &tmp_str);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "Loaded plugins", tmp_str.s? tmp_str.s->val : "");
+		php_info_print_table_row(2, "Loaded plugins", tmp_str.s? ZSTR_VAL(tmp_str.s) : "");
 		smart_str_free(&tmp_str);
 
 		mysqlnd_minfo_dump_api_plugins(&tmp_str);
 		smart_str_0(&tmp_str);
-		php_info_print_table_row(2, "API Extensions", tmp_str.s? tmp_str.s->val : "");
+		php_info_print_table_row(2, "API Extensions", tmp_str.s? ZSTR_VAL(tmp_str.s) : "");
 		smart_str_free(&tmp_str);
 	}
 
@@ -211,7 +211,7 @@ static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
 	zend_long long_value;
 
-	ZEND_ATOL(long_value, new_value->val);
+	ZEND_ATOL(long_value, ZSTR_VAL(new_value));
 	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 		return FAILURE;
 	}

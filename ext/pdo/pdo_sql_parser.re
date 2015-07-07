@@ -217,7 +217,7 @@ safe:
 						zend_string *buf;
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
-						if (!stmt->dbh->methods->quoter(stmt->dbh, buf->val, buf->len, &plc->quoted, &plc->qlen,
+						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 								param->param_type)) {
 							/* bork */
 							ret = -1;

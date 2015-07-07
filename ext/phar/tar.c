@@ -856,7 +856,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /
 	PHP_VAR_SERIALIZE_INIT(metadata_hash);
 	php_var_serialize(&entry->metadata_str, metadata, &metadata_hash);
 	PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-	entry->uncompressed_filesize = entry->compressed_filesize = entry->metadata_str.s ? entry->metadata_str.s->len : 0;
+	entry->uncompressed_filesize = entry->compressed_filesize = entry->metadata_str.s ? ZSTR_LEN(entry->metadata_str.s) : 0;
 
 	if (entry->fp && entry->fp_type == PHAR_MOD) {
 		php_stream_close(entry->fp);
@@ -870,7 +870,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /
 		spprintf(error, 0, "phar error: unable to create temporary file");
 		return -1;
 	}
-	if (entry->metadata_str.s->len != php_stream_write(entry->fp, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
+	if (ZSTR_LEN(entry->metadata_str.s) != php_stream_write(entry->fp, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s))) {
 		spprintf(error, 0, "phar tar error: unable to write metadata to magic metadata file \"%s\"", entry->filename);
 		zend_hash_str_del(&(entry->phar->manifest), entry->filename, entry->filename_len);
 		return ZEND_HASH_APPLY_STOP;
@@ -1017,8 +1017,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			{
 				zend_string *str = php_stream_copy_to_mem(stubfile, len, 0);
 				if (str) {
-					len = str->len;
-					user_stub = estrndup(str->val, str->len);
+					len = ZSTR_LEN(str);
+					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 					zend_string_release(str);
 				} else {
 					user_stub = NULL;

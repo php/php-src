@@ -1014,7 +1014,7 @@ exit_expr:
 
 backticks_expr:
 		/* empty */
-			{ $$ = zend_ast_create_zval_from_str(STR_EMPTY_ALLOC()); }
+			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$ = $1; }
 	|	encaps_list { $$ = $1; }
 ;
@@ -1045,7 +1045,7 @@ scalar:
 	|	T_CLASS_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
 	|	T_START_HEREDOC T_END_HEREDOC
-			{ $$ = zend_ast_create_zval_from_str(STR_EMPTY_ALLOC()); }
+			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }

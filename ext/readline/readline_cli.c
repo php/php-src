@@ -409,12 +409,12 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number);
-		if (!textlen || !strncmp(name->val, text, textlen)) {
+		if (!textlen || !strncmp(ZSTR_VAL(name), text, textlen)) {
 			if (pData) {
 				*pData = zend_hash_get_current_data_ptr(ht);
 			}
 			zend_hash_move_forward(ht);
-			return name->val;
+			return ZSTR_VAL(name);
 		}
 		if (zend_hash_move_forward(ht) == FAILURE) {
 			break;
@@ -459,7 +459,7 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
 	if (retval) {
 		rl_completion_append_character = '(';
-		retval = strdup(func->common.function_name->val);
+		retval = strdup(ZSTR_VAL(func->common.function_name));
 	}
 
 	return retval;
@@ -471,7 +471,7 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
 	if (retval) {
 		rl_completion_append_character = '\0';
-		retval = strdup(ce->name->val);
+		retval = strdup(ZSTR_VAL(ce->name));
 	}
 
 	return retval;
@@ -522,7 +522,7 @@ TODO:
 		if (class_name_end) {
 			class_name_len = class_name_end - text;
 			class_name = zend_string_alloc(class_name_len, 0);
-			zend_str_tolower_copy(class_name->val, text, class_name_len);
+			zend_str_tolower_copy(ZSTR_VAL(class_name), text, class_name_len);
 			if ((ce = zend_lookup_class(class_name)) == NULL) {
 				zend_string_release(class_name);
 				return NULL;
@@ -561,7 +561,7 @@ TODO:
 			int len = class_name_len + 2 + strlen(retval) + 1;
 			char *tmp = malloc(len);
 
-			snprintf(tmp, len, "%s::%s", ce->name->val, retval);
+			snprintf(tmp, len, "%s::%s", ZSTR_VAL(ce->name), retval);
 			free(retval);
 			retval = tmp;
 		}
@@ -604,7 +604,7 @@ static int readline_shell_run(void) /* {{{ */
 	read_history(history_file);
 
 	EG(exit_status) = 0;
-	while ((line = readline(prompt->val)) != NULL) {
+	while ((line = readline(ZSTR_VAL(prompt))) != NULL) {
 		if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
 			free(line);
 			break;

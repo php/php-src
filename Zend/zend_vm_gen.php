@@ -866,8 +866,11 @@ function gen_labels($f, $spec, $kind, $prolog) {
 				$next++;
 			}
 			$next = $num+1;
-		  // Emit pointer to unspecialized handler
-			switch ($kind) {
+
+			//ugly trick for ZEND_VM_DEFINE_OP
+			if ($dsc["code"]) {
+				// Emit pointer to unspecialized handler
+				switch ($kind) {
 				case ZEND_VM_KIND_CALL:
 					out($f,$prolog.$dsc["op"]."_HANDLER,\n");
 					break;
@@ -877,6 +880,19 @@ function gen_labels($f, $spec, $kind, $prolog) {
 				case ZEND_VM_KIND_GOTO:
 					out($f,$prolog."(void*)&&".$dsc["op"]."_HANDLER,\n");
 					break;
+				}
+			} else {
+				switch ($kind) {
+					case ZEND_VM_KIND_CALL:
+						out($f,$prolog."ZEND_NULL_HANDLER,\n");
+						break;
+					case ZEND_VM_KIND_SWITCH:
+						out($f,$prolog."(void*)(uintptr_t)-1,\n");
+						break;
+					case ZEND_VM_KIND_GOTO:
+						out($f,$prolog."(void*)&&ZEND_NULL_HANDLER,\n");
+						break;
+				}
 			}
 		}
 	}
@@ -1185,7 +1201,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 				case "ZEND_VM_CONTINUE_LABEL":
 					if ($kind == ZEND_VM_KIND_CALL) {
 					  // Only SWITCH dispatch method use it
+						out($f,"#if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)\n");
 						out($f,$m[1]."\tint ret;".$m[3]."\n");
+						out($f,"#endif\n");
 					} else if ($kind == ZEND_VM_KIND_SWITCH) {
 					  // Only SWITCH dispatch method use it
 						out($f,"zend_vm_continue:".$m[3]."\n");

@@ -278,7 +278,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
-	   offset_key = STR_EMPTY_ALLOC();
+	   offset_key = ZSTR_EMPTY_ALLOC();
 	   goto fetch_dim_string;
 	case IS_STRING:
 	   offset_key = Z_STR_P(offset);
@@ -290,13 +290,13 @@ fetch_dim_string:
 				if (Z_TYPE_P(retval) == IS_UNDEF) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+							zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
 						}
@@ -306,13 +306,13 @@ fetch_dim_string:
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+					zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);
@@ -710,7 +710,8 @@ SPL_METHOD(Array, offsetGet)
 	}
 	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R, return_value);
 	if (value != return_value) {
-		RETURN_ZVAL(value, 1, 0);
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 } /* }}} */
 
@@ -737,7 +738,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	}
 
 	if (spl_array_is_object(intern)) {
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name->val);
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
 		return;
 	}
 
@@ -936,7 +937,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
 				    Z_TYPE_P(data = Z_INDIRECT_P(data)) == IS_UNDEF) {
 					/* skip */
-				} else if (!string_key->len || string_key->val[0]) {
+				} else if (!ZSTR_LEN(string_key) || ZSTR_VAL(string_key)[0]) {
 					return SUCCESS;
 				}
 			} else {
@@ -1513,7 +1514,8 @@ SPL_METHOD(Array, current)
 			return;
 		}
 	}
-	RETVAL_ZVAL(entry, 1, 0);
+	ZVAL_DEREF(entry);
+	ZVAL_COPY(return_value, entry);
 }
 /* }}} */
 
@@ -1630,7 +1632,9 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(getThis()))) {
-			RETURN_ZVAL(entry, 1, 0);
+			ZVAL_OBJ(return_value, Z_OBJ_P(entry));
+			Z_ADDREF_P(return_value);
+			return;
 		}
 	}
 

@@ -52,7 +52,7 @@ static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, zen
 	if (UNEXPECTED(!str->s)) {
 		goto do_smart_str_realloc;
 	} else {
-		len += str->s->len;
+		len += ZSTR_LEN(str->s);
 		if (UNEXPECTED(len >= str->a)) {
 do_smart_str_realloc:
 			if (persistent) {
@@ -75,28 +75,28 @@ static zend_always_inline void smart_str_free(smart_str *str) {
 
 static zend_always_inline void smart_str_0(smart_str *str) {
 	if (str->s) {
-		str->s->val[str->s->len] = '\0';
+		ZSTR_VAL(str->s)[ZSTR_LEN(str->s)] = '\0';
 	}
 }
 
 static zend_always_inline void smart_str_appendc_ex(smart_str *dest, char ch, zend_bool persistent) {
 	size_t new_len = smart_str_alloc(dest, 1, persistent);
-	dest->s->val[new_len - 1] = ch;
-	dest->s->len = new_len;
+	ZSTR_VAL(dest->s)[new_len - 1] = ch;
+	ZSTR_LEN(dest->s) = new_len;
 }
 
 static zend_always_inline void smart_str_appendl_ex(smart_str *dest, const char *str, size_t len, zend_bool persistent) {
 	size_t new_len = smart_str_alloc(dest, len, persistent);
-	memcpy(dest->s->val + dest->s->len, str, len);
-	dest->s->len = new_len;
+	memcpy(ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s), str, len);
+	ZSTR_LEN(dest->s) = new_len;
 }
 
 static zend_always_inline void smart_str_append_ex(smart_str *dest, const zend_string *src, zend_bool persistent) {
-	smart_str_appendl_ex(dest, src->val, src->len, persistent);
+	smart_str_appendl_ex(dest, ZSTR_VAL(src), ZSTR_LEN(src), persistent);
 }
 
 static zend_always_inline void smart_str_append_smart_str_ex(smart_str *dest, const smart_str *src, zend_bool persistent) {
-	if (src->s && src->s->len) {
+	if (src->s && ZSTR_LEN(src->s)) {
 		smart_str_append_ex(dest, src->s, persistent);
 	}
 }

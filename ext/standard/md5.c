@@ -58,7 +58,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, arg->val, arg->len);
+	PHP_MD5Update(&context, ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 16);

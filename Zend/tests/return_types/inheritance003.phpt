@@ -13,4 +13,4 @@ class B implements A {
 }
 
 --EXPECTF--
-Fatal error: Declaration of B::foo() must be compatible with A::foo(): A in %s on line %d
+Fatal error: Declaration of B::foo(): StdClass must be compatible with A::foo(): A in %s on line %d

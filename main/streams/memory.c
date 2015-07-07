@@ -724,8 +724,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			php_stream_wrapper_log_error(wrapper, options, "rfc2397: unable to decode");
 			return NULL;
 		}
-		comma = base64_comma->val;
-		ilen = (int)base64_comma->len;
+		comma = ZSTR_VAL(base64_comma);
+		ilen = (int)ZSTR_LEN(base64_comma);
 	} else {
 		comma = estrndup(comma, dlen);
 		dlen = php_url_decode(comma, (int)dlen);

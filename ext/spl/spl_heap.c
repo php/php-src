@@ -579,7 +579,7 @@ SPL_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed $value)
+/* {{{ proto bool SplHeap::insert(mixed value)
 	   Push $value on the heap */
 SPL_METHOD(SplHeap, insert)
 {
@@ -630,7 +630,7 @@ SPL_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed $value, mixed $priority)
+/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
@@ -694,7 +694,8 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	RETVAL_ZVAL(value_out, 1, 0);
+	ZVAL_DEREF(value_out);
+	ZVAL_COPY(return_value, value_out);
 	zval_ptr_dtor(&value);
 }
 /* }}} */
@@ -731,12 +732,13 @@ SPL_METHOD(SplPriorityQueue, top)
 		return;
 	}
 
-	RETURN_ZVAL(value_out, 1, 0);
+	ZVAL_DEREF(value_out);
+	ZVAL_COPY(return_value, value_out);
 }
 /* }}} */
 
 
-/* {{{ proto int SplPriorityQueue::setExtractFlags($flags)
+/* {{{ proto int SplPriorityQueue::setExtractFlags(int flags)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
@@ -844,7 +846,8 @@ SPL_METHOD(SplHeap, top)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -1032,7 +1035,8 @@ SPL_METHOD(SplHeap, current)
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
 	} else {
-		RETURN_ZVAL(element, 1, 0);
+		ZVAL_DEREF(element);
+		ZVAL_COPY(return_value, element);
 	}
 }
 /* }}} */
@@ -1058,7 +1062,8 @@ SPL_METHOD(SplPriorityQueue, current)
 			RETURN_NULL();
 		}
 
-		RETURN_ZVAL(data, 1, 0);
+		ZVAL_DEREF(data);
+		ZVAL_COPY(return_value, data);
 	}
 }
 /* }}} */

@@ -135,8 +135,8 @@ static zend_string *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zv
 		}
 	} else {
 		zend_string *hash = zend_string_alloc(sizeof(zend_object*), 0);
-		memcpy(hash->val, (void*)&Z_OBJ_P(obj), sizeof(zend_object*));
-		hash->val[hash->len] = '\0';
+		memcpy(ZSTR_VAL(hash), (void*)&Z_OBJ_P(obj), sizeof(zend_object*));
+		ZSTR_VAL(hash)[ZSTR_LEN(hash)] = '\0';
 		return hash;
 		/* !!! FIXME
 		int hash_len = sizeof(zend_object_value);
@@ -417,7 +417,7 @@ int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *
 	return found;
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::attach($obj, $inf = NULL)
+/* {{{ proto void SplObjectStorage::attach(object obj, mixed inf = NULL)
  Attaches an object to the storage if not yet contained */
 SPL_METHOD(SplObjectStorage, attach)
 {
@@ -431,7 +431,7 @@ SPL_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, getThis(), obj, inf);
 } /* }}} */
 
-/* {{{ proto void SplObjectStorage::detach($obj)
+/* {{{ proto void SplObjectStorage::detach(object obj)
  Detaches an object from the storage */
 SPL_METHOD(SplObjectStorage, detach)
 {
@@ -447,7 +447,7 @@ SPL_METHOD(SplObjectStorage, detach)
 	intern->index = 0;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::getHash($object)
+/* {{{ proto string SplObjectStorage::getHash(object obj)
  Returns the hash of an object */
 SPL_METHOD(SplObjectStorage, getHash)
 {
@@ -461,7 +461,7 @@ SPL_METHOD(SplObjectStorage, getHash)
 
 } /* }}} */
 
-/* {{{ proto mixed SplObjectStorage::offsetGet($object)
+/* {{{ proto mixed SplObjectStorage::offsetGet(object obj)
  Returns associated information for a stored object */
 SPL_METHOD(SplObjectStorage, offsetGet)
 {
@@ -485,7 +485,10 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	if (!element) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
 	} else {
-		RETURN_ZVAL(&element->inf, 1, 0);
+		zval *value = &element->inf;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 } /* }}} */
 
@@ -564,7 +567,7 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 }
 /* }}} */
 
-/* {{{ proto bool SplObjectStorage::contains($obj)
+/* {{{ proto bool SplObjectStorage::contains(object obj)
  Determine whethe an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
 {

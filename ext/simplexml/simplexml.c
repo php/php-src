@@ -527,9 +527,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
-					//???
 					value = sxe_get_value(value, &zval_copy);
-					//INIT_PZVAL(value);
 					new_value = 1;
 					break;
 				}
@@ -704,7 +702,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 	}
 
 	ZVAL_COPY_VALUE(&sxe->tmp, &ret);
-	//???? Z_SET_ISREF_P(return_value);
 
 	return &sxe->tmp;
 }
@@ -969,7 +966,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 		res = zend_string_init((char*)tmp, strlen((char *)tmp), 0);
 		xmlFree(tmp);
 	} else {
-		res = STR_EMPTY_ALLOC();
+		res = ZSTR_EMPTY_ALLOC();
 	}
 
 	return res;
@@ -1836,8 +1833,6 @@ static int cast_object(zval *object, int type, char *contents)
 	} else {
 		ZVAL_NULL(object);
 	}
-	//???? Z_SET_REFCOUNT_P(object, 1);
-	//Z_UNSET_ISREF_P(object);
 
 	switch (type) {
 		case IS_STRING:
@@ -1926,7 +1921,7 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::__toString() U
+/* {{{ proto object SimpleXMLElement::__toString()
    Returns the string content */
 SXE_METHOD(__toString)
 {
@@ -2290,7 +2285,7 @@ SXE_METHOD(__construct)
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
-		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0);
+		zend_throw_exception(zend_ce_exception, "String could not be parsed as XML", 0);
 		return;
 	}
 

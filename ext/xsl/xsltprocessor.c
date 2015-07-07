@@ -163,7 +163,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 				xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
 			}
 			if (xpath_expr) {
-				params[i++] = estrndup(string_key->val, string_key->len);
+				params[i++] = estrndup(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 				params[i++] = xpath_expr;
 			}
 		}
@@ -321,10 +321,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	fci.no_separation = 0;
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable)) {
-		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", callable->val);
+		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
 		valuePush(ctxt, xmlXPathNewString(""));
 	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
-		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'", callable->val);
+		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'", ZSTR_VAL(callable));
 		/* Push an empty string, so that we at least have an xslt result... */
 		valuePush(ctxt, xmlXPathNewString(""));
 	} else {
@@ -384,7 +384,7 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{
 }
 /* }}} */
 
-/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc);
+/* {{{ proto void xsl_xsltprocessor_import_stylesheet(domdocument doc)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
 */
@@ -613,7 +613,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 }
 /* }}} */
 
-/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc);
+/* {{{ proto domdocument xsl_xsltprocessor_transform_to_doc(domnode doc)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
 */
@@ -651,7 +651,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 			if (ce == NULL || !instanceof_function(ce, curce)) {
 				xmlFreeDoc(newdocp);
 				php_error_docref(NULL, E_WARNING,
-					"Expecting class compatible with %s, '%s' given", curclass_name->val, ret_class->val);
+					"Expecting class compatible with %s, '%s' given", ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class));
 				RETURN_FALSE;
 			}
 
@@ -670,7 +670,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 }
 /* }}} end xsl_xsltprocessor_transform_to_doc */
 
-/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri);
+/* {{{ proto int xsl_xsltprocessor_transform_to_uri(domdocument doc, string uri)
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
@@ -702,7 +702,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 }
 /* }}} end xsl_xsltprocessor_transform_to_uri */
 
-/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc);
+/* {{{ proto string xsl_xsltprocessor_transform_to_xml(domdocument doc)
 */
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
@@ -740,7 +740,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 }
 /* }}} end xsl_xsltprocessor_transform_to_xml */
 
-/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
+/* {{{ proto bool xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value])
 */
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
@@ -784,7 +784,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 }
 /* }}} end xsl_xsltprocessor_set_parameter */
 
-/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name);
+/* {{{ proto string xsl_xsltprocessor_get_parameter(string namespace, string name)
 */
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
@@ -810,7 +810,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 }
 /* }}} end xsl_xsltprocessor_get_parameter */
 
-/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name);
+/* {{{ proto bool xsl_xsltprocessor_remove_parameter(string namespace, string name)
 */
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
@@ -834,7 +834,7 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
 
-/* {{{ proto void xsl_xsltprocessor_register_php_functions([mixed $restrict]);
+/* {{{ proto void xsl_xsltprocessor_register_php_functions([mixed $restrict])
 */
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 {
@@ -933,7 +933,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 }
 /* }}} end xsl_xsltprocessor_get_security_prefs */
 
-/* {{{ proto bool xsl_xsltprocessor_has_exslt_support();
+/* {{{ proto bool xsl_xsltprocessor_has_exslt_support()
 */
 PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support)
 {

@@ -805,9 +805,11 @@ SPL_METHOD(SplFixedArray, offsetGet)
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
 
 	if (value) {
-		RETURN_ZVAL(value, 1, 0);
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
+	} else {
+		RETURN_NULL();
 	}
-	RETURN_NULL();
 } /* }}} */
 
 /* {{{ proto void SplFixedArray::offsetSet(mixed $index, mixed $newval)
@@ -1001,9 +1003,11 @@ SPL_METHOD(SplFixedArray, current)
 	zval_ptr_dtor(&zindex);
 
 	if (value) {
-		RETURN_ZVAL(value, 1, 0);
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
+	} else {
+		RETURN_NULL();
 	}
-	RETURN_NULL();
 }
 /* }}} */
 

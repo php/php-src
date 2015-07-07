@@ -597,11 +597,11 @@ char * _mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_ME
 		smart_str_appendc(&tmp_str, *p);
 	} while (*p++);
 
-	ret = (persistent) ? __zend_malloc(tmp_str.s->len + sizeof(size_t)) : _emalloc(REAL_SIZE(tmp_str.s->len + sizeof(size_t)) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	memcpy(FAKE_PTR(ret), tmp_str.s->val, tmp_str.s->len);
+	ret = (persistent) ? __zend_malloc(ZSTR_LEN(tmp_str.s) + sizeof(size_t)) : _emalloc(REAL_SIZE(ZSTR_LEN(tmp_str.s) + sizeof(size_t)) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	memcpy(FAKE_PTR(ret), ZSTR_VAL(tmp_str.s), ZSTR_LEN(tmp_str.s));
 
 	if (ret && collect_memory_statistics) {
-		*(size_t *) ret = tmp_str.s->len;
+		*(size_t *) ret = ZSTR_LEN(tmp_str.s);
 		MYSQLND_INC_GLOBAL_STATISTIC(persistent? STAT_MEM_STRDUP_COUNT : STAT_MEM_ESTRDUP_COUNT);
 	}
 	smart_str_free(&tmp_str);

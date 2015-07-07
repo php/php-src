@@ -183,7 +183,8 @@ PHP_FUNCTION(iptcembed)
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
-	unsigned char *spoolbuf = NULL, *poi = NULL;
+	zend_string *spoolbuf = NULL;
+	unsigned char *poi = NULL;
 	zend_stat_t sb;
 	zend_bool written = 0;
 
@@ -203,14 +204,15 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		zend_fstat(fileno(fp), &sb);
 
-		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
+		spoolbuf = zend_string_alloc(iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 0);
+		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
 	}
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xFF) {
 		fclose(fp);
 		if (spoolbuf) {
-			efree(spoolbuf);
+			zend_string_free(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -218,7 +220,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xD8) {
 		fclose(fp);
 		if (spoolbuf) {
-			efree(spoolbuf);
+			zend_string_free(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -285,9 +287,8 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *) spoolbuf, poi - spoolbuf);
-		efree(spoolbuf);
+		spoolbuf = zend_string_truncate(spoolbuf, poi - (unsigned char*)ZSTR_VAL(spoolbuf), 0);
+		RETURN_NEW_STR(spoolbuf);
 	} else {
 		RETURN_TRUE;
 	}

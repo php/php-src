@@ -908,9 +908,9 @@ PHP_FUNCTION(pcntl_exec)
 			convert_to_string_ex(element);
 
 			/* Length of element + equal sign + length of key + null */
-			pair_length = Z_STRLEN_P(element) + key->len + 2;
+			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
 			*pair = emalloc(pair_length);
-			strlcpy(*pair, key->val, key->len + 1);
+			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
 			strlcat(*pair, "=", pair_length);
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 
@@ -991,7 +991,7 @@ PHP_FUNCTION(pcntl_signal)
 
 	if (!zend_is_callable(handle, 0, &func_name)) {
 		PCNTL_G(last_error) = EINVAL;
-		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", func_name->val);
+		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", ZSTR_VAL(func_name));
 		zend_string_release(func_name);
 		RETURN_FALSE;
 	}

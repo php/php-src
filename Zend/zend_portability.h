@@ -246,6 +246,18 @@ char *alloca();
 # define HAVE_ATTRIBUTE_WEAK
 #endif
 
+#if ZEND_GCC_VERSION >= 3001 || __has_builtin(__builtin_constant_p)
+# define HAVE_BUILTIN_CONSTANT_P
+#endif
+
+#ifdef HAVE_BUILTIN_CONSTANT_P
+# define ZEND_CONST_COND(_condition, _default) \
+	(__builtin_constant_p(_condition) ? (_condition) : (_default))
+#else
+# define ZEND_CONST_COND(_condition, _default) \
+	(_default)
+#endif
+
 #if ZEND_DEBUG
 # define zend_always_inline inline
 # define zend_never_inline

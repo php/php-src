@@ -305,14 +305,10 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	TimeZone::getCanonicalID(id, result, isSystemID, status);
 	INTL_CHECK_STATUS(status, "intltz_get_canonical_id: error obtaining canonical ID");
 
-	char *str;
-	size_t str_len;
-	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), &status);
+	zend_string *u8str =intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status,
 		"intltz_get_canonical_id: could not convert time zone id to UTF-16");
-	RETVAL_STRINGL(str, str_len);
-	//????
-	efree(str);
+	RETVAL_NEW_STR(u8str);
 
 	if (is_systemid) { /* by-ref argument passed */
 		ZVAL_DEREF(is_systemid);
@@ -393,15 +389,12 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	}
 
 	const UnicodeString result = TimeZone::getEquivalentID(id, (int32_t)index);
-	char *str;
-	size_t str_len;
+	zend_string *u8str;
 
-	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), &status);
+	u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status, "intltz_get_equivalent_id: "
 		"could not convert resulting time zone id to UTF-16");
-	RETVAL_STRINGL(str, str_len);
-	//????
-	efree(str);
+	RETVAL_NEW_STR(u8str);
 }
 
 U_CFUNC PHP_FUNCTION(intltz_get_id)
@@ -420,16 +413,13 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 	UnicodeString id_us;
 	to->utimezone->getID(id_us);
 
-	char   *id = NULL;
-	size_t  id_len   = 0;
+	zend_string *u8str;
 
-	intl_convert_utf16_to_utf8(&id, &id_len,
+	u8str = intl_convert_utf16_to_utf8(
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_id: Could not convert id to UTF-8");
 
-	RETVAL_STRINGL(id, id_len);
-	//???
-	efree(id);
+	RETVAL_NEW_STR(u8str);
 }
 
 U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
@@ -569,15 +559,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	to->utimezone->getDisplayName((UBool)daylight, (TimeZone::EDisplayType)display_type,
 		Locale::createFromName(locale_str), result);
 
-	char *str;
-	size_t str_len;
-	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), TIMEZONE_ERROR_CODE_P(to));
+	zend_string *u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_display_name: "
 		"could not convert resulting time zone id to UTF-16");
 
-	RETVAL_STRINGL(str, str_len);
-	//????
-	efree(str);
+	RETVAL_NEW_STR(u8str);
 }
 
 U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)

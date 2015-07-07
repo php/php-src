@@ -1032,8 +1032,8 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 						PHPDBG_G(in_script_xml) = type;
 					}
 					encoded = php_escape_html_entities((unsigned char *) msg, msglen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8"));
-					buflen = encoded->len;
-					memcpy(buf = emalloc(buflen + 1), encoded->val, buflen);
+					buflen = ZSTR_LEN(encoded);
+					memcpy(buf = emalloc(buflen + 1), ZSTR_VAL(encoded), buflen);
 					phpdbg_encode_ctrl_chars(&buf, &buflen);
 					phpdbg_mixed_write(fd, buf, buflen);
 					efree(buf);

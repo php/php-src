@@ -38,11 +38,11 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	ALLOCA_FLAG(use_heap);
 
 	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = DO_ALLOCA(name->len + 1);
-		memcpy(lookup_name, name->val, name->len + 1);
-		zend_str_tolower(lookup_name, name->len);
+		lookup_name = DO_ALLOCA(ZSTR_LEN(name) + 1);
+		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
+		zend_str_tolower(lookup_name, ZSTR_LEN(name));
 
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, name->len)) != NULL) {
+		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, ZSTR_LEN(name))) != NULL) {
 			if (!(c->flags & CONST_CT_SUBST) || (c->flags & CONST_CS)) {
 				retval = 0;
 			}
@@ -123,10 +123,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
-			case ZEND_GOTO:
-				/* would not optimize GOTOs - we cannot really know where it jumps,
-				 * so these optimizations are too dangerous */
-				return 0;
 			case ZEND_FAST_CALL:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				if (opline->extended_value) {
@@ -195,62 +191,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			START_BLOCK_OP(op_array->try_catch_array[i].try_op);
 			START_BLOCK_OP(op_array->try_catch_array[i].catch_op);
 			blocks[op_array->try_catch_array[i].try_op].protected = 1;
-		}
-	}
-	/* Currently, we don't optimize op_arrays with BRK/CONT/GOTO opcodes,
-	 * but, we have to keep brk_cont_array to avoid memory leaks during
-	 * exception handling */
-	if (op_array->last_brk_cont) {
-		int i, j;
-
-		j = 0;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			if (op_array->brk_cont_array[i].start >= 0 &&
-			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-				int parent = op_array->brk_cont_array[i].parent;
-
-				while (parent >= 0 &&
-				       op_array->brk_cont_array[parent].start < 0 &&
-				       (op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FE_FREE ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_END_SILENCE)) {
-					parent = op_array->brk_cont_array[parent].parent;
-				}
-				op_array->brk_cont_array[i].parent = parent;
-				j++;
-			}
-		}
-		if (j) {
-			cfg->loop_start = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_cont  = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_brk   = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			j = 0;
-			for (i = 0; i< op_array->last_brk_cont; i++) {
-				if (op_array->brk_cont_array[i].start >= 0 &&
-				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-					if (i != j) {
-						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
-					}
-					cfg->loop_start[j] = &blocks[op_array->brk_cont_array[j].start];
-					cfg->loop_cont[j]  = &blocks[op_array->brk_cont_array[j].cont];
-					cfg->loop_brk[j]   = &blocks[op_array->brk_cont_array[j].brk];
-					START_BLOCK_OP(op_array->brk_cont_array[j].start);
-					START_BLOCK_OP(op_array->brk_cont_array[j].cont);
-					START_BLOCK_OP(op_array->brk_cont_array[j].brk);
-					blocks[op_array->brk_cont_array[j].start].protected = 1;
-					blocks[op_array->brk_cont_array[j].brk].protected = 1;
-					j++;
-				}
-			}
-			op_array->last_brk_cont = j;
-		} else {
-			efree(op_array->brk_cont_array);
-			op_array->brk_cont_array = NULL;
-			op_array->last_brk_cont = 0;
 		}
 	}
 
@@ -520,16 +460,6 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	/* Walk thorough all paths */
 	zend_access_path(start, ctx);
 
-	/* Add brk/cont paths */
-	if (op_array->last_brk_cont) {
-		int i;
-		for (i=0; i< op_array->last_brk_cont; i++) {
-			zend_access_path(cfg->loop_start[i], ctx);
-			zend_access_path(cfg->loop_cont[i], ctx);
-			zend_access_path(cfg->loop_brk[i], ctx);
-		}
-	}
-
 	/* Add exception paths */
 	if (op_array->last_try_catch) {
 		int i;
@@ -759,28 +689,33 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
 			opline->opcode == ZEND_IS_NOT_EQUAL ||
-			opline->opcode == ZEND_CASE) {
+			/* CASE variable will be deleted later by FREE, so we can't optimize it */
+			(opline->opcode == ZEND_CASE && (ZEND_OP1_TYPE(opline) & (IS_CONST|IS_CV)))) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 				(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
 				 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
-#else
-				 Z_TYPE(ZEND_OP1_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(TRUE,  X)     => T = BOOL(X) */
+				/* T = IS_EQUAL(FALSE, X)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(TRUE,  X) => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(FALSE, X) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP1_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 					   (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
 					    Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
-#else
-					    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(X, TRUE)      => T = BOOL(X) */
+				/* T = IS_EQUAL(X, FALSE)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, TRUE)  => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, FALSE) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
@@ -903,7 +838,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
-				memcpy(tmp->val, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
+				memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
 			} else {
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
@@ -943,7 +878,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			l = old_len + Z_STRLEN(ZEND_OP2_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(src))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
-				memcpy(tmp->val, Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
+				memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
 				Z_STR(ZEND_OP2_LITERAL(last_op)) = tmp;
 			} else {
 				Z_STR(ZEND_OP2_LITERAL(src)) = zend_string_extend(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
@@ -985,10 +920,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			int er;
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-                  Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
-                 (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
-                  Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
+				if (RESULT_USED(opline)) {
+					SET_VAR_SOURCE(opline);
+				}
+                opline++;
+				continue;
+            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 				if (RESULT_USED(opline)) {
 					SET_VAR_SOURCE(opline);
 				}
@@ -1184,16 +1123,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		op_array->last_try_catch = j;
 	}
 
-	/* adjust loop jump targets */
-	if (op_array->last_brk_cont) {
-		int i;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			op_array->brk_cont_array[i].start = cfg->loop_start[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].cont = cfg->loop_cont[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].brk = cfg->loop_brk[i]->start_opline - new_opcodes;
-		}
-	}
-
     /* adjust jump targets */
 	for (cur_block = blocks; cur_block; cur_block = cur_block->next) {
 		if (!cur_block->access) {
@@ -1387,6 +1316,34 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					/* JMPNZ(false) -> NOP */
 					MAKE_NOP(last_op);
 					del_source(block, block->op2_to);
+					block->op2_to = NULL;
+				}
+				break;
+			}
+
+			if (block->op2_to == block->follow_to) {
+				/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
+
+				if (last_op->op1_type == IS_VAR) {
+					zend_op **Tsource = cfg->Tsource;
+					zend_op *src = VAR_SOURCE(last_op->op1);
+
+					if (src &&
+					    src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_DIM_R &&
+					    src->opcode != ZEND_FETCH_OBJ_R) {
+						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+						MAKE_NOP(last_op);
+						block->op2_to = NULL;
+						break;
+					}
+				}
+				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					last_op->opcode = ZEND_FREE;
+					last_op->op2.num = 0;
+					block->op2_to = NULL;
+				} else {
+					MAKE_NOP(last_op);
 					block->op2_to = NULL;
 				}
 				break;

@@ -87,19 +87,19 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 		return FAILURE;
 	}
 	buffer = php_base64_encode((unsigned char*) str, str_len);
-	if (buffer->len < out_len) {
+	if (ZSTR_LEN(buffer) < out_len) {
 		/* Too short of an encoded string generated */
 		zend_string_release(buffer);
 		return FAILURE;
 	}
 	for (pos = 0; pos < out_len; pos++) {
-		if (buffer->val[pos] == '+') {
+		if (ZSTR_VAL(buffer)[pos] == '+') {
 			ret[pos] = '.';
-		} else if (buffer->val[pos] == '=') {
+		} else if (ZSTR_VAL(buffer)[pos] == '=') {
 			zend_string_free(buffer);
 			return FAILURE;
 		} else {
-			ret[pos] = buffer->val[pos];
+			ret[pos] = ZSTR_VAL(buffer)[pos];
 		}
 	}
 	zend_string_free(buffer);
@@ -264,7 +264,7 @@ PHP_FUNCTION(password_verify)
 		RETURN_FALSE;
 	}
 
-	if (ret->len != hash_len || hash_len < 13) {
+	if (ZSTR_LEN(ret) != hash_len || hash_len < 13) {
 		zend_string_free(ret);
 		RETURN_FALSE;
 	}
@@ -274,7 +274,7 @@ PHP_FUNCTION(password_verify)
 	 * equality check that will always check every byte of both
 	 * values. */
 	for (i = 0; i < hash_len; i++) {
-		status |= (ret->val[i] ^ hash[i]);
+		status |= (ZSTR_VAL(ret)[i] ^ hash[i]);
 	}
 
 	zend_string_free(ret);
@@ -343,8 +343,8 @@ PHP_FUNCTION(password_hash)
 			case IS_OBJECT:
 			{
 				zend_string *tmp = zval_get_string(option_buffer);
-				buffer = estrndup(tmp->val, tmp->len);
-				buffer_len = tmp->len;
+				buffer = estrndup(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+				buffer_len = ZSTR_LEN(tmp);
 				zend_string_release(tmp);
 				break;
 			}
@@ -417,7 +417,7 @@ PHP_FUNCTION(password_hash)
 
 	efree(hash);
 
-	if (result->len < 13) {
+	if (ZSTR_LEN(result) < 13) {
 		zend_string_free(result);
 		RETURN_FALSE;
 	}

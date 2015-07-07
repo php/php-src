@@ -162,7 +162,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	for (i = 0; i < size; ++i) {
-		if ((strcasecmp(new_value->val, filter_list[i].name) == 0)) {
+		if ((strcasecmp(ZSTR_VAL(new_value), filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
 			return SUCCESS;
 		}
@@ -180,7 +180,7 @@ static PHP_INI_MH(OnUpdateFlags)
 	if (!new_value) {
 		IF_G(default_filter_flags) = FILTER_FLAG_NO_ENCODE_QUOTES;
 	} else {
-		IF_G(default_filter_flags) = atoi(new_value->val);
+		IF_G(default_filter_flags) = atoi(ZSTR_VAL(new_value));
 	}
 	return SUCCESS;
 }
@@ -685,14 +685,14 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 	 		}
-			if (arg_key->len == 0) {
+			if (ZSTR_LEN(arg_key) == 0) {
 				php_error_docref(NULL, E_WARNING, "Empty keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 			}
 			if ((tmp = zend_hash_find(Z_ARRVAL_P(input), arg_key)) == NULL) {
 				if (add_empty) {
-					add_assoc_null_ex(return_value, arg_key->val, arg_key->len);
+					add_assoc_null_ex(return_value, ZSTR_VAL(arg_key), ZSTR_LEN(arg_key));
 				}
 			} else {
 				zval nval;

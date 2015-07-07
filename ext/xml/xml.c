@@ -504,7 +504,7 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 					   (method = zend_hash_index_find(Z_ARRVAL_P(handler), 1)) != NULL &&
 					   Z_TYPE_P(obj) == IS_OBJECT &&
 					   Z_TYPE_P(method) == IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_P(obj)->name->val, Z_STRVAL_P(method));
+				php_error_docref(NULL, E_WARNING, "Unable to call handler %s::%s()", ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(method));
 			} else 
 				php_error_docref(NULL, E_WARNING, "Unable to call handler");
 		}
@@ -582,29 +582,29 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
 	str = zend_string_alloc(len * 4, 0);
-	str->len = 0;
+	ZSTR_LEN(str) = 0;
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
 		if (c < 0x80) {
-			str->val[str->len++] = (char) c;
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (char) c;
 		} else if (c < 0x800) {
-			str->val[str->len++] = (0xc0 | (c >> 6));
-			str->val[str->len++] = (0x80 | (c & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xc0 | (c >> 6));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0x80 | (c & 0x3f));
 		} else if (c < 0x10000) {
-			str->val[str->len++] = (0xe0 | (c >> 12));
-			str->val[str->len++] = (0xc0 | ((c >> 6) & 0x3f));
-			str->val[str->len++] = (0x80 | (c & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xe0 | (c >> 12));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xc0 | ((c >> 6) & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0x80 | (c & 0x3f));
 		} else if (c < 0x200000) {
-			str->val[str->len++] = (0xf0 | (c >> 18));
-			str->val[str->len++] = (0xe0 | ((c >> 12) & 0x3f));
-			str->val[str->len++] = (0xc0 | ((c >> 6) & 0x3f));
-			str->val[str->len++] = (0x80 | (c & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xf0 | (c >> 18));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xe0 | ((c >> 12) & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xc0 | ((c >> 6) & 0x3f));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0x80 | (c & 0x3f));
 		}
 		pos--;
 		s++;
 	}
-	str->val[str->len] = '\0';
-	str = zend_string_truncate(str, str->len, 0);
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+	str = zend_string_truncate(str, ZSTR_LEN(str), 0);
 	return str;
 }
 /* }}} */
@@ -631,7 +631,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 	}
 
 	str = zend_string_alloc(len, 0);
-	str->len = 0;
+	ZSTR_LEN(str) = 0;
 	while (pos < len) {
 		int status = FAILURE;
 		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
@@ -640,11 +640,11 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 			c = '?';
 		}
 
-		str->val[str->len++] = decoder ? decoder(c) : c;
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? decoder(c) : c;
 	}
-	str->val[str->len] = '\0';
-	if (str->len < len) {
-		str = zend_string_truncate(str, str->len, 0);
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+	if (ZSTR_LEN(str) < len) {
+		str = zend_string_truncate(str, ZSTR_LEN(str), 0);
 	}
 
 	return str;
@@ -706,7 +706,7 @@ static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag)
 	str = xml_utf8_decode((const XML_Char *)tag, strlen(tag), parser->target_encoding);
 
 	if (parser->case_folding) {
-		php_strtoupper(str->val, str->len);
+		php_strtoupper(ZSTR_VAL(str), ZSTR_LEN(str));
 	}
 
 	return str;
@@ -728,7 +728,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 		if (!Z_ISUNDEF(parser->startElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
-			ZVAL_STRING(&args[1], tag_name->val + parser->toffset);
+			ZVAL_STRING(&args[1], ZSTR_VAL(tag_name) + parser->toffset);
 			array_init(&args[2]);
 
 			while (attributes && *attributes) {
@@ -757,13 +757,13 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				array_init(&tag);
 				array_init(&atr);
 
-				_xml_add_to_info(parser, tag_name->val + parser->toffset);
+				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
-				add_assoc_string(&tag, "tag", tag_name->val + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "tag", ZSTR_VAL(tag_name) + parser->toffset); /* cast to avoid gcc-warning */
 				add_assoc_string(&tag, "type", "open");
 				add_assoc_long(&tag, "level", parser->level);
 
-				parser->ltags[parser->level-1] = estrdup(tag_name->val);
+				parser->ltags[parser->level-1] = estrdup(ZSTR_VAL(tag_name));
 				parser->lastwasopen = 1;
 
 				attributes = (const XML_Char **) attrs;
@@ -813,7 +813,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 		if (!Z_ISUNDEF(parser->endElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
-			ZVAL_STRING(&args[1], (tag_name->val) + parser->toffset);
+			ZVAL_STRING(&args[1], ZSTR_VAL(tag_name) + parser->toffset);
 
 			xml_call_handler(parser, &parser->endElementHandler, parser->endElementPtr, 2, args, &retval);
 			zval_ptr_dtor(&retval);
@@ -827,9 +827,9 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			} else {
 				array_init(&tag);
 				  
-				_xml_add_to_info(parser, tag_name->val + parser->toffset);
+				_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
 
-				add_assoc_string(&tag, "tag", tag_name->val + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(&tag, "tag", ZSTR_VAL(tag_name) + parser->toffset); /* cast to avoid gcc-warning */
 				add_assoc_string(&tag, "type", "close");
 				add_assoc_long(&tag, "level", parser->level);
 				  
@@ -871,8 +871,8 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			zend_string *decoded_value;
 
 			decoded_value = xml_utf8_decode(s, len, parser->target_encoding);
-			for (i = 0; i < decoded_value->len; i++) {
-				switch (decoded_value->val[i]) {
+			for (i = 0; i < ZSTR_LEN(decoded_value); i++) {
+				switch (ZSTR_VAL(decoded_value)[i]) {
 					case ' ':
 					case '\t':
 					case '\n':
@@ -891,10 +891,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					
 					/* check if the current tag already has a value - if yes append to that! */
 					if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
-						int newlen = Z_STRLEN_P(myval) + decoded_value->len;
+						int newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
-						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
-								decoded_value->val, decoded_value->len + 1);
+						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
+								ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
 						zend_string_release(decoded_value);
 					} else {
 						add_assoc_str(parser->ctag, "value", decoded_value);
@@ -908,10 +908,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
 							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
 								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
-									int newlen = Z_STRLEN_P(myval) + decoded_value->len;
+									int newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
-									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - decoded_value->len,
-											decoded_value->val, decoded_value->len + 1);
+									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
+											ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
 									zend_string_release(decoded_value);
 									return;
 								}

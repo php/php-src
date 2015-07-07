@@ -32,7 +32,7 @@ static inline const char *dtrace_get_executed_filename(void)
 		ex = ex->prev_execute_data;
 	}
 	if (ex) {
-		return ex->func->op_array.filename->val;
+		return ZSTR_VAL(ex->func->op_array.filename);
 	} else {
 		return zend_get_executed_filename();
 	}

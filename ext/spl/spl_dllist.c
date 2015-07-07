@@ -559,7 +559,7 @@ static HashTable *spl_dllist_object_get_gc(zval *obj, zval **gc_data, int *gc_da
 }
 /* }}} */
 
-/* {{{ proto bool SplDoublyLinkedList::push(mixed $value)
+/* {{{ proto bool SplDoublyLinkedList::push(mixed value)
 	   Push $value on the SplDoublyLinkedList */
 SPL_METHOD(SplDoublyLinkedList, push)
 {
@@ -577,7 +577,7 @@ SPL_METHOD(SplDoublyLinkedList, push)
 }
 /* }}} */
 
-/* {{{ proto bool SplDoublyLinkedList::unshift(mixed $value)
+/* {{{ proto bool SplDoublyLinkedList::unshift(mixed value)
 	   Unshift $value on the SplDoublyLinkedList */
 SPL_METHOD(SplDoublyLinkedList, unshift)
 {
@@ -654,7 +654,8 @@ SPL_METHOD(SplDoublyLinkedList, top)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -677,7 +678,8 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 		return;
 	}
 
-	RETURN_ZVAL(value, 1, 0);
+	ZVAL_DEREF(value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
 
@@ -712,7 +714,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto int SplDoublyLinkedList::setIteratorMode($flags)
+/* {{{ proto int SplDoublyLinkedList::setIteratorMode(int flags)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
@@ -753,7 +755,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 }
 /* }}} */
 
-/* {{{ proto bool SplDoublyLinkedList::offsetExists(mixed $index)
+/* {{{ proto bool SplDoublyLinkedList::offsetExists(mixed index)
  Returns whether the requested $index exists. */
 SPL_METHOD(SplDoublyLinkedList, offsetExists)
 {
@@ -771,7 +773,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
 
-/* {{{ proto mixed SplDoublyLinkedList::offsetGet(mixed $index)
+/* {{{ proto mixed SplDoublyLinkedList::offsetGet(mixed index)
  Returns the value at the specified $index. */
 SPL_METHOD(SplDoublyLinkedList, offsetGet)
 {
@@ -795,14 +797,16 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 	if (element != NULL) {
-		RETURN_ZVAL(&element->data, 1, 0);
+		zval *value = &element->data;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-		return;
 	}
 } /* }}} */
 
-/* {{{ proto void SplDoublyLinkedList::offsetSet(mixed $index, mixed $newval)
+/* {{{ proto void SplDoublyLinkedList::offsetSet(mixed index, mixed newval)
  Sets the value at the specified $index to $newval. */
 SPL_METHOD(SplDoublyLinkedList, offsetSet)
 {
@@ -856,7 +860,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 	}
 } /* }}} */
 
-/* {{{ proto void SplDoublyLinkedList::offsetUnset(mixed $index)
+/* {{{ proto void SplDoublyLinkedList::offsetUnset(mixed index)
  Unsets the value at the specified $index. */
 SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 {
@@ -1117,7 +1121,10 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	if (element == NULL || Z_ISUNDEF(element->data)) {
 		RETURN_NULL();
 	} else {
-		RETURN_ZVAL(&element->data, 1, 0);
+		zval *value = &element->data;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 }
 /* }}} */
@@ -1226,7 +1233,7 @@ error:
 
 } /* }}} */
 
-/* {{{ proto void SplDoublyLinkedList::add(mixed $index, mixed $newval)
+/* {{{ proto void SplDoublyLinkedList::add(mixed index, mixed newval)
  Inserts a new entry before the specified $index consisting of $newval. */
 SPL_METHOD(SplDoublyLinkedList, add)
 {

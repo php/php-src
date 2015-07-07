@@ -150,7 +150,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			}
 			if (use_include_path) {
 				if ((entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
-					name = entry_str->val;
+					name = ZSTR_VAL(entry_str);
 					goto phar_it;
 				} else {
 					/* this file is not in the phar, use the original path */
@@ -207,7 +207,7 @@ phar_it:
 
 			/* uses mmap if possible */
 			contents = php_stream_copy_to_mem(stream, maxlen, 0);
-			if (contents && contents->len > 0) {
+			if (contents && ZSTR_LEN(contents) > 0) {
 				RETVAL_STR(contents);
 			} else if (contents) {
 				zend_string_release(contents);
@@ -278,7 +278,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -379,7 +379,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry_str->val;
+				name = ZSTR_VAL(entry_str);
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);

@@ -167,12 +167,12 @@ ZEND_TSRMLS_CACHE_DEFINE();
 
 ZEND_INI_MH(OnUpdateEncode)
 {
-	if (new_value && new_value->len) {
+	if (new_value && ZSTR_LEN(new_value)) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
+		if (FAILURE == zend_multibyte_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value),
 	&return_list, &return_size, 0)) {
-			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
+			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
 			return FAILURE;
 		}
 		efree(return_list);
@@ -185,9 +185,9 @@ ZEND_INI_MH(OnUpdateDecode)
 	if (new_value) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
+		if (FAILURE == zend_multibyte_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value),
 	&return_list, &return_size, 0)) {
-			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
+			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
 			return FAILURE;
 		}
 		efree(return_list);
@@ -2328,7 +2328,7 @@ static char * exif_get_markername(int marker)
 #endif
 /* }}} */
 
-/* {{{ proto string exif_tagname(index)
+/* {{{ proto string exif_tagname(int index)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
@@ -3881,7 +3881,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 	}
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0);
-	ImageInfo->FileName          = estrndup(base->val, base->len);
+	ImageInfo->FileName          = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));
 	zend_string_release(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
@@ -3905,7 +3905,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 }
 /* }}} */
 
-/* {{{ proto array exif_read_data(string filename [, sections_needed [, sub_arrays[, read_thumbnail]]])
+/* {{{ proto array exif_read_data(string filename [, string sections_needed [, bool sub_arrays[, bool read_thumbnail]]])
    Reads header data from the JPEG/TIFF image filename and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {

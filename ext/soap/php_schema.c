@@ -463,7 +463,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 			smart_str_0(&anonymous);
 			// TODO: avoid reallocation ???
-			newType->name = estrndup(anonymous.s->val, anonymous.s->len);
+			newType->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
 			smart_str_free(&anonymous);
 		}
 		newType->namens = estrdup((char*)tns->children->content);
@@ -561,7 +561,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				// TODO: avoid reallocation ???
-				newType->name = estrndup(anonymous.s->val, anonymous.s->len);
+				newType->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
 				smart_str_free(&anonymous);
 			}
 			newType->namens = estrdup((char*)tns->children->content);
@@ -1100,7 +1100,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 
 			newModel = emalloc(sizeof(sdlContentModel));
 			newModel->kind = XSD_CONTENT_GROUP_REF;
-			newModel->u.group_ref = estrndup(key.s->val, key.s->len);
+			newModel->u.group_ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 
 			if (type) {efree(type);}
 			if (ns) {efree(ns);}
@@ -1127,7 +1127,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 				zend_hash_init(sdl->groups, 0, NULL, delete_type, 0);
 			}
 			if (zend_hash_add_ptr(sdl->groups, key.s, newType) == NULL) {
-				soap_error1(E_ERROR, "Parsing Schema: group '%s' already defined", key.s->val);
+				soap_error1(E_ERROR, "Parsing Schema: group '%s' already defined", ZSTR_VAL(key.s));
 			}
 
 			cur_type = newType;
@@ -1536,7 +1536,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			smart_str_0(&nscat);
 			if (type) {efree(type);}
 			if (ns) {efree(ns);}
-			newType->ref = estrndup(nscat.s->val, nscat.s->len);
+			newType->ref = estrndup(ZSTR_VAL(nscat.s), ZSTR_LEN(nscat.s));
 			smart_str_free(&nscat);
 		} else {
 			newType->name = estrdup((char*)name->children->content);
@@ -1566,7 +1566,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		smart_str_0(&key);
 		if (zend_hash_add_ptr(addHash, key.s, newType) == NULL) {
 			if (cur_type == NULL) {
-				soap_error1(E_ERROR, "Parsing Schema: element '%s' already defined", key.s->val);
+				soap_error1(E_ERROR, "Parsing Schema: element '%s' already defined", ZSTR_VAL(key.s));
 			} else {
 				zend_hash_next_index_insert_ptr(addHash, newType);
 			}
@@ -1767,7 +1767,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
-			newAttr->ref = estrndup(key.s->val, key.s->len);
+			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 			if (attr_name) {efree(attr_name);}
 			if (ns) {efree(ns);}
 		} else {
@@ -1797,7 +1797,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		}
 
 		if (zend_hash_add_ptr(addHash, key.s, newAttr) == NULL) {
-			soap_error1(E_ERROR, "Parsing Schema: attribute '%s' already defined", key.s->val);
+			soap_error1(E_ERROR, "Parsing Schema: attribute '%s' already defined", ZSTR_VAL(key.s));
 		}
 		smart_str_free(&key);
 	} else{
@@ -1934,7 +1934,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				// TODO: avoid reallocation ???
-				dummy_type->name = estrndup(anonymous.s->val, anonymous.s->len);
+				dummy_type->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
 				smart_str_free(&anonymous);
 			}
 			dummy_type->namens = estrdup((char*)tns->children->content);
@@ -1982,7 +1982,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_0(&key);
 
 			if (zend_hash_add_ptr(ctx->attributeGroups, key.s, newType) == NULL) {
-				soap_error1(E_ERROR, "Parsing Schema: attributeGroup '%s' already defined", key.s->val);
+				soap_error1(E_ERROR, "Parsing Schema: attributeGroup '%s' already defined", ZSTR_VAL(key.s));
 			}
 			cur_type = newType;
 			smart_str_free(&key);
@@ -2007,7 +2007,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
-			newAttr->ref = estrndup(key.s->val, key.s->len);
+			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 			if (group_name) {efree(group_name);}
 			if (ns) {efree(ns);}
 			smart_str_free(&key);

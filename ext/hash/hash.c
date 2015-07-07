@@ -163,17 +163,17 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 
 	digest = zend_string_alloc(ops->digest_size, 0);
-	ops->hash_final((unsigned char *) digest->val, context);
+	ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	efree(context);
 
 	if (raw_output) {
-		digest->val[ops->digest_size] = 0;
+		ZSTR_VAL(digest)[ops->digest_size] = 0;
 		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
-		hex_digest->val[2 * ops->digest_size] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
 		RETURN_NEW_STR(hex_digest);
 	}
@@ -282,14 +282,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
-		ops->hash_final((unsigned char *) digest->val, context);
+		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	} else {
-		php_hash_hmac_round((unsigned char *) digest->val, ops, context, K, (unsigned char *) data, data_len);
+		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) data, data_len);
 	}
 
 	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
 
-	php_hash_hmac_round((unsigned char *) digest->val, ops, context, K, (unsigned char *) digest->val, ops->digest_size);
+	php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 
 	/* Zero the key */
 	ZEND_SECURE_ZERO(K, ops->block_size);
@@ -297,13 +297,13 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	efree(context);
 
 	if (raw_output) {
-		digest->val[ops->digest_size] = 0;
+		ZSTR_VAL(digest)[ops->digest_size] = 0;
 		RETURN_NEW_STR(digest);
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, ops->digest_size);
-		hex_digest->val[2 * ops->digest_size] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_release(digest);
 		RETURN_NEW_STR(hex_digest);
 	}
@@ -513,7 +513,7 @@ PHP_FUNCTION(hash_final)
 
 	digest_len = hash->ops->digest_size;
 	digest = zend_string_alloc(digest_len, 0);
-	hash->ops->hash_final((unsigned char *) digest->val, hash->context);
+	hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
 		int i;
 
@@ -525,15 +525,15 @@ PHP_FUNCTION(hash_final)
 		/* Feed this result into the outter hash */
 		hash->ops->hash_init(hash->context);
 		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
-		hash->ops->hash_update(hash->context, (unsigned char *) digest->val, hash->ops->digest_size);
-		hash->ops->hash_final((unsigned char *) digest->val, hash->context);
+		hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(digest), hash->ops->digest_size);
+		hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 
 		/* Zero the key */
 		ZEND_SECURE_ZERO(hash->key, hash->ops->block_size);
 		efree(hash->key);
 		hash->key = NULL;
 	}
-	digest->val[digest_len] = 0;
+	ZSTR_VAL(digest)[digest_len] = 0;
 	efree(hash->context);
 	hash->context = NULL;
 	zend_list_close(Z_RES_P(zhash));
@@ -543,8 +543,8 @@ PHP_FUNCTION(hash_final)
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
-		php_hash_bin2hex(hex_digest->val, (unsigned char *) digest->val, digest_len);
-		hex_digest->val[2 * digest_len] = 0;
+		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
+		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
 		zend_string_release(digest);
 		RETURN_NEW_STR(hex_digest);
 	}
@@ -718,11 +718,11 @@ PHP_FUNCTION(hash_pbkdf2)
 
 	returnval = zend_string_alloc(length, 0);
 	if (raw_output) {
-		memcpy(returnval->val, result, length);
+		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(returnval->val, result, digest_length);
+		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
 	}
-	returnval->val[length] = 0;
+	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);
 	RETURN_NEW_STR(returnval);
 }
@@ -1087,7 +1087,7 @@ PHP_MINFO_FUNCTION(hash)
 	char *s = buffer, *e = s + sizeof(buffer);
 
 	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
-		s += slprintf(s, e - s, "%s ", str->val);
+		s += slprintf(s, e - s, "%s ", ZSTR_VAL(str));
 	} ZEND_HASH_FOREACH_END();
 	*s = 0;
 

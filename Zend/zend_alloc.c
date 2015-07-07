@@ -340,7 +340,7 @@ static ZEND_NORETURN void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	fflush(stderr);
 #endif
 #if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)

@@ -495,13 +495,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
-#define Z_STRVAL(zval)				Z_STR(zval)->val
+#define Z_STRVAL(zval)				ZSTR_VAL(Z_STR(zval))
 #define Z_STRVAL_P(zval_p)			Z_STRVAL(*(zval_p))
 
-#define Z_STRLEN(zval)				Z_STR(zval)->len
+#define Z_STRLEN(zval)				ZSTR_LEN(Z_STR(zval))
 #define Z_STRLEN_P(zval_p)			Z_STRLEN(*(zval_p))
 
-#define Z_STRHASH(zval)				Z_STR(zval)->h
+#define Z_STRHASH(zval)				ZSTR_HASH(Z_STR(zval))
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
 
 #define Z_ARR(zval)					(zval).value.arr
@@ -605,7 +605,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_string *__s = (s);					\
 		Z_STR_P(__z) = __s;						\
 		/* interned strings support */			\
-		Z_TYPE_INFO_P(__z) = IS_INTERNED(__s) ? \
+		Z_TYPE_INFO_P(__z) = ZSTR_IS_INTERNED(__s) ? \
 			IS_INTERNED_STRING_EX : 			\
 			IS_STRING_EX;						\
 	} while (0)
@@ -629,7 +629,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_string *__s = (s);							\
 		Z_STR_P(__z) = __s;								\
 		/* interned strings support */					\
-		if (IS_INTERNED(__s)) {							\
+		if (ZSTR_IS_INTERNED(__s)) {							\
 			Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
 		} else {										\
 			GC_REFCOUNT(__s)++;							\

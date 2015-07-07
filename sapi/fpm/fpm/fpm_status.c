@@ -422,7 +422,7 @@ int fpm_status_handle_request(void) /* {{{ */
 						query_string = proc.query_string;
 					} else {
 						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1);
-						query_string = tmp_query_string->val;
+						query_string = ZSTR_VAL(tmp_query_string);
 					}
 				}
 
