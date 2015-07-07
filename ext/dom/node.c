@@ -930,7 +930,6 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	zval value_copy;
-	xmlChar *enc_str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -938,9 +937,9 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 	}
 
 	convert_to_string_copy(newval, value_copy);
-	enc_str = xmlEncodeEntitiesReentrant(nodep->doc, Z_STRVAL_P(newval));
-	xmlNodeSetContent(nodep, enc_str);
-	xmlFree(enc_str);
+	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
+	xmlNodeSetContent(nodep, (xmlChar *) "");
+	xmlNodeAddContent(nodep, Z_STRVAL_P(newval));
 	if (newval == &value_copy) {
 		zval_dtor(newval);
 	}
