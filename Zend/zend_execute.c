@@ -2383,7 +2383,7 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 				/* free incomplete rope */
 				zend_string **rope;
 				zend_op *last;
-				
+
 				var = var & ~ZEND_LIVE_ROPE;
 				rope = (zend_string **) EX_VAR(var);
 				last = EX(func)->op_array.opcodes + op_num;
