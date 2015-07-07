@@ -1011,7 +1011,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						if (!valid) {
 							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence", E_PARSE);
+								"Invalid UTF-8 codepoint escape sequence", 0);
 							zval_ptr_dtor(zendlval);
 							return FAILURE;
 						}
@@ -1022,7 +1022,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						/* per RFC 3629, UTF-8 can only represent 21 bits */
 						if (codepoint > 0x10FFFF || errno) {
 							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", E_PARSE);
+								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
 							zval_ptr_dtor(zendlval);
 							return FAILURE;
 						}
@@ -2743,7 +2743,7 @@ yy136:
 		 * Because the lexing itself doesn't do that for us
 		 */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", E_PARSE);
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			RETURN_TOKEN(T_ERROR);
 		}
 	} else {
@@ -2760,7 +2760,7 @@ yy136:
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
 				zend_throw_exception(zend_ce_parse_error,
-					"Invalid numeric literal", E_PARSE);
+					"Invalid numeric literal", 0);
 				RETURN_TOKEN(T_ERROR);
 			}
 			ZEND_ASSERT(!errno);
@@ -2768,7 +2768,7 @@ yy136:
 		}
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", E_PARSE);
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			RETURN_TOKEN(T_ERROR);
 		}
 	}

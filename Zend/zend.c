@@ -882,7 +882,7 @@ void zenderror(const char *error) /* {{{ */
 		return;
 	}
 
-	zend_throw_exception(zend_ce_parse_error, error, E_PARSE);
+	zend_throw_exception(zend_ce_parse_error, error, 0);
 }
 /* }}} */
 
@@ -1325,7 +1325,7 @@ ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_type_error, message, E_ERROR);
+	zend_throw_exception(zend_ce_type_error, message, 0);
 	efree(message);
 	va_end(va);
 } /* }}} */
@@ -1338,7 +1338,7 @@ ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *fo
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 	if (throw_exception) {
-		zend_throw_exception(zend_ce_type_error, message, E_ERROR);
+		zend_throw_exception(zend_ce_type_error, message, 0);
 	} else {
 		zend_error(E_WARNING, message);
 	}
