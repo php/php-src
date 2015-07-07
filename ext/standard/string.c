@@ -2749,7 +2749,7 @@ PHP_FUNCTION(lcfirst)
 }
 /* }}} */
 
-/* {{{ proto string ucwords(string str)
+/* {{{ proto string ucwords(string str [, string delims])
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
 {
