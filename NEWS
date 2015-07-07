@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
 
+- Sqlite3:
+  . Fixed bug #69972 (Use-after-free vulnerability in
+    sqlite3SafetyCheckSickOrOk()). (Laruence)
+
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
