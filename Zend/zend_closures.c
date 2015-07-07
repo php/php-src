@@ -32,7 +32,7 @@
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
-	zend_throw_error(zend_ce_error, "Closure object cannot have properties")
+	zend_throw_error(NULL, "Closure object cannot have properties")
 
 typedef struct _zend_closure {
 	zend_object       std;
@@ -53,7 +53,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		efree(arguments);
-		zend_throw_error(zend_ce_error, "Cannot get arguments for calling closure");
+		zend_throw_error(NULL, "Cannot get arguments for calling closure");
 		RETVAL_FALSE;
 	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
 		RETVAL_FALSE;
@@ -207,7 +207,7 @@ ZEND_METHOD(Closure, bind)
 
 static zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(zend_ce_error, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 	return NULL;
 }
 /* }}} */
@@ -450,7 +450,7 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
    Private constructor preventing instantiation */
 ZEND_METHOD(Closure, __construct)
 {
-	zend_throw_error(zend_ce_error, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 }
 /* }}} */
 

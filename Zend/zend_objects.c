@@ -94,7 +94,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 					zend_class_entry *ce = object->ce;
 
 					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+						zend_throw_error(NULL,
 							"Call to private %s::__destruct() from context '%s'",
 							ZSTR_VAL(ce->name),
 							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
@@ -113,7 +113,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 					zend_class_entry *ce = object->ce;
 
 					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+						zend_throw_error(NULL,
 							"Call to protected %s::__destruct() from context '%s'",
 							ZSTR_VAL(ce->name),
 							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");

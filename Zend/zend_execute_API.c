@@ -552,7 +552,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 	char *colon;
 
 	if (IS_CONSTANT_VISITED(p)) {
-		zend_throw_error(zend_ce_error, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
+		zend_throw_error(NULL, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 		return FAILURE;
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 
@@ -575,7 +575,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
 			} else if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				zend_throw_error(zend_ce_error, "Undefined class constant '%s'", Z_STRVAL_P(p));
+				zend_throw_error(NULL, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				RESET_CONSTANT_VISITED(p);
 				return FAILURE;
 			} else {
@@ -602,9 +602,9 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 				}
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (ZSTR_VAL(save)[0] == '\\') {
-						zend_throw_error(zend_ce_error, "Undefined constant '%s'", ZSTR_VAL(save) + 1);
+						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save) + 1);
 					} else {
-						zend_throw_error(zend_ce_error, "Undefined constant '%s'", ZSTR_VAL(save));
+						zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(save));
 					}
 					if (inline_change) {
 						zend_string_release(save);
@@ -781,7 +781,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 	if (func->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_error(zend_ce_error, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
 			return FAILURE;
 		}
 		if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
@@ -903,7 +903,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			fci->object->handlers->call_method(func->common.function_name, fci->object, call, fci->retval);
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
-			zend_throw_error(zend_ce_error, "Cannot call overloaded function for non-object");
+			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
 		}
 
 		zend_vm_stack_free_args(call);
@@ -1329,22 +1329,22 @@ check_fetch_type:
 	switch (fetch_sub_type) {
 		case ZEND_FETCH_CLASS_SELF:
 			if (UNEXPECTED(!EG(scope))) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access self:: when no class scope is active");
+				zend_throw_or_error(fetch_type, NULL, "Cannot access self:: when no class scope is active");
 			}
 			return EG(scope);
 		case ZEND_FETCH_CLASS_PARENT:
 			if (UNEXPECTED(!EG(scope))) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access parent:: when no class scope is active");
+				zend_throw_or_error(fetch_type, NULL, "Cannot access parent:: when no class scope is active");
 				return NULL;
 			}
 			if (UNEXPECTED(!EG(scope)->parent)) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access parent:: when current class scope has no parent");
+				zend_throw_or_error(fetch_type, NULL, "Cannot access parent:: when current class scope has no parent");
 			}
 			return EG(scope)->parent;
 		case ZEND_FETCH_CLASS_STATIC:
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Cannot access static:: when no class scope is active");
+				zend_throw_or_error(fetch_type, NULL, "Cannot access static:: when no class scope is active");
 				return NULL;
 			}
 			return ce;
@@ -1362,11 +1362,11 @@ check_fetch_type:
 	} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
 		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
 			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Interface '%s' not found", ZSTR_VAL(class_name));
 			} else if (fetch_sub_type == ZEND_FETCH_CLASS_TRAIT) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Trait '%s' not found", ZSTR_VAL(class_name));
 			} else {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Class '%s' not found", ZSTR_VAL(class_name));
 			}
 		}
 		return NULL;
@@ -1384,11 +1384,11 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *
 	} else if ((ce = zend_lookup_class_ex(class_name, key, 1)) == NULL) {
 		if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
 			if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Interface '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Interface '%s' not found", ZSTR_VAL(class_name));
 			} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Trait '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Trait '%s' not found", ZSTR_VAL(class_name));
 			} else {
-				zend_throw_or_error(fetch_type, zend_ce_error, "Class '%s' not found", ZSTR_VAL(class_name));
+				zend_throw_or_error(fetch_type, NULL, "Class '%s' not found", ZSTR_VAL(class_name));
 			}
 		}
 		return NULL;

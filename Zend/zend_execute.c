@@ -1201,7 +1201,7 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 
 	/* Note:  property_name in this case is really the array index! */
 	if (!Z_OBJ_HT_P(object)->write_dimension) {
-		zend_throw_error(zend_ce_error, "Cannot use object as array");
+		zend_throw_error(NULL, "Cannot use object as array");
 		FREE_OP(free_value);
 		return;
 	}
@@ -1681,7 +1681,7 @@ convert_to_array:
 		}
 
 		if (dim == NULL) {
-			zend_throw_error(zend_ce_error, "[] operator not supported for strings");
+			zend_throw_error(NULL, "[] operator not supported for strings");
 			ZVAL_NULL(result);
 		} else {
 			zend_check_string_offset(dim, type);
@@ -1689,7 +1689,7 @@ convert_to_array:
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(zend_ce_error, "Cannot use object as array");
+			zend_throw_error(NULL, "Cannot use object as array");
 			retval = &EG(error_zval);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1830,7 +1830,7 @@ try_string_offset:
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(zend_ce_error, "Cannot use object as array");
+			zend_throw_error(NULL, "Cannot use object as array");
 			ZVAL_NULL(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1922,7 +1922,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 					ZVAL_INDIRECT(result, ptr);
 				}
 			} else {
-				zend_throw_error(zend_ce_error, "Cannot access undefined property for object with overloaded property access");
+				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
 				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
 		} else {

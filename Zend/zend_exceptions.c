@@ -261,7 +261,7 @@ ZEND_METHOD(exception, __construct)
 		} else {
 			ce = base_ce;
 		}
-		zend_throw_error(zend_ce_error, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
 		return;
 	}
 
@@ -297,7 +297,7 @@ ZEND_METHOD(error_exception, __construct)
 		} else {
 			ce = zend_ce_error_exception;
 		}
-		zend_throw_error(zend_ce_error, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
 		return;
 	}
 
@@ -1033,7 +1033,7 @@ ZEND_API void zend_throw_exception_object(zval *exception) /* {{{ */
 	exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
-		zend_throw_error(zend_ce_error, "Cannot throw objects that do not implement Throwable");
+		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
 		return;
 	}
 	zend_throw_exception_internal(exception);
