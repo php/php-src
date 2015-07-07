@@ -114,7 +114,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 		break;
 	}
 
-#if 1
+#if 0
 	if (ops->T_liveliness) {
 		uint32_t *var = ops->T_liveliness + (op - ops->opcodes);
 
