@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include "php.h"
+#include "zend_exceptions.h"
 #include "php_random.h"
 
 #if PHP_WIN32
