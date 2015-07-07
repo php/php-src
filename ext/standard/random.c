@@ -133,8 +133,8 @@ PHP_FUNCTION(random_bytes)
 	}
 
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Length must be greater than 0", 0);
+		return;
 	}
 
 	bytes = zend_string_alloc(size, 0);
