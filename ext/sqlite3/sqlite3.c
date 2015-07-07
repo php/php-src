@@ -281,7 +281,11 @@ PHP_METHOD(sqlite3, lastErrorCode)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_errcode(db_obj->db));
+	if (db_obj->initialised) {
+		RETURN_LONG(sqlite3_errcode(db_obj->db));
+	} else {
+		RETURN_LONG(0);
+	}
 }
 /* }}} */
 
@@ -299,7 +303,11 @@ PHP_METHOD(sqlite3, lastErrorMsg)
 		return;
 	}
 
-	RETVAL_STRING((char *)sqlite3_errmsg(db_obj->db));
+	if (db_obj->initialised) {
+		RETURN_STRING((char *)sqlite3_errmsg(db_obj->db));
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
