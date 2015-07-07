@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed bug #69952 (Data integrity issues accessing superglobals by
     reference). (Bob)
 
+- SPL:
+  . Fixed bug #69970 (Use-after-free vulnerability in
+    spl_recursive_it_move_forward_ex()). (Laruence)
+  
 - Standard:
   . Fixed bug #69983 (get_browser fails with user agent of null).
     (Kalle, cmb, Laruence)
