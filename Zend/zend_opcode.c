@@ -774,21 +774,25 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 				opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
 				break;
-			case ZEND_BRK:
-			case ZEND_CONT:
-				{
-					uint32_t jmp_target = zend_get_brk_cont_target(op_array, opline);
-					opline->opcode = ZEND_JMP;
-					opline->op1.opline_num = jmp_target;
-					opline->op2.num = 0;
-					ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				}
-				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) != IS_LONG) {
-					zend_resolve_goto_label(op_array, NULL, opline);
+					/* zend_resolve_goto_label call will replace opcodes with not-yet resolved temporaries. We need to re-iterate over them then. */
+					zend_op *goto_op = opline;
+					while (opline > op_array->opcodes && (opline - 1)->opcode == ZEND_NOP) {
+						opline--;
+					}
+					zend_resolve_goto_label(op_array, NULL, goto_op);
+					continue;
 				}
+				break;
+			case ZEND_BRK:
+			case ZEND_CONT: {
+				uint32_t jmp_target = zend_get_brk_cont_target(op_array, opline);
+				opline->opcode = ZEND_JMP;
+				opline->op1.opline_num = jmp_target;
+				opline->op2.num = 0;
 				/* break omitted intentionally */
+			}
 			case ZEND_JMP:
 			case ZEND_FAST_CALL:
 			case ZEND_DECLARE_ANON_CLASS:

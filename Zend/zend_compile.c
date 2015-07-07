@@ -3606,7 +3606,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 			current = CG(context).current_brk_cont;
 			while (current != -1) {
 				if (CG(context).brk_cont_array[current].start >= 0) {
-					zend_emit_op(NULL, ZEND_NOP, NULL, label_node);
+					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 				}
 				current = CG(context).brk_cont_array[current].parent;
 			}
