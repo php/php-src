@@ -73,9 +73,6 @@ typedef struct _zend_cfg {
 	zend_code_block    *blocks;
 	zend_code_block   **try;
 	zend_code_block   **catch;
-	zend_code_block   **loop_start;
-	zend_code_block   **loop_cont;
-	zend_code_block   **loop_brk;
 	zend_op           **Tsource;
 	char               *same_t;
 } zend_cfg;
