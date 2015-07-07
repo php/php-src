@@ -2381,9 +2381,14 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 
 			if ((var & ZEND_LIVE_MASK) == ZEND_LIVE_ROPE) {
 				/* free incomplete rope */
-				zend_string **rope = (zend_string **) EX_VAR(var & ~ZEND_LIVE_ROPE);
-				zend_op *last = EX(func)->op_array.opcodes + op_num;
-				while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
+				zend_string **rope;
+				zend_op *last;
+				
+				var = var & ~ZEND_LIVE_ROPE;
+				rope = (zend_string **) EX_VAR(var);
+				last = EX(func)->op_array.opcodes + op_num;
+				while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
+						|| last->result.var != var) {
 					ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
 					last--;
 				}

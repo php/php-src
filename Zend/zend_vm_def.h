@@ -2859,7 +2859,12 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV)
 			}
 			rope[opline->extended_value] = _zval_get_string_func(var);
 			FREE_OP2();
-			CHECK_EXCEPTION();
+			if (UNEXPECTED(EG(exception))) {
+				for (i = 0; i <= opline->extended_value; i++) {
+					zend_string_release(rope[i]);
+				}
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	for (i = 0; i <= opline->extended_value; i++) {

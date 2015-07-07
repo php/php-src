@@ -245,7 +245,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, cha
 		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid callback, %s",
 			class_name, space, get_active_function_name(), num, error);
 	} else if (severity == E_ERROR) {
-		zend_throw_error(zend_ce_error, "%s%s%s() expects parameter %d to be a valid callback, %s",
+		zend_throw_error(zend_ce_type_error, "%s%s%s() expects parameter %d to be a valid callback, %s",
 			class_name, space, get_active_function_name(), num, error);
 	} else {
 		zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
