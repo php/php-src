@@ -138,7 +138,7 @@ typedef struct _zend_oparray_context {
 	uint32_t   fast_call_var;
 	int        current_brk_cont;
 	int        last_brk_cont;
-    zend_brk_cont_element *brk_cont_array;
+	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
 } zend_oparray_context;
 
