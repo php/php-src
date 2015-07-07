@@ -3,6 +3,6 @@
 #define PHP_MAJOR_VERSION 7
 #define PHP_MINOR_VERSION 0
 #define PHP_RELEASE_VERSION 0
-#define PHP_EXTRA_VERSION "alpha2"
-#define PHP_VERSION "7.0.0alpha2"
+#define PHP_EXTRA_VERSION "beta1"
+#define PHP_VERSION "7.0.0beta1"
 #define PHP_VERSION_ID 70000
