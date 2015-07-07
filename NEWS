@@ -1,5 +1,68 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+09 Jul 2015, PHP 7.0.0 Beta 1
+
+- Core:
+  . Fixed bug #70006 (cli - function with default arg = STDOUT crash output).
+    (Laruence)
+  . Fixed bug #69521 (Segfault in gc_collect_cycles()).
+    (arjen at react dot com, Laruence)
+  . Improved zend_string API (Francois Laupretre)
+  . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
+    ArrayAccess object). (Laruence)
+  . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
+  . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
+  . Fixed bug #62210 (Exceptions can leak temporary variables. As a part of
+    the fix serious refactoring was done. op_array->brk_cont_array was removed,
+    and replaced with more general and speed efficient op_array->T_liveliness.
+    ZEND_GOTO opcode is always replaced by ZEND_JMP at compile time).
+    (Bob, Dmitry, Laruence)
+
+- CLI server:
+  . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
+  . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
+
+- COM:
+  . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
+
+- JSON
+  . Fixed bug #62010 (json_decode produces invalid byte-sequences).
+    (Jakub Zelenka)
+
+- OCI8:
+  . Corrected oci8 hash destructors to prevent segfaults, and a few other fixes.
+    (Cameron Porter)
+
+- ODBC:
+  . Fixed bug #69975 (PHP segfaults when accessing nvarchar(max) defined
+    columns). (cmb)
+
+- OpenSSL:
+  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
+    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+
+- PCRE:
+  . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
+    string). (cmb)
+
+- Session:
+  . Fixed bug #69952 (Data integrity issues accessing superglobals by
+    reference). (Bob)
+
+- SPL:
+  . Fixed bug #69970 (Use-after-free vulnerability in
+    spl_recursive_it_move_forward_ex()). (Laruence)
+  
+- Standard:
+  . Fixed bug #69983 (get_browser fails with user agent of null).
+    (Kalle, cmb, Laruence)
+  . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
+  . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
+
+- Sqlite3:
+  . Fixed bug #69972 (Use-after-free vulnerability in
+    sqlite3SafetyCheckSickOrOk()). (Laruence)
+
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
 - Core:
@@ -206,6 +269,8 @@ PHP                                                                        NEWS
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
+  . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
+    started with '\0'). (Jakub Zelenka)
 
 - LDAP
   . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
