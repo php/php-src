@@ -403,6 +403,9 @@ static PHP_MINIT_FUNCTION(posix)
 #ifdef RLIMIT_STACK
 	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_STACK", RLIMIT_STACK, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef HAVE_SETRLIMIT
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1381,30 +1384,20 @@ PHP_FUNCTION(posix_getrlimit)
 #endif /* HAVE_GETRLIMIT */
 
 #ifdef HAVE_SETRLIMIT
-/* {{{ proto bool posix_setrlimit(int resource, string softlimit, string hardlimit)
+/* {{{ proto bool posix_setrlimit(int resource, int softlimit, int hardlimit)
    Set system resource consumption limits (POSIX.1-2001) */
 PHP_FUNCTION(posix_setrlimit)
 {
 	struct rlimit rl;
-	char *cur, *max;
-	size_t cur_len, max_len;
+	zend_long cur, max;
 	int res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &res, &cur, &cur_len, &max, &max_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &res, &cur, &max) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (!strcasecmp(cur, "unlimited")) {
-		rl.rlim_cur = RLIM_INFINITY;
-	} else {
-		rl.rlim_cur = zend_atol(cur, cur_len);
-	}
-
-	if (!strcasecmp(max, "unlimited")) {
-		rl.rlim_max = RLIM_INFINITY;
-	} else {
-		rl.rlim_max = zend_atol(max, max_len);
-	}
+	rl.rlim_cur = cur;
+	rl.rlim_max = max;
 
 	if (setrlimit(res, &rl) == -1) {
 		POSIX_G(last_error) = errno;
