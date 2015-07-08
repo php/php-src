@@ -152,6 +152,9 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
 			if (valid_T[currT]) {
 				if (start_of_T[currT] == opline) {
+					/* ZEND_FAST_CALL can not share temporary var with others
+					 * since the fast_var could also be set by ZEND_HANDLE_EXCEPTION
+					 * which could be ahead of it */
 					if (opline->opcode != ZEND_FAST_CALL) {
 						taken_T[map_T[currT]] = 0;
 					}
