@@ -7595,9 +7595,10 @@ ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 		ZEND_VM_CONTINUE();
 	}
-	if (UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
+	if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY && UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
 		fast_call->u2.lineno = (uint32_t)-1;
 	} else {
+		Z_OBJ_P(fast_call) = NULL;
 		/* set return address */
 		fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
 	}
