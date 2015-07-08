@@ -7596,9 +7596,12 @@ ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)
 		ZEND_VM_CONTINUE();
 	}
 	/* set no delayed exception */
-	Z_OBJ_P(fast_call) = NULL;
-	/* set return address */
-	fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
+	if (UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
+		fast_call->u2.lineno = (uint32_t)-1;
+	} else {
+		/* set return address */
+		fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
+	}
 	ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op1));
 	ZEND_VM_CONTINUE();
 }

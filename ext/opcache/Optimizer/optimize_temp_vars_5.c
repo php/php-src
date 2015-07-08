@@ -77,7 +77,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 
     while (opline >= end) {
 		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
-
 			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
 			if (opline->opcode == ZEND_ROPE_END) {
 				int num = (((opline->extended_value + 1) * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
@@ -153,7 +152,9 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
 			if (valid_T[currT]) {
 				if (start_of_T[currT] == opline) {
-					taken_T[map_T[currT]] = 0;
+					if (opline->opcode != ZEND_FAST_CALL) {
+						taken_T[map_T[currT]] = 0;
+					}
 				}
 				ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
 				if (opline->opcode == ZEND_ROPE_INIT) {

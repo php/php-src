@@ -2,6 +2,9 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 23 Jul 2015, PHP 7.0.0 Beta 2
 
+- Core:
+  . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
+
 09 Jul 2015, PHP 7.0.0 Beta 1
 
 - Core:
