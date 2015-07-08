@@ -5650,8 +5650,11 @@ ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
 		ZEND_VM_CONTINUE();
 	}
-	EX(fast_ret) = opline;
-	EX(delayed_exception) = NULL;
+	if (UNEXPECTED(EX(delayed_exception) != NULL)) {
+		EX(fast_ret) = NULL;
+	} else {
+		EX(fast_ret) = opline;
+	}	
 	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
 	ZEND_VM_CONTINUE();
 }
