@@ -2681,7 +2681,8 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);
-			if (arg_node.op_type & (IS_VAR|IS_CV)) {
+			ZEND_ASSERT(arg_node.op_type != IS_CV);
+			if (arg_node.op_type == IS_VAR) {
 				opcode = ZEND_SEND_VAR_NO_REF;
 				if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					flags |= ZEND_ARG_SEND_BY_REF;

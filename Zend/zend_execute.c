@@ -2552,10 +2552,20 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 # endif
 #endif
 
-#define ZEND_VM_NEXT_OPCODE() \
+#define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \
 	CHECK_SYMBOL_TABLES() \
-	ZEND_VM_INC_OPCODE(); \
+	if (check_exception) { \
+		OPLINE = EX(opline) + (skip); \
+	} else { \
+		OPLINE = opline + (skip); \
+	} \
 	ZEND_VM_CONTINUE()
+
+#define ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION() \
+	ZEND_VM_NEXT_OPCODE_EX(1, 1)
+
+#define ZEND_VM_NEXT_OPCODE() \
+	ZEND_VM_NEXT_OPCODE_EX(0, 1)
 
 #define ZEND_VM_SET_NEXT_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \
