@@ -198,13 +198,11 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	zend_class_entry *pce;
 	zend_class_entry sxi;
 
-	if ((pce = zend_hash_str_find_ptr(CG(class_table), "simplexmlelement", sizeof("SimpleXMLElement") - 1)) == NULL) {
+	if ((ce_SimpleXMLElement = sxe_get_element_class_entry()) == NULL) {
 		ce_SimpleXMLElement  = NULL;
 		ce_SimpleXMLIterator = NULL;
 		return SUCCESS; /* SimpleXML must be initialized before */
 	}
-
-	ce_SimpleXMLElement = pce;
 
 	INIT_CLASS_ENTRY_EX(sxi, "SimpleXMLIterator", sizeof("SimpleXMLIterator") - 1, funcs_SimpleXMLIterator);
 	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement);

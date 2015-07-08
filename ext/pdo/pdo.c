@@ -80,17 +80,8 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
 {
 #if defined(HAVE_SPL)
-	if (!root) {
-		if (!spl_ce_RuntimeException) {
-			zend_class_entry *pce;
-
-			if ((pce = zend_hash_str_find_ptr(CG(class_table), "runtimeexception", sizeof("RuntimeException") - 1))) {
-				spl_ce_RuntimeException = pce;
-				return pce;
-			}
-		} else {
-			return spl_ce_RuntimeException;
-		}
+	if (!root) {		
+		return spl_ce_RuntimeException;
 	}
 #endif
 	return zend_ce_exception;
