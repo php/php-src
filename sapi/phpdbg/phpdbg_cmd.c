@@ -731,11 +731,8 @@ readline:
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!cmd) {
-					if (feof(PHPDBG_G(io)[PHPDBG_STDIN].ptr)) {
-						PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
-						zend_bailout();
-					}
-					goto readline;
+					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+					zend_bailout();
 				}
 
 				add_history(cmd);
