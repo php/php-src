@@ -941,9 +941,12 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 			&& opline->opcode != ZEND_BOOL
 			&& opline->opcode != ZEND_JMPZ_EX
 			&& opline->opcode != ZEND_JMPNZ_EX
-			/* these two consecutive ops appear on ternary,
-			 * the result of true branch is undefined for false branch */
+			/* These opcodes write the result of the true branch of a ternary, short
+			 * ternary or coalesce and are immediately followed by the instructions
+			 * for the false branch (where this result is not live) */
 			&& (opline->opcode != ZEND_QM_ASSIGN || (opline + 1)->opcode != ZEND_JMP)
+			&& opline->opcode != ZEND_JMP_SET
+			&& opline->opcode != ZEND_COALESCE
 			/* exception for opcache, it might nowhere use the temporary
 			 * (anyway bool, so no need to free) */
 			&& opline->opcode != ZEND_CASE
@@ -959,14 +962,17 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 			&& opline->opcode != ZEND_DECLARE_INHERITED_CLASS
 			&& opline->opcode != ZEND_DECLARE_INHERITED_CLASS_DELAYED
 			&& opline->opcode != ZEND_DECLARE_ANON_CLASS
-			&& opline->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS) {
+			&& opline->opcode != ZEND_DECLARE_ANON_INHERITED_CLASS
+		) {
 			if (done_pass_two) {
 				var = EX_VAR_TO_NUM(opline->result.var) - op_array->last_var;
 			} else {
 				var = opline->result.var;
 			}
-			/* Objects created via ZEND_NEW are only fully initialized after the DO_FCALL (constructor call) */
+			ZEND_ASSERT(Tstart[var] == (unsigned) -1);
 			if (opline->opcode == ZEND_NEW) {
+				/* Objects created via ZEND_NEW are only fully initialized
+				 * after the DO_FCALL (constructor call) */
 				Tstart[var] = opline->op2.opline_num - 1;
 			} else {
 				Tstart[var] = opline - op_array->opcodes;
