@@ -22,10 +22,16 @@
     (Christian Wenz)
   . Fixed bug #69892 (Different arrays compare indentical due to integer key
     truncation). (Nikita)
+  . Fixed bug #69874 (Can't set empty additional_headers for mail()), regression
+    from fix to bug #68776. (Yasuo)
 
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
-  
+
+- Mysqlnd:
+  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM) (CVE-2015-3152).
+    (Andrey)
+
 - PCRE:
   . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
     string). (cmb)
@@ -38,6 +44,11 @@
     leading single quote). (Matteo)
   . Fixed bug #69344 (PDO PgSQL Incorrect binding numeric array with gaps).
     (Matteo)
+
+- Phar:
+  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file). (Stas)
+  . Fixed bug #69923 (Buffer overflow and stack smashing error in 
+    phar_fix_filepath). (Stas)
 
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
