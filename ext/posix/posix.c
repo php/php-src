@@ -199,6 +199,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_posix_getrlimit, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#ifdef HAVE_SETRLIMIT
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setrlimit, 0, 0, 3)
+	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_INFO(0, softlimit)
+	ZEND_ARG_INFO(0, hardlimit)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO(arginfo_posix_get_last_error, 0)
 ZEND_END_ARG_INFO()
 
@@ -293,6 +301,9 @@ const zend_function_entry posix_functions[] = {
 #ifdef HAVE_GETRLIMIT
 	PHP_FE(posix_getrlimit,	arginfo_posix_getrlimit)
 #endif
+#ifdef HAVE_SETRLIMIT
+	PHP_FE(posix_setrlimit, arginfo_posix_setrlimit)
+#endif
 
 	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
 	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_get_last_error)
@@ -344,7 +355,54 @@ static PHP_MINIT_FUNCTION(posix)
 #ifdef S_IFSOCK
 	REGISTER_LONG_CONSTANT("POSIX_S_IFSOCK", S_IFSOCK, CONST_CS | CONST_PERSISTENT);
 #endif
-
+#ifdef RLIMIT_AS
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_AS", RLIMIT_AS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_CORE
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CORE", RLIMIT_CORE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_CPU
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CPU", RLIMIT_CPU, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_DATA
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_DATA", RLIMIT_DATA, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_FSIZE
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_FSIZE", RLIMIT_FSIZE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_LOCKS
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_LOCKS", RLIMIT_LOCKS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_MEMLOCK
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MEMLOCK", RLIMIT_MEMLOCK, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_MSGQUEUE
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MSGQUEUE", RLIMIT_MSGQUEUE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_NICE
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NICE", RLIMIT_NICE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_NOFILE
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NOFILE", RLIMIT_NOFILE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_NPROC
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPROC", RLIMIT_NPROC, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_RSS
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RSS", RLIMIT_RSS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_RTPRIO
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTPRIO", RLIMIT_RTPRIO, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_RTTIME
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTTIME", RLIMIT_RTTIME, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_SIGPENDING
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_SIGPENDING", RLIMIT_SIGPENDING, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_STACK
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_STACK", RLIMIT_STACK, CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -1321,6 +1379,44 @@ PHP_FUNCTION(posix_getrlimit)
 /* }}} */
 
 #endif /* HAVE_GETRLIMIT */
+
+#ifdef HAVE_SETRLIMIT
+/* {{{ proto bool posix_setrlimit(int resource, string softlimit, string hardlimit)
+   Set system resource consumption limits (POSIX.1-2001) */
+PHP_FUNCTION(posix_setrlimit)
+{
+	struct rlimit rl;
+	char *cur, *max;
+	size_t cur_len, max_len;
+	int res;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &res, &cur, &cur_len, &max, &max_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (!strcasecmp(cur, "unlimited")) {
+		rl.rlim_cur = RLIM_INFINITY;
+	} else {
+		rl.rlim_cur = zend_atol(cur, cur_len);
+	}
+
+	if (!strcasecmp(max, "unlimited")) {
+		rl.rlim_max = RLIM_INFINITY;
+	} else {
+		rl.rlim_max = zend_atol(max, max_len);
+	}
+
+	if (setrlimit(res, &rl) == -1) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+#endif /* HAVE_SETRLIMIT */
+
 
 /* {{{ proto int posix_get_last_error(void)
    Retrieve the error number set by the last posix function which failed. */
