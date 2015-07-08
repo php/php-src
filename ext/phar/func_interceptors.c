@@ -1052,7 +1052,7 @@ void phar_release_functions(void)
 /* {{{ void phar_intercept_functions_init(void) */
 #define PHAR_INTERCEPT(func) \
 	PHAR_G(orig_##func) = NULL; \
-	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
+	if (CG(function_table) && NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		PHAR_G(orig_##func) = orig->internal_function.handler; \
 		orig->internal_function.handler = phar_##func; \
 	}
