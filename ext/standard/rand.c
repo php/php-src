@@ -321,10 +321,10 @@ PHP_FUNCTION(mt_rand)
 			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		} else if (
-			(min > 0 && max < (PHP_MT_RAND_MAX - min)) ||
-			(min < 0 && max > (PHP_MT_RAND_MAX + min))
+			(min > 0 && max < (INT_MAX - min)) ||
+			(min < 0 && max > (INT_MAX + min))
 		) {
-			php_error_docref(NULL, E_WARNING, "range of max(" ZEND_LONG_FMT ") minus min(" ZEND_LONG_FMT ") exceeds getrandmax()", max, min);
+			php_error_docref(NULL, E_WARNING, "range of max(" ZEND_LONG_FMT ") minus min(" ZEND_LONG_FMT ") would overflow", max, min);
 			RETURN_FALSE;
 
 		}

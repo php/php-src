@@ -9,14 +9,14 @@ var_dump(mt_rand(-getrandmax(), getrandmax()));
 var_dump(mt_rand(PHP_INT_MIN,   PHP_INT_MAX));
 
 --EXPECTF--
-Warning: mt_rand(): range of max(%i) minus min(%i) exceeds getrandmax() in %s on line %d
+Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
 bool(false)
 
-Warning: mt_rand(): range of max(%i) minus min(%i) exceeds getrandmax() in %s on line %d
+Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
 bool(false)
 
-Warning: mt_rand(): range of max(%i) minus min(%i) exceeds getrandmax() in %s on line %d
+Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
 bool(false)
 
-Warning: mt_rand(): range of max(%i) minus min(%i) exceeds getrandmax() in %s on line %d
+Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
 bool(false)
