@@ -8,12 +8,15 @@ function foo(): string {
 		try {
 			return $class; // invalid return type
 		} catch (TypeError $e) {
-			return "no leak or segfault";
+			return "BAG!";
 		}
 	}
 }
-print foo();
-
+try {
+	print foo();
+} catch (TypeError $e) {
+	print "no leak or segfault";
+}
 ?>
 --EXPECT--
 no leak or segfault
