@@ -3482,7 +3482,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
 	}
 
-	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_RETURN);
+	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_JUMP);
 
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
@@ -3567,7 +3567,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			}
 
 			if (nest_level > 1) {
-				generate_free_loop_var(&CG(context).brk_cont_array[array_offset].loop_var);
+				generate_free_loop_var_ex(&CG(context).brk_cont_array[array_offset].loop_var, ZEND_FREE_ON_JUMP);
 			}
 
 			array_offset = CG(context).brk_cont_array[array_offset].parent;
@@ -3637,7 +3637,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 			if (pass2_opline) {
 				free_vars++;
 			} else {
-				generate_free_loop_var(&CG(context).brk_cont_array[current].loop_var);
+				generate_free_loop_var_ex(&CG(context).brk_cont_array[current].loop_var, ZEND_FREE_ON_JUMP);
 			}
 		}
 		current = CG(context).brk_cont_array[current].parent;

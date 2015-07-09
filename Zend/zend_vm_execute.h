@@ -1502,8 +1502,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 
 	if (catch_op_num || finally_op_num) {
 		if (EX(func)->op_array.opcodes[op_num].opcode == ZEND_VERIFY_RETURN_TYPE
-		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
-		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FE_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
+		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_JUMP))
+		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FE_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_JUMP))
 		) {
 			catch_op_num = finally_op_num = 0;
 		}

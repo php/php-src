@@ -994,8 +994,8 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 				&& opline->opcode != ZEND_FE_FETCH_RW
 				/* the following opcodes are parts of "return" statement */
 				&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
-				&& (opline->opcode != ZEND_FREE || !(opline->extended_value & ZEND_FREE_ON_RETURN))
-				&& (opline->opcode != ZEND_FE_FREE || !(opline->extended_value & ZEND_FREE_ON_RETURN))
+				&& (opline->opcode != ZEND_FREE || !(opline->extended_value & ZEND_FREE_ON_JUMP))
+				&& (opline->opcode != ZEND_FE_FREE || !(opline->extended_value & ZEND_FREE_ON_JUMP))
 			) {
 				op_live_total += liveliness_kill_var(op_array, opline, var, Tstart, opTs);
 			}
