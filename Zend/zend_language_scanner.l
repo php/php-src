@@ -1011,6 +1011,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 							zend_throw_exception(zend_ce_parse_error,
 								"Invalid UTF-8 codepoint escape sequence", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1022,6 +1023,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 							zend_throw_exception(zend_ce_parse_error,
 								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1659,6 +1661,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		 */
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
 			RETURN_TOKEN(T_ERROR);
 		}
 	} else {
@@ -1676,6 +1679,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			if (end != yytext + yyleng) {
 				zend_throw_exception(zend_ce_parse_error,
 					"Invalid numeric literal", 0);
+				ZVAL_UNDEF(zendlval);
 				RETURN_TOKEN(T_ERROR);
 			}
 			ZEND_ASSERT(!errno);
@@ -1684,6 +1688,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
 			RETURN_TOKEN(T_ERROR);
 		}
 	}
