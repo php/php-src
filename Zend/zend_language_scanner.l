@@ -1662,7 +1662,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_ERROR);
+			RETURN_TOKEN(T_LNUMBER);
 		}
 	} else {
 		errno = 0;
@@ -1680,7 +1680,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 				zend_throw_exception(zend_ce_parse_error,
 					"Invalid numeric literal", 0);
 				ZVAL_UNDEF(zendlval);
-				RETURN_TOKEN(T_ERROR);
+				RETURN_TOKEN(T_DNUMBER);
 			}
 			ZEND_ASSERT(!errno);
 			RETURN_TOKEN(T_DNUMBER);
@@ -1689,7 +1689,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_ERROR);
+			RETURN_TOKEN(T_DNUMBER);
 		}
 	}
 	ZEND_ASSERT(!errno);
@@ -2047,9 +2047,7 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				if (zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == FAILURE) {
-					RETURN_TOKEN(T_ERROR);
-				}
+				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
 				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
@@ -2216,9 +2214,7 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '"') == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2260,9 +2256,7 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '`') == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2336,9 +2330,7 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == FAILURE) {
-		RETURN_TOKEN(T_ERROR);
-	}
+	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 

@@ -1536,6 +1536,10 @@ int zendlex(zend_parser_stack_elem *elem) /* {{{ */
 again:
 	ZVAL_UNDEF(&zv);
 	retval = lex_scan(&zv);
+	if (EG(exception)) {
+		return T_ERROR;
+	}
+
 	switch (retval) {
 		case T_COMMENT:
 		case T_DOC_COMMENT:

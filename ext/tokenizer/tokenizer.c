@@ -191,9 +191,9 @@ void on_event(zend_php_scanner_event event, int token, int line)
 	HashTable *tokens_ht;
 	zval *token_zv;
 
-	switch(event) {
+	switch (event) {
 		case ON_TOKEN:
-			if (token == T_ERROR || token == END) break;
+			if (token == END) break;
 			if (token >= 256) {
 				array_init(&keyword);
 				add_next_index_long(&keyword, token);
@@ -281,7 +281,7 @@ PHP_FUNCTION(token_get_all)
 		success = tokenize_parse(return_value, source);
 	} else {
 		success = tokenize(return_value, source);
-		/* Normal token_get_all() should never throw. Errors are indicated by T_ERROR tokens. */
+		/* Normal token_get_all() should not throw. */
 		zend_clear_exception();
 	}
 
