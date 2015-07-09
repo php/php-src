@@ -115,6 +115,10 @@
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
 
+- JSON
+  . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
+    started with '\0'). (Jakub Zelenka)
+
 - mysqlnd:
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
     bound variables). (Laruence)
@@ -284,8 +288,6 @@
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
-  . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
-    started with '\0'). (Jakub Zelenka)
 
 - LDAP
   . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
