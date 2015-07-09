@@ -280,7 +280,9 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZE
 #define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap);
+ZEND_API zend_mm_heap *zend_mm_get_heap(void);
 
+ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap);
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
