@@ -1389,8 +1389,7 @@ PHP_FUNCTION(posix_getrlimit)
 PHP_FUNCTION(posix_setrlimit)
 {
 	struct rlimit rl;
-	zend_long cur, max;
-	int res;
+	zend_long res, cur, max;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &res, &cur, &max) == FAILURE) {
 		RETURN_FALSE;
