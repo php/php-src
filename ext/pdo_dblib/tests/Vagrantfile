@@ -1,0 +1,116 @@
+Vagrant.configure(2) do |config|
+  config.vm.box = "opentable/win-2008r2-standard-amd64-nocm"
+  config.vm.box_version = ">= 1.0.1"
+  config.vm.provider :virtualbox do |vb|
+      vb.name = "sqlserver-express"
+  end
+  config.vm.network :forwarded_port, guest: 3389, host: 3389
+  config.vm.network :forwarded_port, guest: 1433, host: 1433
+
+  config.vm.provision :shell, inline: $install
+  config.vm.provision :shell, inline: $configure
+end
+
+$install = <<'INSTALL'
+
+$ErrorActionPreference = "Stop"
+
+
+if ((Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile').EnableFirewall -eq 1) {
+    echo "Disabling firewall";
+    cmd /c netsh advfirewall set allprofiles state off | Out-Null
+}
+
+if ((Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server').fDenyTSConnections -eq 1) {
+    echo "Enabling Remote Desktop";
+    Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+}
+
+If(-not(Test-Path -path "c:\windows\microsoft.net\framework\v3.5\csc.exe")) {
+    echo "Installing .NET";
+    import-module servermanager
+    add-windowsfeature as-net-framework
+}
+
+Try {
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") | Out-Null
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement") | Out-Null
+    New-Object ('Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer') | Out-Null
+} Catch [system.exception] {
+    $installer = "C:\vagrant\SQLEXPRWT_x64_ENU.exe"
+
+    If(-not(Test-Path -path $installer)) {
+        echo "Downloading installer";
+        $source = "http://download.microsoft.com/download/0/4/B/04BE03CD-EAF3-4797-9D8D-2E08E316C998/SQLEXPRWT_x64_ENU.exe"
+        $client = new-object System.Net.WebClient
+        $client.DownloadFile($source, $installer)
+    }
+    echo "Installing SqlServerExpress"
+    cmd /c $installer /Q /Action=install /INDICATEPROGRESS /INSTANCENAME="SQLEXPRESS" /INSTANCEID=SQLExpress /IAcceptSQLServerLicenseTerms /FEATURES=SQL,Tools /TCPENABLED=1 /SECURITYMODE=SQL /SAPWD=S3cr3t@9
+}
+
+
+INSTALL
+
+$configure = <<'CONFIGURE'
+
+$dbname = "test";
+$login = "php";
+$passwd = "password";
+$tcpport = 1433;
+
+$ErrorActionPreference = "Stop"
+
+$tcpclient = New-Object System.Net.Sockets.TcpClient;
+Try {
+    $tcpclient.Connect("127.0.0.1", $tcpport);
+} Catch {
+    echo "Configuring TCP-port";
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo") | Out-Null
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement") | Out-Null
+    $Wmi = new-object ($Smo + 'Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer')
+    $Uri = "ManagedComputer[@Name='WIN-2008R2-STD']/ ServerInstance[@Name='SQLEXPRESS']/ServerProtocol[@Name='Tcp']"
+    $Tcp = $Wmi.GetSmoObject($Uri)
+    $Wmi.GetSmoObject($Uri + "/IPAddress[@Name='IPAll']").IPAddressProperties[1].Value="$tcpport"
+    $Tcp.alter()
+    Restart-Service -f "SQL Server (SQLEXPRESS)"
+
+}
+
+$con = New-Object Data.SqlClient.SqlConnection;
+$con.ConnectionString = "Data Source=.\SQLEXPRESS;Initial Catalog=master;Integrated Security=True;";
+$con.Open();
+
+echo "Creating database $dbname (if not exists)";
+$sql = "
+IF NOT EXISTS ( SELECT [name] FROM sys.databases WHERE [name] = '$dbname' ) 
+BEGIN 
+    EXEC master.dbo.sp_executesql N'CREATE DATABASE [$dbname]'
+END
+"
+$cmd = New-Object Data.SqlClient.SqlCommand $sql, $con;
+$cmd.ExecuteNonQuery();
+$cmd.Dispose();
+
+echo "Creating login $login (if not exists)";
+$sql = "
+IF NOT EXISTS 
+    (SELECT name  
+     FROM master.sys.server_principals
+     WHERE name = '$login')
+BEGIN
+    EXEC [$dbname].[dbo].sp_executesql N'CREATE LOGIN $login WITH PASSWORD = ''$passwd'', CHECK_POLICY=OFF, DEFAULT_LANGUAGE=english, DEFAULT_DATABASE=$dbname'
+    EXEC [$dbname].[dbo].sp_executesql N'CREATE USER $login FOR LOGIN $login'
+--    EXEC dbo.sp_executesql N'EXEC master.dbo.sp_addsrvrolemember @loginame = N''$login'', @rolename = N''sysadmin'' '
+END
+"
+$cmd = New-Object Data.SqlClient.SqlCommand $sql, $con;
+$cmd.ExecuteNonQuery();
+$cmd.Dispose();
+$con.Close();
+$con.Dispose();
+
+echo "Done."
+
+CONFIGURE
+
