@@ -783,6 +783,10 @@ static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int in
 
 static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 {
+	if (!ast) {
+		return;
+	}
+
 	if (ast->kind == ZEND_AST_STMT_LIST ||
 	    ast->kind == ZEND_AST_TRAIT_ADAPTATIONS) {
 		zend_ast_list *list = (zend_ast_list*)ast;
