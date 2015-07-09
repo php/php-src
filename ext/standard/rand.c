@@ -313,7 +313,7 @@ PHP_FUNCTION(mt_rand)
 	zend_long max;
 	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
-	
+
 	if (argc != 0) {
 		if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
 			return;
