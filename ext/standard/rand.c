@@ -313,7 +313,7 @@ PHP_FUNCTION(mt_rand)
 	zend_long max;
 	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
-
+	
 	if (argc != 0) {
 		if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
 			return;
@@ -321,8 +321,8 @@ PHP_FUNCTION(mt_rand)
 			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		} else if (
-			(min > 0 && max < (INT_MAX - min)) ||
-			(min < 0 && max > (INT_MAX + min))
+			(min > 0 && max < (ZEND_LONG_MAX - min)) ||
+			(min < 0 && max > (ZEND_LONG_MAX + min))
 		) {
 			php_error_docref(NULL, E_WARNING, "range of max(" ZEND_LONG_FMT ") minus min(" ZEND_LONG_FMT ") would overflow", max, min);
 			RETURN_FALSE;

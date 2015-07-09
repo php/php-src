@@ -2,15 +2,27 @@
 Random number generators should not accept a range that would lead to overflow
 --FILE--
 <?php
-mt_srand(123456);
-var_dump(mt_rand(-1,            getrandmax()));
-var_dump(mt_rand(-getrandmax(), getrandmax()));
-var_dump(mt_rand(-getrandmax(), getrandmax()));
-var_dump(mt_rand(PHP_INT_MIN,   PHP_INT_MAX));
+// the biggest range we can accommodate, based on RAND_RANGE scaling algo
+// 32bit: $upper == getrandmax()       // since we use 32-bit MT algo
+// 64bit: getrandmax() < PHP_INT_MAX   // since we allow scaling into 64-bit range
+$upper = PHP_INT_MAX;
+
+// now run some tests at the edge of that range, all should pass
+var_dump(mt_rand( 1, $upper));    // just inside range
+var_dump(mt_rand( 0, $upper));    // just at range
+var_dump(mt_rand(-1, $upper-1));  // just at range, different scale
+
+// now run some tests outside that range, we should get failures
+var_dump(mt_rand(-1,      $upper)); // one too big
+var_dump(mt_rand(-$upper, $upper)); // double your pleasure
+
+// common idioms that should also never work
+var_dump(mt_rand(PHP_INT_MIN, PHP_INT_MAX));
 
 --EXPECTF--
-Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
-bool(false)
+int(%i)
+int(%i)
+int(%i)
 
 Warning: mt_rand(): range of max(%i) minus min(%i) would overflow in %s on line %d
 bool(false)
