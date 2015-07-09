@@ -1,7 +1,7 @@
 --TEST--
-getprotobynumber fumction errors test
+getprotobynumber function errors test
 --CREDITS--
-edgarsandi <edgar.r.sandi@gmail.com>
+edgarsandi - <edgar.r.sandi@gmail.com>
 --FILE--
 <?php
 	// empty protocol number
