@@ -46,6 +46,7 @@ void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
@@ -277,7 +278,7 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 
 /* }}} */
 
-/* {{{ proto array token_get_all(string source)
+/* {{{ proto array token_get_all(string source [, int flags])
  */
 PHP_FUNCTION(token_get_all)
 {
