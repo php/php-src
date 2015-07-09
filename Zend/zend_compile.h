@@ -882,7 +882,9 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define ZEND_MEMBER_FUNC_CALL	1<<0
+#define ZEND_FREE_ON_RETURN     (1<<0)
+
+#define ZEND_MEMBER_FUNC_CALL	(1<<0)
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
