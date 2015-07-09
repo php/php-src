@@ -2290,7 +2290,7 @@ static void accel_deactivate(void)
 	ZCG(counted) = 0;
 
 #if !ZEND_DEBUG
-	if (ZCG(accel_directives).fast_shutdown) {
+	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
 		zend_accel_fast_shutdown();
 	}
 #endif
