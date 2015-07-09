@@ -894,6 +894,24 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 
 static zend_bool zend_is_call(zend_ast *ast);
 
+static void generate_free_loop_var_ex(znode *var, uint32_t flags) /* {{{ */
+{
+	if (var->op_type != IS_UNUSED) {
+		zend_op *opline = get_next_op(CG(active_op_array));
+
+		opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
+		SET_NODE(opline->op1, var);
+		SET_UNUSED(opline->op2);
+		opline->extended_value = flags;
+	}
+}
+/* }}} */
+
+static void generate_free_loop_var(znode *var) /* {{{ */
+{
+	generate_free_loop_var_ex(var, 0);
+}
+
 static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
@@ -3507,46 +3525,13 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
+static void zend_free_foreach_and_switch_variables(uint32_t flags) /* {{{ */
 {
-	zend_loop_var *base;
-	zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-
-	if (!loop_var) {
-		return 1;
-	}
-	base = zend_stack_base(&CG(loop_var_stack));
-	for (; loop_var >= base; loop_var--) {
-		if (loop_var->opcode == ZEND_FAST_CALL) {
-			zend_op *opline = get_next_op(CG(active_op_array));
-
-			opline->opcode = ZEND_FAST_CALL;
-			opline->result_type = IS_TMP_VAR;
-			opline->result.var = loop_var->var_num;
-			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
-			opline->op1.num = loop_var->u.try_catch_offset;
-		} else if (loop_var->opcode == ZEND_RETURN) {
-			/* Stack separator */
-			break;
-		} else if (depth <= 1) {
-			return 1;
-		} else if (loop_var->opcode == ZEND_NOP) {
-			/* Loop doesn't have freeable variable */
-			depth--;
-		} else {
-			zend_op *opline;
-
-			ZEND_ASSERT(loop_var->var_type == IS_VAR || loop_var->var_type == IS_TMP_VAR);
-			opline = get_next_op(CG(active_op_array));
-			opline->opcode = loop_var->opcode;
-			opline->op1_type = loop_var->var_type;
-			opline->op1.var = loop_var->var_num;
-			SET_UNUSED(opline->op2);
-			opline->op2.num = loop_var->u.brk_cont_offset;
-			opline->extended_value = ZEND_FREE_ON_RETURN;
-			depth--;
-	    }
+	int array_offset = CG(context).current_brk_cont;
+	while (array_offset != -1) {
+		zend_brk_cont_element *brk_cont = &CG(context).brk_cont_array[array_offset];
+		generate_free_loop_var_ex(&brk_cont->loop_var, flags);
+		array_offset = brk_cont->parent;
 	}
 	return (depth == 0);
 }
@@ -3575,7 +3560,12 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	zend_handle_loops_and_finally();
+	/* Generator return types are handled separately */
+	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
+	}
+
+	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_RETURN);
 
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
@@ -3583,10 +3573,6 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 	}
 
-	/* Generator return types are handled separately */
-	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
-	}
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
 
