@@ -17,14 +17,6 @@ PHP                                                                        NEWS
   . Fixed bug #69882 (OpenSSL error “key values mismatch” after 
     openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
 
-- SPL:
-  . Fixed bug #69970 (Use-after-free vulnerability in
-    spl_recursive_it_move_forward_ex()). (Laruence)
-
-- Sqlite3:
-  . Fixed bug #69972 (Use-after-free vulnerability in
-    sqlite3SafetyCheckSickOrOk()). (Laruence)
-
 09 Jul 2015, PHP 5.6.11
 
 - Core:
@@ -74,6 +66,12 @@ PHP                                                                        NEWS
   . Fixed bug #69737 (Segfault when SplMinHeap::compare produces fatal error).
     (Stas)
   . Fixed bug #67805 (SplFileObject setMaxLineLength). (Willian Gustavo Veiga).
+  . Fixed bug #69970 (Use-after-free vulnerability in
+    spl_recursive_it_move_forward_ex()). (Laruence)
+
+- Sqlite3:
+  . Fixed bug #69972 (Use-after-free vulnerability in
+    sqlite3SafetyCheckSickOrOk()). (Laruence)
 
 11 Jun 2015, PHP 5.6.10
 
