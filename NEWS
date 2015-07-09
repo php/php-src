@@ -5,6 +5,10 @@
 - Core:
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
 
+- Soap:
+  . Fixed bug #70032 (make_http_soap_request calls
+    zend_hash_get_current_key_ex(,,,NULL). (Laruence)
+
 - Standard:
   . Fixed bug #70018 (exec does not strip all whitespace). (Laruence)
 
