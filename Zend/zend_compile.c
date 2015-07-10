@@ -872,7 +872,7 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 
 static zend_bool zend_is_call(zend_ast *ast);
 
-static void generate_free_loop_var_ex(znode *var, uint32_t flags) /* {{{ */
+static void generate_free_loop_var(znode *var) /* {{{ */
 {
 	if (var->op_type != IS_UNUSED) {
 		zend_op *opline = get_next_op(CG(active_op_array));
@@ -880,15 +880,9 @@ static void generate_free_loop_var_ex(znode *var, uint32_t flags) /* {{{ */
 		opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
 		SET_NODE(opline->op1, var);
 		SET_UNUSED(opline->op2);
-		opline->extended_value = flags;
 	}
 }
 /* }}} */
-
-static void generate_free_loop_var(znode *var) /* {{{ */
-{
-	generate_free_loop_var_ex(var, 0);
-}
 
 static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 {
@@ -3447,12 +3441,12 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_free_foreach_and_switch_variables(uint32_t flags) /* {{{ */
+static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 {
 	int array_offset = CG(context).current_brk_cont;
 	while (array_offset != -1) {
 		zend_brk_cont_element *brk_cont = &CG(context).brk_cont_array[array_offset];
-		generate_free_loop_var_ex(&brk_cont->loop_var, flags);
+		generate_free_loop_var(&brk_cont->loop_var);
 		array_offset = brk_cont->parent;
 	}
 }
@@ -3476,12 +3470,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	/* Generator return types are handled separately */
-	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
-	}
-
-	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_RETURN);
+	zend_free_foreach_and_switch_variables();
 
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
@@ -3489,6 +3478,10 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 	}
 
+	/* Generator return types are handled separately */
+	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
+	}
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
 
