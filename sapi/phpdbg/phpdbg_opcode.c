@@ -150,9 +150,46 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 		break;
 	}
 
-	spprintf(&result, 0,
-		"%-23s %-20s %-20s %-20s",
-		decode[0] ? decode[0] : opcode_name,
+#if 1
+	if (ops->T_liveliness) {
+		uint32_t *var = ops->T_liveliness + (op - ops->opcodes);
+
+		if (*var != (uint32_t)-1) {
+			smart_str str = {0};
+
+			var = ops->T_liveliness + (*var);
+			smart_str_appends(&str, "; [@");
+			smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
+			while (*(++var) != (uint32_t)-1) {
+				smart_str_appends(&str, ", @");
+				smart_str_append_long(&str, EX_VAR_TO_NUM(((*var) & ~0x3)) - ops->last_var);
+			}
+			smart_str_appendc(&str, ']');
+			smart_str_0(&str);
+
+			asprintf(&decode[0],
+				"%-20s %-20s %-20s%-20s",
+				decode[1] ? decode[1] : "",
+				decode[2] ? decode[2] : "",
+				decode[3] ? decode[3] : "",
+				ZSTR_VAL(str.s));
+
+			smart_str_free(&str);
+
+			if (decode[1])
+				free(decode[1]);
+			if (decode[2])
+				free(decode[2]);
+			if (decode[3])
+				free(decode[3]);
+
+			return decode[0];
+		}
+	}
+#endif
+
+	asprintf(&decode[0],
+		"%-20s %-20s %-20s",
 		decode[1] ? decode[1] : "",
 		decode[2] ? decode[2] : "",
 		decode[3] ? decode[3] : "");
