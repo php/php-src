@@ -1110,6 +1110,12 @@ fast_assign:
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
+				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_REFCOUNT(zobj->properties)--;
+					}
+					zobj->properties = zend_array_dup(zobj->properties);
+				}
 				property = zend_hash_find(zobj->properties, Z_STR_P(property_name));
 				if (property) {
 					goto fast_assign;

@@ -4,6 +4,8 @@
 
 - Core:
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
+  . Fixed bug #69996 (Changing the property of a cloned object affects the
+    original). (Dmitry, Laruence)
 
 - Soap:
   . Fixed bug #70032 (make_http_soap_request calls
