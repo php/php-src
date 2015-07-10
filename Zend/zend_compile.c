@@ -294,7 +294,7 @@ void zend_file_context_end(zend_file_context *prev_context) /* {{{ */
 
 void zend_init_compiler_data_structures(void) /* {{{ */
 {
-	zend_stack_init(&CG(loop_var_stack), sizeof(zend_loop_var));
+	zend_stack_init(&CG(loop_var_stack), sizeof(znode));
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
@@ -580,14 +580,10 @@ static inline void zend_begin_loop(zend_uchar free_opcode, const znode *loop_var
 	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
 	brk_cont_element->parent = parent;
 
-	if (loop_var && (loop_var->op_type & (IS_VAR|IS_TMP_VAR))) {
-		info.opcode = free_opcode;
-		info.var_type = loop_var->op_type;
-		info.var_num = loop_var->u.op.var;
-		info.u.brk_cont_offset = CG(context).current_brk_cont;
+	if (loop_var) {
+		zend_stack_push(&CG(loop_var_stack), loop_var);
 		brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	} else {
-		info.opcode = ZEND_NOP;
 		/* The start field is used to free temporary variables in case of exceptions.
 		 * We won't try to free something of we don't have loop variable.  */
 		brk_cont_element->start = -1;
@@ -605,7 +601,9 @@ static inline void zend_end_loop(int cont_addr) /* {{{ */
 	brk_cont_element->brk = get_next_op_number(CG(active_op_array));
 	CG(context).current_brk_cont = brk_cont_element->parent;
 
-	zend_stack_del_top(&CG(loop_var_stack));
+	if (brk_cont_element->start >= 0) {
+		zend_stack_del_top(&CG(loop_var_stack));
+	}
 }
 /* }}} */
 
@@ -894,15 +892,24 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 
 static zend_bool zend_is_call(zend_ast *ast);
 
-static void generate_free_loop_var(znode *var) /* {{{ */
+static int generate_free_loop_var(znode *var) /* {{{ */
 {
-	if (var->op_type != IS_UNUSED) {
-		zend_op *opline = get_next_op(CG(active_op_array));
+	switch (var->op_type) {
+		case IS_UNUSED:
+			/* Stack separator on function boundary, stop applying */
+			return 1;
+		case IS_VAR:
+		case IS_TMP_VAR:
+		{
+			zend_op *opline = get_next_op(CG(active_op_array));
 
-		opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
-		SET_NODE(opline->op1, var);
-		SET_UNUSED(opline->op2);
+			opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
+			SET_NODE(opline->op1, var);
+			SET_UNUSED(opline->op2);
+		}
 	}
+
+	return 0;
 }
 /* }}} */
 
@@ -3521,13 +3528,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 
 static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 {
-	int array_offset = CG(context).current_brk_cont;
-	while (array_offset != -1) {
-		zend_brk_cont_element *brk_cont = &CG(context).brk_cont_array[array_offset];
-		generate_free_loop_var(&brk_cont->loop_var);
-		array_offset = brk_cont->parent;
-	}
-	return (depth == 0);
+	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
 }
 /* }}} */
 
@@ -3634,11 +3635,24 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
-		if (!zend_handle_loops_and_finally_ex(depth)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
-				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
-				depth, depth == 1 ? "" : "s");
-		}
+		int array_offset = CG(context).current_brk_cont;
+		zend_long nest_level = depth;
+		znode *loop_var = zend_stack_top(&CG(loop_var_stack));
+
+		do {
+			if (array_offset == -1) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+					ast->kind == ZEND_AST_BREAK ? "break" : "continue",
+					depth, depth == 1 ? "" : "s");
+			}
+
+			if (nest_level > 1 && CG(context).brk_cont_array[array_offset].start >= 0) {
+				generate_free_loop_var(loop_var);
+				loop_var--;
+			}
+
+			array_offset = CG(context).brk_cont_array[array_offset].parent;
+		} while (--nest_level > 0);
 	}
 	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
 	opline->op1.num = CG(context).current_brk_cont;
@@ -3651,38 +3665,94 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 	zend_label *dest;
 	int current, remove_oplines = opline->op1.num;
 	zval *label;
-	uint32_t opnum = opline - op_array->opcodes;
+	znode *loop_var = NULL;
 
 	label = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	if (CG(context).labels == NULL ||
-	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL
-	) {
-		CG(in_compilation) = 1;
-		CG(active_op_array) = op_array;
-		CG(zend_lineno) = opline->lineno;
-		zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL) {
+
+		if (pass2_opline) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = pass2_opline->lineno;
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+		} else {
+			/* Label is not defined. Delay to pass 2. */
+			zend_op *opline;
+
+			current = CG(context).current_brk_cont;
+			while (current != -1) {
+				if (CG(context).brk_cont_array[current].start >= 0) {
+					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+				}
+				current = CG(context).brk_cont_array[current].parent;
+			}
+			opline = zend_emit_op(NULL, ZEND_GOTO, NULL, label_node);
+			opline->extended_value = CG(context).current_brk_cont;
+			return;
+		}
 	}
 
 	zval_dtor(label);
 	ZVAL_NULL(label);
 
-	current = opline->extended_value;
-	for (; current != dest->brk_cont; current = op_array->brk_cont_array[current].parent) {
+	/* Check that we are not moving into loop or switch */
+	if (pass2_opline) {
+		current = pass2_opline->extended_value;
+	} else {
+		current = CG(context).current_brk_cont;
+	}
+	if (!pass2_opline) {
+		loop_var = zend_stack_top(&CG(loop_var_stack));
+	}
+	for (distance = 0, free_vars = 0; current != dest->brk_cont; distance++) {
 		if (current == -1) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = opline->lineno;
 			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
-		if (op_array->brk_cont_array[current].start >= 0) {
-			remove_oplines--;
+		if (CG(context).brk_cont_array[current].start >= 0) {
+			if (pass2_opline) {
+				free_vars++;
+			} else {
+				generate_free_loop_var(loop_var);
+				loop_var--;
+			}
 		}
 	}
 
-	for (current = 0; current < op_array->last_try_catch; ++current) {
-		zend_try_catch_element *elem = &op_array->try_catch_array[current];
-		if (elem->try_op > opnum) {
-			break;
+	if (pass2_opline) {
+		if (free_vars) {
+			current = pass2_opline->extended_value;
+			while (current != dest->brk_cont) {
+				if (CG(context).brk_cont_array[current].start >= 0) {
+					zend_op *brk_opline = &op_array->opcodes[CG(context).brk_cont_array[current].brk];
+
+					if (brk_opline->opcode == ZEND_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					} else if (brk_opline->opcode == ZEND_FE_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FE_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					}
+				}
+				current = CG(context).brk_cont_array[current].parent;
+			}
 		}
 		if (elem->finally_op && opnum < elem->finally_op - 1
 			&& (dest->opline_num > elem->finally_end || dest->opline_num < elem->try_op)
@@ -4842,8 +4912,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 
 	{
 		/* Push a separator to the loop variable stack */
-		zend_loop_var dummy_var;
-		dummy_var.opcode = ZEND_RETURN;
+		znode dummy_var;
+		dummy_var.op_type = IS_UNUSED;
 
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}

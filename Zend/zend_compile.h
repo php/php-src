@@ -111,6 +111,25 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
+typedef struct _zend_brk_cont_element {
+	int start;
+	int cont;
+	int brk;
+	int parent;
+} zend_brk_cont_element;
+
+typedef struct _zend_label {
+	int brk_cont;
+	uint32_t opline_num;
+} zend_label;
+
+typedef struct _zend_try_catch_element {
+	uint32_t try_op;
+	uint32_t catch_op;  /* ketchup! */
+	uint32_t finally_op;
+	uint32_t finally_end;
+} zend_try_catch_element;
+
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
