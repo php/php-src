@@ -4075,8 +4075,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		if ((labelzv = zend_hash_get_current_data_ex(CG(context).labels, &hpos))) {
 			zend_label *label = Z_PTR_P(labelzv);
 			if (label->opline_num == get_next_op_number(CG(active_op_array))) {
-				/* using a NOP doesn't work here, it would be removed by opcache */
-				zend_emit_jump(get_next_op_number(CG(active_op_array)) + 1);
+				zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 			}
 		}
 	}
