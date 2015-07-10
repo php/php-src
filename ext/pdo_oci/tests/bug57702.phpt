@@ -81,7 +81,6 @@ while ($stmt->fetch(PDO::FETCH_BOUND)) {
     var_dump($clob1);
     var_dump($clob2);
 }
-print "done\n";
 
 ////////////////////
 
@@ -123,6 +122,22 @@ for ($i = 0; $i < count($a); $i++) {
     var_dump(stream_get_contents($a[$i][1]));
 }
 
+////////////////////
+
+echo "\nSixth Query\n"; 
+
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
+
+$a = array();
+$i = 0;
+foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
+	$a[$i][0] = $row['d4_1'];
+	$a[$i][1] = $row['d4_2'];
+	var_dump(stream_get_contents($a[$i][0]));
+	var_dump(stream_get_contents($a[$i][1]));
+	$i++;
+}
+
 // Cleanup
 $query = "drop table bug57702";
 $stmt = $db->prepare($query);
@@ -149,7 +164,6 @@ string(11) "row 1 col 1"
 string(11) "row 1 col 2"
 string(11) "row 2 col 1"
 string(11) "row 2 col 2"
-done
 
 Fourth Query
 string(11) "row 1 col 1"
@@ -160,6 +174,12 @@ string(11) "row 2 col 2"
 Fifth Query
 string(11) "row 2 col 1"
 string(11) "row 2 col 2"
+string(11) "row 2 col 1"
+string(11) "row 2 col 2"
+
+Sixth Query
+string(11) "row 1 col 1"
+string(11) "row 1 col 2"
 string(11) "row 2 col 1"
 string(11) "row 2 col 2"
 done
