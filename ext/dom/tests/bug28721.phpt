@@ -119,66 +119,65 @@ print_node_r($p);
 
 ?>
 --EXPECT--
-
-name (value): p ( t1 X t2  xxx )
+name (value): p ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
   name (value): #text ( t1 )
-  parent: name (value): p ( t1 X t2  xxx )
+  parent: name (value): p ()
   previousSibling: NULL
-  nextSibling: name (value): b (X)
+  nextSibling: name (value): b ()
 
-  name (value): b (X)
-  parent: name (value): p ( t1 X t2  xxx )
+  name (value): b ()
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t1 )
   nextSibling: name (value): #text ( t2 )
 
     name (value): #text (X)
-    parent: name (value): b (X)
+    parent: name (value): b ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t2 )
-  parent: name (value): p ( t1 X t2  xxx )
-  previousSibling: name (value): b (X)
+  parent: name (value): p ()
+  previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): p ( t1 X t2  xxx )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t2 )
   nextSibling: NULL
 
 Append t1 to p:
 
-name (value): p (X t2  xxx  t1 )
+name (value): p ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
-  name (value): b (X)
-  parent: name (value): p (X t2  xxx  t1 )
+  name (value): b ()
+  parent: name (value): p ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t2 )
 
     name (value): #text (X)
-    parent: name (value): b (X)
+    parent: name (value): b ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t2 )
-  parent: name (value): p (X t2  xxx  t1 )
-  previousSibling: name (value): b (X)
+  parent: name (value): p ()
+  previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): p (X t2  xxx  t1 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t2 )
   nextSibling: name (value): #text ( t1 )
 
   name (value): #text ( t1 )
-  parent: name (value): p (X t2  xxx  t1 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( xxx )
   nextSibling: NULL
 
@@ -186,18 +185,18 @@ t1 == ret: bool(true)
 
 div:
 
-name (value): div ( t3  t4  xxx )
+name (value): div ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
   name (value): #text ( t3 )
-  parent: name (value): div ( t3  t4  xxx )
+  parent: name (value): div ()
   previousSibling: NULL
   nextSibling: name (value): b ()
 
   name (value): b ()
-  parent: name (value): div ( t3  t4  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t3 )
   nextSibling: name (value): #text ( t4 )
 
@@ -207,34 +206,34 @@ nextSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t4 )
-  parent: name (value): div ( t3  t4  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): div ( t3  t4  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t4 )
   nextSibling: NULL
 
 Insert t4 before t3:
 
-name (value): div ( t4  t3  xxx )
+name (value): div ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
   name (value): #text ( t4 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t3 )
 
   name (value): #text ( t3 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t4 )
   nextSibling: name (value): b ()
 
   name (value): b ()
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t3 )
   nextSibling: name (value): #text ( xxx )
 
@@ -244,40 +243,40 @@ nextSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( xxx )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): b ()
   nextSibling: NULL
 
 
 p:
 
-name (value): p (X t2  xxx  t1 )
+name (value): p ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
-  name (value): b (X)
-  parent: name (value): p (X t2  xxx  t1 )
+  name (value): b ()
+  parent: name (value): p ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t2 )
 
     name (value): #text (X)
-    parent: name (value): b (X)
+    parent: name (value): b ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t2 )
-  parent: name (value): p (X t2  xxx  t1 )
-  previousSibling: name (value): b (X)
+  parent: name (value): p ()
+  previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): p (X t2  xxx  t1 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t2 )
   nextSibling: name (value): #text ( t1 )
 
   name (value): #text ( t1 )
-  parent: name (value): p (X t2  xxx  t1 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( xxx )
   nextSibling: NULL
 
@@ -291,73 +290,73 @@ nextSibling: NULL
   name (value): #text ( t5 )
   parent: name (value): #document-fragment ()
   previousSibling: NULL
-  nextSibling: name (value): i ( frob )
+  nextSibling: name (value): i ()
 
-  name (value): i ( frob )
+  name (value): i ()
   parent: name (value): #document-fragment ()
   previousSibling: name (value): #text ( t5 )
   nextSibling: name (value): #text ( t6 )
 
     name (value): #text ( frob )
-    parent: name (value): i ( frob )
+    parent: name (value): i ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t6 )
   parent: name (value): #document-fragment ()
-  previousSibling: name (value): i ( frob )
+  previousSibling: name (value): i ()
   nextSibling: NULL
 
 Appending fragment to p:
 
-name (value): p (X t2  xxx  t1  t5  frob  t6 )
+name (value): p ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
-  name (value): b (X)
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  name (value): b ()
+  parent: name (value): p ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t2 )
 
     name (value): #text (X)
-    parent: name (value): b (X)
+    parent: name (value): b ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t2 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
-  previousSibling: name (value): b (X)
+  parent: name (value): p ()
+  previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t2 )
   nextSibling: name (value): #text ( t1 )
 
   name (value): #text ( t1 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( xxx )
   nextSibling: name (value): #text ( t5 )
 
   name (value): #text ( t5 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t1 )
-  nextSibling: name (value): i ( frob )
+  nextSibling: name (value): i ()
 
-  name (value): i ( frob )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  name (value): i ()
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t5 )
   nextSibling: name (value): #text ( t6 )
 
     name (value): #text ( frob )
-    parent: name (value): i ( frob )
+    parent: name (value): i ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t6 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
-  previousSibling: name (value): i ( frob )
+  parent: name (value): p ()
+  previousSibling: name (value): i ()
   nextSibling: NULL
 
 Fragment:
@@ -369,23 +368,23 @@ nextSibling: NULL
 
 div:
 
-name (value): div ( t4  t3  xxx )
+name (value): div ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
   name (value): #text ( t4 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t3 )
 
   name (value): #text ( t3 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t4 )
   nextSibling: name (value): b ()
 
   name (value): b ()
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t3 )
   nextSibling: name (value): #text ( xxx )
 
@@ -395,30 +394,30 @@ nextSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( xxx )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): b ()
   nextSibling: NULL
 
 Inserting fragment before t4
 Error (2) on line 109: DOMNode::insertBefore(): Document Fragment is empty
 
-name (value): div ( t4  t3  xxx )
+name (value): div ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
   name (value): #text ( t4 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t3 )
 
   name (value): #text ( t3 )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t4 )
   nextSibling: name (value): b ()
 
   name (value): b ()
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): #text ( t3 )
   nextSibling: name (value): #text ( xxx )
 
@@ -428,58 +427,58 @@ nextSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( xxx )
-  parent: name (value): div ( t4  t3  xxx )
+  parent: name (value): div ()
   previousSibling: name (value): b ()
   nextSibling: NULL
 
 p:
 
-name (value): p (X t2  xxx  t1  t5  frob  t6 )
+name (value): p ()
 parent: NULL
 previousSibling: NULL
 nextSibling: NULL
 
-  name (value): b (X)
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  name (value): b ()
+  parent: name (value): p ()
   previousSibling: NULL
   nextSibling: name (value): #text ( t2 )
 
     name (value): #text (X)
-    parent: name (value): b (X)
+    parent: name (value): b ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t2 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
-  previousSibling: name (value): b (X)
+  parent: name (value): p ()
+  previousSibling: name (value): b ()
   nextSibling: name (value): #text ( xxx )
 
   name (value): #text ( xxx )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t2 )
   nextSibling: name (value): #text ( t1 )
 
   name (value): #text ( t1 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( xxx )
   nextSibling: name (value): #text ( t5 )
 
   name (value): #text ( t5 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t1 )
-  nextSibling: name (value): i ( frob )
+  nextSibling: name (value): i ()
 
-  name (value): i ( frob )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
+  name (value): i ()
+  parent: name (value): p ()
   previousSibling: name (value): #text ( t5 )
   nextSibling: name (value): #text ( t6 )
 
     name (value): #text ( frob )
-    parent: name (value): i ( frob )
+    parent: name (value): i ()
     previousSibling: NULL
     nextSibling: NULL
 
   name (value): #text ( t6 )
-  parent: name (value): p (X t2  xxx  t1  t5  frob  t6 )
-  previousSibling: name (value): i ( frob )
+  parent: name (value): p ()
+  previousSibling: name (value): i ()
   nextSibling: NULL

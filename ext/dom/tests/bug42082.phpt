@@ -22,9 +22,9 @@ DOMNodeList
 int(0)
 bool(true)
 bool(true)
-string(0) ""
+NULL
 bool(true)
-bool(true)
+bool(false)
 bool(false)
 bool(false)
 ===DONE===
