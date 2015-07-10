@@ -821,7 +821,13 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		do {
 			dst--;
 			src--;
-			ZVAL_MAKE_REF(src);
+			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+				if (!Z_ISREF_P(src)) {
+					ZVAL_NEW_PERSISTENT_REF(src, src);
+				}
+			} else {
+				ZVAL_MAKE_REF(src);
+			}
 			ZVAL_COPY_VALUE(dst, src);
 			Z_ADDREF_P(dst);
 			if (Z_CONSTANT_P(Z_REFVAL_P(dst))) {
