@@ -51,7 +51,24 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 
 char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 {
-	char *decode[4] = {NULL, NULL, NULL, NULL};
+	const char *opcode_name = phpdbg_decode_opcode(op->opcode);
+	char *result, *decode[4] = {NULL, NULL, NULL, NULL};
+
+	/* EX */
+	switch (op->opcode) {
+	case ZEND_FAST_CALL:
+		if (op->extended_value != 0) {
+			asprintf(&decode[0], "FAST_CALL<%s>",
+				op->extended_value == ZEND_FAST_CALL_FROM_CATCH ? "FROM_CATCH" : "FROM_FINALLY");
+		}
+		break;
+	case ZEND_FAST_RET:
+		if (op->extended_value != 0) {
+			asprintf(&decode[0], "FAST_RET<%s>",
+				op->extended_value == ZEND_FAST_RET_TO_CATCH ? "TO_CATCH" : "TO_FINALLY");
+		}
+		break;
+	}
 
 	/* OP1 */
 	switch (op->opcode) {
@@ -74,9 +91,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 
 	/* OP2 */
 	switch (op->opcode) {
-	/* TODO: ZEND_FAST_CALL, ZEND_FAST_RET op2 */
 	case ZEND_JMPZNZ:
-		asprintf(&decode[2], "J%u or J%" PRIu32, OP_JMP_ADDR(op, op->op2) - ops->opcodes, ZEND_OFFSET_TO_OPLINE(op, op->extended_value) - ops->opcodes);
+		asprintf(&decode[2], "J%ld or J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes, ZEND_OFFSET_TO_OPLINE(op, op->extended_value) - ops->opcodes);
 		break;
 
 	case ZEND_JMPZ:
@@ -86,6 +102,13 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	case ZEND_JMP_SET:
 	case ZEND_ASSERT_CHECK:
 		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
+		break;
+
+	case ZEND_FAST_CALL:
+	case ZEND_FAST_RET:
+		if (op->extended_value != 0) {
+			asprintf(&decode[2], "J%" PRIu32, op->op2.opline_num);
+		}
 		break;
 
 	case ZEND_SEND_VAL:
@@ -113,12 +136,15 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 		break;
 	}
 
-	asprintf(&decode[0],
-		"%-20s %-20s %-20s",
+	asprintf(&result,
+		"%-23s %-20s %-20s %-20s",
+		decode[0] ? decode[0] : opcode_name,
 		decode[1] ? decode[1] : "",
 		decode[2] ? decode[2] : "",
 		decode[3] ? decode[3] : "");
 
+	if (decode[0])
+		free(decode[0]);
 	if (decode[1])
 		free(decode[1]);
 	if (decode[2])
@@ -126,7 +152,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	if (decode[3])
 		free(decode[3]);
 
-	return decode[0];
+	return result;
 } /* }}} */
 
 void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
@@ -142,19 +168,17 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 
 		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("opline", "line=\"%u\" opline=\"%p\" opcode=\"%s\" op=\"%s\" file=\"%s\"", "L%-5u %16p %-30s %s %s",
+			phpdbg_notice("opline", "line=\"%u\" opline=\"%p\" op=\"%s\" file=\"%s\"", "L%-5u %16p %s %s",
 			   opline->lineno,
 			   opline,
-			   phpdbg_decode_opcode(opline->opcode),
 			   decode,
 			   execute_data->func->op_array.filename ? ZSTR_VAL(execute_data->func->op_array.filename) : "unknown");
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %-30s %s %s",
+			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s",
 				opline->lineno,
 				opline,
-				phpdbg_decode_opcode(opline->opcode),
 				decode,
 				execute_data->func->op_array.filename ? ZSTR_VAL(execute_data->func->op_array.filename) : "unknown");
 		}
@@ -182,5 +206,8 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
 	const char *ret = zend_get_opcode_name(opcode);
-	return ret?ret:"UNKNOWN";
+	if (ret) {
+		return ret + 5; /* Skip ZEND_ prefix */
+	}
+	return "UNKNOWN";
 } /* }}} */
