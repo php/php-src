@@ -1200,7 +1200,8 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
-		fn_copy = *fn;
+		/* And how about ZEND_OVERLOADED_FUNCTION? */
+		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION? sizeof(zend_op_array) : sizeof(zend_internal_function));
 
 		/* apply aliases which have not alias name, just setting visibility */
 		if (ce->trait_aliases) {
