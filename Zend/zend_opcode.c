@@ -847,11 +847,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 				&& opline->opcode != ZEND_FETCH_LIST
 				&& opline->opcode != ZEND_CASE
 				&& opline->opcode != ZEND_FE_FETCH_R
-				&& opline->opcode != ZEND_FE_FETCH_RW
-				/* the following opcodes are not the "final" */
-				&& (opline->opcode != ZEND_FREE || !(opline->extended_value & ZEND_FREE_ON_RETURN))
-				&& (opline->opcode != ZEND_FE_FREE || !(opline->extended_value & ZEND_FREE_ON_RETURN))
-			) {
+				&& opline->opcode != ZEND_FE_FETCH_RW) {
 				op_live_total += liveliness_kill_var(op_array, opline, var, Tstart, opTs);
 			}
 		}
@@ -862,7 +858,7 @@ static zend_always_inline uint32_t *generate_var_liveliness_info_ex(zend_op_arra
 		}
 	} while (++opline != end);
 
-#if 0
+#if ZEND_DEBUG
 	/* Check that all TMP variable live-ranges are closed */
 	for (i = 0; i < op_array->T; i++) {
 		ZEND_ASSERT(Tstart[i] == (uint32_t)-1);
