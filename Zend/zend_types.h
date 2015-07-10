@@ -477,6 +477,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OPT_IMMUTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_IMMUTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_IMMUTABLE_P(zval_p)	Z_OPT_IMMUTABLE(*(zval_p))
 
+#define Z_OPT_ISREF(zval)			(Z_OPT_TYPE(zval) == IS_REFERENCE)
+#define Z_OPT_ISREF_P(zval_p)		Z_OPT_ISREF(*(zval_p))
+
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
 #define Z_ISREF_P(zval_p)			Z_ISREF(*(zval_p))
 
@@ -867,6 +870,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define ZVAL_DEREF(z) do {								\
 		if (UNEXPECTED(Z_ISREF_P(z))) {					\
+			(z) = Z_REFVAL_P(z);						\
+		}												\
+	} while (0)
+
+#define ZVAL_OPT_DEREF(z) do {							\
+		if (UNEXPECTED(Z_OPT_ISREF_P(z))) {				\
 			(z) = Z_REFVAL_P(z);						\
 		}												\
 	} while (0)
