@@ -37,6 +37,8 @@ PHP                                                                        NEWS
     (Christian Wenz)
   . Fixed bug #69892 (Different arrays compare indentical due to integer key
     truncation). (Nikita)
+  . Fixed bug #69874 (Can't set empty additional_headers for mail()), regression
+    from fix to bug #68776. (Yasuo)
 
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
