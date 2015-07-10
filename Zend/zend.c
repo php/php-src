@@ -1045,6 +1045,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
+	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	zend_array *symbol_table;
 
@@ -1211,6 +1212,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (in_compilation) {
 				saved_class_entry = CG(active_class_entry);
 				CG(active_class_entry) = NULL;
+				SAVE_STACK(loop_var_stack);
 				SAVE_STACK(delayed_oplines_stack);
 				CG(in_compilation) = 0;
 			}
@@ -1229,6 +1231,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 
 			if (in_compilation) {
 				CG(active_class_entry) = saved_class_entry;
+				RESTORE_STACK(loop_var_stack);
 				RESTORE_STACK(delayed_oplines_stack);
 				CG(in_compilation) = 1;
 			}
