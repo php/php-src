@@ -501,6 +501,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
 					case ZEND_JMP:
+					case ZEND_GOTO:
 					case ZEND_FAST_CALL:
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -589,6 +590,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->arg_info = arg_info;
 	}
 
+	if (op_array->brk_cont_array) {
+		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
+	}
+
 	if (op_array->scope) {
 		op_array->scope = zend_shared_alloc_get_xlat_entry(op_array->scope);
 	}
@@ -611,10 +616,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 	if (op_array->try_catch_array) {
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
-	}
-
-	if (op_array->T_liveliness) {
-		zend_accel_store(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last]);
 	}
 
 	if (op_array->vars) {

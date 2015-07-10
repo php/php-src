@@ -624,6 +624,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_EXIT:
 		case ZEND_THROW:
 		case ZEND_CATCH:
+		case ZEND_GOTO:
 		case ZEND_FAST_CALL:
 		case ZEND_FAST_RET:
 		case ZEND_JMP:

@@ -229,16 +229,16 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
+	if (op_array->brk_cont_array) {
+		ADD_DUP_SIZE(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
+	}
+
 	if (ZCG(accel_directives).save_comments && op_array->doc_comment) {
 		ADD_STRING(op_array->doc_comment);
 	}
 
 	if (op_array->try_catch_array) {
 		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
-	}
-
-	if (op_array->T_liveliness) {
-		ADD_DUP_SIZE(op_array->T_liveliness, sizeof(uint32_t) * op_array->T_liveliness[op_array->last]);
 	}
 
 	if (op_array->vars) {
