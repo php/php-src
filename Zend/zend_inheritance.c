@@ -821,10 +821,9 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		do {
 			dst--;
 			src--;
-			ZVAL_MAKE_REF(src);
-			ZVAL_COPY_VALUE(dst, src);
-			Z_ADDREF_P(dst);
-			if (Z_CONSTANT_P(Z_REFVAL_P(dst))) {
+
+			ZVAL_COPY(dst, src);
+			if (Z_OPT_CONSTANT_P(dst)) {
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		} while (dst != end);
