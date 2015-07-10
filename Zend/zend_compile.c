@@ -3514,9 +3514,20 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_free_foreach_and_switch_variables(void) /* {{{ */
+static void zend_free_foreach_and_switch_variables(uint32_t flags) /* {{{ */
 {
+	uint32_t start_op_number = get_next_op_number(CG(active_op_array));
+
 	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
+
+	if (flags) {
+		uint32_t end_op_number = get_next_op_number(CG(active_op_array));
+
+		while (start_op_number < end_op_number) {
+			CG(active_op_array)->opcodes[start_op_number].extended_value |= flags;
+			start_op_number++;
+		}
+	}
 }
 /* }}} */
 
@@ -3538,7 +3549,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	zend_free_foreach_and_switch_variables();
+	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_RETURN);
 
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);

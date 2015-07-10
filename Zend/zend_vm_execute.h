@@ -1500,6 +1500,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		}
 	}
 
+	if (catch_op_num) {
+		if ((EX(func)->op_array.opcodes[op_num].opcode == ZEND_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
+		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FE_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
+		) {
+			/* exceptions thrown because of TMP variable destruction on "return"
+			 * statement should't be caught in the same function.
+			 * See: Zend/tests/try_finally_012.phpt
+			 */
+			catch_op_num = 0;
+		}
+	}
+
 	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
@@ -40189,10 +40201,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_EX_SPEC_TMPVAR_HANDLER(Z
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FREE_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *var;
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	var = EX_VAR(opline->op1.var);
+	zval_ptr_dtor_nogc(var);
+	ZVAL_NULL(var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -40205,8 +40220,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FREE_SPEC_TMPVAR_HANDLER(ZE
 	var = EX_VAR(opline->op1.var);
 	if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 		zend_hash_iterator_del(Z_FE_ITER_P(var));
+		Z_FE_ITER_P(var) = (uint32_t)-1;
 	}
 	zval_ptr_dtor_nogc(var);
+	ZVAL_NULL(var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
