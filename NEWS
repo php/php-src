@@ -46,6 +46,10 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed bug #69803 (gmp_random_range() modifies second parameter if GMP
     number). (Nikita)
+
+- Mysqlnd:
+  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM) (CVE-2015-3152).
+    (Andrey)
     
 - PCRE:
   . Fixed Bug #53823 (preg_replace: * qualifier on unicode replace garbles the
