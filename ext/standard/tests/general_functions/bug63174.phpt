@@ -13,6 +13,10 @@ var_dump(mt_rand( 1,     $upper));    // just inside range
 var_dump(mt_rand( 0,     $upper));    // just at range
 var_dump(mt_rand(-1,     $upper-1));  // just at range, different scale
 var_dump(mt_rand($lower, -1));        // just inside range
+var_dump(
+    mt_rand($lower, -1) +
+    mt_rand(0,      $upper)
+);
 
 // now run some tests outside that range, we should get failures
 var_dump(mt_rand(-1,      $upper)); // one too big
@@ -24,6 +28,7 @@ var_dump(mt_rand(-$upper, $upper)); // double your pleasure
 var_dump(mt_rand(PHP_INT_MIN, PHP_INT_MAX));
 
 --EXPECTF--
+int(%i)
 int(%i)
 int(%i)
 int(%i)
