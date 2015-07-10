@@ -32,6 +32,7 @@
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
+#include "zend_vm.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -871,61 +872,6 @@ static void ptr_dtor(zval *zv) /* {{{ */
 
 static void str_dtor(zval *zv)  /* {{{ */ {
 	zend_string_release(Z_STR_P(zv));
-}
-/* }}} */
-
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2) /* {{{ */
-{
-	zend_label *dest;
-	int current, distance;
-	zval *label;
-
-	if (pass2) {
-		label = RT_CONSTANT(op_array, opline->op2);
-	} else {
-		label = CT_CONSTANT_EX(op_array, opline->op2.constant);
-	}
-	if (CG(context).labels == NULL ||
-	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL) {
-
-		if (pass2) {
-			CG(in_compilation) = 1;
-			CG(active_op_array) = op_array;
-			CG(zend_lineno) = opline->lineno;
-			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
-		} else {
-			/* Label is not defined. Delay to pass 2. */
-			return;
-		}
-	}
-
-	opline->op1.opline_num = dest->opline_num;
-	zval_dtor(label);
-	ZVAL_NULL(label);
-
-	/* Check that we are not moving into loop or switch */
-	current = opline->extended_value;
-	for (distance = 0; current != dest->brk_cont; distance++) {
-		if (current == -1) {
-			if (pass2) {
-				CG(in_compilation) = 1;
-				CG(active_op_array) = op_array;
-				CG(zend_lineno) = opline->lineno;
-			}
-			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
-		}
-		current = op_array->brk_cont_array[current].parent;
-	}
-
-	if (distance == 0) {
-		/* Nothing to break out of, optimize to ZEND_JMP */
-		opline->opcode = ZEND_JMP;
-		opline->extended_value = 0;
-		SET_UNUSED(opline->op2);
-	} else {
-		/* Set real break distance */
-		ZVAL_LONG(label, distance);
-	}
 }
 /* }}} */
 
@@ -3652,16 +3598,125 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline) /* {{{ */
+{
+	zend_label *dest;
+	int current, distance, free_vars;
+	zval *label;
+	znode *loop_var = NULL;
+
+	if (pass2_opline) {
+		label = RT_CONSTANT(op_array, pass2_opline->op2);
+	} else {
+		label = &label_node->u.constant;
+	}
+	if (CG(context).labels == NULL ||
+	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL) {
+
+		if (pass2_opline) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = pass2_opline->lineno;
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+		} else {
+			/* Label is not defined. Delay to pass 2. */
+			zend_op *opline;
+
+			current = CG(context).current_brk_cont;
+			while (current != -1) {
+				if (op_array->brk_cont_array[current].start >= 0) {
+					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+				}
+				current = op_array->brk_cont_array[current].parent;
+			}
+			opline = zend_emit_op(NULL, ZEND_GOTO, NULL, label_node);
+			opline->extended_value = CG(context).current_brk_cont;
+			return;
+		}
+	}
+
+	zval_dtor(label);
+	ZVAL_NULL(label);
+
+	/* Check that we are not moving into loop or switch */
+	if (pass2_opline) {
+		current = pass2_opline->extended_value;
+	} else {
+		current = CG(context).current_brk_cont;
+	}
+	if (!pass2_opline) {
+		loop_var = zend_stack_top(&CG(loop_var_stack));
+	}
+	for (distance = 0, free_vars = 0; current != dest->brk_cont; distance++) {
+		if (current == -1) {
+			if (pass2_opline) {
+				CG(in_compilation) = 1;
+				CG(active_op_array) = op_array;
+				CG(zend_lineno) = pass2_opline->lineno;
+			}
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
+		}
+		if (op_array->brk_cont_array[current].start >= 0) {
+			if (pass2_opline) {
+				free_vars++;
+			} else {
+				generate_free_loop_var(loop_var);
+				loop_var--;
+			}
+		}
+		current = op_array->brk_cont_array[current].parent;
+	}
+
+	if (pass2_opline) {
+		if (free_vars) {
+			current = pass2_opline->extended_value;
+			while (current != dest->brk_cont) {
+				if (op_array->brk_cont_array[current].start >= 0) {
+					zend_op *brk_opline = &op_array->opcodes[op_array->brk_cont_array[current].brk];
+
+					if (brk_opline->opcode == ZEND_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					} else if (brk_opline->opcode == ZEND_FE_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FE_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					}
+				}
+				current = op_array->brk_cont_array[current].parent;
+			}
+		}
+		pass2_opline->opcode = ZEND_JMP;
+		pass2_opline->op1.opline_num = dest->opline_num;
+		SET_UNUSED(pass2_opline->op2);
+		pass2_opline->extended_value = 0;
+	} else {
+		zend_op *opline = zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
+		opline->op1.opline_num = dest->opline_num;
+	}
+}
+/* }}} */
+
 void zend_compile_goto(zend_ast *ast) /* {{{ */
 {
 	zend_ast *label_ast = ast->child[0];
 	znode label_node;
-	zend_op *opline;
 
 	zend_compile_expr(&label_node, label_ast);
-	opline = zend_emit_op(NULL, ZEND_GOTO, NULL, &label_node);
-	opline->extended_value = CG(context).current_brk_cont;
-	zend_resolve_goto_label(CG(active_op_array), opline, 0);
+	zend_resolve_goto_label(CG(active_op_array), &label_node, NULL);
 }
 /* }}} */
 

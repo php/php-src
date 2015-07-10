@@ -700,11 +700,8 @@ static void zend_resolve_finally_calls(zend_op_array *op_array)
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) != IS_LONG) {
-					uint32_t num = opline->op2.constant;
-
 					ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
-					zend_resolve_goto_label(op_array, opline, 1);
-					opline->op2.constant = num;
+					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
@@ -787,7 +784,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) != IS_LONG) {
-					zend_resolve_goto_label(op_array, opline, 1);
+					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:

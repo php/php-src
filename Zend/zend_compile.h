@@ -712,7 +712,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -953,7 +953,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_BRK 254
+#define ZEND_GOTO 253
+#define ZEND_BRK  254
 #define ZEND_CONT 255
 
 

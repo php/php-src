@@ -56,7 +56,6 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	/* OP1 */
 	switch (op->opcode) {
 	case ZEND_JMP:
-	case ZEND_GOTO:
 	case ZEND_FAST_CALL:
 		asprintf(&decode[1], "J%ld", OP_JMP_ADDR(op, op->op1) - ops->opcodes);
 		break;

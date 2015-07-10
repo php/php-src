@@ -4792,31 +4792,6 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
-{
-	USE_OPLINE
-	zend_brk_cont_element *el;
-
-	SAVE_OPLINE();
-	el = zend_brk_cont(Z_LVAL_P(EX_CONSTANT(opline->op2)), opline->extended_value,
- 	                   &EX(func)->op_array, execute_data);
-
-	if (el->start >= 0) {
-		zend_op *brk_opline = EX(func)->op_array.opcodes + el->brk;
-
-		if (brk_opline->opcode == ZEND_FREE) {
-			zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-		} else if (brk_opline->opcode == ZEND_FE_FREE) {
-			zval *var = EX_VAR(brk_opline->op1.var);
-			if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-				zend_hash_iterator_del(Z_FE_ITER_P(var));
-			}
-			zval_ptr_dtor_nogc(var);
-		}
-	}
-	ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
-}
-
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
