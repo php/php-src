@@ -111,25 +111,6 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
-typedef struct _zend_brk_cont_element {
-	int start;
-	int cont;
-	int brk;
-	int parent;
-} zend_brk_cont_element;
-
-typedef struct _zend_label {
-	int brk_cont;
-	uint32_t opline_num;
-} zend_label;
-
-typedef struct _zend_try_catch_element {
-	uint32_t try_op;
-	uint32_t catch_op;  /* ketchup! */
-	uint32_t finally_op;
-	uint32_t finally_end;
-} zend_try_catch_element;
-
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
 	uint32_t   opcodes_size;
@@ -733,7 +714,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -970,9 +951,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO  253
-#define ZEND_BRK   254
-#define ZEND_CONT  255
+#define ZEND_BRK 254
+#define ZEND_CONT 255
 
 
 END_EXTERN_C()
