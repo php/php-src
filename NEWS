@@ -7,6 +7,9 @@
   . Fixed bug #69996 (Changing the property of a cloned object affects the
     original). (Dmitry, Laruence)
 
+- GD:
+  . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
+
 - Soap:
   . Fixed bug #70032 (make_http_soap_request calls
     zend_hash_get_current_key_ex(,,,NULL). (Laruence)
