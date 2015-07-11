@@ -8,6 +8,7 @@
     original). (Dmitry, Laruence)
 
 - GD:
+  . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
 
 - Soap:
