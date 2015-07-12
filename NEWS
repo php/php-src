@@ -16,6 +16,10 @@
   . Fixed bug #70032 (make_http_soap_request calls
     zend_hash_get_current_key_ex(,,,NULL). (Laruence)
 
+- SPL:
+  . Fixed bug #70053 (MutlitpleIterator array-keys incompatible change in 
+    PHP 7). (Tjerk)
+
 - Standard:
   . Fixed bug #70018 (exec does not strip all whitespace). (Laruence)
 
