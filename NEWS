@@ -8,12 +8,17 @@
     original). (Dmitry, Laruence)
 
 - GD:
+  . Fixed bug #68714 (copy 'n paste error). (cmb)
   . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
 
 - Soap:
   . Fixed bug #70032 (make_http_soap_request calls
     zend_hash_get_current_key_ex(,,,NULL). (Laruence)
+
+- SPL:
+  . Fixed bug #70053 (MutlitpleIterator array-keys incompatible change in 
+    PHP 7). (Tjerk)
 
 - Standard:
   . Fixed bug #70018 (exec does not strip all whitespace). (Laruence)
