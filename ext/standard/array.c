@@ -2773,7 +2773,7 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
-	
+
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
@@ -4047,7 +4047,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements, 
+				zend_sort((void *) lists[i], hash->nNumOfElements,
 						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
@@ -5060,50 +5060,122 @@ PHP_FUNCTION(array_product)
 }
 /* }}} */
 
+typedef struct _php_traverse_key {
+	zval *zval_key;
+	zend_ulong num_key;
+	zend_string *string_key;
+} php_traverse_key;
+
+static void traverse_key_copy(zval *dest, php_traverse_key *key)
+{
+	if (key->zval_key) {
+		ZVAL_COPY(dest, key->zval_key);
+	} else if (key->string_key) {
+		ZVAL_STR_COPY(dest, key->string_key);
+	} else {
+		ZVAL_LONG(dest, key->num_key);
+	}
+}
+
+typedef zend_bool (*zend_iterator_each_t)(zval *value, php_traverse_key *key, void *context);
+
+static void php_traverse(zval *t, zend_iterator_each_t each_func, void *context)
+{
+	zval *value;
+	php_traverse_key key;
+
+	if (Z_TYPE_P(t) == IS_ARRAY) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(t), key.num_key, key.string_key, value) {
+			key.zval_key = NULL;
+			if (!each_func(value, &key, context)) break;
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		zend_class_entry *ce = Z_OBJCE_P(t);
+		zend_object_iterator *iter = ce->get_iterator(ce, t, 0);
+		if (EG(exception)) goto fail;
+		iter->index = 0;
+		if (iter->funcs->rewind) {
+			iter->funcs->rewind(iter);
+		}
+		while (!EG(exception) && iter->funcs->valid(iter) == SUCCESS) {
+			zval zval_key;
+			zend_bool should_continue;
+
+			value = iter->funcs->get_current_data(iter);
+			if (EG(exception) || value == NULL) break;
+
+			if (iter->funcs->get_current_key) {
+				iter->funcs->get_current_key(iter, &zval_key);
+				if (EG(exception)) break;
+			} else {
+				ZVAL_NULL(&zval_key);
+			}
+
+			key.zval_key = &zval_key;
+
+			should_continue = each_func(value, &key, context);
+			zval_ptr_dtor(&zval_key);
+
+			if (!should_continue) break;
+
+			iter->index++;
+			iter->funcs->move_forward(iter);
+		}
+fail:
+		zend_iterator_dtor(iter);
+	}
+}
+
+typedef	struct _php_traverse_until_data {
+	zval *traversable;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	int result, stop_value;
+} php_traverse_until_data;
+
+static zend_bool php_traverse_until(zval *value, php_traverse_key *key, void *context)
+{
+	zval args[3];
+	zval retval;
+	int call_res;
+	php_traverse_until_data *data = context;
+
+	data->fci.retval = &retval;
+	ZVAL_COPY(&args[0], value);
+	traverse_key_copy(&args[1], key);
+	ZVAL_COPY(&args[2], data->traversable);
+	data->fci.params = args;
+	data->fci.param_count = 3;
+	data->fci.no_separation = 0;
+
+	call_res = zend_call_function(&data->fci, &data->fci_cache);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[2]);
+	data->result = call_res == SUCCESS ? zend_is_true(&retval) : 0;
+
+	return data->result != data->stop_value; // stop condition
+}
+
 static void php_array_until(INTERNAL_FUNCTION_PARAMETERS, int stop_value)
 {
-	zval			*array;
-	zend_fcall_info		fci = empty_fcall_info;
-	zend_fcall_info_cache	fci_cache = empty_fcall_info_cache;
-	zval			args[3];
-	zval			retval;
-	int			result = !stop_value;
-	zend_ulong		num_key;
-	zend_string		*string_key;
-	zval			*operand;
+	php_traverse_until_data data = {
+		NULL,
+		empty_fcall_info,
+		empty_fcall_info_cache,
+		!stop_value,
+		stop_value
+	};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "af", &array, &fci, &fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "tf", &data.traversable, &data.fci, &data.fci_cache) == FAILURE) {
 		return;
 	}
 
-	fci.retval = &retval;
-	fci.param_count = 3;
-	fci.no_separation = 0;
+	data.stop_value = stop_value;
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
-		int call_res;
+	php_traverse(data.traversable, php_traverse_until, &data);
 
-		ZVAL_COPY(&args[0], operand);
-		if (string_key) {
-			ZVAL_STR_COPY(&args[1], string_key);
-		} else {
-			ZVAL_LONG(&args[1], num_key);
-		}
-		ZVAL_COPY(&args[2], array);
-		fci.params = args;
-
-		call_res = zend_call_function(&fci, &fci_cache);
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
-		zval_ptr_dtor(&args[2]);
-		result = call_res == SUCCESS ? zend_is_true(&retval) : 0;
-
-		if (result == stop_value) {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	RETURN_BOOL(result);
+	RETURN_BOOL(data.result);
 }
 
 /* {{{ proto bool array_every(array input, mixed predicate)
