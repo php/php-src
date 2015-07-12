@@ -8,6 +8,7 @@
     original). (Dmitry, Laruence)
 
 - GD:
+  . Fixed bug #67447 (imagecrop() add a black line when cropping). (cmb)
   . Fixed bug #68714 (copy 'n paste error). (cmb)
   . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
