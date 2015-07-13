@@ -1760,7 +1760,7 @@ static inline void zend_free_obj_get_result(zval *op) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline int i_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	int ret;
 	int converted = 0;
@@ -1942,15 +1942,9 @@ static zend_always_inline int i_compare_function(zval *result, zval *op1, zval *
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
-{
-	return i_compare_function(result, op1, op2);
-}
-/* }}} */
-
 ZEND_API int zval_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	return i_compare_function(result, op1, op2);
+	return compare_function(result, op1, op2);
 }
 /* }}} */
 

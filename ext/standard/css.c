@@ -37,7 +37,7 @@ PHPAPI void php_info_print_css(void) /* {{{ */
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
-	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto;}\n");
+	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}\n");
 	PUTS(".v i {color: #999;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");

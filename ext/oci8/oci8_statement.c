@@ -166,8 +166,8 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 		statement2->has_descr = 0;
 		statement2->stmttype = 0;
 
-		Z_ADDREF_P(statement->id);
-		Z_ADDREF_P(statement2->connection->id);
+		GC_REFCOUNT(statement->id)++;
+		GC_REFCOUNT(statement2->connection->id)++;
 
 		php_oci_statement_set_prefetch(statement2, statement->prefetch_count);
 		
@@ -1086,7 +1086,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	/* dvoid *php_oci_collection		   = NULL; */
 	OCIStmt *oci_stmt				= NULL;
 	dvoid *bind_data				= NULL;
-	php_oci_bind bind, *old_bind, *bindp;
+	php_oci_bind *old_bind, *bindp;
 	int mode = OCI_DATA_AT_EXEC;
 	sb4 value_sz = -1;
 	sword errstatus;
@@ -1226,7 +1226,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	bindp->parent_statement = statement;
 	ZVAL_COPY(&bindp->zval, var);
 	bindp->type = type;
-	Z_TRY_ADDREF_P(var);
 	
 	PHP_OCI_CALL_RETURN(errstatus,
 		OCIBindByName,
@@ -1411,12 +1410,17 @@ sb4 php_oci_bind_out_callback(
 		convert_to_string(val);
 		zval_dtor(val);
 
-#if 0		
+		{
+			char *p = ecalloc(1, PHP_OCI_PIECE_SIZE);
+			ZVAL_STRINGL(val, p, PHP_OCI_PIECE_SIZE);
+			efree(p);
+		}
+#if 0
 		Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
+		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(val) + 1);
 		/* XXX is this right? */
-#endif		
 		ZVAL_STRINGL(val, NULL, Z_STRLEN(phpbind->zval) + 1);
+#endif		
 
 		/* XXX we assume that zend-zval len has 4 bytes */
 		*alenpp = (ub4*) &Z_STRLEN(phpbind->zval);
@@ -1592,7 +1596,6 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->array.type = type;
 	bindp->indicator = 0;  		/* not used for array binds */
 	bindp->type = 0; 			/* not used for array binds */
-
 	Z_ADDREF_P(var);
 
 	PHP_OCI_CALL_RETURN(errstatus,

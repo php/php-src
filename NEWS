@@ -3,15 +3,21 @@
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
+  . Fixed bug #70057 (Build failure on 32-bit Mac OS X 10.6.8:
+    recursive inlining). (Laruence)
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
   . Fixed bug #69996 (Changing the property of a cloned object affects the
     original). (Dmitry, Laruence)
 
 - GD:
+  . Fixed bug #53154 (Zero-height rectangle has whiskers). (cmb)
   . Fixed bug #67447 (imagecrop() add a black line when cropping). (cmb)
   . Fixed bug #68714 (copy 'n paste error). (cmb)
   . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
+
+- Opcache:
+  . Fixed bug #70058 (Build fails when building for i386). (Laruence)
 
 - Soap:
   . Fixed bug #70032 (make_http_soap_request calls
