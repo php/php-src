@@ -939,8 +939,9 @@ SPL_METHOD(SplFileInfo, getExtension)
 	ret = php_basename(fname, flen, NULL, 0);
 
 	p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
-	if (p) {
-		assert(p > ZSTR_VAL(ret));
+	if (p && p > ZSTR_VAL(ret)) {
+		/* Check for the string length, incase the only '.' is the
+		 * first character of the string */
 		idx = (int)(p - ZSTR_VAL(ret));
 		RETVAL_STRINGL(ZSTR_VAL(ret) + idx + 1, ZSTR_LEN(ret) - idx - 1);
 		zend_string_release(ret);
