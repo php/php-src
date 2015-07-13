@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
   
 - GD:
+  . Fixed bug #69024 (imagescale segfault with palette based image). (cmb)
   . Fixed bug #53154 (Zero-height rectangle has whiskers). (cmb)
   . Fixed bug #67447 (imagecrop() add a black line when cropping). (cmb)
   . Fixed bug #68714 (copy 'n paste error). (cmb)
