@@ -2905,9 +2905,6 @@ PHP_FUNCTION(curl_getinfo)
 	if (ZEND_NUM_ARGS() < 2) {
 		char *s_code;
 #ifdef PHP_WIN32
-		/* libcurl currently relies on 32-bit long directly.
-		   We should use zend_long here once libcurl has full
-		   64-bit support on Windows. */
 		long l_code;
 #else
 		zend_long l_code;
