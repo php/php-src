@@ -270,7 +270,7 @@
   . Added "v" DateTime format modifier to get the 3-digit version of fraction 
     of seconds. (Mariano Iglesias)
   . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
-    RFC3339 Extended format which includes fraction of seconds (Mariano 
+    RFC3339 Extended format which includes fraction of seconds. (Mariano
     Iglesias)
 
 - DBA:
@@ -431,9 +431,9 @@
 
 - Zip:
   . Added ZipArchive::setCompressionName and ZipArchive::setCompressionIndex
-    methods (Remi, Cedric Delmas)
-  . Update bundled libzip to 1.0.1 (Remi, Anatol)
-  . Fixed bug #67161. (ZipArchive::getStream() returns NULL for certain file)
+    methods. (Remi, Cedric Delmas)
+  . Update bundled libzip to 1.0.1. (Remi, Anatol)
+  . Fixed bug #67161 (ZipArchive::getStream() returns NULL for certain file).
     (Christoph M. Becker)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
