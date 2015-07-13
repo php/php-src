@@ -286,32 +286,33 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *msg;
 		char *tmp;
+		char *logline;
 		time_t curtime;
 		size_t len;
 		zend_string *date_str;
 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-		spprintf(&msg, 0, "mail() on [%s:%d]: To: %s -- Headers: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
+		spprintf(&logline, 0, "mail() on [%s:%d]: To: %s -- Headers: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
 		zend_string_free(date_str);
 
 		if (hdr) {
-			php_mail_log_crlf_to_spaces(msg);
+			php_mail_log_crlf_to_spaces(logline);
 		}
 
 		if (!strcmp(mail_log, "syslog")) {
-			php_mail_log_to_syslog(msg);
+			php_mail_log_to_syslog(logline);
 		}
 		else {
-			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, msg, PHP_EOL);
+			/* Add date when logging to file */
+			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
 			php_mail_log_to_file(mail_log, tmp, len);
 		}
 
-		efree(msg);
 		efree(tmp);
+		efree(logline);
 	}
 
 	if (PG(mail_x_header)) {
