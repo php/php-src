@@ -42,7 +42,7 @@ function destroy($id) {
     global $session_save_path, $name;
     echo "Destroy [${session_save_path},${id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
-    @unlink($session_file);
+    unlink($session_file);
     return true;
 }
 
@@ -54,7 +54,7 @@ function gc($maxlifetime) {
         $qualified = ($session_save_path."/".$file); 
         if (is_file($qualified) === TRUE) {
             if (substr($file, 0, $length) === SESSION_FILE_PREFIX) {
-                @unlink($qualified);
+                unlink($qualified);
             }
         }
     }
