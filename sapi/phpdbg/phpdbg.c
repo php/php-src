@@ -1169,7 +1169,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
-	zend_bool quit_immediately = 0;
+	volatile zend_bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
 	zend_bool remote = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;

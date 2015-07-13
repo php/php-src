@@ -1606,7 +1606,10 @@ function gen_vm($def, $skel) {
 		out($f, "\tLOAD_OPLINE();\n");
 		out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
 		out($f, "\t((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-		out($f, "\tret = (opline) ? 0 : -1;\n");
+		out($f, "\tret = (opline) ? execute_data != ex : -1;\n");
+		out($f, "\tif (ret == 1 && execute_data->prev_execute_data != ex) {\n");
+		out($f, "\t\tret = 2;;\n");
+		out($f, "\t}\n");
 		out($f, "#else\n");
 		out($f, "\tret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
 		out($f, "#endif\n");
