@@ -2178,10 +2178,13 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 
 	/* no interpolation needed here */
 	switch (angle_rounded) {
-		case 9000:
+		case -27000:
+		case   9000:
 			return gdImageRotate90(src, 0);
-		case 18000:
+		case -18000:
+		case  18000:
 			return gdImageRotate180(src, 0);
+		case -9000:
 		case 27000:
 			return gdImageRotate270(src, 0);
 	}
