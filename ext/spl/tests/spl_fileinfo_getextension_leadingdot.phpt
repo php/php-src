@@ -10,4 +10,4 @@ var_dump($fileInfo->getExtension());
 unlink($file);
 ?>
 --EXPECT--
-string(0) ""
+string(4) "test"
