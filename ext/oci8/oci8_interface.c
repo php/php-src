@@ -54,7 +54,7 @@ PHP_FUNCTION(oci_define_by_name)
 	size_t name_len;
 	zend_long type = 0;
 	php_oci_statement *statement;
-	php_oci_define *define, *tmp_define;
+	php_oci_define *define;
 	zend_string *zvtmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
@@ -77,10 +77,8 @@ PHP_FUNCTION(oci_define_by_name)
 
 	/* if (zend_hash_add(statement->defines, name, name_len, define, sizeof(php_oci_define), (void **)&tmp_define) == SUCCESS) { */
 	zvtmp = zend_string_init(name, name_len, 0);
-	if ((tmp_define = zend_hash_add_new_ptr(statement->defines, zvtmp, define)) != NULL) {
-		efree(define);
+	if ((define = zend_hash_add_new_ptr(statement->defines, zvtmp, define)) != NULL) {
 		zend_string_release(zvtmp);
-		define = tmp_define;
 	} else {
 		efree(define);
 		zend_string_release(zvtmp);
@@ -90,8 +88,8 @@ PHP_FUNCTION(oci_define_by_name)
 	define->name = (text*) estrndup(name, name_len);
 	define->name_len = name_len;
 	define->type = type;
-	memmove(&define->zval, var, sizeof(zval));
-	Z_ADDREF_P(var);
+	/* convert_to_string(var); */
+	ZVAL_COPY(&define->zval, var);
 
 	RETURN_TRUE;
 }
@@ -1699,6 +1697,7 @@ PHP_FUNCTION(oci_num_fields)
    Parse a SQL or PL/SQL statement and return a statement resource */
 PHP_FUNCTION(oci_parse)
 {
+	zval *z_statement;
 	zval *z_connection;
 	php_oci_connection *connection;
 	php_oci_statement *statement;
@@ -1714,6 +1713,7 @@ PHP_FUNCTION(oci_parse)
 	statement = php_oci_statement_create(connection, query, query_len);
 
 	if (statement) {
+		GC_REFCOUNT(statement->id)++;
 		RETURN_RES(statement->id);
 	}
 	RETURN_FALSE;
