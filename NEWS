@@ -3,8 +3,8 @@
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
-  . Fixed bug #70057 (Build failure on 32-bit Mac OS X 10.6.8:
-    recursive inlining). (Laruence)
+  . Fixed bug #70057 (Build failure on 32-bit Mac OS X 10.6.8: recursive
+    inlining). (Laruence)
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
   . Fixed bug #69996 (Changing the property of a cloned object affects the
     original). (Dmitry, Laruence)
@@ -73,7 +73,7 @@
 
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
-    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+    openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
 
 - PCRE:
   . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
@@ -87,15 +87,15 @@
   . Fixed bug #69970 (Use-after-free vulnerability in
     spl_recursive_it_move_forward_ex()). (Laruence)
   
+- Sqlite3:
+  . Fixed bug #69972 (Use-after-free vulnerability in
+    sqlite3SafetyCheckSickOrOk()). (Laruence)
+
 - Standard:
   . Fixed bug #69983 (get_browser fails with user agent of null).
     (Kalle, cmb, Laruence)
   . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
-
-- Sqlite3:
-  . Fixed bug #69972 (Use-after-free vulnerability in
-    sqlite3SafetyCheckSickOrOk()). (Laruence)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
@@ -127,6 +127,10 @@
   . Fixed bug #69893 (Strict comparison between integer and empty string keys
     crashes). (Nikita)
 
+- Curl:
+  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
+    yahoo dot com)
+
 - DOM:
   . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
     DOMNodeList). (Anatol Belski)
@@ -142,17 +146,13 @@
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
     bound variables). (Laruence)
 
-- Curl:
-  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
-    yahoo dot com)
-
 - Opcache:
   . Removed opcache.load_comments configuration directive. Now doc comments
     loading costs nothing and always enabled. (Dmitry)
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
   
 - PCRE:
-  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
+  . Fixed bug #69864 (Segfault in preg_replace_callback). (cmb, ab)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
@@ -386,7 +386,7 @@
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
 
-- Sqlite3:
+- SQLite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
     required_num_args). (Julien)
 
