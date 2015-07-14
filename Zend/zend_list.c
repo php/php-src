@@ -102,11 +102,11 @@ ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type
 
 ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
-	if (resource_type1 == res->type) {
+	if (res && resource_type1 == res->type) {
 		return res->ptr;
 	}
 
-	if (resource_type2 == res->type) {
+	if (res && resource_type2 == res->type) {
 		return res->ptr;
 	}
 
