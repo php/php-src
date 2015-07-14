@@ -59,7 +59,7 @@
 - COM:
   . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
 
-- JSON
+- JSON:
   . Fixed bug #62010 (json_decode produces invalid byte-sequences).
     (Jakub Zelenka)
 
@@ -134,7 +134,7 @@
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
 
-- JSON
+- JSON:
   . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
     started with '\0'). (Jakub Zelenka)
 
@@ -158,14 +158,14 @@
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
 
-- SPL
+- SPL:
   . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
 
-- SQLite3
+- SQLite3:
   . Fixed bug #69897 (segfault when manually constructing SQLite3Result). 
     (Kalle)
 
-- Standard
+- Standard:
   . Fixed bug #62922 (Truncating entire string should result in string).
     (Nikita)
 
@@ -302,13 +302,13 @@
   . Removed deprecated aliases datefmt_set_timezone_id() and
     IntlDateFormatter::setTimeZoneID(). (Nikita)
 
-- JSON
+- JSON:
   . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
 
-- LDAP
+- LDAP:
   . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
 
 - LiteSpeed:
@@ -363,7 +363,7 @@
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
     ATTR_EMULATE_PREPARES). (Nikita)
 
-- Reflection
+- Reflection:
   . Fixed inheritance chain of Reflector interface. (Tjerk)
   . Added ReflectionGenerator class. (Bob)
   . Added reflection support for return types and type declarations. (Sara,
