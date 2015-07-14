@@ -270,23 +270,27 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 	zend_function *func = zend_hash_str_find_ptr(EG(function_table), function, len);
 
 	if (!func) {
+		zend_string *rt_name;
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, func) {
+			if (func->type == ZEND_USER_FUNCTION && *rt_name->val == '\0') {
+				if (func->op_array.function_name->len == len && !zend_binary_strcasecmp(function, len, func->op_array.function_name->val, func->op_array.function_name->len)) {
+					phpdbg_print_opcodes_function(rt_name->val, rt_name->len);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
 		return;
 	}
 
-	phpdbg_out("function name: %.*s\n", (int) len, function);
+	phpdbg_out("function name: %.*s\n", ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
 	phpdbg_print_function_helper(func);
 }
 
-void phpdbg_print_opcodes_method(const char *class, const char *function) {
-	zend_class_entry *ce;
+static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *function) {
 	zend_function *func;
 
-	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
-		return;
-	}
-
 	if (ce->type != ZEND_USER_CLASS) {
-		phpdbg_out("function name: %s::%s (internal)\n", class, function);
+		phpdbg_out("function name: %s::%s (internal)\n", ce->name->val, function);
 		return;
 	}
 
@@ -294,19 +298,33 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 		return;
 	}
 
-	phpdbg_out("function name: %s::%s\n", class, function);
+	phpdbg_out("function name: %s::%s\n", ce->name->val, function);
 	phpdbg_print_function_helper(func);
 }
 
-void phpdbg_print_opcodes_class(const char *class) {
+void phpdbg_print_opcodes_method(const char *class, const char *function) {
 	zend_class_entry *ce;
+
+	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
+		zend_string *rt_name;
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
+			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
+				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
+					phpdbg_print_opcodes_method_ce(ce, function);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		return;
+	}
+
+	phpdbg_print_opcodes_method_ce(ce, function);
+}
+
+static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	zend_function *method;
 	zend_string *method_name;
 	zend_bool first = 1;
-
-	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
-		return;
-	}
 
 	phpdbg_out("%s %s: %s\n",
 		(ce->type == ZEND_USER_CLASS) ?
@@ -342,10 +360,28 @@ void phpdbg_print_opcodes_class(const char *class) {
 	} ZEND_HASH_FOREACH_END();
 }
 
+void phpdbg_print_opcodes_class(const char *class) {
+	zend_class_entry *ce;
+
+	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
+		zend_string *rt_name;
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
+			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
+				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
+					phpdbg_print_opcodes_ce(ce);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+		
+		return;
+	}
+
+	phpdbg_print_opcodes_ce(ce);
+}
+
 PHPDBG_API void phpdbg_print_opcodes(char *function)
 {
-	char *method_name;
-	strtok(function, ":");
+	char *method_name = strtok(function, ":");
 
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
@@ -364,15 +400,15 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
+		ZEND_HASH_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_USER_CLASS) {
 				phpdbg_out("\n\n");
-				phpdbg_print_opcodes_class(ZSTR_VAL(name));
+				phpdbg_print_opcodes_ce(ce);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if ((method_name = strtok(NULL, ":")) == NULL) {
+	} else if (method_name == NULL) {
 		phpdbg_print_opcodes_function(function, strlen(function));
-	} else if ((method_name + 1) == NULL) {
+	} else if ((method_name = strtok(NULL, ":")) == NULL) {
 		phpdbg_print_opcodes_class(function);
 	} else {
 		phpdbg_print_opcodes_method(function, method_name);

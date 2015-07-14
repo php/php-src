@@ -4793,6 +4793,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
+	zend_class_entry *orig_ce = CG(active_class_entry);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 
@@ -4817,6 +4818,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_op_array) = op_array;
+
+	if (!is_method) {
+		CG(active_class_entry) = NULL;
+	}
+
 	zend_oparray_context_begin(&orig_oparray_context);
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
@@ -4852,6 +4858,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
 
+	CG(active_class_entry) = orig_ce;
 	CG(active_op_array) = orig_op_array;
 }
 /* }}} */

@@ -447,7 +447,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	phpdbg_oplog_entry *cur = PHPDBG_G(oplog_list)->start;
 	phpdbg_oplog_list *prev = PHPDBG_G(oplog_list)->prev;
 
-	HashTable *options;
+	HashTable *options = NULL;
 	zval *option_buffer;
 	zend_bool by_function = 0;
 	zend_bool by_opcode = 0;

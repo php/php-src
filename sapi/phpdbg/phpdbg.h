@@ -100,9 +100,8 @@
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_URL "http://phpdbg.com"
-#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.4.0"
+#define PHPDBG_ISSUES "http://bugs.php.net/report.php"
+#define PHPDBG_VERSION "0.5.0"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
