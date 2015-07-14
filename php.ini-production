@@ -898,7 +898,6 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
-;extension=php_pspell.dll
 ;extension=php_shmop.dll
 
 ; The MIBS data available in the PHP distribution must be installed. 
