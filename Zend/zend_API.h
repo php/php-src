@@ -29,7 +29,6 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_execute.h"
-#include "zend_interfaces.h"
 
 BEGIN_EXTERN_C()
 
@@ -1180,20 +1179,6 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 		*dest = Z_ARRVAL_P(arg);
 	} else if (or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		*dest = Z_OBJ_HT_P(arg)->get_properties(arg);
-	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-		*dest = NULL;
-	} else {
-		return 0;
-	}
-	return 1;
-}
-
-static zend_always_inline int zend_parse_arg_traversable(zval *arg, zval **dest, int check_null)
-{
-	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
-		*dest = arg;
-	} else if (Z_TYPE_P(arg) == IS_OBJECT && EXPECTED(instanceof_function(Z_OBJCE_P(arg), zend_ce_traversable))) {
-		*dest = arg;
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
 	} else {
