@@ -1730,9 +1730,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (DEBUG)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
