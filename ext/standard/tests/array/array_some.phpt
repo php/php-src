@@ -29,6 +29,16 @@ var_dump(array_some(array('hello', 1, 2, 3), function($item) use (&$iterations) 
 }));
 var_dump($iterations);
 
+echo "\n*** Testing traversable functionality ***\n";
+
+var_dump(array_some((function() {
+	yield 'foo' => 'bar';
+	yield 456;
+})(), function($value, $key) {
+	var_dump($value, $key);
+	return true;
+}));
+
 echo "\n*** Testing edge cases ***\n";
 
 var_dump(array_some(array(), 'is_int_ex'));
@@ -53,6 +63,11 @@ bool(false)
 bool(true)
 bool(true)
 int(2)
+
+*** Testing traversable functionality ***
+string(3) "bar"
+string(3) "foo"
+bool(true)
 
 *** Testing edge cases ***
 bool(false)
