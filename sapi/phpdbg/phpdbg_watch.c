@@ -170,7 +170,7 @@ void phpdbg_watch_HashTable_dtor(zval *ptr);
 
 static void phpdbg_free_watch(phpdbg_watchpoint_t *watch) {
 	zend_string_release(watch->str);
-	zend_string_release(watch->name_in_parent);	
+	zend_string_release(watch->name_in_parent);
 }
 
 static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch);
@@ -224,7 +224,7 @@ static void phpdbg_add_watch_collision(phpdbg_watchpoint_t *watch) {
 			if (flags & PHPDBG_WATCH_IMPLICIT) {
 				zend_hash_del(&cur->implicit_watches, watch->str);
 			}
-			
+
 			old->flags = watch->flags;
 			phpdbg_free_watch(watch);
 			efree(watch);
@@ -332,8 +332,10 @@ static phpdbg_watchpoint_t *phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch)
 	if (ref) { \
 		phpdbg_add_watch_collision(ref); \
 	} \
-	phpdbg_free_watch(watch); \
-	efree(watch); \
+	if (watch != old_watch) { \
+		phpdbg_free_watch(watch); \
+		efree(watch); \
+	} \
 	return (x); \
 }
 			if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
@@ -751,12 +753,6 @@ void phpdbg_watch_HashTable_dtor(zval *zv) {
 			phpdbg_notice("watchdelete", "variable=\"%.*s\" recursive=\"%s\"", "%.*s was removed, removing watchpoint%s", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_RECURSIVE) ? " recursively" : "");
 		}
 
-		if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
-			phpdbg_delete_watchpoint_recursive(watch, 0);
-		} else {
-			zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
-		}
-
 		if ((result = phpdbg_btree_find(&PHPDBG_G(watch_HashTables), (zend_ulong) watch->parent_container))) {
 			phpdbg_watch_ht_info *hti = result->ptr;
 			hti->dtor(orig_zv);
@@ -764,10 +760,17 @@ void phpdbg_watch_HashTable_dtor(zval *zv) {
 			if (zend_hash_num_elements(&hti->watches) == 0) {
 				watch->parent_container->pDestructor = hti->dtor;
 				zend_hash_destroy(&hti->watches);
+				phpdbg_btree_delete(&PHPDBG_G(watch_HashTables), (zend_ulong) watch->parent_container);
 				efree(hti);
 			}
 		} else {
 			zval_ptr_dtor_wrapper(orig_zv);
+		}
+
+		if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
+			phpdbg_delete_watchpoint_recursive(watch, 0);
+		} else {
+			zend_hash_del(&PHPDBG_G(watchpoints), watch->str);
 		}
 	}
 }
@@ -819,6 +822,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 	dump = malloc(MEMDUMP_SIZE(size));
 	dump->page = page;
 	dump->size = size;
+	dump->reenable_writing = 0;
 
 	memcpy(&dump->data, page, size);
 
@@ -857,6 +861,7 @@ static void phpdbg_watch_dtor(zval *pDest) {
 	phpdbg_remove_watchpoint(watch);
 
 	phpdbg_free_watch(watch);
+	efree(watch);
 }
 
 static void phpdbg_watch_mem_dtor(void *llist_data) {
