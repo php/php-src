@@ -210,7 +210,6 @@ DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
-	ADD_FLAG("CFLAGS", " /wd6308 ");
 } else if (PHP_ANALYZER == "pvs") {
 	var pvs_studio = false;
 
