@@ -2,6 +2,18 @@
 Random number generators should not accept a range that would lead to overflow
 --FILE--
 <?php
+// simple tests (these should all work)
+var_dump(mt_rand());
+var_dump(mt_rand(0, 242));
+var_dump(mt_rand(1, 242));
+var_dump(mt_rand(65, 90));
+var_dump(mt_rand(-242, -1));
+var_dump(mt_rand(-242, 0));
+var_dump(mt_rand(-242, 1));
+var_dump(mt_rand(-10000, 10000));
+var_dump(mt_rand(19781017, 20130513));
+var_dump(mt_rand(-19561018, -19551124));
+
 // the biggest range we can accommodate, based on RAND_RANGE scaling algo
 // 32bit: $upper == getrandmax()       // since we use 32-bit MT algo
 // 64bit: getrandmax() < PHP_INT_MAX   // since we allow scaling into 64-bit range
@@ -28,6 +40,16 @@ var_dump(mt_rand(-$upper, $upper)); // double your pleasure
 var_dump(mt_rand(PHP_INT_MIN, PHP_INT_MAX));
 
 --EXPECTF--
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
+int(%i)
 int(%i)
 int(%i)
 int(%i)

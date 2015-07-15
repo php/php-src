@@ -30,6 +30,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
+#include "int_overflow.h"
 
 #include "basic_functions.h"
 
@@ -294,10 +295,7 @@ PHP_FUNCTION(mt_rand)
 		} else if (max < min) {
 			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
-		} else if (
-			(min > 0 && max < (ZEND_LONG_MAX - min)) ||
-			(min < 0 && max > (ZEND_LONG_MAX + min))
-		) {
+		} else if (is_subtract_overflow(max, min, 0)) {
 			php_error_docref(NULL, E_WARNING, "range of max(" ZEND_LONG_FMT ") minus min(" ZEND_LONG_FMT ") would overflow", max, min);
 			RETURN_FALSE;
 
