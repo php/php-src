@@ -41,6 +41,23 @@
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
+/**
+ * Generate a random number in the range [__min, __max], ensuring that we never
+ * teleport into UndefinedBehavior land because __max - __min > ZEND_LONG_MAX.
+ */
+#define RAND_RANGE(__n, __min, __max, __tmax) \
+    do { \
+        if (is_subtract_overflow(__max, __min, 0)) { \
+            zend_long number_a = (__n); \
+            zend_long number_b = (__n); \
+            RAND_SCALE(number_a, __min, -1, __tmax); \
+            RAND_SCALE(number_b, 0,  __max, __tmax); \
+            (__n) = number_a + number_b; \
+        } else { \
+            RAND_SCALE(__n, __min, __max, __tmax); \
+        } \
+    } while (0)
+
 /*
  * A bit of tricky math here.  We want to avoid using a modulus because
  * that simply tosses the high-order bits and might skew the distribution
@@ -66,7 +83,7 @@
  *
  * -RL
  */
-#define RAND_RANGE(__n, __min, __max, __tmax) \
+#define RAND_SCALE(__n, __min, __max, __tmax) \
     (__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
 /* MT Rand */

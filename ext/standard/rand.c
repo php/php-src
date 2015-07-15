@@ -258,7 +258,6 @@ PHP_FUNCTION(mt_srand)
 }
 /* }}} */
 
-
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
 PHP_FUNCTION(rand)
@@ -295,10 +294,6 @@ PHP_FUNCTION(mt_rand)
 		} else if (max < min) {
 			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
-		} else if (is_subtract_overflow(max, min, 0)) {
-			php_error_docref(NULL, E_WARNING, "range of max(" ZEND_LONG_FMT ") minus min(" ZEND_LONG_FMT ") would overflow", max, min);
-			RETURN_FALSE;
-
 		}
 	}
 
