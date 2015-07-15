@@ -206,11 +206,6 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
-ARG_ENABLE("security-flags", "Disable the compiler security flags", "yes");
-if (PHP_SECURITY_FLAGS == "yes") {
-	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
-}
-
 /* XXX add and implement clang keyword for clang analyzer */
 ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
 if (PHP_ANALYZER == "vs") {
