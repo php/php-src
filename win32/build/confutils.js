@@ -2750,6 +2750,12 @@ function toolset_setup_build_mode()
     // This reduces the ability of hackers to cause exploit stack-overflow based memory corruptions in PHP deployed on Windows servers
     ADD_FLAG("CFLAGS", "/GS");
 
+    // /SAFESEH protects against exception handler corruption within the process. We should enable it even if we don't use exception handlers, because
+    // Windows and other binaries do. /SAFESEH is x86 only; other platforms are automatically protected by this mitigation.
+    if (!X64) {
+        ADD_FLAG("LDFLAGS", "/SAFESEH");
+    }
+
     // Detects and prevents function pointer corruptions caused by uninitialized local variables, use-after-free vulnerabilities, heap-overflows
     // and some categories of stack-overflow vulnerabilities.
     // This dramatically reduces the ability of hackers to cause exploit memory corruptions on PHP deployed on Windows Servers
