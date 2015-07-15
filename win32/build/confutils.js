@@ -2629,19 +2629,7 @@ function toolset_setup_common_cflags()
 	if (VS_TOOLSET) {
 		ADD_FLAG("CFLAGS", " /FD ");
 
-		// fun stuff: MS deprecated ANSI stdio and similar functions
-		// disable annoying warnings.  In addition, time_t defaults
-		// to 64-bit.  Ask for 32-bit.
-		if (X64) {
-			ADD_FLAG('CFLAGS', ' /wd4996 ');
-		} else {
-			ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
-		}
-
-		if (PHP_DEBUG == "yes") {
-			// Set some debug/release specific options
-			ADD_FLAG('CFLAGS', ' /RTC1 ');
-		}
+		ADD_FLAG('CFLAGS', '/D_USE_32BIT_TIME_T=1 ');
 
 	} else if (CLANG_TOOLSET) {
 		if (X64) {
@@ -2680,12 +2668,10 @@ function vs_warnings() {
     var warnings = {};
     warnings[4100] = "disable";	// Unreferenced formal parameter
     warnings[4127] = "disable";	// Conditional expression is constant (usually a macro expansion, not an error)
-
     warnings[4668] = "disable";	// Using #if UNDEFINED_MACRO instead of #ifdef UNDEFINED_MACRO
     warnings[4710] = "disable";	// The compiler decided not to inline a function marked as INLINE
     warnings[4711] = "disable";	// The compiler decided to inline a function
-
-    warnings[4820] = "disable";	// Message about padding bytes added to a structurenote
+    warnings[4820] = "disable";	// Message about padding bytes added to a structure
 
     // By default, output all warnings but not as errors.
     ADD_FLAG("CFLAGS", "/Wall /WX-");
@@ -2743,6 +2729,7 @@ function toolset_setup_build_mode()
     ADD_FLAG("CFLAGS", "/Zi");
     ADD_FLAG("LDFLAGS", "/debug");
 
+
     // Set the compiler to output code-quality and possible errors to the console.
     vs_warnings();
 
@@ -2758,6 +2745,12 @@ function toolset_setup_build_mode()
     {
         ADD_FLAG("CFLAGS", "/guard:cf");
         ADD_FLAG("LDFLAGS", "/guard:cf");
+    }
+
+    // /SAFESEH protects against exception handler corruption within the process. We should enable it even if we don't use exception handlers, because
+    // Windows and other binaries do. /SAFESEH is x86 only; other platforms are automatically protected by this mitigation.
+    if (!X64) {
+        ADD_FLAG("LDFLAGS", "/SAFESEH");
     }
 
     // Mark the binary as supporting Data Execution prevention to dramatically reduce exploitability of memory-corruption bugs
@@ -2853,6 +2846,8 @@ function php_build_option_handle()
 					}
 				}
 			}
+			if (PHP_PHP_BUILD == "no")
+			    PHP_PHP_BUILD = ".";
 		}
 		PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
 	}
