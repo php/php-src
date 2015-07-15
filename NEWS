@@ -8,6 +8,8 @@
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
   . Fixed bug #69996 (Changing the property of a cloned object affects the
     original). (Dmitry, Laruence)
+  . Fixed bug #70083 (Use after free with assign by ref to overloaded objects).
+    (Bob)
 
 - Curl:
   . Fixed bug #70065 (curl_getinfo() returns corrupted values). (Anatol)
