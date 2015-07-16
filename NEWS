@@ -28,6 +28,8 @@
   . Fixed bug #70058 (Build fails when building for i386). (Laruence)
 
 - Soap:
+  . Fixed bug #70079 (Segmentation fault after more than 100 SoapClient
+    calls). (Laruence)
   . Fixed bug #70032 (make_http_soap_request calls
     zend_hash_get_current_key_ex(,,,NULL). (Laruence)
 

@@ -507,6 +507,7 @@ try_again:
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", stream->res);
+			GC_REFCOUNT(stream->res)++;
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -524,6 +525,7 @@ try_again:
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
 
 		add_property_resource(this_ptr, "httpurl", ret);
+		GC_REFCOUNT(ret)++;
 		/*zend_list_addref(ret);*/
 
 		if (context &&
