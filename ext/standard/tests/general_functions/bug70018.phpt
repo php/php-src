@@ -1,5 +1,11 @@
 --TEST--
-Bug #70018 (exec does not strip all whitespace)
+Bug #70018 (exec does not strip all whitespace), var 1
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == "WIN") {
+  die("skip.. not for Windows");
+}
+?>
 --FILE--
 <?php
 $output = array();
