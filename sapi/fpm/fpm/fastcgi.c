@@ -737,7 +737,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 			}
 			DisconnectNamedPipe(pipe);
 		} else {
-			if (!force) {
+			if (!force || req->keep) {
 				char buf[8];
 
 				shutdown(req->fd, 1);
@@ -746,7 +746,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 			closesocket(req->fd);
 		}
 #else
-		if (!force) {
+		if (!force || req->keep) {
 			char buf[8];
 
 			shutdown(req->fd, 1);
