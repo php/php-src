@@ -359,8 +359,8 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 				continue;
 			}
 			
-			zval_dtor(&column->define->zval);
-			php_oci_column_to_zval(column, &column->define->zval, 0);
+			zval_dtor(column->define->zval);
+			php_oci_column_to_zval(column, column->define->zval, 0);
 		}
 
 		return 0;
@@ -875,17 +875,17 @@ void php_oci_statement_free(php_oci_statement *statement)
 
 	if (statement->columns) {
 		zend_hash_destroy(statement->columns);
-		FREE_HASHTABLE(statement->columns);
+		efree(statement->columns);
 	}
 
 	if (statement->binds) {
 		zend_hash_destroy(statement->binds);
-		FREE_HASHTABLE(statement->binds);
+		efree(statement->binds);
 	}
 
 	if (statement->defines) {
 		zend_hash_destroy(statement->defines);
-		FREE_HASHTABLE(statement->defines);
+		efree(statement->defines);
 	}
 
 	if (statement->parent_stmtid) {
@@ -907,7 +907,7 @@ int php_oci_bind_pre_exec(zval *data, void *result)
 
 	*(int *)result = 0;
 
-	if (Z_TYPE(bind->zval) == IS_ARRAY) {
+	if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
 		/* These checks are currently valid for oci_bind_by_name, not
 		 * oci_bind_array_by_name.  Also bind->type and
 		 * bind->indicator are not used for oci_bind_array_by_name.
@@ -921,7 +921,7 @@ int php_oci_bind_pre_exec(zval *data, void *result)
 		case SQLT_CLOB:
 		case SQLT_BLOB:
 		case SQLT_RDD:
-			if (Z_TYPE(bind->zval) != IS_OBJECT) {
+			if (Z_TYPE_P(bind->zval) != IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "Invalid variable used for bind");
 				*(int *)result = 1;
 			}
@@ -937,14 +937,14 @@ int php_oci_bind_pre_exec(zval *data, void *result)
 		case SQLT_LBI:
 		case SQLT_BIN:
 		case SQLT_LNG:
-			if (Z_TYPE(bind->zval) == IS_RESOURCE || Z_TYPE(bind->zval) == IS_OBJECT) {
+			if (Z_TYPE_P(bind->zval) == IS_RESOURCE || Z_TYPE_P(bind->zval) == IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "Invalid variable used for bind");
 				*(int *)result = 1;
 			}
 			break;
 
 		case SQLT_RSET:
-			if (Z_TYPE(bind->zval) != IS_RESOURCE) {
+			if (Z_TYPE_P(bind->zval) != IS_RESOURCE) {
 				php_error_docref(NULL, E_WARNING, "Invalid variable used for bind");
 				*(int *)result = 1;
 			}
@@ -967,27 +967,27 @@ int php_oci_bind_post_exec(zval *data)
 	sword errstatus;
 
 	if (bind->indicator == -1) { /* NULL */
-		zval *val = &bind->zval;
+		zval *val = bind->zval;
 		if (Z_TYPE_P(val) == IS_STRING) {
 			*Z_STRVAL_P(val) = '\0'; /* XXX avoid warning in debug mode */
 		}
 		zval_dtor(val);
 		ZVAL_NULL(val);
-	} else if (Z_TYPE(bind->zval) == IS_STRING
-			   && Z_STRLEN(bind->zval) > 0
-			   && Z_STRVAL(bind->zval)[ Z_STRLEN(bind->zval) ] != '\0') {
+	} else if (Z_TYPE_P(bind->zval) == IS_STRING
+			   && Z_STRLEN_P(bind->zval) > 0
+			   && Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] != '\0') {
 		/* The post- PHP 5.3 feature for "interned" strings disallows
 		 * their reallocation but (i) any IN binds either interned or
 		 * not should already be null terminated and (ii) for OUT
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-		Z_STR(bind->zval) = zend_string_extend(Z_STR(bind->zval), Z_STRLEN(bind->zval)+1, 0);
-		Z_STRVAL(bind->zval)[ Z_STRLEN(bind->zval) ] = '\0';
-	} else if (Z_TYPE(bind->zval) == IS_ARRAY) {
+		Z_STR_P(bind->zval) = zend_string_extend(Z_STR_P(bind->zval), Z_STRLEN_P(bind->zval)+1, 0);
+		Z_STRVAL_P(bind->zval)[ Z_STRLEN_P(bind->zval) ] = '\0';
+	} else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
 		int i;
 		zval *entry = NULL;
-		HashTable *hash = HASH_OF(&bind->zval);
+		HashTable *hash = HASH_OF(bind->zval);
 	
 		zend_hash_internal_pointer_reset(hash);
 
@@ -1001,7 +1001,7 @@ int php_oci_bind_post_exec(zval *data)
 						ZVAL_LONG(entry, ((ub4 *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_long(&bind->zval, ((ub4 *)(bind->array.elements))[i]);
+						add_next_index_long(bind->zval, ((ub4 *)(bind->array.elements))[i]);
 					}
 				}
 				break;
@@ -1012,7 +1012,7 @@ int php_oci_bind_post_exec(zval *data)
 						ZVAL_DOUBLE(entry, ((double *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_double(&bind->zval, ((double *)(bind->array.elements))[i]);
+						add_next_index_double(bind->zval, ((double *)(bind->array.elements))[i]);
 					}
 				}
 				break;
@@ -1041,10 +1041,10 @@ int php_oci_bind_post_exec(zval *data)
 						if (errstatus != OCI_SUCCESS) {
 							connection->errcode = php_oci_error(connection->err, errstatus);
 							PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-							add_next_index_null(&bind->zval);
+							add_next_index_null(bind->zval);
 						} else {
 							connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
-							add_next_index_stringl(&bind->zval, (char *)buff, buff_len);
+							add_next_index_stringl(bind->zval, (char *)buff, buff_len);
 						}
 					}
 				}
@@ -1064,11 +1064,16 @@ int php_oci_bind_post_exec(zval *data)
 						ZVAL_STRINGL(entry, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_stringl(&bind->zval, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length);
+						add_next_index_stringl(bind->zval, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length);
 					}
 				}
 				break;
 		}
+	} else if ((Z_TYPE_P(bind->zval) == IS_TRUE) || (Z_TYPE_P(bind->zval) == IS_FALSE)) {
+		if (Z_LVAL_P(bind->zval) == 0)
+			ZVAL_BOOL(bind->zval, FALSE);
+		else if (Z_LVAL_P(bind->zval) == 1)
+			ZVAL_BOOL(bind->zval, TRUE);
 	}
 
 	return 0;
@@ -1096,7 +1101,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		{
 			zval *tmp;
 			
-			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "collection", sizeof("collection"))) == NULL) {
+			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "collection", sizeof("collection")-1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 				return 1;
 			}
@@ -1118,7 +1123,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 		{
 			zval *tmp;
 			
-			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "descriptor", sizeof("descriptor"))) == NULL) {
+			if (Z_TYPE_P(var) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(var), "descriptor", sizeof("descriptor")-1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 				return 1;
 			}
@@ -1212,10 +1217,12 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 
 	if ((old_bind = zend_hash_str_find_ptr(statement->binds, name, name_len)) != NULL) {
 		bindp = old_bind;
-		zval_ptr_dtor(&bindp->zval);
+		if (bindp->zval) {
+			zval_ptr_dtor(bindp->zval);
+		}
 	} else {
 		zend_string *zvtmp;
-		zvtmp = zend_string_init(name, name_len + 1, 0);
+		zvtmp = zend_string_init(name, name_len, 0);
 		bindp = (php_oci_bind *) ecalloc(1, sizeof(php_oci_bind));
 		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
 		zend_string_release(zvtmp);
@@ -1224,8 +1231,9 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	bindp->descriptor = oci_desc;
 	bindp->statement = oci_stmt;
 	bindp->parent_statement = statement;
-	ZVAL_COPY(&bindp->zval, var);
+	bindp->zval = var;
 	bindp->type = type;
+	Z_TRY_ADDREF_P(bindp->zval);
 	
 	PHP_OCI_CALL_RETURN(errstatus,
 		OCIBindByName,
@@ -1313,7 +1321,7 @@ sb4 php_oci_bind_in_callback(
 	php_oci_bind *phpbind;
 	zval *val;
 
-	if (!(phpbind=(php_oci_bind *)ictxp) || !(val = &phpbind->zval)) {
+	if (!(phpbind=(php_oci_bind *)ictxp) || !(val = phpbind->zval)) {
 		php_error_docref(NULL, E_WARNING, "Invalid phpbind pointer value");
 		return OCI_ERROR;
 	}
@@ -1366,7 +1374,7 @@ sb4 php_oci_bind_out_callback(
 	zval *val;
 	sb4 retval = OCI_ERROR;
 
-	if (!(phpbind=(php_oci_bind *)octxp) || !(val = &phpbind->zval)) {
+	if (!(phpbind=(php_oci_bind *)octxp) || !(val = phpbind->zval)) {
 		php_error_docref(NULL, E_WARNING, "Invalid phpbind pointer value");
 		return retval;
 	}
@@ -1393,7 +1401,7 @@ sb4 php_oci_bind_out_callback(
 		 * out-bind as the contents would have been changed for in/out
 		 * binds (Bug #46994).
 		 */
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor"))) == NULL) {
+		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor")-1)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Unable to find object outbind descriptor property");
 			return OCI_ERROR;
 		}
@@ -1423,8 +1431,8 @@ sb4 php_oci_bind_out_callback(
 #endif		
 
 		/* XXX we assume that zend-zval len has 4 bytes */
-		*alenpp = (ub4*) &Z_STRLEN(phpbind->zval);
-		*bufpp = Z_STRVAL(phpbind->zval);
+		*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval);
+		*bufpp = Z_STRVAL_P(phpbind->zval);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
 		*indpp = &phpbind->indicator;
@@ -1584,7 +1592,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 		zend_hash_init(statement->binds, 13, NULL, php_oci_bind_hash_dtor, 0);
 	}
 
-	zvtmp = zend_string_init(name, name_len + 1, 0);
+	zvtmp = zend_string_init(name, name_len, 0);
 	bindp = zend_hash_update_ptr(statement->binds, zvtmp, bind);
 	zend_string_release(zvtmp);
 
@@ -1592,11 +1600,12 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->statement = NULL;
 	bindp->parent_statement = statement;
 	bindp->bind = NULL;
-	ZVAL_COPY(&bindp->zval, var);
+	bindp->zval = var;
 	bindp->array.type = type;
 	bindp->indicator = 0;  		/* not used for array binds */
 	bindp->type = 0; 			/* not used for array binds */
-	Z_ADDREF_P(var);
+
+	Z_TRY_ADDREF_P(var);
 
 	PHP_OCI_CALL_RETURN(errstatus,
 							OCIBindByName,
@@ -1620,6 +1629,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	
 		
 	if (errstatus != OCI_SUCCESS) {
+		efree(bindp);
 		statement->errcode = php_oci_error(statement->err, errstatus);
 		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
 		return 1;

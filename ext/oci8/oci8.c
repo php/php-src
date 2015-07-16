@@ -1536,7 +1536,7 @@ void php_oci_define_hash_dtor(zval *data)
 {
 	php_oci_define *define = (php_oci_define *) Z_PTR_P(data);
 
-	zval_ptr_dtor(&define->zval);
+	zval_ptr_dtor(define->zval);
 
 	if (define->name) {
 		efree(define->name);
@@ -1568,7 +1568,7 @@ void php_oci_bind_hash_dtor(zval *data)
 	}
 
 	efree(bind);
-	/*zval_ptr_dtor(&bind->zval); */
+	zval_ptr_dtor(bind->zval);
 }
 /* }}} */
 
@@ -1708,6 +1708,7 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf)
 	text err_buf[PHP_OCI_ERRBUF_LEN];
 
 	memset(err_buf, 0, sizeof(err_buf));
+	*error_buf = (text *)0;
 	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, err_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR));
 
 	if (error_code) {
@@ -2774,7 +2775,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
 				if (fetch_mode & PHP_OCI_NUM) {
-					Z_ADDREF(element);
+					Z_TRY_ADDREF_P(&element);
 				}
 				add_assoc_zval(return_value, column->name, &element);
 			}
