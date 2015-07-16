@@ -25,6 +25,7 @@
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 #include "zend_generators.h"
+#include "zend_interfaces.h"
 #include "phpdbg.h"
 
 #include "phpdbg_help.h"
@@ -585,41 +586,31 @@ PHPDBG_COMMAND(frame) /* {{{ */
 
 static inline void phpdbg_handle_exception(void) /* {{{ */
 {
-	zend_fcall_info fci;
-	zval trace;
 	zend_object *ex = EG(exception);
-
-	/* get filename and linenumber before unsetting exception */
-	/* not really useful??? see blow 
-	const char *filename = zend_get_executed_filename();
-	uint32_t lineno = zend_get_executed_lineno();
-	*/
+	zend_string *msg, *file;
+	zend_long line;
+	zval zv, rv, tmp;
 
 	EG(exception) = NULL;
 
-	/* call __toString */
-	ZVAL_STRINGL(&fci.function_name, "__tostring", sizeof("__tostring") - 1);
-	fci.size = sizeof(fci);
-	fci.function_table = &ex->ce->function_table;
-	fci.symbol_table = NULL;
-	fci.object = ex;
-	fci.retval = &trace;
-	fci.param_count = 0;
-	fci.params = NULL;
-	fci.no_separation = 1;
-	if (zend_call_function(&fci, NULL) == SUCCESS) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", ZSTR_VAL(ex->ce->name), Z_STRLEN(trace), Z_STRVAL(trace));
+	ZVAL_OBJ(&zv, ex);
+	zend_call_method_with_0_params(&zv, ex->ce, NULL, "__tostring", &tmp);
+	file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
+	line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 
-		zval_ptr_dtor(&trace);
+	if (EG(exception)) {
+		EG(exception) = NULL;
+		msg = ZSTR_EMPTY_ALLOC();
 	} else {
-		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", ZSTR_VAL(ex->ce->name));
+		zend_update_property_string(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
+		zval_ptr_dtor(&tmp);
+		msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), 1, &rv));
 	}
 
-	/* output useful information about address */
-/* not really useful ???
-	phpdbg_writeln("exception", "opline=\"%p\" file=\"%s\" line=\"%u\"", "Stack entered at %p in %s on line %u", PHPDBG_G(ops)->opcodes, filename, lineno); */
+	phpdbg_writeln("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught %s in %s on line %lld\n%s", ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line, ZSTR_VAL(msg));
+	zend_string_release(msg);
+	zend_string_release(file);
 
-	zval_dtor(&fci.function_name);
 	if (EG(prev_exception)) {
 		OBJ_RELEASE(EG(prev_exception));
 		EG(prev_exception) = 0;
@@ -1443,7 +1434,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		if (exception && PHPDBG_G(handled_exception) != exception) {
 			zend_execute_data *prev_ex = execute_data;
 			zval zv, rv;
-			zend_string *file;
+			zend_string *file, *msg;
 			zend_long line;
 
 			do {
@@ -1463,9 +1454,12 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			ZVAL_OBJ(&zv, exception);
 			file = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 1, &rv));
 			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
+			msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("message"), 1, &rv));
 
-			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught exception %s in %s on line %lld", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line);
+			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught %s in %s on line %lld: %.*s", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line, ZSTR_LEN(msg) < 80 ? ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
+			zend_string_release(msg);
 			zend_string_release(file);
+
 			DO_INTERACTIVE(1);
 		}
 ex_is_caught:
