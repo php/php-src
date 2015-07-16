@@ -204,6 +204,8 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 	}
 }
 
+ARG_ENABLE("security-flags", "[Ignored] Disabling compiler security features no longer supported", "yes");
+
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
 /* XXX add and implement clang keyword for clang analyzer */
