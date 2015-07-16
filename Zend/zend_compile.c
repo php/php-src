@@ -5667,9 +5667,9 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			if (strcmp(ZSTR_VAL(dirname), ".") == 0) {
 				dirname = zend_string_extend(dirname, MAXPATHLEN, 0);
 #if HAVE_GETCWD
-				VCWD_GETCWD(ZSTR_VAL(dirname), MAXPATHLEN);
+				ZEND_IGNORE_VALUE(VCWD_GETCWD(ZSTR_VAL(dirname), MAXPATHLEN));
 #elif HAVE_GETWD
-				VCWD_GETWD(ZSTR_VAL(dirname));
+				ZEND_IGNORE_VALUE(VCWD_GETWD(ZSTR_VAL(dirname)));
 #endif
 			}
 
