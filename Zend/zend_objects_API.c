@@ -25,9 +25,6 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"
 
-ZEND_API uint32_t (*zend_objects_store_get_handle_ex)();
-ZEND_API void (*zend_objects_store_add_to_free_list_ex)(uint32_t handle);
-
 ZEND_API uint32_t zend_objects_store_get_handle()
 {
 	uint32_t handle;
