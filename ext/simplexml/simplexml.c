@@ -64,7 +64,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter);
 
 /* {{{ _node_as_zval()
  */
-static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const char *nsprefix, int isprefix)
+static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix)
 {
 	php_sxe_object *subnode;
 
@@ -76,7 +76,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 		subnode->iter.name = (xmlChar*)estrdup(name);
 	}
 	if (nsprefix && *nsprefix) {
-		subnode->iter.nsprefix = (xmlChar*)estrdup(nsprefix);
+		subnode->iter.nsprefix = (xmlChar*)estrdup((char*)nsprefix);
 		subnode->iter.isprefix = isprefix;
 	}
 
@@ -975,7 +975,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 
 /* {{{ _get_base_node_value()
  */
-static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *value, char *nsprefix, int isprefix)
+static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *value, xmlChar *nsprefix, int isprefix)
 {
 	php_sxe_object *subnode;
 	xmlChar        *contents;
@@ -991,7 +991,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 		subnode->document = sxe_ref->document;
 		subnode->document->refcount++;
 		if (nsprefix && *nsprefix) {
-			subnode->iter.nsprefix = (xmlChar*)estrdup(nsprefix);
+			subnode->iter.nsprefix = (xmlChar*)estrdup((char *)nsprefix);
 			subnode->iter.isprefix = isprefix;
 		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL);
