@@ -3857,10 +3857,9 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	if (extended && EXT) {	/* parse extended info */
 		zval *item;
 		zend_string *key;
-		zend_ulong num_key;
 
 		/* walk the assoc array */
-		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(EXT), num_key, key, item) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(EXT), key, item) {
 			if (key == NULL) {
 				continue;
 			}

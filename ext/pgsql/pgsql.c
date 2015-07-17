@@ -5803,7 +5803,6 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
 PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
 {
 	zend_string *field = NULL;
-	zend_ulong num_idx = -1;
 	zval meta, *def, *type, *not_null, *has_default, *is_enum, *val, new_val;
 	int err = 0, skip_field;
 	php_pgsql_data_type data_type;
@@ -5824,7 +5823,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		return FAILURE;
 	}
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(values), num_idx, field, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), field, val) {
 		skip_field = 0;
 		ZVAL_NULL(&new_val);
 
@@ -6550,7 +6549,6 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	char *tmp;
 	smart_str querystr = {0};
 	int ret = FAILURE;
-	zend_ulong num_idx;
 	zend_string *fld;
 
 	assert(pg_link != NULL);
@@ -6579,7 +6577,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	build_tablename(&querystr, pg_link, table);
 	smart_str_appends(&querystr, " (");
 
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(var_array), num_idx, fld) {
+	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
 		if (fld == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Expects associative array for values to be inserted");
 			goto cleanup;
@@ -6748,11 +6746,10 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 {
 	char *tmp;
 	char buf[256];
-	zend_ulong num_idx;
 	zend_string *fld;
 	zval *val;
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht, num_idx, fld, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, fld, val) {
 		if (fld == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Expects associative array for values to be inserted");
 			return -1;

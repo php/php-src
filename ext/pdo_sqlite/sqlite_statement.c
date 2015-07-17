@@ -233,7 +233,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-	char *str;
+	const char *str;
 
 	if(colno >= sqlite3_column_count(S->stmt)) {
 		/* error invalid column */
