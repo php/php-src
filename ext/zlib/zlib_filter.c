@@ -26,9 +26,9 @@
 /* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
 	z_stream strm;
-	char *inbuf;
+	unsigned char *inbuf;
 	size_t inbuf_len;
-	char *outbuf;
+	unsigned char *outbuf;
 	size_t outbuf_len;
 	int persistent;
 	zend_bool finished;
@@ -112,7 +112,8 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				out_bucket = php_stream_bucket_new(
+					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
@@ -136,7 +137,8 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				bucket = php_stream_bucket_new(
+					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
@@ -226,7 +228,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				out_bucket = php_stream_bucket_new(
+					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
@@ -245,7 +248,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				bucket = php_stream_bucket_new(
+					stream, estrndup((char *) data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
