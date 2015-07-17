@@ -689,7 +689,6 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	} else {
 		/* network path */
 		memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
-		memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
 		memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 	}
 #endif
