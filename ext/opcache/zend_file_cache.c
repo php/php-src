@@ -678,10 +678,26 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	len = strlen(ZCG(accel_directives).file_cache);
 	filename = emalloc(len + 33 + ZSTR_LEN(script->full_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
+#ifndef ZEND_WIN32
 	filename[len] = '/';
 	memcpy(filename + len + 1, ZCG(system_id), 32);
 	memcpy(filename + len + 33, ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path));
 	memcpy(filename + len + 33 + ZSTR_LEN(script->full_path), SUFFIX, sizeof(SUFFIX));
+#else
+	filename[len] = '\\';
+	memcpy(filename + len + 1, ZCG(system_id), 32);
+	if (ZSTR_LEN(script->full_path) >= 2 && ':' == ZSTR_VAL(script->full_path)[1]) {
+		/* local fs */
+		*(filename + len + 33) = '\\';
+		*(filename + len + 34) = ZSTR_VAL(script->full_path)[0];
+		memcpy(filename + len + 35, ZSTR_VAL(script->full_path) + 2, ZSTR_LEN(script->full_path) - 2);
+		memcpy(filename + len + 35 + ZSTR_LEN(script->full_path) - 2, SUFFIX, sizeof(SUFFIX));
+	} else {
+		/* network path */
+		memcpy(filename + len + 33, ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path));
+		memcpy(filename + len + 33 + ZSTR_LEN(script->full_path), SUFFIX, sizeof(SUFFIX));
+	}
+#endif
 
 	if (zend_file_cache_mkdir(filename, len) != SUCCESS) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
