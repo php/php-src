@@ -390,9 +390,8 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 	php_wddx_add_chunk_static(packet, WDDX_STRING_S);
 
 	if (Z_STRLEN_P(var) > 0) {
-		zend_string *buf;
-
-		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), 0, ENT_QUOTES, NULL);
+		zend_string *buf = php_escape_html_entities(
+			(unsigned char *) Z_STRVAL_P(var), Z_STRLEN_P(var), 0, ENT_QUOTES, NULL);
 
 		php_wddx_add_chunk_ex(packet, ZSTR_VAL(buf), ZSTR_LEN(buf));
 
@@ -589,9 +588,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 
 	if (name) {
 		char *tmp_buf;
-		zend_string *name_esc;
-
-		name_esc = php_escape_html_entities(ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES, NULL);
+		zend_string *name_esc = php_escape_html_entities((unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES, NULL);
 		tmp_buf = emalloc(ZSTR_LEN(name_esc) + sizeof(WDDX_VAR_S));
 		snprintf(tmp_buf, ZSTR_LEN(name_esc) + sizeof(WDDX_VAR_S), WDDX_VAR_S, ZSTR_VAL(name_esc));
 		php_wddx_add_chunk(packet, tmp_buf);
@@ -736,7 +733,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 				char tmp_buf[2];
 
 				snprintf(tmp_buf, sizeof(tmp_buf), "%c", (char)strtol((char *)atts[i], NULL, 16));
-				php_wddx_process_data(user_data, tmp_buf, strlen(tmp_buf));
+				php_wddx_process_data(user_data, (XML_Char *) tmp_buf, strlen(tmp_buf));
 				break;
 			}
 		}
@@ -783,7 +780,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 		if (atts) for (i = 0; atts[i]; i++) {
 			if (!strcmp((char *)atts[i], EL_NAME) && atts[++i] && atts[i][0]) {
-				stack->varname = estrdup(atts[i]);
+				stack->varname = estrdup((char *)atts[i]);
 				break;
 			}
 		}
@@ -798,9 +795,9 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 			if (!strcmp((char *)atts[i], "fieldNames") && atts[++i] && atts[i][0]) {
 				zval tmp;
 				char *key;
-				char *p1, *p2, *endp;
+				const char *p1, *p2, *endp;
 
-				endp = (char *)atts[i] + strlen(atts[i]);
+				endp = (char *)atts[i] + strlen((char *)atts[i]);
 				p1 = (char *)atts[i];
 				while ((p2 = php_memnstr(p1, ",", sizeof(",")-1, endp)) != NULL) {
 					key = estrndup(p1, p2 - p1);
@@ -835,7 +832,7 @@ static void php_wddx_push_element(void *user_data, const XML_Char *name, const X
 
 				if (wddx_stack_top(stack, (void**)&recordset) == SUCCESS &&
 					recordset->type == ST_RECORDSET &&
-					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i], strlen(atts[i]))) != NULL) {
+					(field = zend_hash_str_find(Z_ARRVAL(recordset->data), (char*)atts[i], strlen((char *)atts[i]))) != NULL) {
 					ZVAL_COPY_VALUE(&ent.data, field);
 				}
 
@@ -877,9 +874,8 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		wddx_stack_top(stack, (void**)&ent1);
 
 		if (!strcmp((char *)name, EL_BINARY)) {
-			zend_string *new_str;
-
-			new_str = php_base64_decode(Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
+			zend_string *new_str = php_base64_decode(
+				(unsigned char *)Z_STRVAL(ent1->data), Z_STRLEN(ent1->data));
 			zval_ptr_dtor(&ent1->data);
 			ZVAL_STR(&ent1->data, new_str);
 		}
@@ -1045,14 +1041,14 @@ int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value
 	int retval;
 
 	wddx_stack_init(&stack);
-	parser = XML_ParserCreate("UTF-8");
+	parser = XML_ParserCreate((XML_Char *) "UTF-8");
 
 	XML_SetUserData(parser, &stack);
 	XML_SetElementHandler(parser, php_wddx_push_element, php_wddx_pop_element);
 	XML_SetCharacterDataHandler(parser, php_wddx_process_data);
 
 	/* XXX value should be parsed in the loop to exhaust size_t */
-	XML_Parse(parser, value, (int)vallen, 1);
+	XML_Parse(parser, (const XML_Char *) value, (int)vallen, 1);
 
 	XML_ParserFree(parser);
 
