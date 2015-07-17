@@ -140,13 +140,12 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 /* Store objects API */
 
-ZEND_API void zend_objects_store_put(zend_object *object) /* {{{ */
+ZEND_API void zend_objects_store_put(zend_object *object)
 {
 	int handle = zend_objects_store_get_handle_ex();
 	object->handle = handle;
 	EG(objects_store).object_buckets[handle] = object;
 }
-/* }}} */
 
 ZEND_API void zend_objects_store_free(zend_object *object) /* {{{ */
 {
