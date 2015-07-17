@@ -164,7 +164,11 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 			}
 			++j;
 
-			php_printf("%s", phpdbg_short_zval_print(argstmp, 40));
+			{
+				char *arg_print = phpdbg_short_zval_print(argstmp, 40);
+				php_printf("%s", arg_print);
+				efree(arg_print);
+			}
 
 			phpdbg_xml("</arg>");
 		} ZEND_HASH_FOREACH_END();

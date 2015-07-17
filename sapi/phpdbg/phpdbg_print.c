@@ -82,15 +82,11 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 
 				do {
 					char *decode = phpdbg_decode_opline(op_array, opline);
-					if (decode != NULL) {
-						phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" op=\"%s\"", " L%-4u #%-5u %s",
-							opline->lineno,
-							opcode,
-							decode);
-						free(decode);
-					} else {
-						phpdbg_error("print", "type=\"decodefailure\" opline=\"%16p\"", "Failed to decode opline %16p", opline);
-					}
+					phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" op=\"%s\"", " L%-4u #%-5u %s",
+						opline->lineno,
+						opcode,
+						decode);
+					efree(decode);
 					opline++;
 				} while (opcode++ < end);
 			}
