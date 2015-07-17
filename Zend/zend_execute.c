@@ -91,12 +91,14 @@ static const zend_internal_function zend_pass_function = {
 #define READY_TO_DESTROY(zv) \
 	(zv && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
-#define EXTRACT_ZVAL_PTR(zv) do {						\
-		zval *__zv = (zv);								\
-		if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
-			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));		\
-		}												\
-	} while (0)
+#define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
+	zval *__zv = (zv);								\
+	if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
+		if (!(check_null) || Z_INDIRECT_P(__zv)) {	\
+			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	\
+		}											\
+	}												\
+} while (0)
 
 #define FREE_OP(should_free) \
 	if (should_free) { \

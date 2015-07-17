@@ -3,6 +3,8 @@
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
+  . Fixed bug #70089 (segfault at ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER ()).
+    (Laruence)
   . Fixed bug #70057 (Build failure on 32-bit Mac OS X 10.6.8: recursive
     inlining). (Laruence)
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
