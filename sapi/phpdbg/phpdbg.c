@@ -711,6 +711,8 @@ static int php_sapi_phpdbg_deactivate(void) /* {{{ */
 		pg->prompt[1] = PHPDBG_G(prompt)[1];
 		memcpy(pg->colors, PHPDBG_G(colors), sizeof(pg->colors));
 		pg->eol = PHPDBG_G(eol);
+		pg->input_buflen = PHPDBG_G(input_buflen);
+		memcpy(pg->input_buffer, PHPDBG_G(input_buffer), pg->input_buflen);
 		pg->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
 	}
 
