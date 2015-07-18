@@ -1814,8 +1814,10 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING && !quit_immediately) {
-			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING) {
+			if (!quit_immediately && !phpdbg_startup_run) {
+				phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+			}
 			cleaning++;
 		}
 
