@@ -1475,7 +1475,7 @@ phpdbg_main:
 		/* setup remote server if necessary */
 		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen);
-				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
+			if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 				exit(0);
 			}
 
@@ -1656,7 +1656,7 @@ phpdbg_main:
 
 		/* auto compile */
 		if (PHPDBG_G(exec)) {
-			if (settings) {
+			if (settings || phpdbg_startup_run > 0) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			}
 
@@ -1814,7 +1814,7 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING) {
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING && !quit_immediately) {
 			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
 			cleaning++;
 		}
