@@ -285,7 +285,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {
 				phpdbg_debug("Compare against loaded %s\n", file);
 
 				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(ZSTR_VAL(file), ZSTR_LEN(file), path_str, broken)) == NULL))) {
-					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(broken, line_num);
+					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(fileht, line_num);
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -327,8 +327,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			new_brake.filename = estrndup(file, filelen);
 			PHPDBG_BREAK_UNMAPPING(brake->id);
 
-			if (master) {
-				zend_hash_index_update_mem(master, brake->line, &new_brake, sizeof(phpdbg_breakfile_t));
+			if (zend_hash_index_add_mem(master, brake->line, &new_brake, sizeof(phpdbg_breakfile_t))) {
 				PHPDBG_BREAK_MAPPING(brake->id, master);
 			}
 		} ZEND_HASH_FOREACH_END();
