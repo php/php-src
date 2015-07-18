@@ -621,7 +621,6 @@ PHP_FUNCTION(usort)
 {
 	zval *array;
 	zend_refcounted *arr;
-	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -633,18 +632,17 @@ PHP_FUNCTION(usort)
 
 	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
+	 * original array. The fact of modification is detected by comparing the
+	 * zend_array pointer. The result of sorting in such case is undefined and
+	 * the function returns FALSE.
 	 */
 	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
+		if (arr != Z_COUNTED_P(array)) {
 			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
 			if (--GC_REFCOUNT(arr) <= 0) {
 				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
@@ -666,7 +664,6 @@ PHP_FUNCTION(uasort)
 {
 	zval *array;
 	zend_refcounted *arr;
-	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -678,18 +675,17 @@ PHP_FUNCTION(uasort)
 
 	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
+	 * original array. The fact of modification is detected by comparing the
+	 * zend_array pointer. The result of sorting in such case is undefined and
+	 * the function returns FALSE.
 	 */
 	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
+		if (arr != Z_COUNTED_P(array)) {
 			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
 			if (--GC_REFCOUNT(arr) <= 0) {
 				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
@@ -754,7 +750,6 @@ PHP_FUNCTION(uksort)
 {
 	zval *array;
 	zend_refcounted *arr;
-	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -766,18 +761,17 @@ PHP_FUNCTION(uksort)
 
 	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
+	 * original array. The fact of modification is detected by comparing the
+	 * zend_array pointer. The result of sorting in such case is undefined and
+	 * the function returns FALSE.
 	 */
 	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
 	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
+		if (arr != Z_COUNTED_P(array)) {
 			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
 			if (--GC_REFCOUNT(arr) <= 0) {
 				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
