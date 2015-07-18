@@ -40,6 +40,7 @@
     PHP 7). (Tjerk)
 
 - Standard:
+  . Fixed bug #70096 (Repeated iptcembed() adds superfluous FF bytes). (cmb)
   . Fixed bug #70018 (exec does not strip all whitespace). (Laruence)
 
 - Tokenizer:
