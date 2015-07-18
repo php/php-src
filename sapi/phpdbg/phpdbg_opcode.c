@@ -27,6 +27,15 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
+{
+	const char *ret = zend_get_opcode_name(opcode);
+	if (ret) {
+		return ret + 5; /* Skip ZEND_ prefix */
+	}
+	return "UNKNOWN";
+} /* }}} */
+
 static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type) /* {{{ */
 {
 	char *decode = NULL;
@@ -203,13 +212,4 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
 {
 	phpdbg_print_opline_ex(execute_data, ignore_flags);
-} /* }}} */
-
-const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
-{
-	const char *ret = zend_get_opcode_name(opcode);
-	if (ret) {
-		return ret + 5; /* Skip ZEND_ prefix */
-	}
-	return "UNKNOWN";
 } /* }}} */

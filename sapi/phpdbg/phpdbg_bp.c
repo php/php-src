@@ -928,9 +928,9 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
 {
-	const char *opname = phpdbg_decode_opcode(opcode);
+	const char *opname = zend_get_opcode_name(opcode);
 
-	if (memcmp(opname, PHPDBG_STRL("UNKNOWN")) == 0) {
+	if (!opname) {
 		return NULL;
 	}
 
