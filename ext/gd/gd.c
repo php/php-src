@@ -2440,7 +2440,7 @@ PHP_FUNCTION(imagecreatefromwebp)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
 }
 /* }}} */
-#endif /* HAVE_GD_VPX */
+#endif /* HAVE_GD_WEBP */
 
 /* {{{ proto resource imagecreatefromxbm(string filename)
    Create a new image from XBM file or URL */
