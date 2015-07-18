@@ -615,9 +615,7 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
-/* {{{ proto bool usort(array array_arg, string cmp_function)
-   Sort an array by values using a user-defined comparison function */
-PHP_FUNCTION(usort)
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func, zend_bool renumber) /* {{{ */
 {
 	zval *array;
 	zend_refcounted *arr;
@@ -640,7 +638,7 @@ PHP_FUNCTION(usort)
 	Z_ADDREF_P(array);
 	arr = Z_COUNTED_P(array);
 
-	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) != FAILURE;
+	retval = zend_hash_sort(Z_ARRVAL_P(array), compare_func, renumber) != FAILURE;
 
 	if (arr != Z_COUNTED_P(array)) {
 		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
@@ -657,45 +655,19 @@ PHP_FUNCTION(usort)
 }
 /* }}} */
 
+/* {{{ proto bool usort(array array_arg, string cmp_function)
+   Sort an array by values using a user-defined comparison function */
+PHP_FUNCTION(usort)
+{
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 1);
+}
+/* }}} */
+
 /* {{{ proto bool uasort(array array_arg, string cmp_function)
    Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
-	zval *array;
-	zend_refcounted *arr;
-	zend_bool retval;
-	PHP_ARRAY_CMP_FUNC_VARS;
-
-	PHP_ARRAY_CMP_FUNC_BACKUP();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		return;
-	}
-
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected by comparing the
-	 * zend_array pointer. The result of sorting in such case is undefined and
-	 * the function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	arr = Z_COUNTED_P(array);
-
-	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) != FAILURE;
-
-	if (arr != Z_COUNTED_P(array)) {
-		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-		if (--GC_REFCOUNT(arr) <= 0) {
-			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-		}
-		retval = 0;
-	} else {
-		Z_DELREF_P(array);
-	}
-
-	PHP_ARRAY_CMP_FUNC_RESTORE();
-	RETURN_BOOL(retval);
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, 0);
 }
 /* }}} */
 
@@ -746,40 +718,7 @@ static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
    Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
-	zval *array;
-	zend_refcounted *arr;
-	zend_bool retval;
-	PHP_ARRAY_CMP_FUNC_VARS;
-
-	PHP_ARRAY_CMP_FUNC_BACKUP();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		return;
-	}
-
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected by comparing the
-	 * zend_array pointer. The result of sorting in such case is undefined and
-	 * the function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	arr = Z_COUNTED_P(array);
-
-	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) != FAILURE;
-	if (arr != Z_COUNTED_P(array)) {
-		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-		if (--GC_REFCOUNT(arr) <= 0) {
-			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-		}
-		retval = 0;
-	} else {
-		Z_DELREF_P(array);
-	}
-
-	PHP_ARRAY_CMP_FUNC_RESTORE();
-	RETURN_BOOL(retval);
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, 0);
 }
 /* }}} */
 
