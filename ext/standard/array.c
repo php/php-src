@@ -621,6 +621,7 @@ PHP_FUNCTION(usort)
 {
 	zval *array;
 	zend_refcounted *arr;
+	zend_bool retval;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -639,22 +640,20 @@ PHP_FUNCTION(usort)
 	Z_ADDREF_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (arr != Z_COUNTED_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
-			RETVAL_FALSE;
-		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) != FAILURE;
+
+	if (arr != Z_COUNTED_P(array)) {
+		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+		if (--GC_REFCOUNT(arr) <= 0) {
+			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
 		}
+		retval = 0;
+	} else {
+		Z_DELREF_P(array);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
@@ -664,6 +663,7 @@ PHP_FUNCTION(uasort)
 {
 	zval *array;
 	zend_refcounted *arr;
+	zend_bool retval;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -682,22 +682,20 @@ PHP_FUNCTION(uasort)
 	Z_ADDREF_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (arr != Z_COUNTED_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
-			RETVAL_FALSE;
-		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) != FAILURE;
+
+	if (arr != Z_COUNTED_P(array)) {
+		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+		if (--GC_REFCOUNT(arr) <= 0) {
+			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
 		}
+		retval = 0;
+	} else {
+		Z_DELREF_P(array);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
@@ -750,6 +748,7 @@ PHP_FUNCTION(uksort)
 {
 	zval *array;
 	zend_refcounted *arr;
+	zend_bool retval;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -768,22 +767,19 @@ PHP_FUNCTION(uksort)
 	Z_ADDREF_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (arr != Z_COUNTED_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
-			RETVAL_FALSE;
-		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+	retval = zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) != FAILURE;
+	if (arr != Z_COUNTED_P(array)) {
+		php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+		if (--GC_REFCOUNT(arr) <= 0) {
+			_zval_dtor_func(arr ZEND_FILE_LINE_CC);
 		}
+		retval = 0;
+	} else {
+		Z_DELREF_P(array);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
