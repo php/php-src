@@ -266,7 +266,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								if (node->children) {
 									node = xmlNewDocNode(node->doc, NULL, (char *) node->children, node->name);
 								} else {
-									node = xmlNewDocNode(node->doc, NULL, "xmlns", node->name);
+									node = xmlNewDocNode(node->doc, NULL, (const xmlChar *) "xmlns", node->name);
 								}
 								node->type = XML_NAMESPACE_DECL;
 								node->parent = nsparent;
@@ -282,7 +282,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				}
 				break;
 			default:
-				str = xmlXPathCastToString(obj);
+				str = (char *) xmlXPathCastToString(obj);
 				ZVAL_STRING(&args[i], str);
 				xmlFree(str);
 		}
@@ -302,7 +302,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	if (obj->stringval == NULL) {
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
-		valuePush(ctxt, xmlXPathNewString(""));
+		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 		if (fci.param_count > 0) {
 			for (i = 0; i < nargs - 1; i++) {
 				zval_ptr_dtor(&args[i]);
@@ -311,7 +311,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		}
 		return;
 	}
-	ZVAL_STRING(&handler, obj->stringval);
+	ZVAL_STRING(&handler, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
 
 	ZVAL_COPY_VALUE(&fci.function_name, &handler);
@@ -322,17 +322,17 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable)) {
 		php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
-		valuePush(ctxt, xmlXPathNewString(""));
+		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
 		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'", ZSTR_VAL(callable));
 		/* Push an empty string, so that we at least have an xslt result... */
-		valuePush(ctxt, xmlXPathNewString(""));
+		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 	} else {
 		result = zend_call_function(&fci, NULL);
 		if (result == FAILURE) {
 			if (Z_TYPE(handler) == IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", Z_STRVAL(handler));
-				valuePush(ctxt, xmlXPathNewString(""));
+				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 			}
 		/* retval is == NULL, when an exception occurred, don't report anything, because PHP itself will handle that */
 		} else if (Z_ISUNDEF(retval)) {
@@ -353,10 +353,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				valuePush(ctxt, xmlXPathNewBoolean(Z_LVAL(retval)));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
-				valuePush(ctxt, xmlXPathNewString(""));
+				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 			} else {
 				convert_to_string_ex(&retval);
-				valuePush(ctxt, xmlXPathNewString(Z_STRVAL(retval)));
+				valuePush(ctxt, xmlXPathNewString((xmlChar *) Z_STRVAL(retval)));
 			}
 			zval_ptr_dtor(&retval);
 		}
@@ -445,7 +445,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 		nodep = xmlDocGetRootElement(sheetp->doc);
 		if (nodep && (nodep = nodep->children)) {
 			while (nodep) {
-				if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
+				if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, (const xmlChar *) "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
 					intern->hasKeys = 1;
 					break;
 				}
@@ -728,7 +728,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	if (newdocp) {
 		ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, newdocp, sheetp);
 		if (doc_txt_ptr && doc_txt_len) {
-			RETVAL_STRINGL(doc_txt_ptr, doc_txt_len);
+			RETVAL_STRINGL((char *) doc_txt_ptr, doc_txt_len);
 			xmlFree(doc_txt_ptr);
 		}
 		xmlFreeDoc(newdocp);
@@ -748,7 +748,6 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *id;
 	zval *array_value, *entry, new_string;
 	xsl_object *intern;
-	zend_ulong idx;
 	char *namespace;
 	size_t namespace_len;
 	zend_string *string_key, *name, *value;
@@ -756,7 +755,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
 		intern = Z_XSL_P(id);
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array_value), idx, string_key, entry) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_value), string_key, entry) {
 			if (string_key == NULL) {
 				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;

@@ -217,7 +217,7 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		consumed = bucket->buflen;
 
-		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
+		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), inst->allowed_tags, inst->allowed_tags_len);
 
 		php_stream_bucket_append(buckets_out, bucket);
 	}

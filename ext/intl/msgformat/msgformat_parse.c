@@ -97,7 +97,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	size_t      slocale_len = 0;
 	char       *source = NULL;
 	size_t      src_len = 0;
-	MessageFormatter_object mf = {0};
+	MessageFormatter_object mf;
 	MessageFormatter_object *mfo = &mf;
 
 	/* Parse parameters. */
@@ -110,6 +110,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 		RETURN_FALSE;
 	}
 
+	memset(mfo, 0, sizeof(*mfo));
 	msgformat_data_init(&mfo->mf_data);
 
 	if(pattern && pattern_len) {

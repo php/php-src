@@ -29,7 +29,7 @@ function doCalls(ReflectionGenerator $ref) {
 		doCalls($ref);
 		yield; // Generator !
 	})();
-})())->valid();
+})())->next();
 
 ?>
 --EXPECTF--

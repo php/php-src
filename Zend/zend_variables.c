@@ -39,12 +39,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-
 				ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
-
-				/* break possible cycles */
-				GC_REMOVE_FROM_BUFFER(arr);
-				GC_TYPE_INFO(arr) = IS_NULL | (GC_WHITE << 16);
 				zend_array_destroy(arr);
 				break;
 			}
@@ -97,9 +92,6 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
 
-				/* break possible cycles */
-				GC_REMOVE_FROM_BUFFER(arr);
-				GC_TYPE_INFO(arr) = IS_NULL | (GC_WHITE << 16);
 				zend_array_destroy(arr);
 				break;
 			}

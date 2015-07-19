@@ -255,10 +255,10 @@ Changes to integer handling
   ignored. As such $i previously held the value 7, because the last two digits
   were silently discarded.
 
-* Bitwise shifts by negative numbers will now throw a warning and return false:
+* Bitwise shifts by negative numbers will now throw an ArithmeticError:
 
-      var_dump(1 >> -1); // bool(false)
-      // Warning: Bit shift by negative number
+      var_dump(1 >> -1);
+      // ArithmeticError: Bit shift by negative number
 
 * Left bitwise shifts by a number of bits beyond the bit width of an integer
   will always result in 0:
@@ -570,6 +570,13 @@ Other
     and ReflectionFunctionAbstract::getReturnType() methods both return an
     instance of ReflectionType.
 
+- Stream:
+  . New Windows only stream context options was added to allow blocking reads
+    on pipes. To enable it, pass array("pipe" => array("blocking" => true))
+    when creating the stream context. Be aware, that this option can under
+    circumstances cause dead locks on the pipe buffer. However it can be useful
+    in several CLI use case scenarios.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -606,14 +613,24 @@ Other
     unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]]);
 
 - proc_open():
-  The maximum number of pipes used by proc_open() was previously limited by
+  . The maximum number of pipes used by proc_open() was previously limited by
   hardcoded value of 16. This limit is now removed and the number of pipes is
   effectively limited by the amount of memory available to PHP.
+  . New Windows only configuration option "blocking_pipes" can be used to
+  force blocking reads on child process pipes. This covers several
+  edge cases in CLI usage however can lead to dead locks. Also, this
+  correlates with the new stream context options for pipes.
 
 - array_column():
   The function now supports an array of objects as well as two-dimensional
   arrays. Only public properties are considered, and objects that make use of
   __get() for dynamic properties must also implement __isset().
+
+- stream_context_create()
+  It accepts now a Windows only configuration 
+  array("pipe" => array("blocking" => <boolean>))  which forces blocking reads
+  on pipes. This option should be used carefully because due to the
+  platform restrictions dead locks on pipe buffers are possible.
 
 ========================================
 6. New Functions

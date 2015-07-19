@@ -340,7 +340,7 @@ static ZEND_NORETURN void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	fflush(stderr);
 #endif
 #if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
@@ -2441,6 +2441,20 @@ ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap)
 	old_heap = AG(mm_heap);
 	AG(mm_heap) = (zend_mm_heap*)new_heap;
 	return (zend_mm_heap*)old_heap;
+}
+
+ZEND_API zend_mm_heap *zend_mm_get_heap(void)
+{
+	return AG(mm_heap);
+}
+
+ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap)
+{
+#if ZEND_MM_CUSTOM
+	return AG(mm_heap)->use_custom_heap;
+#else
+	return 0;
+#endif
 }
 
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,

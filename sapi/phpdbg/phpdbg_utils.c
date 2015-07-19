@@ -764,22 +764,22 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 
 	switch (Z_TYPE_P(zv)) {
 		case IS_UNDEF:
-			decode = zend_strndup("", 0);
+			decode = estrdup("");
 			break;
 		case IS_NULL:
-			decode = zend_strndup(ZEND_STRL("null"));
+			decode = estrdup("null");
 			break;
 		case IS_FALSE:
-			decode = zend_strndup(ZEND_STRL("false"));
+			decode = estrdup("false");
 			break;
 		case IS_TRUE:
-			decode = zend_strndup(ZEND_STRL("true"));
+			decode = estrdup("true");
 			break;
 		case IS_LONG:
-			asprintf(&decode, ZEND_ULONG_FMT, Z_LVAL_P(zv));
+			spprintf(&decode, 0, ZEND_LONG_FMT, Z_LVAL_P(zv));
 			break;
 		case IS_DOUBLE:
-			asprintf(&decode, "%.*G", 14, Z_DVAL_P(zv));
+			spprintf(&decode, 0, "%.*G", 14, Z_DVAL_P(zv));
 			break;
 		case IS_STRING: {
 			int i;
@@ -789,28 +789,32 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 					ZSTR_VAL(str)[i] = ' ';
 				}
 			}
-			asprintf(&decode, "\"%.*s\"%c", ZSTR_LEN(str) <= maxlen - 2 ? (int) ZSTR_LEN(str) : (maxlen - 3), ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen - 2 ? 0 : '+');
+			spprintf(&decode, 0, "\"%.*s\"%c",
+				ZSTR_LEN(str) <= maxlen - 2 ? (int) ZSTR_LEN(str) : (maxlen - 3),
+				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen - 2 ? 0 : '+');
 			zend_string_release(str);
 			} break;
 		case IS_RESOURCE:
-			asprintf(&decode, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			spprintf(&decode, 0, "Rsrc #%d", Z_RES_HANDLE_P(zv));
 			break;
 		case IS_ARRAY:
-			asprintf(&decode, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));
+			spprintf(&decode, 0, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));
 			break;
 		case IS_OBJECT: {
 			zend_string *str = Z_OBJCE_P(zv)->name;
-			asprintf(&decode, "%.*s%c", ZSTR_LEN(str) <= maxlen ? (int) ZSTR_LEN(str) : maxlen - 1, ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
+			spprintf(&decode, 0, "%.*s%c",
+				ZSTR_LEN(str) <= maxlen ? (int) ZSTR_LEN(str) : maxlen - 1,
+				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
 			break;
 		}
 		case IS_CONSTANT:
-			decode = zend_strndup(ZEND_STRL("<constant>"));
+			decode = estrdup("<constant>");
 			break;
 		case IS_CONSTANT_AST:
-			decode = zend_strndup(ZEND_STRL("<ast>"));
+			decode = estrdup("<ast>");
 			break;
 		default:
-			asprintf(&decode, "unknown type: %d", Z_TYPE_P(zv));
+			spprintf(&decode, 0, "unknown type: %d", Z_TYPE_P(zv));
 			break;
 	}
 

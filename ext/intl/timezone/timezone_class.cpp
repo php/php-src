@@ -86,18 +86,16 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		//convert offset from milliseconds to minutes
 		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
 	} else {
-		char *str;
-		size_t str_len;
+		zend_string *u8str;
 		/* Call the constructor! */
-		if (intl_charFromString(id, &str, &str_len, &INTL_ERROR_CODE(*outside_error)) == FAILURE) {
+		u8str = intl_charFromString(id, &INTL_ERROR_CODE(*outside_error));
+		if (!u8str) {
 			spprintf(&message, 0, "%s: could not convert id to UTF-8", func);
 			intl_errors_set(outside_error, INTL_ERROR_CODE(*outside_error),
 				message, 1);
 			goto error;
 		}
-		ZVAL_STRINGL(&arg, str, str_len);
-		//???
-		efree(str);
+		ZVAL_STR(&arg, u8str);
 		zend_call_method_with_1_params(ret, NULL, NULL, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
@@ -291,8 +289,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	TimeZone_object	*to;
 	const TimeZone	*tz;
 	UnicodeString	ustr;
-	char			*str;
-	size_t			str_len;
+	zend_string     *u8str;
 	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 
@@ -314,15 +311,13 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
 
 	tz->getID(ustr);
-	intl_convert_utf16_to_utf8(&str, &str_len,
+	u8str = intl_convert_utf16_to_utf8(
 		ustr.getBuffer(), ustr.length(), &uec);
-	if (U_FAILURE(uec)) {
+	if (!u8str) {
 		return debug_info;
 	}
-	ZVAL_STRINGL(&zv, str, str_len);
+	ZVAL_NEW_STR(&zv, u8str);
 	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
-	// TODO: avoid reallocation ???
-	efree(str);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();

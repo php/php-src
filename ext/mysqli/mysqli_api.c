@@ -1479,19 +1479,12 @@ PHP_FUNCTION(mysqli_info)
 /* }}} */
 
 /* {{{ php_mysqli_init() */
-void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-// TODO: We can't properly check if this was to mysql_init() in a class method
-//       or a call to mysqli->init().
-//       To solve the problem, we added instanceof check for the class of $this
-//       ???
-	if (getThis() &&
-	    instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry) &&
-	    (Z_MYSQLI_P(getThis()))->ptr) {
-//???	if (getThis() && (Z_MYSQLI_P(getThis()))->ptr) {
+	if (is_method && (Z_MYSQLI_P(getThis()))->ptr) {
 		return;
 	}
 
@@ -1515,7 +1508,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	mysqli_resource->ptr = (void *)mysql;
 	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 
-	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry)) {
+	if (!is_method) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
 	} else {
 		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
@@ -1527,7 +1520,15 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
    Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init)
 {
-	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
+}
+/* }}} */
+
+/* {{{ proto resource mysqli::init(void)
+   Initialize mysqli and return a resource for use with mysql_real_connect */
+PHP_FUNCTION(mysqli_init_method)
+{
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
 /* }}} */
 
@@ -1693,7 +1694,7 @@ static int mysqli_options_get_option_zval_type(int option)
 	switch (option) {
 #ifdef MYSQLI_USE_MYSQLND
 #if PHP_MAJOR_VERSION == 6
-		/* PHP-7 doesn't supprt unicode yet ??? */
+		/* PHP-7 doesn't supprt unicode */
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:

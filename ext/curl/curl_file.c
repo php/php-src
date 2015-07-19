@@ -78,7 +78,8 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 		return;
 	}
 	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1, &rv);
-	RETURN_ZVAL(res, 1, 0);
+	ZVAL_DEREF(res);
+	ZVAL_COPY(return_value, res);
 }
 
 static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)

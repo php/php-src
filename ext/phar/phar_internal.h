@@ -558,7 +558,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, int *signature_length, char **error);
 
 /* utility functions */
-char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error);
+zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error);
 char *phar_decompress_filter(phar_entry_info * entry, int return_unknown);
 char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 

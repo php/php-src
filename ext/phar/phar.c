@@ -194,8 +194,8 @@ ZEND_INI_MH(phar_ini_cache_list) /* {{{ */
 /* }}} */
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN( "phar.readonly", "1", PHP_INI_ALL, phar_ini_modify_handler, readonly, zend_phar_globals, phar_globals)
-	STD_PHP_INI_BOOLEAN( "phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.readonly", "1", PHP_INI_ALL, phar_ini_modify_handler, readonly, zend_phar_globals, phar_globals)
+	STD_PHP_INI_BOOLEAN("phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
 	STD_PHP_INI_ENTRY("phar.cache_list", "", PHP_INI_SYSTEM, phar_ini_cache_list, cache_list, zend_phar_globals, phar_globals)
 PHP_INI_END()
 
@@ -2073,7 +2073,7 @@ static int php_check_dots(const char *element, int n) /* {{{ */
  */
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 {
-	char newpath[MAXPATHLEN];
+	char *newpath;
 	int newpath_len;
 	char *ptr;
 	char *tok;
@@ -2081,8 +2081,10 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 
 	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
 		newpath_len = PHAR_G(cwd_len);
+		newpath = emalloc(strlen(path) + newpath_len + 1);
 		memcpy(newpath, PHAR_G(cwd), newpath_len);
 	} else {
+		newpath = emalloc(strlen(path) + 2);
 		newpath[0] = '/';
 		newpath_len = 1;
 	}
@@ -2105,6 +2107,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 				if (*tok == '.') {
 					efree(path);
 					*new_len = 1;
+					efree(newpath);
 					return estrndup("/", 1);
 				}
 				break;
@@ -2112,9 +2115,11 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd) /* {{{ */
 				if (tok[0] == '.' && tok[1] == '.') {
 					efree(path);
 					*new_len = 1;
+					efree(newpath);
 					return estrndup("/", 1);
 				}
 		}
+		efree(newpath);
 		return path;
 	}
 
@@ -2163,7 +2168,8 @@ last_time:
 
 	efree(path);
 	*new_len = newpath_len;
-	return estrndup(newpath, newpath_len);
+	newpath[newpath_len] = '\0';
+	return erealloc(newpath, newpath_len + 1);
 }
 /* }}} */
 
@@ -2430,15 +2436,9 @@ static int phar_flush_clean_deleted_apply(zval *zv) /* {{{ */
 
 #include "stub.h"
 
-char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error) /* {{{ */
+zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error) /* {{{ */
 {
-	char *stub = NULL;
 	int index_len, web_len;
-	size_t dummy;
-
-	if (!len) {
-		len = &dummy;
-	}
 
 	if (error) {
 		*error = NULL;
@@ -2471,8 +2471,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 		}
 	}
 
-	phar_get_stub(index_php, web_index, len, &stub, index_len+1, web_len+1);
-	return stub;
+	return phar_get_stub(index_php, web_index, index_len+1, web_len+1);
 }
 /* }}} */
 
@@ -2485,7 +2484,8 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int convert, char **error) /* {{{ */
 {
 	char halt_stub[] = "__HALT_COMPILER();";
-	char *newstub, *tmp;
+	zend_string *newstub;
+	char *tmp;
 	phar_entry_info *entry, *newentry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *pos, has_dirs = 0;
@@ -2631,8 +2631,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			newstub = NULL;
 		} else {
 			/* this is either a brand new phar or a default stub overwrite */
-			newstub = phar_create_default_stub(NULL, NULL, &(phar->halt_offset), NULL);
-			written = php_stream_write(newfile, newstub, phar->halt_offset);
+			newstub = phar_create_default_stub(NULL, NULL, NULL);
+			phar->halt_offset = ZSTR_LEN(newstub);
+			written = php_stream_write(newfile, ZSTR_VAL(newstub), phar->halt_offset);
 		}
 		if (phar->halt_offset != written) {
 			if (closeoldfile) {
@@ -2647,12 +2648,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				}
 			}
 			if (newstub) {
-				efree(newstub);
+				zend_string_free(newstub);
 			}
 			return EOF;
 		}
 		if (newstub) {
-			efree(newstub);
+			zend_string_free(newstub);
 		}
 	}
 	manifest_ftell = php_stream_tell(newfile);

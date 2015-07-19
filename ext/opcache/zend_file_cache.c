@@ -386,7 +386,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -665,9 +664,40 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	new_script->mem = NULL;
 }
 
-int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
+static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 {
 	size_t len;
+	char *filename;
+
+	len = strlen(ZCG(accel_directives).file_cache);
+	filename = emalloc(len + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
+	memcpy(filename, ZCG(accel_directives).file_cache, len);
+#ifndef ZEND_WIN32
+	filename[len] = '/';
+	memcpy(filename + len + 1, ZCG(system_id), 32);
+	memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
+	memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
+#else
+	filename[len] = '\\';
+	memcpy(filename + len + 1, ZCG(system_id), 32);
+	if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
+		/* local fs */
+		*(filename + len + 33) = '\\';
+		*(filename + len + 34) = ZSTR_VAL(script_path)[0];
+		memcpy(filename + len + 35, ZSTR_VAL(script_path) + 2, ZSTR_LEN(script_path) - 2);
+		memcpy(filename + len + 35 + ZSTR_LEN(script_path) - 2, SUFFIX, sizeof(SUFFIX));
+	} else {
+		/* network path */
+		memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
+		memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
+	}
+#endif
+
+	return filename;
+}
+
+int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
+{
 	int fd;
 	char *filename;
 	zend_file_cache_metainfo info;
@@ -676,15 +706,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #endif
 	void *mem, *buf;
 
-	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + ZSTR_LEN(script->full_path) + sizeof(SUFFIX));
-	memcpy(filename, ZCG(accel_directives).file_cache, len);
-	filename[len] = '/';
-	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path));
-	memcpy(filename + len + 33 + ZSTR_LEN(script->full_path), SUFFIX, sizeof(SUFFIX));
+	filename = zend_file_cache_get_bin_file_path(script->full_path);
 
-	if (zend_file_cache_mkdir(filename, len) != SUCCESS) {
+	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
 		efree(filename);
 		return FAILURE;
@@ -913,7 +937,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 # if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
-				case ZEND_GOTO:
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -1164,7 +1187,6 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
 {
 	zend_string *full_path = file_handle->opened_path;
-	size_t len;
 	int fd;
 	char *filename;
 	zend_persistent_script *script;
@@ -1176,13 +1198,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	if (!full_path) {
 		return NULL;
 	}
-	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + ZSTR_LEN(full_path) + sizeof(SUFFIX));
-	memcpy(filename, ZCG(accel_directives).file_cache, len);
-	filename[len] = '/';
-	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, ZSTR_VAL(full_path), ZSTR_LEN(full_path));
-	memcpy(filename + len + 33 + ZSTR_LEN(full_path), SUFFIX, sizeof(SUFFIX));
+	filename = zend_file_cache_get_bin_file_path(full_path);
 
 	fd = open(filename, O_RDONLY | O_BINARY);
 	if (fd < 0) {
@@ -1328,16 +1344,9 @@ use_process_mem:
 
 void zend_file_cache_invalidate(zend_string *full_path)
 {
-	size_t len;
 	char *filename;
 
-	len = strlen(ZCG(accel_directives).file_cache);
-	filename = emalloc(len + 33 + ZSTR_LEN(full_path) + sizeof(SUFFIX));
-	memcpy(filename, ZCG(accel_directives).file_cache, len);
-	filename[len] = '/';
-	memcpy(filename + len + 1, ZCG(system_id), 32);
-	memcpy(filename + len + 33, ZSTR_VAL(full_path), ZSTR_LEN(full_path));
-	memcpy(filename + len + 33 + ZSTR_LEN(full_path), SUFFIX, sizeof(SUFFIX));
+	filename = zend_file_cache_get_bin_file_path(full_path);
 
 	unlink(filename);
 	efree(filename);

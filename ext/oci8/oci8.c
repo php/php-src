@@ -1453,14 +1453,16 @@ static void php_oci_pconnection_list_np_dtor(zend_resource *entry)
 		OCI_G(in_call)) {
 
 		/* Remove the hash entry if present */
-		zvp = zend_hash_find(&EG(persistent_list), connection->hash_key);
-		le = Z_RES_P(zvp); 		/* PHPNG TODO check for null zvp */
-		if (le != NULL && le->type == le_pconnection && le->ptr == connection) {
-			zend_hash_del(&EG(persistent_list), connection->hash_key);
-		}
-		else {
-			php_oci_connection_close(connection);
-			OCI_G(num_persistent)--;
+		if (connection->hash_key) {
+			zvp = zend_hash_find(&EG(persistent_list), connection->hash_key);
+			le = zvp ? Z_RES_P(zvp) : NULL;		/* PHPNG TODO check for null zvp */
+			if (le != NULL && le->type == le_pconnection && le->ptr == connection) {
+				zend_hash_del(&EG(persistent_list), connection->hash_key);
+			}
+			else {
+				php_oci_connection_close(connection);
+				OCI_G(num_persistent)--;
+			}
 		}
 
 #ifdef HAVE_OCI8_DTRACE
@@ -1534,12 +1536,14 @@ void php_oci_define_hash_dtor(zval *data)
 {
 	php_oci_define *define = (php_oci_define *) Z_PTR_P(data);
 
-	zval_ptr_dtor(&define->zval);
+	zval_ptr_dtor(define->zval);
 
 	if (define->name) {
 		efree(define->name);
 		define->name = NULL;
 	}
+
+    efree(define);
 }
 /* }}} */
 
@@ -1562,8 +1566,9 @@ void php_oci_bind_hash_dtor(zval *data)
 	if (bind->array.indicators) {
 		efree(bind->array.indicators);
 	}
+
 	efree(bind);
-	/*zval_ptr_dtor(&bind->zval); */
+	zval_ptr_dtor(bind->zval);
 }
 /* }}} */
 
@@ -1579,7 +1584,7 @@ void php_oci_column_hash_dtor(zval *data)
 		zend_list_close(column->stmtid);
 	}
 
-	if (column->is_descr) {
+	if (column->descid) {
 		zend_list_close(column->descid);
 	}
 
@@ -1703,6 +1708,7 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf)
 	text err_buf[PHP_OCI_ERRBUF_LEN];
 
 	memset(err_buf, 0, sizeof(err_buf));
+	*error_buf = (text *)0;
 	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, err_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR));
 
 	if (error_code) {
@@ -1946,7 +1952,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			le = Z_RES_P(zvp);
 			found = 1;
 			if (le->type == le_index_ptr) {
-				int type, link;
 				void *ptr;
 
 				ptr = le->ptr; /* PHPNG TODO */
@@ -1984,7 +1989,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			if (connection->is_open) {
 				/* found an open connection. now ping it */
 				if (connection->is_persistent) {
-					int rsrc_type;
 
 					/* Check connection liveness in the following order:
 					 * 1) always check OCI_ATTR_SERVER_STATUS
@@ -2008,7 +2012,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							connection->used_this_request = 1;
 							tmp = (php_oci_connection *)connection->id->ptr;
 
-							if (tmp != NULL && rsrc_type == le_pconnection && tmp->hash_key->len == hashed_details.s->len &&
+							if (tmp != NULL && tmp->hash_key->len == hashed_details.s->len &&
 								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && ++GC_REFCOUNT(connection->id) == SUCCESS) {
 								/* do nothing */
 							} else {
@@ -2039,7 +2043,6 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			 * if ping fails
 			 */
 			if (persistent){
-				int rsrc_type;
 
 				connection->is_open = 0;
 				connection->used_this_request = 1;
@@ -2047,7 +2050,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				/* We have to do a hash_del but need to preserve the resource if there is a positive
 				 * refcount. Set the data pointer in the list entry to NULL
 				 */
-				if (connection == connection->id->ptr && rsrc_type == le_pconnection) {
+				if (connection == connection->id->ptr) {
 					le->ptr = NULL;
 				}
 
@@ -2369,14 +2372,17 @@ static int php_oci_connection_close(php_oci_connection *connection)
 	 * (like env) on the session pool
 	 */
 		php_oci_spool_close(connection->private_spool);
+		connection->private_spool = NULL;
 	}
 
 	if (connection->hash_key) {
 		pefree(connection->hash_key, connection->is_persistent);
+		connection->hash_key = NULL;
 	}
 #ifdef HAVE_OCI8_DTRACE
 	if (connection->client_id) {
 		pefree(connection->client_id, connection->is_persistent);
+		connection->client_id = NULL;
 	}
 #endif /* HAVE_OCI8_DTRACE */
 	pefree(connection, connection->is_persistent);
@@ -2568,12 +2574,11 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 	} else if (column->is_descr) {
 
 		if (column->data_type != SQLT_RDD) {
-			int rsrc_type;
 
 			/* reset descriptor's length */
 			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
-			if (!descriptor || rsrc_type != le_descriptor) {
+			if (!descriptor) {
 				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid);
 				return 1;
 			}
@@ -2770,7 +2775,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
 				if (fetch_mode & PHP_OCI_NUM) {
-					Z_ADDREF(element);
+					Z_TRY_ADDREF_P(&element);
 				}
 				add_assoc_zval(return_value, column->name, &element);
 			}
@@ -2972,7 +2977,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
-	zend_resource spool_le = {0};
+	zend_resource spool_le = {{0}};
 	zend_resource *spool_out_le = NULL;
 	zend_bool iserror = 0;
 	zval *spool_out_zv = NULL;

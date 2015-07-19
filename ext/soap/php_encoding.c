@@ -2318,7 +2318,6 @@ iterator_done:
 
 			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
-			//??? el = &data;
 			el = data;
 			for (i = 1; i < dimension; i++) {
 				if (el != NULL && Z_TYPE_P(el) == IS_ARRAY &&

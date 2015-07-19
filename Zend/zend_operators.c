@@ -506,7 +506,11 @@ try_again:
 			break;
 		}
 		case IS_TRUE:
-			ZVAL_NEW_STR(op, zend_string_init("1", 1, 0));
+			if (CG(one_char_string)['1']) {
+				ZVAL_INTERNED_STR(op, CG(one_char_string)['1']);
+			} else {
+				ZVAL_NEW_STR(op, zend_string_init("1", 1, 0));
+			}
 			break;
 		case IS_STRING:
 			break;
@@ -797,7 +801,11 @@ try_again:
 		case IS_FALSE:
 			return ZSTR_EMPTY_ALLOC();
 		case IS_TRUE:
-			return zend_string_init("1", 1, 0);
+			if (CG(one_char_string)['1']) {
+				return CG(one_char_string)['1'];
+			} else {
+				return zend_string_init("1", 1, 0);
+			}
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len;
@@ -899,7 +907,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+					zend_throw_error(NULL, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -952,7 +960,7 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+					zend_throw_error(NULL, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -999,7 +1007,7 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+					zend_throw_error(NULL, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1087,7 +1095,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 					}
 					converted = 1;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+					zend_throw_error(NULL, "Unsupported operand types");
 					return FAILURE;
 				}
 		}
@@ -1152,7 +1160,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 					zendi_convert_scalar_to_number(op2, op2_copy, result);
 					converted = 1;
 				} else {
-					zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+					zend_throw_error(NULL, "Unsupported operand types");
 					return FAILURE; /* unknown datatype */
 				}
 		}
@@ -1173,9 +1181,9 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 	if (op2_lval == 0) {
 		/* modulus by zero */
 		if (EG(current_execute_data) && !CG(in_compilation)) {
-			zend_throw_exception_ex(NULL, 0, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 		} else {
-			zend_error_noreturn(E_ERROR, "Division by zero");
+			zend_error_noreturn(E_ERROR, "Modulo by zero");
 		}
 		ZVAL_UNDEF(result);
 		return FAILURE;
@@ -1302,7 +1310,7 @@ try_again:
 		default:
 			ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BW_NOT);
 
-			zend_error(E_EXCEPTION | E_ERROR, "Unsupported operand types");
+			zend_throw_error(NULL, "Unsupported operand types");
 			return FAILURE;
 	}
 }
@@ -1526,7 +1534,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(NULL, 0, "Bit shift by negative number");
+				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
@@ -1557,7 +1565,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 			return SUCCESS;
 		} else {
 			if (EG(current_execute_data) && !CG(in_compilation)) {
-				zend_throw_exception_ex(NULL, 0, "Bit shift by negative number");
+				zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Bit shift by negative number");
 			} else {
 				zend_error_noreturn(E_ERROR, "Bit shift by negative number");
 			}
@@ -1619,7 +1627,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		zend_string *result_str;
 
 		if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
-			zend_error(E_EXCEPTION | E_ERROR, "String size overflow");
+			zend_throw_error(NULL, "String size overflow");
 			ZVAL_FALSE(result);
 			return FAILURE;
 		}
@@ -1752,7 +1760,7 @@ static inline void zend_free_obj_get_result(zval *op) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline int i_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	int ret;
 	int converted = 0;
@@ -1934,15 +1942,9 @@ static zend_always_inline int i_compare_function(zval *result, zval *op1, zval *
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
-{
-	return i_compare_function(result, op1, op2);
-}
-/* }}} */
-
 ZEND_API int zval_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	return i_compare_function(result, op1, op2);
+	return compare_function(result, op1, op2);
 }
 /* }}} */
 
@@ -2130,8 +2132,12 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (Z_STRLEN_P(str) == 0) {
 		zend_string_release(Z_STR_P(str));
-		Z_STR_P(str) = zend_string_init("1", sizeof("1")-1, 0);
-		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		if (CG(one_char_string)['1']) {
+			ZVAL_INTERNED_STR(str, CG(one_char_string)['1']);
+		} else {
+			Z_STR_P(str) = zend_string_init("1", sizeof("1")-1, 0);
+			Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		}
 		return;
 	}
 
@@ -2414,6 +2420,34 @@ ZEND_API void ZEND_FASTCALL zend_str_tolower(char *str, size_t length) /* {{{ */
 		*p = zend_tolower_ascii(*p);
 		p++;
 	}
+}
+/* }}} */
+
+ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length) /* {{{ */
+{
+	register const unsigned char *p = (const unsigned char*)source;
+	register const unsigned char *end = p + length;
+
+	while (p < end) {
+		if (*p != zend_tolower_ascii(*p)) {
+			char *res = (char*)emalloc(length + 1);
+			register unsigned char *r;
+
+			if (p != (const unsigned char*)source) {
+				memcpy(res, source, p - (const unsigned char*)source);
+			}
+			r = (unsigned char*)p + (res - source);
+			while (p < end) {
+				*r = zend_tolower_ascii(*p);
+				p++;
+				r++;
+			}
+			*r = '\0';
+			return res;
+		}
+		p++;
+	}
+	return NULL;
 }
 /* }}} */
 
@@ -2848,7 +2882,7 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 }
 /* }}} */
 
-ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
 	register size_t i;
@@ -2879,7 +2913,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 }
 /* }}} */
 
-ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
 	unsigned int td[256];
 	register size_t i;

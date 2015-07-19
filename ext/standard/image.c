@@ -204,7 +204,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	unsigned long len=64, szlength;
 	int factor = 1,maxfactor = 16;
 	int status = 0;
-	char *b, *buf = NULL;
+	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
 
 	b = ecalloc(1, len + 1);
@@ -212,7 +212,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a))
 		return NULL;
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
@@ -232,8 +232,8 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 
 		do {
 			szlength = ZSTR_LEN(bufz) * (1<<factor++);
-			buf = (char *) erealloc(buf, szlength);
-			status = uncompress(buf, &szlength, ZSTR_VAL(bufz), ZSTR_LEN(bufz));
+			buf = erealloc(buf, szlength);
+			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), ZSTR_LEN(bufz));
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {

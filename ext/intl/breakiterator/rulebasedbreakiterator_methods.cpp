@@ -114,20 +114,18 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	char *str;
-	size_t str_len;
+	zend_string *u8str;
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
 
-	if (intl_charFromString(rules, &str, &str_len, BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+	u8str = intl_charFromString(rules, BREAKITER_ERROR_CODE_P(bio));
+	if (!u8str)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",
 				0);
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(str, str_len);
-	//???
-	efree(str);
+	RETVAL_STR(u8str);
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)

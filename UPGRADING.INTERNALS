@@ -18,11 +18,15 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   p. TSRM changes
   q. gc_collect_cycles() is now hookable
   r. PDO uses size_t for lengths
+  s. Resource API changes
+  t. Optimized strings concatenation.
+  u. Streams changes
 
 2. Build system changes
   a. Unix build system changes
   b. Windows build system changes
 
+3. Module changes
 
 ================
 0. Wiki Examples
@@ -210,6 +214,10 @@ changes. See: https://wiki.php.net/phpng-upgrading
      Instead of reallocation and copying string on each ZEND_ADD_STRING/VAR/CAHR,
      collect all the strings and then allocate and construct the resulting string once.
 
+  u. Streams changes
+     - It is possible to do blocking reads on Windows pipes. It can be done either
+       using context stream option PHP_STREAM_OPTION_PIPE_BLOCKING or 
+       adding STREAM_USE_BLOCKING_PIPE when opening the stream.
 
 ========================
 2. Build system changes
@@ -267,3 +275,17 @@ changes. See: https://wiki.php.net/phpng-upgrading
     - More documentation can be found in ext/session/mod_files.c as comments.
       mod_files.c may be used as reference implementation.
  
+  Openssl:
+    - several ext/openssl functions require the inclusion of the applink shim
+      as documented in the OpenSSL FAQ https://www.openssl.org/support/faq.html#PROG2
+      to properly work on Windows. While this primarily affects the OpenSSL
+      functionality, the shim needs to be included into the executable file
+      which loads the extension DLL, not into the extension DLL itself. Alternatively
+      it can be compiled and linked with the main program as a separate object file.
+      More information and explanation in the linked OpenSSL FAQ.
+
+      Thus, this primarily affects any WAMP or other redistributions bundling the
+      official PHP release zipballs or building from sources. The applink shim is
+      already integrated with all the PHP executables from the official distribution
+      starting with 7.0.0beta1.
+

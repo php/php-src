@@ -886,7 +886,6 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
-;extension=php_pspell.dll
 ;extension=php_shmop.dll
 
 ; The MIBS data available in the PHP distribution must be installed. 
@@ -975,6 +974,10 @@ cli_server.color = On
 ;stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
+
+;Enables or disables JIT compilation of patterns. This requires the PCRE
+;library to be compiled with JIT support.
+;pcre.jit=1
 
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"

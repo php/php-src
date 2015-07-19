@@ -934,24 +934,22 @@ PHP_METHOD(Phar, interceptFileFuncs)
  */
 PHP_METHOD(Phar, createDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *stub, *error;
+	char *index = NULL, *webindex = NULL, *error;
+	zend_string *stub;
 	size_t index_len = 0, webindex_len = 0;
-	size_t stub_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		return;
 	}
 
-	stub = phar_create_default_stub(index, webindex, &stub_len, &error);
+	stub = phar_create_default_stub(index, webindex, &error);
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 		return;
 	}
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(stub, stub_len);
-	efree(stub);
+	RETURN_NEW_STR(stub);
 }
 /* }}} */
 
@@ -1120,7 +1118,7 @@ static spl_other_handler phar_spl_foreign_handler = {
 PHP_METHOD(Phar, __construct)
 {
 #if !HAVE_SPL
-	zend_throw_exception_ex(zend_exception_get_default(), 0, "Cannot instantiate Phar object without SPL extension");
+	zend_throw_exception_ex(zend_ce_exception, 0, "Cannot instantiate Phar object without SPL extension");
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	size_t fname_len, alias_len = 0;
@@ -1998,9 +1996,10 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 }
 /* }}} */
 
-static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress) /* {{{ */
+static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext, zend_bool compress) /* {{{ */
 {
 	const char *oldname = NULL;
+	phar_archive_data *phar = *sphar;
 	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
@@ -2110,6 +2109,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 				pphar->fp = phar->fp;
 				phar->fp = NULL;
 				phar_destroy_phar_data(phar);
+				*sphar = NULL;
 				phar = pphar;
 				phar->refcount++;
 				newpath = oldpath;
@@ -2292,15 +2292,19 @@ no_copy:
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len);
 	} ZEND_HASH_FOREACH_END();
 
-	if ((ret = phar_rename_archive(phar, ext, 0))) {
+	if ((ret = phar_rename_archive(&phar, ext, 0))) {
 		return ret;
 	} else {
-		zend_hash_destroy(&(phar->manifest));
-		zend_hash_destroy(&(phar->mounted_dirs));
-		zend_hash_destroy(&(phar->virtual_dirs));
-		php_stream_close(phar->fp);
-		efree(phar->fname);
-		efree(phar);
+		if(phar != NULL) {
+			zend_hash_destroy(&(phar->manifest));
+			zend_hash_destroy(&(phar->mounted_dirs));
+			zend_hash_destroy(&(phar->virtual_dirs));
+			if (phar->fp) {
+				php_stream_close(phar->fp);
+			}
+			efree(phar->fname);
+			efree(phar);
+		}
 		return NULL;
 	}
 }
@@ -2909,10 +2913,10 @@ PHP_METHOD(Phar, setStub)
  */
 PHP_METHOD(Phar, setDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
+	char *index = NULL, *webindex = NULL, *error = NULL;
+	zend_string *stub = NULL;
 	size_t index_len = 0, webindex_len = 0;
 	int created_stub = 0;
-	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (phar_obj->archive->is_data) {
@@ -2942,13 +2946,13 @@ PHP_METHOD(Phar, setDefaultStub)
 	}
 
 	if (!phar_obj->archive->is_tar && !phar_obj->archive->is_zip) {
-		stub = phar_create_default_stub(index, webindex, &stub_len, &error);
+		stub = phar_create_default_stub(index, webindex, &error);
 
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "%s", error);
 			efree(error);
 			if (stub) {
-				efree(stub);
+				zend_string_free(stub);
 			}
 			RETURN_FALSE;
 		}
@@ -2960,10 +2964,10 @@ PHP_METHOD(Phar, setDefaultStub)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		return;
 	}
-	phar_flush(phar_obj->archive, stub, stub_len, 1, &error);
+	phar_flush(phar_obj->archive, stub ? ZSTR_VAL(stub) : 0, stub ? ZSTR_LEN(stub) : 0, 1, &error);
 
 	if (created_stub) {
-		efree(stub);
+		zend_string_free(stub);
 	}
 
 	if (error) {
@@ -5292,14 +5296,12 @@ zend_function_entry phar_exception_methods[] = {
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (zend_long)value);
 
-#define phar_exception_get_default() zend_exception_get_default()
-
 void phar_object_init(void) /* {{{ */
 {
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
-	phar_ce_PharException = zend_register_internal_class_ex(&ce, phar_exception_get_default());
+	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
 #if HAVE_SPL
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);

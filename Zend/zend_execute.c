@@ -88,18 +88,17 @@ static const zend_internal_function zend_pass_function = {
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC)
 
-#define PZVAL_LOCK(z) if (Z_REFCOUNTED_P(z)) Z_ADDREF_P((z))
-#define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
-
 #define READY_TO_DESTROY(zv) \
 	(zv && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
-#define EXTRACT_ZVAL_PTR(zv) do {						\
-		zval *__zv = (zv);								\
-		if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
-			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));		\
-		}												\
-	} while (0)
+#define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
+	zval *__zv = (zv);								\
+	if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
+		if (!(check_null) || Z_INDIRECT_P(__zv)) {	\
+			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	\
+		}											\
+	}												\
+} while (0)
 
 #define FREE_OP(should_free) \
 	if (should_free) { \
@@ -1110,6 +1109,12 @@ fast_assign:
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
+				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_REFCOUNT(zobj->properties)--;
+					}
+					zobj->properties = zend_array_dup(zobj->properties);
+				}
 				property = zend_hash_find(zobj->properties, Z_STR_P(property_name));
 				if (property) {
 					goto fast_assign;
@@ -1201,7 +1206,7 @@ static zend_never_inline void zend_assign_to_object_dim(zval *retval, zval *obje
 
 	/* Note:  property_name in this case is really the array index! */
 	if (!Z_OBJ_HT_P(object)->write_dimension) {
-		zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+		zend_throw_error(NULL, "Cannot use object as array");
 		FREE_OP(free_value);
 		return;
 	}
@@ -1681,7 +1686,7 @@ convert_to_array:
 		}
 
 		if (dim == NULL) {
-			zend_error(E_EXCEPTION | E_ERROR, "[] operator not supported for strings");
+			zend_throw_error(NULL, "[] operator not supported for strings");
 			ZVAL_NULL(result);
 		} else {
 			zend_check_string_offset(dim, type);
@@ -1689,7 +1694,7 @@ convert_to_array:
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+			zend_throw_error(NULL, "Cannot use object as array");
 			retval = &EG(error_zval);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1830,7 +1835,7 @@ try_string_offset:
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_error(E_EXCEPTION | E_ERROR, "Cannot use object as array");
+			zend_throw_error(NULL, "Cannot use object as array");
 			ZVAL_NULL(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1922,7 +1927,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 					ZVAL_INDIRECT(result, ptr);
 				}
 			} else {
-				zend_error(E_EXCEPTION | E_ERROR, "Cannot access undefined property for object with overloaded property access");
+				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
 				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
 		} else {
@@ -1980,7 +1985,7 @@ static int zend_check_symbol(zval *pz)
 	if (Z_TYPE_P(pz) > 10) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
@@ -2488,8 +2493,7 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				zend_object_release((zend_object *) call->func->common.prototype);
-			}
-			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				zend_string_release(call->func->common.function_name);
 				zend_free_trampoline(call->func);
 			}
@@ -2522,7 +2526,8 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 				} else if (brk_opline->opcode == ZEND_ROPE_END) {
 					zend_string **rope = (zend_string **) EX_VAR(brk_opline->op1.var);
 					zend_op *last = EX(func)->op_array.opcodes + op_num;
-					while (last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT) {
+					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
+							|| last->result.var != brk_opline->op1.var) {
 						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
 						last--;
 					}
@@ -2563,10 +2568,20 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 # endif
 #endif
 
-#define ZEND_VM_NEXT_OPCODE() \
+#define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \
 	CHECK_SYMBOL_TABLES() \
-	ZEND_VM_INC_OPCODE(); \
+	if (check_exception) { \
+		OPLINE = EX(opline) + (skip); \
+	} else { \
+		OPLINE = opline + (skip); \
+	} \
 	ZEND_VM_CONTINUE()
+
+#define ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION() \
+	ZEND_VM_NEXT_OPCODE_EX(1, 1)
+
+#define ZEND_VM_NEXT_OPCODE() \
+	ZEND_VM_NEXT_OPCODE_EX(0, 1)
 
 #define ZEND_VM_SET_NEXT_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \

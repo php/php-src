@@ -1068,15 +1068,6 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 	zend_persistent_script *persistent_script;
 
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
-#ifdef HAVE_OPCACHE_FILE_CACHE
-		if (ZCG(accel_directives).file_cache) {
-			realpath = accelerator_orig_zend_resolve_path(filename, filename_len);
-			if (realpath) {
-				zend_file_cache_invalidate(realpath);
-				zend_string_release(realpath);
-			}
-		}
-#endif
 		return FAILURE;
 	}
 
@@ -2290,7 +2281,7 @@ static void accel_deactivate(void)
 	ZCG(counted) = 0;
 
 #if !ZEND_DEBUG
-	if (ZCG(accel_directives).fast_shutdown) {
+	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
 		zend_accel_fast_shutdown();
 	}
 #endif

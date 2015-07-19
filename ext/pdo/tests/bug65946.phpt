@@ -18,6 +18,9 @@ $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
 	$sql = 'SELECT FIRST :limit * FROM test';
+} else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+	//$sql = 'SELECT * FROM test FETCH FIRST :limit ROWS ONLY';  // Oracle 12c syntax
+    $sql = "select id from (select a.*, rownum rnum from (SELECT * FROM test) a where rownum <= :limit)";
 } else {
 	$sql = 'SELECT * FROM test LIMIT :limit';
 }

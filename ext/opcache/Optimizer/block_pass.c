@@ -123,10 +123,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
-			case ZEND_GOTO:
-				/* would not optimize GOTOs - we cannot really know where it jumps,
-				 * so these optimizations are too dangerous */
-				return 0;
 			case ZEND_FAST_CALL:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				if (opline->extended_value) {
@@ -762,28 +758,33 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
 			opline->opcode == ZEND_IS_NOT_EQUAL ||
-			opline->opcode == ZEND_CASE) {
+			/* CASE variable will be deleted later by FREE, so we can't optimize it */
+			(opline->opcode == ZEND_CASE && (ZEND_OP1_TYPE(opline) & (IS_CONST|IS_CV)))) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 				(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
 				 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
-#else
-				 Z_TYPE(ZEND_OP1_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(TRUE,  X)     => T = BOOL(X) */
+				/* T = IS_EQUAL(FALSE, X)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(TRUE,  X) => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(FALSE, X) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP1_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 					   (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
 					    Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
-#else
-					    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(X, TRUE)      => T = BOOL(X) */
+				/* T = IS_EQUAL(X, FALSE)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, TRUE)  => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, FALSE) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
@@ -1394,6 +1395,34 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					/* JMPNZ(false) -> NOP */
 					MAKE_NOP(last_op);
 					del_source(block, block->op2_to);
+					block->op2_to = NULL;
+				}
+				break;
+			}
+
+			if (block->op2_to == block->follow_to) {
+				/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
+
+				if (last_op->op1_type == IS_VAR) {
+					zend_op **Tsource = cfg->Tsource;
+					zend_op *src = VAR_SOURCE(last_op->op1);
+
+					if (src &&
+					    src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_DIM_R &&
+					    src->opcode != ZEND_FETCH_OBJ_R) {
+						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+						MAKE_NOP(last_op);
+						block->op2_to = NULL;
+						break;
+					}
+				}
+				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					last_op->opcode = ZEND_FREE;
+					last_op->op2.num = 0;
+					block->op2_to = NULL;
+				} else {
+					MAKE_NOP(last_op);
 					block->op2_to = NULL;
 				}
 				break;

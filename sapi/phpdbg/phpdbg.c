@@ -48,6 +48,10 @@
 #	include <arpa/inet.h>
 #endif /* }}} */
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 int phpdbg_startup_run = 0;
 
@@ -106,6 +110,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
 	pg->sigsegv_bailout = NULL;
+
+	pg->oplog_list = NULL;
 
 #ifdef PHP_WIN32
 	pg->sigio_watcher_thread = INVALID_HANDLE_VALUE;
@@ -443,7 +449,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	phpdbg_oplog_entry *cur = PHPDBG_G(oplog_list)->start;
 	phpdbg_oplog_list *prev = PHPDBG_G(oplog_list)->prev;
 
-	HashTable *options;
+	HashTable *options = NULL;
 	zval *option_buffer;
 	zend_bool by_function = 0;
 	zend_bool by_opcode = 0;
@@ -1165,7 +1171,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
-	zend_bool quit_immediately = 0;
+	volatile zend_bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
 	zend_bool remote = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;
