@@ -1080,8 +1080,9 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakpoint(zend_execute_data *execute
 	}
 
 	if (PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP)) {
-		/* check we are at the beginning of the stack */
-		if (execute_data->opline == execute_data->func->op_array.opcodes) {
+		zend_op_array *op_array = &execute_data->func->op_array;
+		/* check we are at the beginning of the stack, but after argument RECV */
+		if (execute_data->opline == op_array->opcodes + op_array->num_args + !!(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
 			if ((base = phpdbg_find_breakpoint_symbol(execute_data->func))) {
 				goto result;
 			}
