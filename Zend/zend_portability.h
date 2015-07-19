@@ -93,7 +93,7 @@
 # define __has_builtin(x) 0
 #endif
 
-#if defined(ZEND_WIN32)
+#if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
 #elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
@@ -225,7 +225,7 @@ char *alloca();
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
 # define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800
+#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
