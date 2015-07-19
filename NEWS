@@ -17,6 +17,7 @@
   . Fixed bug #70065 (curl_getinfo() returns corrupted values). (Anatol)
 
 - GD:
+  . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
   . Fixed bug #66882 (imagerotate by -90 degrees truncates image by 1px). (cmb)
   . Fixed bug #70064 (imagescale(..., IMG_BICUBIC) leaks memory). (cmb)
   . Fixed bug #69024 (imagescale segfault with palette based image). (cmb)
