@@ -1200,7 +1200,7 @@ PHP_FUNCTION(wddx_packet_end)
 }
 /* }}} */
 
-/* {{{ proto int wddx_add_vars(resource packet_id,  mixed var_names [, mixed ...])
+/* {{{ proto bool wddx_add_vars(resource packet_id,  mixed var_names [, mixed ...])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
