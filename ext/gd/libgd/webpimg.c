@@ -789,6 +789,7 @@ WebPResult WebPEncode(const uint8* Y,
 		  return webp_failure;
 		}
 		p[new_size - 1] = 0;
+        *p_out = p;
 		*p_out_size_bytes = new_size;
 	  }
 
