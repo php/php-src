@@ -57,21 +57,21 @@ static inline int clip(float v, int a, int b) {
   return (v > b) ? b : (v < 0) ? 0 : (int)(v);
 }
 enum {
-    COLOR_RED = 0,
-    COLOR_GREEN = 1,
-    COLOR_BLUE = 2,
-    ALPHA_CHANNEL = 3
+    COLOR_RED = 1,
+    COLOR_GREEN = 2,
+    COLOR_BLUE = 3,
+    ALPHA_CHANNEL = 0
 };
 
-/* endian neutral extractions of RGBA from a 32 bit pixel */
+/* endian neutral extractions of ARGB from a 32 bit pixel */
 static const uint32  RED_SHIFT =
-       8 * (sizeof(uint32) - 1 - COLOR_RED);           /* 24 */
+       8 * (sizeof(uint32) - 1 - COLOR_RED);           /* 16 */
 static const uint32  GREEN_SHIFT =
-       8 * (sizeof(uint32) - 1 - COLOR_GREEN);         /* 16 */
+       8 * (sizeof(uint32) - 1 - COLOR_GREEN);         /*  8 */
 static const uint32  BLUE_SHIFT =
-       8 * (sizeof(uint32) - 1 - COLOR_BLUE);          /*  8 */
+       8 * (sizeof(uint32) - 1 - COLOR_BLUE);          /*  0 */
 static const uint32  ALPHA_SHIFT =
-       8 * (sizeof(uint32) - 1 - ALPHA_CHANNEL);       /*  0 */
+       8 * (sizeof(uint32) - 1 - ALPHA_CHANNEL);       /* 24 */
 
 static inline int GetRed(const uint32* rgba) {
 	return gdTrueColorGetRed(*rgba);
