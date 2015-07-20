@@ -14,6 +14,7 @@
 #define YYGETCONDITION() LEX(state)
 #define YYCURSOR LEX(cursor)
 #define YYMARKER LEX(marker)
+#define YYCTXMARKER LEX(ctxmarker)
 #define yyleng LEX(len)
 #define yytext ((char*) LEX(text))
 #undef YYDEBUG
@@ -94,7 +95,7 @@ INPUT       [^\n\000]+
 <NORMAL>[:]{2} {
 	return T_DCOLON;
 }
-<NORMAL>[:]{1} {
+<NORMAL>[:]{1}/[^\\] {
 	return T_COLON;
 }
 

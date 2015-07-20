@@ -49,7 +49,7 @@ array(5) {
 [Script ended normally]
 prompt> 
 --ARGS--
-'1' '2' '3'
+1 2 3
 --FILE--
 <?php
 

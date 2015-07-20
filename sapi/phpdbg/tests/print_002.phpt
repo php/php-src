@@ -24,7 +24,7 @@ L14-16 foo() %s - %s + 8 ops
  L15   #5     SEND_VAR                @0                   1                                        
  L15   #6     DO_ICALL                                                                              
  L15   #7     RETURN                  null                                                          
-prompt> [L15         %s INIT_FCALL              112                  "var_dump"                                %s]
+prompt> [L15 %s INIT_FCALL              112                  "var_dump"                                %s]
 prompt> 
 --FILE--
 <?php
