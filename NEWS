@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #64878 (304 responses return Content-Type header). (cmb)
   
 - GD:
+  . Fixed bug #53156 (imagerectangle problem with point ordering). (cmb)
   . Fixed bug #66387 (Stack overflow with imagefilltoborder). (cmb)
   . Fixed bug #70102 (imagecreatefromwebm() shifts colors). (cmb)
   . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
