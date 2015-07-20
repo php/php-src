@@ -1394,11 +1394,8 @@ phpdbg_main:
 	}
 
 	/* set exec if present on command line */
-	if (!exec && (argc > php_optind) && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
-		if (strlen(argv[php_optind])) {
-			if (exec) {
-				free(exec);
-			}
+	if (argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
 		php_optind++;
@@ -1529,6 +1526,14 @@ phpdbg_main:
 
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
+		if (exec) { /* set execution context */
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec);
+			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
+
+			free(exec);
+			exec = NULL;
+		}
+
 		php_output_activate();
 		php_output_deactivate();
 
@@ -1542,7 +1547,7 @@ phpdbg_main:
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
-			SG(request_info).argv[i] = exec ? estrdup(exec) : estrdup("");
+			SG(request_info).argv[0] = PHPDBG_G(exec) ? estrdup(PHPDBG_G(exec)) : estrdup("");
 
 			php_hash_environment();
 		}
@@ -1602,14 +1607,6 @@ phpdbg_main:
 		PHPDBG_G(php_stdiop_write) = php_stream_stdio_ops.write;
 		php_stream_stdio_ops.write = phpdbg_stdiop_write;
 #endif
-
-		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(exec);
-			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
-
-			free(exec);
-			exec = NULL;
-		}
 
 		if (oplog_file) { /* open oplog */
 			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
@@ -1775,7 +1772,7 @@ phpdbg_out:
 		{
 			int i;
 			/* free argv */
-			for (i = SG(request_info).argc; --i;) {
+			for (i = SG(request_info).argc; i--;) {
 				efree(SG(request_info).argv[i]);
 			}
 			efree(SG(request_info).argv);
@@ -1838,6 +1835,9 @@ phpdbg_out:
 	}
 
 	if ((cleaning > 0 || remote) && !quit_immediately) {
+		/* reset internal php_getopt state */
+		php_getopt(-1, argv, OPTIONS, NULL, &php_optind, 0, 0);
+
 		goto phpdbg_main;
 	}
 
