@@ -17,6 +17,7 @@
   . Fixed bug #70065 (curl_getinfo() returns corrupted values). (Anatol)
 
 - GD:
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (cmb)
   . Fixed bug #70102 (imagecreatefromwebm() shifts colors). (cmb)
   . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
   . Fixed bug #66882 (imagerotate by -90 degrees truncates image by 1px). (cmb)
