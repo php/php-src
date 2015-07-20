@@ -27,7 +27,7 @@
 error_reporting(-1);
 
 $phpdbg = getenv('TEST_PHPDBG_EXECUTABLE') ?: null;
-$pass_options = " -qbI";
+$pass_options = ' -qbI -n -d "error_reporting=32767" -d "display_errors=1" -d "display_startup_errors=1" -d "log_errors=0"';
 $file = "";
 $cmdargv = "";
 
