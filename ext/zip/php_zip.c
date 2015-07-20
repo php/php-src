@@ -1691,8 +1691,8 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					entry_name = entry_name_buf;
 					entry_name_len = strlen(entry_name);
 				} else {
-					entry_name = Z_STRVAL_P(zval_file);
-					entry_name_len = Z_STRLEN_P(zval_file);
+					entry_name = file_stripped;
+					entry_name_len = file_stripped_len;
 				}
 				if (basename) {
 					zend_string_release(basename);
