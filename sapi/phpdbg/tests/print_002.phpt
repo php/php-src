@@ -1,5 +1,7 @@
 --TEST--
 Relative print commands
+--INI--
+opcache.enable_cli=0
 --PHPDBG--
 b foo
 r

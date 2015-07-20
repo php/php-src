@@ -1,5 +1,7 @@
 --TEST--
 Test phpdbg_*_oplog() functions
+--INI--
+opcache.enable_cli=0
 --PHPDBG--
 r
 q

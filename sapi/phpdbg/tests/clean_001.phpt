@@ -1,5 +1,7 @@
 --TEST--
 Cleaning must preserve breakpoints
+--INI--
+opcache.enable_cli=0
 --PHPDBG--
 b 4
 b foo

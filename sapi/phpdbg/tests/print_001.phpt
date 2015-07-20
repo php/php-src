@@ -1,5 +1,7 @@
 --TEST--
 Basic print functionality
+--INI--
+opcache.enable_cli=0
 --PHPDBG--
 p foo
 p class \Foo\bar
