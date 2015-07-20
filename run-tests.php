@@ -141,6 +141,7 @@ if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
 
 $php = null;
 $php_cgi = null;
+$phpdbg = null;
 
 if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
@@ -158,6 +159,16 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 				$php_cgi = null;
 			}
 		}
+
+		if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
+			$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
+
+			if (file_exists($phpdbg)) {
+				putenv("TEST_PHP_CGI_EXECUTABLE=$phpdbg");
+			} else {
+				$phpdbg = null;
+			}
+		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
@@ -171,6 +182,17 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	}
 
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
+if (getenv('TEST_PHPDBG_EXECUTABLE')) {
+	$phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
+
+	if ($phpdbg=='auto') {
+		$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
+		putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+	}
+
+	$environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 }
 
 function verify_config()
@@ -247,7 +269,7 @@ $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
+	global $cwd, $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
 
 	// Get info from php
 	$info_file = __DIR__ . '/run-test-info.php';
@@ -272,6 +294,14 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
 	} else {
 		$php_cgi_info = '';
+	}
+
+	if ($phpdbg) {
+		$phpdbg_info = `$phpdbg $pass_options $info_params $no_file_cache -qrr "$info_file"`;
+		$php_info_sep = "\n---------------------------------------------------------------------";
+		$phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
+	} else {
+		$phpdbg_info = '';
 	}
 
 	@unlink($info_file);
@@ -299,7 +329,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	// Write test context information.
 	echo "
 =====================================================================
-PHP         : $php $php_info $php_cgi_info
+PHP         : $php $php_info $php_cgi_info $phpdbg_info
 CWD         : $cwd
 Extra dirs  : ";
 	foreach ($user_tests as $test_dir) {
@@ -1205,6 +1235,10 @@ function run_test($php, $file, $env)
 		$php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
 	}
 
+	if (isset($env['TEST_PHPDBG_EXECUTABLE'])) {
+		$phpdbg = $env['TEST_PHPDBG_EXECUTABLE'];
+	}
+
 	if (is_array($file)) {
 		$file = $file[0];
 	}
@@ -1290,7 +1324,7 @@ TEST $file
 
 		} else {
 
-			if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
 				$bork_info = "missing section --FILE--";
 				$borked = true;
 			}
@@ -1367,6 +1401,38 @@ TEST $file
 
 				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
+				return 'SKIPPED';
+			}
+		}
+	}
+
+	/* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
+	if (array_key_exists('PHPDBG', $section_text)) {
+		if (!isset($section_text['STDIN'])) {
+			$section_text['STDIN'] = $section_text['PHPDBG']."\n";
+		}
+
+		if (isset($phpdbg)) {
+			$old_php = $php;
+			$php = $phpdbg . ' -qIb';
+		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
+			$old_php = $php;
+			$php = realpath(dirname($php) . "/phpdbg.exe") . ' -qIb ';
+		} else {
+			if (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
+				$old_php = $php;
+				$php = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg") . ' -qIb ';
+			} else if (file_exists("./sapi/phpdbg/phpdbg")) {
+				$old_php = $php;
+				$php = realpath("./sapi/phpdbg/phpdbg") . ' -qIb ';
+			} else if (file_exists(dirname($php) . "/phpdbg")) {
+				$old_php = $php;
+				$php = realpath(dirname($php) . "/phpdbg") . ' -qIb ';
+			} else {
+				show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+
+				junit_init_suite(junit_get_suitename_for($shortname));
+				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
 				return 'SKIPPED';
 			}
 		}
@@ -1652,8 +1718,12 @@ TEST $file
 	}
 
 	// We've satisfied the preconditions - run the test!
-	show_file_block('php', $section_text['FILE'], 'TEST');
-	save_text($test_file, $section_text['FILE'], $temp_file);
+	if (isset($section_text['FILE'])) {
+		show_file_block('php', $section_text['FILE'], 'TEST');
+		save_text($test_file, $section_text['FILE'], $temp_file);
+	} else {
+		$test_file = $temp_file = "";
+	}
 
 	if (array_key_exists('GET', $section_text)) {
 		$query_string = trim($section_text['GET']);
@@ -1741,7 +1811,7 @@ TEST $file
 		$env['REQUEST_METHOD'] = 'PUT';
 
 		if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
 			return 'BORKED';
 		}
 
@@ -1765,34 +1835,33 @@ TEST $file
 
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 
-    } else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
+	} else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
 
-        $post = trim($section_text['GZIP_POST']);
-        $post = gzencode($post, 9, FORCE_GZIP);
-        $env['HTTP_CONTENT_ENCODING'] = 'gzip';
+		$post = trim($section_text['GZIP_POST']);
+		$post = gzencode($post, 9, FORCE_GZIP);
+		$env['HTTP_CONTENT_ENCODING'] = 'gzip';
 
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
+		save_text($tmp_post, $post);
+		$content_length = strlen($post);
 
-        $env['REQUEST_METHOD'] = 'POST';
-        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
-        $env['CONTENT_LENGTH'] = $content_length;
+		$env['REQUEST_METHOD'] = 'POST';
+		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		$env['CONTENT_LENGTH'] = $content_length;
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 
-    } else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
-        $post = trim($section_text['DEFLATE_POST']);
-        $post = gzcompress($post, 9);
-        $env['HTTP_CONTENT_ENCODING'] = 'deflate';
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
+	} else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
+		$post = trim($section_text['DEFLATE_POST']);
+		$post = gzcompress($post, 9);
+		$env['HTTP_CONTENT_ENCODING'] = 'deflate';
+		save_text($tmp_post, $post);
+		$content_length = strlen($post);
 
-        $env['REQUEST_METHOD'] = 'POST';
-        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
-        $env['CONTENT_LENGTH'] = $content_length;
+		$env['REQUEST_METHOD'] = 'POST';
+		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		$env['CONTENT_LENGTH'] = $content_length;
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
-
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 
 	} else {
 
