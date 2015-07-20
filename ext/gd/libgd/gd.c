@@ -2048,7 +2048,9 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		t=y1;
 		y1 = y2;
 		y2 = t;
-
+	}
+	
+	if (x2 < x1) {
 		t = x1;
 		x1 = x2;
 		x2 = t;
