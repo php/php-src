@@ -564,7 +564,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					last_function = op_array->function_name;
 					last_scope = op_array->scope;
 					if (last_scope == NULL) {
-						fn_name = zend_string_copy(last_function ? last_function : last_file);
+						fn_name = zend_string_copy(last_function);
 					} else {
 						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), ZSTR_LEN(last_function), ZSTR_VAL(last_function));
 					}
