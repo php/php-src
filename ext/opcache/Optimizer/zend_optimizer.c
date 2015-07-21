@@ -494,7 +494,6 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:
-			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -539,7 +538,6 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:
-			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
