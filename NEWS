@@ -1,5 +1,58 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+23 Jul 2015, PHP 7.0.0 Beta 2
+
+- Core:
+  . Fixed bug #70089 (segfault at ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER ()).
+    (Laruence)
+  . Fixed bug #70057 (Build failure on 32-bit Mac OS X 10.6.8: recursive
+    inlining). (Laruence)
+  . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
+  . Fixed bug #69996 (Changing the property of a cloned object affects the
+    original). (Dmitry, Laruence)
+  . Fixed bug #70083 (Use after free with assign by ref to overloaded objects).
+    (Bob)
+
+- Curl:
+  . Fixed bug #70065 (curl_getinfo() returns corrupted values). (Anatol)
+
+- GD:
+  . Fixed bug #53156 (imagerectangle problem with point ordering). (cmb)
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (cmb)
+  . Fixed bug #70102 (imagecreatefromwebm() shifts colors). (cmb)
+  . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
+  . Fixed bug #66882 (imagerotate by -90 degrees truncates image by 1px). (cmb)
+  . Fixed bug #70064 (imagescale(..., IMG_BICUBIC) leaks memory). (cmb)
+  . Fixed bug #69024 (imagescale segfault with palette based image). (cmb)
+  . Fixed bug #53154 (Zero-height rectangle has whiskers). (cmb)
+  . Fixed bug #67447 (imagecrop() add a black line when cropping). (cmb)
+  . Fixed bug #68714 (copy 'n paste error). (cmb)
+  . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
+  . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
+  . Replace libvpx with libwebp for bundled libgd. (cmb, Anatol)
+
+- Opcache:
+  . Fixed bug #70058 (Build fails when building for i386). (Laruence)
+  . Fixed bug #70022 (Crash with opcache using opcache.file_cache_only=1).
+    (Anatol)
+
+- Soap:
+  . Fixed bug #70079 (Segmentation fault after more than 100 SoapClient
+    calls). (Laruence)
+  . Fixed bug #70032 (make_http_soap_request calls
+    zend_hash_get_current_key_ex(,,,NULL). (Laruence)
+
+- SPL:
+  . Fixed bug #70053 (MutlitpleIterator array-keys incompatible change in 
+    PHP 7). (Tjerk)
+
+- Standard:
+  . Fixed bug #70096 (Repeated iptcembed() adds superfluous FF bytes). (cmb)
+  . Fixed bug #70018 (exec does not strip all whitespace). (Laruence)
+
+- Tokenizer:
+  . Fixed bug #69430 (token_get_all has new irrecoverable errors). (Nikita)
+
 09 Jul 2015, PHP 7.0.0 Beta 1
 
 - Core:
@@ -12,11 +65,6 @@ PHP                                                                        NEWS
     ArrayAccess object). (Laruence)
   . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
   . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
-  . Fixed bug #62210 (Exceptions can leak temporary variables. As a part of
-    the fix serious refactoring was done. op_array->brk_cont_array was removed,
-    and replaced with more general and speed efficient op_array->T_liveliness.
-    ZEND_GOTO opcode is always replaced by ZEND_JMP at compile time).
-    (Bob, Dmitry, Laruence)
 
 - CLI server:
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
@@ -25,7 +73,7 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #69939 (Casting object to bool returns false). (Kalle)
 
-- JSON
+- JSON:
   . Fixed bug #62010 (json_decode produces invalid byte-sequences).
     (Jakub Zelenka)
 
@@ -39,7 +87,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
-    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+    openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
 
 - PCRE:
   . Fixed bug #53823 (preg_replace: * qualifier on unicode replace garbles the
@@ -53,15 +101,15 @@ PHP                                                                        NEWS
   . Fixed bug #69970 (Use-after-free vulnerability in
     spl_recursive_it_move_forward_ex()). (Laruence)
   
+- Sqlite3:
+  . Fixed bug #69972 (Use-after-free vulnerability in
+    sqlite3SafetyCheckSickOrOk()). (Laruence)
+
 - Standard:
   . Fixed bug #69983 (get_browser fails with user agent of null).
     (Kalle, cmb, Laruence)
   . Fixed bug #69976 (Unable to parse "all" urls with colon char). (cmb)
   . Fixed bug #69768 (escapeshell*() doesn't cater to !). (cmb)
-
-- Sqlite3:
-  . Fixed bug #69972 (Use-after-free vulnerability in
-    sqlite3SafetyCheckSickOrOk()). (Laruence)
 
 25 Jun 2015, PHP 7.0.0 Alpha 2
 
@@ -93,6 +141,10 @@ PHP                                                                        NEWS
   . Fixed bug #69893 (Strict comparison between integer and empty string keys
     crashes). (Nikita)
 
+- Curl:
+  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
+    yahoo dot com)
+
 - DOM:
   . Fixed bug #69846 (Segmenation fault (access violation) when iterating over
     DOMNodeList). (Anatol Belski)
@@ -100,7 +152,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #61221 (imagegammacorrect function loses alpha channel). (cmb)
 
-- JSON
+- JSON:
   . Fixed bug #68546 (json_decode() Fatal error: Cannot access property
     started with '\0'). (Jakub Zelenka)
 
@@ -108,30 +160,26 @@ PHP                                                                        NEWS
   . Fixed Bug #69796 (mysqli_stmt::fetch doesn't assign null values to
     bound variables). (Laruence)
 
-- Curl:
-  . Fixed bug #69831 (Segmentation fault in curl_getinfo). (im dot denisenko at
-    yahoo dot com)
-
 - Opcache:
   . Removed opcache.load_comments configuration directive. Now doc comments
     loading costs nothing and always enabled. (Dmitry)
   . Fixed bug #69838 (Wrong size calculation for function table). (Anatol)
   
 - PCRE:
-  . Fixed bug #69864 (Segfault in preg_replace_callback) (cmb, ab)
+  . Fixed bug #69864 (Segfault in preg_replace_callback). (cmb, ab)
 
 - PDO_pgsql:
   . Fixed bug #69752 (PDOStatement::execute() leaks memory with DML
     Statements when closeCuror() is u). (Philip Hofstetter)
 
-- SPL
+- SPL:
   . Fixed bug #69845 (ArrayObject with ARRAY_AS_PROPS broken). (Dmitry)
 
-- SQLite3
+- SQLite3:
   . Fixed bug #69897 (segfault when manually constructing SQLite3Result). 
     (Kalle)
 
-- Standard
+- Standard:
   . Fixed bug #62922 (Truncating entire string should result in string).
     (Nikita)
 
@@ -236,7 +284,7 @@ PHP                                                                        NEWS
   . Added "v" DateTime format modifier to get the 3-digit version of fraction 
     of seconds. (Mariano Iglesias)
   . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
-    RFC3339 Extended format which includes fraction of seconds (Mariano 
+    RFC3339 Extended format which includes fraction of seconds. (Mariano
     Iglesias)
 
 - DBA:
@@ -268,13 +316,13 @@ PHP                                                                        NEWS
   . Removed deprecated aliases datefmt_set_timezone_id() and
     IntlDateFormatter::setTimeZoneID(). (Nikita)
 
-- JSON
+- JSON:
   . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
 
-- LDAP
+- LDAP:
   . Fixed bug #47222 (Implement LDAP_OPT_DIAGNOSTIC_MESSAGE). (Andreas Heigl)
 
 - LiteSpeed:
@@ -329,7 +377,7 @@ PHP                                                                        NEWS
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
     ATTR_EMULATE_PREPARES). (Nikita)
 
-- Reflection
+- Reflection:
   . Fixed inheritance chain of Reflector interface. (Tjerk)
   . Added ReflectionGenerator class. (Bob)
   . Added reflection support for return types and type declarations. (Sara,
@@ -352,7 +400,7 @@ PHP                                                                        NEWS
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
 
-- Sqlite3:
+- SQLite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong
     required_num_args). (Julien)
 
@@ -397,9 +445,9 @@ PHP                                                                        NEWS
 
 - Zip:
   . Added ZipArchive::setCompressionName and ZipArchive::setCompressionIndex
-    methods (Remi, Cedric Delmas)
-  . Update bundled libzip to 1.0.1 (Remi, Anatol)
-  . Fixed bug #67161. (ZipArchive::getStream() returns NULL for certain file)
+    methods. (Remi, Cedric Delmas)
+  . Update bundled libzip to 1.0.1. (Remi, Anatol)
+  . Fixed bug #67161 (ZipArchive::getStream() returns NULL for certain file).
     (Christoph M. Becker)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
