@@ -41,4 +41,4 @@ Stack trace:
 #2 {main}
   thrown in %s on line %d
 
-Catchable fatal error: session_start(): Failed to initialize storage module: %s in %ssession_set_save_handler_error3.php on line %d
+Fatal error: session_start(): Failed to initialize storage module: %s in %ssession_set_save_handler_error3.php on line %d

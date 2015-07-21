@@ -11,8 +11,8 @@ session.name=
 var_dump(session_name("foo"));
 var_dump(session_name("bar"));
 --EXPECTF--
-PHP Catchable fatal error:  PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
+PHP Warning:  PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
 
-Catchable fatal error: PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
+Warning: PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
 string(9) "PHPSESSID"
 string(3) "foo"

@@ -23,7 +23,7 @@
 
 #define PS_SANITY_CHECK						\
 	if (PS(default_mod) == NULL) {				\
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot call default session handler"); \
+		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
 		RETURN_FALSE;						\
 	}
 

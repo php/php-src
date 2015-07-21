@@ -74,4 +74,4 @@ session_unset();
 --EXPECTF--
 *** Testing session_set_save_handler() function: create_sid ***
 
-Catchable fatal error: session_start(): Session id must be a string in %s on line %d
+Fatal error: session_start(): Session id must be a string in %s on line %d
