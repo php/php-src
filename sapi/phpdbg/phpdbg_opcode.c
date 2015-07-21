@@ -68,9 +68,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	/* EX */
 	switch (op->opcode) {
 	case ZEND_FAST_CALL:
-		if (op->extended_value != 0) {
-			spprintf(&decode[0], 0, "FAST_CALL<%s>",
-				op->extended_value == ZEND_FAST_CALL_FROM_CATCH ? "FROM_CATCH" : "FROM_FINALLY");
+		if (op->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
+			decode[0] = estrdup("FAST_CALL<FROM_FINALLY>");
 		}
 		break;
 	case ZEND_FAST_RET:

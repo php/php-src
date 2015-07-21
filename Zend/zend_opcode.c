@@ -587,21 +587,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 			zend_adjust_fast_call(op_array, start_op,
 					op_array->try_catch_array[i].finally_op,
 					op_array->try_catch_array[i].finally_end);
-			if (op_array->try_catch_array[i].catch_op) {
-				opline->extended_value = ZEND_FAST_CALL_FROM_CATCH;
-				opline->op2.opline_num = op_array->try_catch_array[i].catch_op;
-				opline->op1.opline_num = get_next_op_number(op_array);
-				/* generate a FAST_CALL to hole CALL_FROM_FINALLY */
-				opline = get_next_op(op_array);
-				opline->opcode = ZEND_FAST_CALL;
-				opline->result_type = IS_TMP_VAR;
-				opline->result.var = fast_call_var;
-				SET_UNUSED(opline->op1);
-				SET_UNUSED(opline->op2);
-				zend_resolve_fast_call(op_array, start_op + 1, op_array->try_catch_array[i].finally_op - 2);
-			} else {
-				zend_resolve_fast_call(op_array, start_op, op_array->try_catch_array[i].finally_op - 2);
-			}
+			zend_resolve_fast_call(op_array, start_op, op_array->try_catch_array[i].finally_op - 2);
 			opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
 
 			/* generate a sequence of FAST_CALL to upward finally block */

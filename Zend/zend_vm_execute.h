@@ -1609,12 +1609,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OP
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->result.var);
 
-	if ((opline->extended_value & ZEND_FAST_CALL_FROM_CATCH) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-	    /* in case of unhandled exception jump to catch block instead of finally */
-		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
-		ZEND_VM_CONTINUE();
-	}
 	if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY && UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
 		fast_call->u2.lineno = (uint32_t)-1;
 	} else {
