@@ -240,7 +240,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];
 
-	zend_stream_fixup(file, &data.buf, &data.len);
+	if (zend_stream_fixup(file, &data.buf, &data.len) == FAILURE) {
+		return NULL;
+	}
 
 	data.filename = filename;
 	data.line[0] = 0;
