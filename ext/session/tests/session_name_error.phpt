@@ -8,6 +8,21 @@ session.name=PHPSESSID
 --FILE--
 <?php
 
+function error_handler($errno, $errstr, $errfile, $errline)
+{
+	if ($errno & E_NOTICE) {
+		return ture; // Ignore notices
+	}
+    if ($errno & E_RECOVERABLE_ERROR) {
+        // Handle E_REVOCERABLE_ERROR
+        echo "\nE_RECOVERABLE_ERROR: {$errstr} in {$errfile} on line {$errline}\n";
+        return true; // Continue execution
+    }
+	return false;
+}
+
+set_error_handler('error_handler');
+
 ob_start();
 
 /* 
@@ -99,103 +114,103 @@ ob_end_flush();
 
 -- Iteration 1 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '0' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '0' in %s on line %d
 int(0)
 string(9) "PHPSESSID"
 
 -- Iteration 2 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
 int(1)
 string(9) "PHPSESSID"
 
 -- Iteration 3 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '12345' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '12345' in %s on line %d
 int(12345)
 string(9) "PHPSESSID"
 
 -- Iteration 4 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '-2345' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '-2345' in %s on line %d
 int(-2345)
 string(9) "PHPSESSID"
 
 -- Iteration 5 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '10.5' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '10.5' in %s on line %d
 float(10.5)
 string(9) "PHPSESSID"
 
 -- Iteration 6 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '-10.5' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '-10.5' in %s on line %d
 float(-10.5)
 string(9) "PHPSESSID"
 
 -- Iteration 7 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '123456789000' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '123456789000' in %s on line %d
 float(123456789000)
 string(9) "PHPSESSID"
 
 -- Iteration 8 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '1.23456789E-9' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '1.23456789E-9' in %s on line %d
 float(1.23456789E-9)
 string(9) "PHPSESSID"
 
 -- Iteration 9 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '0.5' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '0.5' in %s on line %d
 float(0.5)
 string(9) "PHPSESSID"
 
 -- Iteration 10 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 NULL
 string(9) "PHPSESSID"
 
 -- Iteration 11 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 NULL
 string(9) "PHPSESSID"
 
 -- Iteration 12 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
 bool(true)
 string(9) "PHPSESSID"
 
 -- Iteration 13 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 bool(false)
 string(9) "PHPSESSID"
 
 -- Iteration 14 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
 bool(true)
 string(9) "PHPSESSID"
 
 -- Iteration 15 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 bool(false)
 string(9) "PHPSESSID"
 
 -- Iteration 16 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 string(0) ""
 string(9) "PHPSESSID"
 
 -- Iteration 17 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 string(0) ""
 string(9) "PHPSESSID"
 
@@ -218,13 +233,13 @@ string(12) "Hello World!"
 
 -- Iteration 22 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 NULL
 string(12) "Hello World!"
 
 -- Iteration 23 --
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+E_RECOVERABLE_ERROR: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 NULL
 string(12) "Hello World!"
 

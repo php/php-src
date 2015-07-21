@@ -339,7 +339,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		case PS_HASH_FUNC_OTHER:
 			if (!PS(hash_ops)) {
 				efree(buf);
-				php_error_docref(NULL, E_ERROR, "Invalid session hash function");
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Invalid session hash function");
 				return NULL;
 			}
 
@@ -351,7 +351,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 #endif /* HAVE_HASH_EXT */
 		default:
 			efree(buf);
-			php_error_docref(NULL, E_ERROR, "Invalid session hash function");
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Invalid session hash function");
 			return NULL;
 	}
 	efree(buf);
@@ -480,7 +480,7 @@ static void php_session_initialize(void) /* {{{ */
 	zend_string *val = NULL;
 
 	if (!PS(mod)) {
-		php_error_docref(NULL, E_ERROR, "No storage module chosen - failed to initialize session");
+		php_error_docref(NULL,  E_RECOVERABLE_ERROR, "No storage module chosen - failed to initialize session");
 		return;
 	}
 
@@ -488,7 +488,7 @@ static void php_session_initialize(void) /* {{{ */
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
-		php_error_docref(NULL, E_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		return;
 	}
 
@@ -496,7 +496,7 @@ static void php_session_initialize(void) /* {{{ */
 	if (!PS(id)) {
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
-			php_error_docref(NULL, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
 		}
 		if (PS(use_cookies)) {
@@ -600,7 +600,7 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
-			err_type = E_WARNING;
+			err_type = E_RECOVERABLE_ERROR;
 		} else {
 			err_type = E_ERROR;
 		}
@@ -630,7 +630,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
-			err_type = E_WARNING;
+			err_type = E_RECOVERABLE_ERROR;
 		} else {
 			err_type = E_ERROR;
 		}
@@ -699,7 +699,7 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
-			err_type = E_WARNING;
+			err_type = E_RECOVERABLE_ERROR;
 		} else {
 			err_type = E_ERROR;
 		}
@@ -1829,7 +1829,7 @@ static PHP_FUNCTION(session_set_save_handler)
 				add_next_index_zval(&PS(mod_user_names).names[i], obj);
 				add_next_index_str(&PS(mod_user_names).names[i], zend_string_copy(func_name));
 			} else {
-				php_error_docref(NULL, E_ERROR, "Session handler's function table is corrupt");
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Session handler's function table is corrupt");
 				RETURN_FALSE;
 			}
 

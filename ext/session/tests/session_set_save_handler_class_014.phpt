@@ -27,4 +27,4 @@ session_start();
 --EXPECTF--
 *** Testing session_set_save_handler() : calling default handler when save_handler=user ***
 
-Fatal error: SessionHandler::open(): Cannot call default session handler in %s on line %d
+Catchable fatal error: SessionHandler::open(): Cannot call default session handler in %s on line %d

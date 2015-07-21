@@ -191,12 +191,12 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			php_error_docref(NULL, E_ERROR, "No session id returned by function");
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			php_error_docref(NULL, E_ERROR, "Session id must be a string");
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Session id must be a string");
 			return NULL;
 		}
 
