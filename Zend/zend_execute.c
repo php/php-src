@@ -1172,7 +1172,7 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 	zend_uchar c;
 	size_t string_len;
 
-	if (offset < 0) {
+	if (offset < (zend_long)(-Z_STRLEN_P(str))) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
 		zend_string_release(Z_STR_P(str));
@@ -1202,6 +1202,10 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 			ZVAL_NULL(result);
 		}
 		return;
+	}
+
+	if (offset < 0) { /* Handle negative offset */
+		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
 	old_str = Z_STR_P(str);
