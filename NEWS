@@ -32,6 +32,8 @@
 
 - Opcache:
   . Fixed bug #70058 (Build fails when building for i386). (Laruence)
+  . Fixed bug #70022 (Crash with opcache using opcache.file_cache_only=1).
+    (Anatol)
 
 - Soap:
   . Fixed bug #70079 (Segmentation fault after more than 100 SoapClient
