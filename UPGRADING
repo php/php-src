@@ -695,6 +695,9 @@ out, that the corresponding SDK isn't available anymore.
   Mhash is not an extension anymore, use function_exists("mhash") to check whether
   it is avaliable.
 
+- GD
+  The bundled libgd requires libwebp instead of libvpx for the WebP functionality.
+
 ========================================
 10. New Global Constants
 ========================================
