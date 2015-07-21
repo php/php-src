@@ -714,7 +714,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
