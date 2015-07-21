@@ -29,6 +29,7 @@
   . Fixed bug #68714 (copy 'n paste error). (cmb)
   . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
+  . Replace libvpx with libwebp for bundled libgd. (cmb, Anatol)
 
 - Opcache:
   . Fixed bug #70058 (Build fails when building for i386). (Laruence)
