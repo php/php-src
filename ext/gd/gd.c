@@ -1294,6 +1294,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "XPM Support", 0);
 #endif
 	add_assoc_bool(return_value, "XBM Support", 1);
+#ifdef HAVE_GD_WEBP
+	add_assoc_bool(return_value, "WebP Support", 1);
+#else
+	add_assoc_bool(return_value, "WebP Support", 0);
+#endif
 #if defined(USE_GD_JISX0208)
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
 #else
@@ -2435,7 +2440,7 @@ PHP_FUNCTION(imagecreatefromwebp)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
 }
 /* }}} */
-#endif /* HAVE_GD_VPX */
+#endif /* HAVE_GD_WEBP */
 
 /* {{{ proto resource imagecreatefromxbm(string filename)
    Create a new image from XBM file or URL */
@@ -3852,10 +3857,9 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	if (extended && EXT) {	/* parse extended info */
 		zval *item;
 		zend_string *key;
-		zend_ulong num_key;
 
 		/* walk the assoc array */
-		ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(EXT), num_key, key, item) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(EXT), key, item) {
 			if (key == NULL) {
 				continue;
 			}

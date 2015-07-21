@@ -821,7 +821,13 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		do {
 			dst--;
 			src--;
-			ZVAL_MAKE_REF(src);
+			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+				if (!Z_ISREF_P(src)) {
+					ZVAL_NEW_PERSISTENT_REF(src, src);
+				}
+			} else {
+				ZVAL_MAKE_REF(src);
+			}
 			ZVAL_COPY_VALUE(dst, src);
 			Z_ADDREF_P(dst);
 			if (Z_CONSTANT_P(Z_REFVAL_P(dst))) {
@@ -831,6 +837,8 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		ce->default_static_members_count += parent_ce->default_static_members_count;
 		if (ce->type == ZEND_USER_CLASS) {
 			ce->static_members_table = ce->default_static_members_table;
+		} else {
+			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 	}
 
@@ -1192,7 +1200,8 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
-		fn_copy = *fn;
+		/* And how about ZEND_OVERLOADED_FUNCTION? */
+		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION? sizeof(zend_op_array) : sizeof(zend_internal_function));
 
 		/* apply aliases which have not alias name, just setting visibility */
 		if (ce->trait_aliases) {

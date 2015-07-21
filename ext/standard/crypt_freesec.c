@@ -218,7 +218,6 @@ _crypt_extended_init(void)
 	uint32_t *p, *il, *ir, *fl, *fr;
 	uint32_t *bits28, *bits24;
 	u_char inv_key_perm[64];
-	u_char u_key_perm[56];
 	u_char inv_comp_perm[56];
 	u_char init_perm[64], final_perm[64];
 	u_char u_sbox[8][64];
@@ -260,7 +259,6 @@ _crypt_extended_init(void)
 	 * compression permutation.
 	 */
 	for (i = 0; i < 56; i++) {
-		u_key_perm[i] = key_perm[i] - 1;
 		inv_key_perm[key_perm[i] - 1] = i;
 		inv_comp_perm[i] = 255;
 	}
@@ -633,7 +631,7 @@ _crypt_extended_r(const char *key, const char *setting,
 		if (*key)
 			key++;
 	}
-	if (des_setkey((u_char *) keybuf, data))
+	if (des_setkey((char *) keybuf, data))
 		return(NULL);
 
 	if (*setting == _PASSWORD_EFMT1) {
@@ -662,7 +660,7 @@ _crypt_extended_r(const char *key, const char *setting,
 			/*
 			 * Encrypt the key with itself.
 			 */
-			if (des_cipher((u_char *) keybuf, (u_char *) keybuf,
+			if (des_cipher((char *) keybuf, (char *) keybuf,
 			    0, 1, data))
 				return(NULL);
 			/*
@@ -672,7 +670,7 @@ _crypt_extended_r(const char *key, const char *setting,
 			while (q - (u_char *) keybuf < sizeof(keybuf) && *key)
 				*q++ ^= *key++ << 1;
 
-			if (des_setkey((u_char *) keybuf, data))
+			if (des_setkey((char *) keybuf, data))
 				return(NULL);
 		}
 		memcpy(data->output, setting, 9);

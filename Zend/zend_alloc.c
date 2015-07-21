@@ -2443,6 +2443,20 @@ ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap)
 	return (zend_mm_heap*)old_heap;
 }
 
+ZEND_API zend_mm_heap *zend_mm_get_heap(void)
+{
+	return AG(mm_heap);
+}
+
+ZEND_API int zend_mm_is_custom_heap(zend_mm_heap *new_heap)
+{
+#if ZEND_MM_CUSTOM
+	return AG(mm_heap)->use_custom_heap;
+#else
+	return 0;
+#endif
+}
+
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),

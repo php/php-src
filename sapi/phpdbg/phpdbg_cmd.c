@@ -716,8 +716,7 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 #define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
 #if USE_LIB_STAR
-readline:
-			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE)
+			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))
 #endif
 			{
 				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
@@ -727,13 +726,12 @@ readline:
 			else {
 				cmd = readline(phpdbg_get_prompt());
 				PHPDBG_G(last_was_newline) = 1;
-			}
 
-			if (!cmd) {
-				goto readline;
-			}
+				if (!cmd) {
+					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+					zend_bailout();
+				}
 
-			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				add_history(cmd);
 			}
 #endif
@@ -744,7 +742,7 @@ readline:
 		buffer = estrdup(cmd);
 
 #if USE_LIB_STAR
-		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
 			free(cmd);
 		}
 #endif

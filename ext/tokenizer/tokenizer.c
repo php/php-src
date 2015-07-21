@@ -28,6 +28,7 @@
 #include "php_tokenizer.h"
 
 #include "zend.h"
+#include "zend_exceptions.h"
 #include "zend_language_scanner.h"
 #include "zend_language_scanner_defs.h"
 #include <zend_language_parser.h>
@@ -46,6 +47,7 @@ void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
@@ -111,7 +113,6 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	zval token;
 	zval keyword;
 	int token_type;
-	zend_bool destroy;
 	int token_line = 1;
 	int need_tokens = -1; /* for __halt_compiler lexing. -1 = disabled */
 
@@ -126,24 +127,10 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	LANG_SCNG(yy_state) = yycINITIAL;
 	array_init(return_value);
 
-	ZVAL_NULL(&token);
+	ZVAL_UNDEF(&token);
 	while ((token_type = lex_scan(&token))) {
-
-		if(token_type == T_ERROR) break;
-
-		destroy = 1;
-		switch (token_type) {
-			case T_CLOSE_TAG:
-				if (zendtext[zendleng - 1] != '>') {
-					CG(zend_lineno)++;
-				}
-			case T_OPEN_TAG:
-			case T_OPEN_TAG_WITH_ECHO:
-			case T_WHITESPACE:
-			case T_COMMENT:
-			case T_DOC_COMMENT:
-				destroy = 0;
-				break;
+		if (token_type == T_CLOSE_TAG && zendtext[zendleng - 1] != '>') {
+			CG(zend_lineno)++;
 		}
 
 		if (token_type >= 256) {
@@ -161,10 +148,11 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 		} else {
 			add_next_index_stringl(return_value, (char *)zendtext, zendleng);
 		}
-		if (destroy && Z_TYPE(token) != IS_NULL) {
+
+		if (Z_TYPE(token) != IS_UNDEF) {
 			zval_dtor(&token);
+			ZVAL_UNDEF(&token);
 		}
-		ZVAL_NULL(&token);
 
 		/* after T_HALT_COMPILER collect the next three non-dropped tokens */
 		if (need_tokens != -1) {
@@ -203,9 +191,9 @@ void on_event(zend_php_scanner_event event, int token, int line)
 	HashTable *tokens_ht;
 	zval *token_zv;
 
-	switch(event) {
+	switch (event) {
 		case ON_TOKEN:
-			if (token == T_ERROR || token == END) break;
+			if (token == END) break;
 			if (token >= 256) {
 				array_init(&keyword);
 				add_next_index_long(&keyword, token);
@@ -277,7 +265,7 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source)
 
 /* }}} */
 
-/* {{{ proto array token_get_all(string source)
+/* {{{ proto array token_get_all(string source [, int flags])
  */
 PHP_FUNCTION(token_get_all)
 {
@@ -293,6 +281,8 @@ PHP_FUNCTION(token_get_all)
 		success = tokenize_parse(return_value, source);
 	} else {
 		success = tokenize(return_value, source);
+		/* Normal token_get_all() should not throw. */
+		zend_clear_exception();
 	}
 
 	if (!success) RETURN_FALSE;

@@ -1598,6 +1598,10 @@ int zendlex(zend_parser_stack_elem *elem) /* {{{ */
 again:
 	ZVAL_UNDEF(&zv);
 	retval = lex_scan(&zv);
+	if (EG(exception)) {
+		return T_ERROR;
+	}
+
 	switch (retval) {
 		case T_COMMENT:
 		case T_DOC_COMMENT:
@@ -2749,7 +2753,8 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);
-			if (arg_node.op_type & (IS_VAR|IS_CV)) {
+			ZEND_ASSERT(arg_node.op_type != IS_CV);
+			if (arg_node.op_type == IS_VAR) {
 				opcode = ZEND_SEND_VAR_NO_REF;
 				if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					flags |= ZEND_ARG_SEND_BY_REF;
@@ -3509,9 +3514,20 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_free_foreach_and_switch_variables(void) /* {{{ */
+static void zend_free_foreach_and_switch_variables(uint32_t flags) /* {{{ */
 {
+	uint32_t start_op_number = get_next_op_number(CG(active_op_array));
+
 	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
+
+	if (flags) {
+		uint32_t end_op_number = get_next_op_number(CG(active_op_array));
+
+		while (start_op_number < end_op_number) {
+			CG(active_op_array)->opcodes[start_op_number].extended_value |= flags;
+			start_op_number++;
+		}
+	}
 }
 /* }}} */
 
@@ -3533,7 +3549,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	zend_free_foreach_and_switch_variables();
+	zend_free_foreach_and_switch_variables(ZEND_FREE_ON_RETURN);
 
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
@@ -3633,6 +3649,118 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
 	opline->op1.num = CG(context).current_brk_cont;
 	opline->op2.num = depth;
+}
+/* }}} */
+
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline) /* {{{ */
+{
+	zend_label *dest;
+	int current, distance, free_vars;
+	zval *label;
+	znode *loop_var = NULL;
+
+	if (pass2_opline) {
+		label = RT_CONSTANT(op_array, pass2_opline->op2);
+	} else {
+		label = &label_node->u.constant;
+	}
+	if (CG(context).labels == NULL ||
+	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL) {
+
+		if (pass2_opline) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = pass2_opline->lineno;
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+		} else {
+			/* Label is not defined. Delay to pass 2. */
+			zend_op *opline;
+
+			current = CG(context).current_brk_cont;
+			while (current != -1) {
+				if (op_array->brk_cont_array[current].start >= 0) {
+					zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+				}
+				current = op_array->brk_cont_array[current].parent;
+			}
+			opline = zend_emit_op(NULL, ZEND_GOTO, NULL, label_node);
+			opline->extended_value = CG(context).current_brk_cont;
+			return;
+		}
+	}
+
+	zval_dtor(label);
+	ZVAL_NULL(label);
+
+	/* Check that we are not moving into loop or switch */
+	if (pass2_opline) {
+		current = pass2_opline->extended_value;
+	} else {
+		current = CG(context).current_brk_cont;
+	}
+	if (!pass2_opline) {
+		loop_var = zend_stack_top(&CG(loop_var_stack));
+	}
+	for (distance = 0, free_vars = 0; current != dest->brk_cont; distance++) {
+		if (current == -1) {
+			if (pass2_opline) {
+				CG(in_compilation) = 1;
+				CG(active_op_array) = op_array;
+				CG(zend_lineno) = pass2_opline->lineno;
+			}
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
+		}
+		if (op_array->brk_cont_array[current].start >= 0) {
+			if (pass2_opline) {
+				free_vars++;
+			} else {
+				generate_free_loop_var(loop_var);
+				loop_var--;
+			}
+		}
+		current = op_array->brk_cont_array[current].parent;
+	}
+
+	if (pass2_opline) {
+		if (free_vars) {
+			current = pass2_opline->extended_value;
+			while (current != dest->brk_cont) {
+				if (op_array->brk_cont_array[current].start >= 0) {
+					zend_op *brk_opline = &op_array->opcodes[op_array->brk_cont_array[current].brk];
+
+					if (brk_opline->opcode == ZEND_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					} else if (brk_opline->opcode == ZEND_FE_FREE) {
+						(pass2_opline - free_vars)->opcode = ZEND_FE_FREE;
+						(pass2_opline - free_vars)->op1_type = brk_opline->op1_type;
+						if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+							(pass2_opline - free_vars)->op1.var = brk_opline->op1.var;
+						} else {
+							(pass2_opline - free_vars)->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + brk_opline->op1.var);
+							ZEND_VM_SET_OPCODE_HANDLER(pass2_opline - free_vars);
+						}
+						free_vars--;
+					}
+				}
+				current = op_array->brk_cont_array[current].parent;
+			}
+		}
+		pass2_opline->opcode = ZEND_JMP;
+		pass2_opline->op1.opline_num = dest->opline_num;
+		SET_UNUSED(pass2_opline->op2);
+		pass2_opline->extended_value = 0;
+	} else {
+		zend_op *opline = zend_emit_op(NULL, ZEND_JMP, NULL, NULL);
+		opline->op1.opline_num = dest->opline_num;
+	}
 }
 /* }}} */
 
@@ -3989,13 +4117,25 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	uint32_t i;
 	zend_op *opline;
-	uint32_t try_catch_offset = zend_add_try_element(
-		get_next_op_number(CG(active_op_array)));
+	uint32_t try_catch_offset;
 	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
 
 	if (catches->children == 0 && !finally_ast) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
 	}
+
+	/* label: try { } must not be equal to try { label: } */
+	if (CG(context).labels) {
+		zend_label *label;
+		ZEND_HASH_REVERSE_FOREACH_PTR(CG(context).labels, label) {
+			if (label->opline_num == get_next_op_number(CG(active_op_array))) {
+				zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+			}
+			break;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	try_catch_offset = zend_add_try_element(get_next_op_number(CG(active_op_array)));
 
 	zend_compile_stmt(try_ast);
 
@@ -4710,6 +4850,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
+	zend_class_entry *orig_ce = CG(active_class_entry);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 
@@ -4734,6 +4875,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_op_array) = op_array;
+
+	if (!is_method) {
+		CG(active_class_entry) = NULL;
+	}
+
 	zend_oparray_context_begin(&orig_oparray_context);
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
@@ -4769,6 +4915,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
 
+	CG(active_class_entry) = orig_ce;
 	CG(active_op_array) = orig_op_array;
 }
 /* }}} */
@@ -5577,9 +5724,9 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			if (strcmp(ZSTR_VAL(dirname), ".") == 0) {
 				dirname = zend_string_extend(dirname, MAXPATHLEN, 0);
 #if HAVE_GETCWD
-				VCWD_GETCWD(ZSTR_VAL(dirname), MAXPATHLEN);
+				ZEND_IGNORE_VALUE(VCWD_GETCWD(ZSTR_VAL(dirname), MAXPATHLEN));
 #elif HAVE_GETWD
-				VCWD_GETWD(ZSTR_VAL(dirname));
+				ZEND_IGNORE_VALUE(VCWD_GETWD(ZSTR_VAL(dirname)));
 #endif
 			}
 

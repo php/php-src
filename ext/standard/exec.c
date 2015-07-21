@@ -116,7 +116,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			} else if (type == 2) {
 				/* strip trailing whitespaces */
 				l = bufl;
-				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
@@ -129,7 +129,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			/* strip trailing whitespaces if we have not done so already */
 			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
-				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';

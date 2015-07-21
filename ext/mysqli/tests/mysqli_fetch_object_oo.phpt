@@ -129,9 +129,9 @@ require_once('skipifconnectfailure.inc');
 %s on line %d
 [E_WARNING] mysqli_result::fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 [E_WARNING] mysqli_result::fetch_object() expects parameter 1 to be string, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
 [E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
 [E_NOTICE] Undefined variable: b in %s on line %d
 NULL

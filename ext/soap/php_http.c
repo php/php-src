@@ -507,6 +507,7 @@ try_again:
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", stream->res);
+			GC_REFCOUNT(stream->res)++;
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -524,6 +525,7 @@ try_again:
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
 
 		add_property_resource(this_ptr, "httpurl", ret);
+		GC_REFCOUNT(ret)++;
 		/*zend_list_addref(ret);*/
 
 		if (context &&
@@ -814,7 +816,7 @@ try_again:
 				smart_str_append_const(&soap_headers, "Cookie: ");
 				for (i = 0; i < n; i++) {
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-					zend_hash_get_current_key_ex(Z_ARRVAL_P(cookies), &key, NULL, NULL);
+					zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, NULL);
 
 					if (Z_TYPE_P(data) == IS_ARRAY) {
 					  zval *value;

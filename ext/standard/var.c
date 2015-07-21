@@ -994,7 +994,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation[, bool|array allowed_classes])
+/* {{{ proto mixed unserialize(string variable_representation[, array allowed_classes])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {

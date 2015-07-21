@@ -1420,9 +1420,7 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
 ])
 AC_PROG_LIBTOOL
 
-if test "$enable_debug" != "yes"; then
-  PHP_SET_LIBTOOL_VARIABLE([--silent])
-fi
+PHP_SET_LIBTOOL_VARIABLE([--silent])
 
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])

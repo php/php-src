@@ -587,7 +587,7 @@ static int readline_shell_run(void) /* {{{ */
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle *prepend_file_p;
-		zend_file_handle prepend_file = {0};
+		zend_file_handle prepend_file = {{0}};
 
 		prepend_file.filename = PG(auto_prepend_file);
 		prepend_file.opened_path = NULL;

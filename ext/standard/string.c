@@ -2966,15 +2966,6 @@ static zend_string *php_strtr_ex(zend_string *str, char *str_from, char *str_to,
 }
 /* }}} */
 
-static int php_strtr_key_compare(const void *a, const void *b) /* {{{ */
-{
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
-	return f->h > s->h ? -1 : 1;
-}
-/* }}} */
-
 /* {{{ php_strtr_array */
 static void php_strtr_array(zval *return_value, zend_string *input, HashTable *pats)
 {

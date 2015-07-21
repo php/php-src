@@ -909,7 +909,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			}
 #endif
 			/* copy the part of the string before the match */
-			smart_str_appendl(&out_buf, pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
+			smart_str_appendl(&out_buf, (char *)pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
 
 			if (!is_callable) {
 				/* copy replacement and backrefs */
@@ -992,14 +992,14 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
-					smart_str_appendl(&out_buf, pos, 1);
+					smart_str_appendl(&out_buf, (char *)pos, 1);
 				}
 				pos++;
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
 			if (string_lim - pos > 0) {
-				smart_str_appendl(&out_buf, pos, string_lim - pos);
+				smart_str_appendl(&out_buf, (char *)pos, string_lim - pos);
 			}
 		}
 		onig_region_free(regs, 0);

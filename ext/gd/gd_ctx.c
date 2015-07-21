@@ -134,6 +134,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, it must a filename or a stream");
 			RETURN_FALSE;
 		}
+	} else if (argc > 1 && file != NULL) {
+		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
 	} else {
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
@@ -181,7 +186,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				q = i;
 			}
 			if (image_type == PHP_GDIMG_TYPE_XBM) {
-				(*func_p)(im, file, q, ctx);
+				(*func_p)(im, file ? file : "", q, ctx);
 			} else {
 				(*func_p)(im, q, ctx);
 			}

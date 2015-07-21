@@ -385,8 +385,6 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;       /* the length of utf16_buf */
 	int         utf16_len            = 0;                        /* length of converted string */
 
-	HashTable* sortedHash            = NULL;
-
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */

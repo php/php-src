@@ -838,7 +838,6 @@ skip_output:
 PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_string buf = {0};
-	size_t result;
 
 	/* since there are places where (v)spprintf called without checking for null,
 	   a bit of defensive coding here */
@@ -855,13 +854,11 @@ PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list
 
 	if (buf.c) {
 		*pbuf = buf.c;
-		result = buf.len;
+		return buf.len;
 	} else {
-		*pbuf = NULL;
-		result = 0;
+		*pbuf = estrndup("", 0);
+		return 0;
 	}
-
-	return result;
 }
 /* }}} */
 
@@ -883,11 +880,15 @@ PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) 
 
 	xbuf_format_converter(&buf, 0, format, ap);
 
-	if (max_len && buf.s && ZSTR_LEN(buf.s) > max_len) {
+	if (!buf.s) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	if (max_len && ZSTR_LEN(buf.s) > max_len) {
 		ZSTR_LEN(buf.s) = max_len;
 	}
-	smart_str_0(&buf);
 
+	smart_str_0(&buf);
 	return buf.s;
 }
 /* }}} */
