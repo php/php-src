@@ -13,12 +13,12 @@ q
 prompt> [User Function foo (8 ops)]
 L14-16 foo() %s - %s + 8 ops
  L14   #0     RECV                    1                                         $baz                
- L15   #1     INIT_FCALL              112                  "var_dump"                               
- L15   #2     INIT_FCALL              112                  "strrev"                                 
+ L15   #1     INIT_FCALL%s 112                  "var_dump"                               
+ L15   #2     INIT_FCALL%s 112                  "strrev"                                 
  L15   #3     SEND_VAR                $baz                 1                                        
- L15   #4     DO_ICALL                                                          @0                  
+ L15   #4     DO_%cCALL                                                          @0                  
  L15   #5     SEND_VAR                @0                   1                                        
- L15   #6     DO_ICALL                                                                              
+ L15   #6     DO_%cCALL                                                                              
  L15   #7     RETURN                  null                                                          
 prompt> [User Class: Foo\Bar (2 methods)]
 L5-7 Foo\Bar::Foo() %s - %s + 5 ops
@@ -39,7 +39,7 @@ L1-19 {main}() %s - %s + 11 ops
  L18   #4     INIT_METHOD_CALL        @1                   "Foo"                                    
  L18   #5     SEND_VAL_EX             "test"               1                                        
  L18   #6     DO_FCALL                                                                              
- L19   #7     INIT_FCALL              144                  "foo"                                    
+ L19   #7     INIT_FCALL%s 144                  "foo"                                    
  L19   #8     SEND_VAL                "test"               1                                        
  L19   #9     DO_FCALL                                                                              
  L19   #10    RETURN                  1                                                             
