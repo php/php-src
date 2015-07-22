@@ -966,6 +966,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'I', 0, "ignore init"},
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
+	{'e', 0, "generate ext_stmt opcodes"},
 	{'E', 0, "step-through-eval"},
 	{'S', 1, "sapi-name"},
 #ifndef _WIN32
@@ -1242,6 +1243,7 @@ int main(int argc, char **argv) /* {{{ */
 	int socket = -1;
 	FILE* stream = NULL;
 	char *print_opline_func;
+	zend_bool ext_stmt = 0;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1380,6 +1382,10 @@ phpdbg_main:
 
 			case 'v': /* set quietness off */
 				flags &= ~PHPDBG_IS_QUIET;
+			break;
+
+			case 'e':
+				ext_stmt = 1;
 			break;
 
 			case 'E': /* stepping through eval on */
@@ -1692,6 +1698,10 @@ phpdbg_main:
 		}
 
 		cleaning = -1;
+
+		if (ext_stmt) {
+			CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+		}
 
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
