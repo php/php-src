@@ -352,7 +352,11 @@ ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
 		efree(op_array->run_time_cache);
 	}
 
-	if (!op_array->refcount || --(*op_array->refcount) > 0) {
+	if (!op_array->refcount) {
+		return 1;
+	}
+
+	if (--(*op_array->refcount) > 0) {
 		return 0;
 	}
 
