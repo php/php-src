@@ -47,6 +47,7 @@ typedef struct {
 #if HAVE_MMAP
 	void *map;
 #endif
+	zend_op_array *op_array;
 	uint lines;
 	uint line[1];
 } phpdbg_file_source;

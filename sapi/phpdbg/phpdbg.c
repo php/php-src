@@ -480,6 +480,114 @@ static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *ins
 	}
 }
 
+static inline HashTable* phpdbg_add_empty_array(HashTable *ht, zend_string *name) {
+	zval *ht_zv = zend_hash_find(ht, name);
+	if (!ht_zv) {
+		zval zv;
+		array_init(&zv);
+		ht_zv = zend_hash_add_new(ht, name, &zv);
+	}
+	return Z_ARR_P(ht_zv);
+}
+
+/* {{{ proto void phpdbg_end_oplog() */
+static PHP_FUNCTION(phpdbg_get_executable)
+{
+	HashTable *options = NULL;
+	zval *option_buffer;
+	zend_bool by_function = 0;
+	zend_bool by_opcode = 0;
+	HashTable *insert_ht;
+
+	zend_function *func;
+	zend_class_entry *ce;
+	zend_string *name;
+	HashTable *files = &PHPDBG_G(file_sources);
+	HashTable files_tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
+		return;
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
+		by_function = zend_is_true(option_buffer);
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("opcodes")))) {
+		if (by_function) {
+			by_opcode = zend_is_true(option_buffer);
+		}
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("files")))) {
+		ZVAL_DEREF(option_buffer);
+		if (Z_TYPE_P(option_buffer) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(option_buffer)) > 0) {
+			zval *filename;
+
+			files = &files_tmp;
+			zend_hash_init(files, 0, NULL, NULL, 0);
+
+			ZEND_HASH_FOREACH_VAL(Z_ARR_P(option_buffer), filename) {
+				zend_hash_add_empty_element(files, zval_get_string(filename));
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			GC_REFCOUNT(files)++;
+		}
+	} else {
+		GC_REFCOUNT(files)++;
+	}
+
+	array_init(return_value);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+		if (func->type == ZEND_USER_FUNCTION) {
+			if (zend_hash_exists(files, func->op_array.filename)) {
+				insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
+
+				if (by_function) {
+					insert_ht = phpdbg_add_empty_array(insert_ht, name);
+				}
+
+				phpdbg_oplog_fill_executable(&func->op_array, insert_ht, by_opcode);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
+		if (ce->type == ZEND_USER_CLASS) {
+			if (zend_hash_exists(files, ce->info.user.filename)) {
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+					if (func->type == ZEND_USER_FUNCTION) {
+						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
+
+						if (by_function) {
+							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", ZSTR_LEN(name), ZSTR_VAL(name), ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
+							insert_ht = phpdbg_add_empty_array(insert_ht, fn_name);
+							zend_string_release(fn_name);
+						}
+
+						phpdbg_oplog_fill_executable(&func->op_array, insert_ht, by_opcode);
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_STR_KEY(files, name) {
+		phpdbg_file_source *source = zend_hash_find_ptr(&PHPDBG_G(file_sources), name);
+		if (source) {
+			phpdbg_oplog_fill_executable(
+				source->op_array,
+				phpdbg_add_empty_array(Z_ARR_P(return_value), source->op_array->filename),
+				by_opcode);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!--GC_REFCOUNT(files)) {
+		zend_hash_destroy(files);
+	}
+}
+
 /* {{{ proto void phpdbg_end_oplog() */
 static PHP_FUNCTION(phpdbg_end_oplog)
 {
@@ -490,7 +598,6 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	zval *option_buffer;
 	zend_bool by_function = 0;
 	zend_bool by_opcode = 0;
-	zend_bool show_unexecuted = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
 		return;
@@ -517,18 +624,13 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 		}
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("show_unexecuted")))) {
-		show_unexecuted = zend_is_true(option_buffer);
-	}
-
 	array_init(return_value);
 
 	{
 		zend_string *last_file = NULL;
-		zval *file_buf;
+		HashTable *file_ht;
 		zend_string *last_function = (void *)~(uintptr_t)0;
 		zend_class_entry *last_scope = NULL;
-		zval *fn_buf;
 
 		HashTable *insert_ht;
 		zend_long insert_idx;
@@ -540,23 +642,13 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 
 			if (op_array->filename != last_file) {
 				last_file = op_array->filename;
-				file_buf = zend_hash_find(Z_ARR_P(return_value), last_file);
-				if (!file_buf) {
-					zval ht;
-					array_init(&ht);
-					file_buf = zend_hash_add_new(Z_ARR_P(return_value), last_file, &ht);
-
-					if (show_unexecuted) {
-						phpdbg_oplog_fill_executable(op_array, Z_ARR_P(file_buf), by_opcode);
-					}
-				}
-				insert_ht = Z_ARR_P(file_buf);
+				file_ht = insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), last_file);
 			}
 
 			if (by_function) {
 				if (op_array->function_name == NULL) {
 					if (last_function != NULL) {
-						insert_ht = Z_ARR_P(file_buf);
+						insert_ht = file_ht;
 					}
 					last_function = NULL;
 				} else if (op_array->function_name != last_function || op_array->scope != last_scope) {
@@ -568,17 +660,8 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 					} else {
 						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), ZSTR_LEN(last_function), ZSTR_VAL(last_function));
 					}
-					fn_buf = zend_hash_find(Z_ARR_P(return_value), fn_name);
-					if (!fn_buf) {
-						zval ht;
-						array_init(&ht);
-						fn_buf = zend_hash_add_new(Z_ARR_P(return_value), fn_name, &ht);
-
-						if (show_unexecuted) {
-							phpdbg_oplog_fill_executable(op_array, Z_ARR_P(fn_buf), by_opcode);
-						}
-					}
-					insert_ht = Z_ARR_P(fn_buf);
+					insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), fn_name);
+					zend_string_release(fn_name);
 				}
 			}
 
@@ -642,6 +725,11 @@ ZEND_BEGIN_ARG_INFO_EX(phpdbg_start_oplog_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_end_oplog_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 zend_function_entry phpdbg_user_functions[] = {
@@ -655,6 +743,7 @@ zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
 	PHP_FE(phpdbg_start_oplog, phpdbg_start_oplog_arginfo)
 	PHP_FE(phpdbg_end_oplog, phpdbg_end_oplog_arginfo)
+	PHP_FE(phpdbg_get_executable, phpdbg_get_executable_arginfo)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else
