@@ -32,8 +32,8 @@ PHP                                                                        NEWS
     columns). (cmb)
 
 - OpenSSL:
-  . Fixed bug #69882 (OpenSSL error “key values mismatch” after 
-    openssl_pkcs12_read with extra cert) (Tomasz Sawicki)
+  . Fixed bug #69882 (OpenSSL error "key values mismatch" after
+    openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
 
 - Standard:
   . Fixed bug #70096 (Repeated iptcembed() adds superfluous FF bytes). (cmb)
