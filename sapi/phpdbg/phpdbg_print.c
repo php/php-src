@@ -400,14 +400,20 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 				phpdbg_print_opcodes_ce(ce);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if (strstr(function, "::") == NULL) {
-		phpdbg_print_opcodes_function(function, strlen(function));
 	} else {
-		char *method_name, *class_name = strtok(function, "::");
-		if ((method_name = strtok(NULL, "::")) == NULL) {
-			phpdbg_print_opcodes_class(class_name);
+		function = zend_str_tolower_dup(function, strlen(function));
+
+		if (strstr(function, "::") == NULL) {
+			phpdbg_print_opcodes_function(function, strlen(function));
 		} else {
-			phpdbg_print_opcodes_method(class_name, method_name);
+			char *method_name, *class_name = strtok(function, "::");
+			if ((method_name = strtok(NULL, "::")) == NULL) {
+				phpdbg_print_opcodes_class(class_name);
+			} else {
+				phpdbg_print_opcodes_method(class_name, method_name);
+			}
 		}
+
+		efree(function);
 	}
 }
