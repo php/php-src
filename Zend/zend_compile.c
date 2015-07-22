@@ -2047,7 +2047,9 @@ static inline zend_bool zend_is_call(zend_ast *ast) /* {{{ */
 
 static inline zend_bool zend_is_unticked_stmt(zend_ast *ast) /* {{{ */
 {
-	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL;
+	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
+		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_DECL
+		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
 }
 /* }}} */
 
@@ -6968,6 +6970,10 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 	}
 
 	CG(zend_lineno) = ast->lineno;
+
+	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) && !zend_is_unticked_stmt(ast)) {
+		zend_do_extended_info();
+	}
 
 	switch (ast->kind) {
 		case ZEND_AST_STMT_LIST:
