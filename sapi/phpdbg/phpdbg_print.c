@@ -377,8 +377,6 @@ void phpdbg_print_opcodes_class(const char *class) {
 
 PHPDBG_API void phpdbg_print_opcodes(char *function)
 {
-	char *method_name = strtok(function, ":");
-
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
 	} else if (function[0] == '*' && function[1] == 0) {
@@ -402,11 +400,14 @@ PHPDBG_API void phpdbg_print_opcodes(char *function)
 				phpdbg_print_opcodes_ce(ce);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else if (method_name == NULL) {
+	} else if (strstr(function, "::") == NULL) {
 		phpdbg_print_opcodes_function(function, strlen(function));
-	} else if ((method_name = strtok(NULL, ":")) == NULL) {
-		phpdbg_print_opcodes_class(function);
 	} else {
-		phpdbg_print_opcodes_method(function, method_name);
+		char *method_name, *class_name = strtok(function, "::");
+		if ((method_name = strtok(NULL, "::")) == NULL) {
+			phpdbg_print_opcodes_class(class_name);
+		} else {
+			phpdbg_print_opcodes_method(class_name, method_name);
+		}
 	}
 }
