@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #67583 (double fastcgi_end_request on max_children limit).
     (Dmitry Saprykin)
+  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
+    (m6w6)
 
 - GD:
   . Fixed bug #73968 (Premature failing of XBM reading). (cmb)
