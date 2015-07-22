@@ -503,8 +503,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 		ZEND_VM_LEAVE();
 	} else if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_CODE) {
 		zend_detach_symbol_table(execute_data);
-		destroy_op_array(&EX(func)->op_array);
-		efree_size(EX(func), sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(&EX(func)->op_array) != 0)) {
+			efree_size(EX(func), sizeof(zend_op_array));
+		}
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
@@ -3642,7 +3643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -3651,8 +3652,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
@@ -28986,7 +28988,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -28995,8 +28997,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
@@ -40392,7 +40395,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -40401,8 +40404,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
