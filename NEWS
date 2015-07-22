@@ -69,7 +69,7 @@ PHP                                                                        NEWS
     number). (Nikita)
 
 - Mysqlnd:
-  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM) (CVE-2015-3152).
+  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM). (CVE-2015-3152)
     (Andrey)
     
 - PCRE:
