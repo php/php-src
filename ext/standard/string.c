@@ -1968,6 +1968,9 @@ PHP_FUNCTION(strpos)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2018,6 +2021,9 @@ PHP_FUNCTION(stripos)
 		return;
 	}
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
