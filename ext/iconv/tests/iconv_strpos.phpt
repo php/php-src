@@ -37,7 +37,6 @@ var_dump(iconv_strpos("", "string"));
 
 ?>
 --EXPECTF--
-2: %s
 bool(false)
 2: %s
 bool(false)
