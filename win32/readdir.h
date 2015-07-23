@@ -32,7 +32,7 @@ struct dirent {
 /* typedef DIR - not the same as Unix */
 typedef struct {
 	HANDLE handle;				/* _findfirst/_findnext handle */
-	short offset;				/* offset into directory */
+	int offset;					/* offset into directory */
 	short finished;				/* 1 if there are not more files */
 	WIN32_FIND_DATA fileinfo;	/* from _findfirst/_findnext */
 	char *dir;					/* the dir we are reading */
