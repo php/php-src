@@ -5293,6 +5293,9 @@ PHP_FUNCTION(substr_count)
 	endp = p + haystack_len;
 
 	if (offset < 0) {
+		offset += (zend_long)haystack_len;
+	}
+	if (offset < 0) {
 		php_error_docref(NULL, E_WARNING, "Offset should be greater than or equal to 0");
 		RETURN_FALSE;
 	}
@@ -5305,6 +5308,9 @@ PHP_FUNCTION(substr_count)
 
 	if (ac == 4) {
 
+		if (length <= 0) {
+			length += (haystack_len - offset);
+		}
 		if (length <= 0) {
 			php_error_docref(NULL, E_WARNING, "Length should be greater than 0");
 			RETURN_FALSE;
