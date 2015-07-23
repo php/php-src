@@ -1924,12 +1924,12 @@ PHP_FUNCTION(ldap_compare)
 	int dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
 	int errno;
+	struct berval lvalue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len) != SUCCESS) {
 		return;
 	}
 
-	struct berval lvalue;
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
