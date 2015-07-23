@@ -35,7 +35,7 @@
 #define COMMON (is_ref ? "&" : "")
 /* }}} */
 
-static uint zend_obj_num_elements(HashTable *ht)
+static uint32_t zend_obj_num_elements(HashTable *ht) /* {{{ */
 {
 	Bucket *p;
 	uint idx;
@@ -53,6 +53,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 	}
 	return num;
 }
+/* }}} */
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
