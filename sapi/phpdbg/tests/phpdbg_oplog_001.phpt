@@ -9,9 +9,7 @@ q
 [Successful compilation of %s]
 prompt> halloarray(2) {
   ["%s"]=>
-  array(6) {
-    [11]=>
-    int(0)
+  array(5) {
     [13]=>
     int(1)
     [17]=>
@@ -25,10 +23,10 @@ prompt> halloarray(2) {
   }
   ["A::b"]=>
   array(2) {
-    [5]=>
-    int(5)
     [4]=>
     int(1)
+    [5]=>
+    int(5)
   }
 }
 [Script ended normally]
@@ -54,5 +52,5 @@ $a = new A();
 $a->b();
 $a->b('ha');
 
-var_dump(phpdbg_end_oplog(["functions" => true, "show_unexecuted" => true]));
+var_dump(phpdbg_end_oplog(["functions" => true]));
 

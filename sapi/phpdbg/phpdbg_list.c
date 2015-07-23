@@ -288,6 +288,14 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
 
+	dataptr->op_array = ret;
+	if (dataptr->op_array->refcount) {
+		++*dataptr->op_array->refcount;
+	} else {
+		dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
+		*dataptr->op_array->refcount = 2;
+	}
+
 	return ret;
 }
 
@@ -299,6 +307,10 @@ void phpdbg_free_file_source(phpdbg_file_source *data) {
 #endif
 	if (data->buf) {
 		efree(data->buf);
+	}
+
+	if (destroy_op_array(data->op_array)) {
+		efree(data->op_array);
 	}
 
 	efree(data);
