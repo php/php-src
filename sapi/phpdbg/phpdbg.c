@@ -1343,9 +1343,10 @@ int main(int argc, char **argv) /* {{{ */
 	struct sigaction signal_struct;
 	signal_struct.sa_sigaction = phpdbg_signal_handler;
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+	signal_struct.sa_mask = 0;
 	sigio_struct.sa_sigaction = phpdbg_sigio_handler;
 	sigio_struct.sa_flags = SA_SIGINFO;
-
+	sigio_struct.sa_mask = 0;
 
 	address = strdup("127.0.0.1");
 #endif
