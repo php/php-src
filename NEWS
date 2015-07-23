@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.13
 
-
+- Standard:
+  . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
+    (cmb)
 
 23 Jul 2015, PHP 5.6.12RC1
 
