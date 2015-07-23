@@ -49,9 +49,11 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_VAR:
-		case IS_TMP_VAR: {
 			spprintf(&decode, 0, "@%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
-		} break;
+		break;
+		case IS_TMP_VAR:
+			spprintf(&decode, 0, "~%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+		break;
 		case IS_CONST: {
 			zval *literal = RT_CONSTANT(ops, *op);
 			decode = phpdbg_short_zval_print(literal, 20);
