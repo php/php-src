@@ -289,7 +289,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	zend_file_handle_dtor(&fake);
 
 	dataptr->op_array = ret;
-	if (data->op_array) {
+	if (dataptr->op_array) {
 		if (dataptr->op_array->refcount) {
 			++*dataptr->op_array->refcount;
 		} else {
