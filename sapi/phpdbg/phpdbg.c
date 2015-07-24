@@ -1226,7 +1226,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 
 
 /* A bit dark magic in order to have meaningful allocator adresses */
-#if ZEND_DEBUG && __has_builtin(__builtin_frame_address)
+#if ZEND_DEBUG && (__has_builtin(__builtin_frame_address) || ZEND_GCC_VERSION >= 3004)
 #define FETCH_PARENT_FILELINE(argsize) \
 	char *__zend_filename, *__zend_orig_filename; \
 	uint __zend_lineno, __zend_orig_lineno; \
@@ -1245,9 +1245,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 	parent -= sizeof(uint); /* orig_lineno */ \
 	__zend_orig_lineno = *(uint *) parent;
 #elif ZEND_DEBUG
-#define FETCH_PARENT_FILELINE() \
+#define FETCH_PARENT_FILELINE(argsize) \
 	char *__zend_filename = __FILE__, *__zend_orig_filename = NULL; \
 	uint __zend_lineno = __LINE__, __zend_orig_lineno = 0;
+#else
+#define FETCH_PARENT_FILELINE(argsize)
 #endif
 
 void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
@@ -1698,20 +1700,13 @@ phpdbg_main:
 #endif
 #ifndef _WIN32
 		}
-#endif
 
-//		PG(modules_activated) = 0;
-
-#ifndef _WIN32
 		/* setup io here */
 		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
 
 			signal(SIGPIPE, SIG_IGN);
 		}
-#endif
-
-#ifndef _WIN32
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
 		PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
