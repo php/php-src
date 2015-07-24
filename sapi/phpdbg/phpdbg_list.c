@@ -253,8 +253,8 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	}
 
 #if HAVE_MMAP
-	if (file->handle.stream.mmap.map) {
-		data.map = file->handle.stream.mmap.map;
+	if (file->type == ZEND_HANDLE_MAPPED) {
+		data.map = file->handle.stream.handle;
 	}
 #endif
 
@@ -289,11 +289,13 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	zend_file_handle_dtor(&fake);
 
 	dataptr->op_array = ret;
-	if (dataptr->op_array->refcount) {
-		++*dataptr->op_array->refcount;
-	} else {
-		dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
-		*dataptr->op_array->refcount = 2;
+	if (data->op_array) {
+		if (dataptr->op_array->refcount) {
+			++*dataptr->op_array->refcount;
+		} else {
+			dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
+			*dataptr->op_array->refcount = 2;
+		}
 	}
 
 	return ret;
@@ -304,7 +306,7 @@ void phpdbg_free_file_source(zval *zv) {
 
 #if HAVE_MMAP
 	if (data->map) {
-		munmap(data->map, data->len + ZEND_MMAP_AHEAD);
+		php_stream_mmap_unmap(data->map);
 	} else
 #endif
 	if (data->buf) {

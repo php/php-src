@@ -765,6 +765,9 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		PHPDBG_G(buffer) = estrdup(buffer);
 	} else {
 		if (PHPDBG_G(buffer)) {
+			if (buffer) {
+				efree(buffer);
+			}
 			buffer = estrdup(PHPDBG_G(buffer));
 		}
 	}

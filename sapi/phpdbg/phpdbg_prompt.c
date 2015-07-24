@@ -418,12 +418,13 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				VCWD_CHDIR_FILE(res);
 
 				*SG(request_info).argv = PHPDBG_G(exec);
-				php_hash_environment();
+				php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
 				if (PHPDBG_G(in_execution)) {
 					phpdbg_clean(1);
+					return SUCCESS;
 				}
 
 				phpdbg_compile();
@@ -678,7 +679,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
 			SG(request_info).argc = argc;
 
-			php_hash_environment();
+			php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 		}
 
 		zend_try {
@@ -689,13 +690,11 @@ PHPDBG_COMMAND(run) /* {{{ */
 		} zend_catch {
 			PHPDBG_G(in_execution) = 0;
 
-			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-				zend_bailout();
-			}
-
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
+			} else {
+				zend_bailout();
 			}
 		} zend_end_try();
 
@@ -708,8 +707,9 @@ PHPDBG_COMMAND(run) /* {{{ */
 			if (EG(exception)) {
 				phpdbg_handle_exception();
 			}
-		}
 
+			PHPDBG_G(in_execution) = 1;
+		}
 		phpdbg_clean(1);
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
@@ -744,6 +744,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	zend_class_entry *original_scope = EG(scope);
 	zend_vm_stack original_stack = EG(vm_stack);
+	zend_object *ex = NULL;
 
 	PHPDBG_OUTPUT_BACKUP();
 
@@ -769,6 +770,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_try {
 		if (zend_eval_stringl(param->str, param->len, &retval, "eval()'d code") == SUCCESS) {
 			if (EG(exception)) {
+				ex = EG(exception);
 				zend_exception_error(EG(exception), E_ERROR);
 			} else {
 				phpdbg_xml("<eval %r>");
@@ -783,6 +785,10 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			}
 		}
 	} zend_catch {
+		PHPDBG_G(unclean_eval) = 1;
+		if (ex) {
+			OBJ_RELEASE(ex);
+		}
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;
@@ -1185,14 +1191,10 @@ PHPDBG_COMMAND(register) /* {{{ */
 
 PHPDBG_COMMAND(quit) /* {{{ */
 {
-	/* don't allow this to loop, ever ... */
-	if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-		PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
-		zend_bailout();
-	}
+	PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+	PHPDBG_G(flags) &= ~PHPDBG_IS_CLEANING;
 
-	return PHPDBG_NEXT;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_COMMAND(clean) /* {{{ */
@@ -1210,8 +1212,6 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
-
-	PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 
 	phpdbg_clean(1);
 
@@ -1291,7 +1291,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
 	while (ret == SUCCESS || ret == FAILURE) {
-		if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
+		if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
 			zend_bailout();
 		}
 
@@ -1370,15 +1370,14 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 {
 	/* this is implicitly required */
 	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
-		efree(PHPDBG_G(ops));
+		if (destroy_op_array(PHPDBG_G(ops))) {
+			efree(PHPDBG_G(ops));
+		}
 		PHPDBG_G(ops) = NULL;
 	}
 
 	if (full) {
 		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
-
-		zend_bailout();
 	}
 } /* }}} */
 

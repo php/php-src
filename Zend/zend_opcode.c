@@ -343,13 +343,14 @@ ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->static_variables &&
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-	    if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
 		}
 	}
 
 	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
+		op_array->run_time_cache = NULL;
 	}
 
 	if (!op_array->refcount) {
