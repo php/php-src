@@ -299,7 +299,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	return ret;
 }
 
-void phpdbg_free_file_source(phpdbg_file_source *data) {
+void phpdbg_free_file_source(zval *zv) {
+	phpdbg_file_source *data = Z_PTR_P(zv);
+
 #if HAVE_MMAP
 	if (data->map) {
 		munmap(data->map, data->len + ZEND_MMAP_AHEAD);

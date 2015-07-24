@@ -607,7 +607,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), 1, &rv));
 	}
 
-	phpdbg_writeln("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught %s in %s on line %lld\n%s", ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line, ZSTR_VAL(msg));
+	phpdbg_writeln("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT "\n%s", ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line, ZSTR_VAL(msg));
 	zend_string_release(msg);
 	zend_string_release(file);
 
@@ -1461,7 +1461,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			line = zval_get_long(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 1, &rv));
 			msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("message"), 1, &rv));
 
-			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"%lld\"", "Uncaught %s in %s on line %lld: %.*s", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line, ZSTR_LEN(msg) < 80 ? ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
+			phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s", ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line, ZSTR_LEN(msg) < 80 ? ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
 			zend_string_release(msg);
 			zend_string_release(file);
 
