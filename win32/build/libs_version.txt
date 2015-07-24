@@ -3,7 +3,7 @@ cclient-2007f
 freetype-2.5.5
 icu-54.1
 jpeglib-9a
-libcurl-7.40.0
+libcurl-7.42.1
 libiconv-1.14
 libmcrypt-2.5.8
 libmpir-2.6.0
@@ -13,4 +13,4 @@ libssh2-1.5.0
 libtidy-20090406
 libxslt-1.1.27
 libxml-2.9.2
-openssl-1.0.1m
+openssl-1.0.1p
