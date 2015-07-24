@@ -583,7 +583,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
-		    start_op = get_next_op_number(op_array);
+			start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array);
 			opline->opcode = ZEND_FAST_CALL;
@@ -807,6 +807,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					if (opline->op1_type != IS_UNUSED) {
+						(opline + 1)->op1 = opline->op1;
+						(opline + 1)->op1_type = opline->op1_type;
+					}
 					MAKE_NOP(opline);
 				}
 				break;
