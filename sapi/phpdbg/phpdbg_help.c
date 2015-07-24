@@ -869,8 +869,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Direct access to shell commands saves having to switch windows/consoles" CR CR
 
 "**Examples**" CR CR
-"    $P sh ls /usr/src/php-src" CR
-"    Will execute ls /usr/src/php-src, displaying the output in the console"
+"    $P sh ls /path/to/php-src" CR
+"    Will execute ls /path/to/php-src, displaying the output in the console"
 //*********** what does this mean????Note: read only commands please!
 },
 
