@@ -342,6 +342,9 @@ void phpdbg_free_file_source(zval *zv) {
 		efree(data->buf);
 	}
 
+	if (!data->destroy_op_array) {
+		efree(data->op_array->refcount);
+	}
 	if (!data->destroy_op_array || destroy_op_array(data->op_array)) {
 		efree(data->op_array);
 	}
