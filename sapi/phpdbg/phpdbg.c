@@ -1582,11 +1582,11 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+		zend_mm_heap *mm_heap;
 #ifdef _WIN32
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		zend_mm_heap *mm_heap;
 		void* (*_malloc)(size_t);
 		void (*_free)(void*);
 		void* (*_realloc)(void*, size_t);
