@@ -3610,7 +3610,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 	znode *loop_var = NULL;
 
 	if (pass2_opline) {
-		label = RT_CONSTANT(op_array, pass2_opline->op2);
+		label = CT_CONSTANT_EX(op_array, pass2_opline->op2.constant);
 	} else {
 		label = &label_node->u.constant;
 	}

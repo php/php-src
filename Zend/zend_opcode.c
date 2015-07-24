@@ -693,7 +693,6 @@ static void zend_resolve_finally_calls(zend_op_array *op_array)
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) != IS_LONG) {
-					ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
 					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
@@ -744,19 +743,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
-		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
-		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
-		}
-		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
-		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
-		}
-		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
-		}
 		switch (opline->opcode) {
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
@@ -776,7 +762,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				break;
 			case ZEND_GOTO:
-				if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) != IS_LONG) {
+				if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) != IS_LONG) {
 					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
@@ -820,6 +806,19 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+		}
+		if (opline->op1_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
+		}
+		if (opline->op2_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
+		}
+		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
