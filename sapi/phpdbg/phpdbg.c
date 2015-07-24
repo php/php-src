@@ -1951,7 +1951,7 @@ phpdbg_out:
 		/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
 		if (use_mm_wrappers) {
 			/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
-			*(int *) mm_heap = 0;
+			*(size_t *) mm_heap = 0;
 		}
 		zend_try {
 			php_request_shutdown(NULL);
