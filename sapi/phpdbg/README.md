@@ -33,7 +33,7 @@ Installation
 To install **phpdbg**, you must compile the source against your PHP installation sources, and enable the SAPI with the configure command.
 
 ```
-cd /usr/src/php-src/sapi
+cd /path/to/php-src/sapi
 git clone https://github.com/krakjoe/phpdbg
 cd ../
 ./buildconf --force
