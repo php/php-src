@@ -1756,6 +1756,8 @@ phpdbg_main:
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles();
 
+		phpdbg_list_update();
+
 		if (show_banner && cleaning < 2) {
 			/* print blurb */
 			phpdbg_welcome(cleaning == 1);

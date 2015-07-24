@@ -39,6 +39,7 @@ void phpdbg_list_file(zend_string *, uint, int, uint);
 extern const phpdbg_command_t phpdbg_list_commands[];
 
 void phpdbg_init_list(void);
+void phpdbg_list_update(void);
 
 typedef struct {
 	char *filename;
@@ -48,6 +49,7 @@ typedef struct {
 	void *map;
 #endif
 	zend_op_array *op_array;
+	zend_bool destroy_op_array;
 	uint lines;
 	uint line[1];
 } phpdbg_file_source;
