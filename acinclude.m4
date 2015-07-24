@@ -162,7 +162,7 @@ EOF
     eval echo "$i = \$$i" >> Makefile
   done
 
-  cat $abs_srcdir/Makefile.global Makefile.fragments Makefile.objects >> Makefile
+  cat "$abs_srcdir/Makefile.global" Makefile.fragments Makefile.objects >> Makefile
 ])
 
 dnl
@@ -177,7 +177,7 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
   ifelse($1,,src=$ext_srcdir/Makefile.frag,src=$1)
   ifelse($2,,ac_srcdir=$ext_srcdir,ac_srcdir=$2)
   ifelse($3,,ac_builddir=$ext_builddir,ac_builddir=$3)
-  test -f "$src" && $SED -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
+  test -f "$src" && $SED -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" "$src"  >> Makefile.fragments
 ])
 
 dnl
@@ -914,7 +914,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 
 dnl deprecated
 AC_DEFUN([PHP_EXTENSION],[
-  sources=`$AWK -f $abs_srcdir/build/scan_makefile_in.awk < []PHP_EXT_SRCDIR($1)[]/Makefile.in`
+  sources=`$AWK -f "$abs_srcdir/build/scan_makefile_in.awk" < []PHP_EXT_SRCDIR($1)[]/Makefile.in`
 
   PHP_NEW_EXTENSION($1, $sources, $2, $3)
 
@@ -954,7 +954,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED "s#@ext_srcdir@#\"$ext_srcdir\"#g"|$SED s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -2767,9 +2767,9 @@ dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
     AC_MSG_CHECKING([for PDO includes])
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    if test -f "$abs_srcdir/include/php/ext/pdo/php_pdo_driver.h"; then
       pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    elif test -f "$abs_srcdir/ext/pdo/php_pdo_driver.h"; then
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$phpincludedir/ext
