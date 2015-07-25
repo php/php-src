@@ -2368,7 +2368,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 				continue;
 			}
 
-			ZSTR_LEN(str.s) = 0;
+			smart_str_free(&str);
 			smart_str_appends(&str, "pgsql_oid_");
 			smart_str_appends(&str, tmp_oid);
 			smart_str_0(&str);
