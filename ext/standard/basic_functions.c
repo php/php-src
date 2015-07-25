@@ -2213,8 +2213,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_basename, 0, 0, 1)
 	ZEND_ARG_INFO(0, suffix)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_dirname, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dirname, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, levels)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pathinfo, 0, 0, 1)
