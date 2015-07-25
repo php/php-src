@@ -240,23 +240,15 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];
 
-	if (zend_stream_fixup(file, &data.buf, &data.len) == FAILURE) {
+	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
 		return NULL;
 	}
 
+	data.buf = emalloc(data.len + 1);
+	memcpy(data.buf, bufptr, data.len);
+	data.buf[data.len] = 0;
 	data.filename = filename;
 	data.line[0] = 0;
-
-	if (file->handle.stream.mmap.old_closer) {
-		/* do not unmap */
-		file->handle.stream.closer = file->handle.stream.mmap.old_closer;
-	}
-
-#if HAVE_MMAP
-	if (file->type == ZEND_HANDLE_MAPPED) {
-		data.map = file->handle.stream.handle;
-	}
-#endif
 
 	fake.type = ZEND_HANDLE_MAPPED;
 	fake.handle.stream.mmap.buf = data.buf;
@@ -282,6 +274,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	ret = PHPDBG_G(compile_file)(&fake, type);
 
 	if (ret == NULL) {
+		efree(data.buf);
 		efree(dataptr);
 		return NULL;
 	}
@@ -333,11 +326,6 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 void phpdbg_free_file_source(zval *zv) {
 	phpdbg_file_source *data = Z_PTR_P(zv);
 
-#if HAVE_MMAP
-	if (data->map) {
-		php_stream_mmap_unmap(data->map);
-	} else
-#endif
 	if (data->buf) {
 		efree(data->buf);
 	}
