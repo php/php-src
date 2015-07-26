@@ -137,6 +137,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $name ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getMethod ] {
@@ -144,6 +145,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $name ]
       }
+      - Return [ ReflectionMethod ]
     }
 
     Method [ <internal:Reflection> public method getMethods ] {
@@ -151,6 +153,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <optional> $filter ]
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method hasProperty ] {
@@ -158,6 +161,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $name ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getProperty ] {
@@ -165,6 +169,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $name ]
       }
+      - Return [ ReflectionProperty ]
     }
 
     Method [ <internal:Reflection> public method getProperties ] {
@@ -172,6 +177,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <optional> $filter ]
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method hasConstant ] {
@@ -179,6 +185,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $name ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getConstants ] {
@@ -270,6 +277,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $object ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method newInstance ] {
@@ -303,6 +311,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $class ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getStaticProperties ] {
@@ -347,6 +356,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       - Parameters [1] {
         Parameter #0 [ <required> $interface ]
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getExtension ] {

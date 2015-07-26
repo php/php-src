@@ -6298,31 +6298,31 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_setStaticPropertyValue, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasMethod, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_hasMethod, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getMethod, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_getMethod, IS_OBJECT, "ReflectionMethod", 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getMethods, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_class_getMethods, 0, 0, IS_ARRAY, NULL, 0)
 	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasProperty, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_hasProperty, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperty, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_getProperty, IS_OBJECT, "ReflectionProperty", 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getProperties, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_class_getProperties, 0, 0, IS_ARRAY, NULL, 0)
 	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasConstant, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_hasConstant, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
@@ -6330,7 +6330,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getConstant, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_isInstance, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -6345,15 +6345,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_newInstanceArgs, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isSubclassOf, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_isSubclassOf, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, class)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_implementsInterface, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_implementsInterface, _IS_BOOL, NULL, 0)
 	ZEND_ARG_INFO(0, interface)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_class_getConstructor, 0, 1, IS_OBJECT, "ReflectionMethod", 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_class_getConstructor, IS_OBJECT, "ReflectionMethod", 1)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_class_functions[] = {
