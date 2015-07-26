@@ -6105,28 +6105,28 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection__void, 0)
 ZEND_END_ARG_INFO()
 
 /* Reusable return-type arginfos for methods with 0 parameters */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__string0, 0, 1, IS_STRING, NULL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__string0, 0, 0, IS_STRING, NULL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__long0, 0, 1, IS_LONG, NULL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__long0, 0, 0, IS_LONG, NULL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__array0, 0, 1, IS_ARRAY, NULL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__array0, 0, 0, IS_ARRAY, NULL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__bool0, 0, 1, _IS_BOOL, NULL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__bool0, 0, 0, _IS_BOOL, NULL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__class0, 0, 1, IS_OBJECT, "ReflectionClass", 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__class0, 0, 0, IS_OBJECT, "ReflectionClass", 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__type0, 0, 1, IS_OBJECT, "ReflectionType", 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__type0, 0, 0, IS_OBJECT, "ReflectionType", 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__extension0, 0, 1, IS_OBJECT, "ReflectionExtension", 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection__extension0, 0, 0, IS_OBJECT, "ReflectionExtension", 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_getModifierNames, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_reflection_getModifierNames, IS_ARRAY, NULL, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -6209,11 +6209,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_generator___construct, 0)
 	ZEND_ARG_INFO(0, generator)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_generator_trace, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_generator_trace, 0, 0, IS_ARRAY, NULL, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_generator_getFunction, 0, 1, IS_OBJECT, "ReflectionFunctionAbstract", 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_generator_getFunction, 0, 0, IS_OBJECT, "ReflectionFunctionAbstract", 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_generator_functions[] = {
@@ -6483,10 +6483,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter___construct, 0)
 	ZEND_ARG_INFO(0, parameter)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_parameter_getDeclaringFunction, 0, 1, IS_OBJECT, "ReflectionFunctionAbstract", 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_parameter_getDeclaringFunction, 0, 0, IS_OBJECT, "ReflectionFunctionAbstract", 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_parameter_getClass, 0, 1, IS_OBJECT, "ReflectionClass", 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_reflection_parameter_getClass, 0, 0, IS_OBJECT, "ReflectionClass", 1)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_parameter_functions[] = {
