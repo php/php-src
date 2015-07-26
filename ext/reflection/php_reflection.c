@@ -6175,7 +6175,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__bool0, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__class0, 0)
-	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__string0, 0)
+	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__long0, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__extension0, 0)
 	ZEND_ME(reflection_function, getExtensionName, arginfo_reflection__string0, 0)
@@ -6370,7 +6370,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getFileName, arginfo_reflection__string0, 0)
 	ZEND_ME(reflection_class, getStartLine, arginfo_reflection__long0, 0)
 	ZEND_ME(reflection_class, getEndLine, arginfo_reflection__long0, 0)
-	ZEND_ME(reflection_class, getDocComment, arginfo_reflection__string0, 0)
+	ZEND_ME(reflection_class, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getConstructor, arginfo_reflection_class_getConstructor, 0)
 	ZEND_ME(reflection_class, hasMethod, arginfo_reflection_class_hasMethod, 0)
 	ZEND_ME(reflection_class, getMethod, arginfo_reflection_class_getMethod, 0)
@@ -6467,7 +6467,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isDefault, arginfo_reflection__bool0, 0)
 	ZEND_ME(reflection_property, getModifiers, arginfo_reflection__long0, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__class0, 0)
-	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__string0, 0)
+	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
 	PHP_FE_END
 };
