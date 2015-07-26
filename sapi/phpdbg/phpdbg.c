@@ -1309,6 +1309,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *print_opline_func;
 	zend_bool ext_stmt = 0;
 	zend_bool use_mm_wrappers = 0;
+	zend_bool is_exit;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1353,6 +1354,7 @@ phpdbg_main:
 	oplog_file = NULL;
 	oplog_file_len = 0;
 	flags = PHPDBG_DEFAULT_FLAGS;
+	is_exit = 0;
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
@@ -1915,7 +1917,8 @@ phpdbg_out:
 
 		/* In case we aborted during script execution, we may not reset CG(unclean_shutdown) */
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
-			CG(unclean_shutdown) = PHPDBG_G(unclean_eval);
+			is_exit = !PHPDBG_G(in_execution) && EG(exit_status) != 255;
+			CG(unclean_shutdown) = is_exit || PHPDBG_G(unclean_eval);
 		}
 
 		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
@@ -1959,10 +1962,12 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) && PHPDBG_G(in_execution)) {
-			if (!quit_immediately && !phpdbg_startup_run) {
-				phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
-				cleaning++;
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+			if (PHPDBG_G(in_execution) || is_exit) {
+				if (!quit_immediately && !phpdbg_startup_run) {
+					phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+					cleaning++;
+				}
 			}
 		}
 		php_output_deactivate();

@@ -691,7 +691,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 			PHPDBG_G(in_execution) = 0;
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
-				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
 			} else {
 				zend_bailout();
@@ -710,9 +709,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 			PHPDBG_G(in_execution) = 1;
 		}
-		phpdbg_clean(1);
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
+
+		phpdbg_clean(1);
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -794,6 +794,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
+		EG(exit_status) = 0;
 	} zend_end_try();
 
 	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
