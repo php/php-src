@@ -1225,13 +1225,20 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 #endif
 
 
-/* A bit dark magic in order to have meaningful allocator adresses */
-#if ZEND_DEBUG && (__has_builtin(__builtin_frame_address) || ZEND_GCC_VERSION >= 3004)
-#define FETCH_PARENT_FILELINE(argsize) \
+/* A bit dark magic in order to have meaningful allocator adresses [ppc(64) may return bogus addresses here] */
+#if ZEND_DEBUG && (__has_builtin(__builtin_frame_address) || ZEND_GCC_VERSION >= 3004) && !defined(__ppc__) && !defined(__ppc64__)
+/* with gcc %rbp/%ebp for __builtin_frame_address() and clang returns the frame return address being at %ebp/%rbp + sizeof(void*) */
+# ifdef __clang__
+#  define FETCH_PARENT_START() \
+	parent -= ZEND_MM_ALIGNED_SIZE(sizeof(void *));
+# else
+#  define FETCH_PARENT_START()
+# endif
+# define FETCH_PARENT_FILELINE(argsize) \
 	char *__zend_filename, *__zend_orig_filename; \
 	uint __zend_lineno, __zend_orig_lineno; \
 	void *parent = __builtin_frame_address(1U); \
-	parent -= ZEND_MM_ALIGNED_SIZE(sizeof(void *)); /* remove frame pointer adress */ \
+	FETCH_PARENT_START() \
 	parent -= (argsize); /* size of first arguments */ \
 	parent -= sizeof(char *); /* filename */ \
 	__zend_filename = *(char **) parent; \
@@ -1245,11 +1252,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 	parent -= sizeof(uint); /* orig_lineno */ \
 	__zend_orig_lineno = *(uint *) parent;
 #elif ZEND_DEBUG
-#define FETCH_PARENT_FILELINE(argsize) \
+# define FETCH_PARENT_FILELINE(argsize) \
 	char *__zend_filename = __FILE__, *__zend_orig_filename = NULL; \
 	uint __zend_lineno = __LINE__, __zend_orig_lineno = 0;
 #else
-#define FETCH_PARENT_FILELINE(argsize)
+# define FETCH_PARENT_FILELINE(argsize)
 #endif
 
 void *phpdbg_malloc_wrapper(size_t size) /* {{{ */

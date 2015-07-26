@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
     type and an explicit cast). (Laruence)
 
+- phpdbg
+  . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
+
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
