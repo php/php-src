@@ -570,7 +570,7 @@ static void php_session_save_current_state(int write) /* {{{ */
 			}
 
 			if ((ret == FAILURE) && !EG(exception)) {
-				php_error_docref(NULL, E_WARNING, "Failed to write session data (%s). Please "
+				php_error_docref(NULL, E_ERROR, "Failed to write session data (%s). Please "
 								 "verify that the current setting of session.save_path "
 								 "is correct (%s)",
 								 PS(mod)->s_name,
