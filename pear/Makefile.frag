@@ -20,11 +20,11 @@ install-pear:
 			cp $(srcdir)/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
 		else \
 			if test ! -z "$(WGET)" && test -x "$(WGET)"; then \
-				"$(WGET)" http://pear.php.net/install-pear-nozlib.phar -nd -P $(builddir)/; \
+				"$(WGET)" http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar -nd -P $(builddir)/; \
 			elif test ! -z "$(FETCH)" && test -x "$(FETCH)"; then \
-				"$(FETCH)" -o $(builddir)/ http://pear.php.net/install-pear-nozlib.phar; \
+				"$(FETCH)" -o $(builddir)/ http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar; \
 			else \
-				$(top_builddir)/sapi/cli/php -n $(srcdir)/fetch.php http://pear.php.net/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
+				$(top_builddir)/sapi/cli/php -n $(srcdir)/fetch.php http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
 			fi \
 		fi \
 	fi
