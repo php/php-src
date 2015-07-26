@@ -1,5 +1,9 @@
 --TEST--
 Bug #69864 (Segfault in preg_replace_callback)
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 const PREG_CACHE_SIZE = 4096; // this has to be >= the resp. constant in php_pcre.c
