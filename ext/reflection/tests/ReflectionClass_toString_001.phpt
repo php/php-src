@@ -122,7 +122,6 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
-      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method getConstructor ] {
