@@ -60,6 +60,7 @@ T_RUN_SHORT "r"
 WS          [ \r\n\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
+GENERIC_ID  ([^ \r\n\t:#\000]|":\\")+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
 INPUT       [^\n\000]+
@@ -70,7 +71,7 @@ INPUT       [^\n\000]+
 	return 0;
 }
 
-<PRE_RAW, NORMAL>[-][r]{WS}?{DIGITS} {
+<PRE_RAW, NORMAL>"-r"{WS}?{DIGITS} {
 	char *text = yytext + 2;
 	while (*++text < '0');
 	yylval->num = atoi(text);
@@ -83,20 +84,21 @@ INPUT       [^\n\000]+
 	return T_IF;
 }
 
-<NORMAL>{ID}[:]{1}[//]{2} {
+<NORMAL>"#" {
+	return T_POUND;
+}
+<NORMAL>"::" {
+	return T_DCOLON;
+}
+<NORMAL>":"/[^\\] {
+	return T_COLON;
+}
+
+<NORMAL>{ID}"://" {
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_PROTO;
-}
-<NORMAL>[#]{1} {
-	return T_POUND;
-}
-<NORMAL>[:]{2} {
-	return T_DCOLON;
-}
-<NORMAL>[:]{1}/[^\\] {
-	return T_COLON;
 }
 
 <NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
@@ -130,7 +132,7 @@ INPUT       [^\n\000]+
 	return T_OPCODE;
 }
 
-<NORMAL>{ID} {
+<NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
