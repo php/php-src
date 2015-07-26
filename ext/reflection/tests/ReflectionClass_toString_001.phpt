@@ -25,7 +25,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $argument ]
-        Parameter #1 [ <optional> $return ]
+        Parameter #1 [ <optional> boolean $return ]
       }
     }
   }
@@ -275,7 +275,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $args ]
+        Parameter #0 [ <required> ...$args ]
       }
     }
 
