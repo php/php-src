@@ -52,72 +52,84 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method getName ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method isInternal ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isUserDefined ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isAnonymous ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isInstantiable ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isCloneable ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getFileName ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method getStartLine ] {
 
       - Parameters [0] {
       }
+      - Return [ integer ]
     }
 
     Method [ <internal:Reflection> public method getEndLine ] {
 
       - Parameters [0] {
       }
+      - Return [ integer ]
     }
 
     Method [ <internal:Reflection> public method getDocComment ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method getConstructor ] {
 
       - Parameters [0] {
       }
+      - Return [ ReflectionMethod or NULL ]
     }
 
     Method [ <internal:Reflection> public method hasMethod ] {
@@ -173,6 +185,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method getConstant ] {
@@ -186,60 +199,70 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method getInterfaceNames ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method isInterface ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getTraits ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method getTraitNames ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method getTraitAliases ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method isTrait ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isAbstract ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method isFinal ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getModifiers ] {
 
       - Parameters [0] {
       }
+      - Return [ integer ]
     }
 
     Method [ <internal:Reflection> public method isInstance ] {
@@ -286,6 +309,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method getStaticPropertyValue ] {
@@ -308,12 +332,14 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ array ]
     }
 
     Method [ <internal:Reflection> public method isIterateable ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method implementsInterface ] {
@@ -327,30 +353,35 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [0] {
       }
+      - Return [ ReflectionExtension ]
     }
 
     Method [ <internal:Reflection> public method getExtensionName ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method inNamespace ] {
 
       - Parameters [0] {
       }
+      - Return [ boolean ]
     }
 
     Method [ <internal:Reflection> public method getNamespaceName ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
 
     Method [ <internal:Reflection> public method getShortName ] {
 
       - Parameters [0] {
       }
+      - Return [ string ]
     }
   }
 }
