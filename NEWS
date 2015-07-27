@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
     type and an explicit cast). (Laruence)
 
+- SAPI: 
+  . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
+
 - Standard:
   . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
     Execution). (Laruence)
