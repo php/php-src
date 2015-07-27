@@ -1653,8 +1653,8 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 PHP_FUNCTION(dirname)
 {
 	char *str;
-	zend_string *ret;
 	size_t str_len;
+	zend_string *ret;
 	zend_long levels = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &levels) == FAILURE) {
@@ -1666,18 +1666,16 @@ PHP_FUNCTION(dirname)
 	if (levels == 1) {
 		/* Defaut case */
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
-
 	} else if (levels < 1) {
 		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
 		return;
-
-
 	} else {
 		/* Some levels up */
 		do {
-			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len=ZSTR_LEN(ret));
-		} while (ZSTR_LEN(ret)<str_len && --levels>0);
+			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+		} while (ZSTR_LEN(ret) < str_len && --levels);
 	}
+
 	RETURN_NEW_STR(ret);
 }
 /* }}} */
