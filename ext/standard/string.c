@@ -4055,7 +4055,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						Z_STRVAL_P(search), Z_STRLEN_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));
 			} else {
-				lc_subject_str = php_string_tolower(Z_STR_P(subject));
+				lc_subject_str = php_string_tolower(subject_str);
 				ZVAL_STR(result, php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
 						Z_STR_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));

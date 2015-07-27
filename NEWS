@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
     type and an explicit cast). (Laruence)
 
+- Standard:
+  . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
+    Execution). (Laruence)
+
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
