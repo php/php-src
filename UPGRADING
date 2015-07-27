@@ -632,6 +632,10 @@ Other
   on pipes. This option should be used carefully because due to the
   platform restrictions dead locks on pipe buffers are possible.
 
+- dirname()
+  . A new optional argument ($levels) allow to go up various times
+    dirname(dirname($foo)) => dirname($foo, 2);
+
 ========================================
 6. New Functions
 ========================================
