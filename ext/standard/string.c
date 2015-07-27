@@ -1668,6 +1668,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 	} else if (levels < 1) {
 		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
+		zend_string_free(ret);
 		return;
 	} else {
 		/* Some levels up */
