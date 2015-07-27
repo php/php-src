@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70117 (Unexpected return type error). (Laruence)
   . Fixed bug #70106 (Inheritance by anonymous class). (Bob)
+  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
 
 - Opcache:
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
