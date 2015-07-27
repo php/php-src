@@ -218,6 +218,33 @@ ZEND_METHOD(exception, __construct)
 }
 /* }}} */
 
+/* {{{ proto Exception::__wakeup()
+   Exception unserialize checks */
+#define CHECK_EXC_TYPE(name, type) \
+	value = zend_read_property(default_exception_ce, object, name, sizeof(name)-1, 0 TSRMLS_CC); \
+	if(value && Z_TYPE_P(value) != type) { \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		ZVAL_STRINGL(tmp, name, sizeof(name)-1, 1); \
+		Z_OBJ_HANDLER_P(object, unset_property)(object, tmp, 0 TSRMLS_CC); \
+		zval_ptr_dtor(&tmp); \
+	}
+
+ZEND_METHOD(exception, __wakeup)
+{
+	zval *value;
+	zval *object = getThis();
+	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
+	CHECK_EXC_TYPE("message", IS_STRING);
+	CHECK_EXC_TYPE("string", IS_STRING);
+	CHECK_EXC_TYPE("code", IS_LONG);
+	CHECK_EXC_TYPE("file", IS_STRING);
+	CHECK_EXC_TYPE("line", IS_LONG);
+	CHECK_EXC_TYPE("trace", IS_ARRAY);
+	CHECK_EXC_TYPE("previous", IS_OBJECT);
+}
+/* }}} */
+
 /* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Exception previous]]])
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
@@ -728,6 +755,7 @@ ZEND_END_ARG_INFO()
 const static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(exception, __wakeup, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getFile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
