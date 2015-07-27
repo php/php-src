@@ -166,16 +166,20 @@ PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
 PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname) /* {{{ */
 {
 	zend_function *func = NULL;
-	zend_string *lfname = zend_string_alloc(strlen(fname), 0);
-	memcpy(ZSTR_VAL(lfname), zend_str_tolower_dup(fname, ZSTR_LEN(lfname)), ZSTR_LEN(lfname) + 1);
+	zend_string *lfname = zend_string_init(fname, strlen(fname), 0);
+	zend_string *tmp = zend_string_tolower(lfname);
+	zend_string_release(lfname);
+	lfname = tmp;
 
 	if (cname) {
 		zend_class_entry *ce;
-		zend_string *lcname = zend_string_alloc(strlen(cname), 0);
-		memcpy(ZSTR_VAL(lcname), zend_str_tolower_dup(cname, ZSTR_LEN(lcname)), ZSTR_LEN(lcname) + 1);
+		zend_string *lcname = zend_string_init(cname, strlen(cname), 0);
+		tmp = zend_string_tolower(lcname);
+		zend_string_release(lcname);
+		lcname = tmp;
 		ce = zend_lookup_class(lcname);
 
-		efree(lcname);
+		zend_string_release(lcname);
 
 		if (ce) {
 			func = zend_hash_find_ptr(&ce->function_table, lfname);
@@ -184,7 +188,7 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 		func = zend_hash_find_ptr(EG(function_table), lfname);
 	}
 
-	efree(lfname);
+	zend_string_release(lfname);
 	return func;
 } /* }}} */
 

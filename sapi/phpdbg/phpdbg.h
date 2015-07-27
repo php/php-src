@@ -259,8 +259,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
 	zend_bool in_execution;                      /* in execution? */
+	zend_bool unclean_eval;                      /* do not check for memory leaks when we needed to bail out during eval */
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
+	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
@@ -308,8 +310,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HANDLE sigio_watcher_thread;                 /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif
-
-	struct _zend_phpdbg_globals *backup;         /* backup of data to store */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

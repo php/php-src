@@ -295,6 +295,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_RECV:
+				case ZEND_RECV_VARIADIC:
 				case ZEND_VERIFY_RETURN_TYPE:
 					if (opline->op2.num != -1) {
 						opline->op2.num = cache_size;

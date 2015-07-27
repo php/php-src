@@ -325,7 +325,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 	if (param && param->type) {
 		switch (param->type) {
 			case STR_PARAM:
-				fprintf(stderr, "%s STR_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s STR_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			case ADDR_PARAM:
@@ -357,11 +357,11 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			break;
 
 			case COND_PARAM:
-				fprintf(stderr, "%s COND_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s COND_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			case OP_PARAM:
-				fprintf(stderr, "%s OP_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s OP_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			default: {
@@ -765,6 +765,9 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		PHPDBG_G(buffer) = estrdup(buffer);
 	} else {
 		if (PHPDBG_G(buffer)) {
+			if (buffer) {
+				efree(buffer);
+			}
 			buffer = estrdup(PHPDBG_G(buffer));
 		}
 	}

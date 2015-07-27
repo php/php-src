@@ -240,23 +240,18 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];
 
-	if (zend_stream_fixup(file, &data.buf, &data.len) == FAILURE) {
+	if (zend_stream_fixup(file, &bufptr, &data.len) == FAILURE) {
 		return NULL;
 	}
 
+	data.buf = NULL;
+	if (data.len > 0) {
+		data.buf = emalloc(data.len + 1);
+		memcpy(data.buf, bufptr, data.len);
+		data.buf[data.len] = 0;
+	}
 	data.filename = filename;
 	data.line[0] = 0;
-
-	if (file->handle.stream.mmap.old_closer) {
-		/* do not unmap */
-		file->handle.stream.closer = file->handle.stream.mmap.old_closer;
-	}
-
-#if HAVE_MMAP
-	if (file->handle.stream.mmap.map) {
-		data.map = file->handle.stream.mmap.map;
-	}
-#endif
 
 	fake.type = ZEND_HANDLE_MAPPED;
 	fake.handle.stream.mmap.buf = data.buf;
@@ -278,22 +273,54 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	}
 	dataptr->lines = ++line;
 	dataptr->line[line] = endptr - data.buf;
-	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
-
-	zend_hash_str_add_ptr(&PHPDBG_G(file_sources), filename, strlen(filename), dataptr);
-	phpdbg_resolve_pending_file_break(filename);
 
 	ret = PHPDBG_G(compile_file)(&fake, type);
+
+	if (ret == NULL) {
+		efree(data.buf);
+		efree(dataptr);
+		return NULL;
+	}
+
+	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
+	zend_hash_str_add_ptr(&PHPDBG_G(file_sources), filename, strlen(filename), dataptr);
+	phpdbg_resolve_pending_file_break(filename);
 
 	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake);
 
+	return ret;
+}
+
+zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
+	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
+	char resolved_path_buf[MAXPATHLEN];
+	zend_op_array *ret;
+	phpdbg_file_source *dataptr;
+
+	if (VCWD_REALPATH(filename, resolved_path_buf)) {
+		filename = resolved_path_buf;
+	}
+
+	ret = PHPDBG_G(init_compile_file)(file, type);
+
+	if (ret == NULL) {
+		return NULL;
+	}
+
+	dataptr = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), filename, strlen(filename));
+	ZEND_ASSERT(dataptr != NULL);
+
 	dataptr->op_array = ret;
-	if (dataptr->op_array->refcount) {
-		++*dataptr->op_array->refcount;
-	} else {
-		dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
-		*dataptr->op_array->refcount = 2;
+	dataptr->destroy_op_array = 1;
+	if (dataptr->op_array) {
+		if (dataptr->op_array->refcount) {
+			++*dataptr->op_array->refcount;
+		} else {
+			dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
+			*dataptr->op_array->refcount = 2;
+			dataptr->destroy_op_array = 0;
+		}
 	}
 
 	return ret;
@@ -302,16 +329,14 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 void phpdbg_free_file_source(zval *zv) {
 	phpdbg_file_source *data = Z_PTR_P(zv);
 
-#if HAVE_MMAP
-	if (data->map) {
-		munmap(data->map, data->len + ZEND_MMAP_AHEAD);
-	} else
-#endif
 	if (data->buf) {
 		efree(data->buf);
 	}
 
-	if (destroy_op_array(data->op_array)) {
+	if (!data->destroy_op_array) {
+		efree(data->op_array->refcount);
+	}
+	if (!data->destroy_op_array || destroy_op_array(data->op_array)) {
 		efree(data->op_array);
 	}
 
@@ -322,4 +347,9 @@ void phpdbg_init_list(void) {
 	PHPDBG_G(compile_file) = zend_compile_file;
 	zend_hash_init(&PHPDBG_G(file_sources), 1, NULL, (dtor_func_t) phpdbg_free_file_source, 0);
 	zend_compile_file = phpdbg_compile_file;
+}
+
+void phpdbg_list_update(void) {
+	PHPDBG_G(init_compile_file) = zend_compile_file;
+	zend_compile_file = phpdbg_init_compile_file;
 }

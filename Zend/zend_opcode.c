@@ -343,13 +343,14 @@ ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->static_variables &&
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-	    if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
 		}
 	}
 
 	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
+		op_array->run_time_cache = NULL;
 	}
 
 	if (!op_array->refcount) {
@@ -582,7 +583,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
-		    start_op = get_next_op_number(op_array);
+			start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array);
 			opline->opcode = ZEND_FAST_CALL;
@@ -692,7 +693,6 @@ static void zend_resolve_finally_calls(zend_op_array *op_array)
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) != IS_LONG) {
-					ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
 					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
@@ -743,19 +743,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
-		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
-		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
-		}
-		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
-		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
-		}
-		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
-		}
 		switch (opline->opcode) {
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
@@ -775,7 +762,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				break;
 			case ZEND_GOTO:
-				if (Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) != IS_LONG) {
+				if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) != IS_LONG) {
 					zend_resolve_goto_label(op_array, NULL, opline);
 				}
 				/* break omitted intentionally */
@@ -806,6 +793,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					if (opline->op1_type != IS_UNUSED) {
+						(opline + 1)->op1 = opline->op1;
+						(opline + 1)->op1_type = opline->op1_type;
+					}
 					MAKE_NOP(opline);
 				}
 				break;
@@ -815,6 +806,19 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+		}
+		if (opline->op1_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
+		}
+		if (opline->op2_type == IS_CONST) {
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
+		}
+		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;

@@ -524,7 +524,7 @@ zend_bool php_std_auto_global_callback(char *name, uint name_len)
 
 /* {{{ php_build_argv
  */
-static void php_build_argv(char *s, zval *track_vars_array)
+PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 {
 	zval arr, argc, tmp;
 	int count = 0;
