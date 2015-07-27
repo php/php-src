@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 06 Aug 2015, PHP 7.0.0 Beta 3
 
 - Core:
+  . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
   . Fixed bug #70124 (null ptr deref / seg fault in ZEND_HANDLE_EXCEPTION).
     (Laruence)
   . Fixed bug #70117 (Unexpected return type error). (Laruence)
