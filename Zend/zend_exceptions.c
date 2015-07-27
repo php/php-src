@@ -41,7 +41,7 @@ void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 	if (exception == add_previous || !add_previous || !exception) {
 		return;
 	}
-	if (Z_TYPE_P(add_previous) != IS_OBJECT && !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
+	if (Z_TYPE_P(add_previous) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
 		zend_error(E_ERROR, "Cannot set non exception as previous exception");
 		return;
 	}
@@ -586,7 +586,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	int res_len = 0, *len = &res_len, num = 0;
 
 	DEFAULT_0_PARAMS;
-	
+
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
 	if(Z_TYPE_P(trace) != IS_ARRAY) {
 		RETURN_FALSE;
@@ -602,8 +602,8 @@ ZEND_METHOD(exception, getTraceAsString)
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
 
-	res[res_len] = '\0';	
-	RETURN_STRINGL(res, res_len, 0); 
+	res[res_len] = '\0';
+	RETURN_STRINGL(res, res_len, 0);
 }
 /* }}} */
 
@@ -640,15 +640,15 @@ ZEND_METHOD(exception, __toString)
 	int len = 0;
 	zend_fcall_info fci;
 	zval fname;
-	
+
 	DEFAULT_0_PARAMS;
-	
+
 	str = estrndup("", 0);
 
 	exception = getThis();
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 1);
 
-	while (exception && Z_TYPE_P(exception) == IS_OBJECT) {
+	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), default_exception_ce TSRMLS_CC)) {
 		prev_str = str;
 		_default_exception_get_entry(exception, "message", sizeof("message")-1, &message TSRMLS_CC);
 		_default_exception_get_entry(exception, "file", sizeof("file")-1, &file TSRMLS_CC);
@@ -658,6 +658,7 @@ ZEND_METHOD(exception, __toString)
 		convert_to_string(&file);
 		convert_to_long(&line);
 
+		trace = NULL;
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		fci.function_name = &fname;
@@ -670,7 +671,7 @@ ZEND_METHOD(exception, __toString)
 
 		zend_call_function(&fci, NULL TSRMLS_CC);
 
-		if (Z_TYPE_P(trace) != IS_STRING) {
+		if (trace && Z_TYPE_P(trace) != IS_STRING) {
 			zval_ptr_dtor(&trace);
 			trace = NULL;
 		}
