@@ -203,7 +203,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 		array_init(&trace);
 	}
 	Z_SET_REFCOUNT(trace, 0);
-	
+
 	base_ce = i_get_exception_base(&obj);
 
 	if (EXPECTED(class_type != zend_ce_parse_error || !(filename = zend_get_compiled_filename()))) {
@@ -608,7 +608,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	uint32_t num = 0;
 
 	DEFAULT_0_PARAMS;
-	
+
 	object = getThis();
 	base_ce = i_get_exception_base(object);
 
@@ -812,7 +812,7 @@ static const zend_function_entry error_exception_functions[] = {
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
-	
+
 	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -821,6 +821,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_exception->create_object = zend_default_exception_new;
+	zend_ce_exception->serialize = zend_class_serialize_deny;
+	zend_ce_exception->unserialize = zend_class_unserialize_deny;
 	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
 
 	zend_declare_property_string(zend_ce_exception, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
@@ -839,6 +841,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
 	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_error->create_object = zend_default_exception_new;
+	zend_ce_error->serialize = zend_class_serialize_deny;
+	zend_ce_error->unserialize = zend_class_unserialize_deny;
 	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
 
 	zend_declare_property_string(zend_ce_error, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
@@ -868,7 +872,7 @@ void zend_register_default_exception(void) /* {{{ */
 /* }}} */
 
 /* {{{ Deprecated - Use zend_ce_exception directly instead */
-ZEND_API zend_class_entry *zend_exception_get_default(void) 
+ZEND_API zend_class_entry *zend_exception_get_default(void)
 {
 	return zend_ce_exception;
 }
