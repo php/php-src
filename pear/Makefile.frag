@@ -9,6 +9,7 @@ WGET = `which wget 2>/dev/null`
 FETCH = `which fetch 2>/dev/null`
 PEAR_PREFIX = -dp a${program_prefix}
 PEAR_SUFFIX = -ds a$(program_suffix)
+PEAR_INSTALLER_URL = https://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar
 
 install-pear-installer: $(SAPI_CLI_PATH)
 	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) pear/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)" ${PEAR_PREFIX} ${PEAR_SUFFIX}
@@ -20,11 +21,11 @@ install-pear:
 			cp $(srcdir)/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
 		else \
 			if test ! -z "$(WGET)" && test -x "$(WGET)"; then \
-				"$(WGET)" http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar -nd -P $(builddir)/; \
+				"$(WGET)" "${PEAR_INSTALLER_URL}" -nd -P $(builddir)/; \
 			elif test ! -z "$(FETCH)" && test -x "$(FETCH)"; then \
-				"$(FETCH)" -o $(builddir)/ http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar; \
+				"$(FETCH)" -o $(builddir)/ "${PEAR_INSTALLER_URL}"; \
 			else \
-				$(top_builddir)/sapi/cli/php -n $(srcdir)/fetch.php http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
+				$(top_builddir)/sapi/cli/php -n $(srcdir)/fetch.php "${PEAR_INSTALLER_URL}" $(builddir)/install-pear-nozlib.phar; \
 			fi \
 		fi \
 	fi
