@@ -95,35 +95,35 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 {
 	switch (param->type) {
 		case STR_PARAM:
-			asprintf(pointer, "%s", param->str);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s", param->str));
 		break;
 
 		case ADDR_PARAM:
-			asprintf(pointer, ZEND_ULONG_FMT, param->addr);
+			ZEND_IGNORE_VALUE(asprintf(pointer, ZEND_ULONG_FMT, param->addr));
 		break;
 
 		case NUMERIC_PARAM:
-			asprintf(pointer, "%li", param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%li", param->num));
 		break;
 
 		case METHOD_PARAM:
-			asprintf(pointer, "%s::%s", param->method.class, param->method.name);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s", param->method.class, param->method.name));
 		break;
 
 		case FILE_PARAM:
 			if (param->num) {
-				asprintf(pointer, "%s:%lu#%lu", param->file.name, param->file.line, param->num);
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu#%lu", param->file.name, param->file.line, param->num));
 			} else {
-				asprintf(pointer, "%s:%lu", param->file.name, param->file.line);
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu", param->file.name, param->file.line));
 			}
 		break;
 
 		case NUMERIC_FUNCTION_PARAM:
-			asprintf(pointer, "%s#%lu", param->str, param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s#%lu", param->str, param->num));
 		break;
 
 		case NUMERIC_METHOD_PARAM:
-			asprintf(pointer, "%s::%s#%lu", param->method.class, param->method.name, param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s#%lu", param->method.class, param->method.name, param->num));
 		break;
 
 		default:

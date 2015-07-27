@@ -533,12 +533,12 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array) /* {{{ *
 			opline_break = zend_hash_get_current_data_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
 
 			phpdbg_notice("breakpoint", "add=\"success\" id=\"%d\" symbol=\"%s\" num=\"%ld\" opline=\"%#lx\"", "Breakpoint #%d resolved at %s%s%s#%ld (opline %#lx)",
-				brake->id,
+				opline_break->id,
 				brake->class_name ? brake->class_name : "",
 				brake->class_name && brake->func_name ? "::" : "",
 				brake->func_name ? brake->func_name : "",
 				brake->opline_num,
-				brake->opline);
+				opline_break->opline);
 		}
 	} ZEND_HASH_FOREACH_END();
 } /* }}} */

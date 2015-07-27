@@ -1814,7 +1814,7 @@ phpdbg_main:
 			if (PHPDBG_G(ops)) {
 				phpdbg_print_opcodes(print_opline_func);
 			} else {
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
 		}
