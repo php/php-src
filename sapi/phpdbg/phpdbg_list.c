@@ -244,12 +244,11 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 		return NULL;
 	}
 
-	data.buf = NULL;
+	data.buf = emalloc(data.len + 1);
 	if (data.len > 0) {
-		data.buf = emalloc(data.len + 1);
 		memcpy(data.buf, bufptr, data.len);
-		data.buf[data.len] = 0;
 	}
+	data.buf[data.len] = 0;
 	data.filename = filename;
 	data.line[0] = 0;
 
