@@ -2395,6 +2395,15 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
 		int level;
 		int do_exit;
+		
+		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
+			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
+			opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
+			opline->opcode == ZEND_INIT_METHOD_CALL ||
+			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL)) {
+			ZEND_ASSERT(op_num);
+			opline--;
+		}
 
 		do {
 			/* If the exception was thrown during a function call there might be

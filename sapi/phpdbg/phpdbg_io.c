@@ -149,7 +149,7 @@ recv_once:
 #endif
 
 		if (got_now == -1) {
-			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
+			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
 			return -1;
 		}
 		i -= got_now;
@@ -270,7 +270,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
 				buf[wrote] = '\0';
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 			} else {
@@ -280,7 +280,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
 				buf[wrote] = '\0';
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 #ifndef PHP_WIN32
@@ -295,7 +295,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 			wrote = sprintf(buf, "Unable to create socket");
 			buf[wrote] = '\0';
-			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 			return sock;
 		}

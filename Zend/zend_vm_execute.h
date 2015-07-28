@@ -503,8 +503,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 		ZEND_VM_LEAVE();
 	} else if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_CODE) {
 		zend_detach_symbol_table(execute_data);
-		destroy_op_array(&EX(func)->op_array);
-		efree_size(EX(func), sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(&EX(func)->op_array) != 0)) {
+			efree_size(EX(func), sizeof(zend_op_array));
+		}
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
@@ -1609,12 +1610,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OP
 	USE_OPLINE
 	zval *fast_call = EX_VAR(opline->result.var);
 
-	if ((opline->extended_value & ZEND_FAST_CALL_FROM_CATCH) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-	    /* in case of unhandled exception jump to catch block instead of finally */
-		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
-		ZEND_VM_CONTINUE();
-	}
 	if (opline->extended_value == ZEND_FAST_CALL_FROM_FINALLY && UNEXPECTED(Z_OBJ_P(fast_call) != NULL)) {
 		fast_call->u2.lineno = (uint32_t)-1;
 	} else {
@@ -1858,9 +1853,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_CONST_HANDLER
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (EG(exception)) {
-		zend_exception_save();
-	}
 	if (IS_CONST == IS_UNUSED) {
 		Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(NULL, opline->extended_value);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -2261,9 +2253,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLE
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (EG(exception)) {
-		zend_exception_save();
-	}
 	if (IS_UNUSED == IS_UNUSED) {
 		Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(NULL, opline->extended_value);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -2305,9 +2294,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZE
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (EG(exception)) {
-		zend_exception_save();
-	}
 	if (IS_CV == IS_UNUSED) {
 		Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(NULL, opline->extended_value);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -2553,9 +2539,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_SPEC_TMPVAR_HANDLE
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (EG(exception)) {
-		zend_exception_save();
-	}
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 		Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(NULL, opline->extended_value);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -3660,7 +3643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -3669,8 +3652,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
@@ -5679,8 +5663,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -7689,8 +7673,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -7729,7 +7713,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 		if (IS_CONST == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
-		} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_VAR) {
+			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
+			}
+			ZVAL_DEREF(retval_ptr);
+		} else if (IS_CONST == IS_CV) {
 			ZVAL_DEREF(retval_ptr);
 		}
 
@@ -9415,8 +9404,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -11219,8 +11208,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -13525,7 +13514,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		if (IS_TMP_VAR == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
-		} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_VAR) {
+			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
+			}
+			ZVAL_DEREF(retval_ptr);
+		} else if (IS_TMP_VAR == IS_CV) {
 			ZVAL_DEREF(retval_ptr);
 		}
 
@@ -17549,8 +17543,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -19173,8 +19167,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -19213,7 +19207,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		if (IS_VAR == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
-		} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_VAR) {
+			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
+			}
+			ZVAL_DEREF(retval_ptr);
+		} else if (IS_VAR == IS_CV) {
 			ZVAL_DEREF(retval_ptr);
 		}
 
@@ -20769,8 +20768,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -22322,8 +22321,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				HANDLE_EXCEPTION();
 			}
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -24897,7 +24896,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		if (IS_UNUSED == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
-		} else if (IS_UNUSED == IS_VAR || IS_UNUSED == IS_CV) {
+		} else if (IS_UNUSED == IS_VAR) {
+			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
+			}
+			ZVAL_DEREF(retval_ptr);
+		} else if (IS_UNUSED == IS_CV) {
 			ZVAL_DEREF(retval_ptr);
 		}
 
@@ -29004,7 +29008,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -29013,8 +29017,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
@@ -34332,7 +34337,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		if (IS_CV == IS_CONST) {
 			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
 			retval_ref = retval_ptr = EX_VAR(opline->result.var);
-		} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
+		} else if (IS_CV == IS_VAR) {
+			if (UNEXPECTED(Z_TYPE_P(retval_ptr) == IS_INDIRECT)) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
+			}
+			ZVAL_DEREF(retval_ptr);
+		} else if (IS_CV == IS_CV) {
 			ZVAL_DEREF(retval_ptr);
 		}
 
@@ -40410,7 +40420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value);
+		i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -40419,8 +40429,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
-		efree_size(new_op_array, sizeof(zend_op_array));
+		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
+			efree_size(new_op_array, sizeof(zend_op_array));
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();

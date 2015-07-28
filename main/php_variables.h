@@ -41,6 +41,7 @@ PHPAPI void php_register_variable(char *var, char *val, zval *track_vars_array);
 PHPAPI void php_register_variable_safe(char *var, char *val, size_t val_len, zval *track_vars_array);
 PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_array);
 
+PHPAPI void php_build_argv(char *s, zval *track_vars_array);
 PHPAPI int php_hash_environment(void);
 END_EXTERN_C()
 

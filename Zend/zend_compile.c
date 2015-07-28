@@ -2047,7 +2047,9 @@ static inline zend_bool zend_is_call(zend_ast *ast) /* {{{ */
 
 static inline zend_bool zend_is_unticked_stmt(zend_ast *ast) /* {{{ */
 {
-	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL;
+	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
+		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_DECL
+		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
 }
 /* }}} */
 
@@ -2949,8 +2951,9 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	lcname = zend_string_tolower(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
-	if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
-		(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
+	if (!fbc
+	 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
+	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 	) {
 		zend_string_release(lcname);
 		return FAILURE;
@@ -3168,8 +3171,9 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		lcname = zend_string_tolower(Z_STR_P(name));
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
-		if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
-			(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
+		if (!fbc
+		 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
+		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 		) {
 			zend_string_release(lcname);
 			zend_compile_dynamic_call(result, &name_node, args_ast);
@@ -3606,7 +3610,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op
 	znode *loop_var = NULL;
 
 	if (pass2_opline) {
-		label = RT_CONSTANT(op_array, pass2_opline->op2);
+		label = CT_CONSTANT_EX(op_array, pass2_opline->op2.constant);
 	} else {
 		label = &label_node->u.constant;
 	}
@@ -5170,11 +5174,11 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		}
 
 		name = zend_new_interned_string(name);
-		lcname = zend_new_interned_string(lcname);
 	} else {
 		name = zend_generate_anon_class_name(decl->lex_pos);
-		lcname = zend_string_copy(name); /* this normally is an interned string, except with opcache. We need a proper copy here or opcache will fail with use after free. */
+		lcname = zend_string_tolower(name);
 	}
+	lcname = zend_new_interned_string(lcname);
 
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
@@ -5250,6 +5254,9 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	zend_compile_stmt(stmt_ast);
+
+	/* Reset lineno for final opcodes and errors */
+	CG(zend_lineno) = ast->lineno;
 
 	if (ce->num_traits == 0) {
 		/* For traits this check is delayed until after trait binding */
@@ -6966,6 +6973,10 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 	}
 
 	CG(zend_lineno) = ast->lineno;
+
+	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) && !zend_is_unticked_stmt(ast)) {
+		zend_do_extended_info();
+	}
 
 	switch (ast->kind) {
 		case ZEND_AST_STMT_LIST:

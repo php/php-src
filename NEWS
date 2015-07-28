@@ -1,5 +1,26 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+06 Aug 2015, PHP 7.0.0 Beta 3
+
+- Core:
+  . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
+  . Fixed bug #70124 (null ptr deref / seg fault in ZEND_HANDLE_EXCEPTION).
+    (Laruence)
+  . Fixed bug #70117 (Unexpected return type error). (Laruence)
+  . Fixed bug #70106 (Inheritance by anonymous class). (Bob)
+  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
+
+- Opcache:
+  . Fixed bug #70111 (Segfault when a function uses both an explicit return
+    type and an explicit cast). (Laruence)
+
+- SAPI: 
+  . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
+
+- Standard:
+  . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
+    Execution). (Laruence)
+
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
@@ -17,6 +38,10 @@
   . Fixed bug #70065 (curl_getinfo() returns corrupted values). (Anatol)
 
 - GD:
+  . Fixed bug #53156 (imagerectangle problem with point ordering). (cmb)
+  . Fixed bug #66387 (Stack overflow with imagefilltoborder). (cmb)
+  . Fixed bug #70102 (imagecreatefromwebm() shifts colors). (cmb)
+  . Fixed bug #66590 (imagewebp() doesn't pad to even length). (cmb)
   . Fixed bug #66882 (imagerotate by -90 degrees truncates image by 1px). (cmb)
   . Fixed bug #70064 (imagescale(..., IMG_BICUBIC) leaks memory). (cmb)
   . Fixed bug #69024 (imagescale segfault with palette based image). (cmb)
@@ -25,9 +50,12 @@
   . Fixed bug #68714 (copy 'n paste error). (cmb)
   . Fixed bug #66339 (PHP segfaults in imagexbm). (cmb)
   . Fixed bug #70047 (gd_info() doesn't report WebP support). (cmb)
+  . Replace libvpx with libwebp for bundled libgd. (cmb, Anatol)
 
 - Opcache:
   . Fixed bug #70058 (Build fails when building for i386). (Laruence)
+  . Fixed bug #70022 (Crash with opcache using opcache.file_cache_only=1).
+    (Anatol)
 
 - Soap:
   . Fixed bug #70079 (Segmentation fault after more than 100 SoapClient

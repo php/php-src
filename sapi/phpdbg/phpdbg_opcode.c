@@ -27,6 +27,15 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
+{
+	const char *ret = zend_get_opcode_name(opcode);
+	if (ret) {
+		return ret + 5; /* Skip ZEND_ prefix */
+	}
+	return "UNKNOWN";
+} /* }}} */
+
 static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type) /* {{{ */
 {
 	char *decode = NULL;
@@ -40,9 +49,11 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_VAR:
-		case IS_TMP_VAR: {
 			spprintf(&decode, 0, "@%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
-		} break;
+		break;
+		case IS_TMP_VAR:
+			spprintf(&decode, 0, "~%td", EX_VAR_TO_NUM(op->var) - ops->last_var);
+		break;
 		case IS_CONST: {
 			zval *literal = RT_CONSTANT(ops, *op);
 			decode = phpdbg_short_zval_print(literal, 20);
@@ -59,9 +70,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	/* EX */
 	switch (op->opcode) {
 	case ZEND_FAST_CALL:
-		if (op->extended_value != 0) {
-			spprintf(&decode[0], 0, "FAST_CALL<%s>",
-				op->extended_value == ZEND_FAST_CALL_FROM_CATCH ? "FROM_CATCH" : "FROM_FINALLY");
+		if (op->extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
+			decode[0] = estrdup("FAST_CALL<FROM_FINALLY>");
 		}
 		break;
 	case ZEND_FAST_RET:
@@ -133,7 +143,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	/* RESULT */
 	switch (op->opcode) {
 	case ZEND_CATCH:
-		spprintf(&decode[2], 0, "%" PRIu32, op->result.num);
+		spprintf(&decode[3], 0, "%" PRIu32, op->result.num);
 		break;
 	default:
 		decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type);
@@ -203,13 +213,4 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
 {
 	phpdbg_print_opline_ex(execute_data, ignore_flags);
-} /* }}} */
-
-const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
-{
-	const char *ret = zend_get_opcode_name(opcode);
-	if (ret) {
-		return ret + 5; /* Skip ZEND_ prefix */
-	}
-	return "UNKNOWN";
 } /* }}} */

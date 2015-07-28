@@ -8,6 +8,8 @@ notifications:
     email: 
        on_failure: change
     irc:
+      template:
+        - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} -  Change view : %{compare_url} - Build details : %{build_url}"
       channels:
         - "irc.efnet.org#php.pecl"
       on_success: change
@@ -50,4 +52,3 @@ before_script:
 # Run PHPs run-tests.php 
 script:
     - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 1 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
-    - ./sapi/cli/php sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg sapi/phpdbg/phpdbg

@@ -442,12 +442,10 @@ static int phpdbg_create_recursive_ht_watch(phpdbg_watchpoint_t *watch) {
 	zval *zv;
 	zend_string *key;
 	zend_long h;
-	size_t str_len;
 
 	ZEND_ASSERT(watch->type == WATCH_ON_HASHTABLE);
 
 	ZEND_HASH_FOREACH_KEY_VAL(HT_WATCH_HT(watch), h, key, zv) {
-		char *str = NULL;
 		phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
 
 		new_watch->flags = PHPDBG_WATCH_RECURSIVE;
@@ -458,14 +456,10 @@ static int phpdbg_create_recursive_ht_watch(phpdbg_watchpoint_t *watch) {
 			new_watch->name_in_parent = key;
 			++GC_REFCOUNT(key);
 		} else {
-			str_len = spprintf(&str, 0, "%lld", h);
-			new_watch->name_in_parent = zend_string_init(str, str_len, 0);
-			efree(str);
+			new_watch->name_in_parent = strpprintf(0, ZEND_LONG_FMT, h);
 		}
 
-		str_len = spprintf(&str, 0, "%.*s%s%s%s", (int) ZSTR_LEN(watch->str) - 2, ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(ZSTR_VAL(new_watch->name_in_parent)), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
-		new_watch->str = zend_string_init(str, str_len, 0);
-		efree(str);
+		new_watch->str = strpprintf(0, "%.*s%s%s%s", (int) ZSTR_LEN(watch->str) - 2, ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(ZSTR_VAL(new_watch->name_in_parent)), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 
 		while (Z_TYPE_P(zv) == IS_INDIRECT) {
 			zv = Z_INDIRECT_P(zv);
@@ -480,7 +474,6 @@ static int phpdbg_create_recursive_ht_watch(phpdbg_watchpoint_t *watch) {
 }
 
 static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch) {
-	size_t str_len;
 	HashTable *ht;
 	zval *zvp;
 
@@ -490,7 +483,6 @@ static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch) {
 	ZVAL_DEREF(zvp);
 
 	if ((ht = HT_FROM_ZVP(zvp))) {
-		char *str = NULL;
 		phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
 
 		new_watch->flags = PHPDBG_WATCH_RECURSIVE;
@@ -498,9 +490,7 @@ static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch) {
 		new_watch->parent_container = watch->parent_container;
 		new_watch->name_in_parent = watch->name_in_parent;
 		++GC_REFCOUNT(new_watch->name_in_parent);
-		str_len = spprintf(&str, 0, "%.*s[]", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str));
-		new_watch->str = zend_string_init(str, str_len, 0);
-		efree(str);
+		new_watch->str = strpprintf(0, "%.*s[]", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str));
 
 		if (Z_TYPE_P(zvp) == IS_ARRAY) {
 			new_watch->flags |= PHPDBG_WATCH_ARRAY;
@@ -513,7 +503,6 @@ static int phpdbg_create_recursive_zval_watch(phpdbg_watchpoint_t *watch) {
 		phpdbg_create_recursive_ht_watch(new_watch);
 
 		phpdbg_create_watchpoint(new_watch);
-
 	}
 
 	return SUCCESS;
@@ -564,24 +553,22 @@ static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch, zend_b
 }
 
 static void phpdbg_delete_ht_watchpoints_recursive(phpdbg_watchpoint_t *watch) {
-	zend_string *strkey;
+	zend_string *str, *strkey;
 	zend_long numkey;
-	char *str;
-	size_t str_len;
 	phpdbg_watchpoint_t *watchpoint;
 
 	ZEND_HASH_FOREACH_KEY(HT_WATCH_HT(watch), numkey, strkey) {
 		if (strkey) {
-			str_len = spprintf(&str, 0, "%.*s%s%s%s", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(ZSTR_VAL(strkey)), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
+			str = strpprintf(0, "%.*s%s%s%s", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(ZSTR_VAL(strkey)), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		} else {
-			str_len = spprintf(&str, 0, "%.*s%s" ZEND_LONG_FMT "%s", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
+			str = strpprintf(0, "%.*s%s" ZEND_LONG_FMT "%s", (int) ZSTR_LEN(watch->str), ZSTR_VAL(watch->str), (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		}
 
-		if ((watchpoint = zend_hash_str_find_ptr(&PHPDBG_G(watchpoints), str, str_len))) {
+		if ((watchpoint = zend_hash_find_ptr(&PHPDBG_G(watchpoints), str))) {
 			phpdbg_delete_watchpoint_recursive(watchpoint, 1);
 		}
 
-		efree(str);
+		zend_string_release(str);
 	} ZEND_HASH_FOREACH_END();
 }
 

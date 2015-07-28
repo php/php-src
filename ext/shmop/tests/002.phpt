@@ -4,6 +4,9 @@ shmop extension error messages
 edgarsandi - <edgar.r.sandi@gmail.com>
 --SKIPIF--
 <?php
+	if( substr(PHP_OS, 0, 3) == "WIN") {
+		die('skip not for Windows');
+	}
 	if (!extension_loaded("shmop")) {
 
 		die("skip shmop() extension not available");

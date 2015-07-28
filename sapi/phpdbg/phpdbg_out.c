@@ -1281,6 +1281,7 @@ PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) {
 		len = phpdbg_mixed_write(fd, buffer, buflen);
 	}
 
+	efree(buffer);
 	return len;
 }
 
