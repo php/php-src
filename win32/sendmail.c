@@ -868,7 +868,7 @@ static int Post(LPCSTR msg)
 //********************************************************************/
 static int Ack(char **server_response)
 {
-	static char buf[MAIL_BUFFER_SIZE];
+	ZEND_TLS char buf[MAIL_BUFFER_SIZE];
 	int rlen;
 	int Index = 0;
 	int Received = 0;
