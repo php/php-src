@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
+  . Fixed bug #70002 (TS issues with temporary dir handling). (Anatol)
 
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
