@@ -4797,7 +4797,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
-	zend_class_entry *orig_ce = CG(active_class_entry);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 
@@ -4822,10 +4821,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_op_array) = op_array;
-
-	if (!is_method) {
-		CG(active_class_entry) = NULL;
-	}
 
 	zend_oparray_context_begin(&orig_oparray_context);
 
@@ -4862,7 +4857,6 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
 
-	CG(active_class_entry) = orig_ce;
 	CG(active_op_array) = orig_op_array;
 }
 /* }}} */
@@ -5692,7 +5686,9 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_METHOD_C:
-			if (ce) {
+			if ((op_array && !op_array->scope && op_array->function_name) || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+				ZVAL_STR_COPY(zv, op_array->function_name);
+			} else if (ce) {
 				if (op_array && op_array->function_name) {
 					ZVAL_NEW_STR(zv, zend_concat3(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), "::", 2,
 						ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name)));

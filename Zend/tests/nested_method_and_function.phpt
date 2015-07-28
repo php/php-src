@@ -10,20 +10,30 @@ class Foo {
 		function foo() {
 			var_dump(__FUNCTION__);
 			var_dump(__METHOD__);
+			var_dump(__CLASS__);
 		}
 
 		foo();
 		
 		var_dump(__FUNCTION__);
 		var_dump(__METHOD__);
+		var_dump(__CLASS__);
+		
+		return function() {var_dump(__FUNCTION__); var_dump(__METHOD__); var_dump(__CLASS__); };
 	}
 }
 
-Foo::bar();
+$c = Foo::bar();
 
+$c();
 ?>
 --EXPECT--
 string(7) "Baz\foo"
 string(7) "Baz\foo"
+string(7) "Baz\Foo"
 string(3) "bar"
 string(12) "Baz\Foo::bar"
+string(7) "Baz\Foo"
+string(13) "Baz\{closure}"
+string(13) "Baz\{closure}"
+string(7) "Baz\Foo"
