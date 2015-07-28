@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.13
 
+- Core:
+  . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
+
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
