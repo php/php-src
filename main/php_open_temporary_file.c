@@ -176,7 +176,15 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 /* }}} */
 
 /* Cache the chosen temporary directory. */
-static char* temporary_directory;
+static
+#ifdef ZTS
+#ifdef PHP_WIN32
+__declspec(thread)
+#elif defined(__GNUC__)
+__thread
+#endif
+#endif
+char* temporary_directory;
 
 PHPAPI void php_shutdown_temporary_directory(void)
 {
