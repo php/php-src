@@ -67,6 +67,12 @@ typedef enum {
 typedef intptr_t zend_intptr_t;
 typedef uintptr_t zend_uintptr_t;
 
+#ifdef ZTS
+#define ZEND_TLS static TSRM_TLS
+#else
+#define ZEND_TLS static
+#endif
+
 typedef struct _zend_object_handlers zend_object_handlers;
 typedef struct _zend_class_entry     zend_class_entry;
 typedef union  _zend_function        zend_function;

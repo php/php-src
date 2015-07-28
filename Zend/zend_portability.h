@@ -443,12 +443,6 @@ char *alloca();
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
 #endif
 
-#ifdef ZTS
-#define ZEND_TLS TSRM_TLS
-#else
-#define ZEND_TLS
-#endif
-
 #endif /* ZEND_PORTABILITY_H */
 
 /*
