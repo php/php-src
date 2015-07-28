@@ -3096,8 +3096,8 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				HANDLE_EXCEPTION();
 			}
-			HANDLE_EXCEPTION();
 		}
 	}
 

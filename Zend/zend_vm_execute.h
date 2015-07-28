@@ -5663,8 +5663,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				HANDLE_EXCEPTION();
 			}
-			HANDLE_EXCEPTION();
 		}
 	}
 
