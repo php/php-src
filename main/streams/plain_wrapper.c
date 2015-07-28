@@ -358,11 +358,11 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
 					break;
 				}
-				/* If there's nothing to read, wait in 100ms periods. */
+				/* If there's nothing to read, wait in 10ms periods. */
 				if (0 == avail_read) {
-					usleep(100000);
+					usleep(10);
 				}
-			} while (0 == avail_read && retry++ < 320);
+			} while (0 == avail_read && retry++ < 3200000);
 
 			/* Reduce the required data amount to what is available, otherwise read()
 				will block.*/
