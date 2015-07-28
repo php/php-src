@@ -1978,6 +1978,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -2069,6 +2072,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -2391,6 +2397,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -2482,6 +2491,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -2637,6 +2649,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -2728,6 +2743,9 @@ try_function_name:
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -5725,6 +5743,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -9472,6 +9493,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -11279,6 +11303,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
