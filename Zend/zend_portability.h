@@ -444,9 +444,9 @@ char *alloca();
 #endif
 
 #ifdef ZTS
-#define ZEND_THREAD TSRM_TLS
+#define ZEND_TLS TSRM_TLS
 #else
-#define ZEND_THREAD
+#define ZEND_TLS
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

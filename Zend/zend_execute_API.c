@@ -46,7 +46,7 @@ ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0}, {{0}}, {0}}, 
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
-static ZEND_THREAD HANDLE tq_timer = NULL;
+static ZEND_TLS HANDLE tq_timer = NULL;
 #endif
 
 #if 0&&ZEND_DEBUG
