@@ -113,7 +113,7 @@ sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLD
 # download pear 
 $ECHO_N "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
-	wget http://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar -nd -P pear/
+	wget https://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar -nd -P pear/
 else
 	$ECHO_N "Missing wget binary needed for pear download";
 	exit 7

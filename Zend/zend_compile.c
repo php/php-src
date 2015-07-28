@@ -5255,6 +5255,9 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 
 	zend_compile_stmt(stmt_ast);
 
+	/* Reset lineno for final opcodes and errors */
+	CG(zend_lineno) = ast->lineno;
+
 	if (ce->num_traits == 0) {
 		/* For traits this check is delayed until after trait binding */
 		zend_check_deprecated_constructor(ce);
