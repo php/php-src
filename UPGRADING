@@ -709,6 +709,11 @@ out, that the corresponding SDK isn't available anymore.
 - Core
   . PHP_INT_MIN added.
 
+- PCRE
+  . This error constant is added to signal errors due to stack size limitations
+    when PCRE JIT support is enabled:
+  . PREG_JIT_STACKLIMIT_ERROR
+
 - Zlib
   . These constants are added to control flush behavior with the new
     incremental deflate_add() and inflate_add() functions:
