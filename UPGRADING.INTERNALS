@@ -206,7 +206,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
 		    build. 
      ZEND_TLS     - expands to an appropriate thread specific storage specifier
                     with static visibility in the thread safe build, expands to
-                    an empty string in a non thread safe build. 
+                    static specifier in a non thread safe build. 
      
      Variables declared with these storage specifiers can not be shared across 
      threads. While ZEND_TLS enforces the local scope visibility, ZEND_EXT_TLS
