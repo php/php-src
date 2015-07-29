@@ -9,7 +9,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70117 (Unexpected return type error). (Laruence)
   . Fixed bug #70106 (Inheritance by anonymous class). (Bob)
-  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
+  . Fixed bug #69674 (SIGSEGV array.c:953). (cmb)
 
 - Opcache:
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
+  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
     Execution). (Laruence)
   . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
 
