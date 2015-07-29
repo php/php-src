@@ -195,15 +195,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
+#define PHAR_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(phar, v)
 
-#ifdef ZTS
-#	include "TSRM.h"
-#   ifdef COMPILE_DL_PHAR
+#if defined(ZTS) && defined(COMPILE_DL_PHAR)
 ZEND_TSRMLS_CACHE_EXTERN();
-#   endif
-#	define PHAR_G(v) ZEND_TSRMG(phar_globals_id, zend_phar_globals *, v)
-#else
-#	define PHAR_G(v) (phar_globals.v)
 #endif
 
 #ifndef php_uint16

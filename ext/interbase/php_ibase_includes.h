@@ -127,17 +127,10 @@ enum php_interbase_option {
 	PHP_IBASE_NOWAIT 			= 256
 };
 
-#ifdef ZTS
-#else
-#endif
+#define IBG(v) ZEND_MODULE_GLOBALS_ACCESSOR(ibase, v)
 
-#ifdef ZTS
-# define IBG(v) ZEND_TSRMG(ibase_globals_id, zend_ibase_globals *, v)
-# ifdef COMPILE_DL_INTERBASE
+#if defined(ZTS) && defined(COMPILE_DL_INTERBASE)
 ZEND_TSRMLS_CACHE_EXTERN();
-# endif
-#else
-#define IBG(v) (ibase_globals.v)
 #endif
 
 #define BLOB_ID_LEN		18

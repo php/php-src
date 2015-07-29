@@ -75,13 +75,10 @@ ZEND_BEGIN_MODULE_GLOBALS(iconv)
 	char *output_encoding;
 ZEND_END_MODULE_GLOBALS(iconv)
 
-#ifdef ZTS
-# define ICONVG(v) ZEND_TSRMG(iconv_globals_id, zend_iconv_globals *, v)
-# ifdef COMPILE_DL_ICONV
+#define ICONVG(v) ZEND_MODULE_GLOBALS_ACCESSOR(iconv, v)
+
+#ifdef defined(ZTS) && defined(COMPILE_DL_ICONV)
 ZEND_TSRMLS_CACHE_EXTERN();
-# endif
-#else
-# define ICONVG(v) (iconv_globals.v)
 #endif
 
 #ifdef HAVE_IBM_ICONV

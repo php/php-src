@@ -82,14 +82,10 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 ZEND_END_MODULE_GLOBALS(json)
 
 ZEND_EXTERN_MODULE_GLOBALS(json);
+#define JSON_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(json, v)
 
-#ifdef ZTS
-# define JSON_G(v) ZEND_TSRMG(json_globals_id, zend_json_globals *, v)
-# ifdef COMPILE_DL_JSON
-ZEND_TSRMLS_CACHE_EXTERN;
-# endif
-#else
-# define JSON_G(v) (json_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_JSON)
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
 /* json_decode() options */

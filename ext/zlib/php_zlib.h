@@ -63,6 +63,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	int compression_coding;
 ZEND_END_MODULE_GLOBALS(zlib);
 
+#define ZLIBG(v) ZEND_MODULE_GLOBALS_ACCESSOR(zlib, v)
+
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 extern php_stream_ops php_stream_gzio_ops;
 extern php_stream_wrapper php_stream_gzip_wrapper;
@@ -70,13 +72,6 @@ extern php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
 #define phpext_zlib_ptr zlib_module_ptr
-
-#ifdef ZTS
-# include "TSRM.h"
-# define ZLIBG(v) ZEND_TSRMG(zlib_globals_id, zend_zlib_globals *, v)
-#else
-# define ZLIBG(v) (zlib_globals.v)
-#endif
 
 #endif /* PHP_ZLIB_H */
 

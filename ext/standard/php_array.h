@@ -129,10 +129,6 @@ ZEND_BEGIN_MODULE_GLOBALS(array)
 	int (*compare_func)(zval *result, zval *op1, zval *op2);
 ZEND_END_MODULE_GLOBALS(array)
 
-#ifdef ZTS
-#define ARRAYG(v) ZEND_TSRMG(array_globals_id, zend_array_globals *, v)
-#else
-#define ARRAYG(v) (array_globals.v)
-#endif
+#define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
 
 #endif /* PHP_ARRAY_H */
