@@ -194,6 +194,26 @@ changes. See: https://wiki.php.net/phpng-upgrading
      into the destructor. So the previous example could look like
      free(my_struct->vars); given the income was casted to (struct my_struct *).
 
+     A new macro was introduced to simplify the declaration to the extension
+     globals. A simplified declaration looks as follows
+
+     #define MYEXT_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(myext, v)
+
+     Two new storage specifiers was introduced.
+
+     ZEND_EXT_TLS - expand to an appropriate thread specific storage specifier in
+                    the thread safe build, expands to empty in a non thread safe
+		    build. 
+     ZEND_TLS     - expands to an appropriate thread specific storage specifier
+                    with static visibility in the thread safe build, expands to
+                    an empty string in a non thread safe build. 
+     
+     Variables declared with these storage specifiers can not be shared across 
+     threads. While ZEND_TLS enforces the local scope visibility, ZEND_EXT_TLS
+     pertains to the visiblity across several compilation units. In both cases,
+     there's no portable way to achieve the visibility across shared objects.
+     Thus, these specifiers are not compatible with ZEND_API and PHPAPI specifiers.
+
   q. gc_collect_cycles() is now a function pointer, and can be replaced in the
      same manner as zend_execute_ex() if needed (for example, to include the
      time spent in the garbage collector in a profiler). The default
