@@ -12,7 +12,7 @@ Collaboration is a Good Thing(tm), and Git lets us do this. Thus, following
 some basic rules with regards to Git usage will::
 
    a. Make everybody happier, especially those responsible for maintaining
-      Git itself.
+      PHP itself.
 
    b. Keep the changes consistently well documented and easily trackable.
 
@@ -48,11 +48,11 @@ Currently we have the following branches in use::
   PHP-5.6   Is used to release the PHP 5.6.x series. This is a current
             stable version and is open for bugfixes only.
 
-  PHP-5.5   Is used to release the PHP 5.5.x series. This is a current
-            stable version and is open for bugfixes only.
+  PHP-5.5   Is used to release the PHP 5.5.x series. This is an old
+            stable version and is open for security fixes only.
 
-  PHP-5.4   Is used to release the PHP 5.4.x series. This is a current
-            stable version and is open for bugfixes only.
+  PHP-5.4   Is used to release the PHP 5.4.x series. This is an old
+            stable version and is open for security fixes only.
 
   PHP-5.3   This branch is closed.
 
@@ -67,7 +67,7 @@ Currently we have the following branches in use::
 
 The next few rules are more of a technical nature::
 
-   1. All changes should first go to the lowest branch (i.e. 5.4) and then
+   1. All changes should first go to the lowest branch (i.e. 5.6) and then
       get merged up to all other branches. If a change is not needed for
       later branches (i.e. fixes for features which where dropped from later
       branches) an empty merge should be done.
