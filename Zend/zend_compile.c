@@ -6493,16 +6493,9 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_bool is_fully_qualified;
 	zend_string *orig_name = zend_ast_get_str(name_ast);
-	zend_string *resolved_name = zend_resolve_const_name(
-		orig_name, name_ast->attr, &is_fully_qualified);
+	zend_string *resolved_name = zend_resolve_const_name(orig_name, name_ast->attr, &is_fully_qualified);
 
-	if (zend_try_ct_eval_const(&result->u.constant, resolved_name, is_fully_qualified)) {
-		result->op_type = IS_CONST;
-		zend_string_release(resolved_name);
-		return;
-	}
-
-	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__")) {
+	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
 		zend_ast *last = CG(ast);
 
 		while (last->kind == ZEND_AST_STMT_LIST) {
@@ -6511,11 +6504,16 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 		}
 		if (last->kind == ZEND_AST_HALT_COMPILER) {
 			result->op_type = IS_CONST;
-			ZVAL_LONG(&result->u.constant,
-				Z_LVAL_P(zend_ast_get_zval(last->child[0])));
+			ZVAL_LONG(&result->u.constant, Z_LVAL_P(zend_ast_get_zval(last->child[0])));
 			zend_string_release(resolved_name);
 			return;
 		}
+	}
+
+	if (zend_try_ct_eval_const(&result->u.constant, resolved_name, is_fully_qualified)) {
+		result->op_type = IS_CONST;
+		zend_string_release(resolved_name);
+		return;
 	}
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, NULL);
