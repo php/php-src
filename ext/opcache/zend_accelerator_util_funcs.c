@@ -658,16 +658,17 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	do {
 		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
+		_mm_prefetch(dqdest + 4, _MM_HINT_T0);
 
 		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
 		__m128i xmm1 = _mm_load_si128(dqsrc + 1);
 		__m128i xmm2 = _mm_load_si128(dqsrc + 2);
 		__m128i xmm3 = _mm_load_si128(dqsrc + 3);
 		dqsrc  += 4;
-		_mm_stream_si128(dqdest + 0, xmm0);
-		_mm_stream_si128(dqdest + 1, xmm1);
-		_mm_stream_si128(dqdest + 2, xmm2);
-		_mm_stream_si128(dqdest	+ 3, xmm3);
+		_mm_store_si128(dqdest + 0, xmm0);
+		_mm_store_si128(dqdest + 1, xmm1);
+		_mm_store_si128(dqdest + 2, xmm2);
+		_mm_store_si128(dqdest + 3, xmm3);
 		dqdest += 4;
 	} while (dqsrc != end);
 }
