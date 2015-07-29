@@ -44,12 +44,7 @@ ZEND_BEGIN_MODULE_GLOBALS(browscap)
 ZEND_END_MODULE_GLOBALS(browscap)
 
 ZEND_DECLARE_MODULE_GLOBALS(browscap)
-
-#ifdef ZTS
-#define BROWSCAP_G(v)	ZEND_TSRMG(browscap_globals_id, zend_browscap_globals *, v)
-#else
-#define BROWSCAP_G(v)	(browscap_globals.v)
-#endif
+#define BROWSCAP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(browscap, v)
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
