@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #70164 (__COMPILER_HALT_OFFSET__ under namespace is not defined).
     (Bob))
 
+- Curl:
+  . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
+
 - IMAP:
   . Fixed bug #70158 (Building with static imap fails). (cmb)
 
