@@ -77,7 +77,7 @@ ZEND_END_MODULE_GLOBALS(iconv)
 
 #define ICONVG(v) ZEND_MODULE_GLOBALS_ACCESSOR(iconv, v)
 
-#ifdef defined(ZTS) && defined(COMPILE_DL_ICONV)
+#if defined(ZTS) && defined(COMPILE_DL_ICONV)
 ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
