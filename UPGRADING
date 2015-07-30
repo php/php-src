@@ -633,8 +633,11 @@ Other
   platform restrictions dead locks on pipe buffers are possible.
 
 - dirname()
-  . A new optional argument ($levels) allow to go up various times
-    dirname(dirname($foo)) => dirname($foo, 2);
+  A new optional argument ($levels) allow to go up various times
+  dirname(dirname($foo)) => dirname($foo, 2);
+
+- debug_zval_dump
+  It prints now "int" instead of "long", and "float" instead of "double".
 
 ========================================
 6. New Functions
