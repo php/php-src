@@ -3,6 +3,7 @@ Bug #70096 (Repeated iptcembed() adds superfluous FF bytes)
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!function_exists('imagejpeg')) die('skip imagejpeg not available');
 ?>
 --FILE--
 <?php
