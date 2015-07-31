@@ -493,11 +493,9 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->script_encoding_list = NULL;
 
-#ifdef ZTS
 	zend_interned_empty_string_init(&compiler_globals->empty_string);
 
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
-#endif
 }
 /* }}} */
 
@@ -523,9 +521,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	compiler_globals->last_static_member = 0;
 
-#ifdef ZTS
 	zend_interned_empty_string_free(&compiler_globals->empty_string);
-#endif
 }
 /* }}} */
 
@@ -564,11 +560,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
 {
-#ifdef ZTS
 	zend_ini_dtor(executor_globals->ini_directives);
-#else
-	zend_ini_shutdown();
-#endif
+
 	if (&executor_globals->persistent_list != global_persistent_list) {
 		zend_destroy_rsrc_list(&executor_globals->persistent_list);
 	}
