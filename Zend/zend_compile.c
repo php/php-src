@@ -4848,6 +4848,9 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 			CG(active_class_entry), (zend_function *) op_array, E_COMPILE_ERROR);
 	}
 
+	/* put the implicit return on the really last line */
+	CG(zend_lineno) = decl->end_lineno;
+
 	zend_do_extended_info();
 	zend_emit_final_return(NULL);
 
