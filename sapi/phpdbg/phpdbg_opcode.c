@@ -202,11 +202,17 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 
 	if (PHPDBG_G(oplog_list)) {
 		phpdbg_oplog_entry *cur = zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry));
+		zend_op_array *op_array = &execute_data->func->op_array;
 		cur->op = (zend_op *) execute_data->opline;
-		cur->op_array = &execute_data->func->op_array;
+		cur->opcodes = op_array->opcodes;
+		cur->filename = op_array->filename;
+		cur->scope = op_array->scope;
+		cur->function_name = op_array->function_name;
 		cur->next = NULL;
 		PHPDBG_G(oplog_cur)->next = cur;
 		PHPDBG_G(oplog_cur) = cur;
+if (!execute_data->func->op_array.filename)
+printf("ALETR");
 	}
 } /* }}} */
 

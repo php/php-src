@@ -615,25 +615,24 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 		zend_long insert_idx;
 
 		do {
-			zend_op_array *op_array = cur->op_array;
 			zval zero;
 			ZVAL_LONG(&zero, 0);
 
-			if (op_array->filename != last_file) {
-				last_file = op_array->filename;
+			if (cur->filename != last_file) {
+				last_file = cur->filename;
 				file_ht = insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), last_file);
 			}
 
 			if (by_function) {
-				if (op_array->function_name == NULL) {
+				if (cur->function_name == NULL) {
 					if (last_function != NULL) {
 						insert_ht = file_ht;
 					}
 					last_function = NULL;
-				} else if (op_array->function_name != last_function || op_array->scope != last_scope) {
+				} else if (cur->function_name != last_function || cur->scope != last_scope) {
 					zend_string *fn_name;
-					last_function = op_array->function_name;
-					last_scope = op_array->scope;
+					last_function = cur->function_name;
+					last_scope = cur->scope;
 					if (last_scope == NULL) {
 						fn_name = zend_string_copy(last_function);
 					} else {
@@ -645,7 +644,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 			}
 
 			if (by_opcode) {
-				insert_idx = cur->op - op_array->opcodes;
+				insert_idx = cur->op - cur->opcodes;
 			} else {
 				insert_idx = cur->op->lineno;
 			}

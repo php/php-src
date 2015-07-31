@@ -320,6 +320,7 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 			*dataptr->op_array->refcount = 2;
 			dataptr->destroy_op_array = 0;
 		}
+			++*dataptr->op_array->refcount;
 	}
 
 	return ret;
