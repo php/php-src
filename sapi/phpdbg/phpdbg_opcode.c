@@ -211,8 +211,6 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 		cur->next = NULL;
 		PHPDBG_G(oplog_cur)->next = cur;
 		PHPDBG_G(oplog_cur) = cur;
-if (!execute_data->func->op_array.filename)
-printf("ALETR");
 	}
 } /* }}} */
 
