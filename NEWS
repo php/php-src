@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #69674 (SIGSEGV array.c:953). (cmb)
   . Fixed bug #70164 (__COMPILER_HALT_OFFSET__ under namespace is not defined).
     (Bob))
+  . Fixed Bug #70108 (sometimes empty $_SERVER['QUERY_STRING']). (Anatol)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
