@@ -9,7 +9,7 @@ WGET = `which wget 2>/dev/null`
 FETCH = `which fetch 2>/dev/null`
 PEAR_PREFIX = -dp a${program_prefix}
 PEAR_SUFFIX = -ds a$(program_suffix)
-PEAR_INSTALLER_URL = https://pear.php.net/~cweiske/1.10.0dev1/install-pear-nozlib.phar
+PEAR_INSTALLER_URL = https://pear.php.net/~cweiske/1.10.0dev2/install-pear-nozlib.phar
 
 install-pear-installer: $(SAPI_CLI_PATH)
 	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) pear/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)" ${PEAR_PREFIX} ${PEAR_SUFFIX}
