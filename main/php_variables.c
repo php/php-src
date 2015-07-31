@@ -592,6 +592,8 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
  */
 static inline void php_register_server_variables(void)
 {
+	zval request_time_float, request_time_long;
+
 	zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
 	array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
 
@@ -610,15 +612,12 @@ static inline void php_register_server_variables(void)
 	if (SG(request_info).auth_digest) {
 		php_register_variable("PHP_AUTH_DIGEST", SG(request_info).auth_digest, &PG(http_globals)[TRACK_VARS_SERVER]);
 	}
-	/* store request init time */
-	{
-		zval request_time_float, request_time_long;
-		ZVAL_DOUBLE(&request_time_float, sapi_get_request_time());
-		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER]);
-		ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
-		php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER]);
-	}
 
+	/* store request init time */
+	ZVAL_DOUBLE(&request_time_float, sapi_get_request_time());
+	php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER]);
+	ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
+	php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER]);
 }
 /* }}} */
 
