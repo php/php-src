@@ -455,6 +455,18 @@ static void function_copy_ctor(zval *zv)
 	function_add_ref(Z_FUNC_P(zv));
 }
 
+static void auto_global_copy_ctor(zval *zv)
+{
+	zend_auto_global *old_ag = (zend_auto_global *) Z_PTR_P(zv);
+	zend_auto_global *new_ag = pemalloc(sizeof(zend_auto_global), 1);
+
+	new_ag->name = zend_string_copy(old_ag->name);
+	new_ag->auto_global_callback = old_ag->auto_global_callback;
+	new_ag->jit = old_ag->jit;
+
+	Z_PTR_P(zv) = new_ag;
+}
+
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	compiler_globals->compiled_filename = NULL;
@@ -471,7 +483,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0);
-	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL /* empty element */);
+	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, auto_global_copy_ctor);
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
