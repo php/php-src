@@ -19,14 +19,14 @@ L14-16 foo() %s - %s + 8 ops
  L15   #4     DO_%cCALL                                                          @0                  
  L15   #5     SEND_VAR                @0                   1                                        
  L15   #6     DO_%cCALL                                                                              
- L15   #7     RETURN                  null                                                          
+ L16   #7     RETURN                  null                                                          
 prompt> [User Class: Foo\Bar (2 methods)]
 L5-7 Foo\Bar::Foo() %s - %s + 5 ops
  L5    #0     RECV                    1                                         $bar                
  L6    #1     INIT_NS_FCALL_BY_NAME                        "Foo\\var_dump"                          
  L6    #2     SEND_VAR_EX             $bar                 1                                        
  L6    #3     DO_FCALL                                                                              
- L6    #4     RETURN                  null                                                          
+ L7    #4     RETURN                  null                                                          
 L9-9 Foo\Bar::baz() %s - %s + 1 ops
  L9    #0     RETURN                  null                                                          
 prompt> [Not Executing!]
