@@ -5,6 +5,9 @@ Bug #70018 (exec does not strip all whitespace), var 1
 if (substr(PHP_OS, 0, 3) == "WIN") {
   die("skip.. not for Windows");
 }
+if (`echo -e test` == "-e test\n") {
+  die("skip.. /bin/echo does not support -e");
+}
 ?>
 --FILE--
 <?php
