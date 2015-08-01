@@ -2019,6 +2019,9 @@ try_function_name:
 			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
 			GC_REFCOUNT(fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
+		} else {
+			call_info |= ZEND_CALL_RELEASE_THIS;
+			GC_REFCOUNT(object)++; /* For $this pointer */
 		}
 
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
@@ -2438,6 +2441,9 @@ try_function_name:
 			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
 			GC_REFCOUNT(fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
+		} else {
+			call_info |= ZEND_CALL_RELEASE_THIS;
+			GC_REFCOUNT(object)++; /* For $this pointer */
 		}
 
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
@@ -2690,6 +2696,9 @@ try_function_name:
 			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
 			GC_REFCOUNT(fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
+		} else {
+			call_info |= ZEND_CALL_RELEASE_THIS;
+			GC_REFCOUNT(object)++; /* For $this pointer */
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&

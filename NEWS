@@ -11,8 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #70106 (Inheritance by anonymous class). (Bob)
   . Fixed bug #69674 (SIGSEGV array.c:953). (cmb)
   . Fixed bug #70164 (__COMPILER_HALT_OFFSET__ under namespace is not defined).
-    (Bob))
-  . Fixed Bug #70108 (sometimes empty $_SERVER['QUERY_STRING']). (Anatol)
+    (Bob)
+  . Fixed bug #70108 (sometimes empty $_SERVER['QUERY_STRING']). (Anatol)
+  . Fixed bug #70179 ($this refcount issue). (Bob)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
