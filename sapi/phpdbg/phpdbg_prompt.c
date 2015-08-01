@@ -443,14 +443,36 @@ PHPDBG_COMMAND(exec) /* {{{ */
 int phpdbg_compile(void) /* {{{ */
 {
 	zend_file_handle fh;
+	char *buf;
+	size_t len;
 
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
 		return FAILURE;
 	}
 
-	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS) {
+	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
+		/* Skip #! line */
+		if (len >= 3 && buf[0] == '#' && buf[1] == '!') {
+			char *end = buf + len;
+			do {
+				switch (fh.handle.stream.mmap.buf++[0]) {
+					case '\r':
+						if (fh.handle.stream.mmap.buf[0] == '\n') {
+							fh.handle.stream.mmap.buf++;
+						}
+					case '\n':
+						CG(start_lineno) = 2;
+						fh.handle.stream.mmap.len -= fh.handle.stream.mmap.buf - buf;
+						end = fh.handle.stream.mmap.buf;
+				}
+			} while (fh.handle.stream.mmap.buf + 1 < end);
+		}
+
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
+
+		fh.handle.stream.mmap.buf = buf;
+		fh.handle.stream.mmap.len = len;
 		zend_destroy_file_handle(&fh);
 		if (EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
