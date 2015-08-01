@@ -61,6 +61,9 @@ PHP 5.6 UPGRADE NOTES
   longer accept keys or IVs with incorrect sizes. Furthermore an IV is now
   required if the used block cipher mode requires it.
 
+- cURL:
+  Uploads using the @file syntax are now unsupported by default.
+
 ========================================
 2. New Features
 ========================================
