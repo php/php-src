@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 
 - IMAP:
   . Fixed bug #70158 (Building with static imap fails). (cmb)
+  . Fixed bug #69998 (curl multi leaking memory). (Pierrick)
 
 - Opcache:
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
