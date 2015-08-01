@@ -19,4 +19,4 @@ Warning: simplexml_load_string(): XXXXXXX^ in %s on line %d
 
 Warning: simplexml_load_string(): ^ in %s on line %d
 
-Fatal error: Call to a member function xpath() on a non-object in %s on line %d
+Fatal error: Call to a member function xpath() on boolean in %s on line %d
