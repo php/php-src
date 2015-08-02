@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     (Bob)
   . Fixed bug #70108 (sometimes empty $_SERVER['QUERY_STRING']). (Anatol)
   . Fixed bug #70179 ($this refcount issue). (Bob)
+  . Fixed bug #69896 ('asm' operand has impossible constraints). (Anatol)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
