@@ -653,6 +653,10 @@ Other
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
 
+- Zip:
+  . Added ZipArchive::setCompressionIndex() and ZipArchive::setCompressionName()
+    for setting the compression method.
+
 - Zlib:
   . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
     functions allowing incremental/streaming compression/decompression.
