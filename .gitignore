@@ -19,6 +19,8 @@
 *.tgz
 *.tar.gz
 *.tar.bz2
+*.tar.gz.asc
+*.tar.bz2.asc
 .FBCIndex
 .FBCLockFolder
 .deps

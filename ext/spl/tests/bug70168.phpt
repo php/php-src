@@ -11,9 +11,26 @@ for($i = 0; $i < 5; $i++) {
     $v[$i] = 'hi'.$i;
 }
 
-var_dump($data[1]);
+var_dump($data);
 ?>
 ===DONE===
---EXPECT--
-int(1)
+--EXPECTF--
+array(2) {
+  [0]=>
+  object(SplObjectStorage)#%d (1) {
+    ["storage":"SplObjectStorage":private]=>
+    array(1) {
+      ["%s"]=>
+      array(2) {
+        ["obj"]=>
+        object(stdClass)#2 (0) {
+        }
+        ["inf"]=>
+        NULL
+      }
+    }
+  }
+  [1]=>
+  int(1)
+}
 ===DONE===
