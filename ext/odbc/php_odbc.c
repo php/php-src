@@ -387,7 +387,7 @@ const zend_function_entry odbc_functions[] = {
 };
 /* }}} */
 
-ZEND_DECLARE_MODULE_GLOBALS(odbc)
+PHP_ODBC_API ZEND_DECLARE_MODULE_GLOBALS(odbc)
 static PHP_GINIT_FUNCTION(odbc);
 
 /* {{{ odbc_module_entry
