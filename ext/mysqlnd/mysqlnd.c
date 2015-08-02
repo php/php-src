@@ -518,7 +518,7 @@ end:
 
 close_conn:
 	CONN_SET_STATE(conn, CONN_QUIT_SENT);
-	conn->m->send_close(conn TSRMLS_CC);
+	conn->m->send_close(conn);
 	SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	PACKET_FREE(auth_packet);
 	DBG_RETURN(ret);

@@ -61,7 +61,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			zip_error_t *err;
 			err = zip_file_get_error(self->zf);
 			stream->eof = 1;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
 			zip_error_fini(err);
 #endif
 			return 0;

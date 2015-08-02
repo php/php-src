@@ -1811,7 +1811,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
@@ -1911,7 +1911,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;

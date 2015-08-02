@@ -1946,7 +1946,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC) == SUCCESS) {
+		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
 			sslsock->s.is_blocked = 0;
 		}
 
