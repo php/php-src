@@ -1687,7 +1687,7 @@ convert_to_array:
 
 		if (dim == NULL) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
-			ZVAL_NULL(result);
+			ZVAL_INDIRECT(result, &EG(error_zval));
 		} else {
 			zend_check_string_offset(dim, type);
 			ZVAL_INDIRECT(result, NULL); /* wrong string offset */
