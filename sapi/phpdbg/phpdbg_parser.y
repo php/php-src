@@ -23,6 +23,11 @@ static int yyerror(const char *msg);
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 %}
 
 %pure-parser
