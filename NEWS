@@ -17,7 +17,8 @@ PHP                                                                        NEWS
   . Fixed bug #69896 ('asm' operand has impossible constraints). (Anatol)
   . Fixed bug #70183 (null pointer deref (segfault) in zend_eval_const_expr).
     (Hugh Davenport)
-  . Fixed bug #70182 (Segfault in ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER). (Bob)
+  . Fixed bug #70182 (Segfault in ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER).
+    (Hugh Davenport)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
