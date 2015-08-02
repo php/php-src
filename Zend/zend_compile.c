@@ -7374,7 +7374,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
-			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
+			if (!ast->child[0] || !ast->child[1] || ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
 
