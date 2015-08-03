@@ -361,6 +361,7 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 
 	/* ciphers */
 	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
+	MCRYPT_ENTRY2_2_4(AES, "rijndael-128");
 	MCRYPT_ENTRY2_2_4(ARCFOUR_IV, "arcfour-iv");
 	MCRYPT_ENTRY2_2_4(ARCFOUR, "arcfour");
 	MCRYPT_ENTRY2_2_4(BLOWFISH, "blowfish");
@@ -393,6 +394,7 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	MCRYPT_ENTRY2_2_4(SKIPJACK, "skipjack");
 /* modes */
 	MCRYPT_ENTRY2_2_4(MODE_CBC, "cbc");
+	MCRYPT_ENTRY2_2_4(MODE_CTR, "ctr");
 	MCRYPT_ENTRY2_2_4(MODE_CFB, "cfb");
 	MCRYPT_ENTRY2_2_4(MODE_ECB, "ecb");
 	MCRYPT_ENTRY2_2_4(MODE_NOFB, "nofb");
