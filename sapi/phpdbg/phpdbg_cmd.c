@@ -396,6 +396,10 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				case NUMERIC_FUNCTION_PARAM:
 				case STR_PARAM:
 				case OP_PARAM:
+				case EVAL_PARAM:
+				case SHELL_PARAM:
+				case COND_PARAM:
+				case RUN_PARAM:
 					if (remove->str) {
 						efree(remove->str);
 					}

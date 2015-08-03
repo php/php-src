@@ -312,10 +312,10 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 
 	dataptr->op_array = *op_array;
 	if (dataptr->op_array.refcount) {
-		efree(op_array);
+		++*dataptr->op_array.refcount;
 	}
 
-	return &dataptr->op_array;
+	return op_array;
 }
 
 void phpdbg_free_file_source(zval *zv) {

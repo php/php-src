@@ -234,6 +234,12 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		PHPDBG_G(oplog) = NULL;
 	}
 
+	if (PHPDBG_G(ops)) {
+		destroy_op_array(PHPDBG_G(ops));
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
+
 	if (PHPDBG_G(oplog_list)) {
 		phpdbg_oplog_list *cur = PHPDBG_G(oplog_list);
 		do {
