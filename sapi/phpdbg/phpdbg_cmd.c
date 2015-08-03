@@ -385,23 +385,27 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 			switch (remove->type) {
 				case NUMERIC_METHOD_PARAM:
 				case METHOD_PARAM:
-					if (remove->method.class)
-						free(remove->method.class);
-					if (remove->method.name)
-						free(remove->method.name);
+					if (remove->method.class) {
+						efree(remove->method.class);
+					}
+					if (remove->method.name) {
+						efree(remove->method.name);
+					}
 				break;
 
 				case NUMERIC_FUNCTION_PARAM:
 				case STR_PARAM:
 				case OP_PARAM:
-					if (remove->str)
-						free(remove->str);
+					if (remove->str) {
+						efree(remove->str);
+					}
 				break;
 
 				case NUMERIC_FILE_PARAM:
 				case FILE_PARAM:
-					if (remove->file.name)
-						free(remove->file.name);
+					if (remove->file.name) {
+						efree(remove->file.name);
+					}
 				break;
 
 				default: {

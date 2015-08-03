@@ -57,7 +57,7 @@ T_SHELL     'sh'
 T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
-WS          [ \r\n\t]+
+WS          [ \r\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 GENERIC_ID  ([^ \r\n\t:#\000]|":\\")+
@@ -67,7 +67,7 @@ INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>{WS}?[\n\000] {
+<*>[\n\000] {
 	return 0;
 }
 
@@ -96,7 +96,7 @@ INPUT       [^\n\000]+
 
 <NORMAL>{ID}"://" {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_PROTO;
 }
@@ -127,21 +127,21 @@ INPUT       [^\n\000]+
 
 <NORMAL>{OPCODE} {
 	phpdbg_init_param(yylval, OP_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_OPCODE;
 }
 
 <NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_ID;
 }
 
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_INPUT;
 }
