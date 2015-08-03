@@ -213,8 +213,8 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
-	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(file_sources));
+	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
@@ -232,12 +232,6 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(oplog)) {
 		fclose(PHPDBG_G(oplog));
 		PHPDBG_G(oplog) = NULL;
-	}
-
-	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
-		efree(PHPDBG_G(ops));
-		PHPDBG_G(ops) = NULL;
 	}
 
 	if (PHPDBG_G(oplog_list)) {
@@ -558,8 +552,8 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		phpdbg_file_source *source = zend_hash_find_ptr(&PHPDBG_G(file_sources), name);
 		if (source) {
 			phpdbg_oplog_fill_executable(
-				source->op_array,
-				phpdbg_add_empty_array(Z_ARR_P(return_value), source->op_array->filename),
+				&source->op_array,
+				phpdbg_add_empty_array(Z_ARR_P(return_value), source->op_array.filename),
 				by_opcode);
 		}
 	} ZEND_HASH_FOREACH_END();

@@ -335,7 +335,7 @@ void zend_class_add_ref(zval *zv)
 	ce->refcount++;
 }
 
-ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
+ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
 	zval *literal = op_array->literals;
 	zval *end;
@@ -353,12 +353,8 @@ ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
 		op_array->run_time_cache = NULL;
 	}
 
-	if (!op_array->refcount) {
-		return 1;
-	}
-
-	if (--(*op_array->refcount) > 0) {
-		return 0;
+	if (!op_array->refcount || --(*op_array->refcount) > 0) {
+		return;
 	}
 
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
@@ -419,8 +415,6 @@ ZEND_API zend_bool destroy_op_array(zend_op_array *op_array)
 		}
 		efree(arg_info);
 	}
-
-	return 1;
 }
 
 void init_op(zend_op *op)

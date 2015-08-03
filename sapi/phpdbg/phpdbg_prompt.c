@@ -409,7 +409,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				if (PHPDBG_G(ops)) {
 					phpdbg_notice("exec", "type=\"unsetops\"", "Destroying compiled opcodes");
-					phpdbg_clean(0);
+					zend_hash_clean(&PHPDBG_G(file_sources));
 				}
 
 				PHPDBG_G(exec) = res;
@@ -423,7 +423,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
 				if (PHPDBG_G(in_execution)) {
-					phpdbg_clean(1);
+					PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 					return SUCCESS;
 				}
 
@@ -651,7 +651,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		if (PHPDBG_G(in_execution)) {
 			if (phpdbg_ask_user_permission("Do you really want to restart execution?") == SUCCESS) {
 				phpdbg_startup_run++;
-				phpdbg_clean(1);
+				PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 			}
 			return SUCCESS;
 		}
@@ -733,8 +733,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
-
-		phpdbg_clean(1);
+		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -1236,10 +1235,9 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
 
-	phpdbg_clean(1);
-
 	phpdbg_xml("</cleaninfo>");
 
+	PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 	return SUCCESS;
 } /* }}} */
 
@@ -1387,21 +1385,6 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 	phpdbg_print_changed_zvals();
 
 	return ret;
-} /* }}} */
-
-void phpdbg_clean(zend_bool full) /* {{{ */
-{
-	/* this is implicitly required */
-	if (PHPDBG_G(ops)) {
-		if (destroy_op_array(PHPDBG_G(ops))) {
-			efree(PHPDBG_G(ops));
-		}
-		PHPDBG_G(ops) = NULL;
-	}
-
-	if (full) {
-		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
-	}
 } /* }}} */
 
 /* code may behave weirdly if EG(exception) is set; thus backup it */

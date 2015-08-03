@@ -184,6 +184,10 @@ static int yyerror(const char *msg) {
 }
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input) {
+	if (!*input) {
+		return 0;
+	}
+
 	phpdbg_init_lexer(stack, input);
 
 	return yyparse();

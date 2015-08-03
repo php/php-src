@@ -294,35 +294,28 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 	char resolved_path_buf[MAXPATHLEN];
-	zend_op_array *ret;
+	zend_op_array *op_array;
 	phpdbg_file_source *dataptr;
 
 	if (VCWD_REALPATH(filename, resolved_path_buf)) {
 		filename = resolved_path_buf;
 	}
 
-	ret = PHPDBG_G(init_compile_file)(file, type);
+	op_array = PHPDBG_G(init_compile_file)(file, type);
 
-	if (ret == NULL) {
+	if (op_array == NULL) {
 		return NULL;
 	}
 
 	dataptr = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), filename, strlen(filename));
 	ZEND_ASSERT(dataptr != NULL);
 
-	dataptr->op_array = ret;
-	dataptr->destroy_op_array = 1;
-	if (dataptr->op_array) {
-		if (dataptr->op_array->refcount) {
-			++*dataptr->op_array->refcount;
-		} else {
-			dataptr->op_array->refcount = emalloc(sizeof(uint32_t));
-			*dataptr->op_array->refcount = 2;
-			dataptr->destroy_op_array = 0;
-		}
+	dataptr->op_array = *op_array;
+	if (dataptr->op_array.refcount) {
+		efree(op_array);
 	}
 
-	return ret;
+	return &dataptr->op_array;
 }
 
 void phpdbg_free_file_source(zval *zv) {
@@ -332,12 +325,7 @@ void phpdbg_free_file_source(zval *zv) {
 		efree(data->buf);
 	}
 
-	if (!data->destroy_op_array) {
-		efree(data->op_array->refcount);
-	}
-	if (!data->destroy_op_array || destroy_op_array(data->op_array)) {
-		efree(data->op_array);
-	}
+	destroy_op_array(&data->op_array);
 
 	efree(data);
 }
