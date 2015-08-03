@@ -1878,7 +1878,7 @@ TEST $file
 
 		if (version_compare($valgrind_version, '3.3.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --show-leak-kinds=definite,indirect --log-file=$memcheck_filename $cmd";
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
 		} else {
 			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
 		}
@@ -1933,7 +1933,7 @@ COMMAND $cmd
 	$passed = false;
 
 	if ($leak_check) { // leak check
-		$leaked = filesize($memcheck_filename) > 367;
+		$leaked = filesize($memcheck_filename) > 0;
 
 		if (!$leaked) {
 			@unlink($memcheck_filename);
