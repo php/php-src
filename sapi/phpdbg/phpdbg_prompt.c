@@ -1404,13 +1404,15 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 	}
 } /* }}} */
 
-/* code may behave weirdly if EG(exception) is set */
+/* code may behave weirdly if EG(exception) is set; thus backup it */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
 	const zend_op *backup_opline; \
+	const zend_op *before_ex; \
 	if (exception) { \
 		if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) { \
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
+		before_ex = EG(opline_before_exception); \
 		++GC_REFCOUNT(exception); \
 		zend_clear_exception(); \
 	} \
@@ -1436,6 +1438,7 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 					Z_OBJ(zv) = exception; \
 					zend_throw_exception_internal(&zv); \
 				} \
+				EG(opline_before_exception) = before_ex; \
 			} \
 			/* fallthrough */ \
 		default: \
