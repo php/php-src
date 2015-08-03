@@ -24,10 +24,10 @@ if (!extension_loaded("mcrypt")) {
  * Alias to functions: 
  */
 
-echo "*** Testing mcrypt : Rijndael128 functionality ***\n";
+echo "*** Testing mcrypt : AES functionality ***\n";
 
 $cipher = MCRYPT_AES;
-$mode = MCRYPT_MODE_CBC;
+$mode = MCRYPT_MODE_CTR;
 $data = b'This is the secret message which must be encrypted';
 
 // keys up to 128 bits (16 bytes)
