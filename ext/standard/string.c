@@ -1648,20 +1648,34 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string dirname(string path)
+/* {{{ proto string dirname(string path[, int levels])
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
 	char *str;
-	zend_string *ret;
 	size_t str_len;
+	zend_string *ret;
+	zend_long levels = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &levels) == FAILURE) {
 		return;
 	}
 
 	ret = zend_string_init(str, str_len, 0);
-	ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
+
+	if (levels == 1) {
+		/* Defaut case */
+		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
+	} else if (levels < 1) {
+		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
+		zend_string_free(ret);
+		return;
+	} else {
+		/* Some levels up */
+		do {
+			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+		} while (ZSTR_LEN(ret) < str_len && --levels);
+	}
 
 	RETURN_NEW_STR(ret);
 }
@@ -4055,7 +4069,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 						Z_STRVAL_P(search), Z_STRLEN_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));
 			} else {
-				lc_subject_str = php_string_tolower(Z_STR_P(subject));
+				lc_subject_str = php_string_tolower(subject_str);
 				ZVAL_STR(result, php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
 						Z_STR_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));

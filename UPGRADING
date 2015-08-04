@@ -632,6 +632,13 @@ Other
   on pipes. This option should be used carefully because due to the
   platform restrictions dead locks on pipe buffers are possible.
 
+- dirname()
+  A new optional argument ($levels) allow to go up various times
+  dirname(dirname($foo)) => dirname($foo, 2);
+
+- debug_zval_dump
+  It prints now "int" instead of "long", and "float" instead of "double".
+
 ========================================
 6. New Functions
 ========================================
@@ -645,6 +652,10 @@ Other
 - Standard
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
+
+- Zip:
+  . Added ZipArchive::setCompressionIndex() and ZipArchive::setCompressionName()
+    for setting the compression method.
 
 - Zlib:
   . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
@@ -704,6 +715,11 @@ out, that the corresponding SDK isn't available anymore.
 
 - Core
   . PHP_INT_MIN added.
+
+- PCRE
+  . This error constant is added to signal errors due to stack size limitations
+    when PCRE JIT support is enabled:
+  . PREG_JIT_STACKLIMIT_ERROR
 
 - Zlib
   . These constants are added to control flush behavior with the new

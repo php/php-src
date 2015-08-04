@@ -66,7 +66,6 @@ phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx) {
 phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong idx) {
 	phpdbg_btree_branch *branch = tree->branch;
 	int i = tree->depth - 1, last_superior_i = -1;
-	zend_bool had_alternative_branch = 0;
 
 	if (branch == NULL) {
 		return NULL;
@@ -74,30 +73,33 @@ phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong id
 
 	/* find nearest watchpoint */
 	do {
-		/* an impossible branch was found if: */
-		if (!had_alternative_branch && (idx >> i) % 2 == 0 && !branch->branches[0]) {
-			/* there's no lower branch than idx */
-			if (last_superior_i == -1) {
-				/* failure */
-				return NULL;
+		if ((idx >> i) % 2 == 0) {
+			if (branch->branches[0]) {
+				CHOOSE_BRANCH(0);
+			/* an impossible branch was found if: */
+			} else {
+				/* there's no lower branch than idx */
+				if (last_superior_i == -1) {
+					/* failure */
+					return NULL;
+				}
+				/* reset state */
+				branch = tree->branch;
+				i = tree->depth - 1;
+				/* follow branch according to bits in idx until the last lower branch before the impossible branch */
+				do {
+					CHOOSE_BRANCH((idx >> i) % 2 == 1 && branch->branches[1]);
+				} while (--i > last_superior_i);
+				/* use now the lower branch of which we can be sure that it contains only branches lower than idx */
+				CHOOSE_BRANCH(0);
+				/* and choose the highest possible branch in the branch containing only branches lower than idx */
+				while (i--) {
+					CHOOSE_BRANCH(branch->branches[1]);
+				}
+				break;
 			}
-			/* reset state */
-			branch = tree->branch;
-			i = tree->depth - 1;
-			/* follow branch according to bits in idx until the last lower branch before the impossible branch */
-			do {
-				CHOOSE_BRANCH((idx >> i) % 2 == 1 && branch->branches[1]);
-			} while (--i > last_superior_i);
-			/* use now the lower branch of which we can be sure that it contains only branches lower than idx */
-			CHOOSE_BRANCH(0);
-			/* and choose the highest possible branch in the branch containing only branches lower than idx */
-			while (i--) {
-				CHOOSE_BRANCH(branch->branches[1]);
-			}
-			break;
-		}
 		/* follow branch according to bits in idx until having found an impossible branch */
-		if (had_alternative_branch || (idx >> i) % 2 == 1) {
+		} else {
 			if (branch->branches[1]) {
 				if (branch->branches[0]) {
 					last_superior_i = i;
@@ -105,10 +107,11 @@ phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong id
 				CHOOSE_BRANCH(1);
 			} else {
 				CHOOSE_BRANCH(0);
-				had_alternative_branch = 1;
+				while (i--) {
+					CHOOSE_BRANCH(branch->branches[1]);
+				}
+				break;
 			}
-		} else {
-			CHOOSE_BRANCH(0);
 		}
 	} while (i--);
 

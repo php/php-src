@@ -3601,7 +3601,7 @@ zend_strtod
 	}
 
 #ifndef MULTIPLE_THREADS
- static char *dtoa_result;
+ ZEND_TLS char *dtoa_result;
 #endif
 
  static char *

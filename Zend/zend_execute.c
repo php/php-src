@@ -1687,7 +1687,7 @@ convert_to_array:
 
 		if (dim == NULL) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
-			ZVAL_NULL(result);
+			ZVAL_INDIRECT(result, &EG(error_zval));
 		} else {
 			zend_check_string_offset(dim, type);
 			ZVAL_INDIRECT(result, NULL); /* wrong string offset */
@@ -1942,31 +1942,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		zend_error(E_WARNING, "This object doesn't support property references");
 		ZVAL_INDIRECT(result, &EG(error_zval));
 	}
-}
-
-static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, const zend_op_array *op_array, const zend_execute_data *execute_data)
-{
-	zend_brk_cont_element *jmp_to;
-
-	do {
-		ZEND_ASSERT(array_offset != -1);
-		jmp_to = &op_array->brk_cont_array[array_offset];
-		if (nest_levels > 1 && jmp_to->start >= 0) {
-			zend_op *brk_opline = &op_array->opcodes[jmp_to->brk];
-
-			if (brk_opline->opcode == ZEND_FREE) {
-				zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-			} else if (brk_opline->opcode == ZEND_FE_FREE) {
-				zval *var = EX_VAR(brk_opline->op1.var);
-				if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-					zend_hash_iterator_del(Z_FE_ITER_P(var));
-				}
-				zval_ptr_dtor_nogc(var);
-			}
-		}
-		array_offset = jmp_to->parent;
-	} while (--nest_levels > 0);
-	return jmp_to;
 }
 
 #if ZEND_INTENSIVE_DEBUGGING
@@ -2395,6 +2370,15 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
 		int level;
 		int do_exit;
+		
+		if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
+			opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
+			opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
+			opline->opcode == ZEND_INIT_METHOD_CALL ||
+			opline->opcode == ZEND_INIT_STATIC_METHOD_CALL)) {
+			ZEND_ASSERT(op_num);
+			opline--;
+		}
 
 		do {
 			/* If the exception was thrown during a function call there might be

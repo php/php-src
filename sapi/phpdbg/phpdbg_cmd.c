@@ -95,35 +95,35 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 {
 	switch (param->type) {
 		case STR_PARAM:
-			asprintf(pointer, "%s", param->str);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s", param->str));
 		break;
 
 		case ADDR_PARAM:
-			asprintf(pointer, ZEND_ULONG_FMT, param->addr);
+			ZEND_IGNORE_VALUE(asprintf(pointer, ZEND_ULONG_FMT, param->addr));
 		break;
 
 		case NUMERIC_PARAM:
-			asprintf(pointer, "%li", param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%li", param->num));
 		break;
 
 		case METHOD_PARAM:
-			asprintf(pointer, "%s::%s", param->method.class, param->method.name);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s", param->method.class, param->method.name));
 		break;
 
 		case FILE_PARAM:
 			if (param->num) {
-				asprintf(pointer, "%s:%lu#%lu", param->file.name, param->file.line, param->num);
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu#%lu", param->file.name, param->file.line, param->num));
 			} else {
-				asprintf(pointer, "%s:%lu", param->file.name, param->file.line);
+				ZEND_IGNORE_VALUE(asprintf(pointer, "%s:%lu", param->file.name, param->file.line));
 			}
 		break;
 
 		case NUMERIC_FUNCTION_PARAM:
-			asprintf(pointer, "%s#%lu", param->str, param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s#%lu", param->str, param->num));
 		break;
 
 		case NUMERIC_METHOD_PARAM:
-			asprintf(pointer, "%s::%s#%lu", param->method.class, param->method.name, param->num);
+			ZEND_IGNORE_VALUE(asprintf(pointer, "%s::%s#%lu", param->method.class, param->method.name, param->num));
 		break;
 
 		default:
@@ -325,7 +325,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 	if (param && param->type) {
 		switch (param->type) {
 			case STR_PARAM:
-				fprintf(stderr, "%s STR_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s STR_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			case ADDR_PARAM:
@@ -357,11 +357,11 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			break;
 
 			case COND_PARAM:
-				fprintf(stderr, "%s COND_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s COND_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			case OP_PARAM:
-				fprintf(stderr, "%s OP_PARAM(%s=%lu)\n", msg, param->str, param->len);
+				fprintf(stderr, "%s OP_PARAM(%s=%zu)\n", msg, param->str, param->len);
 			break;
 
 			default: {
@@ -385,23 +385,31 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 			switch (remove->type) {
 				case NUMERIC_METHOD_PARAM:
 				case METHOD_PARAM:
-					if (remove->method.class)
-						free(remove->method.class);
-					if (remove->method.name)
-						free(remove->method.name);
+					if (remove->method.class) {
+						efree(remove->method.class);
+					}
+					if (remove->method.name) {
+						efree(remove->method.name);
+					}
 				break;
 
 				case NUMERIC_FUNCTION_PARAM:
 				case STR_PARAM:
 				case OP_PARAM:
-					if (remove->str)
-						free(remove->str);
+				case EVAL_PARAM:
+				case SHELL_PARAM:
+				case COND_PARAM:
+				case RUN_PARAM:
+					if (remove->str) {
+						efree(remove->str);
+					}
 				break;
 
 				case NUMERIC_FILE_PARAM:
 				case FILE_PARAM:
-					if (remove->file.name)
-						free(remove->file.name);
+					if (remove->file.name) {
+						efree(remove->file.name);
+					}
 				break;
 
 				default: {
@@ -765,6 +773,9 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		PHPDBG_G(buffer) = estrdup(buffer);
 	} else {
 		if (PHPDBG_G(buffer)) {
+			if (buffer) {
+				efree(buffer);
+			}
 			buffer = estrdup(PHPDBG_G(buffer));
 		}
 	}

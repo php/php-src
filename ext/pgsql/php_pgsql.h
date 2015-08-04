@@ -323,14 +323,10 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)
+# define PGG(v) ZEND_MODULE_GLOBALS_ACCESSOR(pgsql, v)
 
-#ifdef ZTS
-# define PGG(v) ZEND_TSRMG(pgsql_globals_id, zend_pgsql_globals *, v)
-# ifdef COMPILE_DL_PGSQL
+#if defined(ZTS) && defined(COMPILE_DL_PGSQL)
 ZEND_TSRMLS_CACHE_EXTERN();
-# endif
-#else
-# define PGG(v) (pgsql_globals.v)
 #endif
 
 #endif

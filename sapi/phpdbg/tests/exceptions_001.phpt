@@ -14,12 +14,12 @@ prompt> handle first
  00017: 	} catch (\Exception $e) {
  00018: 		var_dump($e);
 prompt> frame #0: {closure}() at %s:16
-frame #1: {main} at %s:18
+frame #1: {main} at %s:20
 prompt> 3
 prompt> Uncaught Error in %s on line 16
 Error: Call to undefined function foo() in %s:16
 Stack trace:
-#0 %s(18): {closure}()
+#0 %s(20): {closure}()
 #1 {main}
 [Script ended normally]
 prompt> 

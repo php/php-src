@@ -2368,7 +2368,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 				continue;
 			}
 
-			ZSTR_LEN(str.s) = 0;
+			smart_str_free(&str);
 			smart_str_appends(&str, "pgsql_oid_");
 			smart_str_appends(&str, tmp_oid);
 			smart_str_0(&str);
@@ -5506,7 +5506,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
 	if (!tmp_name) {
 		efree(src);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The table name must be specified");
+		php_error_docref(NULL, E_WARNING, "The table name must be specified");
 		return FAILURE;
 	}
 	if (!tmp_name2 || !*tmp_name2) {

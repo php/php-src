@@ -1541,7 +1541,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			now->h = hou;
 			break;
 		default:
-			php_error_docref(NULL, E_STRICT, "You should be using the time() function instead");
+			php_error_docref(NULL, E_DEPRECATED, "You should be using the time() function instead");
 	}
 	/* Update the timestamp */
 	if (gmt) {

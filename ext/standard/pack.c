@@ -700,7 +700,7 @@ PHP_FUNCTION(unpack)
 		}
 
 		if (size != 0 && size != -1 && size < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+			php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}

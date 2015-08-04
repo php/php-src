@@ -100,13 +100,6 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define SQLT_CFILEE 115
 #endif
 
-#ifdef OCI_ERROR_MAXMSG_SIZE2
-/* Bigger size is defined from 11.2.0.3 onwards */
-#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
-#else
-#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
-#endif
-
 #if ZEND_MODULE_API_NO > 20020429
 #define ONUPDATELONGFUNC OnUpdateLong
 #else
@@ -1084,7 +1077,7 @@ static void php_oci_init_global_handles(void)
 {
 	sword errstatus;
 	sb4   ora_error_code = 0;
-	text  tmp_buf[OCI_ERROR_MAXMSG_SIZE];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
+	text  tmp_buf[PHP_OCI_ERRBUF_LEN];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
 
 	errstatus = OCIEnvNlsCreate(&OCI_G(env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, 0, 0);
 
@@ -1095,7 +1088,7 @@ static void php_oci_init_global_handles(void)
 		php_error_docref(NULL, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
 		if (OCI_G(env)
-			&& OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
+			&& OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
 			&& *tmp_buf) {
 			php_error_docref(NULL, E_WARNING, "%s", tmp_buf);
 		}
@@ -1124,7 +1117,7 @@ static void php_oci_init_global_handles(void)
 		PHP_OCI_CALL(OCIHandleFree, (cpoolh, OCI_HTYPE_CPOOL));
 #endif
 	} else {
-		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ERROR);
+		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 
 		if (ora_error_code) {
 			int tmp_buf_len = strlen((char *)tmp_buf);
@@ -1334,7 +1327,7 @@ PHP_MINFO_FUNCTION(oci)
 {
 	char buf[32];
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
-	char *ver;
+	char ver[256];
 #endif
 
 	php_info_print_table_start();
@@ -1348,9 +1341,8 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Revision", "$Id$");
 
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
-	php_oci_client_get_version(&ver);
+	php_oci_client_get_version(ver, sizeof(ver));
 	php_info_print_table_row(2, "Oracle Run-time Client Library Version", ver);
-	efree(ver);
 #else
 	php_info_print_table_row(2, "Oracle Run-time Client Library Version", "Unknown");
 #endif
@@ -1536,8 +1528,6 @@ void php_oci_define_hash_dtor(zval *data)
 {
 	php_oci_define *define = (php_oci_define *) Z_PTR_P(data);
 
-	zval_ptr_dtor(define->zval);
-
 	if (define->name) {
 		efree(define->name);
 		define->name = NULL;
@@ -1557,18 +1547,20 @@ void php_oci_bind_hash_dtor(zval *data)
 
 	if (bind->array.elements) {
 		efree(bind->array.elements);
+		bind->array.elements = NULL;
 	}
 
 	if (bind->array.element_lengths) {
 		efree(bind->array.element_lengths);
+		bind->array.element_lengths = NULL;
 	}
 
 	if (bind->array.indicators) {
 		efree(bind->array.indicators);
+		bind->array.indicators = NULL;
 	}
 
 	efree(bind);
-	zval_ptr_dtor(bind->zval);
 }
 /* }}} */
 
@@ -1585,7 +1577,10 @@ void php_oci_column_hash_dtor(zval *data)
 	}
 
 	if (column->descid) {
-		zend_list_close(column->descid);
+		if (GC_REFCOUNT(column->descid) == 1)
+			zend_list_close(column->descid);
+		else
+			GC_REFCOUNT(column->descid)--;
 	}
 
 	if (column->data) {
@@ -1638,17 +1633,16 @@ void php_oci_connection_descriptors_free(php_oci_connection *connection)
  */
 sb4 php_oci_error(OCIError *err_p, sword errstatus)
 {
-	text *errbuf = (text *)NULL;
+	text errbuf[PHP_OCI_ERRBUF_LEN];
 	sb4 errcode = 0; /* Oracle error number */
 
 	switch (errstatus) {
 		case OCI_SUCCESS:
 			break;
 		case OCI_SUCCESS_WITH_INFO:
-			errcode = php_oci_fetch_errmsg(err_p, &errbuf);
-			if (errbuf) {
+			errcode = php_oci_fetch_errmsg(err_p, errbuf, sizeof(errbuf));
+			if (errcode) {
 				php_error_docref(NULL, E_WARNING, "OCI_SUCCESS_WITH_INFO: %s", errbuf);
-				efree(errbuf);
 			} else {
 				php_error_docref(NULL, E_WARNING, "OCI_SUCCESS_WITH_INFO: failed to fetch error message");
 			}
@@ -1657,19 +1651,17 @@ sb4 php_oci_error(OCIError *err_p, sword errstatus)
 			php_error_docref(NULL, E_WARNING, "OCI_NEED_DATA");
 			break;
 		case OCI_NO_DATA:
-			errcode = php_oci_fetch_errmsg(err_p, &errbuf);
-			if (errbuf) {
+			errcode = php_oci_fetch_errmsg(err_p, errbuf, sizeof(errbuf));
+			if (errcode) {
 				php_error_docref(NULL, E_WARNING, "%s", errbuf);
-				efree(errbuf);
 			} else {
 				php_error_docref(NULL, E_WARNING, "OCI_NO_DATA: failed to fetch error message");
 			}
 			break;
 		case OCI_ERROR:
-			errcode = php_oci_fetch_errmsg(err_p, &errbuf);
-			if (errbuf) {
-				php_error_docref(NULL, E_WARNING, "%s", errbuf);
-				efree(errbuf);
+			errcode = php_oci_fetch_errmsg(err_p, errbuf, sizeof(errbuf));
+			if (errcode) {
+				php_error_docref(NULL, E_WARNING, "%s", errbuf, sizeof(errbuf));
 			} else {
 				php_error_docref(NULL, E_WARNING, "failed to fetch error message");
 			}
@@ -1702,24 +1694,17 @@ sb4 php_oci_error(OCIError *err_p, sword errstatus)
  *
  * Fetch error message into the buffer from the error handle provided
  */
-sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf)
+sb4 php_oci_fetch_errmsg(OCIError *error_handle, text *error_buf, size_t error_buf_size)
 {
 	sb4 error_code = 0;
-	text err_buf[PHP_OCI_ERRBUF_LEN];
 
-	memset(err_buf, 0, sizeof(err_buf));
-	*error_buf = (text *)0;
-	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, err_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR));
+	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, error_buf, (ub4)error_buf_size, (ub4)OCI_HTYPE_ERROR));
 
 	if (error_code) {
-		int err_buf_len = strlen((char *)err_buf);
+		int err_buf_len = strlen((char *)error_buf);
 
-		if (err_buf_len && err_buf[err_buf_len - 1] == '\n') {
-			err_buf[err_buf_len - 1] = '\0';
-		}
-		if (err_buf_len && error_buf) {
-			*error_buf = NULL;
-			*error_buf = (text *)estrndup((char *)err_buf, err_buf_len);
+		if (err_buf_len && error_buf[err_buf_len - 1] == '\n') {
+			error_buf[err_buf_len - 1] = '\0';
 		}
 	}
 	return error_code;
@@ -2013,7 +1998,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							tmp = (php_oci_connection *)connection->id->ptr;
 
 							if (tmp != NULL && tmp->hash_key->len == hashed_details.s->len &&
-								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0 && ++GC_REFCOUNT(connection->id) == SUCCESS) {
+								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0) {
+								++GC_REFCOUNT(connection->id);
 								/* do nothing */
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
@@ -2238,10 +2224,10 @@ static int php_oci_connection_ping(php_oci_connection *connection)
 		return 1;
 	} else {
 		sb4 error_code = 0;
-		text tmp_buf[OCI_ERROR_MAXMSG_SIZE];
+		text tmp_buf[PHP_OCI_ERRBUF_LEN];
 
 		/* Treat ORA-1010 as a successful Ping */
-		OCIErrorGet(OCI_G(err), (ub4)1, NULL, &error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ERROR);
+		OCIErrorGet(OCI_G(err), (ub4)1, NULL, &error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 		if (error_code == 1010) {
 			return 1;
 		}
@@ -2510,9 +2496,8 @@ int php_oci_password_change(php_oci_connection *connection, char *user, int user
  *
  * Get Oracle client library version
  */
-void php_oci_client_get_version(char **version)
+void php_oci_client_get_version(char *version, size_t version_size)
 {
-	char  version_buff[256];
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIClientVersion only available 10.2 onwards */
 	sword major_version = 0;
 	sword minor_version = 0;
@@ -2521,11 +2506,10 @@ void php_oci_client_get_version(char **version)
 	sword port_update_num = 0;
 
 	PHP_OCI_CALL(OCIClientVersion, (&major_version, &minor_version, &update_num, &patch_num, &port_update_num));
-	snprintf(version_buff, sizeof(version_buff), "%d.%d.%d.%d.%d", major_version, minor_version, update_num, patch_num, port_update_num);
+	snprintf(version, version_size, "%d.%d.%d.%d.%d", major_version, minor_version, update_num, patch_num, port_update_num);
 #else
-	memcpy(version_buff, "Unknown", sizeof("Unknown"));
+	memcpy(version, "Unknown", sizeof("Unknown"));
 #endif
-	*version = estrdup(version_buff);
 }
 /* }}} */
 
@@ -2533,12 +2517,11 @@ void php_oci_client_get_version(char **version)
  *
  * Get Oracle server version
  */
-int php_oci_server_get_version(php_oci_connection *connection, char **version)
+int php_oci_server_get_version(php_oci_connection *connection, char *version, size_t version_size)
 {
 	sword errstatus;
-	char version_buff[256];
 
-	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, connection->err, (text *)version_buff, sizeof(version_buff), OCI_HTYPE_SVCCTX));
+	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, connection->err, (text *)version, version_size, OCI_HTYPE_SVCCTX));
 
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus);
@@ -2546,7 +2529,6 @@ int php_oci_server_get_version(php_oci_connection *connection, char **version)
 		return 1;
 	}
 
-	*version = estrdup(version_buff);
 	return 0;
 }
 /* }}} */
@@ -2560,7 +2542,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 	php_oci_descriptor *descriptor;
 	ub4 lob_length;
 	int column_size;
-	char *lob_buffer;
+	char *lob_buffer = (char *)0;
 	int lob_fetch_status;
 
 	if (column->indicator == -1) { /* column is NULL */
@@ -2606,6 +2588,8 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 				} else {
 					ZVAL_EMPTY_STRING(value);
 				}
+				if (lob_buffer)
+					efree(lob_buffer);
 				return 0;
 			}
 		} else {
@@ -2752,7 +2736,53 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
     }
 #endif /* OCI_MAJOR_VERSION */
 
-	array_init(return_value);
+#if 0
+	if (expected_args > 2)
+	{
+		array_init(array);
+
+		for (i = 0; i < statement->ncolumns; i++) {
+
+			column = php_oci_statement_get_column(statement, i + 1, NULL, 0);
+
+			if (column == NULL) {
+				continue;
+			}
+			if ((column->indicator == -1) && ((fetch_mode & PHP_OCI_RETURN_NULLS) == 0)) {
+				continue;
+			}
+
+			if (!(column->indicator == -1)) {
+				zval element;
+
+				php_oci_column_to_zval(column, &element, fetch_mode);
+
+				if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
+					add_index_zval(array, i, &element);
+				}
+				if (fetch_mode & PHP_OCI_ASSOC) {
+					if (fetch_mode & PHP_OCI_NUM) {
+						Z_TRY_ADDREF_P(&element);
+					}
+					add_assoc_zval(array, column->name, &element);
+				}
+
+			} else {
+				if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
+					add_index_null(array, i);
+				}
+				if (fetch_mode & PHP_OCI_ASSOC) {
+					add_assoc_null(array, column->name);
+				}
+			}
+		}
+
+		/* RETURN_LONG(statement->ncolumns); */
+	}
+	else
+#endif
+	{
+		array_init(return_value);
 
 	for (i = 0; i < statement->ncolumns; i++) {
 
@@ -2792,9 +2822,10 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 
 	if (expected_args > 2) {
 		/* Only for ocifetchinto BC.  In all other cases we return array, not long */
-		ZVAL_COPY_VALUE(array, return_value); /* copy return_value to given reference */
-		zval_dtor(return_value);
+		ZVAL_COPY(array, return_value); /* copy return_value to given reference */
+		/* zval_dtor(return_value); */
 		RETURN_LONG(statement->ncolumns);
+	}
 	}
 }
 /* }}} */
@@ -3061,7 +3092,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid)
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		sb4   ora_error_code = 0;
-		text  ora_msg_buf[OCI_ERROR_MAXMSG_SIZE];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
+		text  ora_msg_buf[PHP_OCI_ERRBUF_LEN];  /* Use traditional smaller size: non-PL/SQL errors should fit and it keeps the stack smaller */
 
 #ifdef HAVE_OCI_INSTANT_CLIENT
 		php_error_docref(NULL, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that " PHP_OCI8_LIB_PATH_MSG " includes the directory with Oracle Instant Client libraries");
@@ -3069,7 +3100,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid)
 		php_error_docref(NULL, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
 		if (retenv
-			&& OCIErrorGet(retenv, (ub4)1, NULL, &ora_error_code, ora_msg_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
+			&& OCIErrorGet(retenv, (ub4)1, NULL, &ora_error_code, ora_msg_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ENV) == OCI_SUCCESS
 			&& *ora_msg_buf) {
 			php_error_docref(NULL, E_WARNING, "%s", ora_msg_buf);
 		}

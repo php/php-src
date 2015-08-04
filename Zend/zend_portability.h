@@ -175,7 +175,7 @@ char *alloca();
 # endif
 #endif
 
-#if ZEND_GCC_VERSION >= 2096
+#if ZEND_GCC_VERSION >= 2096 || __has_attribute(__malloc__)
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
@@ -221,12 +221,16 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED_LABEL
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
-# define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
-# define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
-# define ZEND_FASTCALL __vectorcall
+#if !ZEND_DEBUG
+# if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
+#  define ZEND_FASTCALL __attribute__((fastcall))
+# elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
+#  define ZEND_FASTCALL __fastcall
+# elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
+#  define ZEND_FASTCALL __vectorcall
+# else
+#  define ZEND_FASTCALL
+# endif
 #else
 # define ZEND_FASTCALL
 #endif

@@ -19,27 +19,27 @@ var_dump($b[$i]);
 --EXPECTF--
 array(2) refcount(%d){
   [1]=>
-  long(18)
+  int(18)
   [2]=>
-  long(52)
+  int(52)
 }
 array(2) refcount(%d){
   [1]=>
-  long(18)
+  int(18)
   [2]=>
-  long(52)
+  int(52)
 }
 array(2) refcount(%d){
   [0]=>
-  long(1)
+  int(1)
   [1]=>
-  long(2)
+  int(2)
 }
 array(2) refcount(%d){
   [0]=>
-  long(1)
+  int(1)
   [1]=>
-  long(2)
+  int(2)
 }
 int(18)
 int(18)
