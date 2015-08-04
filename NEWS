@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 06 Aug 2015, PHP 7.0.0 Beta 3
 
 - Core:
+  . Fixed "finally" issues. (Nikita, Dmitry)
   . Fixed bug #70159 (__CLASS__ is lost in closures). (Julien)
   . Fixed bug #70156 (Segfault in zend_find_alias_name). (Laruence)
   . Fixed bug #70124 (null ptr deref / seg fault in ZEND_HANDLE_EXCEPTION).
