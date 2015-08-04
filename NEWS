@@ -1,5 +1,46 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+06 Aug 2015, PHP 7.0.0 Beta 3
+
+- Core:
+  . Fixed "finally" issues. (Nikita, Dmitry)
+  . Fixed bug #70159 (__CLASS__ is lost in closures). (Julien)
+  . Fixed bug #70156 (Segfault in zend_find_alias_name). (Laruence)
+  . Fixed bug #70124 (null ptr deref / seg fault in ZEND_HANDLE_EXCEPTION).
+    (Laruence)
+  . Fixed bug #70117 (Unexpected return type error). (Laruence)
+  . Fixed bug #70106 (Inheritance by anonymous class). (Bob)
+  . Fixed bug #69674 (SIGSEGV array.c:953). (cmb)
+  . Fixed bug #70164 (__COMPILER_HALT_OFFSET__ under namespace is not defined).
+    (Bob)
+  . Fixed bug #70108 (sometimes empty $_SERVER['QUERY_STRING']). (Anatol)
+  . Fixed bug #70179 ($this refcount issue). (Bob)
+  . Fixed bug #69896 ('asm' operand has impossible constraints). (Anatol)
+  . Fixed bug #70183 (null pointer deref (segfault) in zend_eval_const_expr).
+    (Hugh Davenport)
+  . Fixed bug #70182 (Segfault in ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER).
+    (Hugh Davenport)
+
+- Curl:
+  . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
+
+- IMAP:
+  . Fixed bug #70158 (Building with static imap fails). (cmb)
+  . Fixed bug #69998 (curl multi leaking memory). (Pierrick)
+
+- Opcache:
+  . Fixed bug #70111 (Segfault when a function uses both an explicit return
+    type and an explicit cast). (Laruence)
+
+- Phpdbg: 
+  . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
+
+- Standard:
+  . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
+  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
+    Execution). (Laruence)
+  . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
+
 23 Jul 2015, PHP 7.0.0 Beta 2
 
 - Core:
