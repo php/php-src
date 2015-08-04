@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.44
 
+. Fixed bug #69892 (Different arrays compare indentical due to integer key
+  truncation). (Nikita)
+
 09 Jul 2015 PHP 5.4.43
 
 - Core:
