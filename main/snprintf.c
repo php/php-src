@@ -139,12 +139,12 @@ static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /*
 }
 /* }}} */
 
-PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
+static inline char *_php_cvt(double value, int ndigit, char dec_point, char exponent, char *buf, int mode) /* {{{ */
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
 
-	digits = zend_dtoa(value, 2, ndigit, &decpt, &sign, NULL);
+	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
 	if (decpt == 9999) {
 		/*
 		 * Infinity or NaN, convert to inf or nan with sign.
@@ -233,6 +233,20 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
     return (buf);
 }
 /* }}} */
+
+PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
+{
+	return _php_cvt(value, ndigit, dec_point, exponent, buf, 2);
+}
+/* }}} */
+
+PHPAPI char *php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
+{
+	return _php_cvt(value, ndigit, dec_point, exponent, buf, 0);
+}
+/* }}} */
+
+
 
 /* {{{ Apache license */
 /* ====================================================================
