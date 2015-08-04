@@ -20,6 +20,9 @@
 *.tar.gz
 *.tar.bz2
 *.tar.xz
+*.tar.gz.asc
+*.tar.bz2.asc
+*.tar.xz.asc
 .FBCIndex
 .FBCLockFolder
 .deps

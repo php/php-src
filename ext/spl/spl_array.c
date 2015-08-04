@@ -1762,13 +1762,12 @@ SPL_METHOD(Array, unserialize)
 
 	ALLOC_INIT_ZVAL(pflags);
 	if (!php_var_unserialize(&pflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pflags) != IS_LONG) {
-		zval_ptr_dtor(&pflags);
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pflags);
 	--p; /* for ';' */
 	flags = Z_LVAL_P(pflags);
-	zval_ptr_dtor(&pflags);
 	/* flags needs to be verified and we also need to verify whether the next
 	 * thing we get is ';'. After that we require an 'm' or somethign else
 	 * where 'm' stands for members and anything else should be an array. If
@@ -1790,6 +1789,7 @@ SPL_METHOD(Array, unserialize)
 		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash TSRMLS_CC)) {
 			goto outexcept;
 		}
+		var_push_dtor(&var_hash, &intern->array);
 	}
 	if (*p != ';') {
 		goto outexcept;
@@ -1808,6 +1808,7 @@ SPL_METHOD(Array, unserialize)
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pmembers);
 	/* copy members */
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
@@ -1818,10 +1819,16 @@ SPL_METHOD(Array, unserialize)
 	/* done reading $serialized */
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (pflags) {
+		zval_ptr_dtor(&pflags);
+	}
 	return;
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (pflags) {
+		zval_ptr_dtor(&pflags);
+	}
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
 	return;
 
