@@ -523,10 +523,8 @@ static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
 	if (finally_op_num) {
 		/* Must be ZEND_FAST_CALL */
 		ZEND_ASSERT(op_array->opcodes[finally_op_num - 2].opcode == ZEND_FAST_CALL);
-		if (op_array->opcodes[op_num].extended_value == 0) {
-			op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-			op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2;
-		}
+		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
+		op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2;
 	}
 }
 
@@ -603,10 +601,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	while (opline < end) {
 		switch (opline->opcode) {
 			case ZEND_FAST_CALL:
-				if (opline->extended_value == ZEND_FAST_CALL_UNBOUND) {
-					opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
-					opline->extended_value = 0;
-				}
+				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
 				zend_resolve_fast_call(op_array, opline - op_array->opcodes);
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;

@@ -3477,7 +3477,6 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
 			opline->op1.num = loop_var->u.try_catch_offset;
-			opline->extended_value = ZEND_FAST_CALL_UNBOUND;
 		} else if (loop_var->opcode == ZEND_RETURN) {
 			/* Stack separator */
 			break;
@@ -4126,7 +4125,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		zend_stack_del_top(&CG(loop_var_stack));
 
 		opline = zend_emit_op(NULL, ZEND_FAST_CALL, NULL, NULL);
-		opline->op1.opline_num = opnum_jmp + 1;
+		opline->op1.num = try_catch_offset;
 		opline->result_type = IS_TMP_VAR;
 		opline->result.var = CG(context).fast_call_var;
 
