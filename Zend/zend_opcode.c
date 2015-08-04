@@ -508,28 +508,7 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static void zend_adjust_fast_call(zend_op_array *op_array, uint32_t fast_call, uint32_t start, uint32_t end)
-{
-	int i;
-	uint32_t op_num = 0;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].finally_op > start
-				&& op_array->try_catch_array[i].finally_end < end) {
-			op_num = op_array->try_catch_array[i].finally_op;
-			start = op_array->try_catch_array[i].finally_end;
-		}
-	}
-
-	if (op_num) {
-		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[op_num - 2].opcode == ZEND_FAST_CALL);
-		op_array->opcodes[op_num - 2].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num - 2].op2.opline_num = fast_call;
-	}
-}
-
-static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t fast_call, uint32_t op_num)
+static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
 {
 	int i;
 	uint32_t finally_op_num = 0;
@@ -544,78 +523,9 @@ static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t fast_call, 
 	if (finally_op_num) {
 		/* Must be ZEND_FAST_CALL */
 		ZEND_ASSERT(op_array->opcodes[finally_op_num - 2].opcode == ZEND_FAST_CALL);
-		if (op_array->opcodes[fast_call].extended_value == 0) {
-			op_array->opcodes[fast_call].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-			op_array->opcodes[fast_call].op2.opline_num = finally_op_num - 2;
-		}
-	}
-}
-
-static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num)
-{
-	uint32_t start_op;
-	zend_op *opline;
-	uint32_t i = op_array->last_try_catch;
-
-	if (dst_num != (uint32_t)-1) {
-		zend_check_finally_breakout(op_array, op_num, dst_num);
-	}
-
-	/* the backward order matters */
-	while (i > 0) {
-		i--;
-		if (op_array->try_catch_array[i].finally_op &&
-		    op_num >= op_array->try_catch_array[i].try_op &&
-		    op_num < op_array->try_catch_array[i].finally_op - 1 &&
-		    (dst_num < op_array->try_catch_array[i].try_op ||
-		     dst_num > op_array->try_catch_array[i].finally_end)) {
-			/* we have a jump out of try block that needs executing finally */
-			uint32_t fast_call_var;
-
-			/* Must be ZEND_FAST_RET */
-			ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[i].finally_end].opcode == ZEND_FAST_RET);
-			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
-
-			/* generate a FAST_CALL to finally block */
-			start_op = get_next_op_number(op_array);
-
-			opline = get_next_op(op_array);
-			opline->opcode = ZEND_FAST_CALL;
-			opline->result_type = IS_TMP_VAR;
-			opline->result.var = fast_call_var;
-			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
-			zend_adjust_fast_call(op_array, start_op,
-					op_array->try_catch_array[i].finally_op,
-					op_array->try_catch_array[i].finally_end);
-			zend_resolve_fast_call(op_array, start_op, op_array->try_catch_array[i].finally_op - 2);
-			opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
-
-			/* We should not generate JMPs that require handling multiple finally blocks */
-			while (i > 0) {
-				i--;
-				if (op_array->try_catch_array[i].finally_op &&
-					op_num >= op_array->try_catch_array[i].try_op &&
-					op_num < op_array->try_catch_array[i].finally_op - 1 &&
-					(dst_num < op_array->try_catch_array[i].try_op ||
-					 dst_num > op_array->try_catch_array[i].finally_end)
-				) {
-					ZEND_ASSERT(0);
-				}
-			}
-
-			/* Finish the sequence with original opcode */
-			opline = get_next_op(op_array);
-			*opline = op_array->opcodes[op_num];
-
-			/* Replace original opcode with jump to this sequence */
-			opline = op_array->opcodes + op_num;
-			opline->opcode = ZEND_JMP;
-			SET_UNUSED(opline->op1);
-			SET_UNUSED(opline->op2);
-			opline->op1.opline_num = start_op;
-
-			break;
+		if (op_array->opcodes[op_num].extended_value == 0) {
+			op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
+			op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2;
 		}
 	}
 }
@@ -662,48 +572,12 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
-static void zend_resolve_finally_calls(zend_op_array *op_array)
-{
-	uint32_t i, j;
-	zend_op *opline;
-
-	for (i = 0, j = op_array->last; i < j; i++) {
-		opline = op_array->opcodes + i;
-		switch (opline->opcode) {
-			case ZEND_BRK:
-			case ZEND_CONT:
-				zend_check_finally_breakout(op_array, i, zend_get_brk_cont_target(op_array, opline));
-				break;
-			case ZEND_GOTO:
-				zend_check_finally_breakout(op_array, i,
-					zend_resolve_goto_label(op_array, opline)->op1.opline_num);
-				break;
-			case ZEND_JMP:
-				zend_resolve_finally_call(op_array, i, opline->op1.opline_num);
-				break;
-			case ZEND_FAST_CALL:
-				if (opline->extended_value == ZEND_FAST_CALL_UNBOUND) {
-					opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
-					opline->extended_value = 0;
-				}
-				zend_resolve_fast_call(op_array, i, i);
-				break;
-			case ZEND_FAST_RET:
-				zend_resolve_finally_ret(op_array, i);
-				break;
-		}
-	}
-}
-
 ZEND_API int pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
 
 	if (!ZEND_USER_CODE(op_array->type)) {
 		return 0;
-	}
-	if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
-		zend_resolve_finally_calls(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_update_extended_info(op_array);
@@ -728,6 +602,17 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	end = opline + op_array->last;
 	while (opline < end) {
 		switch (opline->opcode) {
+			case ZEND_FAST_CALL:
+				if (opline->extended_value == ZEND_FAST_CALL_UNBOUND) {
+					opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
+					opline->extended_value = 0;
+				}
+				zend_resolve_fast_call(op_array, opline - op_array->opcodes);
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
+				break;
+			case ZEND_FAST_RET:
+				zend_resolve_finally_ret(op_array, opline - op_array->opcodes);
+				break;
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				/* break omitted intentionally */
@@ -739,6 +624,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_CONT:
 				{
 					uint32_t jmp_target = zend_get_brk_cont_target(op_array, opline);
+
+					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+						zend_check_finally_breakout(op_array, opline - op_array->opcodes, jmp_target);
+					}
 					opline->opcode = ZEND_JMP;
 					opline->op1.opline_num = jmp_target;
 					opline->op2.num = 0;
@@ -746,10 +635,12 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				break;
 			case ZEND_GOTO:
-				opline = zend_resolve_goto_label(op_array, opline);
+				zend_resolve_goto_label(op_array, opline);
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
+					zend_check_finally_breakout(op_array, opline - op_array->opcodes, opline->op1.opline_num);
+				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-			case ZEND_FAST_CALL:
 			case ZEND_DECLARE_ANON_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;

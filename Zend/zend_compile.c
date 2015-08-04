@@ -56,9 +56,12 @@
 
 typedef struct _zend_loop_var {
 	zend_uchar opcode;
-	uint32_t try_catch_offset;
-	uint32_t brk_cont_offset;
-	znode var;
+	zend_uchar var_type;
+	uint32_t   var_num;
+	union {
+		uint32_t try_catch_offset;
+		uint32_t brk_cont_offset;
+	} u;
 } zend_loop_var;
 
 static inline void zend_alloc_cache_slot(uint32_t literal) {
@@ -565,7 +568,7 @@ void zend_stop_lexing(void)
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
-static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
+static inline void zend_begin_loop(zend_uchar free_opcode, const znode *loop_var) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
 	int parent = CG(context).current_brk_cont;
@@ -576,9 +579,10 @@ static inline void zend_begin_loop(const znode *loop_var) /* {{{ */
 	brk_cont_element->parent = parent;
 
 	if (loop_var && (loop_var->op_type & (IS_VAR|IS_TMP_VAR))) {
-		info.opcode = loop_var->flag ? ZEND_FE_FREE : ZEND_FREE;
-		info.var = *loop_var;
-		info.brk_cont_offset = CG(context).current_brk_cont;
+		info.opcode = free_opcode;
+		info.var_type = loop_var->op_type;
+		info.var_num = loop_var->u.op.var;
+		info.u.brk_cont_offset = CG(context).current_brk_cont;
 		brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	} else {
 		info.opcode = ZEND_NOP;
@@ -887,49 +891,6 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 /* }}} */
 
 static zend_bool zend_is_call(zend_ast *ast);
-
-static zend_loop_var *generate_fast_calls(zend_loop_var *var) /* {{{ */
-{
-	zend_loop_var *base = zend_stack_base(&CG(loop_var_stack));
-	for (; var >= base && var->opcode == ZEND_FAST_CALL; var--) {
-		zend_op *opline = get_next_op(CG(active_op_array));
-		opline->opcode = ZEND_FAST_CALL;
-		SET_NODE(opline->result, &var->var);
-		SET_UNUSED(opline->op1);
-		SET_UNUSED(opline->op2);
-		opline->op1.num = var->try_catch_offset;
-		opline->extended_value = ZEND_FAST_CALL_UNBOUND;
-	}
-	return var;
-}
-/* }}} */
-
-static zend_loop_var *generate_free_loop_var(zend_loop_var *info) /* {{{ */
-{
-	zend_op *opline;
-	zend_loop_var *base = zend_stack_base(&CG(loop_var_stack));
-	ZEND_ASSERT(info->opcode != ZEND_FAST_CALL);
-
-	if (info < base || info->opcode == ZEND_RETURN) {
-		/* Stack separator */
-		return NULL;
-	}
-
-	if (info->opcode == ZEND_NOP) {
-		/* Loop doesn't have freeable variable */
-		return info - 1;
-	}
-
-	ZEND_ASSERT(info->var.op_type == IS_VAR || info->var.op_type == IS_TMP_VAR);
-	opline = get_next_op(CG(active_op_array));
-	opline->opcode = info->opcode;
-	SET_NODE(opline->op1, &info->var);
-	SET_UNUSED(opline->op2);
-	opline->op2.num = info->brk_cont_offset;
-	opline->extended_value = ZEND_FREE_ON_RETURN;
-	return info - 1;
-}
-/* }}} */
 
 static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 {
@@ -3497,13 +3458,55 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_handle_loops_and_finally() /* {{{ */
+static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 {
+	zend_loop_var *base;
 	zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-	while (loop_var) {
-		loop_var = generate_fast_calls(loop_var);
-		loop_var = generate_free_loop_var(loop_var);
+
+	if (!loop_var) {
+		return 1;
 	}
+	base = zend_stack_base(&CG(loop_var_stack));
+	for (; loop_var >= base; loop_var--) {
+		if (loop_var->opcode == ZEND_FAST_CALL) {
+			zend_op *opline = get_next_op(CG(active_op_array));
+
+			opline->opcode = ZEND_FAST_CALL;
+			opline->result_type = IS_TMP_VAR;
+			opline->result.var = loop_var->var_num;
+			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->op2);
+			opline->op1.num = loop_var->u.try_catch_offset;
+			opline->extended_value = ZEND_FAST_CALL_UNBOUND;
+		} else if (loop_var->opcode == ZEND_RETURN) {
+			/* Stack separator */
+			break;
+		} else if (depth <= 1) {
+			return 1;
+		} else if (loop_var->opcode == ZEND_NOP) {
+			/* Loop doesn't have freeable variable */
+			depth--;
+		} else {
+			zend_op *opline;
+
+			ZEND_ASSERT(loop_var->var_type == IS_VAR || loop_var->var_type == IS_TMP_VAR);
+			opline = get_next_op(CG(active_op_array));
+			opline->opcode = loop_var->opcode;
+			opline->op1_type = loop_var->var_type;
+			opline->op1.var = loop_var->var_num;
+			SET_UNUSED(opline->op2);
+			opline->op2.num = loop_var->u.brk_cont_offset;
+			opline->extended_value = ZEND_FREE_ON_RETURN;
+			depth--;
+	    }
+	}
+	return (depth == 0);
+}
+/* }}} */
+
+static int zend_handle_loops_and_finally(void) /* {{{ */
+{
+	zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
 }
 /* }}} */
 
@@ -3602,24 +3605,11 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "'%s' not in the 'loop' or 'switch' context",
 			ast->kind == ZEND_AST_BREAK ? "break" : "continue");
 	} else {
-		int array_offset = CG(context).current_brk_cont;
-		zend_long nest_level = depth;
-		zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-
-		do {
-			if (array_offset == -1) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
-					ast->kind == ZEND_AST_BREAK ? "break" : "continue",
-					depth, depth == 1 ? "" : "s");
-			}
-
-			loop_var = generate_fast_calls(loop_var);
-			if (nest_level > 1) {
-				loop_var = generate_free_loop_var(loop_var);
-			}
-
-			array_offset = CG(active_op_array)->brk_cont_array[array_offset].parent;
-		} while (--nest_level > 0);
+		if (!zend_handle_loops_and_finally_ex(depth)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot '%s' %d level%s",
+				ast->kind == ZEND_AST_BREAK ? "break" : "continue",
+				depth, depth == 1 ? "" : "s");
+		}
 	}
 	opline = zend_emit_op(NULL, ast->kind == ZEND_AST_BREAK ? ZEND_BRK : ZEND_CONT, NULL, NULL);
 	opline->op1.num = CG(context).current_brk_cont;
@@ -3627,7 +3617,7 @@ void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-zend_op *zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 {
 	zend_label *dest;
 	int current, remove_oplines = opline->op1.num;
@@ -3672,12 +3662,6 @@ zend_op *zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{
 		}
 	}
 
-	ZEND_ASSERT(remove_oplines >= 0);
-	while (remove_oplines--) {
-		MAKE_NOP(opline);
-		opline--;
-	}
-
 	opline->opcode = ZEND_JMP;
 	opline->op1.opline_num = dest->opline_num;
 	opline->extended_value = 0;
@@ -3685,7 +3669,12 @@ zend_op *zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{
 	SET_UNUSED(opline->op2);
 	SET_UNUSED(opline->result);
 
-	return opline;
+	ZEND_ASSERT(remove_oplines >= 0);
+	while (remove_oplines--) {
+		opline--;
+		MAKE_NOP(opline);
+		ZEND_VM_SET_OPCODE_HANDLER(opline);
+	}
 }
 /* }}} */
 
@@ -3734,7 +3723,7 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(NULL);
+	zend_begin_loop(ZEND_NOP, NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3757,7 +3746,7 @@ void zend_compile_do_while(zend_ast *ast) /* {{{ */
 	znode cond_node;
 	uint32_t opnum_start, opnum_cond;
 
-	zend_begin_loop(NULL);
+	zend_begin_loop(ZEND_NOP, NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3808,7 +3797,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(NULL);
+	zend_begin_loop(ZEND_NOP, NULL);
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
@@ -3890,8 +3879,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		zend_emit_assign_znode(key_ast, &key_node);
 	}
 
-	reset_node.flag = ZEND_FE_FREE;
-	zend_begin_loop(&reset_node);
+	zend_begin_loop(ZEND_FE_FREE, &reset_node);
 
 	zend_compile_stmt(stmt_ast);
 
@@ -3966,8 +3954,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	expr_node.flag = 0; /* Generate normal FREE */
-	zend_begin_loop(&expr_node);
+	zend_begin_loop(ZEND_FREE, &expr_node);
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
@@ -4075,9 +4062,9 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 		/* Push FAST_CALL on unwind stack */
 		fast_call.opcode = ZEND_FAST_CALL;
-		fast_call.var.op_type = IS_TMP_VAR;
-		fast_call.var.u.op.var = CG(context).fast_call_var;
-		fast_call.try_catch_offset = try_catch_offset;
+		fast_call.var_type = IS_TMP_VAR;
+		fast_call.var_num = CG(context).fast_call_var;
+		fast_call.u.try_catch_offset = try_catch_offset;
 		zend_stack_push(&CG(loop_var_stack), &fast_call);
 	}
 
