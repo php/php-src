@@ -4081,7 +4081,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return SUCCESS;
 	}
 	/* strip .. from path and restrict it to be under dest directory */
-	new_state.cwd = (char*)malloc(2);
+	new_state.cwd = (char*)emalloc(2);
 	new_state.cwd[0] = DEFAULT_SLASH;
 	new_state.cwd[1] = '\0';
 	new_state.cwd_length = 1;
@@ -4094,7 +4094,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		} else {
 			spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
 		}
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 	filename = new_state.cwd + 1;
@@ -4126,21 +4126,21 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			spprintf(error, 4096, "Cannot extract \"%s\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, fullpath);
 		}
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
 	if (!len) {
 		spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
 	if (PHAR_OPENBASEDIR_CHECKPATH(fullpath)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", entry->filename, fullpath);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
@@ -4148,7 +4148,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	if (!overwrite && SUCCESS == php_stream_stat_path(fullpath, &ssb)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", path already exists", entry->filename, fullpath);
 		efree(fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return FAILURE;
 	}
 
@@ -4186,7 +4186,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	}
 
 	filename = NULL;
-	free(new_state.cwd);
+	efree(new_state.cwd);
 	/* it is a standalone directory, job done */
 	if (entry->is_dir) {
 		efree(fullpath);
