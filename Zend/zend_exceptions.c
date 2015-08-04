@@ -282,12 +282,11 @@ ZEND_METHOD(exception, __construct)
 /* {{{ proto Exception::__wakeup()
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(name, type) \
-	zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value); \
-	if(value && Z_TYPE_P(value) != type) { \
-		zval *tmp; \
-		MAKE_STD_ZVAL(tmp); \
-		ZVAL_STRINGL(tmp, name, sizeof(name)-1, 1); \
-		Z_OBJ_HANDLER_P(object, unset_property)(object, tmp, 0 TSRMLS_CC); \
+	if(zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value) != &EG(uninitialized_zval) \
+		&& Z_TYPE(value) != type) { \
+		zval tmp; \
+		ZVAL_STRINGL(&tmp, name, sizeof(name) - 1); \
+		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
 		zval_ptr_dtor(&tmp); \
 	}
 
