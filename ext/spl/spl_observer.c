@@ -809,6 +809,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pcount);
 	--p; /* for ';' */
 	count = Z_LVAL(pcount);
 
@@ -879,6 +880,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pmembers);
 	/* copy members */
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);

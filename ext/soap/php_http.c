@@ -815,10 +815,11 @@ try_again:
 				zend_hash_internal_pointer_reset(Z_ARRVAL_P(cookies));
 				smart_str_append_const(&soap_headers, "Cookie: ");
 				for (i = 0; i < n; i++) {
+					ulong numindx;
+					int res = zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, &numindx);
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-					zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, NULL);
-
-					if (Z_TYPE_P(data) == IS_ARRAY) {
+					
+					if (res == HASH_KEY_IS_STRING && Z_TYPE_P(data) == IS_ARRAY) {
 					  zval *value;
 
 						if ((value = zend_hash_index_find(Z_ARRVAL_P(data), 0)) != NULL &&

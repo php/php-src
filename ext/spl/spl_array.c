@@ -1741,6 +1741,7 @@ SPL_METHOD(Array, unserialize)
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pflags);
 	--p; /* for ';' */
 	flags = Z_LVAL(zflags);
 	/* flags needs to be verified and we also need to verify whether the next
@@ -1763,6 +1764,7 @@ SPL_METHOD(Array, unserialize)
 		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
+		var_push_dtor(&var_hash, &intern->array);
 	}
 	if (*p != ';') {
 		goto outexcept;
@@ -1781,6 +1783,7 @@ SPL_METHOD(Array, unserialize)
 		goto outexcept;
 	}
 
+	var_push_dtor(&var_hash, &pmembers);
 	/* copy members */
 	object_properties_load(&intern->std, Z_ARRVAL(members));
 	zval_ptr_dtor(&members);
@@ -1788,6 +1791,9 @@ SPL_METHOD(Array, unserialize)
 	/* done reading $serialized */
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (pflags) {
+		zval_ptr_dtor(&pflags);
+	}
 	return;
 
 outexcept:
