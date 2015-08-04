@@ -4,7 +4,7 @@ show information about class
 <?php 
 include "skipif.inc"; 
 if (!extension_loaded("reflection")) {
-	die("skip reflection extension required");
+    die("skip reflection extension required");
 }
 ?>
 --FILE--
@@ -18,7 +18,7 @@ var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF-- 
 string(40) "Exception: Class unknown does not exist
 "
 string(183) "Class [ <internal:Core> class stdClass ] {
@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1355) "Class [ <internal:Core> class Exception ] {
+string(1424) "Class [ <internal:Core> class Exception ] {
 
   - Constants [0] {
   }
@@ -61,7 +61,7 @@ string(1355) "Class [ <internal:Core> class Exception ] {
     Property [ <default> private $previous ]
   }
 
-  - Methods [10] {
+  - Methods [11] {
     Method [ <internal:Core> final private method __clone ] {
     }
 
@@ -72,6 +72,9 @@ string(1355) "Class [ <internal:Core> class Exception ] {
         Parameter #1 [ <optional> $code ]
         Parameter #2 [ <optional> $previous ]
       }
+    }
+
+    Method [ <internal:Core> final public method __wakeup ] {
     }
 
     Method [ <internal:Core> final public method getMessage ] {
