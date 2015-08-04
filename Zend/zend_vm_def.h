@@ -4292,6 +4292,8 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == NULL)) {
 		zend_throw_error(NULL, "Only variables can be passed by reference");
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
 		HANDLE_EXCEPTION();
 	}
 

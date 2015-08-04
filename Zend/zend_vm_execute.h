@@ -15248,6 +15248,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(varptr == NULL)) {
 		zend_throw_error(NULL, "Only variables can be passed by reference");
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
 		HANDLE_EXCEPTION();
 	}
 
@@ -28630,6 +28632,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_
 
 	if (IS_CV == IS_VAR && UNEXPECTED(varptr == NULL)) {
 		zend_throw_error(NULL, "Only variables can be passed by reference");
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
 		HANDLE_EXCEPTION();
 	}
 
