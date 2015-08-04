@@ -74,7 +74,7 @@ string(1544) "Class [ <internal:Core> class Exception implements Throwable ] {
       }
     }
 
-    Method [ <internal:Core, prototype Throwable> final public method __wakeup ] {
+    Method [ <internal:Core> public method __wakeup ] {
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getMessage ] {
