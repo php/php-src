@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1424) "Class [ <internal:Core> class Exception ] {
+string(1418) "Class [ <internal:Core> class Exception ] {
 
   - Constants [0] {
   }
@@ -74,7 +74,7 @@ string(1424) "Class [ <internal:Core> class Exception ] {
       }
     }
 
-    Method [ <internal:Core> final public method __wakeup ] {
+    Method [ <internal:Core> public method __wakeup ] {
     }
 
     Method [ <internal:Core> final public method getMessage ] {
