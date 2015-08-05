@@ -93,6 +93,31 @@ static const zend_function_entry json_serializable_interface[] = {
 };
 /* }}} */
 
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnSetJsonPrecision)
+{
+	zend_long i;
+
+	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	if (i >= -1) {
+		JSON_G(precision) = i;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+
+/* {{{ PHP_INI
+ */
+PHP_INI_BEGIN()
+STD_PHP_INI_ENTRY("json.precision", "-1",  PHP_INI_ALL, OnSetJsonPrecision, precision, zend_json_globals, json_globals)
+PHP_INI_END()
+/* }}} */
+
 /* Register constant for options and errors */
 #define PHP_JSON_REGISTER_CONSTANT(_name, _value) \
 	REGISTER_LONG_CONSTANT(_name,  _value, CONST_CS | CONST_PERSISTENT);
@@ -101,6 +126,8 @@ static const zend_function_entry json_serializable_interface[] = {
 static PHP_MINIT_FUNCTION(json)
 {
 	zend_class_entry ce;
+
+	REGISTER_INI_ENTRIES();
 
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
 	php_json_serializable_ce = zend_register_internal_interface(&ce);
@@ -153,6 +180,16 @@ static PHP_GINIT_FUNCTION(json)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+*/
+static PHP_MSHUTDOWN_FUNCTION(json)
+{
+	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
+}
+/* }}} */
+
 
 /* {{{ json_module_entry
  */
@@ -161,7 +198,7 @@ zend_module_entry json_module_entry = {
 	"json",
 	json_functions,
 	PHP_MINIT(json),
-	NULL,
+	PHP_MSHUTDOWN(json),
 	NULL,
 	NULL,
 	PHP_MINFO(json),
