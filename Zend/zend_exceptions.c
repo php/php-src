@@ -282,8 +282,9 @@ ZEND_METHOD(exception, __construct)
 /* {{{ proto Exception::__wakeup()
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(name, type) \
-	if(zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value) != &EG(uninitialized_zval) \
-		&& Z_TYPE(value) != type) { \
+	ZVAL_UNDEF(&value); \
+	pvalue = zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value); \
+	if(Z_TYPE_P(pvalue) != IS_UNDEF && Z_TYPE_P(pvalue) != type) { \
 		zval tmp; \
 		ZVAL_STRINGL(&tmp, name, sizeof(name) - 1); \
 		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
@@ -292,7 +293,7 @@ ZEND_METHOD(exception, __construct)
 
 ZEND_METHOD(exception, __wakeup)
 {
-	zval value;
+	zval value, *pvalue;
 	zval *object = getThis();
 	CHECK_EXC_TYPE("message", IS_STRING);
 	CHECK_EXC_TYPE("string", IS_STRING);
@@ -711,7 +712,7 @@ ZEND_METHOD(exception, __toString)
 	exception = getThis();
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);
 
-	while (exception && Z_TYPE_P(exception) == IS_OBJECT) {
+	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
 		zend_string *prev_str = str;
 		zend_string *message = zval_get_string(GET_PROPERTY(exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY(exception, "file"));
