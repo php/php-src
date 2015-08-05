@@ -1,8 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.28
+?? ??? 2015, PHP 5.5.29
 
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
+
+06 Aug 2015, PHP 5.5.28
 
 - Core:
   . Fixed bug #69793 (Remotely triggerable stack exhaustion via recursive
