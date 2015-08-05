@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015 PHP 5.4.44
+?? ??? 2015 PHP 5.4.45
+
+06 Aug 2015 PHP 5.4.44
 
 - Core:
   . Fixed bug #69793 (Remotely triggerable stack exhaustion via recursive
