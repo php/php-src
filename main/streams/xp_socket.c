@@ -284,7 +284,7 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 
 static int php_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
-	int oldmode, flags;
+	int oldmode, flags, ret;
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_stream_xport_param *xparam;
 
@@ -314,7 +314,11 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					if (0 >= recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EWOULDBLOCK) {
+					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK);
+					if (0 > ret && php_socket_errno() != EWOULDBLOCK && php_socket_errno() != EAGAIN) {
+						alive = 0;
+					}
+					if (0 == ret) {
 						alive = 0;
 					}
 				}
