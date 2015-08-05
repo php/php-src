@@ -986,7 +986,7 @@ PHP_FUNCTION(pcntl_signal)
 		return;
 	}
 
-	if (signo < 1 || signo > SIGRTMAX) {
+	if (signo < 1 || signo > MAX(NSIG-1, SIGRTMAX)) {
 		php_error_docref(NULL, E_WARNING, "Invalid signal");
 		RETURN_FALSE;
 	}
@@ -995,7 +995,7 @@ PHP_FUNCTION(pcntl_signal)
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
 		int i;
-		for (i = 0; i < SIGRTMAX; i++) {
+		for (i = 0; i < MAX(NSIG-1, SIGRTMAX); i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
