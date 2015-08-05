@@ -5428,7 +5428,6 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	zend_long buffer_length;
 	zend_string *buffer = NULL;
 	zval *zstrong_result_returned = NULL;
-	int strong_result = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z/", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
@@ -5446,7 +5445,6 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	buffer = zend_string_alloc(buffer_length, 0);
 
 #ifdef PHP_WIN32
-	strong_result = 1;
 	/* random/urandom equivalent on Windows */
 	if (php_win32_get_random_bytes((unsigned char*)buffer->val, (size_t) buffer_length) == FAILURE){
 		zend_string_release(buffer);
@@ -5456,7 +5454,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_FALSE;
 	}
 #else
-	if ((strong_result = RAND_pseudo_bytes((unsigned char*)ZSTR_VAL(buffer), buffer_length)) < 0) {
+	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_FALSE(zstrong_result_returned);
@@ -5469,7 +5467,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	RETVAL_STR(buffer);
 
 	if (zstrong_result_returned) {
-		ZVAL_BOOL(zstrong_result_returned, strong_result);
+		ZVAL_BOOL(zstrong_result_returned, 1);
 	}
 }
 /* }}} */

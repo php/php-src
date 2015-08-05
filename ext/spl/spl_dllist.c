@@ -1178,7 +1178,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 SPL_METHOD(SplDoublyLinkedList, unserialize)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
-	zval flags, elem;
+	zval *flags, *elem;
 	char *buf;
 	size_t buf_len;
 	const unsigned char *p, *s;
@@ -1196,27 +1196,22 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	/* flags */
-	if (!php_var_unserialize(&flags, &p, s + buf_len, &var_hash)) {
+	flags = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(flags, &p, s + buf_len, &var_hash) || Z_TYPE_P(flags) != IS_LONG) {
 		goto error;
 	}
 
-	if (Z_TYPE(flags) != IS_LONG) {
-		zval_ptr_dtor(&flags);
-		goto error;
-	}
-
-	intern->flags = (int)Z_LVAL(flags);
-	zval_ptr_dtor(&flags);
+	intern->flags = (int)Z_LVAL_P(flags);
 
 	/* elements */
 	while(*p == ':') {
 		++p;
-		if (!php_var_unserialize(&elem, &p, s + buf_len, &var_hash)) {
+		elem = var_tmp_var(&var_hash);
+		if (!php_var_unserialize(elem, &p, s + buf_len, &var_hash)) {
 			goto error;
 		}
 
-		spl_ptr_llist_push(intern->llist, &elem);
-		zval_ptr_dtor(&elem);
+		spl_ptr_llist_push(intern->llist, elem);
 	}
 
 	if (*p != '\0') {
