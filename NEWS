@@ -21,6 +21,12 @@ PHP                                                                        NEWS
     (Hugh Davenport)
   . Fixed bug #70182 (Segfault in ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER).
     (Hugh Davenport)
+  . Fixed bug #69793 (Remotely triggerable stack exhaustion via recursive
+    method calls). (Stas)
+  . Fixed bug #69892 (Different arrays compare indentical due to integer key
+    truncation). (Nikita)
+  . Fixed bug #70121 (unserialize() could lead to unexpected methods execution
+    / NULL pointer deref). (Stas)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
@@ -33,8 +39,31 @@ PHP                                                                        NEWS
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
     type and an explicit cast). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
+    secure). (Stas)
+
+- Phar:
+  . Improved fix for bug #69441. (Anatol Belski)
+  . Fixed bug #70019 (Files extracted from archive may be placed outside of 
+    destination directory). (Anatol Belski)
+
 - Phpdbg: 
   . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
+
+- SOAP:
+  . Fixed bug #70081 (SoapClient info leak / null pointer dereference via
+     multiple type confusions). (Stas)
+
+- SPL:
+  . Fixed bug #70068 (Dangling pointer in the unserialization of ArrayObject
+    items). (sean.heelan)
+  . Fixed bug #70166 (Use After Free Vulnerability in unserialize() with
+    SPLArrayObject). (taoguangchen at icloud dot com)
+  . Fixed bug #70168 (Use After Free Vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
 
 - Standard:
   . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
