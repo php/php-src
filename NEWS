@@ -4,7 +4,6 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
-  . Fixed bug #70002 (TS issues with temporary dir handling). (Anatol)
 
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
@@ -14,6 +13,13 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70012 (Exception lost with nested finally block). (Laruence)
+  . Fixed bug #70002 (TS issues with temporary dir handling). (Anatol)
+  . Fixed bug #69793 (Remotely triggerable stack exhaustion via recursive
+    method calls). (Stas)
+  . Fixed bug #69892 (Different arrays compare indentical due to integer key
+    truncation). (Nikita)
+  . Fixed bug #70121 (unserialize() could lead to unexpected methods execution
+    / NULL pointer deref). (Stas)
 
 - CLI server:
   . Fixed bug #69655 (php -S changes MKCALENDAR request method to MKCOL). (cmb)
@@ -40,9 +46,30 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #69882 (OpenSSL error "key values mismatch" after
     openssl_pkcs12_read with extra cert). (Tomasz Sawicki)
+  . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
+    secure). (Stas)
+
+- Phar:
+  . Improved fix for bug #69441. (Anatol Belski)
+  . Fixed bug #70019 (Files extracted from archive may be placed outside of
+    destination directory). (Anatol Belski)
 
 - Standard:
   . Fixed bug #70096 (Repeated iptcembed() adds superfluous FF bytes). (cmb)
+
+- SOAP:
+  . Fixed bug #70081 (SoapClient info leak / null pointer dereference via
+    multiple type confusions). (Stas)
+
+- SPL:
+  . Fixed bug #70068 (Dangling pointer in the unserialization of ArrayObject
+    items). (sean.heelan)
+  . Fixed bug #70166 (Use After Free Vulnerability in unserialize() with
+    SPLArrayObject). (taoguangchen at icloud dot com)
+  . Fixed bug #70168 (Use After Free Vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
 
 09 Jul 2015, PHP 5.6.11
 
