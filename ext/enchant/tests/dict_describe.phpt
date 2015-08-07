@@ -37,5 +37,5 @@ array(%d) {
   ["desc"]=>
   string(%d) "Myspell Provider"
   ["file"]=>
-  string(%d) "/usr/lib64/enchant/libenchant_myspell.so"
+  string(%d) "/usr/lib/enchant/libenchant_myspell.so"
 }
