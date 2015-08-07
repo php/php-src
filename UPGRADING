@@ -429,6 +429,7 @@ Other language changes
 Standard library changes
 ========================
 
+  . substr() now returns an empty string instead of FALSE when the truncation happens on boundaries.
   . call_user_method() and call_user_method_array() no longer exists.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
