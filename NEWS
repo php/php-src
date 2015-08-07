@@ -72,7 +72,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
     Execution). (Laruence)
-  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
+  . Implemented FR #70112 (Allow "dirname" to go up various times). (Remi)
   . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
 
 23 Jul 2015, PHP 7.0.0 Beta 2
