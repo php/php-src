@@ -189,14 +189,10 @@ extern zend_module_entry soap_module_entry;
 #define phpext_soap_ptr soap_module_ptr
 
 ZEND_EXTERN_MODULE_GLOBALS(soap)
+#define SOAP_GLOBAL(v) ZEND_MODULE_GLOBALS_ACCESSOR(soap, v)
 
-#ifdef ZTS
-# define SOAP_GLOBAL(v) ZEND_TSRMG(soap_globals_id, zend_soap_globals *, v)
-# ifdef COMPILE_DL_SOAP
+#if defined(ZTS) && defined(COMPILE_DL_SOAP)
 ZEND_TSRMLS_CACHE_EXTERN();
-# endif
-#else
-# define SOAP_GLOBAL(v) (soap_globals.v)
 #endif
 
 extern zend_class_entry* soap_var_class_entry;

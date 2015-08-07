@@ -39,11 +39,7 @@ ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 static zend_class_entry *assertion_error_ce;
 
-#ifdef ZTS
-#define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
-#else
-#define ASSERTG(v) (assert_globals.v)
-#endif
+#define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 

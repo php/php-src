@@ -4106,8 +4106,7 @@ ZEND_API zend_string* zend_find_alias_name(zend_class_entry *ce, zend_string *na
 	if ((alias_ptr = ce->trait_aliases)) {
 		alias = *alias_ptr;
 		while (alias) {
-			if (ZSTR_LEN(alias->alias) == ZSTR_LEN(name) &&
-				!strncasecmp(ZSTR_VAL(name), ZSTR_VAL(alias->alias), ZSTR_LEN(alias->alias))) {
+			if (alias->alias && zend_string_equals_ci(alias->alias, name)) {
 				return alias->alias;
 			}
 			alias_ptr++;

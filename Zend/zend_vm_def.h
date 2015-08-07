@@ -2364,9 +2364,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		ZEND_VM_LEAVE();
 	} else if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_CODE) {
 		zend_detach_symbol_table(execute_data);
-		if (EXPECTED(destroy_op_array(&EX(func)->op_array) != 0)) {
-			efree_size(EX(func), sizeof(zend_op_array));
-		}
+		destroy_op_array(&EX(func)->op_array);
+		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
@@ -3089,6 +3088,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 					E_DEPRECATED,
 					"Non-static method %s::%s() should not be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 			} else {
 				/* An internal function assumes $this is present and won't check that.
 				 * So PHP would crash by allowing the call. */
@@ -3096,8 +3098,8 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 					zend_ce_error,
 					"Non-static method %s::%s() cannot be called statically",
 					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				HANDLE_EXCEPTION();
 			}
-			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -3206,6 +3208,9 @@ ZEND_VM_C_LABEL(try_function_name):
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -3244,6 +3249,9 @@ ZEND_VM_C_LABEL(try_function_name):
 			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
 			GC_REFCOUNT(fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
+		} else {
+			call_info |= ZEND_CALL_RELEASE_THIS;
+			GC_REFCOUNT(object)++; /* For $this pointer */
 		}
 		FREE_OP2();
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY) &&
@@ -3297,6 +3305,9 @@ ZEND_VM_C_LABEL(try_function_name):
 					zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						HANDLE_EXCEPTION();
+					}
 				} else {
 					zend_throw_error(
 						zend_ce_error,
@@ -3387,6 +3398,9 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 			zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	} else {
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "%s() expects parameter 1 to be a valid callback, %s", Z_STRVAL_P(EX_CONSTANT(opline->op1)), error);
@@ -4278,6 +4292,8 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == NULL)) {
 		zend_throw_error(NULL, "Only variables can be passed by reference");
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_UNDEF(arg);
 		HANDLE_EXCEPTION();
 	}
 
@@ -5440,7 +5456,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 		}
 
 		call->prev_execute_data = execute_data;
-		i_init_code_execute_data(call, new_op_array, return_value);
+	    i_init_code_execute_data(call, new_op_array, return_value);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
@@ -5449,9 +5465,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY)
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		if (EXPECTED(destroy_op_array(new_op_array) != 0)) {
-			efree_size(new_op_array, sizeof(zend_op_array));
-		}
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
 			HANDLE_EXCEPTION();
@@ -7062,6 +7077,19 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	int in_finally = 0;
 
 	ZEND_VM_INTERRUPT_CHECK();
+
+	{
+		const zend_op *exc_opline = EG(opline_before_exception);
+		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
+			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
+			/* exceptions thrown because of loop var destruction on return/break/...
+			 * are logically thrown at the end of the foreach loop, so adjust the
+			 * op_num.
+			 */
+			op_num = EX(func)->op_array.brk_cont_array[exc_opline->op2.num].brk;
+		}
+	}
+
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
@@ -7079,18 +7107,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				op_num < EX(func)->op_array.try_catch_array[i].finally_end) {
 			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
 			in_finally = 1;
-		}
-	}
-
-	if (catch_op_num) {
-		if ((EX(func)->op_array.opcodes[op_num].opcode == ZEND_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
-		 || (EX(func)->op_array.opcodes[op_num].opcode == ZEND_FE_FREE && (EX(func)->op_array.opcodes[op_num].extended_value & ZEND_FREE_ON_RETURN))
-		) {
-			/* exceptions thrown because of TMP variable destruction on "return"
-			 * statement should't be caught in the same function.
-			 * See: Zend/tests/try_finally_012.phpt
-			 */
-			catch_op_num = 0;
 		}
 	}
 

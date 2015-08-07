@@ -53,6 +53,15 @@
 
 static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLocator *lob);
 
+#define OCI_TEMPLOB_CLOSE(envhp, svchp, errhp, lob)				\
+	do															\
+	{															\
+		boolean isTempLOB;										\
+		OCILobIsTemporary(envhp, errhp, lob, &isTempLOB);		\
+		if (isTempLOB)											\
+			OCILobFreeTemporary(svchp, errhp, lob);				\
+	} while(0)
+
 static int oci_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
@@ -99,6 +108,8 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 				switch (S->cols[i].dtype) {
 					case SQLT_BLOB:
 					case SQLT_CLOB:
+						OCI_TEMPLOB_CLOSE(S->H->env, S->H->svc, S->H->err,
+							(OCILobLocator *) S->cols[i].data);
 						OCIDescriptorFree(S->cols[i].data, OCI_DTYPE_LOB);
 						break;
 					default:
@@ -293,7 +304,13 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 
 			case PDO_PARAM_EVT_FREE:
 				P = param->driver_data;
-				if (P) {
+				if (P && P->thing) {
+					OCI_TEMPLOB_CLOSE(S->H->env, S->H->svc, S->H->err, P->thing);
+					OCIDescriptorFree(P->thing, OCI_DTYPE_LOB);
+					P->thing = NULL;
+					efree(P);
+				}
+				else if (P) {
 					efree(P);
 				}
 				break;
@@ -381,7 +398,6 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						if (stm) {
 							OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
 							php_stream_to_zval(stm, parameter);
-							P->thing = NULL;
 						}
 					} else {
 						/* we're a LOB being used for insert; transfer the data now */
@@ -430,6 +446,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 								OCILobClose(S->H->svc, S->err, (OCILobLocator*)P->thing);
 							}
 						}
+						OCI_TEMPLOB_CLOSE(S->H->env, S->H->svc, S->H->err, P->thing);
 						OCIDescriptorFree(P->thing, OCI_DTYPE_LOB);
 						P->thing = NULL;
 					}

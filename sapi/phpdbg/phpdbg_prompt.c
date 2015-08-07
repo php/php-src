@@ -384,6 +384,20 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 }
 /* }}} */
 
+void phpdbg_clean(zend_bool full) /* {{{ */
+{
+	/* this is implicitly required */
+	if (PHPDBG_G(ops)) {
+		destroy_op_array(PHPDBG_G(ops));
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
+
+	if (full) {
+		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
+	}
+} /* }}} */
+
 PHPDBG_COMMAND(exec) /* {{{ */
 {
 	zend_stat_t sb;
@@ -443,14 +457,36 @@ PHPDBG_COMMAND(exec) /* {{{ */
 int phpdbg_compile(void) /* {{{ */
 {
 	zend_file_handle fh;
+	char *buf;
+	size_t len;
 
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
 		return FAILURE;
 	}
 
-	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS) {
+	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
+		/* Skip #! line */
+		if (len >= 3 && buf[0] == '#' && buf[1] == '!') {
+			char *end = buf + len;
+			do {
+				switch (fh.handle.stream.mmap.buf++[0]) {
+					case '\r':
+						if (fh.handle.stream.mmap.buf[0] == '\n') {
+							fh.handle.stream.mmap.buf++;
+						}
+					case '\n':
+						CG(start_lineno) = 2;
+						fh.handle.stream.mmap.len -= fh.handle.stream.mmap.buf - buf;
+						end = fh.handle.stream.mmap.buf;
+				}
+			} while (fh.handle.stream.mmap.buf + 1 < end);
+		}
+
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
+
+		fh.handle.stream.mmap.buf = buf;
+		fh.handle.stream.mmap.len = len;
 		zend_destroy_file_handle(&fh);
 		if (EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
@@ -1367,28 +1403,15 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 	return ret;
 } /* }}} */
 
-void phpdbg_clean(zend_bool full) /* {{{ */
-{
-	/* this is implicitly required */
-	if (PHPDBG_G(ops)) {
-		if (destroy_op_array(PHPDBG_G(ops))) {
-			efree(PHPDBG_G(ops));
-		}
-		PHPDBG_G(ops) = NULL;
-	}
-
-	if (full) {
-		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
-	}
-} /* }}} */
-
-/* code may behave weirdly if EG(exception) is set */
+/* code may behave weirdly if EG(exception) is set; thus backup it */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
 	const zend_op *backup_opline; \
+	const zend_op *before_ex; \
 	if (exception) { \
 		if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) { \
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
+		before_ex = EG(opline_before_exception); \
 		++GC_REFCOUNT(exception); \
 		zend_clear_exception(); \
 	} \
@@ -1414,6 +1437,7 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 					Z_OBJ(zv) = exception; \
 					zend_throw_exception_internal(&zv); \
 				} \
+				EG(opline_before_exception) = before_ex; \
 			} \
 			/* fallthrough */ \
 		default: \

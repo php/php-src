@@ -152,14 +152,10 @@ ZEND_BEGIN_MODULE_GLOBALS(exif)
 ZEND_END_MODULE_GLOBALS(exif)
 
 ZEND_DECLARE_MODULE_GLOBALS(exif)
+#define EXIF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(exif, v)
 
-#ifdef ZTS
-#define EXIF_G(v) ZEND_TSRMG(exif_globals_id, zend_exif_globals *, v)
-#ifdef COMPILE_DL_EXIF
+#if defined(ZTS) && defined(COMPILE_DL_EXIF)
 ZEND_TSRMLS_CACHE_DEFINE();
-#endif
-#else
-#define EXIF_G(v) (exif_globals.v)
 #endif
 
 /* {{{ PHP_INI

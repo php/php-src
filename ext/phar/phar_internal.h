@@ -195,15 +195,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
+#define PHAR_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(phar, v)
 
-#ifdef ZTS
-#	include "TSRM.h"
-#   ifdef COMPILE_DL_PHAR
+#if defined(ZTS) && defined(COMPILE_DL_PHAR)
 ZEND_TSRMLS_CACHE_EXTERN();
-#   endif
-#	define PHAR_G(v) ZEND_TSRMG(phar_globals_id, zend_phar_globals *, v)
-#else
-#	define PHAR_G(v) (phar_globals.v)
 #endif
 
 #ifndef php_uint16
@@ -529,14 +524,17 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 {
 	char tmp[MAXPATHLEN];
 	int tmp_len;
-	size_t len;
+	size_t len1, len2;
 
 	tmp_len = MIN(MAXPATHLEN, entry->filename_len + entry->phar->fname_len);
-	len = MIN(entry->phar->fname_len, tmp_len);
-	memcpy(tmp, entry->phar->fname, len);
-	len = MIN(tmp_len - len, entry->filename_len);
-	memcpy(tmp + entry->phar->fname_len, entry->filename, len);
-	entry->inode = (unsigned short)zend_hash_func(tmp, tmp_len);
+
+	len1 = MIN(entry->phar->fname_len, tmp_len);
+	memcpy(tmp, entry->phar->fname, len1);
+
+	len2 = MIN(tmp_len - len1, entry->filename_len);
+	memcpy(tmp + len1, entry->filename, len2);
+
+	entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
 }
 /* }}} */
 

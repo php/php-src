@@ -93,6 +93,7 @@ static ZEND_FUNCTION(zend_test_func2);
 static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
+static ZEND_FUNCTION(gc_mem_caches);
 static ZEND_FUNCTION(gc_collect_cycles);
 static ZEND_FUNCTION(gc_enabled);
 static ZEND_FUNCTION(gc_enable);
@@ -321,6 +322,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
 #endif
+	ZEND_FE(gc_mem_caches,      arginfo_zend__void)
 	ZEND_FE(gc_collect_cycles, 	arginfo_zend__void)
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 		arginfo_zend__void)
@@ -368,6 +370,15 @@ int zend_startup_builtin_functions(void) /* {{{ */
 ZEND_FUNCTION(zend_version)
 {
 	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1);
+}
+/* }}} */
+
+/* {{{ proto int gc_mem_caches(void)
+   Reclaims memory used by MM caches.
+   Returns number of freed bytes */
+ZEND_FUNCTION(gc_mem_caches)
+{
+	RETURN_LONG(zend_mm_gc(zend_mm_get_heap()));
 }
 /* }}} */
 

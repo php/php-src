@@ -884,7 +884,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
-		__fill_ht->nInternalPointer = 0; \
+		__fill_ht->nInternalPointer = __fill_idx ? 0 : HT_INVALID_IDX; \
 	} while (0)
 
 static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *key, zval *zv)

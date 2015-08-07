@@ -22,11 +22,13 @@ prompt> halloarray(2) {
     int(4)
   }
   ["A::b"]=>
-  array(2) {
+  array(3) {
     [4]=>
     int(1)
     [5]=>
-    int(5)
+    int(3)
+    [8]=>
+    int(2)
   }
 }
 [Script ended normally]

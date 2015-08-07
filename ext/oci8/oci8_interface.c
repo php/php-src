@@ -88,11 +88,12 @@ PHP_FUNCTION(oci_define_by_name)
 		RETURN_FALSE;
 	}
 
-	define->name = (text*) estrndup(name, name_len);
+	define->name = (text*) ecalloc(1, name_len+1);
+	memcpy(define->name, name, name_len);
+	define->name[name_len] = '\0';
 	define->name_len = name_len;
 	define->type = type;
 	define->zval = var;
-	Z_TRY_ADDREF_P(define->zval);
 
 	RETURN_TRUE;
 }
@@ -183,7 +184,7 @@ PHP_FUNCTION(oci_free_descriptor)
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
-	zend_list_delete(descriptor->id);
+	zend_list_close(descriptor->id);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -305,7 +306,10 @@ PHP_FUNCTION(oci_lob_load)
 		RETURN_FALSE;
 	}
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len);
+        zend_string *ret = zend_string_init(buffer, buffer_len, 0);
+		if (buffer)
+			efree(buffer);
+		RETURN_STR(ret);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -350,7 +354,9 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_FALSE;
 	}	
 	if (buffer_len > 0) {
-		RETURN_STRINGL(buffer, buffer_len);
+		zend_string *ret = zend_string_init(buffer, buffer_len, 0);
+		efree(buffer);
+		RETURN_STR(ret);
 	}
 	else {
 		RETURN_EMPTY_STRING();
@@ -951,7 +957,11 @@ PHP_FUNCTION(oci_lob_export)
 	if (length == -1) {
 		length = lob_length - descriptor->lob_current_position;
 	}
-	
+
+	if (lob_length == 0) {
+		length = 0;
+	}
+
 	if (length == 0) {
 		/* nothing to write, fail silently */
 		RETURN_FALSE;
@@ -987,7 +997,8 @@ PHP_FUNCTION(oci_lob_export)
 		}
 		if (tmp_bytes_read && !php_stream_write(stream, buffer, tmp_bytes_read)) {
 			php_stream_close(stream);
-			efree(buffer);
+			if (buffer)
+				efree(buffer);
 			RETURN_FALSE;
 		}
 		if (buffer) {
@@ -1545,7 +1556,7 @@ PHP_FUNCTION(oci_free_statement)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	zend_list_delete(statement->id);
+	zend_list_close(statement->id);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1574,9 +1585,10 @@ PHP_FUNCTION(oci_close)
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
-	zend_list_delete(connection->id);
+	if (GC_REFCOUNT(connection->id) == 1)
+		zend_list_close(connection->id);
 
-	ZVAL_NULL(z_connection);
+	/* ZVAL_NULL(z_connection); */
 	
 	RETURN_TRUE;
 }
@@ -1613,7 +1625,7 @@ PHP_FUNCTION(oci_error)
 	zval *arg = NULL;
 	php_oci_statement *statement;
 	php_oci_connection *connection;
-	text *errbuf;
+	text errbuf[PHP_OCI_ERRBUF_LEN];
 	sb4 errcode = 0;
 	dvoid *errh = NULL;
 	ub2 error_offset = 0;
@@ -1663,15 +1675,13 @@ go_out:
 		RETURN_FALSE;
 	}
 
-	errcode = php_oci_fetch_errmsg(errh, &errbuf);
+	errcode = php_oci_fetch_errmsg(errh, errbuf, sizeof(errbuf));
 
 	if (errcode) {
 		array_init(return_value);
 		add_assoc_long(return_value, "code", errcode);
 		/* TODO: avoid reallocation ??? */
 		add_assoc_string(return_value, "message", (char*) errbuf);
-		if (errbuf)
-			efree(errbuf);
 		add_assoc_long(return_value, "offset", error_offset);
 		add_assoc_string(return_value, "sqltext", sqltext ? (char *) sqltext : "");
 	} else {
@@ -2064,9 +2074,9 @@ PHP_FUNCTION(oci_result)
    Return a string containing runtime client library version information */
 PHP_FUNCTION(oci_client_version)
 {
-	char *version = NULL;
+	char version[256];
 
-	php_oci_client_get_version(&version);
+	php_oci_client_get_version(version, sizeof(version));
 	RETURN_STRING(version);
 }
 /* }}} */
@@ -2077,7 +2087,8 @@ PHP_FUNCTION(oci_server_version)
 {
 	zval *z_connection;
 	php_oci_connection *connection;
-	char *version = NULL;
+	char version[256];
+	zend_string *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_connection) == FAILURE) {
 		return;
@@ -2085,11 +2096,12 @@ PHP_FUNCTION(oci_server_version)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	if (php_oci_server_get_version(connection, &version)) {
+	if (php_oci_server_get_version(connection, version, sizeof(version))) {
 		RETURN_FALSE;
 	}
 	
-	RETURN_STRING(version);
+	ret = zend_string_init(version, strlen(version), 0);
+	RETURN_STR(ret);
 }
 /* }}} */
 
@@ -2189,7 +2201,7 @@ PHP_FUNCTION(oci_free_collection)
 	
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
-	zend_list_delete(collection->id);
+	zend_list_close(collection->id);
 	RETURN_TRUE;
 }
 /* }}} */

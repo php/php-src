@@ -95,6 +95,13 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_LOB_BUFFER_ENABLED  1
 #define PHP_OCI_LOB_BUFFER_USED     2
 
+#ifdef OCI_ERROR_MAXMSG_SIZE2
+/* Bigger size is defined from 11.2.0.3 onwards */
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
+#else
+#define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
+#endif 
+
 /* The mode parameter for oci_connect() is overloaded and accepts both
  * privilege and external authentication flags OR'd together.
  * PHP_OCI_CRED_EXT must be distinct from the OCI_xxx privilege
@@ -144,7 +151,7 @@ typedef struct {
 	sb4				errcode;					/* last ORA- error number */
 
 	HashTable	   *descriptors;				/* descriptors hash, used to flush all the LOBs using this connection on commit */
-	zend_ulong			descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
+	zend_ulong		descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
 	unsigned		is_open:1;					/* hels to determine if the connection is dead or not */
 	unsigned		is_attached:1;				/* hels to determine if we should detach from the server when closing/freeing the connection */
 	unsigned		is_persistent:1;			/* self-descriptive */
@@ -221,7 +228,7 @@ typedef struct {
 	OCIStmt				*stmt;					/* statement handle */
 	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor received from Oracle */
 	char                 impres_flag;           /* PHP_OCI_IMPRES_*_ */
-	zend_long				 last_query_len;		/* last query length */
+	zend_long			 last_query_len;		/* last query length */
 	HashTable			*columns;				/* hash containing all the result columns */
 	HashTable			*binds;					/* binds hash */
 	HashTable			*defines;				/* defines hash */
@@ -412,7 +419,7 @@ void php_oci_bind_hash_dtor(zval *data);
 void php_oci_descriptor_flush_hash_dtor(zval *data);
 void php_oci_connection_descriptors_free(php_oci_connection *connection);
 sb4 php_oci_error(OCIError *err_p, sword status);
-sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf);
+sb4 php_oci_fetch_errmsg(OCIError *error_handle, text *error_buf, size_t error_buf_size);
 int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, ub2 *error_offset);
 void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclusive);
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive);
@@ -420,8 +427,8 @@ int php_oci_connection_rollback(php_oci_connection *connection);
 int php_oci_connection_commit(php_oci_connection *connection);
 int php_oci_connection_release(php_oci_connection *connection);
 int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len);
-void php_oci_client_get_version(char **version);
-int php_oci_server_get_version(php_oci_connection *connection, char **version);
+void php_oci_client_get_version(char *version, size_t version_size);
+int php_oci_server_get_version(php_oci_connection *connection, char *version, size_t version_size);
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args);
 int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode);
 void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode, ub4 serverStatus);

@@ -103,7 +103,7 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
 
-void zend_generator_yield_from(zend_generator *this, zend_generator *from);
+void zend_generator_yield_from(zend_generator *generator, zend_generator *from);
 ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator);
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);
 

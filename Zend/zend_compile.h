@@ -36,11 +36,13 @@
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+	(opline)->op1.num = 0; \
+	(opline)->op2.num = 0; \
+	(opline)->result.num = 0; \
+	(opline)->opcode = ZEND_NOP; \
+	(opline)->op1_type =  IS_UNUSED; \
+	(opline)->op2_type = IS_UNUSED; \
+	(opline)->result_type = IS_UNUSED; \
 } while (0)
 
 #define RESET_DOC_COMMENT() do { \
@@ -712,7 +714,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -726,7 +728,7 @@ ZEND_API zend_op_array *compile_filename(int type, zval *filename);
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
-ZEND_API zend_bool destroy_op_array(zend_op_array *op_array);
+ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);

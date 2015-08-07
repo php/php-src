@@ -30,7 +30,10 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 typedef struct _phpdbg_oplog_entry phpdbg_oplog_entry;
 struct _phpdbg_oplog_entry {
 	phpdbg_oplog_entry *next;
-	zend_op_array *op_array;
+	zend_string *function_name;
+	zend_class_entry *scope;
+	zend_string *filename;
+	zend_op *opcodes;
 	zend_op *op;
 };
 
