@@ -1,5 +1,5 @@
 --TEST--
-enchant_dict_suggest() function
+enchant_dict_quick_check() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
