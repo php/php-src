@@ -17,6 +17,7 @@ if (is_resource($broker)) {
     $requestDict = enchant_broker_request_dict($broker,$lang);
     
     if ($requestDict) {
+    	echo("OK\n");
         $dictSuggest = enchant_dict_suggest($requestDict,$sugs);        
 
         if (is_array($dictSuggest)) {
@@ -35,5 +36,6 @@ if (is_resource($broker)) {
 }
 ?>
 --EXPECT--
+OK
 OK
 OK
