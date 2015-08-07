@@ -10,23 +10,19 @@ if(!extension_loaded('enchant')) die('skip, enchant not loader');
 <?php
 $broker = enchant_broker_init();
 if (is_resource($broker)) {
-    var_dump(enchant_broker_list_dicts($broker));
+    echo("OK\n");
+    $brokerListDicts = enchant_broker_list_dicts($broker));
+    
+    if (is_array($brokerListDicts)) {
+        echo("OK\n");        
+    } else {
+        exit("broker list dicts failed\n");        
+    }    
 } else {
     exit("init failed\n");
 }
 
 ?>
---EXPECTF--
-array(%d) {
-  [%d]=>
-  array(%d) {
-    ["lang_tag"]=>
-    string(%d) "en_US"
-    ["provider_name"]=>
-    string(%d) "myspell"
-    ["provider_desc"]=>
-    string(%d) "Myspell Provider"
-    ["provider_file"]=>
-    string(%d) "/usr/lib/enchant/libenchant_myspell.so"
-  }
-}
+--EXPECT--
+OK
+OK
