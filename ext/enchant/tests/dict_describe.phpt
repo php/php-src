@@ -16,26 +16,24 @@ if (is_resource($broker)) {
     $requestDict = enchant_broker_request_dict($broker,$lang);
     
     if ($requestDict) {
-        var_dump(enchant_dict_describe($requestDict));    
-        
+        echo("OK\n");
+    	$dictDescribe = enchant_dict_describe($requestDict);
+    	
+        if (is_array($dictDescribe)) {
+            echo("OK\n");
+            
+        } else {
+	    echo("broker request dict failed\n");        
+        }    	
     } else {
 	echo("broker request dict failed\n");        
-    
     }
 
 } else {
     echo("broker is not a resource; failed;\n");
 }
 ?>
---EXPECTF--
+--EXPECT--
 OK
-array(%d) {
-  ["lang"]=>
-  string(%d) "en"
-  ["name"]=>
-  string(%d) "myspell"
-  ["desc"]=>
-  string(%d) "Myspell Provider"
-  ["file"]=>
-  string(%d) "/usr/lib/enchant/libenchant_myspell.so"
-}
+OK
+OK
