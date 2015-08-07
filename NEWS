@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 20 Aug 2015, PHP 7.0.0 RC 1
 
-
+- Standard:
+  . Fixed bug #70208 (Assert breaking access on objects). (Bob)
 
 06 Aug 2015, PHP 7.0.0 Beta 3
 
