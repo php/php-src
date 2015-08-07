@@ -22,7 +22,7 @@ if (is_resource($broker)) {
         if (is_array($dictSuggest)) {
             echo("OK\n");
         } else {
-            echo("dict quick check failed\n");
+            echo("dict suggest failed\n");
         }
         
     } else {
