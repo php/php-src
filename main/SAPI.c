@@ -290,7 +290,12 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			read_bytes = sapi_read_post_block(buffer, SAPI_POST_BLOCK_SIZE TSRMLS_CC);
 
 			if (read_bytes > 0) {
-				php_stream_write(SG(request_info).request_body, buffer, read_bytes);
+				if (php_stream_write(SG(request_info).request_body, buffer, read_bytes) != read_bytes) {
+					/* if parts of the stream can't be written, purge it completely */
+					php_stream_truncate_set_size(SG(request_info).request_body, 0);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST data can't be buffered; all data discarded");
+					break;
+				}
 			}
 
 			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
