@@ -1,5 +1,7 @@
 --TEST--
 enchant_broker_describe() function
+--CREDITS--
+marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
 <?php
 if(!extension_loaded('enchant')) die('skip, enchant not loader');
