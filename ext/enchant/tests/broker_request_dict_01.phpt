@@ -11,22 +11,19 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 --FILE--
 <?php
 $broker = enchant_broker_init();
-if (!is_resource($broker)) {
-    exit("init failed\n");
-}
-
 $dicts = enchant_broker_list_dicts($broker);
+
 if (is_array($dicts)) {
         $dict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
         if (is_resource($dict)) {
-            echo "OK\n";
+            echo("OK\n");
         } else {
-            echo "fail to request " . $dicts[0]['lang_tag'];
+            echo("fail to request " . $dicts[0]['lang_tag']);
         }
 } else {
-    exit("list dicts failed\n");
+    echo("list dicts failed\n");
 }
-echo "OK\n";
+echo("OK\n");
 ?>
 --EXPECT--
 OK
