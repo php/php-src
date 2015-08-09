@@ -1,28 +1,40 @@
 --TEST--
 enchant_broker_describe() function
 --SKIPIF--
-<?php 
+<?php
 if(!extension_loaded('enchant')) die('skip, enchant not loader');
-
- ?>
+if(!enchant_broker_init()) die("failed, broker_init failure\n");
+?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
 
-if(!$broker) exit("failed, broker_init failure\n");
-
-$provides = enchant_broker_describe($broker);
-
-if (is_array($provides)) {
-	foreach ($provides as $backend) {
-		if (!(isset($backend['name']) && isset($backend['desc']) && isset($backend['file']))) {
-			exit("failed\n");
-		}
-	}
-	exit("OK\n");
+if($broker) {
+    echo("OK\n");
+    $provider = enchant_broker_describe($broker);    
+    
+    if (is_array($provider)) {
+        echo("OK\n");
+        
+        foreach ($provider as $backend) {
+	  if ((isset($backend['name']) && isset($backend['desc']) && isset($backend['file']))) {
+	      echo("OK\n");
+	      
+	  } else {    
+	      echo("failed, broker describe\n");
+	      
+	  }
+        }
+        
+    } else {
+        echo "failed, brocker describe array \n";
+    }
+    
 } else {
-	echo "failed";
+    echo("failed, broker_init failure\n");
 }
 ?>
---EXPECTF--
+--EXPECT--
+OK
+OK
 OK
