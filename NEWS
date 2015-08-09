@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Code:
   . Fixed bug #70215 (Segfault when __invoke is static). (Bob)
 
+- CLI server:
+  . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
+    (wusuopu, cmb)
+
 - Phpdbg:
   . Fixed bug #70214 (FASYNC not defined, needs sys/file.h include). (Bob)
 
