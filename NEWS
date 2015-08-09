@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #69900 (Too long timeout on pipes). (Anatol)
   . Fixed bug #70002 (TS issues with temporary dir handling). (Anatol)
 
+- CLI server:
+  . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
+    (wusuopu, cmb)
+
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
