@@ -3,18 +3,16 @@ enchant_broker_dict_exists() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
-<?php 
+<?php
 if(!extension_loaded('enchant')) die('skip, enchant not loader');
+if (!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
 ?>
 --FILE--
 <?php
-$lang="en_US";
 $broker = enchant_broker_init();
-if (!is_resource($broker)) {
-    exit("init failed\n");
-}
+$dicts = enchant_broker_list_dicts($broker);
 
-if (enchant_broker_dict_exists($broker,$lang)) {
+if (enchant_broker_dict_exists($broker, $dicts[0]['lang_tag'])) {
     echo("OK\n");
 } else {
     echo("dicts dont exist failed\n");
