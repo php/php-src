@@ -356,12 +356,12 @@ static PHP_GINIT_FUNCTION(mcrypt)
 
 static PHP_GSHUTDOWN_FUNCTION(mcrypt)
 {
-	if (mcrypt_globals->fd[RANDOM] >= 0) {
+	if (mcrypt_globals->fd[RANDOM] > 0) {
 		close(mcrypt_globals->fd[RANDOM]);
 		mcrypt_globals->fd[RANDOM] = -1;
 	}
 
-	if (mcrypt_globals->fd[URANDOM] >= 0) {
+	if (mcrypt_globals->fd[URANDOM] > 0) {
 		close(mcrypt_globals->fd[URANDOM]);
 		mcrypt_globals->fd[URANDOM] = -1;
 	}
