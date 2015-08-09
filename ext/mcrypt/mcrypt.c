@@ -415,12 +415,14 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 	php_stream_filter_unregister_factory("mcrypt.*");
 	php_stream_filter_unregister_factory("mdecrypt.*");
 
-	if (MCG(fd[RANDOM]) > 0) {
+	if (MCG(fd[RANDOM]) >= 0) {
 		close(MCG(fd[RANDOM]));
+		MCG(fd[RANDOM]) = -1;
 	}
 
-	if (MCG(fd[URANDOM]) > 0) {
+	if (MCG(fd[URANDOM]) >= 0) {
 		close(MCG(fd[URANDOM]));
+		MCG(fd[URANDOM]) = -1;
 	}
 
 	UNREGISTER_INI_ENTRIES();
