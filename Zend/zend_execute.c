@@ -1339,14 +1339,18 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		ZVAL_COPY(result, z);
-		ZVAL_DUP(&z_copy, z);
+
+		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
+			ZVAL_COPY(result, Z_REFVAL_P(z));
+		} else {
+			ZVAL_COPY(result, z);
+		}
+		ZVAL_DUP(&z_copy, result);
 		if (inc) {
 			increment_function(&z_copy);
 		} else {
 			decrement_function(&z_copy);
 		}
-		if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(&z_copy);

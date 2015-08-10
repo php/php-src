@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
+  . Fixed bug #70223 (Incrementing value returned by magic getter). (Laruence)
   . Fixed bug #70215 (Segfault when __invoke is static). (Bob)
 
 - CLI server:
