@@ -101,7 +101,37 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 				}
 			} else {
 				if (!zend_bitset_in(valid_T, currT)) {
-					GET_AVAILABLE_T();
+					int use_new_var = 0;
+
+					/* Code in "finally" blocks may modify temorary variables.
+					 * We allocate new temporaries for values that need to
+					 * relive FAST_CALLs.
+					 */
+					if ((op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) &&
+					    (opline->opcode == ZEND_RETURN ||
+					     opline->opcode == ZEND_RETURN_BY_REF ||
+					     opline->opcode == ZEND_FREE ||
+					     opline->opcode == ZEND_FE_FREE)) {
+						zend_op *curr = opline;
+
+						while (--curr >= end) {
+							if (curr->opcode == ZEND_FAST_CALL) {
+								use_new_var = 1;
+								break;
+							} else if (curr->opcode != ZEND_FREE &&
+							           curr->opcode != ZEND_FE_FREE &&
+							           curr->opcode != ZEND_VERIFY_RETURN_TYPE &&
+							           curr->opcode != ZEND_DISCARD_EXCEPTION) {
+								break;
+							}
+						}
+					}
+					if (use_new_var) {
+						i = ++max;
+						zend_bitset_incl(taken_T, i);
+					} else {
+						GET_AVAILABLE_T();
+					}
 					map_T[currT] = i;
 					zend_bitset_incl(valid_T, currT);
 				}
