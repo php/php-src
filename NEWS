@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
     (wusuopu, cmb)
 
+- PDO:
+  . Fixed bug #70221 (persistent sqlite connection + custom function
+    segfaults). (Laruence)
+
 - Phpdbg:
   . Fixed bug #70214 (FASYNC not defined, needs sys/file.h include). (Bob)
 

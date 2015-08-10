@@ -1262,6 +1262,15 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
+static void cls_method_pdtor(zval *el) /* {{{ */ {
+	zend_function *func = (zend_function*)Z_PTR_P(el);
+	if (func->common.function_name) {
+		zend_string_release(func->common.function_name);
+	}
+	pefree(func, 1);
+}
+/* }}} */
+
 /* {{{ overloaded object handlers for PDO class */
 int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 {
@@ -1283,12 +1292,13 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
 		php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO methods.");
 	}
-	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, cls_method_dtor, dbh->is_persistent, 0);
+	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL,
+			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
-		ifunc->function_name = zend_string_init(funcs->fname, strlen(funcs->fname), 0);
+		ifunc->function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
 		ifunc->scope = dbh_obj->std.ce;
 		ifunc->prototype = NULL;
 		if (funcs->flags) {
