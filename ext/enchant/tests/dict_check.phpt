@@ -20,12 +20,13 @@ if (is_resource($broker)) {
     
     if ($requestDict) {
         echo("OK\n");
+        enchant_dict_add_to_personal($requestDict, $newWord);
       
-        if (enchant_dict_check($requestDict,$newWord)) {
+        if (enchant_dict_check($requestDict, $newWord)) {
             echo("OK\n");
             
         } else {
-            echo("dict add to personal failed\n");
+            echo("dict check new word failed\n");
         }
         
     } else {
