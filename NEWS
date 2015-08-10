@@ -420,7 +420,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #69085 (SoapClient's __call() type confusion through
-    unserialize()). (andrea dot palazzo at truel dot it, Laruence)
+    unserialize()). (CVE-2015-4147, CVE-2015-4148) (andrea dot palazzo at truel
+    dot it, Laruence)
 
 - SPL:
   . Fixed bug #69108 ("Segmentation fault" when (de)serializing
