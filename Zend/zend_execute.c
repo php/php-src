@@ -2553,6 +2553,9 @@ void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
 #  define ZEND_VM_FP_GLOBAL_REG "r28"
 #  define ZEND_VM_IP_GLOBAL_REG "r29"
+# elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
+#  define ZEND_VM_FP_GLOBAL_REG "r28"
+#  define ZEND_VM_IP_GLOBAL_REG "r29"
 # endif
 #endif
 
