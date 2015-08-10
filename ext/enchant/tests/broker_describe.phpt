@@ -10,6 +10,7 @@ if(!enchant_broker_init()) die("failed, broker_init failure\n");
 --FILE--
 <?php
 $broker = enchant_broker_init();
+$counter = 0;
 
 if($broker) {
     echo("OK\n");
@@ -19,13 +20,14 @@ if($broker) {
         echo("OK\n");
         
         foreach ($provider as $backend) {
-	  if ((isset($backend['name']) && isset($backend['desc']) && isset($backend['file']))) {
+	  if ((isset($backend[$counter]['name']) && isset($backend[$counter]['desc']) && isset($backend[$counter]['file']))) {
 	      echo("OK\n");
 	      
 	  } else {    
 	      echo("failed, broker describe\n");
 	      
 	  }
+	  $counter++;
         }
         
     } else {
