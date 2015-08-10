@@ -212,7 +212,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_
 #define zend_hash_next_free_element(ht) \
 	(ht)->nNextFreeElement
 
-ZEND_API int ZEND_FASTCALL zend_hash_resize(HashTable *ht, uint32_t size);
+ZEND_API void ZEND_FASTCALL zend_hash_resize(HashTable *ht, uint32_t nSize);
 ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);

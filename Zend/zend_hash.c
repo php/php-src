@@ -807,18 +807,22 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_resize(HashTable *ht, uint32_t size) {
+ZEND_API void ZEND_FASTCALL zend_hash_resize(HashTable *ht, uint32_t nSize) {
 	void *old_data = HT_GET_DATA_ADDR(ht);
-	Bucket *old_buckets = ht->arData;
+	if (ht->u.flags & HASH_FLAG_INITIALIZED) {
+		Bucket *old_buckets = ht->arData;
 
-	HANDLE_BLOCK_INTERRUPTIONS();
-	ht->nTableSize = zend_hash_check_size(size);
-	ht->nTableMask = -ht->nTableSize;
-	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT));
-	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
-	pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT);
-	zend_hash_rehash(ht);
-	HANDLE_UNBLOCK_INTERRUPTIONS();
+		HANDLE_BLOCK_INTERRUPTIONS();
+		ht->nTableSize = zend_hash_check_size(nSize);
+		ht->nTableMask = -ht->nTableSize;
+		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT));
+		memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
+		pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT);
+		zend_hash_rehash(ht);
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+	} else {
+		ht->nTableSize = zend_hash_check_size(nSize);
+	}
 }
 
 ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
