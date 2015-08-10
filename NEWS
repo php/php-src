@@ -43,13 +43,14 @@ PHP                                                                        NEWS
     from fix to bug #68776. (Yasuo)
 
 - Mysqlnd:
-  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM) (CVE-2015-3152).
+  . Fixed bug #69669 (mysqlnd is vulnerable to BACKRONYM). (CVE-2015-3152)
     (Andrey)
 
 - Phar:
-  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file). (Stas)
+  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file).
+    (CVE-2015-5589) (Stas)
   . Fixed bug #69923 (Buffer overflow and stack smashing error in 
-    phar_fix_filepath). (Stas)
+    phar_fix_filepath). (CVE-2015-5590) (Stas)
 
 11 Jun 2015 PHP 5.4.42
 
