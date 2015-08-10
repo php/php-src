@@ -163,7 +163,7 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #69085 (SoapClient's __call() type confusion through
-    unserialize()). (Dmitry)
+    unserialize()). (CVE-2015-4147, CVE-2015-4148) (Dmitry)
 
 - ZIP:
   . Fixed bug #69253 (ZIP Integer Overflow leads to writing past heap
