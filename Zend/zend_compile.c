@@ -3505,7 +3505,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 
 static int zend_handle_loops_and_finally(void) /* {{{ */
 {
-	zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
+	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
 }
 /* }}} */
 
