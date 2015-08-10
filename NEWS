@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #70223 (Incrementing value returned by magic getter). (Laruence)
   . Fixed bug #70215 (Segfault when __invoke is static). (Bob)
   . Fixed bug #70207 (Finally is broken with opcache). (Laruence, Dmitry)
+  . Fixed bug #70173 (ZVAL_COPY_VALUE_EX broken for 32bit Solaris Sparc).
+    (Laruence, cmb)
 
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
