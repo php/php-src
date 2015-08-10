@@ -18,8 +18,11 @@ then
 	GPG_USER=$2
 fi
 
+if test "x$PHPROOT" == "x"; then
+    PHPROOT=.
+fi
 
-for TARBALL in "php-$RELEASE_VER.tar.bz2" "php-$RELEASE_VER.tar.gz" "php-$RELEASE_VER.tar.xz"
+for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
 do
 	if ! [ -e $TARBALL ]
 	then
@@ -35,7 +38,7 @@ do
 	fi
 done
 
-for TARBALL in "php-$RELEASE_VER.tar.bz2" "php-$RELEASE_VER.tar.gz" "php-$RELEASE_VER.tar.xz"
+for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
 do 
 	echo $TARBALL 
 	echo "SHA256 hash: `sha256sum $TARBALL | cut -d' ' -f1`";
