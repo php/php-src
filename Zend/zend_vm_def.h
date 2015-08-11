@@ -6637,17 +6637,22 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMPVAR|UNUSED|CV, ANY)
 	SAVE_OPLINE();
 	if (OP1_TYPE != IS_UNUSED) {
 		zend_free_op free_op1;
-		zval *ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+		zval *ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-		if (Z_TYPE_P(ptr) == IS_LONG) {
-			EG(exit_status) = Z_LVAL_P(ptr);
-		} else if (Z_TYPE_P(ptr) == IS_TRUE || Z_TYPE_P(ptr) == IS_FALSE || Z_TYPE_P(ptr) == IS_NULL) {
-			EG(exit_status) = Z_TYPE_P(ptr) == IS_TRUE;
-		} else if (Z_TYPE_P(ptr) == IS_DOUBLE) {
-			EG(exit_status) = (int) Z_DVAL_P(ptr);
-		} else {
-			zend_print_variable(ptr);
-		}
+		do {
+			if (Z_TYPE_P(ptr) == IS_LONG) {
+				EG(exit_status) = Z_LVAL_P(ptr);
+			} else {
+				if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
+					ptr = Z_REFVAL_P(ptr);
+					if (Z_TYPE_P(ptr) == IS_LONG) {
+						EG(exit_status) = Z_LVAL_P(ptr);
+						break;
+					}
+				}
+				zend_print_variable(ptr);
+			}
+		} while (0);
 		FREE_OP1();
 	}
 	zend_bailout();

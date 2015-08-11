@@ -425,7 +425,6 @@ Other language changes
   . Removed support for #-style comments in ini files. Use ;-style comments
     instead.
   . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
-  . exit() and die() interpret all scalars except strings as exit_status now.
 
 Standard library changes
 ========================

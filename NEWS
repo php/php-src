@@ -13,8 +13,6 @@ PHP                                                                        NEWS
   . Fixed bug #70198 (Checking liveness does not work as expected).
     (Shafreeck Sea, Anatol Belski)
   . Fixed bug #70241 (Skipped assertions affect Generator returns). (Bob)
-  . exit() and die() interpret all scalars except strings as exit_status now.
-    (Bob)
 
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
