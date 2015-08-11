@@ -272,6 +272,9 @@ zend_module_entry mcrypt_module_entry = {
 };
 
 #ifdef COMPILE_DL_MCRYPT
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
 ZEND_GET_MODULE(mcrypt)
 #endif
 
@@ -350,6 +353,9 @@ static void php_mcrypt_module_dtor(zend_resource *rsrc) /* {{{ */
 
 static PHP_GINIT_FUNCTION(mcrypt)
 {/*{{{*/
+#if defined(COMPILE_DL_MCRYPT) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	mcrypt_globals->fd[RANDOM] = -1;
 	mcrypt_globals->fd[URANDOM] = -1;
 }/*}}}*/
