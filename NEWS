@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
     (wusuopu, cmb)
 
+- MCrypt:
+  . Fixed bug #69833 mcrypt fd caching not working
+
 - Opcache:
   . Fixed bug #70237 (Empty while and do-while segmentation fault with opcode
     on CLI enabled). (Dmitry, Laruence)
