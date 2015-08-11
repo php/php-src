@@ -1,5 +1,5 @@
 --TEST--
-enchant_broker_request_dict() function
+enchant_broker_dict_exists() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -13,21 +13,11 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 $broker = enchant_broker_init();
 $dicts = enchant_broker_list_dicts($broker);
 
-if (is_array($dicts)) {
-    if (count($dicts)) {
-    $dict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-   
-        if (is_resource($dict)) {
-            echo "OK\n";
-        } else {
-            echo "fail to request " . $dicts[0]['lang_tag'];
-        }
-    }
+if (enchant_broker_dict_exists($broker, $dicts[0]['lang_tag'])) {
+    echo("OK\n");
 } else {
-    echo("list dicts failed\n");
+    echo("dicts dont exist failed\n");
 }
-echo("OK\n");
 ?>
 --EXPECT--
-OK
 OK

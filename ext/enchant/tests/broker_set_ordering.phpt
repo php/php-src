@@ -1,5 +1,5 @@
 --TEST--
-enchant_broker_request_dict() function
+enchant_broker_set_ordering() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -12,22 +12,21 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 <?php
 $broker = enchant_broker_init();
 $dicts = enchant_broker_list_dicts($broker);
+$comma = ";";
 
-if (is_array($dicts)) {
-    if (count($dicts)) {
-    $dict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-   
-        if (is_resource($dict)) {
-            echo "OK\n";
-        } else {
-            echo "fail to request " . $dicts[0]['lang_tag'];
-        }
+if (is_resource($broker)) {
+    echo("OK\n");
+    if (enchant_broker_set_ordering($broker,$dicts[0]['lang_tag'],$comma)) {
+        echo("OK\n");
+    } else {
+        echo("enchant failed ==>" . $enchantErr);
     }
 } else {
-    echo("list dicts failed\n");
+    echo("init failed\n");
 }
-echo("OK\n");
+echo "OK\n";
 ?>
 --EXPECT--
+OK
 OK
 OK

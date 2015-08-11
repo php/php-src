@@ -1,5 +1,5 @@
 --TEST--
-enchant_broker_request_dict() function
+enchant_dict_quick_check() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
@@ -12,21 +12,26 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 <?php
 $broker = enchant_broker_init();
 $dicts = enchant_broker_list_dicts($broker);
+$word = "aspell";
 
-if (is_array($dicts)) {
-    if (count($dicts)) {
-    $dict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-   
-        if (is_resource($dict)) {
-            echo "OK\n";
+if (is_resource($broker)) {
+    echo("OK\n");
+    $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
+    
+    if ($requestDict) {
+        enchant_dict_quick_check($requestDict,$word,$sugs);
+        
+        if (is_array($sugs)) {
+            echo("OK\n");
         } else {
-            echo "fail to request " . $dicts[0]['lang_tag'];
+            echo("dict quick check failed\n");
         }
+    } else {
+        echo("broker request dict failed\n");
     }
 } else {
-    echo("list dicts failed\n");
+    echo("broker is not a resource; failed;\n");
 }
-echo("OK\n");
 ?>
 --EXPECT--
 OK
