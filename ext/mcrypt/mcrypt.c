@@ -288,6 +288,8 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 static PHP_MINFO_FUNCTION(mcrypt);
 static PHP_MINIT_FUNCTION(mcrypt);
 static PHP_MSHUTDOWN_FUNCTION(mcrypt);
+static PHP_GINIT_FUNCTION(mcrypt);
+static PHP_GSHUTDOWN_FUNCTION(mcrypt);
 
 ZEND_DECLARE_MODULE_GLOBALS(mcrypt)
 
@@ -300,8 +302,8 @@ zend_module_entry mcrypt_module_entry = {
 	PHP_MINFO(mcrypt),
 	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(mcrypt),
-	NULL,
-	NULL,
+	PHP_GINIT(mcrypt),
+	PHP_GSHUTDOWN(mcrypt),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
@@ -381,6 +383,25 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
+static PHP_GINIT_FUNCTION(mcrypt)
+{
+	mcrypt_globals->fd[RANDOM] = -1;
+	mcrypt_globals->fd[URANDOM] = -1;
+}
+
+static PHP_GSHUTDOWN_FUNCTION(mcrypt)
+{
+	if (mcrypt_globals->fd[RANDOM] > 0) {
+		close(mcrypt_globals->fd[RANDOM]);
+		mcrypt_globals->fd[RANDOM] = -1;
+	}
+
+	if (mcrypt_globals->fd[URANDOM] > 0) {
+		close(mcrypt_globals->fd[URANDOM]);
+		mcrypt_globals->fd[URANDOM] = -1;
+	}
+}
+
 static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
 	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
@@ -438,9 +459,6 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
 	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
 
-	MCG(fd[RANDOM]) = -1;
-	MCG(fd[URANDOM]) = -1;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -449,14 +467,6 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
 	php_stream_filter_unregister_factory("mcrypt.*" TSRMLS_CC);
 	php_stream_filter_unregister_factory("mdecrypt.*" TSRMLS_CC);
-
-	if (MCG(fd[RANDOM]) > 0) {
-		close(MCG(fd[RANDOM]));
-	}
-
-	if (MCG(fd[URANDOM]) > 0) {
-		close(MCG(fd[URANDOM]));
-	}
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
