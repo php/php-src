@@ -186,7 +186,7 @@ $op1_get_zval_ptr_deref = array(
 	"CONST"  => "EX_CONSTANT(opline->op1)",
 	"UNUSED" => "NULL",
 	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var)",
-	"TMPVAR" => "???",
+	"TMPVAR" => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
 );
 
 $op2_get_zval_ptr_deref = array(
@@ -196,7 +196,7 @@ $op2_get_zval_ptr_deref = array(
 	"CONST"  => "EX_CONSTANT(opline->op2)",
 	"UNUSED" => "NULL",
 	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var)",
-	"TMPVAR" => "???",
+	"TMPVAR" => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
 );
 
 $op1_get_zval_ptr_undef = array(

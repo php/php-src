@@ -3966,20 +3966,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_O
 
 		zval *ptr = EX_CONSTANT(opline->op1);
 
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_variable(ptr);
-			}
-		} while (0);
+		if (Z_TYPE_P(ptr) == IS_LONG) {
+			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_TRUE || Z_TYPE_P(ptr) == IS_FALSE || Z_TYPE_P(ptr) == IS_NULL) {
+			EG(exit_status) = Z_TYPE_P(ptr) == IS_TRUE;
+		} else if (Z_TYPE_P(ptr) == IS_DOUBLE) {
+			EG(exit_status) = (int) Z_DVAL_P(ptr);
+		} else {
+			zend_print_variable(ptr);
+		}
 
 	}
 	zend_bailout();
@@ -22771,20 +22766,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_
 
 		zval *ptr = NULL;
 
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_variable(ptr);
-			}
-		} while (0);
+		if (Z_TYPE_P(ptr) == IS_LONG) {
+			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_TRUE || Z_TYPE_P(ptr) == IS_FALSE || Z_TYPE_P(ptr) == IS_NULL) {
+			EG(exit_status) = Z_TYPE_P(ptr) == IS_TRUE;
+		} else if (Z_TYPE_P(ptr) == IS_DOUBLE) {
+			EG(exit_status) = (int) Z_DVAL_P(ptr);
+		} else {
+			zend_print_variable(ptr);
+		}
 
 	}
 	zend_bailout();
@@ -29365,22 +29355,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCO
 	SAVE_OPLINE();
 	if (IS_CV != IS_UNUSED) {
 
-		zval *ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+		zval *ptr = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
 
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_variable(ptr);
-			}
-		} while (0);
+		if (Z_TYPE_P(ptr) == IS_LONG) {
+			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_TRUE || Z_TYPE_P(ptr) == IS_FALSE || Z_TYPE_P(ptr) == IS_NULL) {
+			EG(exit_status) = Z_TYPE_P(ptr) == IS_TRUE;
+		} else if (Z_TYPE_P(ptr) == IS_DOUBLE) {
+			EG(exit_status) = (int) Z_DVAL_P(ptr);
+		} else {
+			zend_print_variable(ptr);
+		}
 
 	}
 	zend_bailout();
@@ -40507,22 +40492,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_TMPVAR_HANDLER(ZEND_
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		zend_free_op free_op1;
-		zval *ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+		zval *ptr = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
 
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_variable(ptr);
-			}
-		} while (0);
+		if (Z_TYPE_P(ptr) == IS_LONG) {
+			EG(exit_status) = Z_LVAL_P(ptr);
+		} else if (Z_TYPE_P(ptr) == IS_TRUE || Z_TYPE_P(ptr) == IS_FALSE || Z_TYPE_P(ptr) == IS_NULL) {
+			EG(exit_status) = Z_TYPE_P(ptr) == IS_TRUE;
+		} else if (Z_TYPE_P(ptr) == IS_DOUBLE) {
+			EG(exit_status) = (int) Z_DVAL_P(ptr);
+		} else {
+			zend_print_variable(ptr);
+		}
 		zval_ptr_dtor_nogc(free_op1);
 	}
 	zend_bailout();
