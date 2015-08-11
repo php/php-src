@@ -567,7 +567,7 @@ static inline int make_real_object(zval *object)
 	return 1;
 }
 
-ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce)
+static char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce)
 {
 	zend_string *key;
 	ALLOCA_FLAG(use_heap);
@@ -589,7 +589,7 @@ static zend_always_inline zend_class_entry* zend_verify_arg_class_kind(const zen
 	return zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 }
 
-ZEND_API void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
+static void zend_verify_arg_error(const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname = ZSTR_VAL(zf->common.function_name);
@@ -869,7 +869,7 @@ static zend_always_inline int zend_verify_missing_arg(zend_execute_data *execute
 	return 0;
 }
 
-ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
+static void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
 	const char *fsep;
@@ -893,7 +893,7 @@ ZEND_API void zend_verify_return_error(const zend_function *zf, const char *need
 	}
 }
 
-ZEND_API void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
+static void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
 {
 	const char *fname = ZSTR_VAL(zf->common.function_name);
 	const char *fsep;
@@ -2667,8 +2667,24 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 	return zend_user_opcode_handlers[opcode];
 }
 
-ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type) {
+ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
+{
 	return get_zval_ptr(op_type, *node, execute_data, should_free, type);
+}
+
+ZEND_API ZEND_FASTCALL void zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
+{
+	zend_verify_internal_arg_type(zf, arg_num, arg);
+}
+
+ZEND_API ZEND_FASTCALL int zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+{
+	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
+}
+
+ZEND_API ZEND_FASTCALL int zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+{
+	return zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
 /*
