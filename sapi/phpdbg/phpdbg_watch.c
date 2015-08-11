@@ -1133,5 +1133,7 @@ void phpdbg_watch_efree(void *ptr) {
 		}
 	}
 
-	PHPDBG_G(original_free_function)(ptr);
+	if (PHPDBG_G(original_free_function)) {
+		PHPDBG_G(original_free_function)(ptr);
+	}
 }
