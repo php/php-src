@@ -3428,9 +3428,11 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 void zend_compile_unset(zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
-
 	znode var_node;
 	zend_op *opline;
+
+	zend_ensure_writable_variable(var_ast);
+
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 			if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
