@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #70173 (ZVAL_COPY_VALUE_EX broken for 32bit Solaris Sparc).
     (Laruence, cmb)
   . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
+  . Fixed bug #70198 (Checking liveness does not work as expected).
+    (Shafreeck Sea, Anatol Belski)
 
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
