@@ -349,13 +349,13 @@ static void php_mcrypt_module_dtor(zend_resource *rsrc) /* {{{ */
 /* }}} */
 
 static PHP_GINIT_FUNCTION(mcrypt)
-{
+{/*{{{*/
 	mcrypt_globals->fd[RANDOM] = -1;
 	mcrypt_globals->fd[URANDOM] = -1;
-}
+}/*}}}*/
 
 static PHP_GSHUTDOWN_FUNCTION(mcrypt)
-{
+{/*{{{*/
 	if (mcrypt_globals->fd[RANDOM] > 0) {
 		close(mcrypt_globals->fd[RANDOM]);
 		mcrypt_globals->fd[RANDOM] = -1;
@@ -365,7 +365,7 @@ static PHP_GSHUTDOWN_FUNCTION(mcrypt)
 		close(mcrypt_globals->fd[URANDOM]);
 		mcrypt_globals->fd[URANDOM] = -1;
 	}
-}
+}/*}}}*/
 
 static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 {
