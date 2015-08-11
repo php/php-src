@@ -11,7 +11,7 @@ PHP                                                                        NEWS
     (wusuopu, cmb)
 
 - MCrypt:
-  . Fixed bug #69833 mcrypt fd caching not working
+  . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
 
 - Opcache:
   . Fixed bug #70237 (Empty while and do-while segmentation fault with opcode
