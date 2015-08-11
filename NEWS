@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
   . Fixed bug #70198 (Checking liveness does not work as expected).
     (Shafreeck Sea, Anatol Belski)
+  . Fixed bug #70241 (Skipped assertions affect Generator returns). (Bob)
 
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
