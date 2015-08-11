@@ -293,7 +293,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					if (0 >= recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EWOULDBLOCK) {
+#ifdef PHP_WIN32
+					int ret;
+#else
+					ssize_t ret;
+#endif
+					int err;
+
+					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK);
+					err = php_socket_errno();
+					if (0 == ret || /* the counterpart did properly shutdown*/
+						0 > ret && err != EWOULDBLOCK && err != EAGAIN) { /* there was an unrecoverable error */
 						alive = 0;
 					}
 				}
