@@ -23,7 +23,7 @@ if (!\$socket) {
 	echo "\$errstr (\$errno)<br />\\n";
 } else {
 	while (\$conn = stream_socket_accept(\$socket)) {
-		
+		sleep(1);
 		/* just close the connection immediately after accepting,
 			the client side will need wait a bit longer to realize it.*/
 		fclose(\$conn);
@@ -37,12 +37,12 @@ $dummy0 = $dummy1 = array();
 $srv_proc = proc_open(PHP_BINARY . " -n $srv_fl", $dummy0, $dummy1);
 
 $i = 0;
-$fp = stream_socket_client($srv_addr, $errno, $errstr, 1);
+$fp = stream_socket_client($srv_addr, $errno, $errstr, 2);
 if (!$fp) {
 	echo "$errstr ($errno)<br />\n";
 } else {
 	stream_set_blocking($fp, 0);
-	sleep(1);
+	sleep(2);
 	while (!feof($fp)) {
 		++$i;
 	}
