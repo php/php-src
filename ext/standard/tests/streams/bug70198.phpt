@@ -13,21 +13,19 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 	- on the client side - sleep(1) and check feof()
 */
 
-$srv_addr = "tcp://127.0.0.1:8085";
+$srv_addr = "tcp://127.0.0.1:8964";
 $srv_fl = dirname(__FILE__) . "/bug70198_svr_" . md5(uniqid()) . ".php";
 $srv_fl_cont = <<<SRV
 <?php
 \$socket = stream_socket_server('$srv_addr', \$errno, \$errstr);
 
 if (!\$socket) {
-	echo "\$errstr (\$errno)<br />\\n";
+	echo "\$errstr (\$errno)\\n";
 } else {
-	while (\$conn = stream_socket_accept(\$socket)) {
-		
+	if (\$conn = stream_socket_accept(\$socket, 3)) {
 		/* just close the connection immediately after accepting,
 			the client side will need wait a bit longer to realize it.*/
 		fclose(\$conn);
-		break;
 	}
 	fclose(\$socket);
 }
@@ -37,9 +35,11 @@ $dummy0 = $dummy1 = array();
 $srv_proc = proc_open(PHP_BINARY . " -n $srv_fl", $dummy0, $dummy1);
 
 $i = 0;
+/* wait a bit for the server startup */
+sleep(1);
 $fp = stream_socket_client($srv_addr, $errno, $errstr, 1);
 if (!$fp) {
-	echo "$errstr ($errno)<br />\n";
+	echo "$errstr ($errno)\n";
 } else {
 	stream_set_blocking($fp, 0);
 	sleep(1);
@@ -49,7 +49,6 @@ if (!$fp) {
 	fclose($fp);
 	var_dump($i);
 }
-
 
 proc_close($srv_proc);
 unlink($srv_fl);
