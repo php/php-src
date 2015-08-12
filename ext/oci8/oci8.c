@@ -1120,7 +1120,7 @@ static void php_oci_init_global_handles(void)
 		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 
 		if (ora_error_code) {
-			int tmp_buf_len = strlen((char *)tmp_buf);
+			int tmp_buf_len = (int) strlen((char *)tmp_buf);
 
 			if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 				tmp_buf[tmp_buf_len - 1] = '\0';
@@ -1701,7 +1701,7 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text *error_buf, size_t error_b
 	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, error_buf, (ub4)error_buf_size, (ub4)OCI_HTYPE_ERROR));
 
 	if (error_code) {
-		int err_buf_len = strlen((char *)error_buf);
+		int err_buf_len = (int) strlen((char *)error_buf);
 
 		if (err_buf_len && error_buf[err_buf_len - 1] == '\n') {
 			error_buf[err_buf_len - 1] = '\0';
@@ -1768,7 +1768,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 		charset = NULL;
 	}
 
-	connection = php_oci_do_connect_ex(username, username_len, password, password_len, NULL, 0, dbname, dbname_len, charset, session_mode, persistent, exclusive);
+	connection = php_oci_do_connect_ex(username, (int) username_len, password, (int) password_len, NULL, 0, dbname, (int) dbname_len, charset, session_mode, persistent, exclusive);
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECT_RETURN_ENABLED()) {
@@ -1937,11 +1937,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			le = Z_RES_P(zvp);
 			found = 1;
 			if (le->type == le_index_ptr) {
-				void *ptr;
+				zend_resource *ptr;
 
-				ptr = le->ptr; /* PHPNG TODO */
-				if (ptr && (le->type == le_connection)) {
-					connection = (php_oci_connection *)ptr;
+				ptr = (zend_resource *) le->ptr; /* PHPNG TODO */
+				if (ptr && (ptr->type == le_connection)) {
+					connection = (php_oci_connection *)ptr->ptr;
 				}
 			}
 		}
@@ -1960,7 +1960,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		 * TODO: put in negative code for non-persistent stubs
 		 */
 		if (connection && connection->is_persistent && connection->is_stub) {
-			if (php_oci_create_session(connection, NULL, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, session_mode)) {
+			if (php_oci_create_session(connection, NULL, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, (int) session_mode)) {
 				smart_str_free(&hashed_details);
 				zend_hash_del(&EG(persistent_list), connection->hash_key);
 
@@ -2142,13 +2142,13 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	 * connect/password change
 	 */
 	if (!use_spool) {
-		if (php_oci_old_create_session(connection, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, session_mode)) {
+		if (php_oci_old_create_session(connection, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, (int) session_mode)) {
 			php_oci_connection_close(connection);
 			return NULL;
 		}
 	} else {
 		/* create using the client-side session pool */
-		if (php_oci_create_session(connection, session_pool, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, session_mode)) {
+		if (php_oci_create_session(connection, session_pool, dbname, dbname_len, username, username_len, password, password_len, new_password, new_password_len, (int) session_mode)) {
 			php_oci_connection_close(connection);
 			return NULL;
 		}
@@ -2521,7 +2521,7 @@ int php_oci_server_get_version(php_oci_connection *connection, char *version, si
 {
 	sword errstatus;
 
-	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, connection->err, (text *)version, version_size, OCI_HTYPE_SVCCTX));
+	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, connection->err, (text *)version, (ub4) version_size, OCI_HTYPE_SVCCTX));
 
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus);
@@ -2798,7 +2798,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (!(column->indicator == -1)) {
 			zval element;
 
-			php_oci_column_to_zval(column, &element, fetch_mode);
+			php_oci_column_to_zval(column, &element, (int) fetch_mode);
 
 			if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
 				add_index_zval(return_value, i, &element);
@@ -3118,7 +3118,14 @@ static OCIEnv *php_oci_create_env(ub2 charsetid)
  */
 static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode)
 {
-	ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
+	ub4 statement_cache_size = 0;
+
+	if (OCI_G(statement_cache_size) > 0) {
+		if (OCI_G(statement_cache_size) > UB4MAXVAL-1)
+			statement_cache_size = (ub4) UB4MAXVAL-1;
+		else
+			statement_cache_size = (ub4) OCI_G(statement_cache_size);
+	}
 
 	/* Create the OCI environment separate for each connection */
 	if (!(connection->env = php_oci_create_env(connection->charset))) {
@@ -3306,7 +3313,14 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	ub4 purity = -2;				/* Illegal value to initialize */
 #endif
 	time_t timestamp = time(NULL);
-	ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
+	ub4 statement_cache_size = 0;
+
+	if (OCI_G(statement_cache_size) > 0) {
+		if (OCI_G(statement_cache_size) > UB4MAXVAL-1)
+			statement_cache_size = (ub4) UB4MAXVAL-1;
+		else
+			statement_cache_size = (ub4) OCI_G(statement_cache_size);
+	}
 
 	/* Persistent connections have private session pools */
 	if (connection->is_persistent && !connection->private_spool &&
