@@ -1461,7 +1461,7 @@ PHP_FUNCTION(strtotime)
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &times, &time_len, &preset_ts) == FAILURE || !time_len) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &times, &time_len, &preset_ts) == FAILURE || !time_len) {
 		RETURN_FALSE;
 	}
 
