@@ -879,9 +879,9 @@ zend_string *zend_resolve_class_name_ast(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void ptr_dtor(zval *zv) /* {{{ */
+static void label_ptr_dtor(zval *zv) /* {{{ */
 {
-	efree(Z_PTR_P(zv));
+	efree_size(Z_PTR_P(zv), sizeof(zend_label));
 }
 /* }}} */
 
@@ -3747,7 +3747,7 @@ void zend_compile_label(zend_ast *ast) /* {{{ */
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 8, NULL, ptr_dtor, 0);
+		zend_hash_init(CG(context).labels, 8, NULL, label_ptr_dtor, 0);
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
