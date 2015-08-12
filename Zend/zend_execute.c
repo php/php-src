@@ -2672,17 +2672,17 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_e
 	return get_zval_ptr(op_type, *node, execute_data, should_free, type);
 }
 
-ZEND_API ZEND_FASTCALL void zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
+ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
 {
 	zend_verify_internal_arg_type(zf, arg_num, arg);
 }
 
-ZEND_API ZEND_FASTCALL int zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
 
-ZEND_API ZEND_FASTCALL int zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+ZEND_API int ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
 	return zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
