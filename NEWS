@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
     (wusuopu, cmb)
 
+- Date:
+  . Fixed bug #70245 (strtotime does not emit warning when 2nd parameter is
+    object or string). (cmb)
+
 - MCrypt:
   . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
 
