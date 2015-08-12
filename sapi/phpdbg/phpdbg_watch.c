@@ -322,6 +322,16 @@ static phpdbg_watchpoint_t *phpdbg_get_refcount_watch(phpdbg_watchpoint_t *paren
 static phpdbg_watchpoint_t *phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch) {
 	phpdbg_watchpoint_t *ret = watch;
 
+	if (watch->type == WATCH_ON_ZVAL) {
+		switch (Z_TYPE_P(watch->addr.zv)) {
+			case IS_NULL:
+			case IS_UNDEF:
+			case IS_TRUE:
+			case IS_FALSE:
+				memset(watch->addr.zv, 0, sizeof(zend_value));
+		}
+	}
+
 	/* exclude references & refcounted */
 	if (!watch->parent || watch->parent->type != WATCH_ON_ZVAL || watch->type == WATCH_ON_HASHTABLE) {
 		phpdbg_watchpoint_t *old_watch = zend_hash_find_ptr(&PHPDBG_G(watchpoints), watch->str);
@@ -949,23 +959,35 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 		}
 
 		/* Show to the user what changed and delete watchpoint upon removal */
-		if (memcmp(oldPtr, watch->addr.ptr, watch->size) != SUCCESS) {
+		{
 			zend_bool do_break = 0;
 
-			if (watch->flags & PHPDBG_WATCH_NORMAL) {
-				switch (watch->type) {
-					case WATCH_ON_ZVAL:
-						do_break = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */);
-						break;
-					case WATCH_ON_HASHTABLE:
-						do_break = zend_hash_num_elements(HT_PTR_HT(oldPtr)) != zend_hash_num_elements(HT_WATCH_HT(watch));
-						break;
-					case WATCH_ON_REFCOUNTED:
-						if (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS) {
-							do_break = memcmp(oldPtr, watch->addr.ref, sizeof(uint32_t) /* no zend_refcounted metadata info */);
-						}
-						break;
-				}
+			switch (watch->type) {
+				case WATCH_ON_ZVAL:
+					do_break = memcmp(oldPtr, watch->addr.zv, sizeof(zend_value) + sizeof(uint32_t) /* value + typeinfo */);
+					if (!do_break) {
+						goto end;
+					}
+					break;
+				case WATCH_ON_HASHTABLE:
+					do_break = zend_hash_num_elements(HT_PTR_HT(oldPtr)) != zend_hash_num_elements(HT_WATCH_HT(watch));
+					if (!do_break) {
+						goto end;
+					}
+					break;
+				case WATCH_ON_REFCOUNTED:
+					do_break = memcmp(oldPtr, watch->addr.ref, sizeof(uint32_t) /* no zend_refcounted metadata info */);
+					if (!do_break) {
+						goto end;
+					}
+					if (!(PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS)) {
+						do_break = 0;
+					}
+					break;
+			}
+
+			if (!(watch->flags & PHPDBG_WATCH_NORMAL)) {
+				do_break = 0;
 			}
 
 			if (do_break) {
@@ -1067,7 +1089,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 			if (do_break) {
 				phpdbg_xml("</watchdata>");
 			}
-		}
+		} end:
 
 		dump->reenable_writing = dump->reenable_writing | reenable;
 	}
