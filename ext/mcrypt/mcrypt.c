@@ -1377,7 +1377,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 
 		while (read_bytes < size) {
 			n = read(*fd, iv + read_bytes, size - read_bytes);
-			if (n < 0) {
+			if (n <= 0) {
 				break;
 			}
 			read_bytes += n;
