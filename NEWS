@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #70237 (Empty while and do-while segmentation fault with opcode
     on CLI enabled). (Dmitry, Laruence)
 
+- PCRE:
+  . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
+    match). (cmb)
+  
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
