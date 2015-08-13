@@ -1,6 +1,6 @@
 ﻿$Id$
 
-PHP X.Y UPGRADE NOTES
+﻿PHP 7.0 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
