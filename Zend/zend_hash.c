@@ -197,7 +197,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags &= ~HASH_FLAG_PACKED;
-	new_data = pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT);
+	new_data = pemalloc(HT_DATA_SIZE_EX(ht->nTableSize) + HT_HASH_SIZE_EX(-ht->nTableSize), (ht)->u.flags & HASH_FLAG_PERSISTENT);
 	ht->nTableMask = -ht->nTableSize;
 	HT_SET_DATA_ADDR(ht, new_data);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
@@ -208,14 +208,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 {
-	void *old_data = HT_GET_DATA_ADDR(ht);
+	void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 	Bucket *old_buckets = ht->arData;
 
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	HANDLE_BLOCK_INTERRUPTIONS();
+	new_data = pemalloc(HT_DATA_SIZE_EX(ht->nTableSize) + HT_HASH_SIZE_EX(HT_MIN_MASK), (ht)->u.flags & HASH_FLAG_PERSISTENT);
 	ht->u.flags |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
-	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
+	HT_SET_DATA_ADDR(ht, new_data);
 	HT_HASH_RESET_PACKED(ht);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 	pefree(old_data, (ht)->u.flags & HASH_FLAG_PERSISTENT);
@@ -2198,12 +2199,13 @@ ZEND_API int ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, co
 		}
 	} else {
 		if (renumber) {
-			void *old_data = HT_GET_DATA_ADDR(ht);
+			void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 			Bucket *old_buckets = ht->arData;
 
+			new_data = pemalloc(HT_DATA_SIZE_EX(ht->nTableSize) + HT_HASH_SIZE_EX(HT_MIN_MASK), ht->u.flags & HASH_FLAG_PERSISTENT & HASH_FLAG_PERSISTENT);
 			ht->u.flags |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 			ht->nTableMask = HT_MIN_MASK;
-			HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), ht->u.flags & HASH_FLAG_PERSISTENT & HASH_FLAG_PERSISTENT));
+			HT_SET_DATA_ADDR(ht, new_data);
 			memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 			pefree(old_data, ht->u.flags & HASH_FLAG_PERSISTENT & HASH_FLAG_PERSISTENT);
 			HT_HASH_RESET_PACKED(ht);
