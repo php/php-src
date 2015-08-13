@@ -31,6 +31,8 @@
 #else
 #include <strings.h>
 #endif
+
+#define TIMELIB_SUPPORTS_V2DATA
 #include "timezonedb.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
