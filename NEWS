@@ -40,6 +40,8 @@ PHP                                                                        NEWS
   . Fixed bug #70214 (FASYNC not defined, needs sys/file.h include). (Bob)
 
 - Standard:
+  . Fixed bug #70250 (extract() turns array elements to references).
+    (Laruence)
   . Fixed bug #70211 (php 7 ZEND_HASH_IF_FULL_DO_RESIZE use after free).
     (Laruence)
   . Fixed bug #70208 (Assert breaking access on objects). (Bob)

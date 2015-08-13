@@ -1500,6 +1500,7 @@ PHP_FUNCTION(extract)
 					zend_hash_update(symbol_table, Z_STR(final_name), entry);
 				}
 			} else {
+				ZVAL_DEREF(entry);
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 				zend_hash_update_ind(symbol_table, Z_STR(final_name), entry);
 			}
