@@ -140,7 +140,7 @@ struct _zval_struct {
 	} u2;
 };
 
-struct _zend_refcounted {
+typedef struct _zend_refcounted_h {
 	uint32_t         refcount;			/* reference counter 32-bit */
 	union {
 		struct {
@@ -151,10 +151,14 @@ struct _zend_refcounted {
 		} v;
 		uint32_t type_info;
 	} u;
+} zend_refcounted_h;
+
+struct _zend_refcounted {
+	zend_refcounted_h gc;
 };
 
 struct _zend_string {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
 	char              val[1];
@@ -169,7 +173,7 @@ typedef struct _Bucket {
 typedef struct _zend_array HashTable;
 
 struct _zend_array {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
@@ -270,7 +274,7 @@ typedef struct _HashTableIterator {
 } HashTableIterator;
 
 struct _zend_object {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
@@ -279,19 +283,19 @@ struct _zend_object {
 };
 
 struct _zend_resource {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	int               handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
 
 struct _zend_reference {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zval              val;
 };
 
 struct _zend_ast_ref {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zend_ast         *ast;
 };
 
@@ -365,11 +369,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
-#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
-#define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
-#define GC_FLAGS(p)					((zend_refcounted*)(p))->u.v.flags
-#define GC_INFO(p)					((zend_refcounted*)(p))->u.v.gc_info
-#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->u.type_info
+#define GC_REFCOUNT(p)				(p)->gc.refcount
+#define GC_TYPE(p)					(p)->gc.u.v.type
+#define GC_FLAGS(p)					(p)->gc.u.v.flags
+#define GC_INFO(p)					(p)->gc.u.v.gc_info
+#define GC_TYPE_INFO(p)				(p)->gc.u.type_info
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))

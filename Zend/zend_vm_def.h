@@ -3241,8 +3241,8 @@ ZEND_VM_C_LABEL(try_function_name):
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(fbc->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
@@ -3377,8 +3377,8 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 			if (OP2_TYPE & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(function_name);
 			}
-			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(func->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)func->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		}
 		called_scope = fcc.called_scope;
@@ -6727,9 +6727,11 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 		} else if (OP1_TYPE == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (OP1_TYPE == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -6765,9 +6767,11 @@ ZEND_VM_HANDLER(169, ZEND_COALESCE, CONST|TMP|VAR|CV, ANY)
 		} else if (OP1_TYPE == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (OP1_TYPE == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));

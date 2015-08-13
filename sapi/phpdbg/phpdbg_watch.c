@@ -185,7 +185,7 @@ static phpdbg_watchpoint_t *phpdbg_create_refcounted_watchpoint(phpdbg_watchpoin
 	watch->parent = parent;
 	watch->str = parent->str;
 	++GC_REFCOUNT(parent->str);
-	phpdbg_create_addr_watchpoint(&ref->refcount, sizeof(uint32_t), watch);
+	phpdbg_create_addr_watchpoint(&GC_REFCOUNT(ref), sizeof(uint32_t), watch);
 	watch->type = WATCH_ON_REFCOUNTED;
 
 	return watch;
@@ -1047,7 +1047,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 						}
 						if (Z_REFCOUNTED_P(watch->addr.zv)) {
 							if ((watch->flags & PHPDBG_WATCH_NORMAL) && (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS)) {
-								phpdbg_writeln("watchrefcount", "type=\"new\" refcount=\"%d\"", "New refcount: %d", Z_COUNTED_P(watch->addr.zv)->refcount);
+								phpdbg_writeln("watchrefcount", "type=\"new\" refcount=\"%d\"", "New refcount: %d", Z_REFCOUNT_P(watch->addr.zv));
 							}
 							if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
 								phpdbg_create_recursive_watchpoint(watch);
@@ -1079,8 +1079,8 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump) {
 					break;
 				case WATCH_ON_REFCOUNTED: {
 					if ((watch->flags & PHPDBG_WATCH_NORMAL) && (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS)) {
-						phpdbg_writeln("watchrefcount", "type=\"old\" refcount=\"%d\"", "Old refcount: %d", ((zend_refcounted *) oldPtr)->refcount);
-						phpdbg_writeln("watchrefcount", "type=\"new\" refcount=\"%d\"", "New refcount: %d", watch->addr.ref->refcount);
+						phpdbg_writeln("watchrefcount", "type=\"old\" refcount=\"%d\"", "Old refcount: %d", GC_REFCOUNT((zend_refcounted *) oldPtr));
+						phpdbg_writeln("watchrefcount", "type=\"new\" refcount=\"%d\"", "New refcount: %d", GC_REFCOUNT(watch->addr.ref));
 					}
 					break;
 				}

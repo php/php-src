@@ -2016,8 +2016,8 @@ try_function_name:
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(fbc->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
@@ -2438,8 +2438,8 @@ try_function_name:
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(fbc->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
@@ -2693,8 +2693,8 @@ try_function_name:
 		Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &called_scope, &fbc, &object) == SUCCESS) {
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			ZEND_ASSERT(GC_TYPE(fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(fbc->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
@@ -4011,9 +4011,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEN
 		} else if (IS_CONST == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_CONST == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -4048,9 +4050,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CONST_HANDLER(ZE
 		} else if (IS_CONST == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_CONST == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -5735,8 +5739,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 			if (IS_CONST & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(function_name);
 			}
-			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(func->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)func->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		}
 		called_scope = fcc.called_scope;
@@ -9485,8 +9489,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 			if (IS_CV & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(function_name);
 			}
-			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(func->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)func->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		}
 		called_scope = fcc.called_scope;
@@ -11295,8 +11299,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 			if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(function_name);
 			}
-			ZEND_ASSERT(GC_TYPE(func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT(func->common.prototype)++;
+			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
+			GC_REFCOUNT((zend_object*)func->common.prototype)++;
 			call_info |= ZEND_CALL_CLOSURE;
 		}
 		called_scope = fcc.called_scope;
@@ -12371,9 +12375,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_TMP_HANDLER(ZEND_
 		} else if (IS_TMP_VAR == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_TMP_VAR == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -12409,9 +12415,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_TMP_HANDLER(ZEND
 		} else if (IS_TMP_VAR == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_TMP_VAR == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -16203,9 +16211,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_VAR_HANDLER(ZEND_
 		} else if (IS_VAR == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_VAR == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -16241,9 +16251,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_VAR_HANDLER(ZEND
 		} else if (IS_VAR == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_VAR == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -29412,9 +29424,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_O
 		} else if (IS_CV == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_CV == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
@@ -29449,9 +29463,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CV_HANDLER(ZEND_
 		} else if (IS_CV == IS_CV) {
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 		} else if (IS_CV == IS_VAR && ref) {
+			zend_reference *r = Z_REF_P(ref);
+
 			if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
+			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+				efree_size(r, sizeof(zend_reference));
 			}
 		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
