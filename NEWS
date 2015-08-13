@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #70237 (Empty while and do-while segmentation fault with opcode
     on CLI enabled). (Dmitry, Laruence)
 
+- PCRE:
+  . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
+    match). (cmb)
+
 - PDO:
   . Fixed bug #70221 (persistent sqlite connection + custom function
     segfaults). (Laruence)
