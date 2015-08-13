@@ -477,7 +477,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 	}
 
 	ht = Z_OBJPROP_P(rval);
-	zend_hash_resize(ht, zend_hash_num_elements(ht) + elements);
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		return 0;
 	}
