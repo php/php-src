@@ -1740,6 +1740,11 @@ double_str:
 		high = zval_get_double(zhigh);
 		i = 0;
 
+		if (zend_isinf(high) || zend_isinf(low)) {
+			php_error_docref(NULL, E_WARNING, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
+			RETURN_FALSE;
+		}
+
 		Z_TYPE_INFO(tmp) = IS_DOUBLE;
 		if (low > high) { 		/* Negative steps */
 			if (low - high < step || step <= 0) {
