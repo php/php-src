@@ -239,20 +239,18 @@ struct _zend_array {
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arData, idx)
 
-#define HT_HASH_SIZE_EX(nTableMask) \
+#define HT_HASH_SIZE(nTableMask) \
 	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
-#define HT_DATA_SIZE_EX(nTableSize) \
+#define HT_DATA_SIZE(nTableSize) \
 	((size_t)(nTableSize) * sizeof(Bucket))
-#define HT_HASH_SIZE(ht) \
-	HT_HASH_SIZE_EX((ht)->nTableMask)
-#define HT_DATA_SIZE(ht) \
-	HT_DATA_SIZE_EX((ht)->nTableSize)
+#define HT_SIZE_EX(nTableSize, nTableMask) \
+	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
 #define HT_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + HT_DATA_SIZE(ht))
+	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
 #define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
+	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
 #define HT_HASH_RESET(ht) \
-	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht))
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
 #define HT_HASH_RESET_PACKED(ht) do { \
 		HT_HASH(ht, -2) = HT_INVALID_IDX; \
 		HT_HASH(ht, -1) = HT_INVALID_IDX; \
@@ -261,10 +259,10 @@ struct _zend_array {
 	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
 
 #define HT_SET_DATA_ADDR(ht, ptr) do { \
-		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE(ht)); \
+		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
 	} while (0)
 #define HT_GET_DATA_ADDR(ht) \
-	((char*)((ht)->arData) - HT_HASH_SIZE(ht))
+	((char*)((ht)->arData) - HT_HASH_SIZE((ht)->nTableMask))
 
 typedef uint32_t HashPosition;
 
