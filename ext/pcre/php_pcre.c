@@ -43,6 +43,11 @@
 
 #define PCRE_CACHE_SIZE 4096
 
+/* not fully functional workaround for libpcre < 8.0, see bug #70232 */
+#ifndef PCRE_NOTEMPTY_ATSTART
+# define PCRE_NOTEMPTY_ATSTART PCRE_NOTEMPTY
+#endif
+
 enum {
 	PHP_PCRE_NO_ERROR = 0,
 	PHP_PCRE_INTERNAL_ERROR,
@@ -794,7 +799,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 				pcre_free((void *) stringlist);
 			}
 		} else if (count == PCRE_ERROR_NOMATCH) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -811,10 +816,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 		
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 		
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
@@ -1256,7 +1261,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 				limit--;
 
 		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -1290,10 +1295,10 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		}
 			
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 		
 		/* Advance to the next piece. */
 		start_offset = offsets[1];
@@ -1659,7 +1664,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 				}
 			}
 		} else if (count == PCRE_ERROR_NOMATCH) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -1691,10 +1696,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 		
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
