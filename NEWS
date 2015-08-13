@@ -371,6 +371,7 @@ PHP                                                                        NEWS
   . Improved zend_qsort(using hybrid sorting algo) for better performance, 
     and also renamed zend_qsort to zend_sort. (Laruence)
   . Added stable sorting algo zend_insert_sort. (Laruence)
+  . Improved zend_memnchr(using sunday algo) for better performance. (Laruence)
   . Implemented the RFC `Scalar Type Decalarations v0.5`. (Anthony)
   . Implemented the RFC `Group Use Declarations`. (Marcio)
   . Implemented the RFC `Continue Output Buffering`. (Mike)
