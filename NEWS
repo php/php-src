@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #70245 (strtotime does not emit warning when 2nd parameter is
     object or string). (cmb)
+  . Fixed bug #70266 (DateInterval::__construct.interval_spec is not supposed to
+    be optional). (cmb)
 
 - MCrypt:
   . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
