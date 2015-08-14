@@ -572,7 +572,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memcpy(key_s, key, key_len);
 
 	if (iv_len != iv_size) {
-		php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
+		if (mcrypt_enc_mode_has_iv(pm->td)) {
+			php_error_docref(NULL, E_WARNING, "Iv size incorrect; supplied length: %zd, needed: %d", iv_len, iv_size);
+		}
 		if (iv_len > iv_size) {
 			iv_len = iv_size;
 		}
