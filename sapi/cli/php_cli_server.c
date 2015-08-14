@@ -1579,6 +1579,18 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 
 	decoded_vpath_end = decoded_vpath + php_url_decode(decoded_vpath, vpath_len);
 
+#ifdef PHP_WIN32
+	{
+		char *p = decoded_vpath;
+		
+		do {
+			if (*p == '\\') {
+				*p = '/';
+			}
+		} while (*p++);
+	}
+#endif
+
 	p = decoded_vpath;
 
 	if (p < decoded_vpath_end && *p == '/') {
