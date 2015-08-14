@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
     (wusuopu, cmb)
 
+- Date:
+  . Fixed bug #70266 (DateInterval::__construct.interval_spec is not supposed to
+    be optional). (cmb)
+
 - MCrypt:
   . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
 
