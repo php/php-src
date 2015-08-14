@@ -248,7 +248,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, NULL, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, NULL, 1)
@@ -2451,9 +2451,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_object *object;
 	int lineno, frameno = 0;
 	zend_function *func;
-	const char *function_name;
-	const char *filename;
-	const char *include_filename = NULL;
+	zend_string *function_name;
+	zend_string *filename;
+	zend_string *include_filename = NULL;
 	zval stack_frame;
 
 	call = NULL;
@@ -2504,7 +2504,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		}
 
 		if (skip->func && ZEND_USER_CODE(skip->func->common.type)) {
-			filename = ZSTR_VAL(skip->func->op_array.filename);
+			filename = skip->func->op_array.filename;
 			if (skip->opline->opcode == ZEND_HANDLE_EXCEPTION) {
 				if (EG(opline_before_exception)) {
 					lineno = EG(opline_before_exception)->lineno;
@@ -2514,7 +2514,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			} else {
 				lineno = skip->opline->lineno;
 			}
-			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
+			add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, zend_string_copy(filename));
 			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
@@ -2549,17 +2549,16 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			func = call->func;
 			function_name = (func->common.scope &&
 			                 func->common.scope->trait_aliases) ?
-				ZSTR_VAL(zend_resolve_method_name(
-					(object ? object->ce : func->common.scope), func)) :
-				(func->common.function_name ?
-					ZSTR_VAL(func->common.function_name) : NULL);
+				zend_resolve_method_name(
+					(object ? object->ce : func->common.scope), func) :
+				func->common.function_name;
 		} else {
 			func = NULL;
 			function_name = NULL;
 		}
 
 		if (function_name) {
-			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
+			add_assoc_str_ex(&stack_frame, "function", sizeof("function")-1, zend_string_copy(function_name));
 
 			if (object) {
 				if (func->common.scope) {
@@ -2591,33 +2590,34 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
+			const char *pseudo_function_name;
 
 			if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type) || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 				/* can happen when calling eval from a custom sapi */
-				function_name = "unknown";
+				pseudo_function_name = "unknown";
 				build_filename_arg = 0;
 			} else
 			switch (ptr->opline->extended_value) {
 				case ZEND_EVAL:
-					function_name = "eval";
+					pseudo_function_name = "eval";
 					build_filename_arg = 0;
 					break;
 				case ZEND_INCLUDE:
-					function_name = "include";
+					pseudo_function_name = "include";
 					break;
 				case ZEND_REQUIRE:
-					function_name = "require";
+					pseudo_function_name = "require";
 					break;
 				case ZEND_INCLUDE_ONCE:
-					function_name = "include_once";
+					pseudo_function_name = "include_once";
 					break;
 				case ZEND_REQUIRE_ONCE:
-					function_name = "require_once";
+					pseudo_function_name = "require_once";
 					break;
 				default:
 					/* this can actually happen if you use debug_backtrace() in your error_handler and
 					 * you're in the top-scope */
-					function_name = "unknown";
+					pseudo_function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
@@ -2631,11 +2631,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 
-				add_next_index_string(&arg_array, (char*)include_filename);
+				add_next_index_str(&arg_array, zend_string_copy(include_filename));
 				add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &arg_array);
 			}
 
-			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
+			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char *) pseudo_function_name);
 		}
 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
