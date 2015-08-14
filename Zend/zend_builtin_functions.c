@@ -2227,7 +2227,6 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					while (i < first_extra_arg) {
 						if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
 						ZEND_HASH_FILL_ADD(p);
-						zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
 						p++;
 						i++;
 					}
