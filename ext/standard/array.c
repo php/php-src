@@ -1637,6 +1637,16 @@ PHP_FUNCTION(array_fill_keys)
 }
 /* }}} */
 
+#define RANGE_CHECK_INIT_ARRAY(start, end) do { \
+		double __calc_size = ((start - end) / step) + 1; \
+		if (fabs(__calc_size) >= (double)HT_MAX_SIZE) { \
+			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", start > end ? end : start, start > end ? start : end); \
+			RETURN_FALSE; \
+		} \
+		array_init_size(return_value, (uint32_t)fabs(__calc_size)); \
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1); \
+	} while (0)
+
 /* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
@@ -1752,8 +1762,7 @@ double_str:
 				goto err;
 			}
 
-			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			RANGE_CHECK_INIT_ARRAY(low, high);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
 				Z_DVAL(tmp) = value;
@@ -1766,8 +1775,7 @@ double_str:
 				goto err;
 			}
 
-			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			RANGE_CHECK_INIT_ARRAY(high, low);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
 					Z_DVAL(tmp) = value;
@@ -1793,8 +1801,8 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, (uint32_t)(((low - high) / lstep) + 1));
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+
+			RANGE_CHECK_INIT_ARRAY(low, high);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= lstep) {
 					Z_LVAL(tmp) = (zend_long)low;
@@ -1806,8 +1814,8 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, (uint32_t)(((high - low) / lstep) + 1));
-			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+
+			RANGE_CHECK_INIT_ARRAY(high, low);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += lstep) {
 					Z_LVAL(tmp) = (zend_long)low;
@@ -1827,6 +1835,8 @@ err:
 	}
 }
 /* }}} */
+
+#undef RANGE_CHECK_INIT_ARRAY
 
 static void php_array_data_shuffle(zval *array) /* {{{ */
 {
