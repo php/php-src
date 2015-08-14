@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
     (wusuopu, cmb)
+  . Fixed bug #70264 (CLI server directory traversal). (cmb)
 
 - Date:
   . Fixed bug #70266 (DateInterval::__construct.interval_spec is not supposed to
