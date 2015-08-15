@@ -3515,7 +3515,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_ADD_SUBMODULE(module) \
 	zend_hash_add_empty_element(&basic_submodules, #module, strlen(#module));
-	
+
 #define BASIC_RINIT_SUBMODULE(module) \
 	if (zend_hash_exists(&basic_submodules, #module, strlen(#module))) { \
 		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
@@ -5903,10 +5903,11 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			ALLOC_ZVAL(element);
 			MAKE_COPY_ZVAL(&arg2, element);
 
-			if (arg3 && Z_STRLEN_P(arg3) > 0) {
-				add_assoc_zval_ex(hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3) + 1, element);
-			} else {
+			if (!arg3 || (Z_TYPE_P(arg3) == IS_STRING && Z_STRLEN_P(arg3) == 0)) {
 				add_next_index_zval(hash, element);
+			} else {
+				array_set_zval_key(Z_ARRVAL_P(hash), arg3, element);
+				zval_ptr_dtor(&element);
 			}
 		}
 		break;
