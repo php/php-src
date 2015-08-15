@@ -31,6 +31,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
+  . Fixed bug #70157 (parse_ini_string() segmentation fault with 
+    INI_SCANNER_TYPED). (Tjerk)
 
 06 Aug 2015, PHP 5.6.12
 
