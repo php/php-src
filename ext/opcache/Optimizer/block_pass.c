@@ -387,6 +387,10 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 		return;
 	}
 
+	if (from == to) {
+		return;
+	}
+
 	while (*cs) {
 		if ((*cs)->from == from) {
 		 	DEL_SOURCE(cs);

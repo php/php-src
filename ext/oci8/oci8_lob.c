@@ -69,7 +69,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 	}
 
 	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
-	descriptor->type = type;
+	descriptor->type = (ub4) type;
 	descriptor->connection = connection;
 	++GC_REFCOUNT(descriptor->connection->id);
 
@@ -216,7 +216,7 @@ static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, z
 	sword errstatus;
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
-		return read_length;
+		return (int) read_length;
 	}
 
 	if (!descriptor->chunk_size) {
@@ -225,16 +225,16 @@ static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, z
 		if (errstatus != OCI_SUCCESS) {
 			connection->errcode = php_oci_error(connection->err, errstatus);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-			return read_length; /* we have to return original length here */
+			return (int) read_length; /* we have to return original length here */
 		}
 		descriptor->chunk_size = chunk_size;
 		connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	}
 	
 	if ((read_length % descriptor->chunk_size) != 0) {
-		return descriptor->chunk_size * ((read_length / descriptor->chunk_size) + 1);
+		return (int) descriptor->chunk_size * (((int) read_length / descriptor->chunk_size) + 1);
 	}
-	return read_length;
+	return (int) read_length;
 }
 /* }}} */
 
@@ -278,7 +278,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, zend_long read_length, zen
 		requested_len = length;
 	}
 	
-	if (requested_len > (length - initial_offset)) {
+	if ((ub4) requested_len > (length - (ub4) initial_offset)) {
 		requested_len = length - initial_offset;
 	}
 	
@@ -324,7 +324,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, zend_long read_length, zen
 		/* BLOBs don't have encoding, so bytes_per_char == 1 */
 	}
 
-	ctx.alloc_len = (requested_len + 1) * bytes_per_char;
+	ctx.alloc_len = ((ub4) requested_len + 1) * bytes_per_char;
 	*data = ecalloc(bytes_per_char, requested_len + 1);
 
 	if (is_clob) {
@@ -335,7 +335,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, zend_long read_length, zen
 		bytes_read = requested_len;
 	}
 
-	buffer_size = (requested_len < buffer_size ) ? requested_len : buffer_size;		/* optimize buffer size */
+	buffer_size = ((int) requested_len < buffer_size ) ? (int) requested_len : buffer_size;		/* optimize buffer size */
 	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size);	/* use chunk size */
 
 	bufp = (ub1 *) ecalloc(1, buffer_size);
@@ -450,7 +450,7 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 	*bytes_written = data_len;
 	descriptor->lob_current_position += data_len;
 	
-	if (descriptor->lob_current_position > descriptor->lob_size) {
+	if ((int) descriptor->lob_current_position > (int) descriptor->lob_size) {
 		descriptor->lob_size = descriptor->lob_current_position;
 	}
 	
@@ -529,7 +529,7 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 	if (length == -1) {
 		copy_len = length_from - descriptor_from->lob_current_position;
 	} else {
-		copy_len = length;
+		copy_len = (ub4) length;
 	}
 
 	if ((int)copy_len <= 0) {
@@ -646,7 +646,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, zend_long flush_flag)
 		return 0;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobFlushBuffer, (connection->svc, connection->err, lob, flush_flag));
+	PHP_OCI_CALL_RETURN(errstatus, OCILobFlushBuffer, (connection->svc, connection->err, lob, (ub4) flush_flag));
 
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus);
@@ -830,7 +830,7 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, zend_long new_lob_leng
 		return 1;
 	}
 	
-	PHP_OCI_CALL_RETURN(errstatus, OCILobTrim, (connection->svc, connection->err, lob, new_lob_length));
+	PHP_OCI_CALL_RETURN(errstatus, OCILobTrim, (connection->svc, connection->err, lob, (ub4) new_lob_length));
 
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus);
@@ -838,7 +838,7 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, zend_long new_lob_leng
 		return 1;
 	}
 	
-	descriptor->lob_size = new_lob_length;
+	descriptor->lob_size = (ub4) new_lob_length;
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 
 	return 0;
@@ -868,7 +868,7 @@ int php_oci_lob_erase (php_oci_descriptor *descriptor, zend_long offset, ub4 len
 		length = lob_length;
 	}
 	
-	PHP_OCI_CALL_RETURN(errstatus, OCILobErase, (connection->svc, connection->err, lob, (ub4 *)&length, offset+1));
+	PHP_OCI_CALL_RETURN(errstatus, OCILobErase, (connection->svc, connection->err, lob, (ub4 *)&length, (ub4) offset+1));
 
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus);

@@ -83,11 +83,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
 	int fd[2]; // RANDOM = 0, URANDOM = 1
 ZEND_END_MODULE_GLOBALS(mcrypt)
 
-#ifdef ZTS
-# define MCG(v)    TSRMG(mcrypt_globals_id, zend_mcrypt_globals *, v)
-#else
-# define MCG(v)    (mcrypt_globals.v)
-#endif
+#define MCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mcrypt, v)
 
 #else
 #define mcrypt_module_ptr NULL

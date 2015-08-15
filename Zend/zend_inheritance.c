@@ -25,9 +25,9 @@
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
 
-static void ptr_dtor(zval *zv) /* {{{ */
+static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
-	efree(Z_PTR_P(zv));
+	efree_size(Z_PTR_P(zv), sizeof(zend_function));
 }
 /* }}} */
 
@@ -1098,7 +1098,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				}
 			} else {
 				ALLOC_HASHTABLE(*overriden);
-				zend_hash_init_ex(*overriden, 8, NULL, ptr_dtor, 0, 0);
+				zend_hash_init_ex(*overriden, 8, NULL, overriden_ptr_dtor, 0, 0);
 			}
 			zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
 			return;

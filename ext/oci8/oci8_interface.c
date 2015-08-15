@@ -91,8 +91,8 @@ PHP_FUNCTION(oci_define_by_name)
 	define->name = (text*) ecalloc(1, name_len+1);
 	memcpy(define->name, name, name_len);
 	define->name[name_len] = '\0';
-	define->name_len = name_len;
-	define->type = type;
+	define->name_len = (ub4) name_len;
+	define->type = (ub4) type;
 	define->zval = var;
 
 	RETURN_TRUE;
@@ -157,7 +157,7 @@ PHP_FUNCTION(oci_bind_array_by_name)
 		RETURN_FALSE;
 	}
 	
-	if (php_oci_bind_array_by_name(statement, name, name_len, bind_var, max_array_len, max_item_len, type)) {
+	if (php_oci_bind_array_by_name(statement, name, (sb4) name_len, bind_var, max_array_len, max_item_len, type)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -223,7 +223,7 @@ PHP_FUNCTION(oci_lob_save)
 		RETURN_FALSE;
 	}
 	
-	if (php_oci_lob_write(descriptor, offset, data, data_len, &bytes_written)) {
+	if (php_oci_lob_write(descriptor, (ub4) offset, data, (ub4) data_len, &bytes_written)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -463,7 +463,7 @@ PHP_FUNCTION(oci_lob_seek)
 			return;
 		}	
 	}
-	
+
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
@@ -477,11 +477,11 @@ PHP_FUNCTION(oci_lob_seek)
 
 	switch(whence) {
 		case PHP_OCI_SEEK_CUR:
-			descriptor->lob_current_position += offset;
+			descriptor->lob_current_position += (ub4) offset;
 			break;
 		case PHP_OCI_SEEK_END:
 			if ((descriptor->lob_size + offset) >= 0) {
-				descriptor->lob_current_position = descriptor->lob_size + offset;
+				descriptor->lob_current_position = descriptor->lob_size + (ub4) offset;
 			}
 			else {
 				descriptor->lob_current_position = 0;
@@ -489,9 +489,14 @@ PHP_FUNCTION(oci_lob_seek)
 			break;
 		case PHP_OCI_SEEK_SET:
 		default:
-				descriptor->lob_current_position = (offset > 0) ? offset : 0;
+				descriptor->lob_current_position = (offset > 0) ? (ub4) offset : 0;
 			break;
 	}	
+	if ((descriptor->lob_current_position < 0) ||
+		(descriptor->lob_current_position > UB4MAXVAL-1)) {
+		php_error_docref(NULL, E_WARNING, "Invalid offset or LOB position");
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 /* }}} */
@@ -530,7 +535,7 @@ PHP_FUNCTION(oci_lob_write)
 {
 	zval *tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	size_t data_len;
+	zend_long data_len;
 	zend_long write_len = 0;
 	ub4 bytes_written;
 	char *data;
@@ -565,7 +570,7 @@ PHP_FUNCTION(oci_lob_write)
 		RETURN_LONG(0);
 	}
 	
-	if (php_oci_lob_write(descriptor, descriptor->lob_current_position, data, data_len, &bytes_written)) {
+	if (php_oci_lob_write(descriptor, descriptor->lob_current_position, data, (ub4) data_len, &bytes_written)) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(bytes_written);
@@ -698,7 +703,7 @@ PHP_FUNCTION(oci_lob_erase)
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
-	if (php_oci_lob_erase(descriptor, offset, length, &bytes_erased)) {
+	if (php_oci_lob_erase(descriptor, offset, (ub4) length, &bytes_erased)) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(bytes_erased);
@@ -1047,7 +1052,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 	
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
-	if (php_oci_lob_write_tmp(descriptor, type, data, data_len)) {
+	if (php_oci_lob_write_tmp(descriptor, type, data, (int) data_len)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1343,7 +1348,7 @@ PHP_FUNCTION(oci_execute)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	if (php_oci_statement_execute(statement, mode)) {
+	if (php_oci_statement_execute(statement, (ub4) mode)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1585,7 +1590,10 @@ PHP_FUNCTION(oci_close)
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
-	if (GC_REFCOUNT(connection->id) == 1)
+	if (GC_REFCOUNT(connection->id) == 2) /* CHANGED VERSION::PHP7
+											 Changed the refCount to 2 since
+											 internally Zend engine increments
+											 RefCount value by 1 */
 		zend_list_close(connection->id);
 
 	/* ZVAL_NULL(z_connection); */
@@ -1723,7 +1731,7 @@ PHP_FUNCTION(oci_parse)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	statement = php_oci_statement_create(connection, query, query_len);
+	statement = php_oci_statement_create(connection, query, (int) query_len);
 
 	if (statement) {
 		RETURN_RES(statement->id);
@@ -2002,7 +2010,7 @@ PHP_FUNCTION(oci_password_change)
 			RETURN_FALSE;
 		}
 
-		if (php_oci_password_change(connection, user, user_len, pass_old, pass_old_len, pass_new, pass_new_len)) {
+		if (php_oci_password_change(connection, user, (int) user_len, pass_old, (int) pass_old_len, pass_new, (int) pass_new_len)) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -2021,7 +2029,7 @@ PHP_FUNCTION(oci_password_change)
 			RETURN_FALSE;
 		}
 
-		connection = php_oci_do_connect_ex(user, user_len, pass_old, pass_old_len, pass_new, pass_new_len, dbname, dbname_len, NULL, OCI_DEFAULT, 0, 0);
+		connection = php_oci_do_connect_ex(user, (int) user_len, pass_old, (int) pass_old_len, pass_new, (int) pass_new_len, dbname, (int) dbname_len, NULL, OCI_DEFAULT, 0, 0);
 		if (!connection) {
 			RETURN_FALSE;
 		}
@@ -2233,7 +2241,7 @@ PHP_FUNCTION(oci_collection_append)
 	
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
-	if (php_oci_collection_append(collection, value, value_len)) {
+	if (php_oci_collection_append(collection, value, (int) value_len)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2341,7 +2349,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 	
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
-	if (php_oci_collection_element_set(collection, element_index, value, value_len)) {
+	if (php_oci_collection_element_set(collection, element_index, value, (int) value_len)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2453,7 +2461,7 @@ PHP_FUNCTION(oci_new_collection)
 	
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	
-	if ( (collection = php_oci_collection_create(connection, tdo, tdo_len, schema, schema_len)) ) {
+	if ( (collection = php_oci_collection_create(connection, tdo, (int) tdo_len, schema, (int) schema_len)) ) {
 		object_init_ex(return_value, oci_coll_class_entry_ptr);
 		add_property_resource(return_value, "collection", collection->id);
 	}

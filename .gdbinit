@@ -101,7 +101,7 @@ define dump_bt
 					____print_str $zvalue->value.str->val $zvalue->value.str->len
 				end
 				if $type == 7
-					printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
+					printf "array(%d)[%p]", $zvalue->value.arr->nNumOfElements, $zvalue
 				end
 				if $type == 8
 					printf "object[%p]", $zvalue

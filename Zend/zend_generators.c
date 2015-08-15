@@ -469,7 +469,7 @@ void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 
 	generator->node.parent = from;
 	zend_generator_get_current(generator);
-	--GC_REFCOUNT(from);
+	--GC_REFCOUNT(&from->std);
 }
 
 ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator)

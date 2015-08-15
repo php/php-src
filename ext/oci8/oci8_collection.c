@@ -278,7 +278,7 @@ int php_oci_collection_trim(php_oci_collection *collection, zend_long trim_size)
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
 
-	PHP_OCI_CALL_RETURN(errstatus, OCICollTrim, (connection->env, connection->err, trim_size, collection->collection));
+	PHP_OCI_CALL_RETURN(errstatus, OCICollTrim, (connection->env, connection->err, (sb4) trim_size, collection->collection));
 
 	if (errstatus != OCI_SUCCESS) {
 		errstatus = php_oci_error(connection->err, errstatus);
