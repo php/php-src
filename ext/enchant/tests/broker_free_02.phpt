@@ -12,7 +12,7 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 <?php
 $broker = enchant_broker_init();
 $dicts = enchant_broker_list_dicts($broker);
-$newWord = array("iLoveJava","iLoveJavascript","iLoveRuby","iLovePerl","iLoveAwk","iLoveC");
+$newWord = "iLikePerl";
 
 if (is_resource($broker)) {
     echo("OK\n");
@@ -20,10 +20,8 @@ if (is_resource($broker)) {
     
     if ($requestDict) {
         echo("OK\n");
-        for($x=0;$x<count($newWord);$x++) {
-	    $AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord[$x]);
-        }
-        
+	$AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord);
+
         if (NULL === $AddtoPersonalDict) {
             var_dump($AddtoPersonalDict);
             
