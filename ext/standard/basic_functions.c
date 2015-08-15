@@ -5845,11 +5845,11 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			ZVAL_DUP(&element, arg2);
-
-			if (arg3 && Z_STRLEN_P(arg3) > 0) {
-				zend_symtable_update(Z_ARRVAL_P(find_hash), Z_STR_P(arg3), &element);
-			} else {
+			if (!arg3 || (Z_TYPE_P(arg3) == IS_STRING && Z_STRLEN_P(arg3) == 0)) {
 				add_next_index_zval(find_hash, &element);
+			} else {
+				array_set_zval_key(Z_ARRVAL_P(find_hash), arg3, &element);
+				zval_ptr_dtor(&element);
 			}
 		}
 		break;
