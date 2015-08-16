@@ -5228,6 +5228,10 @@ PHP_FUNCTION(openssl_encrypt)
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
+		if (INT_MAX < password_len) {
+			php_error_docref(NULL, E_WARNING, "password is too long");
+			RETURN_FALSE;
+		}
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
@@ -5324,6 +5328,10 @@ PHP_FUNCTION(openssl_decrypt)
 
 	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
+		if (INT_MAX < password_len) {
+			php_error_docref(NULL, E_WARNING, "password is too long");
+			RETURN_FALSE;
+		}
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
@@ -5403,6 +5411,10 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		RETURN_FALSE;
 	}
 
+	if (INT_MAX < pub_len) {
+		php_error_docref(NULL, E_WARNING, "pub_key is too long");
+		RETURN_FALSE;
+	}
 	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
 
 	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
@@ -5454,7 +5466,11 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_FALSE;
 	}
 #else
-	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), buffer_length) <= 0) {
+	if (INT_MAX < buffer_length) {
+		php_error_docref(NULL, E_WARNING, "length is too long");
+		RETURN_FALSE;
+	}
+	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_FALSE(zstrong_result_returned);
