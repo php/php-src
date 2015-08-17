@@ -104,9 +104,6 @@ typedef struct _php_output_context {
 	php_output_buffer out;
 } php_output_context;
 
-/* XXX remove this after TLS branch merge */
-#define PHP_OUTPUT_TSRMLS(ctx)
-
 /* old-style, stateless callback */
 typedef void (*php_output_handler_func_t)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode);
 /* new-style, opaque context callback */

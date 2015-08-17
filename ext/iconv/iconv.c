@@ -401,7 +401,6 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 {
 	char *s, *content_type, *mimetype = NULL;
 	int output_status, mimetype_len = 0;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		output_status = php_output_get_status();

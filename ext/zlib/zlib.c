@@ -124,7 +124,6 @@ static int php_zlib_output_encoding(void)
 static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		/* start up */
@@ -210,7 +209,6 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (!php_zlib_output_encoding()) {
 		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
