@@ -11,7 +11,7 @@ if(!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, dont
 --FILE--
 <?php
 $broker = enchant_broker_init();
-$pathPwlDict = "enchant_broker_request_pwl_dict.pwl";
+$pathPwlDict = __DIR__ . "/enchant_broker_request_pwl_dict.pwl";
 
 if (is_resource($broker)) {
     echo("OK\n");
