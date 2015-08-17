@@ -23,15 +23,14 @@ if (is_resource($broker)) {
         
         if ($pathPwlDict === $dictdescribe['file']) {
             echo("OK\n");
-
         } else {
             echo("broker dict describe is not a resource failed\n");
         }
         
     } else {
         echo("dict broker request pwl has failed\n");
-    
     }
+    
 } else {
     echo("broker is not a resource; failed;\n");
 }
