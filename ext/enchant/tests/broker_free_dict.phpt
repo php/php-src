@@ -30,14 +30,11 @@ if (is_resource($broker)) {
             } else {
                 echo("dict broker free has failed\n");
             }
-            
         } else {
             echo("dict add to personal failed\n");
         }
-        
     } else {
         echo("broker request dict failed\n");        
-    
     }
 } else {
     echo("broker is not a resource; failed;\n");
