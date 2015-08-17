@@ -36,19 +36,15 @@ if (is_resource($broker)) {
                 } else {
                     echo("broker free failed\n");
                 }
-                
             } else {
                 echo("broker dict free failed\n");
             }
-
         } else {
             echo("dict add to personal failed\n");
         }
-
     } else {
         echo("broker request dict failed\n");        
     }    
-    
 } else {
     echo("init failed\n");
 }
