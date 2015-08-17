@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
+  . Fixed bug #70262 (Accessing array crashes PHP 7.0beta3).
+    (Laruence, Dmitry)
   . Fixed bug #70258 (Segfault if do_resize fails to allocated memory).
     (Laruence)
   . Fixed bug #70253 (segfault at _efree () in zend_alloc.c:1389). (Laruence)
