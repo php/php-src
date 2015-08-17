@@ -3682,11 +3682,16 @@ PHP_FUNCTION(date_diff)
 }
 /* }}} */
 
-static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz TSRMLS_DC)
+static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size_t tz_len TSRMLS_DC)
 {
 	timelib_time *dummy_t = ecalloc(1, sizeof(timelib_time));
 	int           dst, not_found;
 	char         *orig_tz = tz;
+
+	if (strlen(tz) != tz_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Timezone must not contain null bytes");
+		return FAILURE;
+	}
 
 	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (not_found) {
@@ -3714,7 +3719,7 @@ PHP_FUNCTION(timezone_open)
 		RETURN_FALSE;
 	}
 	tzobj = zend_object_store_get_object(php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC);
-	if (SUCCESS != timezone_initialize(tzobj, tz TSRMLS_CC)) {
+	if (SUCCESS != timezone_initialize(tzobj, tz, tz_len TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 }
@@ -3733,7 +3738,7 @@ PHP_METHOD(DateTimeZone, __construct)
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
 		tzobj = zend_object_store_get_object(getThis() TSRMLS_CC);
-		if (FAILURE == timezone_initialize(tzobj, tz TSRMLS_CC)) {
+		if (FAILURE == timezone_initialize(tzobj, tz, tz_len TSRMLS_CC)) {
 			ZVAL_NULL(getThis());
 		}
 	}
@@ -3748,7 +3753,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 
 	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS && Z_TYPE_PP(z_timezone_type) == IS_LONG) {
 		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS && Z_TYPE_PP(z_timezone) == IS_STRING) {
-			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
+			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_PP(z_timezone), Z_STRLEN_PP(z_timezone) TSRMLS_CC)) {
 				return SUCCESS;
 			}
 		}
