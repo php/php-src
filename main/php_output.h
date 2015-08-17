@@ -95,7 +95,7 @@ typedef struct _php_output_buffer {
 	size_t size;
 	size_t used;
 	uint free:1;
-	uint _res:31;
+	uint _reserved:31;
 } php_output_buffer;
 
 typedef struct _php_output_context {
