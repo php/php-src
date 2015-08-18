@@ -1,5 +1,5 @@
 #  +----------------------------------------------------------------------+
-#  | PHP Version 5                                                        |
+#  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
 #  | Copyright (c) 1997-2014 The PHP Group                                |
 #  +----------------------------------------------------------------------+
@@ -39,7 +39,7 @@ $(STAMP): build/buildcheck.sh
 snapshot:
 	distname='$(DISTNAME)'; \
 	if test -z "$$distname"; then \
-		distname='php5-snapshot'; \
+		distname='php7-snapshot'; \
 	fi; \
 	myname=`basename \`pwd\`` ; \
 	cd .. && cp -rp $$myname $$distname; \

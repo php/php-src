@@ -14,6 +14,7 @@ var_dump(is_callable(array($b,"__construct")));
 echo "Done\n";
 ?>
 --EXPECTF--	
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; a has a deprecated constructor in %s on line %d
 string(13) "a::a() called"
 bool(true)
 bool(false)

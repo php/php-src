@@ -18,15 +18,8 @@ function i3() {
         return 3;
 }
 
-function i4() {
-        global $a;
-        $a = array(10, 11, 12, 13, 14);
-        echo "i4\n";
-        return 4;
-}
-
-$a = 0; // $a should not be indexable till the i4 has been executed
-list($a[i1()+i2()], , list($a[i3()], $a[i4()]), $a[]) = array (0, 1, array(30, 40), 3, 4);
+$a = array(10, 11, 12, 13);
+list($a[i1()+i2()], , list($a[i3()], $a[])) = array(0, 1, array(30, 40), 3);
 
 var_dump($a);
 
@@ -35,8 +28,7 @@ var_dump($a);
 i1
 i2
 i3
-i4
-array(6) {
+array(5) {
   [0]=>
   int(10)
   [1]=>
@@ -47,6 +39,4 @@ array(6) {
   int(30)
   [4]=>
   int(40)
-  [5]=>
-  int(3)
 }

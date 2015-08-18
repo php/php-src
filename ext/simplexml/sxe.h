@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,7 +23,8 @@
 
 #include "php.h"
 
-extern zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
+extern PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 PHP_MINIT_FUNCTION(sxe);
 

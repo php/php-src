@@ -41,7 +41,7 @@ echo "Done";
 *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with closed handle --
 
-Warning: fgetc(): %d is not a valid stream resource in %s on line %d
+Warning: fgetc(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 -- Testing fgetc() with unset handle --
 

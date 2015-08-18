@@ -7,7 +7,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPList {
-    function SOAPList($s, $i, $c) {
+    function __construct($s, $i, $c) {
         $this->varString = $s;
         $this->varInt = $i;
         $this->child = $c;

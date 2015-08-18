@@ -123,42 +123,42 @@ int(2)
 
 -- Iteration with start value as "Array" --
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
--- Iteration with start value as "Array" --
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration with start value as "Array" --
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
--- Iteration with start value as "Array" --
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration with start value as "Array" --
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, array given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
+NULL
+
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
+NULL
+
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration with start value as "" --
@@ -187,42 +187,42 @@ int(2)
 
 -- Iteration with start value as "" --
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "" --
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
-NULL
-
--- Iteration with start value as "string" --
-
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "string" --
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, string given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
+NULL
+
+-- Iteration with start value as "string" --
+
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "object" --
 
-Warning: strspn() expects parameter 3 to be long, object given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, object given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration with start value as "" --
@@ -235,9 +235,9 @@ int(2)
 
 -- Iteration with start value as "Resource id #%d" --
 
-Warning: strspn() expects parameter 3 to be long, resource given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, resource given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 3 to be long, resource given in %s on line %d
+Warning: strspn() expects parameter 3 to be integer, resource given in %s on line %d
 NULL
 Done

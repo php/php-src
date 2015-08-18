@@ -1,5 +1,5 @@
 --TEST--
-Bug #60825 (Segfault when running symfony 2 tests)
+Bug #60825 (Segfault when running symfony 2 tests) (PHP7)
 --DESCRIPTION--
 run this with valgrind
 --FILE--
@@ -13,7 +13,10 @@ class test {
 }
 $a = new test;
 require_once $a;
-debug_zval_dump(test::$x);
+debug_zval_dump($a, test::$x);
 ?>
 --EXPECTF--
-string(%d) "%sbug60825.php" refcount(2)
+object(test)#%d (0) refcount(%d){
+}
+object(test)#%d (0) refcount(%d){
+}

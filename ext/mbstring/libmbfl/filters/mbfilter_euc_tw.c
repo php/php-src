@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_tw.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -184,7 +184,7 @@ mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		c1 = filter->cache;
 		if (c1 >= 0x100 && c1 <= 0xdff && c > 0xa0 && c < 0xff) {
-			plane = (c1 & 0xf00) >> 8; 
+			plane = (c1 & 0xf00) >> 8;
 			s = (c1 & 0xff)*94 + c - 0xa1;
 			w = 0;
 			if (s >= 0) {
@@ -259,7 +259,7 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 				s = (s & 0xffff) | 0x8080;
 				CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
 				CK((*filter->output_function)(s & 0xff, filter->data));
-			} 
+			}
 		} else {
 			s = (0x8ea00000 + (plane << 16)) | ((s & 0xffff) | 0x8080);
 			CK((*filter->output_function)(0x8e , filter->data));

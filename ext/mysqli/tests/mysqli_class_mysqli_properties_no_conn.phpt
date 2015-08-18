@@ -188,7 +188,7 @@ warning_count = 'NULL'
 Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
 mysqli->client_info = ''/NULL ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
@@ -199,7 +199,7 @@ mysqli->sqlstate = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
 mysqli->thread_id = ''/NULL (''/NULL)
 mysqli->protocol_version = ''/NULL (''/NULL)
 mysqli->server_info = ''/NULL (''/NULL)
@@ -261,7 +261,7 @@ warning_count = 'NULL'
 Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(@mysqli_get_client_info() === @$mysqli->client_info) failed in %s on line %d
 mysqli->client_info = ''/NULL ('%s'/%s)
 mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
@@ -272,7 +272,7 @@ mysqli->sqlstate = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(@mysqli_thread_id($mysqli) > @$mysqli->thread_id) failed in %s on line %d
 mysqli->thread_id = ''/NULL (''/NULL)
 mysqli->protocol_version = ''/NULL (''/NULL)
 mysqli->server_info = ''/NULL (''/NULL)

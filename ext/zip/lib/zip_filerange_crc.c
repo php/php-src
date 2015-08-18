@@ -1,6 +1,6 @@
 /*
   zip_filerange_crc.c -- compute CRC32 for a range of a file
-  Copyright (C) 2008-2015 Dieter Baron and Thomas Klausner
+  Copyright (C) 2008-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,7 +31,6 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdio.h>
 #include <errno.h>
@@ -39,32 +38,39 @@
 #include "zipint.h"
 
 
-
 
 int
-_zip_filerange_crc(FILE *fp, off_t start, off_t len, uLong *crcp,
-		   struct zip_error *errp)
+_zip_filerange_crc(zip_source_t *src, zip_uint64_t start, zip_uint64_t len, uLong *crcp, zip_error_t *error)
 {
     Bytef buf[BUFSIZE];
-    size_t n;
+    zip_int64_t n;
 
     *crcp = crc32(0L, Z_NULL, 0);
 
-    if (fseeko(fp, start, SEEK_SET) != 0) {
-	_zip_error_set(errp, ZIP_ER_SEEK, errno);
+    if (start > ZIP_INT64_MAX) {
+	zip_error_set(error, ZIP_ER_SEEK, EFBIG);
+	return -1;
+    }
+
+    if (zip_source_seek(src, (zip_int64_t)start, SEEK_SET) != 0) {
+	_zip_error_set_from_source(error, src);
 	return -1;
     }
     
     while (len > 0) {
-	n = len > BUFSIZE ? BUFSIZE : (size_t)len;
-	if ((n=fread(buf, 1, n, fp)) == 0) {
-	    _zip_error_set(errp, ZIP_ER_READ, errno);
+	n = (zip_int64_t)(len > BUFSIZE ? BUFSIZE : len);
+	if ((n = zip_source_read(src, buf, (zip_uint64_t)n)) < 0) {
+	    _zip_error_set_from_source(error, src);
+	    return -1;
+	}
+	if (n == 0) {
+	    zip_error_set(error, ZIP_ER_EOF, 0);
 	    return -1;
 	}
 
 	*crcp = crc32(*crcp, buf, (uInt)n);
 
-	len-= n;
+	len -= (zip_uint64_t)n;
     }
 
     return 0;

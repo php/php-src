@@ -4,7 +4,7 @@ Bug #14293 (serialize() and __sleep())
 <?php 
 class t
 {
-	function t()
+	function __construct()
 	{
 		$this->a = 'hello';
 	}

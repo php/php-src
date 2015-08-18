@@ -119,27 +119,27 @@ NULL
 
 -- Testing with first argument value: float(10.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Testing with first argument value: float(-10.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Testing with first argument value: float(123456789000)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Testing with first argument value: float(1.23456789E-9)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Testing with first argument value: float(0.5)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Testing with first argument value: NULL

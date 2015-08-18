@@ -1,5 +1,7 @@
 --TEST--
 Test scandir() function : usage variations - diff data types as $sorting_order arg
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
@@ -227,37 +229,37 @@ array(2) {
 
 -- Iteration 16 --
 
-Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: scandir() expects parameter 2 to be long, array given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: scandir() expects parameter 2 to be long, string given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: scandir() expects parameter 2 to be long, object given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 23 --
@@ -278,6 +280,6 @@ array(2) {
 
 -- Iteration 25 --
 
-Warning: scandir() expects parameter 2 to be long, resource given in %s on line %d
+Warning: scandir() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 ===DONE===

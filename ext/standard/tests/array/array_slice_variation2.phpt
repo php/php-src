@@ -152,16 +152,9 @@ array(4) {
 }
 
 -- Iteration 7 --
-array(4) {
-  ["one"]=>
-  int(1)
-  [0]=>
-  int(2)
-  ["three"]=>
-  int(3)
-  [1]=>
-  int(4)
-}
+
+Warning: array_slice() expects parameter 2 to be integer, float given in %s on line %d
+NULL
 
 -- Iteration 8 --
 array(4) {
@@ -257,32 +250,32 @@ array(4) {
 
 -- Iteration 16 --
 
-Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_slice() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

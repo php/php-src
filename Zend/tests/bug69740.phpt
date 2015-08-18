@@ -22,7 +22,7 @@ foreach (generate() as $i) {
 1
 finally
 
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

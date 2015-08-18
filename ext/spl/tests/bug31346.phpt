@@ -15,5 +15,4 @@ $i->next();
 ?>
 ===DONE===
 --EXPECTF--
-Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sbug31346.php on line %d
 ===DONE===

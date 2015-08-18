@@ -51,6 +51,7 @@ ldap_delete($link, "cn=userE,$base");
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
+Deprecated: Function ldap_sort() is deprecated in %s.php on line %d
 bool(true)
 array(7) {
   ["count"]=>

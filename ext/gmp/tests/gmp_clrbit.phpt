@@ -10,7 +10,7 @@ gmp_clrbit($n, 0);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(-1);
-gmp_clrbit($n, -1);
+var_dump(gmp_clrbit($n, -1));
 var_dump(gmp_strval($n));
 
 $n = gmp_init("1000000");
@@ -35,10 +35,11 @@ gmp_clrbit();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "0"
 
 Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
+bool(false)
 string(2) "-1"
 
 Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d

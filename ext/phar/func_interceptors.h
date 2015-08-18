@@ -20,12 +20,12 @@
 /* $Id$ */
 
 BEGIN_EXTERN_C()
-void phar_intercept_functions(TSRMLS_D);
-void phar_release_functions(TSRMLS_D);
-void phar_intercept_functions_init(TSRMLS_D);
-void phar_intercept_functions_shutdown(TSRMLS_D);
-void phar_save_orig_functions(TSRMLS_D);
-void phar_restore_orig_functions(TSRMLS_D);
+void phar_intercept_functions(void);
+void phar_release_functions(void);
+void phar_intercept_functions_init(void);
+void phar_intercept_functions_shutdown(void);
+void phar_save_orig_functions(void);
+void phar_restore_orig_functions(void);
 END_EXTERN_C()
 
 /*

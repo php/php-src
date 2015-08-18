@@ -2,6 +2,7 @@
 Bug #60227 (header() cannot detect the multi-line header with CR), CRLF
 --INI--
 expose_php=0
+default_charset=UTF-8
 --FILE--
 <?php
 header("X-foo: e\r\nfoo");

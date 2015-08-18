@@ -1,5 +1,5 @@
 --TEST--
-Bug #55871 (Interruption in substr_replace())
+Bug #55871 (Interruption in substr_replace()) (PHP7)
 --FILE--
 <?php
 class test1 {
@@ -25,23 +25,29 @@ class test3 {
 
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test1), 40, 0);
-var_dump($out);
+var_dump($out, $my_var);
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test2), 40, 0);
-var_dump($out);
+var_dump($out, $my_var);
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test3), 40, 0);
-var_dump($out);
+var_dump($out, $my_var);
 --EXPECTF--
-
-Warning: substr_replace(): Argument was modified while replacing in %s on line %d
-array(0) {
+array(1) {
+  [0]=>
+  string(40) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 }
-
-Warning: substr_replace(): Argument was modified while replacing in %s on line %d
-array(0) {
+array(1) {
+  [0]=>
+  string(0) ""
 }
-
-Warning: substr_replace(): Argument was modified while replacing in %s on line %d
-array(0) {
+array(1) {
+  [0]=>
+  string(40) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 }
+int(134512640)
+array(1) {
+  [0]=>
+  string(40) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+}
+string(48) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"

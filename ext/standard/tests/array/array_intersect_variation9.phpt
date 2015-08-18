@@ -92,10 +92,6 @@ Notice: Array to string conversion in %sarray_intersect_variation9.php on line %
 Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
 
 Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
 array(4) {
   [0]=>
   array(4) {
@@ -139,14 +135,6 @@ array(4) {
   }
 }
 - With more arguments -
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
-
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
 
 Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
 

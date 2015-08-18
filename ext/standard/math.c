@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
+#include "zend_exceptions.h"
 
 #include <math.h>
 #include <float.h>
@@ -144,7 +145,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	if (!php_math_is_finite(value)) {
 		return value;
 	}
-	
+
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
@@ -181,7 +182,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 
 	/* round the temp value */
 	tmp_value = php_round_helper(tmp_value, mode);
-	
+
 	/* see if it makes sense to use simple division to round the value */
 	if (abs(places) < 23) {
 		if (places > 0) {
@@ -219,7 +220,16 @@ static double php_asinh(double z)
 #ifdef HAVE_ASINH
 	return(asinh(z));
 #else
+# ifdef _WIN64
+	if (z >= 0) {
+		return log(z + sqrt(z * z + 1));
+	}
+	else {
+		return -log(-z + sqrt(z * z + 1));
+	}
+# else
 	return(log(z + sqrt(1 + pow(z, 2))) / log(M_E));
+# endif
 #endif
 }
 /* }}} */
@@ -231,7 +241,15 @@ static double php_acosh(double x)
 #ifdef HAVE_ACOSH
 	return(acosh(x));
 #else
+# ifdef _WIN64
+	if (x >= 1) {
+		return log(x + sqrt(x * x - 1));
+	} else {
+		return (DBL_MAX+DBL_MAX)-(DBL_MAX+DBL_MAX);
+	}
+# else
 	return(log(x + sqrt(x * x - 1)));
+# endif
 #endif
 }
 /* }}} */
@@ -274,44 +292,57 @@ static double php_expm1(double x)
 
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
-PHP_FUNCTION(abs) 
+PHP_FUNCTION(abs)
 {
-	zval **value;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	zval *value;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	convert_scalar_to_number_ex(value);
-	
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(fabs(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		if (Z_LVAL_PP(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
+			RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
 		} else {
-			RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
+			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
 	}
 	RETURN_FALSE;
 }
-/* }}} */ 
+/* }}} */
 
 /* {{{ proto float ceil(float number)
    Returns the next highest integer value of the number */
-PHP_FUNCTION(ceil) 
+PHP_FUNCTION(ceil)
 {
-	zval **value;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	zval *value;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	convert_scalar_to_number_ex(value);
 
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(ceil(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_PP(value));
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
 }
@@ -321,18 +352,24 @@ PHP_FUNCTION(ceil)
    Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
 {
-	zval **value;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	zval *value;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	convert_scalar_to_number_ex(value);
 
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(floor(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_PP(value));
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		RETURN_DOUBLE(zval_get_double(value));
 	}
 	RETURN_FALSE;
 }
@@ -342,13 +379,13 @@ PHP_FUNCTION(floor)
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
-	zval **value;
+	zval *value;
 	int places = 0;
-	long precision = 0;
-	long mode = PHP_ROUND_HALF_UP;
+	zend_long precision = 0;
+	zend_long mode = PHP_ROUND_HALF_UP;
 	double return_val;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ll", &value, &precision, &mode) == FAILURE) {
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &value, &precision, &mode) == FAILURE) {
 		return;
 	}
 
@@ -357,17 +394,17 @@ PHP_FUNCTION(round)
 	}
 	convert_scalar_to_number_ex(value);
 
-	switch (Z_TYPE_PP(value)) {
+	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
 			/* Simple case - long that doesn't need to be rounded. */
 			if (places >= 0) {
-				RETURN_DOUBLE((double) Z_LVAL_PP(value));
+				RETURN_DOUBLE((double) Z_LVAL_P(value));
 			}
 			/* break omitted intentionally */
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_PP(value) == IS_LONG) ? (double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
-			return_val = _php_math_round(return_val, places, mode);
+			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
+			return_val = _php_math_round(return_val, (int)places, (int)mode);
 			RETURN_DOUBLE(return_val);
 			break;
 
@@ -384,9 +421,15 @@ PHP_FUNCTION(sin)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(sin(num));
 }
 /* }}} */
@@ -396,10 +439,16 @@ PHP_FUNCTION(sin)
 PHP_FUNCTION(cos)
 {
 	double num;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(cos(num));
 }
 /* }}} */
@@ -410,9 +459,15 @@ PHP_FUNCTION(tan)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(tan(num));
 }
 /* }}} */
@@ -423,9 +478,15 @@ PHP_FUNCTION(asin)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(asin(num));
 }
 /* }}} */
@@ -436,9 +497,15 @@ PHP_FUNCTION(acos)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(acos(num));
 }
 /* }}} */
@@ -449,9 +516,15 @@ PHP_FUNCTION(atan)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(atan(num));
 }
 /* }}} */
@@ -462,9 +535,16 @@ PHP_FUNCTION(atan2)
 {
 	double num1, num2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd", &num1, &num2) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd", &num1, &num2) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(num1)
+		Z_PARAM_DOUBLE(num2)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(atan2(num1, num2));
 }
 /* }}} */
@@ -475,9 +555,15 @@ PHP_FUNCTION(sinh)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(sinh(num));
 }
 /* }}} */
@@ -488,9 +574,15 @@ PHP_FUNCTION(cosh)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(cosh(num));
 }
 /* }}} */
@@ -501,9 +593,15 @@ PHP_FUNCTION(tanh)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(tanh(num));
 }
 /* }}} */
@@ -514,9 +612,15 @@ PHP_FUNCTION(asinh)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(php_asinh(num));
 }
 /* }}} */
@@ -526,10 +630,16 @@ PHP_FUNCTION(asinh)
 PHP_FUNCTION(acosh)
 {
 	double num;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(php_acosh(num));
 }
 /* }}} */
@@ -540,9 +650,15 @@ PHP_FUNCTION(atanh)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE(php_atanh(num));
 }
 /* }}} */
@@ -561,9 +677,15 @@ PHP_FUNCTION(is_finite)
 {
 	double dval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(dval)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_BOOL(zend_finite(dval));
 }
 /* }}} */
@@ -574,9 +696,15 @@ PHP_FUNCTION(is_infinite)
 {
 	double dval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(dval)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_BOOL(zend_isinf(dval));
 }
 /* }}} */
@@ -587,9 +715,15 @@ PHP_FUNCTION(is_nan)
 {
 	double dval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &dval) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(dval)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_BOOL(zend_isnan(dval));
 }
 /* }}} */
@@ -600,11 +734,11 @@ PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/", &zbase, &zexp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/z/", &zbase, &zexp) == FAILURE) {
 		return;
 	}
 
-	pow_function(return_value, zbase, zexp TSRMLS_CC);
+	pow_function(return_value, zbase, zexp);
 }
 /* }}} */
 
@@ -614,9 +748,15 @@ PHP_FUNCTION(exp)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETURN_DOUBLE(exp(num));
 }
@@ -625,33 +765,47 @@ PHP_FUNCTION(exp)
 /* {{{ proto float expm1(float number)
    Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
 /*
-   WARNING: this function is expermental: it could change its name or 
+   WARNING: this function is expermental: it could change its name or
    disappear in the next version of PHP!
 */
 PHP_FUNCTION(expm1)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE(php_expm1(num));
 }
 /* }}} */
 
 /* {{{ proto float log1p(float number)
-   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */ 
+   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
 /*
-   WARNING: this function is expermental: it could change its name or 
+   WARNING: this function is expermental: it could change its name or
    disappear in the next version of PHP!
 */
 PHP_FUNCTION(log1p)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE(php_log1p(num));
 }
 /* }}} */
@@ -661,22 +815,43 @@ PHP_FUNCTION(log1p)
 PHP_FUNCTION(log)
 {
 	double num, base = 0;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|d", &num, &base) == FAILURE) {
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d|d", &num, &base) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_DOUBLE(num)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DOUBLE(base)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	if (ZEND_NUM_ARGS() == 1) {
 		RETURN_DOUBLE(log(num));
 	}
+
+#ifdef HAVE_LOG2
+	if (base == 2.0) {
+		RETURN_DOUBLE(log2(num));
+	}
+#endif
+
+	if (base == 10.0) {
+		RETURN_DOUBLE(log10(num));
+	}
+
+	if (base == 1.0) {
+		RETURN_DOUBLE(php_get_nan());
+	}
+
 	if (base <= 0.0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "base must be greater than 0");				
+		php_error_docref(NULL, E_WARNING, "base must be greater than 0");
 		RETURN_FALSE;
 	}
-	if (base == 1) {
-		RETURN_DOUBLE(php_get_nan());
-	} else {
-		RETURN_DOUBLE(log(num) / log(base));
-	}
+
+	RETURN_DOUBLE(log(num) / log(base));
 }
 /* }}} */
 
@@ -686,9 +861,16 @@ PHP_FUNCTION(log10)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE(log10(num));
 }
 /* }}} */
@@ -699,22 +881,37 @@ PHP_FUNCTION(sqrt)
 {
 	double num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE(sqrt(num));
 }
 /* }}} */
 
 /* {{{ proto float hypot(float num1, float num2)
-   Returns sqrt(num1*num1 + num2*num2) */ 
+   Returns sqrt(num1*num1 + num2*num2) */
 PHP_FUNCTION(hypot)
 {
 	double num1, num2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd", &num1, &num2) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd", &num1, &num2) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(num1)
+		Z_PARAM_DOUBLE(num2)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 #if HAVE_HYPOT
 	RETURN_DOUBLE(hypot(num1, num2));
 #elif defined(_MSC_VER)
@@ -731,9 +928,15 @@ PHP_FUNCTION(deg2rad)
 {
 	double deg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &deg) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &deg) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(deg)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	RETURN_DOUBLE((deg / 180.0) * M_PI);
 }
 /* }}} */
@@ -744,9 +947,16 @@ PHP_FUNCTION(rad2deg)
 {
 	double rad;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &rad) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &rad) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(rad)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE((rad / M_PI) * 180);
 }
 /* }}} */
@@ -755,10 +965,10 @@ PHP_FUNCTION(rad2deg)
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-PHPAPI long _php_math_basetolong(zval *arg, int base)
+PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 {
-	long num = 0, digit, onum;
-	int i;
+	zend_long num = 0, digit, onum;
+	zend_long i;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -769,12 +979,12 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 
 	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
-		
+
 		digit = (c >= '0' && c <= '9') ? c - '0'
 			: (c >= 'A' && c <= 'Z') ? c - 'A' + 10
 			: (c >= 'a' && c <= 'z') ? c - 'a' + 10
 			: base;
-		
+
 		if (digit >= base) {
 			continue;
 		}
@@ -785,10 +995,9 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 			continue;
 
 		{
-			TSRMLS_FETCH();
 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-			return LONG_MAX;
+			php_error_docref(NULL, E_WARNING, "Number '%s' is too big to fit in long", s);
+			return ZEND_LONG_MAX;
 		}
 	}
 
@@ -802,12 +1011,12 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
  */
 PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
-	long num = 0;
+	zend_long num = 0;
 	double fnum = 0;
-	int i;
+	zend_long i;
 	int mode = 0;
 	char c, *s;
-	long cutoff;
+	zend_long cutoff;
 	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -816,38 +1025,38 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 
 	s = Z_STRVAL_P(arg);
 
-	cutoff = LONG_MAX / base;
-	cutlim = LONG_MAX % base;
-	
+	cutoff = ZEND_LONG_MAX / base;
+	cutlim = ZEND_LONG_MAX % base;
+
 	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
-		if (c >= '0' && c <= '9') 
+		if (c >= '0' && c <= '9')
 			c -= '0';
-		else if (c >= 'A' && c <= 'Z') 
+		else if (c >= 'A' && c <= 'Z')
 			c -= 'A' - 10;
-		else if (c >= 'a' && c <= 'z') 
+		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
 		else
 			continue;
 
 		if (c >= base)
 			continue;
-		
+
 		switch (mode) {
 		case 0: /* Integer */
 			if (num < cutoff || (num == cutoff && c <= cutlim)) {
 				num = num * base + c;
 				break;
 			} else {
-				fnum = num;
+				fnum = (double)num;
 				mode = 1;
 			}
 			/* fall-through */
 		case 1: /* Float */
 			fnum = fnum * base + c;
-		}	
+		}
 	}
 
 	if (mode == 1) {
@@ -864,15 +1073,15 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI char * _php_math_longtobase(zval *arg, int base)
+PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(unsigned long) << 3) + 1];
+	char buf[(sizeof(zend_ulong) << 3) + 1];
 	char *ptr, *end;
-	unsigned long value;
+	zend_ulong value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	value = Z_LVAL_P(arg);
@@ -885,7 +1094,7 @@ PHPAPI char * _php_math_longtobase(zval *arg, int base)
 		value /= base;
 	} while (ptr > buf && value);
 
-	return estrndup(ptr, end - ptr);
+	return zend_string_init(ptr, end - ptr, 0);
 }
 /* }}} */
 
@@ -894,12 +1103,12 @@ PHPAPI char * _php_math_longtobase(zval *arg, int base)
  * Convert a zval to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
+PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
-		return STR_EMPTY_ALLOC();
+		return ZSTR_EMPTY_ALLOC();
 	}
 
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
@@ -909,8 +1118,8 @@ PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number too large");
-			return STR_EMPTY_ALLOC();
+			php_error_docref(NULL, E_WARNING, "Number too large");
+			return ZSTR_EMPTY_ALLOC();
 		}
 
 		end = ptr = buf + sizeof(buf) - 1;
@@ -921,24 +1130,24 @@ PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 			fvalue /= base;
 		} while (ptr > buf && fabs(fvalue) >= 1);
 
-		return estrndup(ptr, end - ptr);
+		return zend_string_init(ptr, end - ptr, 0);
 	}
-	
+
 	return _php_math_longtobase(arg, base);
-}	
+}
 /* }}} */
 
 /* {{{ proto int bindec(string binary_number)
    Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
 {
-	zval **arg;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 2, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 2, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -948,13 +1157,13 @@ PHP_FUNCTION(bindec)
    Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
 {
-	zval **arg;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 16, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 16, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -964,13 +1173,13 @@ PHP_FUNCTION(hexdec)
    Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
 {
-	zval **arg;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 8, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 8, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -980,15 +1189,15 @@ PHP_FUNCTION(octdec)
    Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 2);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 2);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -996,15 +1205,15 @@ PHP_FUNCTION(decbin)
    Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 8);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 8);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1012,15 +1221,15 @@ PHP_FUNCTION(decoct)
    Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 16);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 16);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1028,49 +1237,49 @@ PHP_FUNCTION(dechex)
    Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
-	zval **number, temp;
-	long frombase, tobase;
-	char *result;
+	zval *number, temp;
+	zend_long frombase, tobase;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zll", &number, &frombase, &tobase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zll", &number, &frombase, &tobase) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(number);
-	
+
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%ld)", frombase);
+		php_error_docref(NULL, E_WARNING, "Invalid `from base' (%pd)", frombase);
 		RETURN_FALSE;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%ld)", tobase);
+		php_error_docref(NULL, E_WARNING, "Invalid `to base' (%pd)", tobase);
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(*number, frombase, &temp) == FAILURE) {
+	if(_php_math_basetozval(number, (int)frombase, &temp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	result = _php_math_zvaltobase(&temp, tobase TSRMLS_CC);
-	RETVAL_STRING(result, 0);
-} 
+	result = _php_math_zvaltobase(&temp, (int)tobase);
+	RETVAL_STR(result);
+}
 /* }}} */
 
-/* {{{ _php_math_number_format 
+/* {{{ _php_math_number_format
 */
-PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
+PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len,
-		int *result_len)
+PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_point,
+		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
 {
-	char *tmpbuf = NULL, *resbuf;
+	zend_string *res;
+	zend_string *tmpbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
 	int integral;
-	int tmplen, reslen=0;
-	int count=0;
+	int reslen = 0;
+	int count = 0;
 	int is_negative=0;
 
 	if (d < 0) {
@@ -1080,44 +1289,40 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 
 	dec = MAX(0, dec);
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
-
-	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
-
-	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
-		if (result_len) {
-			*result_len = tmplen;
-		}
-
+	tmpbuf = strpprintf(0, "%.*F", dec, d);
+	if (tmpbuf == NULL) {
+		return NULL;
+	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 
 	/* find decimal point, if expected */
 	if (dec) {
-		dp = strpbrk(tmpbuf, ".,");
+		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
 	} else {
 		dp = NULL;
 	}
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = dp - tmpbuf;
+		integral = (int)(dp - ZSTR_VAL(tmpbuf));
 	} else {
 		/* no decimal point was found */
-		integral = tmplen;
+		integral = (int)ZSTR_LEN(tmpbuf);
 	}
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral += thousand_sep_len * ((integral-1) / 3);
+		integral += (int)(thousand_sep_len * ((integral-1) / 3));
 	}
-	
+
 	reslen = integral;
-	
+
 	if (dec) {
 		reslen += dec;
 
 		if (dec_point) {
-			reslen += dec_point_len;
+			reslen += (int)dec_point_len;
 		}
 	}
 
@@ -1125,24 +1330,24 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	if (is_negative) {
 		reslen++;
 	}
-	resbuf = (char *) emalloc(reslen+1); /* +1 for NUL terminator */
+	res = zend_string_alloc(reslen, 0);
 
-	s = tmpbuf+tmplen-1;
-	t = resbuf+reslen;
+	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
+	t = ZSTR_VAL(res) + reslen;
 	*t-- = '\0';
 
 	/* copy the decimal places.
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		int declen = dp ? s - dp : 0;
+		int declen = (int)(dp ? s - dp : 0);
 		int topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
 			*t-- = '0';
 		}
-		
+
 		if (dp) {
 			s -= declen + 1; /* +1 to skip the point */
 			t -= declen;
@@ -1160,9 +1365,9 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 
 	/* copy the numbers before the decimal point, adding thousand
 	 * separator every three digits */
-	while(s >= tmpbuf) {
+	while (s >= ZSTR_VAL(tmpbuf)) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
+		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1173,43 +1378,41 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 		*t-- = '-';
 	}
 
-	efree(tmpbuf);
-	
-	if (result_len) {
-		*result_len = reslen;
-	}
-
-	return resbuf;
+	ZSTR_LEN(res) = reslen;
+	zend_string_release(tmpbuf);
+	return res;
 }
-
-PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
-{
-	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
-			thousand_sep, thousand_sep_len, NULL);
-}
-/* }}} */
 
 /* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_separator, string thousands_separator]])
    Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
 	double num;
-	long dec = 0;
+	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	int thousand_sep_len = 0, dec_point_len = 0;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
+	size_t thousand_sep_len = 0, dec_point_len = 0;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_DOUBLE(num)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(dec)
+		Z_PARAM_STRING_EX(dec_point, dec_point_len, 1, 0)
+		Z_PARAM_STRING_EX(thousand_sep, thousand_sep_len, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
-		RETURN_STRING(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr), 0);
+		RETURN_STR(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr));
 		break;
 	case 2:
-		RETURN_STRING(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr), 0);
+		RETURN_STR(_php_math_number_format(num, (int)dec, dec_point_chr, thousand_sep_chr));
 		break;
 	case 4:
 		if (dec_point == NULL) {
@@ -1222,10 +1425,8 @@ PHP_FUNCTION(number_format)
 			thousand_sep_len = 1;
 		}
 
-		Z_TYPE_P(return_value) = IS_STRING;
-		Z_STRVAL_P(return_value) = _php_math_number_format_ex_len(num, dec,
-				dec_point, dec_point_len, thousand_sep, thousand_sep_len,
-				&Z_STRLEN_P(return_value));
+		RETVAL_STR(_php_math_number_format_ex(num, (int)dec,
+				dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -1240,14 +1441,44 @@ PHP_FUNCTION(fmod)
 {
 	double num1, num2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd",  &num1, &num2) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd",  &num1, &num2) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(num1)
+		Z_PARAM_DOUBLE(num2)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
 	RETURN_DOUBLE(fmod(num1, num2));
 }
 /* }}} */
 
+/* {{{ proto int intdiv(int numerator, int divisor)
+   Returns the integer division of the numerator by the divisor */
+PHP_FUNCTION(intdiv)
+{
+	zend_long numerator, divisor;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &numerator, &divisor) == FAILURE) {
+		return;
+	}
+
+	if (divisor == 0) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+		return;
+	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
+		/* Prevent overflow error/crash ... really should not happen:
+		   We don't return a float here as that violates function contract */
+		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
+		return;
+	}
+
+	RETURN_LONG(numerator / divisor);
+}
+/* }}} */
 
 /*
  * Local variables:

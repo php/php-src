@@ -1,5 +1,5 @@
 --TEST--
-Bug #43200 (Interface implementation / inheritence not possible in abstract classes)
+Bug #43200 (Interface implementation / inheritance not possible in abstract classes)
 --FILE--
 <?php
 

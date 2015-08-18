@@ -15,8 +15,8 @@ $numbers = array(
 	"0100000000001000", //2^-1022. + 10^-Accuracy[2^-1022.]*1.01
 	"ffffffffffffef7f", //2^1024. (maximum normal double)
 	"feffffffffffef7f", //2^1024. - 10^-Accuracy[2^1024.]
-	"0100000000000000", //minumum subnormal double
-	"0200000000000000", //2nd minumum subnormal double
+	"0100000000000000", //minimum subnormal double
+	"0200000000000000", //2nd minimum subnormal double
 	"fffffffffffff000", //maximum subnormal double
 	"fefffffffffff000", //2nd maximum subnormal double
 	"0000000000000f7f", //+inf

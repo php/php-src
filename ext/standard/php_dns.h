@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,7 +34,7 @@
 			res_nsearch(res, dname, class, type, answer, anslen);
 #define php_dns_free_handle(res) \
 			res_nclose(res); \
-			php_dns_free_res(*res)
+			php_dns_free_res(res)
 
 #elif defined(HAVE_RES_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -51,15 +51,15 @@ static char php_hex2int(int c) /* {{{ */
 }
 /* }}} */
 
-PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t length, size_t *ret_length, int replace_us_by_ws) /* {{{ */
+PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t length, int replace_us_by_ws) /* {{{ */
 {
-	register unsigned int i;
+	register size_t i;
 	register unsigned const char *p1;
 	register unsigned char *p2;
 	register unsigned int h_nbl, l_nbl;
 
 	size_t decoded_len, buf_size;
-	unsigned char *retval;
+	zend_string *retval;
 
 	static unsigned int hexval_tbl[256] = {
 		64, 64, 64, 64, 64, 64, 64, 64, 64, 32, 16, 64, 64, 16, 64, 64,
@@ -96,8 +96,8 @@ PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t len
 		i--;
 	}
 
-	retval = emalloc(buf_size + 1);
-	i = length; p1 = str; p2 = retval;
+	retval = zend_string_alloc(buf_size, 0);
+	i = length; p1 = str; p2 = (unsigned char*)ZSTR_VAL(retval);
 	decoded_len = 0;
 
 	while (i > 0 && *p1 != '\0') {
@@ -138,21 +138,22 @@ PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t len
 	}
 
 	*p2 = '\0';
-	*ret_length = decoded_len;
+	ZSTR_LEN(retval) = decoded_len;
 	return retval;
 }
 /* }}} */
 
 #define PHP_QPRINT_MAXL 75
- 
-PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t length, size_t *ret_length) /* {{{ */
-{
-	unsigned long lp = 0;
-	unsigned char c, *ret, *d;
-	char *hex = "0123456789ABCDEF";
 
-	ret = safe_emalloc(3, length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1), 1);
-	d = ret;
+PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length) /* {{{ */
+{
+	zend_ulong lp = 0;
+	unsigned char c, *d;
+	char *hex = "0123456789ABCDEF";
+	zend_string *ret;
+
+	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
+	d = (unsigned char*)ZSTR_VAL(ret);
 
 	while (length--) {
 		if (((c = *str++) == '\015') && (*str == '\012') && length > 0) {
@@ -162,9 +163,9 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 			lp = 0;
 		} else {
 			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (*str == '\015'))) {
-				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f)) 
-            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL)) 
-            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL)) 
+				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f))
+            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL))
+            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL))
             || ((c > 0xef) && (c <= 0xf4) && ((lp + 9) > PHP_QPRINT_MAXL))) {
 					*d++ = '=';
 					*d++ = '\015';
@@ -186,9 +187,7 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 		}
 	}
 	*d = '\0';
-	*ret_length = d - ret;
-
-	ret = erealloc(ret, *ret_length + 1);
+	ret = zend_string_truncate(ret, d - (unsigned char*)ZSTR_VAL(ret), 0);
 	return ret;
 }
 /* }}} */
@@ -202,28 +201,30 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	char *arg1, *str_in, *str_out;
-	int arg1_len, i = 0, j = 0, k;
+	zend_string *arg1;
+	char *str_in;
+	zend_string *str_out;
+	size_t i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg1) == FAILURE) {
 		return;
 	}
-    
-	if (arg1_len == 0) {
+
+	if (ZSTR_LEN(arg1) == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-	str_in = arg1;
-	str_out = emalloc(arg1_len + 1);
+	str_in = ZSTR_VAL(arg1);
+	str_out = zend_string_alloc(ZSTR_LEN(arg1), 0);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':
-			if (str_in[i + 1] && str_in[i + 2] && 
-				isxdigit((int) str_in[i + 1]) && 
+			if (str_in[i + 1] && str_in[i + 2] &&
+				isxdigit((int) str_in[i + 1]) &&
 				isxdigit((int) str_in[i + 2]))
 			{
-				str_out[j++] = (php_hex2int((int) str_in[i + 1]) << 4) 
+				ZSTR_VAL(str_out)[j++] = (php_hex2int((int) str_in[i + 1]) << 4)
 						+ php_hex2int((int) str_in[i + 2]);
 				i += 3;
 			} else  /* check for soft line break according to RFC 2045*/ {
@@ -245,37 +246,37 @@ PHP_FUNCTION(quoted_printable_decode)
 					i += k + 1;
 				}
 				else {
-					str_out[j++] = str_in[i++];
+					ZSTR_VAL(str_out)[j++] = str_in[i++];
 				}
 			}
 			break;
 		default:
-			str_out[j++] = str_in[i++];
+			ZSTR_VAL(str_out)[j++] = str_in[i++];
 		}
 	}
-	str_out[j] = '\0';
-    
-	RETVAL_STRINGL(str_out, j, 0);
+	ZSTR_VAL(str_out)[j] = '\0';
+	ZSTR_LEN(str_out) = j;
+
+	RETVAL_NEW_STR(str_out);
 }
 /* }}} */
 
 /* {{{ proto string quoted_printable_encode(string str) */
 PHP_FUNCTION(quoted_printable_encode)
 {
-	char *str, *new_str;
-	int str_len;
-	size_t new_str_len;
+	zend_string *str;
+	zend_string *new_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) != SUCCESS) {
 		return;
 	}
 
-	if (!str_len) {
+	if (!ZSTR_LEN(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	new_str = (char *)php_quot_print_encode((unsigned char *)str, (size_t)str_len, &new_str_len);
-	RETURN_STRINGL(new_str, new_str_len, 0);
+	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), (size_t)ZSTR_LEN(str));
+	RETURN_STR(new_str);
 }
 /* }}} */
 

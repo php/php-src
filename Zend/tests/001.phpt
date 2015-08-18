@@ -44,7 +44,7 @@ int(0)
 int(2)
 int(0)
 
-Warning: Missing argument 2 for test3() in %s on line %d
+Warning: Missing argument 2 for test3()%s
 int(1)
 int(2)
 int(1)

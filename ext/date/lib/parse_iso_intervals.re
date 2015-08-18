@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -188,9 +188,9 @@ static void timelib_eat_until_separator(char **ptr)
 	}
 }
 
-static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
+static timelib_long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
 {
-	long retval = 0;
+	timelib_long retval = 0;
 
 	*tz_not_found = 0;
 
@@ -398,7 +398,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 
 /*!max:re2c */
 
-void timelib_strtointerval(char *s, int len,
+void timelib_strtointerval(char *s, size_t len,
                            timelib_time **begin, timelib_time **end,
 						   timelib_rel_time **period, int *recurrences,
 						   struct timelib_error_container **errors)

@@ -155,7 +155,7 @@ class object_class
   protected $protected_var1 = "string_1";
   protected $protected_var2;
 
-  function object_class ( ) {
+  function __construct ( ) {
     $this->value = 50;
     $this->public_var2 = 11;
     $this->private_var2 = 21;
@@ -191,7 +191,7 @@ class contains_object_class
      echo "func() is called \n";
    }
 
-   function contains_object_class () {
+   function __construct () {
      $this->class_object1 = new object_class();
      $this->class_object2 = new object_class();
      $this->class_object3 = $this->class_object1;

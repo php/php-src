@@ -6,7 +6,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -158,16 +158,16 @@ const unsigned short mbfl_docomo2uni_pua[4][3] = {
 	{0x28c2, 0x292f, 0xe63e},
 	{0x2930, 0x2934, 0xe6ac},
 	{0x2935, 0x2951, 0xe6b1},
-	{0x2952, 0x29db, 0xe6ce},	
+	{0x2952, 0x29db, 0xe6ce},
 };
 
 const unsigned short mbfl_kddi2uni_pua[7][3] = {
 	{0x26ec, 0x2838, 0xe468},
 	{0x284c, 0x2863, 0xe5b5},
 	{0x24b8, 0x24ca, 0xe5cd},
-	{0x24cb, 0x2545, 0xea80},	
-	{0x2839, 0x284b, 0xeafb},	
-	{0x2546, 0x25c0, 0xeb0e},	
+	{0x24cb, 0x2545, 0xea80},
+	{0x2839, 0x284b, 0xeafb},
+	{0x2546, 0x25c0, 0xeb0e},
 	{0x25c1, 0x25c6, 0xeb89},
 };
 
@@ -248,7 +248,7 @@ int
 mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	int i, match = 0;
-	
+
 	for (i = 0; i < n; i++) {
 		if (map[i][0] <= c && c <= map[i][1]) {
 			*w = c - map[i][0] + map[i][2];
@@ -263,7 +263,7 @@ int
 mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	int i, match = 0;
-	
+
 	for (i = 0; i < n; i++) {
 		if (map[i][2] <= c && c <= map[i][2] - map[i][0] + map[i][1]) {
 			*w = c + map[i][0] - map[i][2];
@@ -282,8 +282,8 @@ mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 		if (s >= mb_tbl_code2uni_docomo1_min + 0x00a2 &&
 			s <= mb_tbl_code2uni_docomo1_min + 0x00ad &&
 			s != mb_tbl_code2uni_docomo1_min + 0x00a3) {
-			w =  0x20E3; 	
-			*snd = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min]; 
+			w =  0x20E3;
+			*snd = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min];
 			if (*snd > 0xf000) {
 				*snd += 0x10000;
 			}
@@ -328,7 +328,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 				w += 0x10000;
 			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
 				w += 0xf0000;
-			}			
+			}
 		}
 	} else if (s >= mb_tbl_code2uni_kddi2_min && s <= mb_tbl_code2uni_kddi2_max) {
 		si = s - mb_tbl_code2uni_kddi2_min;
@@ -346,7 +346,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 				w += 0x10000;
 			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
 				w += 0xf0000;
-			}			
+			}
 		}
 	}
 	return w;
@@ -368,12 +368,12 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			}
 			w = 0x20E3;
 		} else {
-			w = mb_tbl_code2uni_sb1[si];    
+			w = mb_tbl_code2uni_sb1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
 			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
 				w += 0xf0000;
-			}			
+			}
 		}
 	} else if (s >= mb_tbl_code2uni_sb2_min && s <= mb_tbl_code2uni_sb2_max) {
 		si = s - mb_tbl_code2uni_sb2_min;
@@ -382,7 +382,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w += 0x10000;
 		} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
 			w += 0xf0000;
-		}		
+		}
 	} else if (s >= mb_tbl_code2uni_sb3_min && s <= mb_tbl_code2uni_sb3_max) {
 		si = s - mb_tbl_code2uni_sb3_min;
 		if (si >= 0x0069 && si <= 0x0072) {
@@ -394,7 +394,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 				w += 0x10000;
 			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
 				w += 0xf0000;
-			}			
+			}
 		}
 	}
 	return w;
@@ -404,7 +404,7 @@ int
 mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 {
 	int i, match = 0, c1s;
-	
+
 	if (filter->status == 1) {
 		c1s = filter->cache;
 		filter->cache = 0;
@@ -413,7 +413,7 @@ mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 			if (c1s == 0x0023) {
 				*s1 = 0x2964;
 				match = 1;
-			} else if (c1s == 0x0030) { 
+			} else if (c1s == 0x0030) {
 				*s1 = 0x296f;
 				match = 1;
 			} else if (c1s >= 0x0031 && c1s <= 0x0039) {
@@ -429,7 +429,7 @@ mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 			filter->cache = c;
 			*s1 = -1;
 			return match;
-		}		
+		}
 
 		if (c == 0x00A9) {
 			*s1 = 0x29b5; match = 1;
@@ -446,13 +446,13 @@ mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter)
 			if (i >= 0) {
 				*s1 = mb_tbl_uni_docomo2code3_value[i];
 				match = 1;
-			}			
+			}
 		} else if (c >= mb_tbl_uni_docomo2code5_min && c <= mb_tbl_uni_docomo2code5_max) {
 			i = mbfl_bisec_srch2(c - 0xf0000, mb_tbl_uni_docomo2code5_key, mb_tbl_uni_docomo2code5_len);
 			if (i >= 0) {
 				*s1 = mb_tbl_uni_docomo2code5_val[i];
 				match = 1;
-			} 			
+			}
 		}
 	}
 
@@ -463,7 +463,7 @@ int
 mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 {
 	int i, match = 0, c1s;
-	
+
 	if (filter->status == 1) {
 		c1s = filter->cache;
 		filter->cache = 0;
@@ -472,7 +472,7 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 			if (c1s == 0x0023) {
 				*s1 = 0x25bc;
 				match = 1;
-			} else if (c1s == 0x0030) { 
+			} else if (c1s == 0x0030) {
 				*s1 = 0x2830;
 				match = 1;
 			} else if (c1s >= 0x0031 && c1s <= 0x0039) {
@@ -482,7 +482,7 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 		} else if ((c >= NFLAGS(0x41) && c <= NFLAGS(0x5A)) && (c1s >= NFLAGS(0x41) && c1s <= NFLAGS(0x5A))) {
 			for (i=0; i<10; i++) {
 				if (c1s == NFLAGS(nflags_s[i][0]) && c == NFLAGS(nflags_s[i][1])) {
-					*s1 = nflags_code_kddi[i]; 
+					*s1 = nflags_code_kddi[i];
 					match = 1;
 					break;
 				}
@@ -500,7 +500,7 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 			filter->cache = c;
 			*s1 = -1;
 			return match;
-		}		
+		}
 
 		if (c == 0x00A9) {
 			*s1 = 0x27dc; match = 1;
@@ -523,10 +523,10 @@ mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
 			if (i >= 0) {
 				*s1 = mb_tbl_uni_kddi2code5_val[i];
 				match = 1;
-			} 			
-		}		
+			}
+		}
 	}
-	
+
 	return match;
 }
 
@@ -534,7 +534,7 @@ int
 mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 {
 	int i, match = 0, c1s;
-	
+
 	if (filter->status == 1) {
 		filter->status = 0;
 		c1s = filter->cache;
@@ -543,7 +543,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 			if (c1s == 0x0023) {
 				*s1 = 0x2817;
 				match = 1;
-			} else if (c1s == 0x0030) { 
+			} else if (c1s == 0x0030) {
 				*s1 = 0x282c;
 				match = 1;
 			} else if (c1s >= 0x0031 && c1s <= 0x0039) {
@@ -553,7 +553,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 		} else if ((c >= NFLAGS(0x41) && c <= NFLAGS(0x5A)) && (c1s >= NFLAGS(0x41) && c1s <= NFLAGS(0x5A))) {
 			for (i=0; i<10; i++) {
 				if (c1s == NFLAGS(nflags_s[i][0]) && c == NFLAGS(nflags_s[i][1])) {
-					*s1 = nflags_code_sb[i]; 
+					*s1 = nflags_code_sb[i];
 					match = 1;
 					break;
 				}
@@ -570,7 +570,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 			filter->cache = c;
 			*s1 = -1;
 			return match;
-		}		
+		}
 
 		if (c == 0x00A9) {
 			*s1 = 0x2855; match = 1;
@@ -593,8 +593,8 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 			if (i >= 0) {
 				*s1 = mb_tbl_uni_sb2code5_val[i];
 				match = 1;
-			} 			
-		}		
+			}
+		}
 	}
 	return match;
 }
@@ -666,7 +666,7 @@ retry:
 				} else if (s >= (94*94) && s < (114*94)) {		/* user (95ku - 114ku) */
 					w = s - (94*94) + 0xe000;
 				}
-				
+
  				if (s >= (94*94) && s < 119*94) {
 					if (filter->from->no_encoding == mbfl_no_encoding_sjis_docomo) {
 						w = mbfilter_sjis_emoji_docomo2unicode(s, &snd);
@@ -679,7 +679,7 @@ retry:
 					if (w > 0  && snd > 0) {
 						CK((*filter->output_function)(snd, filter->data));
 					}
-				}		
+				}
 			}
 			if (w <= 0) {
 				w = (s1 << 8) | s2;
@@ -698,7 +698,7 @@ retry:
 		break;
 	/* ESC : Softbank Emoji */
 	case 2:
-		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb && 
+		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb &&
 			c == 0x24) {
 				filter->cache = c;
 				filter->status++;
@@ -712,7 +712,7 @@ retry:
 
 	/* ESC $ : Softbank Emoji */
 	case 3:
-		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb && 
+		if (filter->from->no_encoding == mbfl_no_encoding_sjis_sb &&
 			((c >= 0x45 && c <= 0x47) || (c >= 0x4f && c <= 0x51))) {
 				filter->cache = c;
 				filter->status++;
@@ -734,27 +734,27 @@ retry:
 			if (c == 0x0f) {
 				w = c;
 				filter->cache = 0;
-				filter->status = 0;				
+				filter->status = 0;
 			} else {
 				if (c1 == 0x47 && c >= 0x21 && c <= 0x7a) {
-					s1 = 0x91; s2 = c;	
+					s1 = 0x91; s2 = c;
 				} else if (c1 == 0x45 && c >= 0x21 && c <= 0x7a) {
-					s1 = 0x8d; s2 = c;	
+					s1 = 0x8d; s2 = c;
 				} else if (c1 == 0x46 && c >= 0x21 && c <= 0x7a) {
-					s1 = 0x8e; s2 = c;	
+					s1 = 0x8e; s2 = c;
 				} else if (c1 == 0x4f && c >= 0x21 && c <= 0x6d) {
-					s1 = 0x92; s2 = c;	
+					s1 = 0x92; s2 = c;
 				} else if (c1 == 0x50 && c >= 0x21 && c <= 0x6c) {
-					s1 = 0x95; s2 = c;	
+					s1 = 0x95; s2 = c;
 				} else if (c1 == 0x51 && c >= 0x21 && c <= 0x5e) {
-					s1 = 0x96; s2 = c;	
+					s1 = 0x96; s2 = c;
 				}
 				s  = (s1 - 0x21)*94 + s2 - 0x21;
 				w = mbfilter_sjis_emoji_sb2unicode(s, &snd);
 				if (w > 0) {
 					if (snd > 0) {
 						CK((*filter->output_function)(snd, filter->data));
-					}					
+					}
 					CK((*filter->output_function)(w, filter->data));
 				}
 			}

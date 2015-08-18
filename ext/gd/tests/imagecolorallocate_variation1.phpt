@@ -137,27 +137,27 @@ NULL
 
 -- float 10.5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- float -10.5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- float 10.1234567e10 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- float 10.7654321E-10 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- float .5 --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- empty array --

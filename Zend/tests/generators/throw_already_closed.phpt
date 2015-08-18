@@ -17,7 +17,7 @@ $gen->throw(new Exception('test'));
 --EXPECTF--
 bool(false)
 
-Fatal error: Uncaught exception 'Exception' with message 'test' in %s:%d
+Fatal error: Uncaught Exception: test in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

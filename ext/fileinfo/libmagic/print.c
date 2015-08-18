@@ -35,7 +35,7 @@
 #include "cdf.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.78 2015/01/06 02:04:10 christos Exp $")
 #endif  /* lint */
 
 #include <stdio.h>
@@ -61,14 +61,13 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
 	va_list va;
 	char *expanded_format = NULL;
 	int expanded_len;
-	TSRMLS_FETCH();
 
 	va_start(va, f);
 	expanded_len = vasprintf(&expanded_format, f, va);
 	va_end(va);
-	
+
 	if (expanded_len >= 0 && expanded_format) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Warning: %s", expanded_format);
+		php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
 
 		free(expanded_format);
 	}
@@ -79,12 +78,16 @@ file_fmttime(uint64_t v, int flags, char *buf)
 {
 	char *pp;
 	time_t t = (time_t)v;
-	struct tm *tm;
+	struct tm *tm = NULL;
 
 	if (flags & FILE_T_WINDOWS) {
 		struct timeval ts;
 		cdf_timestamp_to_timespec(&ts, t);
 		t = ts.tv_sec;
+	} else {
+		// XXX: perhaps detect and print something if overflow
+		// on 32 bit time_t?
+		t = (time_t)v;
 	}
 
 	if (flags & FILE_T_LOCAL) {
@@ -112,6 +115,9 @@ file_fmttime(uint64_t v, int flags, char *buf)
 			goto out;
 		pp = asctime_r(tm, buf);
 	}
+	if (tm == NULL)
+		goto out;
+	pp = asctime_r(tm, buf);
 
 	if (pp == NULL)
 		goto out;

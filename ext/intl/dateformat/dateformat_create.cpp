@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,45 +34,46 @@ extern "C" {
 }
 
 #include "dateformat_helpers.h"
+#include "zend_exceptions.h"
 
 /* {{{ */
-static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	zval		*object;
 
 	const char	*locale_str;
-	int			locale_len		= 0;
+	size_t		locale_len		= 0;
 	Locale		locale;
-    long		date_type		= 0;
-    long		time_type		= 0;
+    zend_long	date_type		= 0;
+    zend_long	time_type		= 0;
 	zval		*calendar_zv	= NULL;
 	Calendar	*calendar		= NULL;
-	long		calendar_type;
+	zend_long	calendar_type;
 	bool		calendar_owned;
-	zval		**timezone_zv	= NULL;
+	zval		*timezone_zv	= NULL;
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
-    int         pattern_str_len	= 0;
+    size_t      pattern_str_len	= 0;
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
-    int         slength			= 0;
+    int32_t     slength			= 0;
 	IntlDateFormatter_object* dfo;
+	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
-	intl_error_reset(NULL TSRMLS_CC);
+	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|Zzs",
+    if (zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(), "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "
-				"unable to parse input parameters", 0 TSRMLS_CC);
-		zval_dtor(return_value);
-		RETURN_NULL();
+				"unable to parse input parameters", 0);
+		return FAILURE;
     }
 
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	if (locale_len == 0) {
-		locale_str = intl_locale_get_default(TSRMLS_C);
+		locale_str = intl_locale_get_default();
 	}
 	locale = Locale::createFromName(locale_str);
 
@@ -80,25 +81,25 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
-				"datefmt_create: cannot call constructor twice", 0 TSRMLS_CC);
-		return;
+				"datefmt_create: cannot call constructor twice", 0);
+		return FAILURE;
 	}
 
 	/* process calendar */
 	if (datefmt_process_calendar_arg(calendar_zv, locale, "datefmt_create",
 			INTL_DATA_ERROR_P(dfo), calendar, calendar_type,
-			calendar_owned TSRMLS_CC)
+			calendar_owned)
 			== FAILURE) {
 		goto error;
 	}
 
 	/* process timezone */
-	explicit_tz = timezone_zv != NULL && Z_TYPE_PP(timezone_zv) != IS_NULL;
+	explicit_tz = timezone_zv != NULL && Z_TYPE_P(timezone_zv) != IS_NULL;
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar
 		timezone = timezone_process_timezone_argument(timezone_zv,
-				INTL_DATA_ERROR_P(dfo), "datefmt_create" TSRMLS_CC);
+				INTL_DATA_ERROR_P(dfo), "datefmt_create");
 		if (timezone == NULL) {
 			goto error;
 		}
@@ -111,7 +112,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			/* object construction -> only set global error */
 			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: "
-					"error converting pattern to UTF-16", 0 TSRMLS_CC);
+					"error converting pattern to UTF-16", 0);
 			goto error;
 		}
 	}
@@ -140,7 +141,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		}
     } else {
 		intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),	"datefmt_create: date "
-				"formatter creation failed", 0 TSRMLS_CC);
+				"formatter creation failed", 0);
 		goto error;
 	}
 
@@ -160,11 +161,8 @@ error:
 	if (calendar != NULL && calendar_owned) {
 		delete calendar;
 	}
-	if (U_FAILURE(intl_error_get_code(NULL TSRMLS_CC))) {
-		/* free_object handles partially constructed instances fine */
-		zval_dtor(return_value);
-		RETVAL_NULL();
-	}
+
+	return U_FAILURE(intl_error_get_code(NULL)) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
@@ -176,7 +174,10 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+		zval_ptr_dtor(return_value);
+		RETURN_NULL();
+	}
 }
 /* }}} */
 
@@ -185,9 +186,17 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
  */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
+	zend_error_handling error_handling;
+
+	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = getThis();
-	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
+		}
+	}
+	zend_restore_error_handling(&error_handling);
 }
 /* }}} */

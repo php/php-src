@@ -69,7 +69,7 @@ int fpm_scoreboard_init_main() /* {{{ */
 		wp->scoreboard->start_epoch = time(NULL);
 		strlcpy(wp->scoreboard->pool, wp->config->name, sizeof(wp->scoreboard->pool));
 	}
-	return 0;	
+	return 0;
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
   zip_set_name.c -- rename helper function
-  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,30 +31,28 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <stdlib.h>
 #include <string.h>
 
 #include "zipint.h"
 
-
 
 int
-_zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
+_zip_set_name(zip_t *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
 {
-    struct zip_entry *e;
-    struct zip_string *str;
+    zip_entry_t *e;
+    zip_string_t *str;
     int changed;
     zip_int64_t i;
 
     if (idx >= za->nentry) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
 
     if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+	zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 
@@ -71,7 +69,7 @@ _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t fl
     /* TODO: encoding flags needed for CP437? */
     if ((i=_zip_name_locate(za, name, 0, NULL)) >= 0 && (zip_uint64_t)i != idx) {
 	_zip_string_free(str);
-	_zip_error_set(&za->error, ZIP_ER_EXISTS, 0);
+	zip_error_set(&za->error, ZIP_ER_EXISTS, 0);
 	return -1;
     }
 
@@ -97,7 +95,7 @@ _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t fl
     if (changed) {
         if (e->changes == NULL) {
             if ((e->changes=_zip_dirent_clone(e->orig)) == NULL) {
-                _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+                zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 		_zip_string_free(str);
                 return -1;
             }

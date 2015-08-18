@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_cn.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -168,7 +168,7 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 		if (c == 0xff04) {
 			s = 0xa1e7;
 		} else if (c == 0xff5e) {
-			s = 0xa1ab; 
+			s = 0xa1ab;
 		} else if (c >= 0xff01 && c <= 0xff5d) {
 			s = c - 0xff01 + 0xa3a1;
 		} else if (c >= 0xffe0 && c <= 0xffe5) {

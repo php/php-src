@@ -48,7 +48,7 @@ foo.html => Content-Type: text/html; charset=UTF-8
 foo.htm => Content-Type: text/html; charset=UTF-8
 foo.svg => Content-Type: image/svg+xml
 foo.css => Content-Type: text/css; charset=UTF-8
-foo.js => Content-Type: text/javascript; charset=UTF-8
+foo.js => Content-Type: application/javascript
 foo.png => Content-Type: image/png
 foo.webm => Content-Type: video/webm
 foo.ogv => Content-Type: video/ogg

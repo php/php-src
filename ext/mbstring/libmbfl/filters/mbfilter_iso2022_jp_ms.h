@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_ja.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifndef MBFL_MBFILTER_ISO2022_JP_MS_H
@@ -36,7 +36,7 @@ extern const mbfl_encoding mbfl_encoding_2022jpms;
 extern const struct mbfl_identify_vtbl vtbl_identify_2022jpms;
 extern const struct mbfl_convert_vtbl vtbl_2022jpms_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jpms;
- 
+
 int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter);

@@ -4,6 +4,7 @@ Test umask() function : usage variation
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only for Non Windows');
 }
@@ -143,22 +144,22 @@ int(0)
 int(0)
 
 --empty array--
-Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, array given, %s(%d)
 bool(false)
 int(63)
 
 --int indexed array--
-Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, array given, %s(%d)
 bool(false)
 int(63)
 
 --associative array--
-Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, array given, %s(%d)
 bool(false)
 int(63)
 
 --nested arrays--
-Error: 2 - umask() expects parameter 1 to be long, array given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, array given, %s(%d)
 bool(false)
 int(63)
 
@@ -187,42 +188,42 @@ int(0)
 int(0)
 
 --empty string DQ--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --empty string SQ--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --string DQ--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --string SQ--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --mixed case string--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --heredoc--
-Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, string given, %s(%d)
 bool(false)
 int(63)
 
 --instance of classWithToString--
-Error: 2 - umask() expects parameter 1 to be long, object given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, object given, %s(%d)
 bool(false)
 int(63)
 
 --instance of classWithoutToString--
-Error: 2 - umask() expects parameter 1 to be long, object given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be integer, object given, %s(%d)
 bool(false)
 int(63)
 

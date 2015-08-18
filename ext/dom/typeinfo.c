@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 
 
 /*
-* class domtypeinfo 
+* class domtypeinfo
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo
 * Since: DOM Level 3
@@ -41,29 +41,27 @@ const zend_function_entry php_dom_typeinfo_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ type_name	string	
-readonly=yes 
+/* {{{ type_name	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeName
-Since: 
+Since:
 */
-int dom_typeinfo_type_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_name_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
 /* }}} */
 
-/* {{{ type_namespace	string	
-readonly=yes 
+/* {{{ type_namespace	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeNamespace
-Since: 
+Since:
 */
-int dom_typeinfo_type_namespace_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_namespace_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 

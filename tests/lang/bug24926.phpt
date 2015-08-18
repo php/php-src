@@ -9,7 +9,7 @@ class foo {
 
     public $functions = array();
     
-    function foo()
+    function __construct()
     {
         $function = create_function('', 'return "FOO\n";');
         print($function());

@@ -71,7 +71,7 @@
  *
  */
 
-/* 
+/*
  * Unicode support
  *
  * Portions copyright (c) 1999,2000,2001 by the PHP3 internationalization team.

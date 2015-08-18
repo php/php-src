@@ -451,7 +451,7 @@ function delete_file($filename) {
  Description: Deletes given number of files if exists.
    $file_path = location of the files
    $name_prefix = prefix for the filename, rest of the name is incremental(increment by 1 only)
-     numeric starting from suffix upto count
+     numeric starting from suffix up to count
    $count = number of files to be deleted
    $name_suffix = first numeric suffix in the name
  Returns: An array with following key/value pair
@@ -495,7 +495,7 @@ function delete_files($file_path,
    $file_path = location of link files 
    $link_file_count = Number of link files 
    $link_name_prefix = prefix for the linkname, rest of the name is incremental(increment by 1 only)
-     numeric starting from $link_name_suffix upto count
+     numeric starting from $link_name_suffix up to count
    $link_name_suffix = first numeric suffix in the name
 
  Returns: An array with following key/value pair

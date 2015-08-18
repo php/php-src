@@ -56,7 +56,6 @@ $min = array(true,
 			 false,
 			 null,
 			 "10",
-			 "0x10",
 			 "10.5");
 		
 // Eexepcted numerical equivalent of above non-numerics		
@@ -64,7 +63,6 @@ $minval = array(1,
 				0,
 				0,
 				10,
-				0,
 				10);
 for ($x = 0; $x < count($min); $x++) {
 	for ($i = 0; $i < 100; $i++) {
@@ -99,5 +97,4 @@ PASSED range min = 1 max = 100
 PASSED range min = 0 max = 100
 PASSED range min = 0 max = 100
 PASSED range min = 10 max = 100
-PASSED range min = 0 max = 100
 PASSED range min = 10 max = 100

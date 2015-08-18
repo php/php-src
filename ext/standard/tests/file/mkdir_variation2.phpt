@@ -2,6 +2,8 @@
 Test mkdir() function : usage variation: different types for mode
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
@@ -128,16 +130,16 @@ Directory created
 Directory created
 
 --empty array--
-Error: 2 - mkdir() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
 
 --int indexed array--
-Error: 2 - mkdir() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
 
 --associative array--
-Error: 2 - mkdir() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
 
 --nested arrays--
-Error: 2 - mkdir() expects parameter 2 to be long, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
 
 --uppercase NULL--
 Directory created
@@ -158,28 +160,28 @@ Directory created
 Directory created
 
 --empty string DQ--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --empty string SQ--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --string DQ--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --string SQ--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --mixed case string--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --heredoc--
-Error: 2 - mkdir() expects parameter 2 to be long, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
 
 --instance of classWithToString--
-Error: 2 - mkdir() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, object given, %s(%d)
 
 --instance of classWithoutToString--
-Error: 2 - mkdir() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be integer, object given, %s(%d)
 
 --undefined var--
 Directory created

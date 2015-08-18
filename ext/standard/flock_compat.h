@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #ifndef FLOCK_COMPAT_H
 #define FLOCK_COMPAT_H
 
-/* php_flock internally uses fcntl whther or not flock is available
+/* php_flock internally uses fcntl whether or not flock is available
  * This way our php_flock even works on NFS files.
  * More info: /usr/src/linux/Documentation
  */
@@ -59,7 +59,7 @@ PHPAPI int flock(int fd, int operation);
 #endif
 
 #ifndef PHP_WIN32
-extern int inet_aton(const char *, struct in_addr *); 
+extern int inet_aton(const char *, struct in_addr *);
 #endif
 #endif
 

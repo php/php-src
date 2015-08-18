@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,12 +40,14 @@
 # include "imap4r1.h"	/* location of c-client quota functions */
 #else
 # include "mail.h"
-# include "rfc822.h" 
+# include "rfc822.h"
 #endif
 
 extern zend_module_entry imap_module_entry;
 #define imap_module_ptr &imap_module_entry
 
+#include "php_version.h"
+#define PHP_IMAP_VERSION PHP_VERSION
 
 /* Data types */
 
@@ -94,7 +96,7 @@ typedef struct _php_imap_message_struct {
 	unsigned long msgid;
 	struct _php_imap_message_struct *next;
 } MESSAGELIST;
- 
+
 
 /* Functions */
 

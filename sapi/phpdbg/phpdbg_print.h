@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,6 +34,8 @@ PHPDBG_PRINT(class);
 PHPDBG_PRINT(method);
 PHPDBG_PRINT(func);
 PHPDBG_PRINT(stack);
+
+PHPDBG_API void phpdbg_print_opcodes(char *function);
 
 extern const phpdbg_command_t phpdbg_print_commands[];
 

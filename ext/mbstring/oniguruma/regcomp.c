@@ -2,7 +2,7 @@
   regcomp.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2013  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -5575,10 +5575,43 @@ onig_init(void)
 }
 
 
+static OnigEndCallListItemType* EndCallTop;
+
+extern void onig_add_end_call(void (*func)(void))
+{
+  OnigEndCallListItemType* item;
+
+  item = (OnigEndCallListItemType* )xmalloc(sizeof(*item));
+  if (item == 0) return ;
+
+  item->next = EndCallTop;
+  item->func = func;
+
+  EndCallTop = item;
+}
+
+static void
+exec_end_call_list(void)
+{
+  OnigEndCallListItemType* prev;
+  void (*func)(void);
+
+  while (EndCallTop != 0) {
+    func = EndCallTop->func;
+    (*func)();
+
+    prev = EndCallTop;
+    EndCallTop = EndCallTop->next;
+    xfree(prev);
+  }
+}
+
 extern int
 onig_end(void)
 {
   THREAD_ATOMIC_START;
+
+  exec_end_call_list();
 
 #ifdef ONIG_DEBUG_STATISTICS
   onig_print_statistics(stderr);

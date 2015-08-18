@@ -186,7 +186,7 @@ string(18) "!@#$%&*@$%#&/;:,<>"
 string(12) "hello\0world"
 
 -- Iteration 33 --
-string(73) "This is line 1 of \'heredoc\' string
+string(7%d) "This is line 1 of \'heredoc\' string
 This is line 2 of \"heredoc\" string"
 
 -- Iteration 34 --

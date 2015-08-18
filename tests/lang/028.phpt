@@ -28,7 +28,7 @@ function dafna()
 
 
 class dafna_class {
-	function dafna_class() {
+	function __construct() {
 		$this->myname = "Dafna";
 	}
 	function GetMyName() {

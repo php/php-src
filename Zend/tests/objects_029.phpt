@@ -23,4 +23,8 @@ new foo;
 
 ?>
 --EXPECTF--
-Fatal error: Access to undeclared static property: foo::$f in %s on line %d
+Fatal error: Uncaught Error: Access to undeclared static property: foo::$f in %s:%d
+Stack trace:
+#0 %s(%d): foo->__construct()
+#1 {main}
+  thrown in %s on line %d

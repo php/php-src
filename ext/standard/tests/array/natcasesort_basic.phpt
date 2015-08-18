@@ -43,10 +43,10 @@ array(5) {
 -- After Sorting: --
 bool(true)
 array(5) {
-  [3]=>
-  string(3) "a01"
   [0]=>
   string(3) "A01"
+  [3]=>
+  string(3) "a01"
   [1]=>
   string(2) "a1"
   [4]=>

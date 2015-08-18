@@ -132,17 +132,17 @@ bool(false)
 
 -- float 10.5 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: date_format() expects parameter 1 to be DateTimeInterface, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- empty array --

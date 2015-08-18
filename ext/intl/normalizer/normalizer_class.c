@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,14 +51,14 @@ zend_function_entry Normalizer_class_functions[] = {
 /* {{{ normalizer_register_Normalizer_class
  * Initialize 'Normalizer' class
  */
-void normalizer_register_Normalizer_class( TSRMLS_D )
+void normalizer_register_Normalizer_class( void )
 {
 	zend_class_entry ce;
 
 	/* Create and register 'Normalizer' class. */
 	INIT_CLASS_ENTRY( ce, "Normalizer", Normalizer_class_functions );
 	ce.create_object = NULL;
-	Normalizer_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+	Normalizer_ce_ptr = zend_register_internal_class( &ce );
 
 	/* Declare 'Normalizer' class properties. */
 	if( !Normalizer_ce_ptr )

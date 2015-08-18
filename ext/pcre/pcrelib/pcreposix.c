@@ -42,9 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for

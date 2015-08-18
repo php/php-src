@@ -23,32 +23,31 @@
 
 static char **limit_extensions = NULL;
 
-static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
+static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
-	char *duplicate;
+	zend_string *duplicate;
 
-	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry) == FAILURE) {
+	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length)) == NULL) {
 		return FAILURE;
 	}
 
-	duplicate = strdup(new_value);
+	duplicate = zend_string_init(new_value, new_value_length, 1);
 
 	if (!ini_entry->on_modify
-			|| ini_entry->on_modify(ini_entry, duplicate, new_value_length,
-				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC) == SUCCESS) {
+			|| ini_entry->on_modify(ini_entry, duplicate,
+				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
 		ini_entry->value = duplicate;
-		ini_entry->value_length = new_value_length;
 		ini_entry->modifiable = mode;
 	} else {
-		free(duplicate);
+		zend_string_release(duplicate);
 	}
 
 	return SUCCESS;
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS_DC) TSRMLS_DC) /* {{{ */
+static void fpm_php_disable(char *value, int (*zend_disable)(char *, size_t)) /* {{{ */
 {
 	char *s = 0, *e = value;
 
@@ -58,7 +57,7 @@ static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS
 			case ',':
 				if (s) {
 					*e = '\0';
-					zend_disable(s, e - s TSRMLS_CC);
+					zend_disable(s, e - s);
 					s = 0;
 				}
 				break;
@@ -72,14 +71,13 @@ static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS
 	}
 
 	if (s) {
-		zend_disable(s, e - s TSRMLS_CC);
+		zend_disable(s, e - s);
 	}
 }
 /* }}} */
 
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 {
-	TSRMLS_FETCH();
 
 	char *name = kv->key;
 	char *value = kv->value;
@@ -88,25 +86,25 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
-		php_dl(value, MODULE_PERSISTENT, &zv, 1 TSRMLS_CC);
-		return Z_BVAL(zv) ? 1 : -1;
+		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+		return Z_TYPE(zv) == IS_TRUE;
 	}
 
-	if (fpm_php_zend_ini_alter_master(name, name_len+1, value, value_len, mode, PHP_INI_STAGE_ACTIVATE TSRMLS_CC) == FAILURE) {
+	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 		return -1;
 	}
 
 	if (!strcmp(name, "disable_functions") && *value) {
 		char *v = strdup(value);
 		PG(disable_functions) = v;
-		fpm_php_disable(v, zend_disable_function TSRMLS_CC);
+		fpm_php_disable(v, zend_disable_function);
 		return 1;
 	}
 
 	if (!strcmp(name, "disable_classes") && *value) {
 		char *v = strdup(value);
 		PG(disable_classes) = v;
-		fpm_php_disable(v, zend_disable_class TSRMLS_CC);
+		fpm_php_disable(v, zend_disable_class);
 		return 1;
 	}
 
@@ -132,6 +130,7 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
+/* }}} */
 
 static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -157,37 +156,37 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 /* }}} */
 #endif
 
-char *fpm_php_script_filename(TSRMLS_D) /* {{{ */
+char *fpm_php_script_filename(void) /* {{{ */
 {
 	return SG(request_info).path_translated;
 }
 /* }}} */
 
-char *fpm_php_request_uri(TSRMLS_D) /* {{{ */
+char *fpm_php_request_uri(void) /* {{{ */
 {
 	return (char *) SG(request_info).request_uri;
 }
 /* }}} */
 
-char *fpm_php_request_method(TSRMLS_D) /* {{{ */
+char *fpm_php_request_method(void) /* {{{ */
 {
 	return (char *) SG(request_info).request_method;
 }
 /* }}} */
 
-char *fpm_php_query_string(TSRMLS_D) /* {{{ */
+char *fpm_php_query_string(void) /* {{{ */
 {
 	return SG(request_info).query_string;
 }
 /* }}} */
 
-char *fpm_php_auth_user(TSRMLS_D) /* {{{ */
+char *fpm_php_auth_user(void) /* {{{ */
 {
 	return SG(request_info).auth_user;
 }
 /* }}} */
 
-size_t fpm_php_content_length(TSRMLS_D) /* {{{ */
+size_t fpm_php_content_length(void) /* {{{ */
 {
 	return SG(request_info).content_length;
 }
@@ -195,15 +194,14 @@ size_t fpm_php_content_length(TSRMLS_D) /* {{{ */
 
 static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 {
-	TSRMLS_FETCH();
-	php_module_shutdown(TSRMLS_C);
+	php_module_shutdown();
 	sapi_shutdown();
 }
 /* }}} */
 
 void fpm_php_soft_quit() /* {{{ */
 {
-	fcgi_set_in_shutdown(1);
+	fcgi_terminate();
 }
 /* }}} */
 
@@ -258,38 +256,29 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 }
 /* }}} */
 
-char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC) /* {{{ */
+char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 {
-	zval **data, **tmp;
-	char *string_key;
-	uint string_len;
-	ulong num_key;
+	zval *data, *tmp;
+	zend_string *str;
 	if (!table || !key) {
 		return NULL;
 	}
 
 	/* inspired from ext/standard/info.c */
 
-	zend_is_auto_global(table, strlen(table) TSRMLS_CC);
+	zend_is_auto_global(table);
 
 	/* find the table and ensure it's an array */
-	if (zend_hash_find(&EG(symbol_table), table, strlen(table) + 1, (void **) &data) == SUCCESS && Z_TYPE_PP(data) == IS_ARRAY) {
-
-		/* reset the internal pointer */
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
-
-		/* parse the array to look for our key */
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
-			/* ensure the key is a string */
-			if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING) {
-				/* compare to our key */
-				if (!strncmp(string_key, key, string_len)) {
-					return Z_STRVAL_PP(tmp);
-				}
-			}
-			zend_hash_move_forward(Z_ARRVAL_PP(data));
-		}
+	data = zend_hash_find(&EG(symbol_table), table);
+	if (!data || Z_TYPE_P(data) != IS_ARRAY) {
+		return NULL;
 	}
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), str, tmp) {
+		if (str && !strncmp(ZSTR_VAL(str), key, ZSTR_LEN(str))) {
+			return Z_STRVAL_P(tmp);
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	return NULL;
 }

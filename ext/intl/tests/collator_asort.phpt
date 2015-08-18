@@ -152,18 +152,18 @@ array (
 )
  Result: true
 
-Test 3.9f25de4482bc7b58de508e278113317c:
+Test 3.d5a9747a8bd4c32cb2a705f7e6d8a56f:
 array (
-  'aa' => 'a',
-  'aaa' => 'a',
   'a' => 'a',
+  'aaa' => 'a',
+  'aa' => 'a',
 )
  Result: true
 
-Test 4.a85a41ea78e45b651080cfd98c0b431d:
+Test 4.dcc371022fa1eac76e73b0455d70790a:
 array (
-  7 => '',
   2 => NULL,
+  7 => '',
   5 => '!',
   1 => 'abc',
 )

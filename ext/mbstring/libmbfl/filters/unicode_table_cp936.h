@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -3175,7 +3175,7 @@ const int cp936_ucs_table_size = (sizeof(cp936_ucs_table)/sizeof(unsigned short)
 
 
 /* UCS -> CP936 */
-const unsigned short ucs_a1_cp936_table[] = { 
+const unsigned short ucs_a1_cp936_table[] = {
 0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,
 0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,

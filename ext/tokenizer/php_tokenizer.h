@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,6 +23,9 @@
 
 extern zend_module_entry tokenizer_module_entry;
 #define phpext_tokenizer_ptr &tokenizer_module_entry
+
+#include "php_version.h"
+#define PHP_TOKENIZER_VERSION PHP_VERSION
 
 #ifdef ZTS
 #include "TSRM.h"

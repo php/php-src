@@ -10,7 +10,7 @@ $x->test();
 ?>
 --EXPECTF--
 Notice: Undefined property: Exception::$previous in %s on line %d
-exception 'Exception' in %s:%d
+Exception in %s:%d
 Stack trace:
 #0 {main}
 

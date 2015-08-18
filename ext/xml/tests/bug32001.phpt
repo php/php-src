@@ -14,7 +14,7 @@ class testcase {
 	private $tags;
 	private $chunk_size;
 
-	function testcase($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
+	function __construct($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
 		$this->encoding = $enc;
 		$this->chunk_size = $chunk_size;
 		$this->bom = $bom;

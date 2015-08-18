@@ -6,12 +6,15 @@ modulus by zero
 $a = array(1,2,3);
 $b = array();
 
-$c = $a % $b;
-var_dump($c);
+try {
+    $c = $a % $b;
+    var_dump($c);
+} catch (DivisionByZeroError $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Division by zero in %s on line %d
-bool(false)
+--EXPECT--
+Exception: Modulo by zero
 Done

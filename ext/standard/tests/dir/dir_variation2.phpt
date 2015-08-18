@@ -126,23 +126,23 @@ Warning: dir() expects parameter 2 to be resource, integer given in %s on line %
 NULL
 
 -- Iteration 5 --
-Warning: dir() expects parameter 2 to be resource, double given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
-Warning: dir() expects parameter 2 to be resource, double given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
-Warning: dir() expects parameter 2 to be resource, double given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
-Warning: dir() expects parameter 2 to be resource, double given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
-Warning: dir() expects parameter 2 to be resource, double given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

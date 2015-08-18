@@ -150,68 +150,68 @@ Warning: sort() expects parameter 1 to be array, integer given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 10 --
 

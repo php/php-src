@@ -10,11 +10,9 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 $a="aaa\n<>";
 
 var_dump( mb_ereg("^[^><]+$",$a) );
-var_dump( ereg("^[^><]+$",$a) );
+var_dump( !!preg_match("/^[^><]+$/",$a) );
 ?>
 
 --EXPECTF--
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)

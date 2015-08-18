@@ -5,7 +5,7 @@ ZE2: set_exception_handler()
 --FILE--
 <?php
 class MyException extends Exception {
-	function MyException($_error) {
+	function __construct($_error) {
 		$this->error = $_error;	
 	}
 	

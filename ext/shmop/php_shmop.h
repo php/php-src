@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,6 +24,9 @@
 extern zend_module_entry shmop_module_entry;
 #define phpext_shmop_ptr &shmop_module_entry
 
+#include "php_version.h"
+#define PHP_SHMOP_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(shmop);
 PHP_MINFO_FUNCTION(shmop);
 
@@ -45,7 +48,7 @@ struct php_shmop
 	int shmflg;
 	int shmatflg;
 	char *addr;
-	int size;
+	zend_long size;
 };
 
 typedef struct {

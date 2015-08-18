@@ -149,68 +149,68 @@ Warning: ksort() expects parameter 1 to be array, integer given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, double given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 10 --
 

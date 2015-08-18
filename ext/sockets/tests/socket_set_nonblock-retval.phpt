@@ -21,7 +21,7 @@ var_dump(socket_set_nonblock($socket2));
 --EXPECTF--
 bool(true)
 
-Warning: socket_set_nonblock(): %d is not a valid Socket resource in %s on line %d
+Warning: socket_set_nonblock(): supplied resource is not a valid Socket resource in %s on line %d
 bool(false)
 --CREDITS--
 Robin Mehner, robin@coding-robin.de

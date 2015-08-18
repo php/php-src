@@ -24,7 +24,7 @@ Class [ <user> class just_constants ] {
     Constant [ null NULL_CONSTANT ] {  }
     Constant [ string STRING_CONSTANT ] { This is a string }
     Constant [ integer INTEGER_CONSTANT ] { 1000 }
-    Constant [ double FLOAT_CONSTANT ] { 3.14159265 }
+    Constant [ float FLOAT_CONSTANT ] { 3.14159265 }
   }
 
   - Static properties [0] {

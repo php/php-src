@@ -14,17 +14,17 @@ var_dump($di);
 --EXPECTF--
 object(DateInterval)#%d (15) {
   ["y"]=>
-  int(-1)
+  int(2)
   ["m"]=>
-  int(-1)
+  int(0)
   ["d"]=>
-  int(-1)
+  int(0)
   ["h"]=>
-  int(-1)
+  int(6)
   ["i"]=>
-  int(-1)
+  int(8)
   ["s"]=>
-  int(-1)
+  int(0)
   ["weekday"]=>
   int(10)
   ["weekday_behavior"]=>

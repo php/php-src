@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,60 +34,50 @@ static zend_object_handlers MessageFormatter_handlers;
  */
 
 /* {{{ MessageFormatter_objects_dtor */
-static void MessageFormatter_object_dtor(void *object, zend_object_handle handle TSRMLS_DC )
+static void MessageFormatter_object_dtor(zend_object *object )
 {
-	zend_objects_destroy_object( object, handle TSRMLS_CC );
+	zend_objects_destroy_object( object );
 }
 /* }}} */
 
 /* {{{ MessageFormatter_objects_free */
-void MessageFormatter_object_free( zend_object *object TSRMLS_DC )
+void MessageFormatter_object_free( zend_object *object )
 {
-	MessageFormatter_object* mfo = (MessageFormatter_object*)object;
+	MessageFormatter_object* mfo = php_intl_messageformatter_fetch_object(object);
 
-	zend_object_std_dtor( &mfo->zo TSRMLS_CC );
+	zend_object_std_dtor( &mfo->zo );
 
-	msgformat_data_free( &mfo->mf_data TSRMLS_CC );
-
-	efree( mfo );
+	msgformat_data_free( &mfo->mf_data );
 }
 /* }}} */
 
 /* {{{ MessageFormatter_object_create */
-zend_object_value MessageFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
+zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 {
-	zend_object_value    retval;
 	MessageFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(MessageFormatter_object) );
-	msgformat_data_init( &intern->mf_data TSRMLS_CC );
-	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	intern = ecalloc( 1, sizeof(MessageFormatter_object) + zend_object_properties_size(ce));
+	msgformat_data_init( &intern->mf_data );
+	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		MessageFormatter_object_dtor,
-		(zend_objects_free_object_storage_t)MessageFormatter_object_free,
-		NULL TSRMLS_CC );
+	intern->zo.handlers = &MessageFormatter_handlers;
 
-	retval.handlers = &MessageFormatter_handlers;
-
-	return retval;
+	return &intern->zo;
 }
 /* }}} */
 
 /* {{{ MessageFormatter_object_clone */
-zend_object_value MessageFormatter_object_clone(zval *object TSRMLS_DC)
+zend_object *MessageFormatter_object_clone(zval *object)
 {
-	zend_object_value new_obj_val;
-	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 	MessageFormatter_object *mfo, *new_mfo;
+	zend_object *new_obj;
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj_val = MessageFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
-	new_mfo = (MessageFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
-	/* clone standard parts */	
-	zend_objects_clone_members(&new_mfo->zo, new_obj_val, &mfo->zo, handle TSRMLS_CC);
+	new_obj = MessageFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	new_mfo = php_intl_messageformatter_fetch_object(new_obj);
+	/* clone standard parts */
+	zend_objects_clone_members(&new_mfo->zo, &mfo->zo);
 
 	/* clone formatter object */
 	if (MSG_FORMAT_OBJECT(mfo) != NULL) {
@@ -96,13 +86,13 @@ zend_object_value MessageFormatter_object_clone(zval *object TSRMLS_DC)
 
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			intl_errors_set(INTL_DATA_ERROR_P(mfo), INTL_DATA_ERROR_CODE(mfo),
-					"Failed to clone MessageFormatter object", 0 TSRMLS_CC);
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed to clone MessageFormatter object");
+					"Failed to clone MessageFormatter object", 0);
+			zend_throw_exception_ex(NULL, 0, "Failed to clone MessageFormatter object");
 		}
 	} else {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Cannot clone unconstructed MessageFormatter");
+		zend_throw_exception_ex(NULL, 0, "Cannot clone unconstructed MessageFormatter");
 	}
-	return new_obj_val;
+	return new_obj;
 }
 /* }}} */
 
@@ -160,18 +150,22 @@ static zend_function_entry MessageFormatter_class_functions[] = {
 /* {{{ msgformat_register_class
  * Initialize 'MessageFormatter' class
  */
-void msgformat_register_class( TSRMLS_D )
+void msgformat_register_class( void )
 {
 	zend_class_entry ce;
 
 	/* Create and register 'MessageFormatter' class. */
 	INIT_CLASS_ENTRY( ce, "MessageFormatter", MessageFormatter_class_functions );
 	ce.create_object = MessageFormatter_object_create;
-	MessageFormatter_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
 
 	memcpy(&MessageFormatter_handlers, zend_get_std_object_handlers(),
 		sizeof MessageFormatter_handlers);
+	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
+	MessageFormatter_handlers.dtor_obj = MessageFormatter_object_dtor;
+	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
+
 
 	/* Declare 'MessageFormatter' class properties. */
 	if( !MessageFormatter_ce_ptr )

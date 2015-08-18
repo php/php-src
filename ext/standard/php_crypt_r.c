@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -62,7 +62,7 @@ MUTEX_T php_crypt_extended_init_lock;
 #if 0
 CONDITION_VARIABLE initialized;
 #endif
-	
+
 void php_init_crypt_r()
 {
 #ifdef ZTS
@@ -206,7 +206,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 
 	/* Then something really weird... */
 	for (i = pwl; i != 0; i >>= 1) {
@@ -288,13 +288,13 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 
 	*p = '\0';
 
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 
 
 _destroyCtx1:
 	if (ctx1) {
 		if (!CryptDestroyHash(ctx1)) {
-			
+
 		}
 	}
 
@@ -318,16 +318,16 @@ _destroyProv:
  */
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 {
-	static char passwd[MD5_HASH_MAX_LEN], *p;
+	ZEND_TLS char passwd[MD5_HASH_MAX_LEN], *p;
 	const char *sp, *ep;
 	unsigned char final[16];
 	unsigned int i, sl, pwl;
 	PHP_MD5_CTX	ctx, ctx1;
 	php_uint32 l;
 	int pl;
-	
+
 	pwl = strlen(pw);
-	
+
 	/* Refine the salt first */
 	sp = salt;
 
@@ -418,7 +418,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 	*p = '\0';
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 	return (passwd);
 }
 

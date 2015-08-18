@@ -10,7 +10,7 @@ error_reporting=2047
 class MyCloneable {
 	static $id = 0;
 
-	function MyCloneable() {
+	function __construct() {
 		$this->id = self::$id++;
 	}
 
@@ -34,8 +34,15 @@ echo $clone->name . "\n";
 echo $clone->address . "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Accessing static property MyCloneable::$id as non static in %s on line %d
+
+Notice: Accessing static property MyCloneable::$id as non static in %s on line %d
 0
+
+Notice: Accessing static property MyCloneable::$id as non static in %s on line %d
+
+Notice: Accessing static property MyCloneable::$id as non static in %s on line %d
 1
 Hello
 New York

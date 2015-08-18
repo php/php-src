@@ -8,7 +8,7 @@ PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
 
 if test $PHP_SQLITE3 != "no"; then
   sqlite3_extra_sources=""
-  PHP_SQLITE3_CFLAGS=""
+  PHP_SQLITE3_CFLAGS=" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 "
 
   dnl when running phpize enable_maintainer_zts is not available
   if test -z "$enable_maintainer_zts"; then

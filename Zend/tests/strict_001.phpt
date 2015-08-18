@@ -14,6 +14,6 @@ var_dump($array[$fp]);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
 Done

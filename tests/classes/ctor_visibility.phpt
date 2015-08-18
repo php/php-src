@@ -66,4 +66,9 @@ Test::__construct()
 TestPriv::__construct()
 DerivedPriv::__construct()
 
-Fatal error: Cannot call private TestPriv::__construct() in %sctor_visibility.php on line %d
+Fatal error: Uncaught Error: Cannot call private TestPriv::__construct() in %sctor_visibility.php:%d
+Stack trace:
+#0 %s(%d): DerivedPriv->__construct()
+#1 %s(%d): DerivedPriv::f()
+#2 {main}
+  thrown in %sctor_visibility.php on line %d

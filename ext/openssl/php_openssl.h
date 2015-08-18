@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,6 +25,9 @@
 #ifdef HAVE_OPENSSL_EXT
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
+
+#include "php_version.h"
+#define PHP_OPENSSL_VERSION PHP_VERSION
 
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2

@@ -229,14 +229,10 @@ stdint.h is available, include it; it may define INT64_MAX. Systems that do not
 have stdint.h (e.g. Solaris) may have inttypes.h. The macro int64_t may be set
 by "configure". */
 
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#else
 #if defined HAVE_STDINT_H
 #include <stdint.h>
 #elif defined HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 #endif
 
 #if defined INT64_MAX || defined int64_t

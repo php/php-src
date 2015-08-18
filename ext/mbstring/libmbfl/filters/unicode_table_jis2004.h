@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -1748,7 +1748,7 @@ static const unsigned short ucs_a1_jisx0213_table[] = { // 0x0000 - 0x045f
 };
 
 static const int ucs_a1_jisx0213_table_min = 0x0000;
-static const int ucs_a1_jisx0213_table_max = 0x0000 + 
+static const int ucs_a1_jisx0213_table_max = 0x0000 +
 	(sizeof(ucs_a1_jisx0213_table)/sizeof(unsigned short));
 
 static const unsigned short ucs_hk_jisx0213_table[] = { // 0x3000 - 0x30ff
@@ -4642,7 +4642,7 @@ static const unsigned short ucs_r2_jisx0213_table[] = { // 0xfa0f - 0xfa6a
 static const int ucs_r2_jisx0213_min = 0xFA0F;
 static const int ucs_r2_jisx0213_max = 0xFA6A;
 
-/* 
+/*
    CJK Compatibility Ideographs: U+F900 - U+FAFF (separate mapping for U+F9XX)
 */
 static const unsigned short ucs_r2b_jisx0213_cmap_key[] = {
@@ -4651,7 +4651,7 @@ static const unsigned short ucs_r2b_jisx0213_cmap_key[] = {
 static const unsigned short ucs_r2b_jisx0213_cmap_val[] = {
 	0x763b,0x742e,0x754e,0x7b4f,0x7649,0x7e24,0x7d5d};
 
-static const int ucs_r2b_jisx0213_cmap_len = 
+static const int ucs_r2b_jisx0213_cmap_len =
 	sizeof(ucs_r2b_jisx0213_cmap_key)/sizeof(unsigned short);
 
 /*
@@ -5042,7 +5042,7 @@ static const unsigned short jisx0213_p2_ofst[] = {
 	1, 8, 3, 4, 5, 12, 13, 14, 15, 78, 79, 80, 81, 82,
 	83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94};
 
-static const int jisx0213_p2_ofst_len = 
+static const int jisx0213_p2_ofst_len =
 	sizeof(jisx0213_p2_ofst)/sizeof(unsigned short);
 
 static const int uni2jis_tbl_range[][2] = {

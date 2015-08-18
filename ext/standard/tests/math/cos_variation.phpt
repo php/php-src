@@ -45,7 +45,7 @@ float(-0.5328330203)
 float(-0.1117112391)
 float(-0.1117112391)
 
-Warning: cos() expects parameter 1 to be double, string given in %s on line %d
+Warning: cos() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(0.5623790763)
 

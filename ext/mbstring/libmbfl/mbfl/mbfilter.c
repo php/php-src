@@ -72,7 +72,7 @@
  *
  */
 
-/* 
+/*
  * Unicode support
  *
  * Portions copyright (c) 1999,2000,2001 by the PHP3 internationalization team.
@@ -137,7 +137,7 @@ mbfl_buffer_converter_new(
 mbfl_buffer_converter *
 mbfl_buffer_converter_new2(
 	const mbfl_encoding *from,
-	const mbfl_encoding *to, 
+	const mbfl_encoding *to,
     int buf_initsz)
 {
 	mbfl_buffer_converter *convd;
@@ -339,7 +339,7 @@ mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result)
 }
 
 mbfl_string *
-mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, 
+mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string,
 				  mbfl_string *result)
 {
 	if (convd == NULL || string == NULL || result == NULL) {
@@ -535,7 +535,7 @@ const mbfl_encoding *mbfl_encoding_detector_judge2(mbfl_encoding_detector *ident
 			}
 			n--;
 		}
- 
+
 		/* fallback judge */
 		if (!encoding) {
 			n = identd->filter_list_size - 1;
@@ -702,7 +702,7 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 			}
 		}
 	}
- 
+
 	/* cleanup */
 	/* dtors should be called in reverse order */
 	i = num; while (--i >= 0) {
@@ -785,7 +785,7 @@ mbfl_identify_encoding2(mbfl_string *string, const mbfl_encoding **elist, int el
 			}
 		}
 	}
- 
+
 	/* cleanup */
 	/* dtors should be called in reverse order */
 	i = num; while (--i >= 0) {
@@ -844,7 +844,7 @@ mbfl_strlen(mbfl_string *string)
 	} else {
 		/* wchar filter */
 		mbfl_convert_filter *filter = mbfl_convert_filter_new(
-		  string->no_encoding, 
+		  string->no_encoding,
 		  mbfl_no_encoding_wchar,
 		  filter_count_output, 0, &len);
 		if (filter == NULL) {
@@ -865,7 +865,7 @@ mbfl_strlen(mbfl_string *string)
 	return len;
 }
 
- 
+
 /*
  *  strpos
  */
@@ -931,7 +931,7 @@ retry:
 /*
  *	oddlen
  */
-int 
+int
 mbfl_oddlen(mbfl_string *string)
 {
 	int len, n, m, k;
@@ -1071,7 +1071,7 @@ mbfl_strpos(
 							++result;
 						} else if ((c & 0xc0) != 0x80) {
 							++result;
-						}	
+						}
 					}
 					goto out;
 				}
@@ -1116,7 +1116,7 @@ mbfl_strpos(
 		qe = needle_u8_val + needle_u8_len;
 		if (offset < 0) {
 			if (-offset > needle_len) {
-				offset += needle_len; 
+				offset += needle_len;
 				while (offset < 0) {
 					unsigned char c;
 					if (p <= e) {
@@ -1158,7 +1158,7 @@ mbfl_strpos(
 							++result;
 						} else if ((c & 0xc0) != 0x80) {
 							++result;
-						}	
+						}
 					}
 					goto out;
 				}
@@ -2024,7 +2024,7 @@ mbfl_ja_jp_hantozen(
 		mbfl_no_encoding_wchar,
 		(int(*)(int, void*))next_filter->filter_function,
 		(int(*)(void*))next_filter->filter_flush,
-		next_filter);	
+		next_filter);
 	if (encoder == NULL) {
 		goto out;
 	}

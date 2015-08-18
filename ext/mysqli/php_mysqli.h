@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -25,6 +25,9 @@
 
 #define phpext_mysqli_ptr &mysqli_module_entry
 extern zend_module_entry mysqli_module_entry;
+
+#include "php_version.h"
+#define PHP_MYSQLI_VERSION PHP_VERSION
 
 #endif	/* PHP_MYSQLI.H */
 

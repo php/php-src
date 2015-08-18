@@ -181,4 +181,3 @@ PHP_FUNCTION(my_get_raw)
         RETVAL_FALSE;
     }
 }
-

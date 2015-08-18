@@ -133,27 +133,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: usort() expects parameter 1 to be array, double given in %s on line %d
+Warning: usort() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: usort() expects parameter 1 to be array, double given in %s on line %d
+Warning: usort() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: usort() expects parameter 1 to be array, double given in %s on line %d
+Warning: usort() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: usort() expects parameter 1 to be array, double given in %s on line %d
+Warning: usort() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: usort() expects parameter 1 to be array, double given in %s on line %d
+Warning: usort() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

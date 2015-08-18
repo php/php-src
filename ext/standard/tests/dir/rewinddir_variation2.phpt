@@ -40,6 +40,6 @@ string(%d) "%s"
 
 -- Call to rewinddir() --
 
-Warning: rewinddir(): %d is not a valid Directory resource in %s on line %d
+Warning: rewinddir(): supplied resource is not a valid Directory resource in %s on line %d
 bool(false)
 ===DONE===

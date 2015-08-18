@@ -1,7 +1,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -472,7 +472,6 @@ class testHarness {
 			'error_append_string'=>'',
 			'auto_prepend_file'=>'',
 			'auto_append_file'=>'',
-			'magic_quotes_runtime'=>'0',
 		);	
 	public $env = array();
 	public $info_params = array();

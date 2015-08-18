@@ -4,6 +4,15 @@
 ARG_ENABLE("ftp", "ftp support", "yes");
 
 if (PHP_FTP == "yes") {
-	EXTENSION("ftp", "php_ftp.c ftp.c");
+
+	EXTENSION("ftp", "php_ftp.c ftp.c", true);
+
+	if (CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", "CFLAGS_FTP") &&
+		CHECK_LIB("ssleay32.lib", "ftp", PHP_FTP) &&
+		CHECK_LIB("libeay32.lib", "ftp", PHP_FTP)) {
+		MESSAGE("Enabling SSL support for ext\\ftp");
+		AC_DEFINE('HAVE_FTP_SSL', 1, 'Have FTP over SSL support');
+	}
+
 	AC_DEFINE('HAVE_FTP', 1, 'Have FTP support');
 }

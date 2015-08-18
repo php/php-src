@@ -46,6 +46,22 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
+#ifdef MAP_HUGETLB
+	/* Try to allocate huge pages first to reduce dTLB misses.
+	 * OS has to be configured properly
+	 * (e.g. https://wiki.debian.org/Hugepages#Enabling_HugeTlbPage)
+	 * You may verify huge page usage with the following command:
+	 * `grep "Huge" /proc/meminfo`
+	 */
+	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
+	if (shared_segment->p != MAP_FAILED) {
+		shared_segment->pos = 0;
+		shared_segment->size = requested_size;
+
+		return ALLOC_SUCCESS;
+	}
+#endif
+
 	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 	if (shared_segment->p == MAP_FAILED) {
 		*error_in = "mmap";

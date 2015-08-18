@@ -25,6 +25,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void zend_vm_use_old_executor(void);
 ZEND_API void zend_vm_set_opcode_handler(zend_op* opcode);
+ZEND_API int zend_vm_call_opcode_handler(zend_execute_data *ex);
 
 END_EXTERN_C()
 

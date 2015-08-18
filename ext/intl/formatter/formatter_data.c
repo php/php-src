@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,20 +23,20 @@
 /* {{{ void formatter_data_init( formatter_data* nf_data )
  * Initialize internals of formatter_data.
  */
-void formatter_data_init( formatter_data* nf_data TSRMLS_DC )
+void formatter_data_init( formatter_data* nf_data )
 {
 	if( !nf_data )
 		return;
 
 	nf_data->unum                = NULL;
-	intl_error_reset( &nf_data->error TSRMLS_CC );
+	intl_error_reset( &nf_data->error );
 }
 /* }}} */
 
 /* {{{ void formatter_data_free( formatter_data* nf_data )
  * Clean up mem allocted by internals of formatter_data
  */
-void formatter_data_free( formatter_data* nf_data TSRMLS_DC )
+void formatter_data_free( formatter_data* nf_data )
 {
 	if( !nf_data )
 		return;
@@ -45,18 +45,18 @@ void formatter_data_free( formatter_data* nf_data TSRMLS_DC )
 		unum_close( nf_data->unum );
 
 	nf_data->unum = NULL;
-	intl_error_reset( &nf_data->error TSRMLS_CC );
+	intl_error_reset( &nf_data->error );
 }
 /* }}} */
 
 /* {{{ formatter_data* formatter_data_create()
  * Alloc mem for formatter_data and initialize it with default values.
  */
-formatter_data* formatter_data_create( TSRMLS_D )
+formatter_data* formatter_data_create( void )
 {
 	formatter_data* nf_data = ecalloc( 1, sizeof(formatter_data) );
 
-	formatter_data_init( nf_data TSRMLS_CC );
+	formatter_data_init( nf_data );
 
 	return nf_data;
 }

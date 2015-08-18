@@ -108,7 +108,7 @@ module, program, etc).
 
 For example for APXS:
 
-PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php5.c php_apache.c)
+PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php7.c php_apache.c)
 
 
 

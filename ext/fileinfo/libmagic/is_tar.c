@@ -40,7 +40,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_tar.c,v 1.37 2010/11/30 14:58:53 rrt Exp $")
+FILE_RCSID("@(#)$File: is_tar.c,v 1.36 2009/02/03 20:27:51 christos Exp $")
 #endif
 
 #include "magic.h"

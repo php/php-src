@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -37,7 +37,7 @@
 #else
 #define NULL (void *)(0L)
 #endif
-#endif 
+#endif
 
 #ifdef WIN32
 #ifdef MBFL_DLL_EXPORT

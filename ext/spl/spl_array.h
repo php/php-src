@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,8 +31,8 @@ extern PHPAPI zend_class_entry *spl_ce_RecursiveArrayIterator;
 
 PHP_MINIT_FUNCTION(spl_array);
 
-extern void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC);
-extern void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC);
+extern void spl_array_iterator_append(zval *object, zval *append_value);
+extern void spl_array_iterator_key(zval *object, zval *return_value);
 
 #endif /* SPL_ARRAY_H */
 

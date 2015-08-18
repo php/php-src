@@ -21,7 +21,7 @@ class a {
  
 class b {
     public $a;
-    function b(&$a) {
+    function __construct(&$a) {
         $this->a = &$a;
     }
 }
@@ -42,6 +42,8 @@ session_start();
 
 echo "values after session:\n";
 var_dump($a,$b);
+
+session_destroy();
 ?>
 --EXPECTF--
 original values:

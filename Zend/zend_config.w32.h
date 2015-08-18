@@ -47,9 +47,8 @@ typedef unsigned int uint;
 #define HAVE_CLASS_ISTDIOSTREAM
 #define istdiostream stdiostream
 
+#if _MSC_VER < 1900
 #define snprintf _snprintf
-#if _MSC_VER < 1500
-#define vsnprintf _vsnprintf
 #endif
 #define strcasecmp(s1, s2) stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
@@ -64,7 +63,7 @@ typedef unsigned int uint;
  */
 #ifdef ZEND_WIN32_FORCE_INLINE
 /* _ALLOW_KEYWORD_MACROS is only relevant for C++ */
-# if (_MSC_VER >= 1700) && !defined(_ALLOW_KEYWORD_MACROS)
+# ifndef _ALLOW_KEYWORD_MACROS
 #  define _ALLOW_KEYWORD_MACROS
 # endif
 # undef inline
@@ -82,17 +81,6 @@ typedef unsigned int uint;
 
 #define ZEND_DLEXPORT		__declspec(dllexport)
 #define ZEND_DLIMPORT		__declspec(dllimport)
-
-/* 0x00200000L is MB_SERVICE_NOTIFICATION, which is only supported under Windows NT
- * (and requires _WIN32_WINNT to be defined, which prevents the resulting executable
- * from running under Windows 9x
- * Windows 9x should silently ignore it, so it's being used here directly
- */
-#ifndef MB_SERVICE_NOTIFICATION
-#define	MB_SERVICE_NOTIFICATION		0x00200000L
-#endif
-
-#define ZEND_SERVICE_MB_STYLE		(MB_TOPMOST|MB_SERVICE_NOTIFICATION)
 
 #endif /* ZEND_CONFIG_W32_H */
 

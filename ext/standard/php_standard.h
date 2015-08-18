@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,6 +59,10 @@
 #include "php_ftok.h"
 #include "php_type.h"
 #include "php_password.h"
+#include "php_random.h"
+
+#include "php_version.h"
+#define PHP_STANDARD_VERSION PHP_VERSION
 
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);

@@ -24,7 +24,8 @@ require_once('skipifconnectfailure.inc');
 			if (gettype($id) !== 'string') {
 				printf("[002] Expecting string on 32bit got %s/%s\n", gettype($id), var_export($id, true));
 			}
-			if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($id)) {
+			if ((version_compare(PHP_VERSION, '6.0', '==') == 1) &&
+			    !is_unicode($id)) {
 				printf("[003] Expecting unicode string\n");
 			}
 		}

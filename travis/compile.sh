@@ -13,9 +13,9 @@ fi
 ./configure --quiet \
 $DEBUG \
 $TS \
+--enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
---with-mysql=mysqlnd \
 --with-mysqli=mysqlnd \
 --with-pgsql \
 --with-pdo-pgsql \
@@ -49,13 +49,16 @@ $TS \
 --with-openssl \
 --with-gmp \
 --enable-bcmath \
---enable-phpdbg \
 --enable-calendar \
 --enable-ftp \
 --with-pspell=/usr \
---with-recode=/usr \
 --with-enchant=/usr \
 --enable-wddx \
+--with-imap \
+--with-imap-ssl \
+--with-freetype-dir=/usr \
+--with-xpm-dir=/usr \
+--with-kerberos \
 --enable-sysvmsg 
 make -j2 --quiet
 sudo make install

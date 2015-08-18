@@ -1,6 +1,6 @@
 /*
   zip_delete.c -- delete file from zip archive
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,22 +31,20 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
-
 
 ZIP_EXTERN int
-zip_delete(struct zip *za, zip_uint64_t idx)
+zip_delete(zip_t *za, zip_uint64_t idx)
 {
     if (idx >= za->nentry) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
 
     if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+	zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 
@@ -60,4 +58,3 @@ zip_delete(struct zip *za, zip_uint64_t idx)
     return 0;
 }
 
-

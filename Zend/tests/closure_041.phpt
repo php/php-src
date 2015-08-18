@@ -49,7 +49,7 @@ $d = $staticUnscoped->bindTo(null); $d(); echo "\n";
 $d = $nonstaticUnscoped->bindTo(null); $d(); echo "\n";
 $d = $staticScoped->bindTo(null); $d(); echo "\n";
 $d = $nonstaticScoped->bindTo(null); $d(); echo "\n";
-//$d should have been turned to static
+// $d is still non-static
 $d->bindTo($d);
 
 echo "After binding, with same-class instance for the bound ones", "\n";
@@ -83,8 +83,6 @@ scoped to A: bool(true)
 bound: no
 scoped to A: bool(true)
 bound: no
-
-Warning: Cannot bind an instance to a static closure in %s on line %d
 After binding, with same-class instance for the bound ones
 
 Warning: Cannot bind an instance to a static closure in %s on line %d

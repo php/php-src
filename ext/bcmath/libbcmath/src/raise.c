@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -44,7 +44,7 @@
    only the integer part is used.  */
 
 void
-bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
+bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
 {
    bc_num temp, power;
    long exponent;
@@ -87,7 +87,7 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
    while ((exponent & 1) == 0)
      {
        pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale TSRMLS_CC);
+       bc_multiply (power, power, &power, pwrscale);
        exponent = exponent >> 1;
      }
    temp = bc_copy_num (power);
@@ -98,10 +98,10 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
    while (exponent > 0)
      {
        pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale TSRMLS_CC);
+       bc_multiply (power, power, &power, pwrscale);
        if ((exponent & 1) == 1) {
 	 calcscale = pwrscale + calcscale;
-	 bc_multiply (temp, power, &temp, calcscale TSRMLS_CC);
+	 bc_multiply (temp, power, &temp, calcscale);
        }
        exponent = exponent >> 1;
      }
@@ -109,7 +109,7 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
    /* Assign the value. */
    if (neg)
      {
-       bc_divide (BCG(_one_), temp, result, rscale TSRMLS_CC);
+       bc_divide (BCG(_one_), temp, result, rscale);
        bc_free_num (&temp);
      }
    else

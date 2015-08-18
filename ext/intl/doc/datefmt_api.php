@@ -150,7 +150,7 @@ class DateFormatter {
 	  *                          time patterns, parsing as much as possible to obtain a value.
           *                          'false' sets the parser to strictly parse strings into dates. 
 	  *                          Extra space, unrecognized tokens, or invalid values 
-	  *                          ("Feburary 30th") are not accepted.
+	  *                          ("February 30th") are not accepted.
 	  *
           * @return boolean          'true' if successful; 'false' if an error occurred. 
 	  */
@@ -338,7 +338,7 @@ class DateFormatter {
 	  *                          time patterns, parsing as much as possible to obtain a value.
           *                          'false' sets the parser to strictly parse strings into dates. 
 	  *                          Extra space, unrecognized tokens, or invalid values 
-	  *                          ("Feburary 30th") are not accepted.
+	  *                          ("February 30th") are not accepted.
 	  *
           * @return boolean          'true' if successful; 'false' if an error occurred. 
 	  */
@@ -363,18 +363,6 @@ class DateFormatter {
 	  * @return string ID string for the time zone used by this formatter
 	  */
 	 function datefmt_get_timezone_id($fmt) {}
-
-
-	/**
-	 * Sets the time zone to use
-         * @param DateFormatter $fmt The date formatter resource
-	 * @param string $zone zone ID string of the time zone to use.
-	 *                     if null or the empty string, the default time zone for
-	 *                     the runtime is used.
-	 * @return boolean 'true' on successful setting of the time zone, 'false'
-	 *                 if an error occurred (such as the time zone wasn't recognized).
-	 */
-        function datefmt_set_timezone_id($fmt , $zone) {}
 
 
         /**

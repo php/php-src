@@ -15,5 +15,6 @@ eval("class $a {}");
 if ($a instanceof $a); // Segmentation fault
 new $a;                // Segmentation fault
 echo "ok\n";
+?>
 --EXPECT--
 ok

@@ -58,9 +58,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECTF--
-Warning: IntlDateFormatter::setTimeZoneId(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
+Warning: IntlDateFormatter::setTimeZone(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
 
-Warning: datefmt_set_timezone_id(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
+Warning: datefmt_set_timezone(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
 
 After creation of the dateformatter :  timezone_id= US/Pacific
 -----------

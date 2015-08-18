@@ -132,17 +132,17 @@ bool(false)
 
 -- float 10.5 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- empty array --

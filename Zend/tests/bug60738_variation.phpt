@@ -16,7 +16,7 @@ NULL
 object(Closure)#1 (0) {
 }
 
-Fatal error: Uncaught exception 'Exception' with message 'Exception!' in %s:%d
+Fatal error: Uncaught Exception: Exception! in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

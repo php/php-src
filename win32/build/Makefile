@@ -1,5 +1,5 @@
 #  +----------------------------------------------------------------------+
-#  | PHP Version 5                                                        |
+#  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
 #  | Copyright (c) 1997-2008 The PHP Group                                |
 #  +----------------------------------------------------------------------+
@@ -36,11 +36,13 @@ build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 !if $(RE2C) == ""
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c \
+	sapi\phpdbg\phpdbg_parser.c \
 	$(PHPDEF) $(MCFILE)
 !else
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
+	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
 
@@ -53,18 +55,24 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
+sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
+	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
+	
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+	
+sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
 
 !if $(PGOMGR) != ""
-PHP5_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php5.pgd
+PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7.pgd
 !else
-PHP5_PGD_OPTION=
+PHP7_PGD_OPTION=
 !endif
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
@@ -89,8 +97,9 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
-	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest
-	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP5_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest >nul
+#	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
@@ -158,19 +167,14 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	$(BUILD_DIR)\php.exe -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
-	cd ..\..
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
-	cd ..\..
 	cd $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\php-test-pack-$(PHP_VERSION_STRING).zip .
-	cd ..\..
 	cd $(BUILD_DIR)
 	-$(ZIP) -9 -q php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip *.pdb
-	cd
-	cd
 	-$(ZIP) -9 -q -r php-devel-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip $(BUILD_DIR_DEV_NAME)
-	cd ..\..
+	cd $(BUILD_DIR)
 
 dist: all build-dist
 snap: build-snap build-devel build-dist

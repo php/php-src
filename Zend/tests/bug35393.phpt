@@ -23,7 +23,7 @@ Array
     [0] => main
 )
 
-Strict Standards: Only variables should be passed by reference in %sbug35393.php on line 12
+Notice: Only variables should be passed by reference in %sbug35393.php on line 12
 Array
 (
     [0] => main

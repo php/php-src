@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -220,7 +220,7 @@ mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 			s = 0xff65;				/* HALFWIDTH KATAKANA MIDDLE DOT */
 		}
 	} else if (mode & (MBFL_FILT_TL_ZEN2HAN_HIRA2KANA
-			| MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) { 
+			| MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) {
 		if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRA2KANA) &&
 				c >= 0x3041 && c <= 0x3093) {
 			/* Zenkaku hirangana to Zenkaku katakana */

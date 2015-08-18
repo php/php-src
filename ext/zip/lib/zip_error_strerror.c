@@ -1,6 +1,6 @@
 /*
   zip_error_sterror.c -- get string representation of struct zip_error
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,7 +31,6 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include <errno.h>
 #include <stdio.h>
@@ -40,15 +39,14 @@
 
 #include "zipint.h"
 
-
 
-const char *
-_zip_error_strerror(struct zip_error *err)
+ZIP_EXTERN const char *
+zip_error_strerror(zip_error_t *err)
 {
     const char *zs, *ss;
     char buf[128], *s;
 
-    _zip_error_fini(err);
+    zip_error_fini(err);
 
     if (err->zip_err < 0 || err->zip_err >= _zip_nerr_str) {
 	sprintf(buf, "Unknown error %d", err->zip_err);

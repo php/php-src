@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,12 +22,15 @@
 #define PHP_READLINE_H
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
-#ifdef ZTS 
+#ifdef ZTS
 #warning Readline module will *NEVER* be thread-safe
 #endif
 
 extern zend_module_entry readline_module_entry;
 #define phpext_readline_ptr &readline_module_entry
+
+#include "php_version.h"
+#define PHP_READLINE_VERSION PHP_VERSION
 
 #else
 

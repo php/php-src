@@ -21,7 +21,7 @@ var_dump(ibase_free_query($x));
 --EXPECTF--
 bool(true)
 
-Warning: ibase_free_query(): 11 is not a valid Firebird/InterBase query resource in %s on line %d
+Warning: ibase_free_query(): supplied resource is not a valid Firebird/InterBase query resource in %s on line %d
 bool(false)
 
 Warning: ibase_free_query(): supplied resource is not a valid Firebird/InterBase query resource in %s on line %d

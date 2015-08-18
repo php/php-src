@@ -39,7 +39,7 @@ $arr = json_decode($arr_enc, true);
 var_dump($arr);
 
 ?>
---EXPECT--
+--EXPECTF--
 Testing: 
 {
     "JSON Test Pattern pass3": {
@@ -49,9 +49,9 @@ Testing:
 }
 
 DECODE: AS OBJECT
-object(stdClass)#1 (1) {
+object(stdClass)#%d (1) {
   ["JSON Test Pattern pass3"]=>
-  object(stdClass)#2 (2) {
+  object(stdClass)#%d (2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>
@@ -73,9 +73,9 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 {"JSON Test Pattern pass3":{"The outermost value":"must be an object or array.","In this test":"It is an object."}}
 DECODE AGAIN: AS OBJECT
-object(stdClass)#3 (1) {
+object(stdClass)#%d (1) {
   ["JSON Test Pattern pass3"]=>
-  object(stdClass)#4 (2) {
+  object(stdClass)#%d (2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>

@@ -177,8 +177,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
-	/* TODO: 
-	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway 
+	/* TODO:
+	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway
 	  through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if
 	  desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)
 	*/
@@ -188,7 +188,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
 #endif
 	void **wanted_mapping_base = default_mapping_base_set;
-	TSRMLS_FETCH();
 
 	zend_shared_alloc_lock_win32();
 	/* Mapping retries: When Apache2 restarts, the parent process startup routine

@@ -38,7 +38,7 @@ try {
 	if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
 		printf("[004] Expecting false got %s\n", var_export($tmp, true));
 
-	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be long, array given in
+	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be integer, array given in
 	if (false !== ($tmp = @$stmt->getColumnMeta(array())))
 		printf("[005] Expecting false got %s\n", var_export($tmp, true));
 

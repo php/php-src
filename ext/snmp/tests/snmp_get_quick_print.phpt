@@ -29,7 +29,7 @@ Checking error handling
 Warning: snmp_get_quick_print() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: snmp_set_quick_print() expects parameter 1 to be long, %s given in %s on line %d
+Warning: snmp_set_quick_print() expects parameter 1 to be integer, %s given in %s on line %d
 bool(false)
 
 Warning: snmp_set_quick_print() expects exactly 1 parameter, 0 given in %s on line %d

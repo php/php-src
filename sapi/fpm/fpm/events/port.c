@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -42,7 +42,7 @@ static struct fpm_event_module_s port_module = {
 	.clean = fpm_event_port_clean,
 	.wait = fpm_event_port_wait,
 	.add = fpm_event_port_add,
-	.remove = fpm_event_port_remove, 
+	.remove = fpm_event_port_remove,
 };
 
 port_event_t *events = NULL;

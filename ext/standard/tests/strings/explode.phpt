@@ -2,6 +2,8 @@
 explode() function
 --INI--
 error_reporting=2047
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* From http://bugs.php.net/19865 */

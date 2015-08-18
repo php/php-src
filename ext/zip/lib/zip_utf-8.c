@@ -1,6 +1,6 @@
 /*
   zip_utf-8.c -- UTF-8 support functions for libzip
-  Copyright (C) 2011-2012 Dieter Baron and Thomas Klausner
+  Copyright (C) 2011-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -31,13 +31,11 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 
 #include "zipint.h"
 
 #include <stdlib.h>
 
-
 
 static const zip_uint16_t _cp437_to_unicode[256] = {
     /* 0x00 - 0x0F */
@@ -114,12 +112,11 @@ static const zip_uint16_t _cp437_to_unicode[256] = {
 #define UTF_8_CONTINUE_MASK  0xc0
 #define UTF_8_CONTINUE_MATCH 0x80
 
-
 
-enum zip_encoding_type
-_zip_guess_encoding(struct zip_string *str, enum zip_encoding_type expected_encoding)
+zip_encoding_type_t
+_zip_guess_encoding(zip_string_t *str, zip_encoding_type_t expected_encoding)
 {
-    enum zip_encoding_type enc;
+    zip_encoding_type_t enc;
     const zip_uint8_t *name;
     zip_uint32_t i, j, ulen;
 
@@ -177,7 +174,6 @@ done:
     return enc;
 }
 
-
 
 static zip_uint32_t
 _zip_unicode_to_utf8_len(zip_uint32_t codepoint)
@@ -191,7 +187,6 @@ _zip_unicode_to_utf8_len(zip_uint32_t codepoint)
     return 4;
 }
 
-
 
 static zip_uint32_t
 _zip_unicode_to_utf8(zip_uint32_t codepoint, zip_uint8_t *buf)
@@ -201,28 +196,27 @@ _zip_unicode_to_utf8(zip_uint32_t codepoint, zip_uint8_t *buf)
 	return 1;
     }
     if (codepoint < 0x0800) {
-	buf[0] = UTF_8_LEN_2_MATCH | ((codepoint >> 6) & 0x1f);
-	buf[1] = UTF_8_CONTINUE_MATCH | (codepoint & 0x3f);
+	buf[0] = (zip_uint8_t)(UTF_8_LEN_2_MATCH | ((codepoint >> 6) & 0x1f));
+	buf[1] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | (codepoint & 0x3f));
 	return 2;
     }
     if (codepoint < 0x10000) {
-	buf[0] = UTF_8_LEN_3_MATCH | ((codepoint >> 12) & 0x0f);
-	buf[1] = UTF_8_CONTINUE_MATCH | ((codepoint >> 6) & 0x3f);
-	buf[2] = UTF_8_CONTINUE_MATCH | (codepoint & 0x3f);
+	buf[0] = (zip_uint8_t)(UTF_8_LEN_3_MATCH | ((codepoint >> 12) & 0x0f));
+	buf[1] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | ((codepoint >> 6) & 0x3f));
+	buf[2] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | (codepoint & 0x3f));
 	return 3;
     }
-    buf[0] = UTF_8_LEN_4_MATCH | ((codepoint >> 18) & 0x07);
-    buf[1] = UTF_8_CONTINUE_MATCH | ((codepoint >> 12) & 0x3f);
-    buf[2] = UTF_8_CONTINUE_MATCH | ((codepoint >> 6) & 0x3f);
-    buf[3] = UTF_8_CONTINUE_MATCH | (codepoint & 0x3f);
+    buf[0] = (zip_uint8_t)(UTF_8_LEN_4_MATCH | ((codepoint >> 18) & 0x07));
+    buf[1] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | ((codepoint >> 12) & 0x3f));
+    buf[2] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | ((codepoint >> 6) & 0x3f));
+    buf[3] = (zip_uint8_t)(UTF_8_CONTINUE_MATCH | (codepoint & 0x3f));
     return 4;
 }
 
-
 
 zip_uint8_t *
 _zip_cp437_to_utf8(const zip_uint8_t * const _cp437buf, zip_uint32_t len,
-		   zip_uint32_t *utf8_lenp, struct zip_error *error)
+		   zip_uint32_t *utf8_lenp, zip_error_t *error)
 {
     zip_uint8_t *cp437buf = (zip_uint8_t *)_cp437buf;
     zip_uint8_t *utf8buf;
@@ -239,7 +233,7 @@ _zip_cp437_to_utf8(const zip_uint8_t * const _cp437buf, zip_uint32_t len,
 	buflen += _zip_unicode_to_utf8_len(_cp437_to_unicode[cp437buf[i]]);
 
     if ((utf8buf=(zip_uint8_t*)malloc(buflen)) == NULL) {
-	_zip_error_set(error, ZIP_ER_MEMORY, 0);
+	zip_error_set(error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 

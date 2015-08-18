@@ -149,38 +149,38 @@ bool(true)
 43567
 -- Iteration 12 --
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 43567
 -- Iteration 13 --
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 43567
 -- Iteration 14 --
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 43567
 -- Iteration 15 --
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
+Warning: chmod() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 43567
 *** Done ***

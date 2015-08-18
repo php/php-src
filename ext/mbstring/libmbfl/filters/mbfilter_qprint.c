@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -108,7 +108,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		}
 
 		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
-		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 && 
+		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 &&
 		       (mbfl_charprop_table[s] & MBFL_CHP_MMHQENC) != 0)) {
 			/* hex-octet */
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */

@@ -1,11 +1,11 @@
-PHP_ARG_WITH(interbase,for InterBase support,
-[  --with-interbase[=DIR]    Include InterBase support.  DIR is the InterBase base
-                          install directory [/usr/interbase]])
+PHP_ARG_WITH(interbase,for Firebird support,
+[  --with-interbase[=DIR]    Include Firebird support.  DIR is the Firebird base
+                          install directory [/opt/firebird]])
 
 if test "$PHP_INTERBASE" != "no"; then
   if test "$PHP_INTERBASE" = "yes"; then
-    IBASE_INCDIR=/usr/interbase/include
-    IBASE_LIBDIR=/usr/interbase/lib
+    IBASE_INCDIR=/opt/firebird/include
+    IBASE_LIBDIR=/opt/firebird/lib
   else
     IBASE_INCDIR=$PHP_INTERBASE/include
     IBASE_LIBDIR=$PHP_INTERBASE/$PHP_LIBDIR
@@ -23,7 +23,7 @@ if test "$PHP_INTERBASE" != "no"; then
       [
         IBASE_LIBNAME=ib_util
       ], [
-        AC_MSG_ERROR([libgds, libib_util or libfbclient not found! Check config.log for more information.])
+        AC_MSG_ERROR([libfbclient, libgds or libib_util not found! Check config.log for more information.])
       ], [
         -L$IBASE_LIBDIR
       ])

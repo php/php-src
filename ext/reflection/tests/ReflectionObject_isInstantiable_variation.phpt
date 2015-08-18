@@ -69,6 +69,11 @@ foreach($reflectionObjects  as $reflectionObject ) {
 }
 ?>
 --EXPECTF--
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; publicCtorOld has a deprecated constructor in %s on line %d
+
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; protectedCtorOld has a deprecated constructor in %s on line %d
+
+Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; privateCtorOld has a deprecated constructor in %s on line %d
 Is noCtor instantiable? bool(true)
 Is publicCtorNew instantiable? bool(true)
 Is protectedCtorNew instantiable? bool(false)

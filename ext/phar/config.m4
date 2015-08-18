@@ -5,7 +5,7 @@ PHP_ARG_ENABLE(phar, for phar archive support,
 [  --disable-phar          Disable phar support], yes)
 
 if test "$PHP_PHAR" != "no"; then
-  PHP_NEW_EXTENSION(phar, util.c tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared)
+  PHP_NEW_EXTENSION(phar, util.c tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   AC_MSG_CHECKING([for phar openssl support])
   if test "$PHP_HASH_SHARED" != "yes"; then
     if test "$PHP_HASH" != "no"; then

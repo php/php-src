@@ -18,6 +18,7 @@ Code Implementation
 
 For instance, ``function int mail(char *to, char *from)`` should NOT free
 to and/or from.
+
 Exceptions:
 
 - The function's designated behavior is freeing that resource.  E.g. efree()
@@ -112,6 +113,7 @@ User Functions/Methods Naming Conventions
     of ``parent_*``::
 
     A family of 'foo' functions, for example:
+    
     Good:
     'foo_select_bar'
     'foo_insert_baz'

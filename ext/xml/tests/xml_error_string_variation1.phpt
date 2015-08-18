@@ -1,7 +1,7 @@
 --TEST--
 Test xml_error_string() function : usage variations  - test different types for code
 --SKIPIF--
-<?php 
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
 	print "skip - XML extension not loaded"; 
 }	 
@@ -103,27 +103,27 @@ string(8) "No error"
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be long, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be long, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be long, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be long, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 Arg value Array 
 
-Warning: xml_error_string() expects parameter 1 to be long, array given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 Arg value  
@@ -146,27 +146,27 @@ string(8) "No error"
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 
 
-Warning: xml_error_string() expects parameter 1 to be long, object given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 
 Arg value  

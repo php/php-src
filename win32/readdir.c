@@ -26,7 +26,6 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	int index;
 	char resolved_path_buff[MAXPATHLEN];
-	TSRMLS_FETCH();
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
@@ -37,8 +36,8 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 	strcpy(filespec, resolved_path_buff);
-	index = strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || 
+	index = (int)strlen(filespec) - 1;
+	if (index >= 0 && (filespec[index] == '/' ||
 	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "\\*");
@@ -83,7 +82,7 @@ struct dirent *readdir(DIR *dp)
 
 	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
-	dp->dent.d_reclen = strlen(dp->dent.d_name);
+	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
 
 	return &(dp->dent);
@@ -107,7 +106,7 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 
 	strlcpy(dp->dent.d_name, dp->fileinfo.cFileName, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
-	dp->dent.d_reclen = strlen(dp->dent.d_name);
+	dp->dent.d_reclen = (unsigned short)strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
 
 	memcpy(entry, &dp->dent, sizeof(*entry));
@@ -152,8 +151,8 @@ int rewinddir(DIR *dp)
 	}
 
 	strcpy(filespec, dp->dir);
-	index = strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || 
+	index = (int)strlen(filespec) - 1;
+	if (index >= 0 && (filespec[index] == '/' ||
 	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
@@ -161,9 +160,18 @@ int rewinddir(DIR *dp)
 	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;
 	}
-	
+
 	dp->handle = handle;
 	free(filespec);
 
 	return 0;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

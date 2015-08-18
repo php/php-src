@@ -1,5 +1,7 @@
 --TEST--
 Creating recursive array on foreach using same variable
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 

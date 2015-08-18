@@ -43,9 +43,7 @@ from the subject string after a regex match has succeeded. The original idea
 for these functions came from Scott Wimer. */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "pcre_internal.h"
 

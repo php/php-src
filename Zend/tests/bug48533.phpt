@@ -36,6 +36,6 @@ int(2)
 %unicode|string%(9) "__call::c"
 %unicode|string%(15) "__callStatic::a"
 
-Strict Standards: Non-static method foo::b() should not be called statically in %s on line %d
+Deprecated: Non-static method foo::b() should not be called statically in %s on line %d
 int(2)
 %unicode|string%(15) "__callStatic::c"

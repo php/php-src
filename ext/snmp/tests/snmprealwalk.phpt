@@ -52,10 +52,10 @@ var_dump($return);
 --EXPECTF--
 Checking error handling
 
-Warning: snmprealwalk() expects parameter 4 to be long, %s given in %s on line %d
+Warning: snmprealwalk() expects parameter 4 to be integer, %s given in %s on line %d
 bool(false)
 
-Warning: snmprealwalk() expects parameter 5 to be long, %s given in %s on line %d
+Warning: snmprealwalk() expects parameter 5 to be integer, %s given in %s on line %d
 bool(false)
 Checking working
 Single OID

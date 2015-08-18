@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,11 +39,11 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 												void *object,
 												int is_datetime,
 												intl_error *outside_error,
-												const char *func TSRMLS_DC)
+												const char *func)
 {
 	char		*id = NULL,
 				offset_id[] = "GMT+00:00";
-	int			id_len = 0;
+	int32_t		id_len = 0;
 	char		*message;
 	TimeZone	*timeZone;
 
@@ -66,7 +66,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 				spprintf(&message, 0, "%s: object has an time zone offset "
 					"that's too large", func);
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1 TSRMLS_CC);
+					message, 1);
 				efree(message);
 				return NULL;
 			}
@@ -97,7 +97,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 		spprintf(&message, 0, "%s: time zone id '%s' "
 			"extracted from ext/date DateTimeZone not recognized", func, id);
 		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1 TSRMLS_CC);
+			message, 1);
 		efree(message);
 		delete timeZone;
 		return NULL;
@@ -107,10 +107,10 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 /* }}} */
 
 U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
-		intl_error *err, const char *func TSRMLS_DC)
+		intl_error *err, const char *func)
 {
 	zval	retval;
-	zval	*zfuncname;
+	zval	zfuncname;
 	char	*message;
 
 	if (err && U_FAILURE(err->code)) {
@@ -125,15 +125,13 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
-		INIT_ZVAL(retval);
-		MAKE_STD_ZVAL(zfuncname);
-		ZVAL_STRING(zfuncname, "getTimestamp", 1);
-		if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC)
+		ZVAL_STRING(&zfuncname, "getTimestamp");
+		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
 			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
 					"object", func);
 			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR,
-				message, 1 TSRMLS_CC);
+				message, 1);
 			efree(message);
 			zval_ptr_dtor(&zfuncname);
 			return FAILURE;
@@ -145,12 +143,12 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 
 	if (tz) {
 		php_date_obj *datetime;
-		datetime = (php_date_obj*)zend_object_store_get_object(z TSRMLS_CC);
+		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
 			spprintf(&message, 0, "%s: the DateTime object is not properly "
 					"initialized", func);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1 TSRMLS_CC);
+				message, 1);
 			efree(message);
 			return FAILURE;
 		}
@@ -158,12 +156,12 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			*tz = TimeZone::getGMT()->clone();
 		} else {
 			*tz = timezone_convert_datetimezone(datetime->time->zone_type,
-				datetime, 1, NULL, func TSRMLS_CC);
+				datetime, 1, NULL, func);
 			if (*tz == NULL) {
 				spprintf(&message, 0, "%s: could not convert DateTime's "
 						"time zone", func);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1 TSRMLS_CC);
+					message, 1);
 				efree(message);
 				return FAILURE;
 			}
@@ -173,10 +171,10 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	return SUCCESS;
 }
 
-U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TSRMLS_DC)
+U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 {
 	double	rv = NAN;
-	long	lv;
+	zend_long	lv;
 	int		type;
 	char	*message;
 
@@ -196,7 +194,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 					"which would be required for it to be a valid date", func,
 					Z_STRVAL_P(z));
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1 TSRMLS_CC);
+				message, 1);
 			efree(message);
 		}
 		break;
@@ -207,16 +205,15 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
 		break;
 	case IS_OBJECT:
-		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
-			intl_datetime_decompose(z, &rv, NULL, err, func TSRMLS_CC);
-		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr TSRMLS_CC)) {
-			Calendar_object *co = (Calendar_object *)
-				zend_object_store_get_object(z TSRMLS_CC );
+		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce())) {
+			intl_datetime_decompose(z, &rv, NULL, err, func);
+		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr)) {
+			Calendar_object *co = Z_INTL_CALENDAR_P(z);
 			if (co->ucal == NULL) {
 				spprintf(&message, 0, "%s: IntlCalendar object is not properly "
 						"constructed", func);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1 TSRMLS_CC);
+					message, 1);
 				efree(message);
 			} else {
 				UErrorCode status = UErrorCode();
@@ -224,7 +221,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 				if (U_FAILURE(status)) {
 					spprintf(&message, 0, "%s: call to internal "
 							"Calendar::getTime() has failed", func);
-					intl_errors_set(err, status, message, 1 TSRMLS_CC);
+					intl_errors_set(err, status, message, 1);
 					efree(message);
 				}
 			}
@@ -233,14 +230,14 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 			spprintf(&message, 0, "%s: invalid object type for date/time "
 					"(only IntlCalendar and DateTime permitted)", func);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1 TSRMLS_CC);
+				message, 1);
 			efree(message);
 		}
 		break;
 	default:
 		spprintf(&message, 0, "%s: invalid PHP type for date", func);
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1 TSRMLS_CC);
+			message, 1);
 		efree(message);
 		break;
 	}

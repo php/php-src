@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,23 +28,23 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 {
 	int ret;
 	char *text;
-	int text_len;
+	size_t text_len;
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
-	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &text, &text_len, &error_code)) {
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &text, &text_len, &error_code)) {
 		return;
 	}
-	
+
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	ret = uspoof_checkUTF8(co->uspoof, text, text_len, NULL, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
-	
+
 	if (error_code) {
 		zval_dtor(error_code);
 		ZVAL_LONG(error_code, ret);
@@ -60,24 +60,26 @@ PHP_METHOD(Spoofchecker, areConfusable)
 {
 	int ret;
 	char *s1, *s2;
-	int s1_len, s2_len;
+	size_t s1_len, s2_len;
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
-	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z", &s1, &s1_len,
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &s1, &s1_len,
 										 &s2, &s2_len, &error_code)) {
 		return;
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
-
-	ret = uspoof_areConfusableUTF8(co->uspoof, s1, s1_len, s2, s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
-
+	if(s1_len > INT32_MAX || s2_len > INT32_MAX) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+	} else {
+		ret = uspoof_areConfusableUTF8(co->uspoof, s1, (int32_t)s1_len, s2, (int32_t)s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
+	}
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
-	
+
 	if (error_code) {
 		zval_dtor(error_code);
 		ZVAL_LONG(error_code, ret);
@@ -92,10 +94,10 @@ PHP_METHOD(Spoofchecker, areConfusable)
 PHP_METHOD(Spoofchecker, setAllowedLocales)
 {
 	char *locales;
-	int locales_len;
+	size_t locales_len;
 	SPOOFCHECKER_METHOD_INIT_VARS;
-	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &locales, &locales_len)) {
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &locales, &locales_len)) {
 		return;
 	}
 
@@ -104,7 +106,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	uspoof_setAllowedLocales(co->uspoof, locales, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		return;
 	}
 }
@@ -115,10 +117,10 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
  */
 PHP_METHOD(Spoofchecker, setChecks)
 {
-	long checks;
+	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
-		
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &checks)) {
 		return;
 	}
 
@@ -127,7 +129,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	uspoof_setChecks(co->uspoof, checks, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
 /* }}} */

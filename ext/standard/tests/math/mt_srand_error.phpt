@@ -10,7 +10,7 @@ var_dump(mt_srand("500ABC"));
 Warning: mt_srand() expects at most 1 parameter, 2 given in %s on line 2
 NULL
 
-Warning: mt_srand() expects parameter 1 to be long, string given in %s on line 3
+Warning: mt_srand() expects parameter 1 to be integer, string given in %s on line 3
 NULL
 
 Notice: A non well formed numeric value encountered in %s on line 4

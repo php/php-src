@@ -37,11 +37,11 @@ $conf = array(
 'TEST_WEB_BASE_URL'    =>    NULL,
 
 /* if set, copy phpt files into this directory,
-   which should be accessable via an http server.  The
+   which should be accessible via an http server.  The
    TEST_WEB_BASE_URL setting should be the base url
    to access this path.  If this is not used,
    TEST_WEB_BASE_URL should be the base url pointing
-   to TEST_PHP_SRCDIR, which should then be accessable via
+   to TEST_PHP_SRCDIR, which should then be accessible via
    an http server.
    
    An example would be:

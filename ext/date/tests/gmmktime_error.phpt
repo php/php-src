@@ -18,12 +18,9 @@ $sec = 8;
 $mon = 8;
 $day = 8;
 $year = 2008;
-$extra_arg1 = 10;
-$extra_arg2 = 10;
+$extra_arg = 10;
 
-var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year, $extra_arg1) );
-
-var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year, $extra_arg1, $extra_arg2) );
+var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year, $extra_arg) );
 ?>
 ===DONE===
 --EXPECTF--
@@ -31,9 +28,6 @@ var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year, $extra_arg1, $extra_arg
 
 -- Testing gmmktime() function with more than expected no. of arguments --
 
-Deprecated: gmmktime(): The is_dst parameter is deprecated in %s on line %d
-int(1218182888)
-
-Warning: gmmktime() expects at most 7 parameters, 8 given in %s on line %d
+Warning: gmmktime() expects at most 6 parameters, 7 given in %s on line %d
 bool(false)
 ===DONE===

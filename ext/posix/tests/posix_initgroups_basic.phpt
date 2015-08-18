@@ -16,7 +16,7 @@ var_dump(posix_initgroups(NULL, NULL));
 --EXPECTF--
 Basic test of POSIX posix_initgroups function
 
-Warning: posix_initgroups() expects parameter 2 to be long, string given in %s on line %d
+Warning: posix_initgroups() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 bool(false)
 ===DONE====

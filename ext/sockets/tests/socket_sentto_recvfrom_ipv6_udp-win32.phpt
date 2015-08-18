@@ -48,7 +48,7 @@ require 'ipv6_skipif.inc';
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [10022]: An invalid argument was supplied.
+Warning: socket_recvfrom(): unable to recvfrom [10022]: %s
  in %s on line %d
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d

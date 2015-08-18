@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -726,8 +726,8 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 
 
 /* {{{ mysqlnd_cset_escape_quotes */
-PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
-										const char * escapestr, size_t escapestr_len TSRMLS_DC)
+PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
+										const char * escapestr, size_t escapestr_len)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
@@ -780,8 +780,8 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 
 
 /* {{{ mysqlnd_cset_escape_slashes */
-PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
-										 const char * escapestr, size_t escapestr_len TSRMLS_DC)
+PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
+										 const char * escapestr, size_t escapestr_len)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
@@ -865,7 +865,7 @@ static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 		MYSQLND_PLUGIN_API_VERSION,
 		"charsets",
 		MYSQLND_VERSION_ID,
-		MYSQLND_VERSION,
+		PHP_MYSQLND_VERSION,
 		"PHP License 3.01",
 		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{
@@ -887,9 +887,9 @@ static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
 
 /* {{{ mysqlnd_charsets_plugin_register */
 void
-mysqlnd_charsets_plugin_register(TSRMLS_D)
+mysqlnd_charsets_plugin_register(void)
 {
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_charsets_plugin TSRMLS_CC);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_charsets_plugin);
 }
 /* }}} */
 

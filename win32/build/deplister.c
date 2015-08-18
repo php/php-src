@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -22,6 +22,7 @@
  * module to it's stdout for use by distro/installer building tools */
 
 #include <windows.h>
+#include <stdio.h>
 #include <imagehlp.h>
 
 BOOL CALLBACK StatusRoutine(IMAGEHLP_STATUS_REASON reason,
@@ -47,7 +48,7 @@ BOOL CALLBACK StatusRoutine(IMAGEHLP_STATUS_REASON reason,
 int main(int argc, char *argv[])
 {
 	return BindImageEx(BIND_NO_BOUND_IMPORTS | BIND_NO_UPDATE | BIND_ALL_IMAGES,
-		argv[1], NULL, argv[2], StatusRoutine);	
+		argv[1], NULL, argv[2], StatusRoutine);
 }
 
 /*

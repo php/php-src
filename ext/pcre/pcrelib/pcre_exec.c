@@ -41,9 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 pattern matching using an NFA algorithm, trying to mimic Perl as closely as
 possible. There are also some static supporting functions. */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #define NLBLOCK md             /* Block containing newline information */
 #define PSSTART start_subject  /* Field containing processed string start */
@@ -1040,7 +1038,7 @@ for (;;)
     the result of a recursive call to match() whatever happened so it was
     possible to reduce stack usage by turning this into a tail recursion,
     except in the case of a possibly empty group. However, now that there is
-    the possibility of (*THEN) occurring in the final alternative, this
+    the possiblity of (*THEN) occurring in the final alternative, this
     optimization is no longer always possible.
 
     We can optimize if we know there are no (*THEN)s in the pattern; at present

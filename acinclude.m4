@@ -844,7 +844,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
     *netware*[)]
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php5lib, , -L$(top_builddir)/netware -lphp5lib) $(translit(ifelse($1, php5lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php7lib, , -L$(top_builddir)/netware -lphp7lib) $(translit(ifelse($1, php7lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
     *[)]
       suffix=la
@@ -2736,7 +2736,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       enable-libtool-lock | with-pic | with-tags | enable-shared | enable-static | enable-fast-install | with-gnu-ld[)];;
 
       # Allow certain TSRM options
-      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads[)];;
+      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads [)];;
 
       # Allow certain Zend options
       with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
@@ -2771,8 +2771,8 @@ AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
+      pdo_cv_inc_path=$phpincludedir/ext
     fi
   ])
   if test -n "$pdo_cv_inc_path"; then
@@ -3030,4 +3030,22 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
 #endif
   ])
   AC_DEFINE([PHP_HAVE_STDINT_TYPES], [1], [Checked for stdint types])
+])
+
+dnl PHP_CHECK_BUILTIN_EXPECT
+AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
+  AC_MSG_CHECKING([for __builtin_expect])
+
+  AC_TRY_LINK(, [
+    return __builtin_expect(1,1) ? 1 : 0;
+  ], [
+    have_builtin_expect=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_expect=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+
 ])

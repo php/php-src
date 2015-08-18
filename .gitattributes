@@ -49,7 +49,6 @@ UPGRADING.INTERNALS             merge=NEWS
 /ext/spl/tests/SplArray_fromArray.phpt	-crlf
 /ext/standard/tests/dir/scandir_variation3.phpt	-crlf
 /ext/standard/tests/general_functions/escapeshellcmd-win32.phpt	-crlf
-/ext/standard/tests/general_functions/set_magic_quotes_runtime_error.phpt	-crlf
 /ext/standard/tests/strings/bug26817.phpt	-crlf
 /ext/standard/tests/strings/bug26973.phpt	-crlf
 /ext/standard/tests/strings/bug27457.phpt	-crlf

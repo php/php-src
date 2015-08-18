@@ -55,7 +55,7 @@ object(tidyNode)#3 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#4 (9) {
+    object(tidyNode)#4 (9) {
       ["value"]=>
       string(16) "<title></title>
 "
@@ -128,7 +128,7 @@ object(tidyNode)#5 (9) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidyNode)#6 (9) {
+    object(tidyNode)#6 (9) {
       ["value"]=>
       string(9) "<b>Hi</b>"
       ["name"]=>
@@ -148,7 +148,7 @@ object(tidyNode)#5 (9) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidyNode)#7 (8) {
+        object(tidyNode)#7 (8) {
           ["value"]=>
           string(2) "Hi"
           ["name"]=>
@@ -169,7 +169,7 @@ object(tidyNode)#5 (9) {
       }
     }
     [1]=>
-    &object(tidyNode)#8 (9) {
+    object(tidyNode)#8 (9) {
       ["value"]=>
       string(21) "<i>Bye<u>Test</u></i>"
       ["name"]=>
@@ -189,7 +189,7 @@ object(tidyNode)#5 (9) {
       ["child"]=>
       array(2) {
         [0]=>
-        &object(tidyNode)#9 (8) {
+        object(tidyNode)#9 (8) {
           ["value"]=>
           string(3) "Bye"
           ["name"]=>
@@ -208,7 +208,7 @@ object(tidyNode)#5 (9) {
           NULL
         }
         [1]=>
-        &object(tidyNode)#10 (9) {
+        object(tidyNode)#10 (9) {
           ["value"]=>
           string(11) "<u>Test</u>"
           ["name"]=>
@@ -228,7 +228,7 @@ object(tidyNode)#5 (9) {
           ["child"]=>
           array(1) {
             [0]=>
-            &object(tidyNode)#11 (8) {
+            object(tidyNode)#11 (8) {
               ["value"]=>
               string(4) "Test"
               ["name"]=>
@@ -273,7 +273,7 @@ object(tidyNode)#6 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#7 (8) {
+    object(tidyNode)#7 (8) {
       ["value"]=>
       string(2) "Hi"
       ["name"]=>
@@ -332,7 +332,7 @@ object(tidyNode)#8 (9) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidyNode)#9 (8) {
+    object(tidyNode)#9 (8) {
       ["value"]=>
       string(3) "Bye"
       ["name"]=>
@@ -351,7 +351,7 @@ object(tidyNode)#8 (9) {
       NULL
     }
     [1]=>
-    &object(tidyNode)#10 (9) {
+    object(tidyNode)#10 (9) {
       ["value"]=>
       string(11) "<u>Test</u>"
       ["name"]=>
@@ -371,7 +371,7 @@ object(tidyNode)#8 (9) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidyNode)#11 (8) {
+        object(tidyNode)#11 (8) {
           ["value"]=>
           string(4) "Test"
           ["name"]=>
@@ -432,7 +432,7 @@ object(tidyNode)#10 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#11 (8) {
+    object(tidyNode)#11 (8) {
       ["value"]=>
       string(4) "Test"
       ["name"]=>

@@ -72,12 +72,12 @@ array(8) {
   [2]=>
   array(1) {
     [0]=>
-    string(0) ""
+    int(0)
   }
   [3]=>
   array(1) {
     [0]=>
-    int(0)
+    string(0) ""
   }
   [4]=>
   array(1) {

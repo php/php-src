@@ -3,7 +3,7 @@ Phar::startBuffering()/setStub()/stopBuffering() zip-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.readonly=0

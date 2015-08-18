@@ -4,6 +4,7 @@ Test mb_split() function : usage variations  - different parameter types for lim
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
@@ -284,32 +285,32 @@ array(1) {
 
 -- Iteration 16 --
 
-Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: mb_split() expects parameter 3 to be long, object given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -326,6 +327,6 @@ array(1) {
 
 -- Iteration 24 --
 
-Warning: mb_split() expects parameter 3 to be long, resource given in %s on line %d
+Warning: mb_split() expects parameter 3 to be integer, resource given in %s on line %d
 bool(false)
 Done

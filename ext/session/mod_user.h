@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,6 +24,6 @@
 extern ps_module ps_mod_user;
 #define ps_user_ptr &ps_mod_user
 
-PS_FUNCS_SID(user);
+PS_FUNCS_UPDATE_TIMESTAMP(user);
 
 #endif

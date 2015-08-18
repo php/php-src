@@ -1,5 +1,5 @@
 --TEST--
-Pass same variable by ref and by value. 
+Pass same variable by ref and by value (PHP7).
 --FILE--
 <?php
 function valRef($x, &$y) {
@@ -42,7 +42,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  string(10) "original.a"
+  string(9) "changed.x"
   [1]=>
   string(9) "changed.y"
 }
@@ -62,6 +62,6 @@ array(2) {
   [0]=>
   string(9) "changed.x"
   [1]=>
-  string(10) "original.b"
+  string(9) "changed.y"
 }
 string(9) "changed.x"

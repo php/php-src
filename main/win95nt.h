@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -39,9 +39,8 @@ typedef char * caddr_t;
 #define		_IFLNK	0120000	/* symbolic link */
 #define S_IFIFO		_IFIFO
 #define S_IFBLK		_IFBLK
-#define	S_IFLNK		_IFLNK
-#ifndef S_ISREG 
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#ifndef S_IFLNK
+# define	S_IFLNK		_IFLNK
 #endif
 #define chdir(path) _chdir(path)
 #define mkdir(a, b)	_mkdir(a)
@@ -55,7 +54,7 @@ typedef char * caddr_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 #if !NSAPI
-typedef long pid_t;
+typedef int pid_t;
 #endif
 
 /* missing in vc5 math.h */

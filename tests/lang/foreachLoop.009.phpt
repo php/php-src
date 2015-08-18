@@ -55,6 +55,7 @@ foreach ($refedArray as $k=>&$v4) {
 Remove elements from a referenced array during loop
 key: 0; value: original.0
 key: 1; value: original.1
+key: 2; value: original.2
 
 Remove elements from a referenced array during loop, using &$value
 key: 0; value: original.0
@@ -64,11 +65,6 @@ Add elements to a referenced array during loop
 key: 0; value: original.0
 key: 1; value: original.1
 key: 2; value: original.2
-key: 3; value: new.0
-key: 4; value: new.1
-key: 5; value: new.2
-key: 6; value: new.3
-Loop detected, as expected.
 
 Add elements to a referenced array during loop, using &$value
 key: 0; value: original.0

@@ -41,10 +41,10 @@ $array_arg = array(
        array(-0x123, -0xabc, -0xABC, -0xAb1, -0x9fa),
 
        // array with positive octal values
-/*9*/  array(0123, 02348, 034, 00),
+/*9*/  array(0123, 0234, 034, 00),
 
        // array with negative octal values
-/*10*/ array(-0123, -02348, -034),
+/*10*/ array(-0123, -0234, -034),
 
 );
 

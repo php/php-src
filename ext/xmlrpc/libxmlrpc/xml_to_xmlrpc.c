@@ -5,28 +5,28 @@
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2000 Epinions, Inc. 
+/*
+  Copyright 2000 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -95,7 +95,7 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
          }
       }
 		else if (!strcmp(el->name, ELEM_DATA)	/* should be ELEM_ARRAY, but there is an extra level. weird */
-			 || (!strcmp(el->name, ELEM_PARAMS) && 
+			 || (!strcmp(el->name, ELEM_PARAMS) &&
 				  (XMLRPC_RequestGetRequestType(request) == xmlrpc_request_call)) ) {		/* this "PARAMS" concept is silly.  dave?! */
          xml_element* iter = (xml_element*)Q_Head(&el->children);
          XMLRPC_SetIsVector(current_val, xmlrpc_vector_array);
@@ -118,7 +118,7 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
             iter = (xml_element*)Q_Next(&el->children);
          }
 		}
-		else if (!strcmp(el->name, ELEM_STRING) || 
+		else if (!strcmp(el->name, ELEM_STRING) ||
                  (!strcmp(el->name, ELEM_VALUE) && Q_Size(&el->children) == 0)) {
          XMLRPC_SetValueString(current_val, el->text.str, el->text.len);
 		}
@@ -164,7 +164,7 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
 
          iter = (xml_element*)Q_Head(&el->children);
          while ( iter ) {
-            xml_element_to_XMLRPC_REQUEST_worker(request, parent_vector, 
+            xml_element_to_XMLRPC_REQUEST_worker(request, parent_vector,
                                                  current_val, iter);
             iter = (xml_element*)Q_Next(&el->children);
          }
@@ -186,7 +186,7 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST(XMLRPC_REQUEST request, xml_element* 
    return NULL;
 }
 
-xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VALUE node, 
+xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VALUE node,
                                           XMLRPC_REQUEST_TYPE request_type, int depth) {
 #define BUF_SIZE 512
    xml_element* root = NULL;
@@ -197,9 +197,9 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
       xml_element* elem_val = xml_elem_new();
 
       /* special case for when root element is not an array */
-      if (depth == 0 && 
-          !(type == xmlrpc_vector && 
-            vtype == xmlrpc_vector_array && 
+      if (depth == 0 &&
+          !(type == xmlrpc_vector &&
+            vtype == xmlrpc_vector_array &&
             request_type == xmlrpc_request_call) ) {
          int bIsFault = (vtype == xmlrpc_vector_struct && XMLRPC_VectorGetValueWithID(node, ELEM_FAULTCODE));
 
@@ -228,8 +228,7 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             break;
          case xmlrpc_double:
             {
-                TSRMLS_FETCH();
-                elem_val->name = strdup(ELEM_DOUBLE);
+                                elem_val->name = strdup(ELEM_DOUBLE);
                 ap_php_snprintf(buf, BUF_SIZE, "%.*G", (int) EG(precision), XMLRPC_GetValueDouble(node));
                 simplestring_add(&elem_val->text, buf);
             }
@@ -270,7 +269,7 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
                           */
                          xml_element* data = xml_elem_new();
                          data->name = strdup(ELEM_DATA);
-    
+
                          elem_val->name = strdup(ELEM_ARRAY);
                          Q_PushTail(&elem_val->children, data);
                          root_vector_elem = data;
@@ -399,7 +398,7 @@ xml_element* XMLRPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
       }
 		}
       if (xParams) {
-         Q_PushTail(&wrapper->children, 
+         Q_PushTail(&wrapper->children,
                     XMLRPC_to_xml_element_worker(NULL, XMLRPC_RequestGetData(request), XMLRPC_RequestGetRequestType(request), 0));
 		}
 		else {

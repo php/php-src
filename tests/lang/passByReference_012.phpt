@@ -17,9 +17,9 @@ var_dump(array_shift(array_shift($stack)));
 ?>
 ===DONE===
 --EXPECTF--
-Strict Standards: Only variables should be passed by reference in %s on line %d
+Notice: Only variables should be passed by reference in %s on line %d
 string(3) "two"
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
+Notice: Only variables should be passed by reference in %s on line %d
 string(3) "one"
 ===DONE===

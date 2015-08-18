@@ -20,14 +20,15 @@ unset($f1, $f2);
 gc_collect_cycles();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'foobar' in %sgc_030.php:%d
+Fatal error: Uncaught Exception: foobar in %sgc_030.php:%d
 Stack trace:
 #0 [internal function]: foo->__destruct()
 #1 %sgc_030.php(%d): gc_collect_cycles()
 #2 {main}
 
-Next exception 'Exception' with message 'foobar' in %sgc_030.php:%d
+Next Exception: foobar in %sgc_030.php:%d
 Stack trace:
-#0 %sgc_030.php(%d): foo->__destruct()
-#1 {main}
+#0 [internal function]: foo->__destruct()
+#1 %sgc_030.php(%d): gc_collect_cycles()
+#2 {main}
   thrown in %sgc_030.php on line %d

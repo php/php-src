@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -34,7 +34,7 @@
 #define my_ulonglong			uint64_t
 
 #define MYSQL_VERSION_ID		MYSQLND_VERSION_ID
-#define MYSQL_SERVER_VERSION	MYSQLND_VERSION
+#define MYSQL_SERVER_VERSION	PHP_MYSQLND_VERSION
 #define MYSQL_ERRMSG_SIZE		MYSQLND_ERRMSG_SIZE
 #define SQLSTATE_LENGTH			MYSQLND_SQLSTATE_LENGTH
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,7 +23,7 @@
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H
 
-PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result);
+PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, zend_bool quiet);
 PHP_FUNCTION(crypt);
 #if HAVE_CRYPT
 PHP_MINIT_FUNCTION(crypt);

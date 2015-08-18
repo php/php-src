@@ -32,5 +32,5 @@ echo "Done";
 -- Testing mb_internal_encoding() function with more than expected no. of arguments --
 
 Warning: mb_internal_encoding() expects at most 1 parameter, 2 given in %s on line %d
-bool(false)
+NULL
 Done

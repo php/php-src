@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifndef MBFL_MBFILTER_ISO8859_5_H
@@ -36,7 +36,7 @@ extern const mbfl_encoding mbfl_encoding_8859_5;
 extern const struct mbfl_identify_vtbl vtbl_identify_8859_5;
 extern const struct mbfl_convert_vtbl vtbl_8859_5_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_8859_5;
- 
+
 int mbfl_filt_conv_8859_5_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_8859_5(int c, mbfl_convert_filter *filter);
 

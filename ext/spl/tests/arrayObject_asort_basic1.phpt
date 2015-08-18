@@ -36,7 +36,7 @@ object(ArrayObject)#%d (1) {
   }
 }
 
-Warning: asort() expects parameter 2 to be long, string given in %sarrayObject_asort_basic1.php on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %sarrayObject_asort_basic1.php on line %d
 bool(false)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>

@@ -3,7 +3,7 @@ Phar: test that creation of zip-based phar generates valid zip with all bells/wh
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "<")) die("skip Unicode support required");
+if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip Unicode support required");
 if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("zlib")) die("skip zlib not available");
 if (!extension_loaded("bz2")) die("skip bz2 not available");

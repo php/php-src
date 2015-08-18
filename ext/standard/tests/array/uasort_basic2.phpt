@@ -58,13 +58,13 @@ array(6) {
   int(1)
   [1]=>
   int(1)
-  [3]=>
-  int(2)
   [2]=>
   int(2)
-  [5]=>
-  int(3)
+  [3]=>
+  int(2)
   [4]=>
+  int(3)
+  [5]=>
   int(3)
 }
 -- Numeric array with decreasing values --
@@ -74,21 +74,21 @@ array(6) {
   int(1)
   [5]=>
   int(1)
-  [3]=>
-  int(2)
   [2]=>
   int(2)
-  [1]=>
-  int(3)
+  [3]=>
+  int(2)
   [0]=>
+  int(3)
+  [1]=>
   int(3)
 }
 -- Numeric array with increasing and decreasing values --
 bool(true)
 array(6) {
-  [5]=>
-  int(1)
   [0]=>
+  int(1)
+  [5]=>
   int(1)
   [1]=>
   int(2)

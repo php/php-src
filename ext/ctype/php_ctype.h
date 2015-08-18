@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -18,6 +18,9 @@
 
 #ifndef PHP_CTYPE_H
 #define PHP_CTYPE_H
+
+#include "php_version.h"
+#define PHP_CTYPE_VERSION PHP_VERSION
 
 #if HAVE_CTYPE
 

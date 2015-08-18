@@ -38,7 +38,7 @@ var_dump(ftp_quit($ftp));
 bool(true)
 string(4) "UNIX"
 
-Warning: ftp_alloc() expects parameter 2 to be long, array given in %s004.php on line 12
+Warning: ftp_alloc() expects parameter 2 to be integer, array given in %s004.php on line 12
 bool(false)
 
 Warning: ftp_cdup() expects exactly 1 parameter, 2 given in %s004.php on line 13

@@ -25,7 +25,7 @@ NULL
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, integer given in %s on line 8
 NULL
 
-Warning: ReflectionClass::isInstance() expects parameter 1 to be object, double given in %s on line 9
+Warning: ReflectionClass::isInstance() expects parameter 1 to be object, float given in %s on line 9
 NULL
 
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, boolean given in %s on line 10

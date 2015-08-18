@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,6 +26,9 @@
 extern zend_module_entry recode_module_entry;
 #define phpext_recode_ptr &recode_module_entry
 
+#include "php_version.h"
+#define PHP_RECODE_VERSION PHP_VERSION
+
 PHP_MINIT_FUNCTION(recode);
 PHP_MSHUTDOWN_FUNCTION(recode);
 PHP_MINFO_FUNCTION(recode);
@@ -35,5 +38,5 @@ PHP_FUNCTION(recode_file);
 #else
 #define phpext_recode_ptr NULL
 #endif
-	
+
 #endif /* PHP_RECODE_H */

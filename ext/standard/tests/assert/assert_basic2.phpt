@@ -29,9 +29,9 @@ assert(0);
 string(2) "f1"
 f1 called
 
-Warning: assert(): Assertion failed in %s on line 13
+Warning: assert(): assert(0) failed in %s on line 13
 string(2) "f1"
 string(2) "f2"
 f2 called
 
-Warning: assert(): Assertion failed in %s on line 17
+Warning: assert(): assert(0) failed in %s on line 17

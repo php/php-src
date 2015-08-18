@@ -48,8 +48,8 @@ array(3) {
   float(123.456)
 }
 
-Warning: session_decode(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
+Warning: session_decode(): Session is not active. You cannot decode session data in %s on line %d
+bool(false)
 array(3) {
   ["foo"]=>
   int(1234567890)

@@ -144,8 +144,12 @@ case "$1" in
 		echo " done"
 	;;
 
+	configtest)
+		$php_fpm_BIN -t
+	;;
+
 	*)
-		echo "Usage: $0 {start|stop|force-quit|restart|reload|status}"
+		echo "Usage: $0 {start|stop|force-quit|restart|reload|status|configtest}"
 		exit 1
 	;;
 

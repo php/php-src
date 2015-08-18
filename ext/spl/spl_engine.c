@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,32 +32,37 @@
 #include "spl_array.h"
 
 /* {{{ spl_instantiate */
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC)
+PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
 {
-	if (alloc) {
-		ALLOC_ZVAL(*object);
-	}
-	object_init_ex(*object, pce);
-	Z_SET_REFCOUNT_PP(object, 1);
-	Z_SET_ISREF_PP(object); /* check if this can be hold always */
+	object_init_ex(object, pce);
+	Z_SET_REFCOUNT_P(object, 1);
+	// !!!PZ_SET_ISREF_P(object); /* check if this can be hold always */
 }
 /* }}} */
 
-PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
+	zend_ulong idx;
+
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
-		ZEND_HANDLE_NUMERIC(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, idx);
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), idx)) {
+			return idx;
+		}
 		break;
 	case IS_DOUBLE:
-		return (long)Z_DVAL_P(offset);
-	case IS_RESOURCE:
-	case IS_BOOL:
+		return (zend_long)Z_DVAL_P(offset);
 	case IS_LONG:
 		return Z_LVAL_P(offset);
+	case IS_FALSE:
+		return 0;
+	case IS_TRUE:
+		return 1;
+	case IS_RESOURCE:
+		return Z_RES_HANDLE_P(offset);
 	}
 	return -1;
-} 
+}
 /* }}} */
 
 /*

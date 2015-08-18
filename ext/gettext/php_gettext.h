@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,6 +25,9 @@
 
 extern zend_module_entry php_gettext_module_entry;
 #define gettext_module_ptr &php_gettext_module_entry
+
+#include "php_version.h"
+#define PHP_GETTEXT_VERSION PHP_VERSION
 
 PHP_MINFO_FUNCTION(php_gettext);
 

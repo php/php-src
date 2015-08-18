@@ -187,7 +187,7 @@ mysqli_result->unknown = ''
 
 Constructor:
 
-Warning: mysqli_result::__construct() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: mysqli_result::__construct() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 
 Warning: mysqli_result::__construct() expects parameter 1 to be mysqli, %unicode_string_optional% given in %s on line %d
 done!

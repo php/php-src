@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -41,7 +41,7 @@
 /* Convert strings to bc numbers.  Base 10 only.*/
 
 void
-bc_str2num (bc_num *num, char *str, int scale TSRMLS_DC)
+bc_str2num (bc_num *num, char *str, int scale)
 {
   int digits, strscale;
   char *ptr, *nptr;

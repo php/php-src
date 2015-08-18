@@ -27,4 +27,3 @@ version 1.1.0 March 02, 2010
 - added cp5022x encoding (moriyoshi)
 - added ISO-2022-JP-MS (moriyoshi)
 - moved to github.com from sourceforge.jp (moriyoshi)
-

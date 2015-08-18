@@ -32,17 +32,17 @@ print "== INVALID PARAMETER ==\n";
 
 // Note: Other than string type, PHP raises Warning
 $r = mb_internal_encoding('BAD');
-($r === FALSE) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
+($r === false) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
 $enc = mb_internal_encoding();
 print "$enc\n";
 
 $r = mb_internal_encoding($t_ary);
-($r === FALSE) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
+($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
 $enc = mb_internal_encoding();
 print "$enc\n";
 
 $r = mb_internal_encoding($t_obj);
-($r === FALSE) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
+($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
 $enc = mb_internal_encoding();
 print "$enc\n";
 

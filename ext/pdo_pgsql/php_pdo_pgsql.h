@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -25,6 +25,9 @@
 
 extern zend_module_entry pdo_pgsql_module_entry;
 #define phpext_pdo_pgsql_ptr &pdo_pgsql_module_entry
+
+#include "php_version.h"
+#define PHP_PDO_PGSQL_VERSION PHP_VERSION
 
 #ifdef ZTS
 #include "TSRM.h"

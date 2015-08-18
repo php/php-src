@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,6 +25,9 @@
 
 extern zend_module_entry wddx_module_entry;
 #define wddx_module_ptr &wddx_module_entry
+
+#include "php_version.h"
+#define PHP_WDDX_VERSION PHP_VERSION
 
 PHP_FUNCTION(wddx_serialize_value);
 PHP_FUNCTION(wddx_serialize_vars);
