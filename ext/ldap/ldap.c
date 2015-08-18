@@ -70,17 +70,24 @@
 #define PHP_LDAP_ESCAPE_FILTER 0x01
 #define PHP_LDAP_ESCAPE_DN     0x02
 
-#ifndef HAVE_LDAP_CONTROL_FIND
+#if defined(LDAP_CONTROL_PAGEDRESULTS) && !defined(HAVE_LDAP_CONTROL_FIND)
 LDAPControl *ldap_control_find( const char *oid, LDAPControl **ctrls, LDAPControl ***nextctrlp)
 {
-  assert(nextctrlp == NULL);
-  return ldap_find_control(oid, ctrls);
+	assert(nextctrlp == NULL);
+	return ldap_find_control(oid, ctrls);
+}
+#endif
+
+#if !defined(LDAP_API_FEATURE_X_OPENLDAP)
+void ldap_memvfree(void **v)
+{
+	ldap_value_free((char **)v);
 }
 #endif
 
 typedef struct {
 	LDAP *link;
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	zval *rebindproc;
 #endif
 } ldap_linkdata;
@@ -104,10 +111,8 @@ static void _close_ldap_link(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
-	/* ldap_unbind_s() is deprecated;
-	 * the distinction between ldap_unbind() and ldap_unbind_s() is moot */
 	ldap_unbind_ext(ld->link, NULL, NULL);
-#ifdef HAVE_3ARG_SETREBINDPROC
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 
 	if (ld->rebindproc != NULL) {
 		zval_dtor(ld->rebindproc);
@@ -349,11 +354,8 @@ PHP_FUNCTION(ldap_connect)
 
 	ld = ecalloc(1, sizeof(ldap_linkdata));
 
-	/* OpenLDAP provides a specific call to detect valid LDAP URIs;
-	 * ldap_init()/ldap_open() is deprecated, use ldap_initialize() instead.
-	 */
 	{
-		int rc;
+		int rc = LDAP_SUCCESS;
 		char	*url = host;
 		if (!ldap_is_ldap_url(url)) {
 			int	urllen = hostlen + sizeof( "ldap://:65535" );
@@ -367,7 +369,21 @@ PHP_FUNCTION(ldap_connect)
 			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
 		}
 
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+		/* ldap_init() is deprecated, use ldap_initialize() instead.
+		 */
 		rc = ldap_initialize(&ldap, url);
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+		/* ldap_init does not support URLs.
+		 * We must try the original host and port information.
+		 */
+		ldap = ldap_init(host, port);
+		if (ldap == NULL) {
+			efree(ld);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create session handle");
+			RETURN_FALSE;
+		}
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 		if (url != host) {
 			efree(url);
 		}
@@ -465,14 +481,19 @@ PHP_FUNCTION(ldap_bind)
 	}
 
 	{
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+		/* ldap_simple_bind_s() is deprecated, use ldap_sasl_bind_s() instead.
+		 */
 		struct berval   cred;
 
-		/* ldap_bind_s() is deprecated; use ldap_sasl_bind_s() instead */
 		cred.bv_val = ldap_bind_pw;
 		cred.bv_len = ldap_bind_pw ? ldap_bind_pwlen : 0;
 		rc = ldap_sasl_bind_s(ld->link, ldap_bind_dn, LDAP_SASL_SIMPLE, &cred,
 				NULL, NULL,     /* no controls right now */
 				NULL);	  /* we don't care about the server's credentials */
+#else /* ! LDAP_API_FEATURE_X_OPENLDAP */
+		rc = ldap_simple_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw);
+#endif /* ! LDAP_API_FEATURE_X_OPENLDAP */
 	}
 	if ( rc != LDAP_SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
@@ -1304,7 +1325,6 @@ PHP_FUNCTION(ldap_explode_dn)
 		add_index_string(return_value, i, ldap_value[i], 1);
 	}
 
-	/* ldap_value_free() is deprecated */
 	ldap_memvfree((void **)ldap_value);
 }
 /* }}} */
@@ -2485,7 +2505,7 @@ PHP_FUNCTION(ldap_start_tls)
 #endif
 #endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP */
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 /* {{{ _ldap_rebind_proc()
 */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
@@ -3138,7 +3158,7 @@ ZEND_END_ARG_INFO()
 #endif
 #endif
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, callback)
@@ -3226,7 +3246,7 @@ const zend_function_entry ldap_functions[] = {
 #endif
 #endif
 
-#if defined(HAVE_3ARG_SETREBINDPROC)
+#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	PHP_FE(ldap_set_rebind_proc,						arginfo_ldap_set_rebind_proc)
 #endif
 
