@@ -102,8 +102,16 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int op1_len = (int)Z_STRLEN_P(op1);
-	int length = op1_len + (int)Z_STRLEN_P(op2);
+	int length, op1_len;
+
+	if (Z_TYPE_P(op1) != IS_STRING) {
+		zend_string *str = zval_get_string(op1);
+		ZVAL_PSTRINGL(op1, str->val, str->len);
+		zend_string_release(str);
+	}
+
+	op1_len = (int)Z_STRLEN_P(op1);
+	length = op1_len + (int)Z_STRLEN_P(op2);
 
 	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, 1));
 	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
@@ -300,7 +308,11 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG);
 			zend_string_release(Z_STR($1));
-			zend_string_release(Z_STR($2));
+			if (Z_TYPE($2) == IS_STRING) {
+				zend_string_release(Z_STR($2));
+			} else {
+				zval_dtor(&$2);
+			}
 			zval_ptr_dtor(&$5);
 		}
 	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); zend_string_release(Z_STR($1)); }

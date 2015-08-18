@@ -36,11 +36,13 @@
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+	(opline)->op1.num = 0; \
+	(opline)->op2.num = 0; \
+	(opline)->result.num = 0; \
+	(opline)->opcode = ZEND_NOP; \
+	(opline)->op1_type =  IS_UNUSED; \
+	(opline)->op2_type = IS_UNUSED; \
+	(opline)->result_type = IS_UNUSED; \
 } while (0)
 
 #define RESET_DOC_COMMENT() do { \

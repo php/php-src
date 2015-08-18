@@ -1225,48 +1225,12 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 } /* }}} */
 #endif
 
-
-/* A bit dark magic in order to have meaningful allocator adresses [ppc(64) may return bogus addresses here] */
-#if ZEND_DEBUG && (__has_builtin(__builtin_frame_address) || ZEND_GCC_VERSION >= 3004) && !defined(__ppc__) && !defined(__ppc64__)
-/* with gcc %rbp/%ebp for __builtin_frame_address() and clang returns the frame return address being at %ebp/%rbp + sizeof(void*) */
-# ifdef __clang__
-#  define FETCH_PARENT_START() \
-	parent -= ZEND_MM_ALIGNED_SIZE(sizeof(void *));
-# else
-#  define FETCH_PARENT_START()
-# endif
-# define FETCH_PARENT_FILELINE(argsize) \
-	char *__zend_filename, *__zend_orig_filename; \
-	uint __zend_lineno, __zend_orig_lineno; \
-	void *parent = __builtin_frame_address(1U); \
-	FETCH_PARENT_START() \
-	parent -= (argsize); /* size of first arguments */ \
-	parent -= sizeof(char *); /* filename */ \
-	__zend_filename = *(char **) parent; \
-	parent = (void *) ((intptr_t) parent & ZEND_MM_ALIGNMENT_MASK); /* realign */ \
-	parent -= sizeof(uint); /* lineno */ \
-	__zend_lineno = *(uint *) parent; \
-	parent = (void *) ((intptr_t) parent & ZEND_MM_ALIGNMENT_MASK); /* realign */ \
-	parent -= sizeof(char *); /* orig_filename */ \
-	__zend_orig_filename = *(char **) parent; \
-	parent = (void *) ((intptr_t) parent & ZEND_MM_ALIGNMENT_MASK); /* realign */ \
-	parent -= sizeof(uint); /* orig_lineno */ \
-	__zend_orig_lineno = *(uint *) parent;
-#elif ZEND_DEBUG
-# define FETCH_PARENT_FILELINE(argsize) \
-	char *__zend_filename = __FILE__, *__zend_orig_filename = NULL; \
-	uint __zend_lineno = __LINE__, __zend_orig_lineno = 0;
-#else
-# define FETCH_PARENT_FILELINE(argsize)
-#endif
-
-void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
+void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
-	FETCH_PARENT_FILELINE(ZEND_MM_ALIGNED_SIZE(sizeof(size)));
 	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
-void phpdbg_free_wrapper(void *p) /* {{{ */
+void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
 	zend_mm_heap *heap = zend_mm_get_heap();
 	if (UNEXPECTED(heap == p)) {
@@ -1274,14 +1238,13 @@ void phpdbg_free_wrapper(void *p) /* {{{ */
 		 * let's prevent it from segfault for now
 		 */
 	} else {
-		FETCH_PARENT_FILELINE(ZEND_MM_ALIGNED_SIZE(sizeof(p)));
+		phpdbg_watch_efree(p);
 		return _zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 } /* }}} */
 
-void *phpdbg_realloc_wrapper(void *ptr, size_t size) /* {{{ */
+void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
-	FETCH_PARENT_FILELINE(ZEND_MM_ALIGNED_SIZE(sizeof(ptr)) + ZEND_MM_ALIGNED_SIZE(sizeof(size)));
 	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
@@ -1633,18 +1596,20 @@ phpdbg_main:
 
 		use_mm_wrappers = !_malloc && !_realloc && !_free;
 
-		if (use_mm_wrappers) {
-			_malloc = phpdbg_malloc_wrapper;
-			_realloc = phpdbg_realloc_wrapper;
-			_free = phpdbg_free_wrapper;
-		}
-
 		phpdbg_init_list();
 
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
-		zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
+		if (use_mm_wrappers) {
+#if ZEND_DEBUG
+			zend_mm_set_custom_debug_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
+#else
+			zend_mm_set_custom_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
+#endif
+		} else {
+			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
+		}
 
 		phpdbg_setup_watchpoints();
 

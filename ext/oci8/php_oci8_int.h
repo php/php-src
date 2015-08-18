@@ -176,7 +176,7 @@ typedef struct {
 	php_oci_connection	*connection;			/* parent connection handle */
 	dvoid				*descriptor;			/* OCI descriptor handle */
 	ub4					 type;					/* descriptor type (FILE/LOB) */
-	int					 lob_current_position;	/* LOB internal pointer */
+	ub4					 lob_current_position;	/* LOB internal pointer */
 	int					 lob_size;				/* cached LOB size. -1 = Lob wasn't initialized yet */
 	int					 buffering;				/* cached buffering flag. 0 - off, 1 - on, 2 - on and buffer was used */
 	ub4					 chunk_size;			/* chunk size of the LOB. 0 - unknown */
@@ -492,14 +492,14 @@ int php_oci_statement_cancel(php_oci_statement *statement);
 void php_oci_statement_free(php_oci_statement *statement);
 int php_oci_bind_pre_exec(zval *data, void *result);
 int php_oci_bind_post_exec(zval *data);
-int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long maxlength, ub2 type);
+int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long maxlength, ub2 type);
 sb4 php_oci_bind_in_callback(dvoid *ictxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp);
 sb4 php_oci_bind_out_callback(dvoid *octxp, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data);
 int php_oci_cleanup_pre_fetch(zval *data);
 int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type);
 int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows);
-int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type);
+int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t name_len, zval *var, zend_long max_table_length, zend_long maxlength, zend_long type);
 php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_length);
 php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_length);
 php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_length, zend_long maxlength);
@@ -552,4 +552,6 @@ ZEND_EXTERN_MODULE_GLOBALS(oci)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */

@@ -175,7 +175,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 	while (var_hash) {
 		next = var_hash->next;
-		efree(var_hash);
+		efree_size(var_hash, sizeof(var_entries));
 		var_hash = next;
 	}
 
@@ -184,7 +184,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 			zval_ptr_dtor(&var_dtor_hash->data[i]);
 		}
 		next = var_dtor_hash->next;
-		efree(var_dtor_hash);
+		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
 	}
 }
@@ -474,13 +474,15 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 {
 	zval retval;
 	zval fname;
+	HashTable *ht;
 
 	if (Z_TYPE_P(rval) != IS_OBJECT) {
 		return 0;
 	}
 
-	//??? TODO: resize before
-	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_OBJPROP_P(rval), elements, 1)) {
+	ht = Z_OBJPROP_P(rval);
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
+	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		return 0;
 	}
 

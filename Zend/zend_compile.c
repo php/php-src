@@ -879,9 +879,9 @@ zend_string *zend_resolve_class_name_ast(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void ptr_dtor(zval *zv) /* {{{ */
+static void label_ptr_dtor(zval *zv) /* {{{ */
 {
-	efree(Z_PTR_P(zv));
+	efree_size(Z_PTR_P(zv), sizeof(zend_label));
 }
 /* }}} */
 
@@ -1125,6 +1125,32 @@ void zend_do_early_binding(void) /* {{{ */
 	zend_del_literal(CG(active_op_array), opline->op1.constant);
 	zend_del_literal(CG(active_op_array), opline->op2.constant);
 	MAKE_NOP(opline);
+}
+/* }}} */
+
+static void zend_mark_function_as_generator() /* {{{ */
+{
+	if (!CG(active_op_array)->function_name) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"The \"yield\" expression can only be used inside a function");
+	}
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
+		if (!CG(active_op_array)->arg_info[-1].class_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg,
+				zend_get_type_by_const(CG(active_op_array)->arg_info[-1].type_hint));
+		}
+		if (!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Traversable")-1
+				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Traversable")-1, "Traversable", sizeof("Traversable")-1) == 0) &&
+			!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Iterator")-1
+				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Iterator")-1, "Iterator", sizeof("Iterator")-1) == 0) &&
+			!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Generator")-1
+				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Generator")-1, "Generator", sizeof("Generator")-1) == 0)) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name));
+		}
+	}
+
+	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 }
 /* }}} */
 
@@ -3041,6 +3067,22 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 }
 /* }}} */
 
+static void zend_compile_assert_side_effects(zend_ast *ast) /* {{{ */
+{
+	int i;
+	int children = zend_ast_is_list(ast) ? zend_ast_get_list(ast)->children : zend_ast_get_num_children(ast);
+
+	for (i = 0; i < children; i++) {
+		zend_ast *child = (zend_ast_is_list(ast) ? zend_ast_get_list(ast)->child : ast->child)[i];
+		if (child->kind == ZEND_AST_YIELD) {
+			zend_mark_function_as_generator();
+		} else if (ast->kind >= ZEND_AST_IS_LIST_SHIFT) {
+			zend_compile_assert_side_effects(child);
+		}
+	}
+}
+/* }}} */
+
 static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
@@ -3081,6 +3123,8 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		}
 		result->op_type = IS_CONST;
 		ZVAL_TRUE(&result->u.constant);
+
+		zend_compile_assert_side_effects((zend_ast *) args);
 	}
 
 	return SUCCESS;
@@ -3428,9 +3472,11 @@ void zend_compile_static_var(zend_ast *ast) /* {{{ */
 void zend_compile_unset(zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
-
 	znode var_node;
 	zend_op *opline;
+
+	zend_ensure_writable_variable(var_ast);
+
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
 			if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
@@ -3505,7 +3551,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 
 static int zend_handle_loops_and_finally(void) /* {{{ */
 {
-	zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
+	return zend_handle_loops_and_finally_ex(zend_stack_count(&CG(loop_var_stack)) + 1);
 }
 /* }}} */
 
@@ -3701,7 +3747,7 @@ void zend_compile_label(zend_ast *ast) /* {{{ */
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 8, NULL, ptr_dtor, 0);
+		zend_hash_init(CG(context).labels, 8, NULL, label_ptr_dtor, 0);
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
@@ -6181,32 +6227,6 @@ void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 
 	result->op_type = IS_CONST;
 	ZVAL_BOOL(&result->u.constant, 1);
-}
-/* }}} */
-
-static void zend_mark_function_as_generator() /* {{{ */
-{
-	if (!CG(active_op_array)->function_name) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"The \"yield\" expression can only be used inside a function");
-	}
-	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
-		if (!CG(active_op_array)->arg_info[-1].class_name) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg,
-				zend_get_type_by_const(CG(active_op_array)->arg_info[-1].type_hint));
-		}
-		if (!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Traversable")-1
-				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Traversable")-1, "Traversable", sizeof("Traversable")-1) == 0) &&
-			!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Iterator")-1
-				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Iterator")-1, "Iterator", sizeof("Iterator")-1) == 0) &&
-			!(ZSTR_LEN(CG(active_op_array)->arg_info[-1].class_name) == sizeof("Generator")-1
-				&& zend_binary_strcasecmp(ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name), sizeof("Generator")-1, "Generator", sizeof("Generator")-1) == 0)) {
-			zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(CG(active_op_array)->arg_info[-1].class_name));
-		}
-	}
-
-	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 }
 /* }}} */
 
