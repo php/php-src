@@ -325,27 +325,56 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 {
 	zend_ulong hash = Z_UL(5381);
 
-	/* variant with the hash unrolled eight times */
-	for (; len >= 8; len -= 8) {
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
+#if 0
+	if (len < SIZEOF_ZEND_LONG)
+	{
+		switch (len) {
+			case 7: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 6: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 5: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 4: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 3: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 2: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 1: hash = ((hash << 8) + hash) + *str++; break;
+			case 0: break;
+	EMPTY_SWITCH_DEFAULT_CASE()
+		}
 	}
-	switch (len) {
-		case 7: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 6: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 5: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 4: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 3: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
-		case 1: hash = ((hash << 5) + hash) + *str++; break;
-		case 0: break;
-EMPTY_SWITCH_DEFAULT_CASE()
+	else
+#endif
+	{
+		/* variant with the hash unrolled eight times */
+		for (; len >= 8; len -= 8) {
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+			hash = ((hash << 5) + hash) + *str++;
+		}
+		switch (len) {
+#if 0
+			case 7: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 6: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 5: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 4: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 3: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 2: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
+			case 1: hash = ((hash << 5) + hash) + *str++; break;
+#else
+			case 7: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 6: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 5: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 4: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 3: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 2: hash = ((hash << 8) + hash) + *str++; /* fallthrough... */
+			case 1: hash = ((hash << 8) + hash) + *str++; break;
+#endif
+			case 0: break;
+	EMPTY_SWITCH_DEFAULT_CASE()
+		}
 	}
 
 	/* Hash value can't be zero, so we always set the high bit */

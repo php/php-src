@@ -497,9 +497,14 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		} else if (EXPECTED(p->h == h) &&
 		     EXPECTED(p->key) &&
-		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key)) &&
-		     EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
-			return p;
+		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key))) {
+
+			 if (ZSTR_LEN(p->key) < SIZEOF_ZEND_LONG) {
+				 return p;
+			 }
+			 if (EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+				 return p;
+			 }
 		}
 		idx = Z_NEXT(p->val);
 	}
