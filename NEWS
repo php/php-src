@@ -46,6 +46,7 @@ PHP                                                                        NEWS
     match). (cmb)
 
 - PDO:
+  . Fixed bug #70272 (Segfault in pdo_mysql). (Laruence)
   . Fixed bug #70221 (persistent sqlite connection + custom function
     segfaults). (Laruence)
 
