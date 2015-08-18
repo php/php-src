@@ -4011,6 +4011,22 @@ PHP_FUNCTION(openssl_pbkdf2)
 	if (key_length <= 0) {
 		RETURN_FALSE;
 	}
+	if (INT_MAX < key_length) {
+		php_error_docref(NULL, E_WARNING, "key_length is too long");
+		RETURN_FALSE;
+	}
+	if (INT_MAX < iterations) {
+		php_error_docref(NULL, E_WARNING, "iterations is too long");
+		RETURN_FALSE;
+	}
+	if (INT_MAX < password_len) {
+		php_error_docref(NULL, E_WARNING, "password_len is too long");
+		RETURN_FALSE;
+	}
+	if (INT_MAX < salt_len) {
+		php_error_docref(NULL, E_WARNING, "salt_len is too long");
+		RETURN_FALSE;
+	}
 
 	if (method_len) {
 		digest = EVP_get_digestbyname(method);
