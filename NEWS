@@ -4,7 +4,6 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
-  . Fixed bug #70293 (Skipped assertions affect Generator returns). (Bob)
 
 20 Aug 2015, PHP 7.0.0 RC 1
 
@@ -24,7 +23,7 @@ PHP                                                                        NEWS
   . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
   . Fixed bug #70198 (Checking liveness does not work as expected).
     (Shafreeck Sea, Anatol Belski)
-  . Fixed bug #70241 (Skipped assertions affect Generator returns). (Bob)
+  . Fixed bug #70241/#70293 (Skipped assertions affect Generator returns). (Bob)
   . Fixed bug #70239 (Creating a huge array doesn't result in exhausted,
     but segfault). (Laruence, Anatol)
 
