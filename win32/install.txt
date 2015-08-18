@@ -211,9 +211,7 @@ c:\php
    |
    |-php5activescript.dll
    |
-   |-php5apache.dll
-   |
-   |-php5apache2.dll
+   |-php5apache2_4.dll
    |
    |-..
    |
@@ -234,14 +232,7 @@ c:\php
 
    Here is a list of server modules shipped with PHP 5:
 
-     * sapi/php5apache2_2.dll - Apache 2.2.x module.
-     * sapi/php5apache.dll (php5apache.dll) - Apache 1.x module
-     * sapi/php5apache2.dll (php5apache2.dll) -  - Apache 2.0.x module.
-     * sapi/php5isapi.dll - ISAPI Module for ISAPI compliant web servers 
-       like IIS 5.0 or newer. However the FCGI SAPI is recommended with 
-       IIS
-     * sapi/php5nsapi.dll (php5nsapi.dll) - Sun/iPlanet/Netscape server
-       module.
+     * php5apache2_4.dll - Apache 2.4.x module.
 
    Server modules provide significantly better performance and additional
    functionality compared to the CGI binary. The FastCGI is significantly
