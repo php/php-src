@@ -29,7 +29,6 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
-#include "php_globals.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
