@@ -153,7 +153,7 @@ define ____printzv_contents
 
 	# 15 == IS_INDIRECT
 	if $type >= 5 && $type != 15
-		printf "(refcount=%d) ", $zvalue->value.counted->refcount
+		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
 	if $type == 0
