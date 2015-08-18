@@ -442,7 +442,7 @@ ZEND_METHOD(error_exception, getSeverity)
 				zend_error(E_WARNING, "Value for %s is no string", key);    \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
-				smart_str_append(str, Z_STR_P(tmp));   \
+				smart_str_append_escaped(str, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));   \
 			}                                                               \
 		} \
 	} while (0)
@@ -556,7 +556,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			break;
 		case IS_OBJECT:
 			smart_str_appends(str, "Object(");
-			smart_str_append(str, Z_OBJCE_P(arg)->name);
+			smart_str_append_escaped(str, ZSTR_VAL(Z_OBJCE_P(arg)->name), ZSTR_LEN(Z_OBJCE_P(arg)->name));
 			smart_str_appends(str, "), ");
 			break;
 	}
