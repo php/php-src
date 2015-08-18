@@ -1712,7 +1712,7 @@ convert_to_array:
 							ZVAL_DUP(result, retval);
 							retval = result;
 						} else {
-							ZVAL_COPY(result, retval);
+							ZVAL_COPY_VALUE(result, retval);
 							retval = result;
 						}
 					}
