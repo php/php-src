@@ -141,7 +141,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 			if (!p || *(p + 5) != ' ') {
 				zend_string_free(dt);
 				efree(cookie);
-				zend_string_free(encoded_value);
+				zend_string_release(encoded_value);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
@@ -155,7 +155,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	}
 
 	if (encoded_value) {
-		zend_string_free(encoded_value);
+		zend_string_release(encoded_value);
 	}
 
 	if (path && ZSTR_LEN(path)) {

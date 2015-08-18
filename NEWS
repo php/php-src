@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
+- Standard:
+  . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
+
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
