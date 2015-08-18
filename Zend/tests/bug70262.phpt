@@ -2,33 +2,29 @@
 Bug #70262 (Accessing array crashes)
 --FILE--
 <?php
-class C {
-    public $arguments;
-    public function __construct($arg) {
-        $this->arguments = $arg;
+
+$array = array();
+$array[] = 1; // make this not immutable
+
+$extra = $array; // make the refcount == 2
+
+class A {
+    public function getObj($array) {
+        $obj = new Stdclass;
+        $obj->arr = $array; // make the refcount == 3;
+        return $obj;
     }
 }
 
-function & a(&$arg) {
-    $c = new C($arg);
-    $arg[] = $c;
-    return $c;
-}
+$a = new A;
+$a->getObj($array) //use function call to get a refcount == 1 IS_VAR object
+    ->arr // FETCH_OBJ_W will EXTRACT_ZVAL_PTR because getObj() result a refcount == 1 object (READY_TO_DESTROY)
+        [0] = "test"; //We will get a refcount == 3 array (not a IS_INDIRCT) in ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER
 
-function c($arr) {
-    a($arr)->arguments[0] = "bad";
-}
-
-$arr = array();
-$arr[] = "foo";
-$arr[] = "bar";
-c($arr);
-var_dump($arr);
+var_dump($array);
 ?>
 --EXPECT--
-array(2) {
+array(1) {
   [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
+  int(1)
 }

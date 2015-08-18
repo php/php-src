@@ -480,13 +480,8 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		*should_free = NULL;
 		ret = Z_INDIRECT_P(ret);
-	} else if (!Z_REFCOUNTED_P(ret)) {
-		*should_free = ret; /* immutable array may be converted to regular */
-	} else if (Z_REFCOUNT_P(ret) == 1) {
-		*should_free = ret;
 	} else {
-		*should_free = NULL;
-		Z_DELREF_P(ret);
+		*should_free = ret; /* immutable array may be converted to regular */
 	}
 	return ret;
 }
