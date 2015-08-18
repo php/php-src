@@ -1037,7 +1037,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 
 		zend_error_va(severity, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
-			"Uncaught %.*s\n  thrown", PG(log_errors_max_len) ? MIN(ZSTR_LEN(str), MAX(PG(log_errors_max_len) - 18, 0)) : ZSTR_LEN(str), ZSTR_VAL(str));
+			"Uncaught %s\n  thrown", ZSTR_VAL(str));
 
 		zend_string_release(str);
 		zend_string_release(file);
