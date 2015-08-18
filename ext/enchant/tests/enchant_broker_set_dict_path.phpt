@@ -12,7 +12,7 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 --FILE--
 <?php
 $broker = enchant_broker_init();
-$windowsOS = "c:\windows\is\a\bad\OS";
+$windowsOS = "c:\\windows\\is\\a\\bad\\OS";
 $linuxOS = "/home/fedora/is/the/better/distro/linux";
 $dictTipeWin = 1;
 $dictTipeLinux = 2;
