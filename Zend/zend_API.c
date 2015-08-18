@@ -1321,13 +1321,6 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS)) /* {{{ */
-{
-	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
-	return FAILURE;
-}
-/* }}} */
-
 ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval *ret, tmp;

@@ -386,9 +386,6 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties);
 
-/* no longer supported */
-ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
-
 ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n);
 ZEND_API int add_assoc_null_ex(zval *arg, const char *key, size_t key_len);
 ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b);
