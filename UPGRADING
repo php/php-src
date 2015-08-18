@@ -431,9 +431,8 @@ Standard library changes
   . call_user_method() and call_user_method_array() no longer exists.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
-  . Improved zend_qsort(using hybrid sorting algo) for better performance,
-    and also renamed zend_qsort to zend_sort.
-  . Added stable sorting algo zend_insert_sort.
+  . The internal sorting algorithm has been improved, what may result in
+    different sort order of elements that compare as equal.
   . Removed dl() function on fpm-fcgi.
   . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
 
