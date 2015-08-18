@@ -4822,6 +4822,10 @@ PHP_FUNCTION(openssl_verify)
 		return;
 	}
 
+	if (UINT_MAX < signature_len) {
+		php_error_docref(NULL, E_WARNING, "signature is too long");
+		RETURN_FALSE;
+	}
 	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
 		if (method != NULL) {
 			signature_algo = Z_LVAL_P(method);
@@ -4846,7 +4850,7 @@ PHP_FUNCTION(openssl_verify)
 
 	EVP_VerifyInit   (&md_ctx, mdtype);
 	EVP_VerifyUpdate (&md_ctx, data, data_len);
-	err = EVP_VerifyFinal (&md_ctx, (unsigned char *)signature, (int)signature_len, pkey);
+	err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature, (unsigned int)signature_len, pkey);
 	EVP_MD_CTX_cleanup(&md_ctx);
 
 	if (keyresource == NULL) {

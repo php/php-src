@@ -917,7 +917,13 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
-		ZVAL_MAKE_REF(zv);
+		if (!Z_ISREF_P(zv)) {
+			if (iface->type == ZEND_INTERNAL_CLASS) {
+				ZVAL_NEW_PERSISTENT_REF(zv, zv);
+			} else {
+				ZVAL_NEW_REF(zv, zv);
+			}
+		}
 		Z_ADDREF_P(zv);
 		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;

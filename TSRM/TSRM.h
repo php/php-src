@@ -202,6 +202,8 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMLS_CACHE_UPDATE()
 #define TSRMLS_CACHE
 
+#define TSRM_TLS
+
 /* BC only */
 #define TSRMLS_D	void
 #define TSRMLS_DC
