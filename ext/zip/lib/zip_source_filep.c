@@ -43,6 +43,7 @@
 #ifdef _WIN32
 /* WIN32 needs <fcntl.h> for _O_BINARY */
 #include <fcntl.h>
+#include <windows.h>
 #endif
 
 /* Windows sys/types.h does not provide these */
@@ -248,10 +249,17 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
                 zip_error_set(&ctx->error, ZIP_ER_WRITE, errno);
             }
             ctx->fout = NULL;
+#ifdef _WIN32
+            if (!MoveFileEx(ctx->tmpname, ctx->fname, MOVEFILE_REPLACE_EXISTING)) {
+                zip_error_set(&ctx->error, ZIP_ER_RENAME, GetLastError());
+                return -1;
+            }
+#else
             if (rename(ctx->tmpname, ctx->fname) < 0) {
                 zip_error_set(&ctx->error, ZIP_ER_RENAME, errno);
                 return -1;
             }
+#endif
 	    mask = umask(022);
 	    umask(mask);
 	    /* not much we can do if chmod fails except make the whole commit fail */
