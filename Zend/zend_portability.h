@@ -216,9 +216,13 @@ char *alloca();
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_COLD __attribute__((cold))
+# define ZEND_HOT __attribute__((cold))
 #else
 # define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_ATTRIBUTE_UNUSED_LABEL
+# define ZEND_COLD __attribute__((cold))
+# define ZEND_HOT __attribute__((cold));
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)

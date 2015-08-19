@@ -338,7 +338,7 @@ static const int bin_pages[] = {
 };
 
 #if ZEND_DEBUG
-void zend_debug_alloc_output(char *format, ...)
+ZEND_COLD void zend_debug_alloc_output(char *format, ...)
 {
 	char output_buf[256];
 	va_list args;
@@ -355,7 +355,7 @@ void zend_debug_alloc_output(char *format, ...)
 }
 #endif
 
-static ZEND_NORETURN void zend_mm_panic(const char *message)
+static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
@@ -368,7 +368,7 @@ static ZEND_NORETURN void zend_mm_panic(const char *message)
 	exit(1);
 }
 
-static ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
+static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *format,
 	size_t limit,
 #if ZEND_DEBUG

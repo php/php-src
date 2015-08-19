@@ -149,7 +149,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array) /
 }
 /* }}} */
 
-ZEND_API void zend_wrong_param_count(void) /* {{{ */
+ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -196,7 +196,7 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 /* }}} */
 
 #ifdef FAST_ZPP
-ZEND_API void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -212,7 +212,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int mi
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -226,7 +226,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -236,7 +236,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, 
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -790,7 +790,7 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num, zval *arg, const char 
 	return ret;
 }
 
-static void zend_parse_parameters_debug_error(const char *msg) {
+static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope
 		? ZSTR_VAL(active_function->common.scope->name) : "";
