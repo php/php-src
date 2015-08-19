@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
+  . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
+    (marcio dot web2 at gmail dot com)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
 - Standard:
