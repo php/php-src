@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
     match). (cmb)
+
+- SPL:
+  . Fixed bug #70290 (Null pointer deref (segfault) in spl_autoload via
+    ob_start). (hugh at allthethings dot co dot nz)
   
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
