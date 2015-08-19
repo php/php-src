@@ -4022,11 +4022,6 @@ PHP_FUNCTION(openssl_pbkdf2)
 		RETURN_FALSE;
 	}
 
-	PHP_OPENSSL_CHECK_OVERFLOW(key_length, key);
-	PHP_OPENSSL_CHECK_OVERFLOW(iterations, iterations);
-	PHP_OPENSSL_CHECK_OVERFLOW(password_len, password);
-	PHP_OPENSSL_CHECK_OVERFLOW(salt_len, salt);
-
 	if (method_len) {
 		digest = EVP_get_digestbyname(method);
 	} else {
@@ -4037,6 +4032,11 @@ PHP_FUNCTION(openssl_pbkdf2)
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
 		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_OVERFLOW(key_length, key);
+	PHP_OPENSSL_CHECK_OVERFLOW(iterations, iterations);
+	PHP_OPENSSL_CHECK_OVERFLOW(password_len, password);
+	PHP_OPENSSL_CHECK_OVERFLOW(salt_len, salt);
 
 	out_buffer = zend_string_alloc(key_length, 0);
 
