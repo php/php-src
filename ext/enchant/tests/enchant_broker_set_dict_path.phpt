@@ -12,23 +12,23 @@ if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) {die("skip, don
 --FILE--
 <?php
 $broker = enchant_broker_init();
-$windowsOS = "c:\\windows\\is\\a\\bad\\OS";
-$linuxOS = "/home/fedora/is/the/better/distro/linux";
-$dictTipeWin = 1;
-$dictTipeLinux = 2;
+$backEndDictType1 = "MYSPELL";
+$backEndDictType2 = "ISPELL";
+$dictTypeValue1 = 1;
+$dictTypeValue2 = 2;
 
 if (is_resource($broker)) {
     echo("OK\n");
     
-    if (enchant_broker_set_dict_path($broker, $dictTipeWin, $windowsOS)) {
+    if (enchant_broker_set_dict_path($broker, $dictTypeValue1, $backEndDictType1)) {
         echo("OK\n");
         
-        if (enchant_broker_set_dict_path($broker, $dictTipeLinux, $linuxOS)) {
+        if (enchant_broker_set_dict_path($broker, $dictTypeValue2, $backEndDictType2)) {
             echo("OK\n");
                 
             if ( 
-                  (enchant_broker_get_dict_path($broker,$dictTipeWin) == $windowsOS) && 
-                  (enchant_broker_get_dict_path($broker,$dictTipeLinux) == $linuxOS)            
+                  (enchant_broker_get_dict_path($broker,$dictTypeValue1) == $backEndDictType1) && 
+                  (enchant_broker_get_dict_path($broker,$dictTypeValue2) == $backEndDictType2)            
               ) {
                    echo("OK\n");
 
@@ -37,10 +37,10 @@ if (is_resource($broker)) {
             }                    
         
         } else {
-           echo("broker set dict path {$linuxOS} has failed \n");
+           echo("broker set dict path {$backEndDictType2} has failed \n");
         }
     } else {
-        echo("broker set dict path {$windows} has failed \n");
+        echo("broker set dict path {$backEndDictType1} has failed \n");
     }
 } else {
     echo("broker is not a resource; failed; \n");
