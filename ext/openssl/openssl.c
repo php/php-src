@@ -3671,6 +3671,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 	RETVAL_FALSE;
 
+	PHP_OPENSSL_CHECK_OVERFLOW(passphrase_len, passphrase);
+
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource);
 
 	if (key == NULL) {
@@ -3742,6 +3744,8 @@ PHP_FUNCTION(openssl_pkey_export)
 		return;
 	}
 	RETVAL_FALSE;
+
+	PHP_OPENSSL_CHECK_OVERFLOW(passphrase_len, passphrase);
 
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource);
 
