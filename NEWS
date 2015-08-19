@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     (marcio dot web2 at gmail dot com)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
+- SPL:
+  . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
+
 - Standard:
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
 
