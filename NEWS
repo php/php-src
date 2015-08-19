@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
+  . Fixed bug #70299 (Memleak while assigning object offsetGet result).
+    (Laruence)
   . Fixed bug #70288 (Apache crash related to ZEND_SEND_REF). (Laruence)
   . Fixed bug #70262 (Accessing array crashes PHP 7.0beta3).
     (Laruence, Dmitry)
