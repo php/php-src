@@ -335,13 +335,17 @@ use_type:
 ;
 
 group_use_declaration:
-	namespace_name T_NS_SEPARATOR '{' use_declarations '}'
-		{$$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
+		namespace_name T_NS_SEPARATOR '{' use_declarations '}'
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' use_declarations '}'
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
-	namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
-		{$$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
+		namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 inline_use_declarations:
