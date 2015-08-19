@@ -33,7 +33,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #70290 (Null pointer deref (segfault) in spl_autoload via
     ob_start). (hugh at allthethings dot co dot nz)
-  
+  . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
+
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
