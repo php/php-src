@@ -89,12 +89,13 @@ static const zend_internal_function zend_pass_function = {
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC)
 
 #define READY_TO_DESTROY(zv) \
-	(zv && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
+	(UNEXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
 	zval *__zv = (zv);								\
-	if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
-		if (!(check_null) || Z_INDIRECT_P(__zv)) {	\
+	if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {	\
+		if (!(check_null) ||						\
+		    EXPECTED(Z_INDIRECT_P(__zv))) {			\
 			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));	\
 		}											\
 	}												\
@@ -481,7 +482,7 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 		*should_free = NULL;
 		ret = Z_INDIRECT_P(ret);
 	} else {
-		*should_free = ret; /* immutable array may be converted to regular */
+		*should_free = ret;
 	}
 	return ret;
 }
