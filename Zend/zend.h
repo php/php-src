@@ -77,7 +77,7 @@
 ZEND_TSRMLS_CACHE_EXTERN();
 
 #ifdef HAVE_NORETURN
-# ifdef ZEND_NORETRUN_ALIAS
+# ifdef ZEND_NORETURN_ALIAS
 ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
 # else
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...);
