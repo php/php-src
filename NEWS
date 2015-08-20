@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
 
+- Reflection:
+  . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
+
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:

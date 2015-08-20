@@ -273,7 +273,7 @@ static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *obje
 
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
-	if (!ptr->func && ptr->prev_execute_data && Z_OBJ(ptr->This)) {
+	if (!ptr->func && Z_OBJ(ptr->This)) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
 			zend_generator *root = (generator->node.children < 1 ? generator : generator->node.ptr.leaf)->node.ptr.root;
