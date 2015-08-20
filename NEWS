@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     (marcio dot web2 at gmail dot com)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
+- PDO_OCI:
+  . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
+
 - SPL:
   . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
 
