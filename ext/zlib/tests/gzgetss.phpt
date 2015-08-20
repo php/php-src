@@ -11,7 +11,7 @@ if(!extension_loaded("zlib")){die("skip - ZLIB extension not loaded");}
 $handle = gzopen('gzgetss.gz', 'r');
 while (!gzeof($handle)) {
    $buffer = gzgetss($handle, 4096);
-   echo $buffer;
+   print($buffer);
 }
 gzclose($handle);
 ?>
