@@ -44,7 +44,7 @@ do
 	echo "SHA256 hash: `sha256sum $TARBALL | cut -d' ' -f1`";
 	echo PGP signature:
 	cat $TARBALL.asc
-	echo -e "\n\n"
+	echo -e "\n"
 done
 
 exit 0
