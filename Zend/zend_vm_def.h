@@ -2219,7 +2219,7 @@ ZEND_VM_C_LABEL(assign_dim_clean):
 			}
 		}
 	}
- 	FREE_OP1_VAR_PTR();
+	FREE_OP1_VAR_PTR();
 	/* assign_dim has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }

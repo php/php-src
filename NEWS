@@ -3,7 +3,13 @@ PHP                                                                        NEWS
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
+  . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
+  . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
+    (marcio dot web2 at gmail dot com)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
+
+- SPL:
+  . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
 
 - Standard:
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
@@ -11,6 +17,8 @@ PHP                                                                        NEWS
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
+  . Fixed bug #70299 (Memleak while assigning object offsetGet result).
+    (Laruence)
   . Fixed bug #70288 (Apache crash related to ZEND_SEND_REF). (Laruence)
   . Fixed bug #70262 (Accessing array crashes PHP 7.0beta3).
     (Laruence, Dmitry)

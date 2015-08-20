@@ -77,10 +77,10 @@
 ZEND_TSRMLS_CACHE_EXTERN();
 
 #ifdef HAVE_NORETURN
-# ifdef ZEND_NORETRUN_ALIAS
-void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
+# ifdef ZEND_NORETURN_ALIAS
+ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
 # else
-ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...);
 # endif
 #else
 # define zend_error_noreturn zend_error
@@ -240,7 +240,7 @@ void zend_register_standard_ini_entries(void);
 void zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
-ZEND_API void _zend_bailout(char *filename, uint lineno);
+ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno);
 
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
@@ -249,7 +249,7 @@ ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
-ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 ZEND_API void zend_activate(void);
 ZEND_API void zend_deactivate(void);
@@ -284,10 +284,10 @@ extern zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_l
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
 
-ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...);
-ZEND_API void zend_type_error(const char *format, ...);
-ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *format, ...);
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...);
+ZEND_API ZEND_COLD void zend_type_error(const char *format, ...);
+ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...);
 
 void zenderror(const char *error);
 

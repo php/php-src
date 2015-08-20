@@ -3,7 +3,7 @@ Type group use declarations should not allow override on inner itens
 --FILE--
 <?php
 
-// should not throw syntax errors
+// should throw syntax errors
 
 use const Foo\Bar\{
     A,

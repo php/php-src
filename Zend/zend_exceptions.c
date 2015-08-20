@@ -120,7 +120,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
@@ -233,7 +233,7 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 
 /* {{{ proto Exception|Error Exception|Error::__clone()
    Clone the exception object */
-ZEND_METHOD(exception, __clone)
+ZEND_COLD ZEND_METHOD(exception, __clone)
 {
 	/* Should never be executable */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0);
@@ -908,7 +908,7 @@ ZEND_API zend_class_entry *zend_get_error_exception(void)
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
 {
 	zval ex;
 
@@ -935,7 +935,7 @@ ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	char *message;
@@ -950,7 +950,7 @@ ZEND_API zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, ze
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_long code, int severity) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_long code, int severity) /* {{{ */
 {
 	zval ex;
 	zend_object *obj = zend_throw_exception(exception_ce, message, code);
@@ -980,7 +980,7 @@ static void zend_error_helper(int type, const char *filename, const uint lineno,
 }
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
@@ -1048,7 +1048,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_throw_exception_object(zval *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
 	zend_class_entry *exception_ce;
 

@@ -345,7 +345,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
+static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
 	if (arg_info->class_name) {
 		const char *class_name;
@@ -387,7 +387,7 @@ static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zen
 }
 /* }}} */
 
-static zend_string *zend_get_function_declaration(const zend_function *fptr) /* {{{ */
+static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function *fptr) /* {{{ */
 {
 	smart_str str = {0};
 

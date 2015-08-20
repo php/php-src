@@ -1796,8 +1796,8 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ arginfo and function tbale */
-ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
+/* {{{ arginfo and function table */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 
