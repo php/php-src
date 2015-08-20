@@ -42,6 +42,21 @@
 
 #include "php_config.h"
 
+#if HAVE_STDINT_H && defined(__cplusplus)
+  /* C99 requires these for C++ to get the definitions
+   * of INT64_MAX and other macros used by Zend/zend_long.h
+   * C11 drops this requirement, so these effectively
+   * just backport that piece of behavior.
+   *
+   * These defines are placed here instead of
+   * with the include below, because sys/types
+   * and inttypes may include stdint themselves.
+   * And these definitions MUST come first.
+   */
+# define __STDC_LIMIT_MACROS
+# define __STDC_CONSTANT_MACROS
+#endif
+
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
