@@ -229,7 +229,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_declaration_statement trait_declaration_statement
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
-%type <ast> mixed_group_use_declaration use_declaration const_decl inner_statement
+%type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
+%type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
@@ -335,9 +336,9 @@ use_type:
 ;
 
 group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' use_declarations '}'
+		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' use_declarations '}'
+	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
@@ -355,9 +356,11 @@ inline_use_declarations:
 			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
-inline_use_declaration:
-		use_declaration { $$ = $1; $$->attr = T_CLASS; }
-	|	use_type use_declaration { $$ = $2; $$->attr = $1; }
+unprefixed_use_declarations:
+		unprefixed_use_declarations ',' unprefixed_use_declaration
+			{ $$ = zend_ast_list_add($1, $3); }
+	|	unprefixed_use_declaration
+			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
 use_declarations:
@@ -367,15 +370,21 @@ use_declarations:
 			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
-use_declaration:
+inline_use_declaration:
+		unprefixed_use_declaration { $$ = $1; $$->attr = T_CLASS; }
+	|	use_type unprefixed_use_declaration { $$ = $2; $$->attr = $1; }
+;
+
+unprefixed_use_declaration:
 		namespace_name
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
 	|	namespace_name T_AS T_STRING
 			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
-	|	T_NS_SEPARATOR namespace_name
-			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $2, NULL); }
-	|	T_NS_SEPARATOR namespace_name T_AS T_STRING
-			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $2, $4); }
+;
+
+use_declaration:
+		unprefixed_use_declaration                { $$ = $1; }
+	|	T_NS_SEPARATOR unprefixed_use_declaration { $$ = $2; }
 ;
 
 const_list:
