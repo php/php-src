@@ -2553,6 +2553,8 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	RETVAL_FALSE;
 
+	PHP_OPENSSL_CHECK_OVERFLOW(zp12_len, pkcs12);
+
 	bio_in = BIO_new(BIO_s_mem());
 
 	if(0 >= BIO_write(bio_in, zp12, (int)zp12_len))
