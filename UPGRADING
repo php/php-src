@@ -770,6 +770,9 @@ out, that the corresponding SDK isn't available anymore.
     it depends alone on the openssl library. If it's present at the compile time,
     ftp_ssl_connect() is enabled automatically.
 
+- imap
+  . Static building of ext/imap is disabled
+
 - odbc
   . The odbc extension is always shipped shared
 
