@@ -480,6 +480,22 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
+#define ZEND_STR2LONG_MEMEQ(s1, s2 ,len ) \
+		zend_ulong_memeq((const zend_ulong *)(s1), (const zend_ulong *)(s2), (len) >> (SIZEOF_ZEND_LONG_LOG2))
+
+static zend_always_inline zend_bool zend_ulong_memeq(const zend_ulong *arr1, const zend_ulong *arr2, size_t len)
+{
+	while (len != 0) {
+		if ( *arr1 != *arr2 ) {
+			return 0;
+		}
+		arr1++;
+		arr2++;
+		len --;
+	}
+	return 1; /* strings are equal */
+}
+
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
 {
 	zend_ulong h;
@@ -497,14 +513,9 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		} else if (EXPECTED(p->h == h) &&
 		     EXPECTED(p->key) &&
-		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key))) {
-
-			 if (ZSTR_LEN(p->key) < SIZEOF_ZEND_LONG) {
+		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key)) &&
+			 EXPECTED(ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) )) {
 				 return p;
-			 }
-			 if (EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
-				 return p;
-			 }
 		}
 		idx = Z_NEXT(p->val);
 	}
@@ -526,7 +537,7 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 		if ((p->h == h)
 			 && p->key
 			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), str, len)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
@@ -1083,7 +1094,8 @@ ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 			(p->h == h &&
 		     p->key &&
 		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
-		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+		     ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)))) {
+
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
@@ -1114,7 +1126,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 			(p->h == h &&
 		     p->key &&
 		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
-		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+		     ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)))) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -1162,7 +1174,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 		if ((p->h == h)
 			 && p->key
 			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), str, len)) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -1206,7 +1218,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *str, siz
 		if ((p->h == h)
 			 && p->key
 			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && ZEND_STR2LONG_MEMEQ(ZSTR_VAL(p->key), str, len)) {
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}

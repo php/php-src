@@ -40,6 +40,7 @@ typedef int64_t zend_off_t;
 # define Z_L(i) INT64_C(i)
 # define Z_UL(i) UINT64_C(i)
 # define SIZEOF_ZEND_LONG 8
+# define SIZEOF_ZEND_LONG_LOG2 3
 #else
 typedef int32_t zend_long;
 typedef uint32_t zend_ulong;
@@ -50,6 +51,7 @@ typedef int32_t zend_off_t;
 # define Z_L(i) INT32_C(i)
 # define Z_UL(i) UINT32_C(i)
 # define SIZEOF_ZEND_LONG 4
+# define SIZEOF_ZEND_LONG_LOG2 2
 #endif
 
 
