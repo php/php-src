@@ -1628,7 +1628,13 @@ void phpdbg_force_interruption(void) /* {{{ */ {
 
 	if (data) {
 		if (data->func) {
-			phpdbg_notice("hardinterrupt", "opline=\"%p\" num=\"%lu\" file=\"%s\" line=\"%u\"", "Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename, data->opline->lineno);
+			if (ZEND_USER_CODE(data->func->type)) {
+				phpdbg_notice("hardinterrupt", "opline=\"%p\" num=\"%lu\" file=\"%s\" line=\"%u\"", "Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename, data->opline->lineno);
+			} else if (data->func->internal_function.function_name) {
+				phpdbg_notice("hardinterrupt", "func=\"%s\"", "Current opline: in internal function %s", data->func->internal_function.function_name->val);
+			} else {
+				phpdbg_notice("hardinterrupt", "", "Current opline: executing internal code");
+			}
 		} else {
 			phpdbg_notice("hardinterrupt", "opline=\"%p\"", "Current opline: %p (op_array information unavailable)", data->opline);
 		}

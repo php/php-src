@@ -768,16 +768,14 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 
 	if (buffer && strlen(buffer)) {
 		if (PHPDBG_G(buffer)) {
-			efree(PHPDBG_G(buffer));
+			free(PHPDBG_G(buffer));
 		}
-		PHPDBG_G(buffer) = estrdup(buffer);
-	} else {
-		if (PHPDBG_G(buffer)) {
-			if (buffer) {
-				efree(buffer);
-			}
-			buffer = estrdup(PHPDBG_G(buffer));
+		PHPDBG_G(buffer) = strdup(buffer);
+	} else if (PHPDBG_G(buffer)) {
+		if (buffer) {
+			efree(buffer);
 		}
+		buffer = estrdup(PHPDBG_G(buffer));
 	}
 
 	return buffer;

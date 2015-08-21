@@ -220,7 +220,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
 	if (PHPDBG_G(buffer)) {
-		efree(PHPDBG_G(buffer));
+		free(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
 
@@ -1085,17 +1085,21 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 		}
 	} else {
 		/* set signalled only when not interactive */
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-			if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
-				char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
+		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+			char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
 
-				phpdbg_set_sigsafe_mem(mem);
-				zend_try {
-					phpdbg_force_interruption();
-				} zend_end_try()
-				phpdbg_clear_sigsafe_mem();
-				return;
+			phpdbg_set_sigsafe_mem(mem);
+			zend_try {
+				phpdbg_force_interruption();
+			} zend_end_try()
+			phpdbg_clear_sigsafe_mem();
+
+			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+			if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+				zend_bailout();
 			}
+		} else {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	}
@@ -1182,9 +1186,13 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 							phpdbg_force_interruption();
 						} zend_end_try();
 						phpdbg_clear_sigsafe_mem();
-						break;
-					}
-					if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+
+						PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+						if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+							zend_bailout();
+						}
+					} else if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 						PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 					}
 					break;
