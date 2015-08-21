@@ -1,6 +1,7 @@
 --TEST--
 XMLReader: Bug #70309 XmlReader read generates extra output
 --SKIPIF--
+<?php if (substr(PHP_OS, 0, 3) != 'WIN') die('skip.. only for Windows'); ?>
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 --FILE--
