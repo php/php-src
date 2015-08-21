@@ -4,16 +4,18 @@ gzgetss — Get line from gz-file pointer and strip HTML tags - function
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
 <?php
+
+<?php
 if(!extension_loaded("zlib")){die("skip - ZLIB extension not loaded");}
 ?>
 --FILE--
 <?php
-$handle = gzopen('gzgetss.gz', 'r');
+$handle = gzopen(__DIR__ . '/gzgetss.gz', 'r');
 while (!gzeof($handle)) {
-   $buffer = gzgetss($handle, 4096);
+   $buffer = gzgetss($handle, 100, "<h1>");
    echo $buffer;
 }
 gzclose($handle);
 ?>
 --EXPECT--
-string gzgetss(resource $zp, int $length [, string $allowable_tags ]);
+<h1 class="title">Description</h1>
