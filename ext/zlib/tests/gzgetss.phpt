@@ -8,7 +8,8 @@ if(!extension_loaded("zlib")){die("skip - ZLIB extension not loaded");}
 ?>
 --FILE--
 <?php
-$handle = gzopen('gzgetss.gz', 'r');
+$handle = gzopen(__DIR__ . '/gzgetss.gz', 'r');
+
 while (!gzeof($handle)){
    $buffer = gzgetss($handle, 4096);
    print($buffer);
