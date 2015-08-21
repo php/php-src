@@ -13,4 +13,4 @@ $h->insert(6);
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Call to undefined method SplMinHeap::notexist() in %s/bug69737.php on line %d
+Fatal error: Call to undefined method SplMinHeap::notexist() in %s%ebug69737.php on line %d
