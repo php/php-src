@@ -13,11 +13,11 @@ if(!extension_loaded("zlib")){die("skip - ZLIB extension not loaded");}
 $handle = gzopen(__DIR__ . '/gzgetss.gz', 'r');
 
 while (!gzeof($handle)){
-   $buffer = gzgetss($handle, 4096, "<h1>");
+   $buffer = gzgetss($handle, 4096, "<code>");
    print($buffer);
 
 }
 gzclose($handle);
 ?>
 --EXPECT--
-<h1 class="title">Description</h1>
+<code>stringgzgetss(resource $zp, int $length [, string $allowable_tags ]);<code/>
