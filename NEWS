@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
     (marcio dot web2 at gmail dot com)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
+  . Fixed bug #70321 (Magic getter breaks reference to array property). (Bob)
 
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)

@@ -89,7 +89,7 @@ static const zend_internal_function zend_pass_function = {
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC)
 
 #define READY_TO_DESTROY(zv) \
-	(UNEXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
+	(EXPECTED(zv) && Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1 && (EXPECTED(Z_ISREF_P(zv) == 0) || Z_REFCOUNTED_P(Z_REFVAL_P(zv)) && Z_REFCOUNT_P(Z_REFVAL_P(zv)) == 1))
 
 #define EXTRACT_ZVAL_PTR(zv, check_null) do {		\
 	zval *__zv = (zv);								\
