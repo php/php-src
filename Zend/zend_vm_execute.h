@@ -19441,11 +19441,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDL
 	zval *var_ptr;
 
 	var_ptr = EX_VAR(opline->op1.var);
-	if (Z_TYPE_P(var_ptr) != IS_OBJECT &&
-	    !Z_ISREF_P(var_ptr) &&
-	    Z_REFCOUNTED_P(var_ptr) &&
-	    Z_REFCOUNT_P(var_ptr) > 1) {
-
+	if (UNEXPECTED(Z_ISREF_P(var_ptr))) {
+		if (UNEXPECTED(Z_REFCOUNT_P(var_ptr) == 1)) {
+			ZVAL_UNREF(var_ptr);
+		}
+	} else if (Z_COPYABLE_P(var_ptr) && Z_REFCOUNT_P(var_ptr) > 1) {
 		Z_DELREF_P(var_ptr);
 		ZVAL_DUP(EX_VAR(opline->op1.var), var_ptr);
 	}
