@@ -3,9 +3,11 @@ PHP                                                                        NEWS
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
-  . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
   . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
     (marcio dot web2 at gmail dot com)
+  . Fixed bug #70321 (Magic getter breaks reference to array property).
+    (Laruence)
+  . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
 - PDO_OCI:

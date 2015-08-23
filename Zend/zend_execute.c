@@ -1721,6 +1721,8 @@ convert_to_array:
 						zend_class_entry *ce = Z_OBJCE_P(container);
 						zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
 					}
+				} else if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
+					ZVAL_UNREF(retval);
 				}
 				if (result != retval) {
 					ZVAL_INDIRECT(result, retval);
@@ -1925,6 +1927,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result)) != NULL) {
 				if (ptr != result) {
 					ZVAL_INDIRECT(result, ptr);
+				} else if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {
+					ZVAL_UNREF(ptr);
 				}
 			} else {
 				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
@@ -1937,6 +1941,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result);
 		if (ptr != result) {
 			ZVAL_INDIRECT(result, ptr);
+		} else if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {
+			ZVAL_UNREF(ptr);
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
