@@ -1,0 +1,5 @@
+<div>
+    <p class="para rdfs-comment">
+      <code><span class="type">string</span><span class="methodname"><strong>gzgetss</strong></span>(resource $zp, int $length [, string $allowable_tags ]);<code/>
+    </p>
+</div>
