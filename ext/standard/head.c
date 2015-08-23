@@ -91,6 +91,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		return FAILURE;
 	}
 
+	if (zend_hash_exists(SG(set_cookies), name, name_len + 1) == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "should not be used twice with the same name");
+	} else {
+		zend_hash_add_empty_element(SG(set_cookies), name, name_len + 1);
+	}
+
 	len += name_len;
 	if (value && url_encode) {
 		int encoded_value_len;

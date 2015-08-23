@@ -3751,6 +3751,9 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Default to global filters only */
 	FG(stream_filters) = NULL;
 
+	ALLOC_HASHTABLE(SG(set_cookies));
+	zend_hash_init(SG(set_cookies), 0, NULL, NULL, 0);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -3807,6 +3810,10 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
  	BG(page_uid) = -1;
  	BG(page_gid) = -1;
+
+	zend_hash_destroy(SG(set_cookies));
+	FREE_HASHTABLE(SG(set_cookies));
+
 	return SUCCESS;
 }
 /* }}} */
