@@ -155,6 +155,11 @@ static void php_phpdbg_destroy_bp_opcode(zval *brake) /* {{{ */
 	efree(Z_PTR_P(brake));
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_opline(zval *brake) /* {{{ */
+{
+	efree(Z_PTR_P(brake));
+} /* }}} */
+
 static void php_phpdbg_destroy_bp_methods(zval *brake) /* {{{ */
 {
 	zend_hash_destroy(Z_ARRVAL_P(brake));
@@ -188,7 +193,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
@@ -302,11 +307,17 @@ static PHP_FUNCTION(phpdbg_exec)
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
-	if (zend_parse_parameters_none() == FAILURE && EG(current_execute_data)) {
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
+		ex = ex->prev_execute_data;
+	}
+
+	if (zend_parse_parameters_none() == FAILURE || !ex) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1);
+	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_file(string file, integer line) */
