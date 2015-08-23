@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
     match). (cmb)
 
+- Phpdbg:
+  . Fix phpdbg_break_next() sometimes not breaking. (Bob)
+
 - SPL:
   . Fixed bug #70290 (Null pointer deref (segfault) in spl_autoload via
     ob_start). (hugh at allthethings dot co dot nz)

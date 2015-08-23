@@ -687,6 +687,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRML
 
 		PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_OPLINE);
 		new_break.opline = (zend_ulong) opline;
+		new_break.base = NULL;
 
 		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE],
 			(zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
