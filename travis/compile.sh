@@ -10,7 +10,9 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix=$HOME"/php-install" \
+--quiet \
 $DEBUG \
 $TS \
 --enable-fpm \
@@ -50,4 +52,4 @@ $TS \
 --with-gmp \
 --enable-bcmath
 make -j2 --quiet
-sudo make install
+make install
