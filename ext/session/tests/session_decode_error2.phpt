@@ -53,563 +53,247 @@ array(0) {
 }
 
 -- Iteration 4 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+bool(false)
+array(0) {
 }
 
 -- Iteration 5 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 6 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 7 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 8 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 9 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 10 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 11 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 12 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 13 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 14 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 15 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 16 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 17 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 18 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 19 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 20 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 21 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 22 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 23 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 24 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 25 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 26 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 27 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 28 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 29 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 30 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 31 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 32 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 33 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 34 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 35 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 36 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 37 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 38 --
-bool(true)
-array(1) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 39 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 40 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 41 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 42 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 43 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 44 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 45 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 46 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 47 --
-bool(true)
-array(2) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
+bool(false)
+array(0) {
 }
 
 -- Iteration 48 --
-bool(true)
-array(3) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["blah"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 49 --
-bool(true)
-array(3) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["blah"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 50 --
-bool(true)
-array(3) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["blah"]=>
-  NULL
+bool(false)
+array(0) {
 }
 
 -- Iteration 51 --
-bool(true)
-array(3) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["blah"]=>
-  NULL
+bool(false)
+array(0) {
 }
-bool(true)
-Done
 
+Warning: session_destroy(): Trying to destroy uninitialized session in %s/session_decode_error2.php on line %d
+bool(false)
+Done
