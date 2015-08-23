@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
 
+- Curl:
+  . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
+    (Laruence)
+
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
 
