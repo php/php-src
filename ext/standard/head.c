@@ -110,7 +110,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 	cookie = emalloc(len + 100);
 
-	if (value && value_len == 0) {
+	if (value == NULL || value_len == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
