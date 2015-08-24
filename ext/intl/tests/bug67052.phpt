@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 function ut_main()
 {
-        setlocale(LC_ALL, 'de_DE');
+        setlocale(LC_ALL, 'de_DE.UTF-8');
         $fmt = new NumberFormatter( 'sl_SI.UTF-8', NumberFormatter::DECIMAL);
         $num = "1.234.567,891";
         $res_str =  $fmt->parse($num)."\n";
@@ -26,5 +26,5 @@ ut_run();
 ?>
 --EXPECT--
 1234567,891
-de_DE
+de_DE.UTF-8
 
