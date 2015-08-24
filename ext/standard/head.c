@@ -120,7 +120,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 
 	cookie = emalloc(len + 100);
 
-	if (value && ZSTR_LEN(value) == 0) {
+	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
