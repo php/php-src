@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no /dev on Windows');
 }
-if (!file_exists("/dev/console")) {
+if (!file_exists("/dev/null")) {
     die('skip /dev/console not available');
 }    
 ?>
@@ -20,7 +20,7 @@ Description: Returns the type of the file. Possible values are fifo, char,
 */
 
 echo "-- Checking for char --\n";
-print( filetype("/dev/console") )."\n";
+print( filetype("/dev/null") )."\n";
 ?>
 ===DONE===
 --EXPECTF--
