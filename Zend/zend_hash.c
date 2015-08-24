@@ -136,7 +136,20 @@ static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
 		(ht)->nTableMask = -(ht)->nTableSize;
 		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
 		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
-		HT_HASH_RESET(ht);
+		if (EXPECTED(ht->nTableMask == -8)) {
+			Bucket *arData = ht->arData;
+
+			HT_HASH_EX(arData, -8) = -1;
+			HT_HASH_EX(arData, -7) = -1;
+			HT_HASH_EX(arData, -6) = -1;
+			HT_HASH_EX(arData, -5) = -1;
+			HT_HASH_EX(arData, -4) = -1;
+			HT_HASH_EX(arData, -3) = -1;
+			HT_HASH_EX(arData, -2) = -1;
+			HT_HASH_EX(arData, -1) = -1;
+		} else {
+			HT_HASH_RESET(ht);
+		}
 	}
 }
 
