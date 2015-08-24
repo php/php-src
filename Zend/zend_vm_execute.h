@@ -32798,20 +32798,30 @@ check_indirect:
 		}
 	}
 
-	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
-
 	do {
 		zend_reference *ref;
 
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
-			ZVAL_NEW_REF(value, value);
-		} else if (UNEXPECTED(variable_ptr == value)) {
-			break;
+			ref = (zend_reference*)emalloc(sizeof(zend_reference));
+			GC_REFCOUNT(ref) = 2;
+			GC_TYPE_INFO(ref) = IS_REFERENCE;
+			ZVAL_COPY_VALUE(&ref->val, value);
+			Z_REF_P(value) = ref;
+			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+		} else {
+			ref = Z_REF_P(value);
+			GC_REFCOUNT(ref)++;
 		}
-		ref = Z_REF_P(value);
-		GC_REFCOUNT(ref)++;
+
+		variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->op1.var);
+
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			if (!Z_DELREF_P(variable_ptr)) {
+			uint32_t refcnt = Z_DELREF_P(variable_ptr);
+
+			if (UNEXPECTED(variable_ptr == value)) {
+				break;
+			}
+			if (refcnt == 0) {
 				SAVE_OPLINE();
 				zval_dtor_func_for_ptr(Z_COUNTED_P(variable_ptr));
 				if (UNEXPECTED(EG(exception))) {
