@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
 
 - Standard:
+  . Fixed bug #70342 (changing configuration with ignore_user_abort(true) isn't
+    working). (Laruence)
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
 
 - Reflection:
