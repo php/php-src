@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug #70342 (changing configuration with ignore_user_abort(true) isn't
     working). (Laruence)
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
+  . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
 
 - Reflection:
   . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
