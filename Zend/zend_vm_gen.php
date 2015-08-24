@@ -1111,7 +1111,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#undef LOAD_NEXT_OPLINE\n");
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE opline\n");
-							out($f,"#define DCL_OPLINE const zend_op *opline;\n");
+							out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+							out($f,"# define DCL_OPLINE register const zend_op *opline __asm__(ZEND_VM_IP_GLOBAL_REG);\n");
+							out($f,"#else\n");
+							out($f,"# define DCL_OPLINE const zend_op *opline;\n");
+							out($f,"#endif\n");
 							out($f,"#define USE_OPLINE\n");
 							out($f,"#define LOAD_OPLINE() opline = EX(opline)\n");
 							out($f,"#define LOAD_NEXT_OPLINE() opline = EX(opline) + 1\n");
@@ -1136,7 +1140,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#undef LOAD_NEXT_OPLINE\n");
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE opline\n");
-							out($f,"#define DCL_OPLINE const zend_op *opline;\n");
+							out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
+							out($f,"# define DCL_OPLINE register const zend_op *opline __asm__(ZEND_VM_IP_GLOBAL_REG);\n");
+							out($f,"#else\n");
+							out($f,"# define DCL_OPLINE const zend_op *opline;\n");
+							out($f,"#endif\n");
 							out($f,"#define USE_OPLINE\n");
 							out($f,"#define LOAD_OPLINE() opline = EX(opline)\n");
 							out($f,"#define LOAD_NEXT_OPLINE() opline = EX(opline) + 1\n");
@@ -1171,7 +1179,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						foreach ($params as $param => $x) {
 							out($f,$m[1].$param.";\n");
 						}
+						out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
+						out($f,$m[1]."register zend_execute_data *execute_data __asm__(ZEND_VM_FP_GLOBAL_REG) = ex;\n");
+						out($f,"#else\n");
 						out($f,$m[1]."zend_execute_data *execute_data = ex;\n");
+						out($f,"#endif\n");
 					} else {
 						out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
 						out($f,$m[1]."const zend_op *orig_opline = opline;\n");
