@@ -609,7 +609,7 @@ PHPAPI int php_get_module_initialized(void)
 
 /* {{{ php_log_err
  */
-PHPAPI void php_log_err(char *log_message)
+PHPAPI ZEND_COLD void php_log_err(char *log_message)
 {
 	int fd = -1;
 	time_t error_time;
@@ -703,7 +703,7 @@ PHPAPI size_t php_printf(const char *format, ...)
  * html error messages if correcponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS for details.
  */
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
 	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
@@ -888,7 +888,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 /* {{{ php_error_docref0 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref0(const char *docref, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
 {
 	va_list args;
 
@@ -900,7 +900,7 @@ PHPAPI void php_error_docref0(const char *docref, int type, const char *format, 
 
 /* {{{ php_error_docref1 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 {
 	va_list args;
 
@@ -912,7 +912,7 @@ PHPAPI void php_error_docref1(const char *docref, const char *param1, int type, 
 
 /* {{{ php_error_docref2 */
 /* See: CODING_STANDARDS for details. */
-PHPAPI void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 {
 	char *params;
 	va_list args;
@@ -929,7 +929,7 @@ PHPAPI void php_error_docref2(const char *docref, const char *param1, const char
 
 #ifdef PHP_WIN32
 #define PHP_WIN32_ERROR_MSG_BUFFER_SIZE 512
-PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
+PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	if (error == 0) {
 		php_error_docref2(NULL, param1, param2, E_WARNING, "%s", strerror(errno));
 	} else {
@@ -957,7 +957,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
@@ -1411,7 +1411,7 @@ static void php_free_request_globals(void)
 
 /* {{{ php_message_handler_for_zend
  */
-static void php_message_handler_for_zend(zend_long message, const void *data)
+static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void *data)
 {
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN:
