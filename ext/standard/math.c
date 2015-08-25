@@ -734,9 +734,17 @@ PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
 
+
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/z/", &zbase, &zexp) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL_DEREF(zbase)
+		Z_PARAM_ZVAL_DEREF(zexp)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	pow_function(return_value, zbase, zexp);
 }
@@ -1497,9 +1505,16 @@ PHP_FUNCTION(intdiv)
 {
 	zend_long numerator, divisor;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &numerator, &divisor) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(numerator)
+		Z_PARAM_LONG(divisor)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (divisor == 0) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
