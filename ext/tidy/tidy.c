@@ -577,6 +577,11 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		data = arg1;
 	}
 
+	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(data))) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+
 	doc = tidyCreate();
 	errbuf = emalloc(sizeof(TidyBuffer));
 	tidyBufInit(errbuf);
@@ -608,7 +613,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		TidyBuffer buf;
 
 		tidyBufInit(&buf);
-		tidyBufAttach(&buf, (byte *) ZSTR_VAL(data), ZSTR_LEN(data));
+		tidyBufAttach(&buf, (byte *) ZSTR_VAL(data), (uint)ZSTR_LEN(data));
 
 		if (tidyParseBuffer(doc, &buf) < 0) {
 			php_error_docref(NULL, E_WARNING, "%s", errbuf->bp);
@@ -1158,10 +1163,15 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 			tidyOptSetBool(doc, TidyForceOutput, yes);
 			tidyOptSetBool(doc, TidyMark, no);
 
+			if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
+				php_error_docref(NULL, E_WARNING, "Input string is too long");
+				return status;
+			}
+
 			TIDY_SET_DEFAULT_CONFIG(doc);
 
 			tidyBufInit(&inbuf);
-			tidyBufAttach(&inbuf, (byte *) output_context->in.data, output_context->in.used);
+			tidyBufAttach(&inbuf, (byte *) output_context->in.data, (uint)output_context->in.used);
 
 			if (0 <= tidyParseBuffer(doc, &inbuf) && 0 <= tidyCleanAndRepair(doc)) {
 				tidyBufInit(&outbuf);
@@ -1412,7 +1422,7 @@ static PHP_FUNCTION(tidy_get_config)
 				break;
 
 			case TidyBoolean:
-				add_assoc_bool(return_value, opt_name, (zend_long)opt_value);
+				add_assoc_bool(return_value, opt_name, opt_value ? 1 : 0);
 				break;
 		}
 	}
