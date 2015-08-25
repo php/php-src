@@ -1003,7 +1003,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 	return SUCCESS;
 }
 
-static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *enc)
+static int php_tidy_parse_string(PHPTidyObj *obj, char *string, uint len, char *enc)
 {
 	TidyBuffer buf;
 
@@ -1195,12 +1195,17 @@ static PHP_FUNCTION(tidy_parse_string)
 		RETURN_FALSE;
 	}
 
+	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+
 	tidy_instanciate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if (php_tidy_parse_string(obj, ZSTR_VAL(input), ZSTR_LEN(input), enc) == FAILURE) {
+	if (php_tidy_parse_string(obj, ZSTR_VAL(input), (uint)ZSTR_LEN(input), enc) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -1261,9 +1266,14 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETURN_FALSE;
 	}
 
+	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), ZSTR_LEN(contents), enc) == FAILURE) {
+	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint)ZSTR_LEN(contents), enc) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 	}
@@ -1574,9 +1584,14 @@ static TIDY_DOC_METHOD(__construct)
 			return;
 		}
 
+		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+		}
+
 		TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-		php_tidy_parse_string(obj, ZSTR_VAL(contents), ZSTR_LEN(contents), enc);
+		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint)ZSTR_LEN(contents), enc);
 
 		zend_string_release(contents);
 	}
@@ -1605,9 +1620,14 @@ static TIDY_DOC_METHOD(parseFile)
 		RETURN_FALSE;
 	}
 
+	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), ZSTR_LEN(contents), enc) == FAILURE) {
+	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint)ZSTR_LEN(contents), enc) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -1630,11 +1650,16 @@ static TIDY_DOC_METHOD(parseString)
 		RETURN_FALSE;
 	}
 
+	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+
 	obj = Z_TIDY_P(object);
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if(php_tidy_parse_string(obj, ZSTR_VAL(input), ZSTR_LEN(input), enc) == SUCCESS) {
+	if(php_tidy_parse_string(obj, ZSTR_VAL(input), (uint)ZSTR_LEN(input), enc) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
