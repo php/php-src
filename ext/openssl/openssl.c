@@ -3597,13 +3597,10 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, pub_key);
-					if (dh->p && dh->g) {
-						if (!dh->pub_key) {
-							DH_generate_key(dh);
-						}
-						if (EVP_PKEY_assign_DH(pkey, dh)) {
-							RETURN_RESOURCE(zend_list_insert(pkey, le_key TSRMLS_CC));
-						}
+					if (dh->p && dh->g &&
+							(dh->pub_key || DH_generate_key(dh)) &&
+							EVP_PKEY_assign_DH(pkey, dh)) {
+						RETURN_RESOURCE(zend_list_insert(pkey, le_key TSRMLS_CC));
 					}
 					DH_free(dh);
 				}
