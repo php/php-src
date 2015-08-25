@@ -53,7 +53,6 @@ PHP_FUNCTION(mysqli_field_count);
 PHP_FUNCTION(mysqli_field_seek);
 PHP_FUNCTION(mysqli_field_tell);
 PHP_FUNCTION(mysqli_free_result);
-PHP_FUNCTION(mysqli_get_cache_stats);
 PHP_FUNCTION(mysqli_get_client_stats);
 PHP_FUNCTION(mysqli_get_connection_stats);
 PHP_FUNCTION(mysqli_get_charset);
