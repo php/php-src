@@ -49636,11 +49636,16 @@ ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)
 	LOAD_OPLINE();
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 	((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-	ret = opline? ((execute_data != ex)? (int)(execute_data->prev_execute_data != ex) + 1 : 0) : -1;
+	if (EXPECTED(opline)) {
+		ret = execute_data != ex ? (int)(execute_data->prev_execute_data != ex) + 1 : 0;
+		SAVE_OPLINE();
+	} else {
+		ret = -1;
+	}
 #else
 	ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-#endif
 	SAVE_OPLINE();
+#endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
 	execute_data = orig_execute_data;
 #endif
