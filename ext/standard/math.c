@@ -1480,6 +1480,36 @@ PHP_FUNCTION(intdiv)
 }
 /* }}} */
 
+/* {{{ proto number ldexp(float x, int exp)
+   Returns the result of multiplying x (the significand) by 2 raised to the power of exp (the exponent). */
+PHP_FUNCTION(ldexp)
+{
+	zval *value;
+	zend_long exp = 0;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &value, &exp) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(value)
+		Z_PARAM_LONG(exp)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	convert_scalar_to_number_ex(value);
+
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(ldexp(Z_DVAL_P(value), (int) exp));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		RETURN_DOUBLE(ldexp(Z_LVAL_P(value), (int) exp));
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
