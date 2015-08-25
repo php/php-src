@@ -425,9 +425,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							key = zend_string_alloc(key_len, 0);
 							ZSTR_LEN(key) = snprintf(ZSTR_VAL(key), ZSTR_LEN(key)-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
-							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];
-							key_len = Z_STRLEN_P(class_name) + sizeof("::") - 1 + Z_STRLEN(op_array->literals[i]);
+							int key_len = Z_STRLEN_P(class_name) + sizeof("::") - 1 + Z_STRLEN(op_array->literals[i]);
 							key = zend_string_alloc(key_len, 0);
 							memcpy(ZSTR_VAL(key), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 							memcpy(ZSTR_VAL(key) + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
