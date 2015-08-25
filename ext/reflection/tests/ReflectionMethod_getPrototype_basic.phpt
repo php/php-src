@@ -5,18 +5,15 @@ marcosptf - <marcosptf@yahoo.com.br>
 --FILE--
 <?php
 class Hello {
-
     public function sayHelloTo($name) {
         return 'Hello ' . $name;
     }
-
 }
-class HelloWorld extends Hello {
 
+class HelloWorld extends Hello {
     public function sayHelloTo($name) {
         return 'Hello world: ' . $name;
     }
-
 }
 
 $reflectionMethod = new ReflectionMethod('HelloWorld', 'sayHelloTo');
@@ -30,4 +27,3 @@ object(ReflectionMethod)#2 (2) {
   ["class"]=>
   string(5) "Hello"
 }
-
