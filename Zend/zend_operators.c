@@ -642,10 +642,12 @@ try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
-				zval tmp;
-				ZVAL_COPY_VALUE(&tmp, op);
-				SEPARATE_ARRAY(&tmp);
-				object_and_properties_init(op, zend_standard_class_def, Z_ARR(tmp));
+				HashTable *ht = Z_ARR_P(op);
+				if (Z_IMMUTABLE_P(op)) {
+					/* TODO: try not to duplicate immutable arrays as well ??? */
+					ht = zend_array_dup(ht);
+				}
+				object_and_properties_init(op, zend_standard_class_def, ht);
 				break;
 			}
 		case IS_OBJECT:
