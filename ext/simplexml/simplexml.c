@@ -2203,7 +2203,12 @@ PHP_FUNCTION(simplexml_load_file)
 		return;
 	}
 
-	docp = xmlReadFile(filename, NULL, options);
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = xmlReadFile(filename, NULL, (int)options);
 
 	if (!docp) {
 		RETURN_FALSE;
@@ -2244,7 +2249,20 @@ PHP_FUNCTION(simplexml_load_string)
 		return;
 	}
 
-	docp = xmlReadMemory(data, data_len, NULL, NULL, options);
+	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+		php_error_docref(NULL, E_WARNING, "Data is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+		php_error_docref(NULL, E_WARNING, "Namespace is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 
 	if (!docp) {
 		RETURN_FALSE;
@@ -2281,7 +2299,20 @@ SXE_METHOD(__construct)
 		return;
 	}
 
-	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
+	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+		php_error_docref(NULL, E_WARNING, "Data is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+		php_error_docref(NULL, E_WARNING, "Namespace is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
