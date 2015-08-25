@@ -24,7 +24,7 @@
 /* Flag macros for basic range recognition. Notable is that
    always sizeof(signed) == sizeof(unsigned), so no need to
    overcomplicate things. */
-#if SIZEOF_INT == SIZEOF_ZEND_LONG
+#if SIZEOF_INT < SIZEOF_ZEND_LONG
 # define ZEND_LONG_CAN_OVFL_INT 1
 # define ZEND_LONG_CAN_OVFL_UINT 1
 #endif
