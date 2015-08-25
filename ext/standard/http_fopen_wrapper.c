@@ -576,13 +576,13 @@ finish:
 		}
 	}
 
-	/* Send a Connection: close header when using HTTP 1.1 or later to avoid
-	 * hanging when the server interprets the RFC literally and establishes a
-	 * keep-alive connection, unless the user specifically requests something
-	 * else by specifying a Connection header in the context options. */
-	if (protocol_version &&
-	    ((have_header & HTTP_HEADER_CONNECTION) == 0) &&
-	    (strncmp(protocol_version, "1.0", MIN(protocol_version_len, 3)) > 0)) {
+	/* Send a Connection: close header to avoid hanging when the server
+	 * interprets the RFC literally and establishes a keep-alive connection,
+	 * unless the user specifically requests something else by specifying a
+	 * Connection header in the context options. Send that header even for
+	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * keep-alive response, which is the preferred response type. */
+	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		php_stream_write_string(stream, "Connection: close\r\n");
 	}
 

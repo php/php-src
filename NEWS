@@ -11,13 +11,17 @@ PHP                                                                        NEWS
     DH key resource). (Jakub Zelenka)
 
 - PDO:
-  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+  . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
 - Phpdbg:
   . Fix phpdbg_break_next() sometimes not breaking. (Bob)
 
 - Standard:
   . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
+
+- Streams:
+  . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
+    (Niklas Keller)
 
 03 Sep 2015, PHP 5.6.13
 
