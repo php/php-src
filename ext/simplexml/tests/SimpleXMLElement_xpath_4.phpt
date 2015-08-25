@@ -8,15 +8,10 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 --FILE--
 <?php
 $xml = simplexml_load_string("XXXXXXX^",$x,0x6000000000000001);
-var_dump($xml->xpath("BBBB"));
+var_dump($xml);
 ?>
 --EXPECTF--
 Notice: Undefined variable: x in %s on line %d
 
-Warning: simplexml_load_string(): Entity: line 1: parser error : Start tag expected, '<' not found in %s on line %d
-
-Warning: simplexml_load_string(): XXXXXXX^ in %s on line %d
-
-Warning: simplexml_load_string(): ^ in %s on line %d
+Warning: simplexml_load_string(): Invalid options in %s on line %d
 bool(false)
-
