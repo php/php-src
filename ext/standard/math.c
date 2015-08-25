@@ -789,7 +789,7 @@ PHP_FUNCTION(expm1)
 /* {{{ proto float log1p(float number)
    Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
 /*
-   WARNING: this function is expermental: it could change its name or
+   WARNING: this function is experimental: it could change its name or
    disappear in the next version of PHP!
 */
 PHP_FUNCTION(log1p)
