@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
 
+- Streams:
+  . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections) (Niklas Keller)
+
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:

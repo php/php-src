@@ -86,44 +86,52 @@ array(7) {
   string(15) "HTTP/1.0 200 OK"
 }
 string(5) "done."
-string(195) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 GET /foo/bar2 HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 GET /foo/bar3 HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 GET /foo/bar4 HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: fail after 2 redirections --
 
 Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(97) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 GET /foo/bar2 HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: fail at first redirection --
 
 Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: fail at first redirection (2) --
 
 Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
 bool(false)
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: return at first redirection --
@@ -135,8 +143,9 @@ array(2) {
   string(41) "Location: http://127.0.0.1:12342/foo/bar2"
 }
 string(1) "1"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: return at first redirection (2) --
@@ -148,8 +157,9 @@ array(2) {
   string(41) "Location: http://127.0.0.1:12342/foo/bar2"
 }
 string(1) "1"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: return at second redirection --
@@ -165,10 +175,12 @@ array(4) {
   string(41) "Location: http://127.0.0.1:12342/foo/bar3"
 }
 string(0) ""
-string(97) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 GET /foo/bar2 HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
