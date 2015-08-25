@@ -1493,6 +1493,14 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
 		RETURN_FALSE;
 	}
+	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
 
 	newdoc = dom_document_parser(id, mode, source, source_len, options);
 
@@ -2001,6 +2009,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
 			php_error_docref(NULL, E_WARNING, "Invalid file source");
@@ -2009,7 +2022,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
 		source_len = xmlStrlen((xmlChar *) source);
-		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
+		if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+		}
+		ctxt = htmlCreateMemoryParserCtxt(source, (int)source_len);
 	}
 
 	if (!ctxt) {
@@ -2017,7 +2034,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (options) {
-		htmlCtxtUseOptions(ctxt, options);
+		htmlCtxtUseOptions(ctxt, (int)options);
 	}
 
 	ctxt->vctxt.error = php_libxml_ctx_error;
