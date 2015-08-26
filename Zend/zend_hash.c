@@ -1967,7 +1967,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, H
     uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
@@ -1987,7 +1987,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 	uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	idx = ht->nNumUsed;
 	while (idx > 0) {
@@ -2006,7 +2006,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (1) {
@@ -2030,7 +2030,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPositi
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (idx > 0) {
