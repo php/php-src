@@ -1166,18 +1166,16 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 			if (Z_TYPE_P(var) != IS_NULL) {
 				convert_to_string(var);
 			}
-			if (maxlength == -1) {
-				/*
- 				value_sz = (Z_TYPE_P(var) == IS_STRING) ? Z_STRLEN_P(var) : PHP_OCI_PIECE_SIZE;
-				*/
-				/* We should use max length as dynamic bind is used */
-				value_sz = PHP_OCI_PIECE_SIZE;
-			} else {
-				if (maxlength == 0) {
-					value_sz = PHP_OCI_PIECE_SIZE;
+			if ((maxlength == -1) || (maxlength == 0)) {
+				if (type == SQLT_LNG) {
+					value_sz = SB4MAXVAL;
+				} else if (Z_TYPE_P(var) == IS_STRING) {
+					value_sz = (sb4) Z_STRLEN_P(var);
 				} else {
-					value_sz = (sb4) maxlength;
+					value_sz = PHP_OCI_PIECE_SIZE;
 				}
+			} else {
+				value_sz = (sb4) maxlength;
 			}
 			break;
 
@@ -1225,10 +1223,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 			break;
 	}
 
-	if (value_sz == 0) {
-		value_sz = 1;
-	}
-
 	if (!statement->binds) {
 		ALLOC_HASHTABLE(statement->binds);
 		zend_hash_init(statement->binds, 13, NULL, php_oci_bind_hash_dtor, 0);
@@ -1249,7 +1243,12 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 	bindp->parent_statement = statement;
 	bindp->zval = var;
 	bindp->type = type;
-	
+	/* Storing max length set in OCIBindByName() to check it later in
+	 * php_oci_bind_in_callback() function to avoid ORA-1406 error while
+	 * executing OCIStmtExecute()
+     */
+	bindp->dummy_len = value_sz;
+
 	PHP_OCI_CALL_RETURN(errstatus,
 		OCIBindByName,
 		(
@@ -1353,6 +1352,14 @@ sb4 php_oci_bind_in_callback(
 
 		*bufpp = Z_STRVAL_P(val);
 		*alenp = (ub4) Z_STRLEN_P(val);
+		/*
+		 * bind_char_1: If max length set in OCIBindByName is less than the
+		 * actual length of input string, then we have to overwrite alenp with
+		 * max value set in OCIBindByName (dummy_len). Or else it will cause
+		 * ORA-1406 error in OCIStmtExecute
+		 */
+		if ((phpbind->dummy_len > 0) && (phpbind->dummy_len < *alenp))
+			*alenp = phpbind->dummy_len;
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else if (phpbind->statement != 0) {
 		/* RSET */
