@@ -1,5 +1,5 @@
 --TEST--
-Timeout within function containing exteption
+Timeout within function containing exception
 --SKIPIF--
 <?php 
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
