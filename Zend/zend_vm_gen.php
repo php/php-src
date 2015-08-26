@@ -1618,11 +1618,16 @@ function gen_vm($def, $skel) {
 		out($f, "\tLOAD_OPLINE();\n");
 		out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
 		out($f, "\t((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-		out($f, "\tret = opline? ((execute_data != ex)? (int)(execute_data->prev_execute_data != ex) + 1 : 0) : -1;\n");
+		out($f, "\tif (EXPECTED(opline)) {\n");
+		out($f, "\t\tret = execute_data != ex ? (int)(execute_data->prev_execute_data != ex) + 1 : 0;\n");
+		out($f, "\t\tSAVE_OPLINE();\n");
+		out($f, "\t} else {\n");
+		out($f, "\t\tret = -1;\n");
+		out($f, "\t}\n");
 		out($f, "#else\n");
 		out($f, "\tret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-		out($f, "#endif\n");
 		out($f, "\tSAVE_OPLINE();\n");
+		out($f, "#endif\n");
 		out($f, "#ifdef ZEND_VM_FP_GLOBAL_REG\n");
 		out($f, "\texecute_data = orig_execute_data;\n");
 		out($f, "#endif\n");

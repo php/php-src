@@ -349,7 +349,7 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 		return NULL;
 	}
 
-	fake_name = zend_strpprintf(0, "%s\0%p", filename, op_array->opcodes);
+	fake_name = strpprintf(0, "%s\0%p", filename, op_array->opcodes);
 
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 	zend_hash_add_ptr(&PHPDBG_G(file_sources), fake_name, dataptr);
