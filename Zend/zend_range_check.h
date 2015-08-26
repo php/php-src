@@ -39,10 +39,10 @@
 
 /* zend_long vs. (unsigned) int checks. */
 #ifdef ZEND_LONG_CAN_OVFL_INT
-# define ZEND_LONG_INT_OVFL(zlong) ((zlong) > (zend_long)INT_MAX)
-# define ZEND_LONG_INT_UDFL(zlong) ((zlong) < (zend_long)INT_MIN)
-# define ZEND_LONG_EXCEEDS_INT(zlong) (ZEND_LONG_INT_OVFL(zlong) || ZEND_LONG_INT_UDFL(zlong))
-# define ZEND_LONG_UINT_OVFL(zlong) ((zlong) < 0 || (zlong) > (zend_long)UINT_MAX)
+# define ZEND_LONG_INT_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)INT_MAX)
+# define ZEND_LONG_INT_UDFL(zlong) UNEXPECTED((zlong) < (zend_long)INT_MIN)
+# define ZEND_LONG_EXCEEDS_INT(zlong) UNEXPECTED(ZEND_LONG_INT_OVFL(zlong) || ZEND_LONG_INT_UDFL(zlong))
+# define ZEND_LONG_UINT_OVFL(zlong) UNEXPECTED((zlong) < 0 || (zlong) > (zend_long)UINT_MAX)
 #else
 # define ZEND_LONG_INT_OVFL(zl) (0)
 # define ZEND_LONG_INT_UDFL(zl) (0)
@@ -51,9 +51,9 @@
 #endif
 
 /* size_t vs (unsigned) int checks. */
-#define ZEND_SIZE_T_INT_OVFL(size) ((size) > (size_t)INT_MAX)
+#define ZEND_SIZE_T_INT_OVFL(size) 	UNEXPECTED((size) > (size_t)INT_MAX)
 #ifdef ZEND_SIZE_T_CAN_OVFL_UINT
-# define ZEND_SIZE_T_UINT_OVFL(size) ((size) > (size_t)UINT_MAX)
+# define ZEND_SIZE_T_UINT_OVFL(size) UNEXPECTED((size) > (size_t)UINT_MAX)
 #else
 # define ZEND_SIZE_T_UINT_OVFL(size) (0)
 #endif
