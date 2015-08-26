@@ -55,17 +55,13 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	zend_bool use_exceptions;
 ZEND_END_MODULE_GLOBALS(intl)
 
-/* Macro to access request-wide global variables. */
-#ifdef ZTS
-#define INTL_G(v) ZEND_TSRMG(intl_globals_id, zend_intl_globals *, v)
-#ifdef COMPILE_DL_INTL
+#if defined(ZTS) && defined(COMPILE_DL_INTL)
 ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define INTL_G(v) (intl_globals.v)
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(intl)
+/* Macro to access request-wide global variables. */
+#define INTL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(intl, v)
 
 PHP_MINIT_FUNCTION(intl);
 PHP_MSHUTDOWN_FUNCTION(intl);

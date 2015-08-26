@@ -23,7 +23,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 
-Fatal error: Uncaught exception 'Exception' in %s:%d
+Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): Element->ThrowException()
 #1 [internal function]: Element::CallBack(Object(Element))

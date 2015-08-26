@@ -24,12 +24,18 @@
 #include "phpdbg.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
+#include "ext/standard/php_string.h"
 
-#if defined(HAVE_SYS_IOCTL_H)
-#	include "sys/ioctl.h"
-#	ifndef GWINSZ_IN_SYS_IOCTL
-#		include <termios.h>
-#	endif
+/* FASYNC under Solaris */
+#ifdef HAVE_SYS_FILE_H
+# include <sys/file.h>
+#endif
+
+#ifdef HAVE_SYS_IOCTL_H
+# include "sys/ioctl.h"
+# ifndef GWINSZ_IN_SYS_IOCTL
+#  include <termios.h>
+# endif
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -165,16 +171,20 @@ PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
 PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname) /* {{{ */
 {
 	zend_function *func = NULL;
-	zend_string *lfname = zend_string_alloc(strlen(fname), 0);
-	memcpy(lfname->val, zend_str_tolower_dup(fname, lfname->len), lfname->len + 1);
+	zend_string *lfname = zend_string_init(fname, strlen(fname), 0);
+	zend_string *tmp = zend_string_tolower(lfname);
+	zend_string_release(lfname);
+	lfname = tmp;
 
 	if (cname) {
 		zend_class_entry *ce;
-		zend_string *lcname = zend_string_alloc(strlen(cname), 0);
-		memcpy(lcname->val, zend_str_tolower_dup(cname, lcname->len), lcname->len + 1);
+		zend_string *lcname = zend_string_init(cname, strlen(cname), 0);
+		tmp = zend_string_tolower(lcname);
+		zend_string_release(lcname);
+		lcname = tmp;
 		ce = zend_lookup_class(lcname);
 
-		efree(lcname);
+		zend_string_release(lcname);
 
 		if (ce) {
 			func = zend_hash_find_ptr(&ce->function_table, lfname);
@@ -183,7 +193,7 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 		func = zend_hash_find_ptr(EG(function_table), lfname);
 	}
 
-	efree(lfname);
+	zend_string_release(lfname);
 	return func;
 } /* }}} */
 
@@ -297,16 +307,13 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 #ifndef HAVE_LIBEDIT
 	/* TODO: libedit doesn't seems to support coloured prompt */
 	if ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED)) {
-		asprintf(
-			&PHPDBG_G(prompt)[1], "\033[%sm%s\033[0m ",
+		ZEND_IGNORE_VALUE(asprintf(&PHPDBG_G(prompt)[1], "\033[%sm%s\033[0m ",
 			PHPDBG_G(colors)[PHPDBG_COLOR_PROMPT]->code,
-			PHPDBG_G(prompt)[0]);
+			PHPDBG_G(prompt)[0]));
 	} else
 #endif
 	{
-		asprintf(
-			&PHPDBG_G(prompt)[1], "%s ",
-			PHPDBG_G(prompt)[0]);
+		ZEND_IGNORE_VALUE(asprintf(&PHPDBG_G(prompt)[1], "%s ", PHPDBG_G(prompt)[0]));
 	}
 
 	return PHPDBG_G(prompt)[1];
@@ -345,7 +352,7 @@ PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd) {
-#ifndef _WIN32
+#if !defined(_WIN32) && defined(FASYNC)
 	int flags;
 	fcntl(STDIN_FILENO, F_SETOWN, getpid());
 	flags = fcntl(STDIN_FILENO, F_GETFL);
@@ -384,7 +391,7 @@ int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry
 		efree(str_name);
 	}
 
-	return ce ? SUCCESS : FAILURE;
+	return *ce ? SUCCESS : FAILURE;
 }
 
 char *phpdbg_get_property_key(char *key) {
@@ -456,8 +463,8 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 					char *name;
 					char *keyname = estrndup(last_index, index_len);
 					if (strkey) {
-						key = strkey->val;
-						keylen = strkey->len;
+						key = ZSTR_VAL(strkey);
+						keylen = ZSTR_LEN(strkey);
 					} else {
 						keylen = spprintf(&key, 0, "%llu", numkey);
 					}
@@ -572,7 +579,7 @@ static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong 
 
 	phpdbg_try_access {
 		if (key) { /* string key */
-			phpdbg_xml(" name=\"%.*s\"", key->len, key->val);
+			phpdbg_xml(" name=\"%.*s\"", ZSTR_LEN(key), ZSTR_VAL(key));
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\"", num);
 		}
@@ -606,7 +613,7 @@ static int phpdbg_xml_object_property_dump(zval *zv, zend_string *key, zend_ulon
 					phpdbg_xml(" class=\"%s\" protection=\"private\"", class_name);
 				}
 			} else {
-				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", key->len, key->val);
+				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", ZSTR_LEN(key), ZSTR_VAL(key));
 			}
 		} else { /* numeric key */
 			phpdbg_xml(" name=\"%ld\" protection=\"public\"", num);
@@ -680,7 +687,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				}
 
 				class_name = Z_OBJ_HANDLER_P(zv, get_class_name)(Z_OBJ_P(zv));
-				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, class_name->len, class_name->val, Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
+				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, ZSTR_LEN(class_name), ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
 				zend_string_release(class_name);
 
 				element_dump_func = phpdbg_xml_object_property_dump;
@@ -727,11 +734,11 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op < op_num; i++) {
+	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
 		uint32_t catch = op_array->try_catch_array[i].catch_op, finally = op_array->try_catch_array[i].finally_op;
 		if (op_num <= catch || op_num <= finally) {
-			if (finally && finally < catch) {
-				return 0;
+			if (finally) {
+				return 1;
 			}
 
 			do {
@@ -756,3 +763,66 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 
 	return op->opcode == ZEND_CATCH;
 }
+
+char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
+{
+	char *decode = NULL;
+
+	switch (Z_TYPE_P(zv)) {
+		case IS_UNDEF:
+			decode = estrdup("");
+			break;
+		case IS_NULL:
+			decode = estrdup("null");
+			break;
+		case IS_FALSE:
+			decode = estrdup("false");
+			break;
+		case IS_TRUE:
+			decode = estrdup("true");
+			break;
+		case IS_LONG:
+			spprintf(&decode, 0, ZEND_LONG_FMT, Z_LVAL_P(zv));
+			break;
+		case IS_DOUBLE:
+			spprintf(&decode, 0, "%.*G", 14, Z_DVAL_P(zv));
+			break;
+		case IS_STRING: {
+			int i;
+			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"", 2);
+			for (i = 0; i < ZSTR_LEN(str); i++) {
+				if (ZSTR_VAL(str)[i] < 32) {
+					ZSTR_VAL(str)[i] = ' ';
+				}
+			}
+			spprintf(&decode, 0, "\"%.*s\"%c",
+				ZSTR_LEN(str) <= maxlen - 2 ? (int) ZSTR_LEN(str) : (maxlen - 3),
+				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen - 2 ? 0 : '+');
+			zend_string_release(str);
+			} break;
+		case IS_RESOURCE:
+			spprintf(&decode, 0, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			break;
+		case IS_ARRAY:
+			spprintf(&decode, 0, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));
+			break;
+		case IS_OBJECT: {
+			zend_string *str = Z_OBJCE_P(zv)->name;
+			spprintf(&decode, 0, "%.*s%c",
+				ZSTR_LEN(str) <= maxlen ? (int) ZSTR_LEN(str) : maxlen - 1,
+				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
+			break;
+		}
+		case IS_CONSTANT:
+			decode = estrdup("<constant>");
+			break;
+		case IS_CONSTANT_AST:
+			decode = estrdup("<ast>");
+			break;
+		default:
+			spprintf(&decode, 0, "unknown type: %d", Z_TYPE_P(zv));
+			break;
+	}
+
+	return decode;
+} /* }}} */

@@ -198,7 +198,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
 	col->name = zend_string_alloc(colname_len, 0);
-	cp = col->name->val;
+	cp = ZSTR_VAL(col->name);
 	if (colname_len > var->aliasname_length) {
 		memmove(cp, var->relname, var->relname_length);
 		cp += var->relname_length;
@@ -475,10 +475,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			for (i = 0; i < sqlda->sqld; ++i) {
 				XSQLVAR *var = &sqlda->sqlvar[i];
 
-				if ((var->aliasname_length && !strncasecmp(param->name->val, var->aliasname,
-						min(param->name->len, var->aliasname_length)))
-						|| (var->sqlname_length && !strncasecmp(param->name->val, var->sqlname,
-						min(param->name->len, var->sqlname_length)))) {
+				if ((var->aliasname_length && !strncasecmp(ZSTR_VAL(param->name), var->aliasname,
+						min(ZSTR_LEN(param->name), var->aliasname_length)))
+						|| (var->sqlname_length && !strncasecmp(ZSTR_VAL(param->name), var->sqlname,
+						min(ZSTR_LEN(param->name), var->sqlname_length)))) {
 					param->paramno = i;
 					break;
 				}
@@ -631,7 +631,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						}
 					case PDO_PARAM_EVT_NORMALIZE:
 							 if (!param->is_param) {
-								  char *s = param->name->val;
+								  char *s = ZSTR_VAL(param->name);
 								  while (*s != '\0') {
 									   *s = toupper(*s);
 										s++;

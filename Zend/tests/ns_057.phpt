@@ -56,4 +56,7 @@ const ok
 class ok
 ok
 
-Fatal error: Undefined constant 'Test\ns1\unknown' in %sns_057.php on line %d
+Fatal error: Uncaught Error: Undefined constant 'Test\ns1\unknown' in %sns_057.php:%d
+Stack trace:
+#0 {main}
+  thrown in %sns_057.php on line %d

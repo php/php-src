@@ -909,7 +909,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			}
 #endif
 			/* copy the part of the string before the match */
-			smart_str_appendl(&out_buf, pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
+			smart_str_appendl(&out_buf, (char *)pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
 
 			if (!is_callable) {
 				/* copy replacement and backrefs */
@@ -941,9 +941,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				/* null terminate buffer */
 				smart_str_0(&eval_buf);
 				/* do eval */
-				if (zend_eval_stringl(eval_buf.s->val, eval_buf.s->len, &v, description) == FAILURE) {
+				if (zend_eval_stringl(ZSTR_VAL(eval_buf.s), ZSTR_LEN(eval_buf.s), &v, description) == FAILURE) {
 					efree(description);
-					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, eval_buf.s->val);
+					php_error_docref(NULL,E_ERROR, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_buf.s));
 					/* zend_error() does not return in this case */
 				}
 
@@ -951,7 +951,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				convert_to_string(&v);
 				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
 				/* Clean up */
-				eval_buf.s->len = 0;
+				ZSTR_LEN(eval_buf.s) = 0;
 				zval_dtor(&v);
 			} else if (is_callable) {
 				zval args[1];
@@ -975,7 +975,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					convert_to_string_ex(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					if (eval_buf.s) {
-						eval_buf.s->len = 0;
+						ZSTR_LEN(eval_buf.s) = 0;
 					}
 					zval_ptr_dtor(&retval);
 				} else {
@@ -992,14 +992,14 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
-					smart_str_appendl(&out_buf, pos, 1);
+					smart_str_appendl(&out_buf, (char *)pos, 1);
 				}
 				pos++;
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
 			if (string_lim - pos > 0) {
-				smart_str_appendl(&out_buf, pos, string_lim - pos);
+				smart_str_appendl(&out_buf, (char *)pos, string_lim - pos);
 			}
 		}
 		onig_region_free(regs, 0);

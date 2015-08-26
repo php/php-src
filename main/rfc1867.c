@@ -193,7 +193,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 static int unlink_filename(zval *el) /* {{{ */
 {
 	zend_string *filename = Z_STR_P(el);
-	VCWD_UNLINK(filename->val);
+	VCWD_UNLINK(ZSTR_VAL(filename));
 	return 0;
 }
 /* }}} */
@@ -420,8 +420,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 
 	/* get lines of text, or CRLF_CRLF */
 
-	while( (line = get_line(self)) && line[0] != '\0' )
-	{
+	while ((line = get_line(self)) && line[0] != '\0') {
 		/* add header to table */
 		char *value = NULL;
 
@@ -435,7 +434,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 
 		if (value) {
-			if(buf_value.c && key) {
+			if (buf_value.c && key) {
 				/* new entry, add the old one to the list */
 				smart_string_0(&buf_value);
 				entry.key = key;
@@ -446,7 +445,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 			}
 
 			*value = '\0';
-			do { value++; } while(isspace(*value));
+			do { value++; } while (isspace(*value));
 
 			key = estrdup(line);
 			smart_string_appends(&buf_value, value);
@@ -457,7 +456,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 	}
 
-	if(buf_value.c && key) {
+	if (buf_value.c && key) {
 		/* add the last one to the list */
 		smart_string_0(&buf_value);
 		entry.key = key;
@@ -1100,7 +1099,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				multipart_event_file_end event_file_end;
 
 				event_file_end.post_bytes_processed = SG(read_post_bytes);
-				event_file_end.temp_filename = temp_filename->val;
+				event_file_end.temp_filename = ZSTR_VAL(temp_filename);
 				event_file_end.cancel_upload = cancel_upload;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END, &event_file_end, &event_extra_data) == FAILURE) {
 					cancel_upload = UPLOAD_ERROR_X;
@@ -1110,7 +1109,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			if (cancel_upload) {
 				if (temp_filename) {
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
-						unlink(temp_filename->val);
+						unlink(ZSTR_VAL(temp_filename));
 					}
 					zend_string_release(temp_filename);
 				}

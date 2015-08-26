@@ -582,14 +582,13 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 
 			{
 				zend_string * key;
-				zend_ulong unused_num_key;
 				zval * entry_value;
-				ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
+				ZEND_HASH_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
 					if (key) { /* HASH_KEY_IS_STRING */
 						size_t value_len = Z_STRLEN_P(entry_value);
 
-						ca_payload_len += php_mysqlnd_net_store_length_size(key->len);
-						ca_payload_len += key->len;
+						ca_payload_len += php_mysqlnd_net_store_length_size(ZSTR_LEN(key));
+						ca_payload_len += ZSTR_LEN(key);
 						ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
 						ca_payload_len += value_len;
 					}
@@ -621,16 +620,15 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 #else
 				{
 					zend_string * key;
-					zend_ulong unused_num_key;
 					zval * entry_value;
-					ZEND_HASH_FOREACH_KEY_VAL(packet->connect_attr, unused_num_key, key, entry_value) {
+					ZEND_HASH_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
 						if (key) { /* HASH_KEY_IS_STRING */
 							size_t value_len = Z_STRLEN_P(entry_value);
 
 							/* copy key */
-							p = php_mysqlnd_net_store_length(p, key->len);
-							memcpy(p, key->val, key->len);
-							p+= key->len;
+							p = php_mysqlnd_net_store_length(p, ZSTR_LEN(key));
+							memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
+							p+= ZSTR_LEN(key);
 							/* copy value */
 							p = php_mysqlnd_net_store_length(p, value_len);
 							memcpy(p, Z_STRVAL_P(entry_value), value_len);
@@ -1358,10 +1356,10 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn)
 	if (meta->name != mysqlnd_empty_string) {
 		meta->sname = zend_string_init(meta->name, meta->name_length, packet->persistent_alloc);
 	} else {
-		meta->sname = STR_EMPTY_ALLOC();
+		meta->sname = ZSTR_EMPTY_ALLOC();
 	}
-	meta->name = meta->sname->val;
-	meta->name_length = meta->sname->len;
+	meta->name = ZSTR_VAL(meta->sname);
+	meta->name_length = ZSTR_LEN(meta->sname);
 
 	/* Now do allocs */
 	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {

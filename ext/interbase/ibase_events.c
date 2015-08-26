@@ -318,7 +318,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 	/* get the callback */
 	if (!zend_is_callable(cb_arg, 0, &cb_name)) {
-		_php_ibase_module_error("Callback argument %s is not a callable function", cb_name->val);
+		_php_ibase_module_error("Callback argument %s is not a callable function", ZSTR_VAL(cb_name));
 		zend_string_release(cb_name);
 		RETURN_FALSE;
 	}

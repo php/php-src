@@ -207,9 +207,9 @@ PHPAPI const char* php_get_temporary_directory(void)
 		DWORD len = GetTempPath(sizeof(sTemp),sTemp);
 		assert(0 < len);  /* should *never* fail! */
 		if (sTemp[len - 1] == DEFAULT_SLASH) {
-			PG(php_sys_temp_dir) = zend_strndup(sTemp, len - 1);
+			PG(php_sys_temp_dir) = estrndup(sTemp, len - 1);
 		} else {
-			PG(php_sys_temp_dir) = zend_strndup(sTemp, len);
+			PG(php_sys_temp_dir) = estrndup(sTemp, len);
 		}
 		return PG(php_sys_temp_dir);
 	}

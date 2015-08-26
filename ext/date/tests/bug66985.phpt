@@ -1,5 +1,5 @@
 --TEST--
-Bug #66986 (Some timezones are no longer valid in PHP 5.5.10)
+Bug #66985 (Some timezones are no longer valid in PHP 5.5.10)
 --FILE--
 <?php
 $zones = array(

@@ -573,8 +573,8 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	php_var_serialize(&buf, &zv, &serialize_data);
 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
-	*buffer = (unsigned char *) estrndup(buf.s->val, buf.s->len);
-	*buf_len = buf.s->len;
+	*buffer = (unsigned char *) estrndup(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+	*buf_len = ZSTR_LEN(buf.s);
 	zend_string_release(buf.s);
 
 	return SUCCESS;
@@ -760,7 +760,7 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 	}
 
 	str = zend_string_alloc(num_len, 0);
-	mpz_get_str(str->val, base, gmpnum);
+	mpz_get_str(ZSTR_VAL(str), base, gmpnum);
 
 	/*
 	 * From GMP documentation for mpz_sizeinbase():
@@ -770,10 +770,10 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 	 * So let's check to see if we already have a \0 byte...
 	 */
 
-	if (str->val[str->len - 1] == '\0') {
-		str->len--;
+	if (ZSTR_VAL(str)[ZSTR_LEN(str) - 1] == '\0') {
+		ZSTR_LEN(str)--;
 	} else {
-		str->val[str->len] = '\0';
+		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 
 	ZVAL_NEW_STR(result, str);
@@ -1149,8 +1149,8 @@ ZEND_FUNCTION(gmp_export)
 		size_t out_len = count * size;
 
 		zend_string *out_string = zend_string_alloc(out_len, 0);
-		mpz_export(out_string->val, NULL, order, size, endian, 0, gmpnumber);
-		out_string->val[out_len] = '\0';
+		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);
+		ZSTR_VAL(out_string)[out_len] = '\0';
 
 		RETURN_NEW_STR(out_string);
 	}
@@ -1837,6 +1837,7 @@ ZEND_FUNCTION(gmp_random_range)
 {
 	zval *min_arg, *max_arg;
 	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
+	mpz_t gmpnum_range;
 	gmp_temp_t temp_a, temp_b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &min_arg, &max_arg) == FAILURE) {
@@ -1855,22 +1856,23 @@ ZEND_FUNCTION(gmp_random_range)
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
+		mpz_init(gmpnum_range);
 
-		if (Z_LVAL_P(min_arg)) {
-			mpz_sub_ui(gmpnum_max, gmpnum_max, Z_LVAL_P(min_arg));
+		if (Z_LVAL_P(min_arg) != 0) {
+			mpz_sub_ui(gmpnum_range, gmpnum_max, Z_LVAL_P(min_arg) - 1);
+		} else {
+			mpz_add_ui(gmpnum_range, gmpnum_max, 1);
 		}
 
-		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
 
-		if (Z_LVAL_P(min_arg)) {
+		if (Z_LVAL_P(min_arg) != 0) {
 			mpz_add_ui(gmpnum_result, gmpnum_result, Z_LVAL_P(min_arg));
 		}
 
+		mpz_clear(gmpnum_range);
 		FREE_GMP_TEMP(temp_a);
-
-	}
-	else {
+	} else {
 		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
 
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
@@ -1881,12 +1883,14 @@ ZEND_FUNCTION(gmp_random_range)
 		}
 
 		INIT_GMP_RETVAL(gmpnum_result);
+		mpz_init(gmpnum_range);
 
-		mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
-		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
-		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_sub(gmpnum_range, gmpnum_max, gmpnum_min);
+		mpz_add_ui(gmpnum_range, gmpnum_range, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_range);
 		mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
 
+		mpz_clear(gmpnum_range);
 		FREE_GMP_TEMP(temp_b);
 		FREE_GMP_TEMP(temp_a);
 	}

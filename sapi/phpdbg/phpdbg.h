@@ -100,9 +100,8 @@
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_URL "http://phpdbg.com"
-#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.4.0"
+#define PHPDBG_ISSUES "http://bugs.php.net/report.php"
+#define PHPDBG_VERSION "0.5.0"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
@@ -113,6 +112,8 @@
 #undef memcpy
 #define memcpy(...) memcpy_tmp(__VA_ARGS__)
 #endif
+
+#define quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
 
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
@@ -130,6 +131,7 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_opcode.h"
 #ifdef PHP_WIN32
 # include "phpdbg_sigio_win32.h"
 #endif
@@ -259,11 +261,18 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
 	zend_bool in_execution;                      /* in execution? */
+	zend_bool unclean_eval;                      /* do not check for memory leaks when we needed to bail out during eval */
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
+	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
+	zend_op_array *(*compile_string)(zval *source_string, char *filename);
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
+	zend_arena *oplog_arena;                     /* arena for storing oplog */
+	phpdbg_oplog_list *oplog_list;               /* list of oplog starts */
+	phpdbg_oplog_entry *oplog_cur;               /* current oplog entry */
+
 	struct {
 		FILE *ptr;
 		int fd;
@@ -304,8 +313,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HANDLE sigio_watcher_thread;                 /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif
-
-	struct _zend_phpdbg_globals *backup;         /* backup of data to store */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

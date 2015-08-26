@@ -55,10 +55,6 @@
 # define EWOULDBLOCK WSAEWOULDBLOCK
 #endif
 
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
-#endif
-
 /* This functions transforms the first char to 'w' if it's not 'r', 'a' or 'w'
  * and strips any subsequent chars except '+' and 'b'.
  * Use this to sanitize stream->mode if you call e.g. fdopen, fopencookie or

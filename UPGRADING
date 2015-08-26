@@ -1,6 +1,4 @@
-﻿$Id$
-
-PHP X.Y UPGRADE NOTES
+﻿PHP 7.0 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -61,7 +59,7 @@ Changes to variable handling
       $last = array_pop((getArray()));
       // Strict Standards: Only variables should be passed by reference
 
-  will now throw a strict standards error irregardless of whether parentheses
+  will now throw a strict standards error regardless of whether parentheses
   are used. Previously no notice was generated in the second case.
 
 * Array elements or object properties that are automatically created during
@@ -255,10 +253,10 @@ Changes to integer handling
   ignored. As such $i previously held the value 7, because the last two digits
   were silently discarded.
 
-* Bitwise shifts by negative numbers will now throw a warning and return false:
+* Bitwise shifts by negative numbers will now throw an ArithmeticError:
 
-      var_dump(1 >> -1); // bool(false)
-      // Warning: Bit shift by negative number
+      var_dump(1 >> -1);
+      // ArithmeticError: Bit shift by negative number
 
 * Left bitwise shifts by a number of bits beyond the bit width of an integer
   will always result in 0:
@@ -299,7 +297,7 @@ Changes to string handling
     if (false === $int) {
         throw new Exception("Invalid integer!");
     }
-    var_dump($num); // int(65535)
+    var_dump($int); // int(65535)
 
 * Due to the addition of the Unicode Codepoint Escape Syntax for double-quoted
   strings and heredocs, "\u{" followed by an invalid sequence will now result in
@@ -323,21 +321,21 @@ Relevant RFCs:
 Changes to error handling
 -------------------------
 
-* The new base class of the exception hierarchy is BaseException, from which
-  Exception extends. Typehints in exception handling code may need to be changed
-  to account for this.
+* There are now two exception classes: Exception and Error. Both classes
+  implement a new interface Throwable. Type hints in exception handling code
+  may need to be changed to account for this.
 
-* Some fatal errors and recoverable fatal errors now throw an EngineException
-  instead. As EngineException extends BaseException but not Exception, these
-  exceptions will not caught by existing try/catch blocks.
+* Some fatal errors and recoverable fatal errors now throw an Error instead.
+  As Error is a separate class from Exception, these exceptions will not be
+  caught by existing try/catch blocks.
 
   For the recoverable fatal errors which have been converted into an exception,
   it is no longer possible to silently ignore the error from an error handler.
-  In particular, it is no longer possible to ignore typehint failures.
+  In particular, it is no longer possible to ignore type hint failures.
 
-* Parser errors now generate a ParseException (extends BaseException). Error
+* Parser errors now generate a ParseError that extends Error. Error
   handling for eval()s on potentially invalid code should be changed to catch
-  ParseException in addition to the previous return value / error_get_last()
+  ParseError in addition to the previous return value / error_get_last()
   based handling.
 
 * Constructors of internal classes will now always throw an exception on
@@ -347,6 +345,7 @@ Changes to error handling
 
 Relevant RFCs:
 * https://wiki.php.net/rfc/engine_exceptions_for_php7
+* https://wiki.php.net/rfc/throwable-interface
 * https://wiki.php.net/rfc/internal_constructor_behaviour
 * https://wiki.php.net/rfc/reclassify_e_strict
 
@@ -428,12 +427,12 @@ Other language changes
 Standard library changes
 ========================
 
+  . substr() now returns an empty string instead of FALSE when the truncation happens on boundaries.
   . call_user_method() and call_user_method_array() no longer exists.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
-  . Improved zend_qsort(using hybrid sorting algo) for better performance,
-    and also renamed zend_qsort to zend_sort.
-  . Added stable sorting algo zend_insert_sort.
+  . The internal sorting algorithm has been improved, what may result in
+    different sort order of elements that compare as equal.
   . Removed dl() function on fpm-fcgi.
   . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
 
@@ -461,6 +460,10 @@ Other
     IntlDateFormatter::setTimeZoneID(). Use datefmt_set_timezone() and
     IntlDateFormatter::setTimeZone() instead.
 
+- libxml:
+  . Added LIBXML_BIGLINES parser option. It's available starting with libxml 2.9.0
+    and adds suppport for line numbers >16-bit in the error reporting.
+
 - Mcrypt
   . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().
@@ -480,6 +483,10 @@ Other
   . session.lazy_write(default=On) INI setting enables only write session data when
     session data is updated.
 
+- Opcache
+  . Removed opcache.load_comments configuration directive. Now doc comments
+    loading costs nothing and always enabled.
+
 - OpenSSL:
   . Removed the "rsa_key_size" SSL context option in favor of automatically
     setting the appropriate size given the negotiated crypto algorithm.
@@ -488,7 +495,7 @@ Other
 
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
-    preg_reaplace_callback() instead.
+    preg_replace_callback() instead.
 
 - PDO_pgsql:
   . Removed PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT attribute in favor of
@@ -530,12 +537,43 @@ Other
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
   . Added the yield from operator for delegating Generators like coroutines.
     (RFC: https://wiki.php.net/rfc/generator-delegation)
+  . Reserved keywords can now be used in various new contexts.
+    (RFC: https://wiki.php.net/rfc/context_sensitive_lexer)
+  . Added support for scalar type declarations and strict mode using
+    declare(strict_types=1) (RFC: https://wiki.php.net/rfc/scalar_type_hints_v5)
+  . Added support for cryptographically secure user land RNG
+    (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
+
+- Opcache
+  . Added second level file based opcode cache (experimental - disabled by
+    default). To enable it, PHP should be configured and built with 
+    --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
+    should be set in php.ini. The second level cache may improve performance
+    at server restart or SHM reset. In addition, it's possibe to use file cache
+    without SHM at all, using opcache.file_cache_only=1 (this may be useful for
+    sharing hosting), and disable file cache consistency check, to speedup
+    loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
     streams to negotiate alternative protocols using the ALPN TLS extension when
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
     accessible through stream_get_meta_data() output.
+
+- Reflection
+  . Added a ReflectionGenerator class (yield from Traces, current file/line,
+    etc.)
+  . Added a ReflectionType class to better support the new return type and
+    scalar type declarations features. The new ReflectionParameter::getType()
+    and ReflectionFunctionAbstract::getReturnType() methods both return an
+    instance of ReflectionType.
+
+- Stream:
+  . New Windows only stream context options was added to allow blocking reads
+    on pipes. To enable it, pass array("pipe" => array("blocking" => true))
+    when creating the stream context. Be aware, that this option can under
+    circumstances cause dead locks on the pipe buffer. However it can be useful
+    in several CLI use case scenarios.
 
 ========================================
 3. Changes in SAPI modules
@@ -570,8 +608,34 @@ Other
   . Added second parameter for unserialize function 
     (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
     acceptable classes: 
-    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
+    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]]);
 
+- proc_open():
+  . The maximum number of pipes used by proc_open() was previously limited by
+  hardcoded value of 16. This limit is now removed and the number of pipes is
+  effectively limited by the amount of memory available to PHP.
+  . New Windows only configuration option "blocking_pipes" can be used to
+  force blocking reads on child process pipes. This covers several
+  edge cases in CLI usage however can lead to dead locks. Also, this
+  correlates with the new stream context options for pipes.
+
+- array_column():
+  The function now supports an array of objects as well as two-dimensional
+  arrays. Only public properties are considered, and objects that make use of
+  __get() for dynamic properties must also implement __isset().
+
+- stream_context_create()
+  It accepts now a Windows only configuration 
+  array("pipe" => array("blocking" => <boolean>))  which forces blocking reads
+  on pipes. This option should be used carefully because due to the
+  platform restrictions dead locks on pipe buffers are possible.
+
+- dirname()
+  A new optional argument ($levels) allow to go up various times
+  dirname(dirname($foo)) => dirname($foo, 2);
+
+- debug_zval_dump
+  It prints now "int" instead of "long", and "float" instead of "double".
 
 ========================================
 6. New Functions
@@ -586,6 +650,10 @@ Other
 - Standard
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
+
+- Zip:
+  . Added ZipArchive::setCompressionIndex() and ZipArchive::setCompressionName()
+    for setting the compression method.
 
 - Zlib:
   . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
@@ -608,6 +676,7 @@ Other
 - sapi/continuity
 - sapi/isapi
 - sapi/milter
+- sapi/nsapi
 - sapi/phttpd
 - sapi/pi3web
 - sapi/roxen
@@ -615,13 +684,28 @@ Other
 - sapi/tux
 - sapi/webjames
 - ext/mssql
+- ext/mysql
 - ext/sybase_ct
-For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+- ext/ereg
+
+For more details see 
+
+https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
+https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
+
+NOTE: NSAPI was not voted in the RFC, however it was removed afterwards. It turned
+out, that the corresponding SDK isn't available anymore.
 
 ========================================
 9. Other Changes to Extensions
 ========================================
 
+- Mhash
+  Mhash is not an extension anymore, use function_exists("mhash") to check whether
+  it is avaliable.
+
+- GD
+  The bundled libgd requires libwebp instead of libvpx for the WebP functionality.
 
 ========================================
 10. New Global Constants
@@ -629,6 +713,11 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
 - Core
   . PHP_INT_MIN added.
+
+- PCRE
+  . This error constant is added to signal errors due to stack size limitations
+    when PCRE JIT support is enabled:
+  . PREG_JIT_STACKLIMIT_ERROR
 
 - Zlib
   . These constants are added to control flush behavior with the new
@@ -639,6 +728,23 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
   . ZLIB_FULL_FLUSH
   . ZLIB_BLOCK
   . ZLIB_FINISH
+
+- GD
+  . T1Lib support removed, thus lifting the optional dependency on T1Lib, the
+    following is therefore not available anymore:
+
+    Functions:
+      - imagepsbbox()
+      - imagepsencodefont()
+      - imagepsextendedfont()
+      - imagepsfreefont()
+      - imagepsloadfont()
+      - imagepsslantfont()
+      - imagepstext()
+
+    Resources:
+      - 'gd PS font'
+      - 'gd PS encoding'
 
 ========================================
 11. Changes to INI File Handling
@@ -656,12 +762,16 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 - Core
   . Support for native 64 bit integers in 64 bit builds.
   . Support for large files in 64 bit builds.
+  . Support for getrusage()
 
 - ftp
   . The ftp extension is always shipped shared
   . For SSL support, the dependency on the openssl extension was abolished. Instead
     it depends alone on the openssl library. If it's present at the compile time,
     ftp_ssl_connect() is enabled automatically.
+
+- imap
+  . Static building of ext/imap is disabled
 
 - odbc
   . The odbc extension is always shipped shared
@@ -672,9 +782,9 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
 - Core
   . Instead of being undefined and platform-dependent, NaN and Infinity will
-    always be zero when casted to integer.
-  . Calling a method on a non-object no longer raises a fatal error; see
-    also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object.
+    always be zero when cast to integer.
+  . Calling a method on a non-object now raises a catchable error instead of a
+    fatal error; see: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
   . Error messages for zend_parse_parameters, type hints and conversions now
     always say "integer" and "float" instead of "long" and "double".
   . Output buffering now continues to work for an aborted connection if

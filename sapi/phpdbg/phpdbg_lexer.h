@@ -28,6 +28,7 @@ typedef struct {
         unsigned char *text;
         unsigned char *cursor;
         unsigned char *marker;
+        unsigned char *ctxmarker;
         int state;
 } phpdbg_lexer_data;
 

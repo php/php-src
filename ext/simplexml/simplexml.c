@@ -64,7 +64,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter);
 
 /* {{{ _node_as_zval()
  */
-static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const char *nsprefix, int isprefix)
+static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix)
 {
 	php_sxe_object *subnode;
 
@@ -76,7 +76,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 		subnode->iter.name = (xmlChar*)estrdup(name);
 	}
 	if (nsprefix && *nsprefix) {
-		subnode->iter.nsprefix = (xmlChar*)estrdup(nsprefix);
+		subnode->iter.nsprefix = (xmlChar*)estrdup((char*)nsprefix);
 		subnode->iter.isprefix = isprefix;
 	}
 
@@ -517,7 +517,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			case IS_DOUBLE:
 			case IS_NULL:
 				if (Z_TYPE_P(value) != IS_STRING) {
-					ZVAL_DUP(&zval_copy, value);
+					ZVAL_COPY(&zval_copy, value);
 					value = &zval_copy;
 					convert_to_string(value);
 					new_value = 1;
@@ -527,9 +527,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
-					//???
 					value = sxe_get_value(value, &zval_copy);
-					//INIT_PZVAL(value);
 					new_value = 1;
 					break;
 				}
@@ -704,7 +702,6 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 	}
 
 	ZVAL_COPY_VALUE(&sxe->tmp, &ret);
-	//???? Z_SET_ISREF_P(return_value);
 
 	return &sxe->tmp;
 }
@@ -969,7 +966,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 		res = zend_string_init((char*)tmp, strlen((char *)tmp), 0);
 		xmlFree(tmp);
 	} else {
-		res = STR_EMPTY_ALLOC();
+		res = ZSTR_EMPTY_ALLOC();
 	}
 
 	return res;
@@ -978,7 +975,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 
 /* {{{ _get_base_node_value()
  */
-static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *value, char *nsprefix, int isprefix)
+static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval *value, xmlChar *nsprefix, int isprefix)
 {
 	php_sxe_object *subnode;
 	xmlChar        *contents;
@@ -994,7 +991,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 		subnode->document = sxe_ref->document;
 		subnode->document->refcount++;
 		if (nsprefix && *nsprefix) {
-			subnode->iter.nsprefix = (xmlChar*)estrdup(nsprefix);
+			subnode->iter.nsprefix = (xmlChar*)estrdup((char *)nsprefix);
 			subnode->iter.isprefix = isprefix;
 		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL);
@@ -1066,7 +1063,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			return 0;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-			if (!node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last) {
+			if (sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -1186,7 +1183,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
 
-			if ( !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
@@ -1836,8 +1833,6 @@ static int cast_object(zval *object, int type, char *contents)
 	} else {
 		ZVAL_NULL(object);
 	}
-	//???? Z_SET_REFCOUNT_P(object, 1);
-	//Z_UNSET_ISREF_P(object);
 
 	switch (type) {
 		case IS_STRING:
@@ -1926,16 +1921,12 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type)
 }
 /* }}} */
 
-/* {{{ proto object SimpleXMLElement::__toString() U
+/* {{{ proto object SimpleXMLElement::__toString()
    Returns the string content */
 SXE_METHOD(__toString)
 {
-	zval           result;
-
-	if (sxe_object_cast_ex(getThis(), &result, IS_STRING) == SUCCESS) {
-		RETURN_ZVAL(&result, 0, 0);
-	} else {
-		zval_ptr_dtor(&result);
+	if (sxe_object_cast_ex(getThis(), return_value, IS_STRING) != SUCCESS) {
+		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -1979,9 +1970,9 @@ static int sxe_count_elements(zval *object, zend_long *count) /* {{{ */
 			if (!Z_ISUNDEF(intern->tmp)) {
 				zval_ptr_dtor(&intern->tmp);
 			}
-			ZVAL_ZVAL(&intern->tmp, &rv, 0, 0);
-			convert_to_long(&intern->tmp);
-			*count = (zend_long)Z_LVAL(intern->tmp);
+			ZVAL_LONG(&intern->tmp, zval_get_long(&rv));
+			zval_ptr_dtor(&rv);
+			*count = Z_LVAL(intern->tmp);
 			return SUCCESS;
 		}
 		return FAILURE;
@@ -2294,7 +2285,7 @@ SXE_METHOD(__construct)
 
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
-		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0);
+		zend_throw_exception(zend_ce_exception, "String could not be parsed as XML", 0);
 		return;
 	}
 

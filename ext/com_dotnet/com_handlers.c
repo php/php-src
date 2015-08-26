@@ -493,6 +493,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type)
 			break;
 		case IS_FALSE:
 		case IS_TRUE:
+		case _IS_BOOL:
 			vt = VT_BOOL;
 			break;
 		case IS_STRING:

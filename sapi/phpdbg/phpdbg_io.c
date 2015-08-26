@@ -90,7 +90,6 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
 	if (bytes <= 0) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
 		zend_bailout();
-		return 0;
 	}
 
 	return bytes;
@@ -150,7 +149,7 @@ recv_once:
 #endif
 
 		if (got_now == -1) {
-			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
+			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
 			return -1;
 		}
 		i -= got_now;
@@ -178,11 +177,17 @@ PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len) {
 
 
 PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
+	int ret;
+
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_consume_bytes(sock, ptr, len, tmo);
 	}
 
-	return read(sock, ptr, len);
+	do {
+		ret = read(sock, ptr, len);
+	} while (ret == -1 && errno == EINTR);
+
+	return ret;
 }
 
 
@@ -265,7 +270,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
 				buf[wrote] = '\0';
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 			} else {
@@ -275,7 +280,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
 				buf[wrote] = '\0';
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 #ifndef PHP_WIN32
@@ -290,7 +295,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 
 			wrote = sprintf(buf, "Unable to create socket");
 			buf[wrote] = '\0';
-			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+			quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 			return sock;
 		}

@@ -129,8 +129,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	UChar currency[5] = {0};
 	UChar* sstr = NULL;
 	int32_t sstr_len = 0;
-	char *currency_str = NULL;
-	size_t currency_len = 0;
+	zend_string *u8str;
 	char *str;
 	size_t str_len;
 	int32_t* position_p = NULL;
@@ -173,12 +172,10 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
-	intl_convert_utf16_to_utf8(&currency_str, &currency_len, currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
+	u8str = intl_convert_utf16_to_utf8(currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
 	zval_dtor( zcurrency );
-	ZVAL_STRINGL(zcurrency, currency_str, currency_len);
-	//????
-	efree(currency_str);
+	ZVAL_NEW_STR(zcurrency, u8str);
 
 	RETVAL_DOUBLE( number );
 }

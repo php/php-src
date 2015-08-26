@@ -17,7 +17,7 @@ $timezone = "GMT";
 $extra_arg = 99;
 try {
     new DateTimeZone($timezone, $extra_arg);
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 

@@ -35,7 +35,7 @@ static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, z
 	zend_function *func = pce->constructor;
 	spl_instantiate(pce, retval);
 
-	zend_call_method(retval, pce, &func, func->common.function_name->val, func->common.function_name->len, NULL, 1, arg1, NULL);
+	zend_call_method(retval, pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 1, arg1, NULL);
 	return 0;
 }
 /* }}} */
@@ -46,7 +46,7 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval *retval, z
 	zend_function *func = pce->constructor;
 	spl_instantiate(pce, retval);
 
-	zend_call_method(retval, pce, &func, func->common.function_name->val, func->common.function_name->len, NULL, 2, arg1, arg2);
+	zend_call_method(retval, pce, &func, ZSTR_VAL(func->common.function_name), ZSTR_LEN(func->common.function_name), NULL, 2, arg1, arg2);
 	return 0;
 }
 /* }}} */

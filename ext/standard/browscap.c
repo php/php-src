@@ -44,12 +44,7 @@ ZEND_BEGIN_MODULE_GLOBALS(browscap)
 ZEND_END_MODULE_GLOBALS(browscap)
 
 ZEND_DECLARE_MODULE_GLOBALS(browscap)
-
-#ifdef ZTS
-#define BROWSCAP_G(v)	ZEND_TSRMG(browscap_globals_id, zend_browscap_globals *, v)
-#else
-#define BROWSCAP_G(v)	(browscap_globals.v)
-#endif
+#define BROWSCAP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(browscap, v)
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
@@ -84,7 +79,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	char *lc_pattern;
 
 	res = zend_string_safe_alloc(Z_STRLEN_P(pattern), 2, 4, persistent);
-	t = res->val;
+	t = ZSTR_VAL(res);
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
@@ -130,7 +125,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	t[j++] = '~';
 
 	t[j]=0;
-	res->len = j;
+	ZSTR_LEN(res) = j;
 	Z_STR_P(pattern) = res;
 	efree(lc_pattern);
 }
@@ -174,13 +169,13 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
-					// TODO: USE STR_EMPTY_ALLOC()?
+					// TODO: USE ZSTR_EMPTY_ALLOC()?
 					ZVAL_NEW_STR(&new_property, zend_string_init("", sizeof("")-1, persistent));
 				} else { /* Other than true/false setting */
 					ZVAL_STR(&new_property, zend_string_dup(Z_STR_P(arg2), persistent));
 				}
 				new_key = zend_string_dup(Z_STR_P(arg1), persistent);
-				zend_str_tolower(new_key->val, new_key->len);
+				zend_str_tolower(ZSTR_VAL(new_key), ZSTR_LEN(new_key));
 				zend_hash_update(Z_ARRVAL(bdata->current_section), new_key, &new_property);
 				zend_string_release(new_key);
 			}
@@ -296,7 +291,7 @@ PHP_INI_MH(OnChangeBrowscap)
 		if (bdata->filename[0] != '\0') {
 			browscap_bdata_dtor(bdata, 0);
 		}
-		if (VCWD_REALPATH(new_value->val, bdata->filename) == NULL) {
+		if (VCWD_REALPATH(ZSTR_VAL(new_value), bdata->filename) == NULL) {
 			return FAILURE;
 		}
 		return SUCCESS;
@@ -462,7 +457,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (agent_name == NULL) {
-		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) ||
+		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) && 
 			(http_user_agent = zend_hash_str_find(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
 		) {
 			php_error_docref(NULL, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");

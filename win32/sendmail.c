@@ -241,25 +241,46 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(mailRPath);
 	} else if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
-	} else if (	headers_lc &&
-				(pos1 = strstr(headers_lc->val, "from:")) &&
-				((pos1 == headers_lc->val) || (*(pos1-1) == '\n'))
-	) {
-		/* Real offset is memaddress from the original headers + difference of
-		 * string found in the lowercase headrs + 5 characters to jump over
-		 * the from: */
-		pos1 = headers + (pos1 - headers_lc->val) + 5;
-		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
-			RPath = estrndup(pos1, strlen(pos1));
-		} else {
-			RPath = estrndup(pos1, pos2 - pos1);
+	} else if (headers_lc) {
+		int found = 0;
+		char *lookup = headers_lc->val;
+
+		while (lookup) {
+			pos1 = strstr(lookup, "from:");
+
+			if (!pos1) {
+				break;
+			} else if (pos1 != headers_lc->val && *(pos1-1) != '\n') {
+				if (strlen(pos1) >= sizeof("from:")) {
+					lookup = pos1 + sizeof("from:");
+					continue;
+				} else {
+					break;
+				}
+			}
+
+			found = 1;
+
+			/* Real offset is memaddress from the original headers + difference of
+			 * string found in the lowercase headrs + 5 characters to jump over
+			 * the from: */
+			pos1 = headers + (pos1 - lookup) + 5;
+			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+				RPath = estrndup(pos1, strlen(pos1));
+			} else {
+				RPath = estrndup(pos1, pos2 - pos1);
+			}
+
+			break;
 		}
-	} else {
-		if (headers_lc) {
-			zend_string_free(headers_lc);
+
+		if (!found) {
+			if (headers_lc) {
+				zend_string_free(headers_lc);
+			}
+			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
+			return FAILURE;
 		}
-		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
-		return FAILURE;
 	}
 
 	/* attempt to connect with mail host */
@@ -607,7 +628,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	data_cln = php_str_to_str(data, strlen(data), PHP_WIN32_MAIL_DOT_PATTERN, sizeof(PHP_WIN32_MAIL_DOT_PATTERN) - 1,
 					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1);
 	if (!data_cln) {
-		data_cln = STR_EMPTY_ALLOC();
+		data_cln = ZSTR_EMPTY_ALLOC();
 	}
 
 	/* send message contents in 1024 chunks */
@@ -868,7 +889,7 @@ static int Post(LPCSTR msg)
 //********************************************************************/
 static int Ack(char **server_response)
 {
-	static char buf[MAIL_BUFFER_SIZE];
+	ZEND_TLS char buf[MAIL_BUFFER_SIZE];
 	int rlen;
 	int Index = 0;
 	int Received = 0;
@@ -977,3 +998,12 @@ static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString)
 	}
 	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -27,4 +27,7 @@ NULL
 Notice: Trying to get index of a non-array in %s on line 11
 NULL
 
-Fatal error: Cannot use object of type stdClass as array in %s on line %d
+Fatal error: Uncaught Error: Cannot use object of type stdClass as array in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

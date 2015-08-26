@@ -318,7 +318,7 @@ _destroyProv:
  */
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 {
-	static char passwd[MD5_HASH_MAX_LEN], *p;
+	ZEND_TLS char passwd[MD5_HASH_MAX_LEN], *p;
 	const char *sp, *ep;
 	unsigned char final[16];
 	unsigned int i, sl, pwl;
@@ -418,7 +418,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 	*p = '\0';
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 	return (passwd);
 }
 

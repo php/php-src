@@ -115,6 +115,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					zend_bool dbg_skip_trace = TRUE; \
+					((void)__dbg_prof_start); \
 					if ((dbg_obj1)) { \
 						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \

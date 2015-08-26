@@ -26,6 +26,7 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_bitset.h"
 
 #define DEBUG_BLOCKPASS 0
 
@@ -38,11 +39,11 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	ALLOCA_FLAG(use_heap);
 
 	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = DO_ALLOCA(name->len + 1);
-		memcpy(lookup_name, name->val, name->len + 1);
-		zend_str_tolower(lookup_name, name->len);
+		lookup_name = DO_ALLOCA(ZSTR_LEN(name) + 1);
+		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
+		zend_str_tolower(lookup_name, ZSTR_LEN(name));
 
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, name->len)) != NULL) {
+		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, ZSTR_LEN(name))) != NULL) {
 			if (!(c->flags & CONST_CT_SUBST) || (c->flags & CONST_CS)) {
 				retval = 0;
 			}
@@ -123,13 +124,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
-			case ZEND_BRK:
-			case ZEND_CONT:
-			case ZEND_GOTO:
-				/* would not optimize non-optimized BRK/CONTs - we cannot
-				 really know where it jumps, so these optimizations are
-				too dangerous */
-				return 0;
 			case ZEND_FAST_CALL:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				if (opline->extended_value) {
@@ -179,8 +173,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				break;
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
-				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				START_BLOCK_OP(opno + 2);
+				START_BLOCK_OP(opline->extended_value);
+				START_BLOCK_OP(opno + 1);
 				break;
 		}
 		opno++;
@@ -211,6 +205,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			if (op_array->brk_cont_array[i].start >= 0 &&
 			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
 			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
+			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
 			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 				int parent = op_array->brk_cont_array[i].parent;
 
@@ -218,6 +213,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				       op_array->brk_cont_array[parent].start < 0 &&
 				       (op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE ||
 				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FE_FREE ||
+					     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode != ZEND_ROPE_END ||
 				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_END_SILENCE)) {
 					parent = op_array->brk_cont_array[parent].parent;
 				}
@@ -234,6 +230,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				if (op_array->brk_cont_array[i].start >= 0 &&
 				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
 				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
+				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
 				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
@@ -303,6 +300,11 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 					cur_block->ext_to = &blocks[opline->extended_value];
 					cur_block->follow_to = &blocks[opno];
 					break;
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+					cur_block->ext_to = &blocks[opline->extended_value];
+					cur_block->follow_to = &blocks[opno];
+					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
@@ -312,8 +314,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
 				case ZEND_ASSERT_CHECK:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
@@ -384,6 +384,10 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 
 	if (to->sources == NULL) {
 		to->access = 0;
+		return;
+	}
+
+	if (from == to) {
 		return;
 	}
 
@@ -602,7 +606,7 @@ static void strip_nop(zend_code_block *block, zend_optimizer_ctx *ctx)
 	block->len = new_end - block->start_opline;
 }
 
-static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array, char *used_ext, zend_cfg *cfg, zend_optimizer_ctx *ctx)
+static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_cfg *cfg, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = block->start_opline;
 	zend_op *end, *last_op = NULL;
@@ -759,28 +763,33 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
 			opline->opcode == ZEND_IS_NOT_EQUAL ||
-			opline->opcode == ZEND_CASE) {
+			/* CASE variable will be deleted later by FREE, so we can't optimize it */
+			(opline->opcode == ZEND_CASE && (ZEND_OP1_TYPE(opline) & (IS_CONST|IS_CV)))) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 				(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
 				 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
-#else
-				 Z_TYPE(ZEND_OP1_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(TRUE,  X)     => T = BOOL(X) */
+				/* T = IS_EQUAL(FALSE, X)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(TRUE,  X) => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(FALSE, X) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP1_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
-// TODO: Optimization of comparison with null may be not safe ???
-#if 1
 					   (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
 					    Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
-#else
-					    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_TRUE) {
-#endif
+				/* T = IS_EQUAL(X, TRUE)      => T = BOOL(X) */
+				/* T = IS_EQUAL(X, FALSE)     => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, TRUE)  => T = BOOL_NOT(X) */
+				/* T = IS_NOT_EQUAL(X, FALSE) => T = BOOL(X) */
+				/* Optimization of comparison with "null" is not safe,
+				 * because ("0" == null) is not equal to !("0")
+				 */
 				opline->opcode =
 					((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 					ZEND_BOOL : ZEND_BOOL_NOT;
@@ -795,7 +804,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode == ZEND_JMPZNZ) &&
 			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 			VAR_SOURCE(opline->op1) != NULL &&
-			!used_ext[VAR_NUM(ZEND_OP1(opline).var)] &&
+			!zend_bitset_in(used_ext, VAR_NUM(ZEND_OP1(opline).var)) &&
 			VAR_SOURCE(opline->op1)->opcode == ZEND_BOOL_NOT) {
 			/* T = BOOL_NOT(X) + JMPZ(T) -> NOP, JMPNZ(X) */
 			zend_op *src = VAR_SOURCE(opline->op1);
@@ -870,7 +879,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode == ZEND_JMPZNZ) &&
 			(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			VAR_SOURCE(opline->op1) != NULL &&
-			(!used_ext[VAR_NUM(ZEND_OP1(opline).var)] ||
+			(!zend_bitset_in(used_ext, VAR_NUM(ZEND_OP1(opline).var)) ||
 			((ZEND_RESULT_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 			 ZEND_RESULT(opline).var == ZEND_OP1(opline).var)) &&
 			(VAR_SOURCE(opline->op1)->opcode == ZEND_BOOL ||
@@ -903,7 +912,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
-				memcpy(tmp->val, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
+				memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
 			} else {
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
@@ -943,7 +952,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			l = old_len + Z_STRLEN(ZEND_OP2_LITERAL(opline));
 			if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(src))) {
 				zend_string *tmp = zend_string_alloc(l, 0);
-				memcpy(tmp->val, Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
+				memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
 				Z_STR(ZEND_OP2_LITERAL(last_op)) = tmp;
 			} else {
 				Z_STR(ZEND_OP2_LITERAL(src)) = zend_string_extend(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
@@ -985,10 +994,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			int er;
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-                  Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
-                 (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
-                  Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
+				if (RESULT_USED(opline)) {
+					SET_VAR_SOURCE(opline);
+				}
+                opline++;
+				continue;
+            } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
+                zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
 				if (RESULT_USED(opline)) {
 					SET_VAR_SOURCE(opline);
 				}
@@ -1104,7 +1117,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					VAR_SOURCE(opline->op1)->opcode == ZEND_IS_NOT_IDENTICAL ||
 					VAR_SOURCE(opline->op1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
 					VAR_SOURCE(opline->op1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ) &&
-					!used_ext[VAR_NUM(ZEND_OP1(opline).var)]) {
+					!zend_bitset_in(used_ext, VAR_NUM(ZEND_OP1(opline).var))) {
 			/* T = IS_SMALLER(X, Y), T1 = BOOL(T) => T = IS_SMALLER(X, Y), T1 = QM_ASSIGN(T) */
 			zend_op *src = VAR_SOURCE(opline->op1);
 			COPY_NODE(src->result, opline->result);
@@ -1387,6 +1400,34 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					/* JMPNZ(false) -> NOP */
 					MAKE_NOP(last_op);
 					del_source(block, block->op2_to);
+					block->op2_to = NULL;
+				}
+				break;
+			}
+
+			if (block->op2_to == block->follow_to) {
+				/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
+
+				if (last_op->op1_type == IS_VAR) {
+					zend_op **Tsource = cfg->Tsource;
+					zend_op *src = VAR_SOURCE(last_op->op1);
+
+					if (src &&
+					    src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_DIM_R &&
+					    src->opcode != ZEND_FETCH_OBJ_R) {
+						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+						MAKE_NOP(last_op);
+						block->op2_to = NULL;
+						break;
+					}
+				}
+				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					last_op->opcode = ZEND_FREE;
+					last_op->op2.num = 0;
+					block->op2_to = NULL;
+				} else {
+					MAKE_NOP(last_op);
 					block->op2_to = NULL;
 				}
 				break;
@@ -1735,21 +1776,22 @@ next_target_znz:
 
 #define T_USAGE(op) do { \
 		if ((op ## _type & (IS_VAR | IS_TMP_VAR)) && \
-		   !defined_here[VAR_NUM(op.var)] && !used_ext[VAR_NUM(op.var)]) {	\
-			used_ext[VAR_NUM(op.var)] = 1;									\
+		   !zend_bitset_in(defined_here, VAR_NUM(op.var)) && !zend_bitset_in(used_ext, VAR_NUM(op.var))) {	\
+			zend_bitset_incl(used_ext, VAR_NUM(op.var));									\
 		} \
 	} while (0)
 
-#define NEVER_USED(op) ((op ## _type & (IS_VAR | IS_TMP_VAR)) && !usage[VAR_NUM(op.var)]) /* !used_ext[op.var] && */
+#define NEVER_USED(op) ((op ## _type & (IS_VAR | IS_TMP_VAR)) && !zend_bitset_in(usage, VAR_NUM(op.var))) /* !zend_bitset_in(used_ext, op.var) && */
 #define RES_NEVER_USED(opline) (opline->result_type == IS_UNUSED || NEVER_USED(opline->result))
 
 /* Find a set of variables which are used outside of the block where they are
  * defined. We won't apply some optimization patterns for such variables. */
-static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *used_ext, zend_optimizer_ctx *ctx)
+static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
 {
 	zend_code_block *next_block = block->next;
-	char *usage;
-	char *defined_here;
+	uint32_t bitset_len;
+	zend_bitset usage;
+	zend_bitset defined_here;
 	void *checkpoint;
 
 	if (op_array->T == 0) {
@@ -1758,9 +1800,10 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 	}
 
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	usage = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
-	memset(usage, 0, op_array->last_var + op_array->T);
-	defined_here = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
+	usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
+	zend_bitset_clear(usage, bitset_len);
+	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
 	while (next_block) {
 		zend_op *opline = next_block->start_opline;
@@ -1770,19 +1813,26 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			next_block = next_block->next;
 			continue;
 		}
-		memset(defined_here, 0, op_array->last_var + op_array->T);
+		zend_bitset_clear(defined_here, bitset_len);
 
 		while (opline<end) {
 			T_USAGE(opline->op1);
-			T_USAGE(opline->op2);
+			if (opline->op2_type & (IS_VAR | IS_TMP_VAR)) {
+				if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
+					/* these opcode use the op2 as result */
+					zend_bitset_incl(defined_here, VAR_NUM(ZEND_OP2(opline).var));
+				} else {
+					T_USAGE(opline->op2);
+				}
+			}
 
 			if (RESULT_USED(opline)) {
-				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
+				if (!zend_bitset_in(defined_here, VAR_NUM(ZEND_RESULT(opline).var)) && !zend_bitset_in(used_ext, VAR_NUM(ZEND_RESULT(opline).var)) &&
 					opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 					/* these opcode use the result as argument */
-					used_ext[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
+					zend_bitset_incl(used_ext, VAR_NUM(ZEND_RESULT(opline).var));
 				}
-				defined_here[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
+				zend_bitset_incl(defined_here, VAR_NUM(ZEND_RESULT(opline).var));
 			}
 			opline++;
 		}
@@ -1793,7 +1843,7 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 	{
 		int i;
 		for (i = op_array->last_var; i< op_array->T; i++) {
-			fprintf(stderr, "T%d: %c\n", i, used_ext[i] + '0');
+			fprintf(stderr, "T%d: %c\n", i, zend_bitset_in(used_ext, i) + '0');
 		}
 	}
 #endif
@@ -1806,7 +1856,7 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			continue;
 		}
 
-		memcpy(usage, used_ext, op_array->last_var + op_array->T);
+		zend_bitset_copy(usage, used_ext, bitset_len);
 
 		while (opline >= block->start_opline) {
 			/* usage checks */
@@ -1855,25 +1905,25 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
-					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;
+					zend_bitset_incl(usage, VAR_NUM(ZEND_RESULT(opline).var));
 				}
 			} else {
 				if (RESULT_USED(opline)) {
-					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 0;
+					zend_bitset_excl(usage, VAR_NUM(ZEND_RESULT(opline).var));
 				}
 			}
 
 			if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
-				usage[VAR_NUM(ZEND_OP1(opline).var)] = 1;
+				zend_bitset_incl(usage, VAR_NUM(ZEND_OP1(opline).var));
 			}
 
 			if (ZEND_OP2_TYPE(opline) == IS_VAR || ZEND_OP2_TYPE(opline) == IS_TMP_VAR) {
-				usage[VAR_NUM(ZEND_OP2(opline).var)] = 1;
+				zend_bitset_incl(usage, VAR_NUM(ZEND_OP2(opline).var));
 			}
 
 			if ((ZEND_RESULT_TYPE(opline) & IS_VAR) &&
                 (ZEND_RESULT_TYPE(opline) & EXT_TYPE_UNUSED) &&
-                usage[VAR_NUM(ZEND_RESULT(opline).var)]) {
+                zend_bitset_in(usage, VAR_NUM(ZEND_RESULT(opline).var))) {
 				ZEND_RESULT_TYPE(opline) &= ~EXT_TYPE_UNUSED;
  			}
 
@@ -1892,7 +1942,8 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_cfg cfg;
 	zend_code_block *cur_block;
 	int pass;
-	char *usage;
+	uint32_t bitset_len;
+	zend_bitset usage;
 	void *checkpoint;
 
 #if DEBUG_BLOCKPASS
@@ -1914,17 +1965,19 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_rebuild_access_path(&cfg, op_array, 0, ctx);
 	/* full rebuild here to produce correct sources! */
 	if (op_array->last_var || op_array->T) {
+		bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
 		cfg.Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
 		cfg.same_t = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
-		usage = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+		usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 	} else {
+		bitset_len = 0;
 		cfg.Tsource = NULL;
 		cfg.same_t = NULL;
 		usage = NULL;
 	}
 	for (pass = 0; pass < PASSES; pass++) {
 		/* Compute data dependencies */
-		memset(usage, 0, op_array->last_var + op_array->T);
+		zend_bitset_clear(usage, bitset_len);
 		zend_t_usage(cfg.blocks, op_array, usage, ctx);
 
 		/* optimize each basic block separately */
@@ -1947,7 +2000,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_rebuild_access_path(&cfg, op_array, 1, ctx);
 	}
 
-	memset(usage, 0, op_array->last_var + op_array->T);
+	zend_bitset_clear(usage, bitset_len);
 	zend_t_usage(cfg.blocks, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array);
 

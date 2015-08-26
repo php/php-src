@@ -153,10 +153,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 
 	if (mode == INTL_IDN_TO_ASCII) {
 		len = uidna_nameToASCII_UTF8(uts46, domain, domain_len,
-				buffer->val, buffer_capac, &info, &status);
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	} else {
 		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
-				buffer->val, buffer_capac, &info, &status);
+				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode) == FAILURE) {
@@ -168,8 +168,8 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		php_error_docref(NULL, E_ERROR, "ICU returned an unexpected length");
 	}
 
-	buffer->val[len] = '\0';
-	buffer->len = len;
+	ZSTR_VAL(buffer)[len] = '\0';
+	ZSTR_LEN(buffer) = len;
 
 	if (info.errors == 0) {
 		RETVAL_STR(buffer);
@@ -207,8 +207,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	UChar* ustring = NULL;
 	int ustring_len = 0;
 	UErrorCode status;
-	char     *converted_utf8;
-	size_t    converted_utf8_len;
+	zend_string *u8str;
 	UChar     converted[MAXPATHLEN];
 	int32_t   converted_ret_len;
 
@@ -242,23 +241,20 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		}
 
 		status = U_ZERO_ERROR;
-		intl_convert_utf16_to_utf8(&converted_utf8, &converted_utf8_len, converted, converted_ret_len, &status);
+		u8str = intl_convert_utf16_to_utf8(converted, converted_ret_len, &status);
 
-		if (U_FAILURE(status)) {
+		if (!u8str) {
 			/* Set global error code. */
 			intl_error_set_code(NULL, status);
 
 			/* Set error messages. */
 			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
-			efree(converted_utf8);
 			RETURN_FALSE;
 		}
 	}
 
 	/* return the allocated string, not a duplicate */
-	RETVAL_STRINGL(converted_utf8, converted_utf8_len);
-	//????
-	efree(converted_utf8);
+	RETVAL_NEW_STR(u8str);
 }
 
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)

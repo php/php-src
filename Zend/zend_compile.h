@@ -36,11 +36,13 @@
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+	(opline)->op1.num = 0; \
+	(opline)->op2.num = 0; \
+	(opline)->result.num = 0; \
+	(opline)->opcode = ZEND_NOP; \
+	(opline)->op1_type =  IS_UNUSED; \
+	(opline)->op2_type = IS_UNUSED; \
+	(opline)->result_type = IS_UNUSED; \
 } while (0)
 
 #define RESET_DOC_COMMENT() do { \
@@ -183,16 +185,6 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
-#if SIZEOF_ZEND_LONG == 8
-# ifdef _WIN32
-#  define THIS_HASHVAL 6385726429Ui64
-# else
-#  define THIS_HASHVAL 6385726429ULL
-# endif
-#else
-#define THIS_HASHVAL 2090759133UL
-#endif
-
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
@@ -224,6 +216,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_DTOR		0x4000
 #define ZEND_ACC_CLONE		0x8000
 
+/* method flag used by Closure::__invoke() */
+#define ZEND_ACC_USER_ARG_INFO 0x80
+
 /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
 
@@ -246,6 +241,8 @@ typedef struct _zend_try_catch_element {
 
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
+
+#define ZEND_ACC_NO_RT_ARENA          0x80000
 
 /* call through user function trampoline. e.g. __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_TRAMPOLINE  0x200000
@@ -401,7 +398,7 @@ typedef struct _zend_internal_function {
 	struct _zend_module_entry *module;
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name->val : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
@@ -711,17 +708,13 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
 
-/* Functions for a null terminated pointer list, used for traits parsing and compilation */
-void zend_init_list(void *result, void *item);
-void zend_add_to_list(void *result, void *item);
-
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);
 void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -884,9 +877,9 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define EXT_TYPE_FREE_ON_RETURN		(1<<2)
+#define ZEND_FREE_ON_RETURN     (1<<0)
 
-#define ZEND_MEMBER_FUNC_CALL	1<<0
+#define ZEND_MEMBER_FUNC_CALL   (1<<0)
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
@@ -954,12 +947,17 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
 
-#define ZEND_FAST_CALL_FROM_CATCH	1
-#define ZEND_FAST_CALL_FROM_FINALLY	2
+#define ZEND_FAST_CALL_FROM_FINALLY	1
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
+
+/* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_GOTO 253
+#define ZEND_BRK  254
+#define ZEND_CONT 255
+
 
 END_EXTERN_C()
 
@@ -981,30 +979,33 @@ END_EXTERN_C()
  * to change the default compiler behavior */
 
 /* generate extended debug information */
-#define ZEND_COMPILE_EXTENDED_INFO				(1<<0)
+#define ZEND_COMPILE_EXTENDED_INFO              (1<<0)
 
 /* call op_array handler of extendions */
 #define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
 
 /* generate ZEND_INIT_FCALL_BY_NAME for internal functions instead of ZEND_INIT_FCALL */
-#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS	(1<<2)
+#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS  (1<<2)
 
 /* don't perform early binding for classes inherited form internal ones;
  * in namespaces assume that internal class that doesn't exist at compile-time
  * may apper in run-time */
-#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES	(1<<3)
+#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<3)
 
 /* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
-#define ZEND_COMPILE_DELAYED_BINDING			(1<<4)
+#define ZEND_COMPILE_DELAYED_BINDING            (1<<4)
 
 /* disable constant substitution at compile-time */
-#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION	(1<<5)
+#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION   (1<<5)
 
 /* disable usage of builtin instruction for strlen() */
-#define ZEND_COMPILE_NO_BUILTIN_STRLEN			(1<<6)
+#define ZEND_COMPILE_NO_BUILTIN_STRLEN          (1<<6)
 
 /* disable substitution of persistent constants at compile-time */
 #define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<7)
+
+/* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
+#define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

@@ -88,7 +88,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	}
 */
 	str = zend_string_alloc(3 * Z_STRLEN_P(value), 0);
-	p = (unsigned char *) str->val;
+	p = (unsigned char *) ZSTR_VAL(str);
 	s = (unsigned char *) Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);
 
@@ -103,7 +103,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		s++;
 	}
 	*p = '\0';
-	str->len = p - (unsigned char *)str->val;
+	ZSTR_LEN(str) = p - (unsigned char *)ZSTR_VAL(str);
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, str);
 }
@@ -127,13 +127,13 @@ static void php_filter_strip(zval *value, zend_long flags)
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
 		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
 		} else {
-			buf->val[c] = str[i];
+			ZSTR_VAL(buf)[c] = str[i];
 			++c;
 		}
 	}
 	/* update zval string data */
-	buf->val[c] = '\0';
-	buf->len = c;
+	ZSTR_VAL(buf)[c] = '\0';
+	ZSTR_LEN(buf) = c;
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, buf);
 }
@@ -166,13 +166,13 @@ static void filter_map_apply(zval *value, filter_map *map)
 	c = 0;
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((*map)[str[i]]) {
-			buf->val[c] = str[i];
+			ZSTR_VAL(buf)[c] = str[i];
 			++c;
 		}
 	}
 	/* update zval string data */
-	buf->val[c] = '\0';
-	buf->len = c;
+	ZSTR_VAL(buf)[c] = '\0';
+	ZSTR_LEN(buf) = c;
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, buf);
 }

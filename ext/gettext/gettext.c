@@ -139,13 +139,13 @@ ZEND_GET_MODULE(php_gettext)
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
 
 #define PHP_GETTEXT_DOMAIN_LENGTH_CHECK \
-	if (domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH) { \
+	if (UNEXPECTED(domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH)) { \
 		php_error_docref(NULL, E_WARNING, "domain passed too long"); \
 		RETURN_FALSE; \
 	}
 
 #define PHP_GETTEXT_LENGTH_CHECK(check_name, check_len) \
-	if (check_len > PHP_GETTEXT_MAX_MSGID_LENGTH) { \
+	if (UNEXPECTED(check_len > PHP_GETTEXT_MAX_MSGID_LENGTH)) { \
 		php_error_docref(NULL, E_WARNING, "%s passed too long", check_name); \
 		RETURN_FALSE; \
 	}
@@ -199,8 +199,8 @@ PHP_NAMED_FUNCTION(zif_gettext)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid->len)
-	msgstr = gettext(msgid->val);
+	PHP_GETTEXT_LENGTH_CHECK("msgid", ZSTR_LEN(msgid))
+	msgstr = gettext(ZSTR_VAL(msgid));
 
 	RETURN_STRING(msgstr);
 }

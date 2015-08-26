@@ -1599,9 +1599,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 					} else { /* blob id only */
 						char *s;
 						ISC_QUAD bl_qd = *(ISC_QUAD *) var->sqldata;
-						s = _php_ibase_quad_to_string(bl_qd);
-						ZVAL_STRINGL(&result, s, BLOB_ID_LEN);
-						efree(s);
+						ZVAL_NEW_STR(&result, _php_ibase_quad_to_string(bl_qd));
 					}
 					break;
 				case SQL_ARRAY:
@@ -1626,10 +1624,8 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 						efree(ar_data);
 
 					} else { /* blob id only */
-						char *s;
 						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
-						s = _php_ibase_quad_to_string(ar_qd);
-						ZVAL_STRINGL(&result, s, BLOB_ID_LEN);
+						ZVAL_NEW_STR(&result, _php_ibase_quad_to_string(ar_qd));
 					}
 					break;
 				_php_ibase_fetch_error:

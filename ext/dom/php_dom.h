@@ -137,7 +137,7 @@ entry = zend_register_internal_class_ex(&ce, parent_ce);
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name->val);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
   		RETURN_NULL();\
   	} \
 }

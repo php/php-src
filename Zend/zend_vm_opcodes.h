@@ -82,8 +82,6 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
-#define ZEND_BRK                              50
-#define ZEND_CONT                             51
 #define ZEND_BOOL                             52
 #define ZEND_FAST_CONCAT                      53
 #define ZEND_ROPE_INIT                        54
@@ -132,7 +130,6 @@ END_EXTERN_C()
 #define ZEND_FETCH_OBJ_UNSET                  97
 #define ZEND_FETCH_LIST                       98
 #define ZEND_FETCH_CONSTANT                   99
-#define ZEND_GOTO                            100
 #define ZEND_EXT_STMT                        101
 #define ZEND_EXT_FCALL_BEGIN                 102
 #define ZEND_EXT_FCALL_END                   103

@@ -95,13 +95,10 @@ ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	gmp_randstate_t rand_state;
 ZEND_END_MODULE_GLOBALS(gmp)
 
-#ifdef ZTS
-#define GMPG(v) ZEND_TSRMG(gmp_globals_id, zend_gmp_globals *, v)
-#ifdef COMPILE_DL_GMP
+#define GMPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(gmp, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_GMP)
 ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define GMPG(v) (gmp_globals.v)
 #endif
 
 #else

@@ -14,6 +14,7 @@
 #define YYGETCONDITION() LEX(state)
 #define YYCURSOR LEX(cursor)
 #define YYMARKER LEX(marker)
+#define YYCTXMARKER LEX(ctxmarker)
 #define yyleng LEX(len)
 #define yytext ((char*) LEX(text))
 #undef YYDEBUG
@@ -56,20 +57,21 @@ T_SHELL     'sh'
 T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
-WS          [ \r\n\t]+
+WS          [ \r\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
+GENERIC_ID  ([^ \r\n\t:#\000]|":\\")+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
 INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>{WS}?[\n\000] {
+<*>[\n\000] {
 	return 0;
 }
 
-<PRE_RAW, NORMAL>[-][r]{WS}?{DIGITS} {
+<PRE_RAW, NORMAL>"-r"{WS}?{DIGITS} {
 	char *text = yytext + 2;
 	while (*++text < '0');
 	yylval->num = atoi(text);
@@ -82,20 +84,21 @@ INPUT       [^\n\000]+
 	return T_IF;
 }
 
-<NORMAL>{ID}[:]{1}[//]{2} {
-	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
-	yylval->len = yyleng;
-	return T_PROTO;
-}
-<NORMAL>[#]{1} {
+<NORMAL>"#" {
 	return T_POUND;
 }
-<NORMAL>[:]{2} {
+<NORMAL>"::" {
 	return T_DCOLON;
 }
-<NORMAL>[:]{1} {
+<NORMAL>":"/[^\\] {
 	return T_COLON;
+}
+
+<NORMAL>{ID}"://" {
+	phpdbg_init_param(yylval, STR_PARAM);
+	yylval->str = estrndup(yytext, yyleng);
+	yylval->len = yyleng;
+	return T_PROTO;
 }
 
 <NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
@@ -124,21 +127,21 @@ INPUT       [^\n\000]+
 
 <NORMAL>{OPCODE} {
 	phpdbg_init_param(yylval, OP_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_OPCODE;
 }
 
-<NORMAL>{ID} {
+<NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_ID;
 }
 
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = zend_strndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_INPUT;
 }

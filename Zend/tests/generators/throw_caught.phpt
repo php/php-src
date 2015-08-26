@@ -20,7 +20,7 @@ var_dump($gen->throw(new RuntimeException('Test')));
 ?>
 --EXPECTF--
 before yield
-exception 'RuntimeException' with message 'Test' in %s:%d
+RuntimeException: Test in %s:%d
 Stack trace:
 #0 {main}
 

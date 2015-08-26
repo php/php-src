@@ -278,7 +278,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
-	   offset_key = STR_EMPTY_ALLOC();
+	   offset_key = ZSTR_EMPTY_ALLOC();
 	   goto fetch_dim_string;
 	case IS_STRING:
 	   offset_key = Z_STR_P(offset);
@@ -290,13 +290,13 @@ fetch_dim_string:
 				if (Z_TYPE_P(retval) == IS_UNDEF) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+							zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
 						}
@@ -306,13 +306,13 @@ fetch_dim_string:
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+					zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_NULL(&value);
@@ -529,6 +529,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 					} else {
 						zval_ptr_dtor(data);
 						ZVAL_UNDEF(data);
+						ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 						zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
 						if (spl_array_is_object(intern)) {
 							spl_array_skip_protected(intern, ht);
@@ -710,7 +711,8 @@ SPL_METHOD(Array, offsetGet)
 	}
 	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R, return_value);
 	if (value != return_value) {
-		RETURN_ZVAL(value, 1, 0);
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
 	}
 } /* }}} */
 
@@ -737,7 +739,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	}
 
 	if (spl_array_is_object(intern)) {
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name->val);
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
 		return;
 	}
 
@@ -831,12 +833,21 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 }
 /* }}} */
 
+static HashTable *spl_array_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+{
+	spl_array_object *intern = Z_SPLARRAY_P(obj);
+	*gc_data = &intern->array;
+	*gc_data_count = 1;
+	return zend_std_get_properties(obj);
+}
+/* }}} */
+
 static zval *spl_array_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_read_dimension(object, member, type, rv);
 	}
 	return std_object_handlers.read_property(object, member, type, cache_slot, rv);
@@ -847,7 +858,7 @@ static void spl_array_write_property(zval *object, zval *member, zval *value, vo
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+	&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		spl_array_write_dimension(object, member, value);
 		return;
 	}
@@ -859,7 +870,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_get_dimension_ptr(1, object, member, type);
 	}
 	//!!! FIXME
@@ -872,7 +883,7 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_has_dimension(object, member, has_set_exists);
 	}
 	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot);
@@ -883,7 +894,7 @@ static void spl_array_unset_property(zval *object, zval *member, void **cache_sl
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, cache_slot)) {
+		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		spl_array_unset_dimension(object, member);
 		return;
 	}
@@ -927,7 +938,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
 				    Z_TYPE_P(data = Z_INDIRECT_P(data)) == IS_UNDEF) {
 					/* skip */
-				} else if (!string_key->len || string_key->val[0]) {
+				} else if (!ZSTR_LEN(string_key) || ZSTR_VAL(string_key)[0]) {
 					return SUCCESS;
 				}
 			} else {
@@ -1504,7 +1515,8 @@ SPL_METHOD(Array, current)
 			return;
 		}
 	}
-	RETVAL_ZVAL(entry, 1, 0);
+	ZVAL_DEREF(entry);
+	ZVAL_COPY(return_value, entry);
 }
 /* }}} */
 
@@ -1621,7 +1633,9 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(getThis()))) {
-			RETURN_ZVAL(entry, 1, 0);
+			ZVAL_OBJ(return_value, Z_OBJ_P(entry));
+			Z_ADDREF_P(return_value);
+			return;
 		}
 	}
 
@@ -1697,7 +1711,7 @@ SPL_METHOD(Array, unserialize)
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval members, zflags;
+	zval *members, *zflags;
 	HashTable *aht;
 	zend_long flags;
 
@@ -1724,14 +1738,15 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&zflags, &p, s + buf_len, &var_hash) || Z_TYPE(zflags) != IS_LONG) {
+	zflags = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(zflags, &p, s + buf_len, &var_hash) || Z_TYPE_P(zflags) != IS_LONG) {
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	flags = Z_LVAL(zflags);
+	flags = Z_LVAL_P(zflags);
 	/* flags needs to be verified and we also need to verify whether the next
-	 * thing we get is ';'. After that we require an 'm' or somethign else
+	 * thing we get is ';'. After that we require an 'm' or something else
 	 * where 'm' stands for members and anything else should be an array. If
 	 * neither 'a' or 'm' follows we have an error. */
 
@@ -1750,6 +1765,7 @@ SPL_METHOD(Array, unserialize)
 		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
+		var_push_dtor(&var_hash, &intern->array);
 	}
 	if (*p != ';') {
 		goto outexcept;
@@ -1762,18 +1778,15 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	ZVAL_UNDEF(&members);
-	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash) || Z_TYPE(members) != IS_ARRAY) {
-		zval_ptr_dtor(&members);
+	members = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(members, &p, s + buf_len, &var_hash) || Z_TYPE_P(members) != IS_ARRAY) {
 		goto outexcept;
 	}
 
 	/* copy members */
-	object_properties_load(&intern->std, Z_ARRVAL(members));
-	zval_ptr_dtor(&members);
+	object_properties_load(&intern->std, Z_ARRVAL_P(members));
 
 	/* done reading $serialized */
-
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;
 
@@ -1784,8 +1797,8 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ arginfo and function tbale */
-ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
+/* {{{ arginfo and function table */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 
@@ -1913,6 +1926,7 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
 	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
+	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
 	spl_handler_ArrayObject.write_property = spl_array_write_property;
 	spl_handler_ArrayObject.get_property_ptr_ptr = spl_array_get_property_ptr_ptr;

@@ -39,7 +39,7 @@
 			zend_string_release(str); \
 			str = new_str; \
 		} else { \
-	    	new_str = zend_accel_memdup((void*)str, _STR_HEADER_SIZE + (str)->len + 1); \
+	    	new_str = zend_accel_memdup((void*)str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
 			zend_string_release(str); \
 	    	str = new_str; \
 	    	zend_string_hash_val(str); \
@@ -47,7 +47,7 @@
 		} \
     } while (0)
 #define zend_accel_memdup_string(str) do { \
-		str = zend_accel_memdup(str, _STR_HEADER_SIZE + (str)->len + 1); \
+		str = zend_accel_memdup(str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
     	zend_string_hash_val(str); \
 		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
 	} while (0)
@@ -94,7 +94,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		}
 		ht->nTableMask = -hash_size;
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
-		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
+		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
 		HT_HASH_RESET(ht);
 		memcpy(ht->arData, old_buckets, ht->nNumUsed * sizeof(Bucket));
 		efree(old_data);
@@ -342,6 +342,7 @@ static void zend_persist_zval_static(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
+				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_IMMUTABLE;
 			} else {
 				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
 				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
@@ -500,7 +501,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
 					case ZEND_JMP:
-					case ZEND_GOTO:
 					case ZEND_FAST_CALL:
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -518,10 +518,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_NEW:
 					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
-					case ZEND_FE_FETCH_R:
-					case ZEND_FE_FETCH_RW:
 					case ZEND_ASSERT_CHECK:
 						ZEND_OP2(opline).jmp_addr = &new_opcodes[ZEND_OP2(opline).jmp_addr - op_array->opcodes];
+						break;
+					case ZEND_FE_FETCH_R:
+					case ZEND_FE_FETCH_RW:
+						/* relative extended_value don't have to be changed */
 						break;
 				}
 			}

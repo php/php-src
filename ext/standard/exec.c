@@ -116,7 +116,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			} else if (type == 2) {
 				/* strip trailing whitespaces */
 				l = bufl;
-				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
@@ -129,7 +129,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			/* strip trailing whitespaces if we have not done so already */
 			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
-				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
@@ -262,7 +262,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
-			memcpy(cmd->val + y, str + x, mb_len);
+			memcpy(ZSTR_VAL(cmd) + y, str + x, mb_len);
 			y += mb_len;
 			x += mb_len - 1;
 			continue;
@@ -277,15 +277,16 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				} else if (p && *p == str[x]) {
 					p = NULL;
 				} else {
-					cmd->val[y++] = '\\';
+					ZSTR_VAL(cmd)[y++] = '\\';
 				}
-				cmd->val[y++] = str[x];
+				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will
-				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
+			/* % is Windows specific for environmental variables, ^%PATH% will 
+				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':
+			case '!':
 			case '"':
 			case '\'':
 #endif
@@ -311,17 +312,17 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 			case '\x0A': /* excluding these two */
 			case '\xFF':
 #ifdef PHP_WIN32
-				cmd->val[y++] = '^';
+				ZSTR_VAL(cmd)[y++] = '^';
 #else
-				cmd->val[y++] = '\\';
+				ZSTR_VAL(cmd)[y++] = '\\';
 #endif
 				/* fall-through */
 			default:
-				cmd->val[y++] = str[x];
+				ZSTR_VAL(cmd)[y++] = str[x];
 
 		}
 	}
-	cmd->val[y] = '\0';
+	ZSTR_VAL(cmd)[y] = '\0';
 
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
@@ -329,7 +330,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 		cmd = zend_string_truncate(cmd, y, 0);
 	}
 
-	cmd->len = y;
+	ZSTR_LEN(cmd) = y;
 
 	return cmd;
 }
@@ -347,9 +348,9 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
-	cmd->val[y++] = '"';
+	ZSTR_VAL(cmd)[y++] = '"';
 #else
-	cmd->val[y++] = '\'';
+	ZSTR_VAL(cmd)[y++] = '\'';
 #endif
 
 	for (x = 0; x < l; x++) {
@@ -359,7 +360,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
-			memcpy(cmd->val + y, str + x, mb_len);
+			memcpy(ZSTR_VAL(cmd) + y, str + x, mb_len);
 			y += mb_len;
 			x += mb_len - 1;
 			continue;
@@ -369,32 +370,41 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 #ifdef PHP_WIN32
 		case '"':
 		case '%':
-			cmd->val[y++] = ' ';
+		case '!':
+			ZSTR_VAL(cmd)[y++] = ' ';
 			break;
 #else
 		case '\'':
-			cmd->val[y++] = '\'';
-			cmd->val[y++] = '\\';
-			cmd->val[y++] = '\'';
+			ZSTR_VAL(cmd)[y++] = '\'';
+			ZSTR_VAL(cmd)[y++] = '\\';
+			ZSTR_VAL(cmd)[y++] = '\'';
 #endif
 			/* fall-through */
 		default:
-			cmd->val[y++] = str[x];
+			ZSTR_VAL(cmd)[y++] = str[x];
 		}
 	}
 #ifdef PHP_WIN32
-	cmd->val[y++] = '"';
+	if (y > 0 && '\\' == ZSTR_VAL(cmd)[y - 1]) {
+		int k = 0, n = y - 1;
+		for (; n >= 0 && '\\' == ZSTR_VAL(cmd)[n]; n--, k++);
+		if (k % 2) {
+			ZSTR_VAL(cmd)[y++] = '\\';
+		}
+	}
+
+	ZSTR_VAL(cmd)[y++] = '"';
 #else
-	cmd->val[y++] = '\'';
+	ZSTR_VAL(cmd)[y++] = '\'';
 #endif
-	cmd->val[y] = '\0';
+	ZSTR_VAL(cmd)[y] = '\0';
 
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
 		cmd = zend_string_truncate(cmd, y, 0);
 	}
-	cmd->len = y;
+	ZSTR_LEN(cmd) = y;
 	return cmd;
 }
 /* }}} */
@@ -462,7 +472,7 @@ PHP_FUNCTION(shell_exec)
 	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
-	if (ret && ret->len > 0) {
+	if (ret && ZSTR_LEN(ret) > 0) {
 		RETVAL_STR(ret);
 	}
 }

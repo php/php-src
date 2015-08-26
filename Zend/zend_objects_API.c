@@ -87,7 +87,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 		return;
 	}
 
-	/* Free object contents, but don't free objects themselves */
+	/* Free object contents, but don't free objects themselves, so they show up as leaks */
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
@@ -105,21 +105,6 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 			}
 		}
 	} while (obj_ptr != end);
-
-	/* Free objects themselves if they now have a refcount of 0, which means that
-	 * they were previously part of a cycle. Everything else will report as a leak.
-	 * Cycles are allowed because not all internal objects currently support GC. */
-	end = objects->object_buckets + objects->top;
-	while (obj_ptr != end) {
-		obj = *obj_ptr;
-		if (IS_OBJ_VALID(obj) && GC_REFCOUNT(obj) == 0) {
-			/* Not adding to free list as we are shutting down anyway */
-			void *ptr = ((char*)obj) - obj->handlers->offset;
-			GC_REMOVE_FROM_BUFFER(obj);
-			efree(ptr);
-		}
-		obj_ptr++;
-	}
 }
 
 

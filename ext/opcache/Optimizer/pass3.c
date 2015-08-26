@@ -202,12 +202,6 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 					break;
 				}
 
-				/* convert L: JMPZ L+1 to NOP */
-				if (ZEND_OP2(opline).opline_num == opline_num + 1) {
-					MAKE_NOP(opline);
-					goto done_jmp_optimization;
-				}
-
 				while (ZEND_OP2(opline).opline_num < op_array->last) {
 					int target = ZEND_OP2(opline).opline_num;
 
@@ -322,8 +316,6 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_JMPNZ ||
 							   op->opcode == ZEND_JMPNZ_EX ||
 							   op->opcode == ZEND_JMPZNZ ||
-							   op->opcode == ZEND_BRK ||
-							   op->opcode == ZEND_CONT ||
 							   op->opcode == ZEND_CASE ||
 							   op->opcode == ZEND_RETURN ||
 							   op->opcode == ZEND_RETURN_BY_REF ||
@@ -358,8 +350,6 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_JMPNZ ||
 							   op->opcode == ZEND_JMPNZ_EX ||
 							   op->opcode == ZEND_JMPZNZ ||
-							   op->opcode == ZEND_BRK ||
-							   op->opcode == ZEND_CONT ||
 							   op->opcode == ZEND_CASE ||
 							   op->opcode == ZEND_RETURN ||
 							   op->opcode == ZEND_RETURN_BY_REF ||

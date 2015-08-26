@@ -18,10 +18,10 @@ echo "\nDone";
 ?>
 
 --EXPECTF--
-long(4)
+int(4)
 string(4) "John" refcount(%d)
 int(%d)
-long(4)
+int(4)
 string(4) "John" refcount(%d)
 
 Done

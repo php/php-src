@@ -39,7 +39,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %d.%d.%d%a ] {
     }
   }
 
-  - Constants [14] {
+  - Constants [15] {
     Constant [ integer PREG_PATTERN_ORDER ] { 1 }
     Constant [ integer PREG_SET_ORDER ] { 2 }
     Constant [ integer PREG_OFFSET_CAPTURE ] { 256 }
@@ -53,6 +53,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %d.%d.%d%a ] {
     Constant [ integer PREG_RECURSION_LIMIT_ERROR ] { 3 }
     Constant [ integer PREG_BAD_UTF8_ERROR ] { 4 }
     Constant [ integer PREG_BAD_UTF8_OFFSET_ERROR ] { 5 }
+    Constant [ integer PREG_JIT_STACKLIMIT_ERROR ] { 6 }
     Constant [ string PCRE_VERSION ] { %s }
   }
 

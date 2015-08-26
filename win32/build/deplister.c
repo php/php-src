@@ -22,6 +22,7 @@
  * module to it's stdout for use by distro/installer building tools */
 
 #include <windows.h>
+#include <stdio.h>
 #include <imagehlp.h>
 
 BOOL CALLBACK StatusRoutine(IMAGEHLP_STATUS_REASON reason,

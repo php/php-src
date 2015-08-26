@@ -5,7 +5,7 @@ SPL: FixedArray: Trying to instantiate passing string to construtor parameter
 
 try {
 	$a = new SplFixedArray('FOO');
-} catch (TypeException $iae) {
+} catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 ?>

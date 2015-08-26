@@ -876,7 +876,6 @@ default_socket_timeout = 60
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
-;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
@@ -887,7 +886,6 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
-;extension=php_pspell.dll
 ;extension=php_shmop.dll
 
 ; The MIBS data available in the PHP distribution must be installed. 
@@ -976,6 +974,10 @@ cli_server.color = On
 ;stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
+
+;Enables or disables JIT compilation of patterns. This requires the PCRE
+;library to be compiled with JIT support.
+;pcre.jit=1
 
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
@@ -1109,64 +1111,6 @@ ibase.dateformat = "%Y-%m-%d"
 
 ; Default time format.
 ibase.timeformat = "%H:%M:%S"
-
-[MySQL]
-; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
-; http://php.net/mysql.allow_local_infile
-mysql.allow_local_infile = On
-
-; Allow or prevent persistent links.
-; http://php.net/mysql.allow-persistent
-mysql.allow_persistent = On
-
-; If mysqlnd is used: Number of cache slots for the internal result set cache
-; http://php.net/mysql.cache_size
-mysql.cache_size = 2000
-
-; Maximum number of persistent links.  -1 means no limit.
-; http://php.net/mysql.max-persistent
-mysql.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://php.net/mysql.max-links
-mysql.max_links = -1
-
-; Default port number for mysql_connect().  If unset, mysql_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
-; http://php.net/mysql.default-port
-mysql.default_port =
-
-; Default socket name for local MySQL connects.  If empty, uses the built-in
-; MySQL defaults.
-; http://php.net/mysql.default-socket
-mysql.default_socket =
-
-; Default host for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-host
-mysql.default_host =
-
-; Default user for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-user
-mysql.default_user =
-
-; Default password for mysql_connect() (doesn't apply in safe mode).
-; Note that this is generally a *bad* idea to store passwords in this file.
-; *Any* user with PHP access can run 'echo get_cfg_var("mysql.default_password")
-; and reveal this password!  And of course, any users with read access to this
-; file will be able to reveal the password as well.
-; http://php.net/mysql.default-password
-mysql.default_password =
-
-; Maximum time (in seconds) for connect timeout. -1 means no limit
-; http://php.net/mysql.connect-timeout
-mysql.connect_timeout = 60
-
-; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
-; SQL-Errors will be displayed.
-; http://php.net/mysql.trace-mode
-mysql.trace_mode = Off
 
 [MySQLi]
 
@@ -1825,11 +1769,6 @@ ldap.max_links = -1
 ; If disabled, all PHPDoc comments are dropped from the code to reduce the
 ; size of the optimized code.
 ;opcache.save_comments=1
-
-; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-; may be always stored (save_comments=1), but not loaded by applications
-; that don't need them anyway.
-;opcache.load_comments=1
 
 ; If enabled, a fast shutdown sequence is used for the accelerated code
 ;opcache.fast_shutdown=0

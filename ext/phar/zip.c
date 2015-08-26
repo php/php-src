@@ -584,8 +584,8 @@ foundit:
 				{
 					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 					if (str) {
-						entry.uncompressed_filesize = str->len;
-						actual_alias = estrndup(str->val, str->len);
+						entry.uncompressed_filesize = ZSTR_LEN(str);
+						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
@@ -616,8 +616,8 @@ foundit:
 				{
 					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 					if (str) {
-						entry.uncompressed_filesize = str->len;
-						actual_alias = estrndup(str->val, str->len);
+						entry.uncompressed_filesize = ZSTR_LEN(str);
+						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
@@ -638,8 +638,8 @@ foundit:
 				{
 					zend_string *str = php_stream_copy_to_mem(fp, entry.uncompressed_filesize, 0);
 					if (str) {
-						entry.uncompressed_filesize = str->len;
-						actual_alias = estrndup(str->val, str->len);
+						entry.uncompressed_filesize = ZSTR_LEN(str);
+						actual_alias = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 						zend_string_release(str);
 					} else {
 						actual_alias = NULL;
@@ -969,7 +969,7 @@ continue_dir:
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
 		php_var_serialize(&entry->metadata_str, &entry->metadata, &metadata_hash);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-		PHAR_SET_16(central.comment_len, entry->metadata_str.s->len);
+		PHAR_SET_16(central.comment_len, ZSTR_LEN(entry->metadata_str.s));
 	}
 
 	entry->header_offset = php_stream_tell(p->filefp);
@@ -1080,7 +1080,7 @@ continue_dir:
 	entry->fp_type = PHAR_FP;
 
 	if (entry->metadata_str.s) {
-		if (entry->metadata_str.s->len != php_stream_write(p->centralfp, entry->metadata_str.s->val, entry->metadata_str.s->len)) {
+		if (ZSTR_LEN(entry->metadata_str.s) != php_stream_write(p->centralfp, ZSTR_VAL(entry->metadata_str.s), ZSTR_LEN(entry->metadata_str.s))) {
 			spprintf(p->error, 0, "unable to write metadata as file comment for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			smart_str_free(&entry->metadata_str);
 			return ZEND_HASH_APPLY_STOP;
@@ -1123,7 +1123,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		php_stream_seek(pass->centralfp, 0, SEEK_SET);
 		php_stream_copy_to_stream_ex(pass->centralfp, newfile, tell, NULL);
 		if (metadata->s) {
-			php_stream_write(newfile, metadata->s->val, metadata->s->len);
+			php_stream_write(newfile, ZSTR_VAL(metadata->s), ZSTR_LEN(metadata->s));
 		}
 
 		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, pass->error)) {
@@ -1272,8 +1272,8 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			{
 				zend_string *str = php_stream_copy_to_mem(stubfile, len, 0);
 				if (str) {
-					len = str->len;
-					user_stub = estrndup(str->val, str->len);
+					len = ZSTR_LEN(str);
+					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 					zend_string_release(str);
 				} else {
 					user_stub = NULL;
@@ -1483,7 +1483,7 @@ nocentralerror:
 
 	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
 		/* set phar metadata */
-		PHAR_SET_16(eocd.comment_len, main_metadata_str.s->len);
+		PHAR_SET_16(eocd.comment_len, ZSTR_LEN(main_metadata_str.s));
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
 			if (error) {
@@ -1492,7 +1492,7 @@ nocentralerror:
 			goto nocentralerror;
 		}
 
-		if (main_metadata_str.s->len != php_stream_write(pass.filefp, main_metadata_str.s->val, main_metadata_str.s->len)) {
+		if (ZSTR_LEN(main_metadata_str.s) != php_stream_write(pass.filefp, ZSTR_VAL(main_metadata_str.s), ZSTR_LEN(main_metadata_str.s))) {
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", phar->fname);
 			}

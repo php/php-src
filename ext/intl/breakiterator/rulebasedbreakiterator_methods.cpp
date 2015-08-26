@@ -66,7 +66,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
 			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
-				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "");
+				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "");
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1);
 			efree(msg);
@@ -114,20 +114,18 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	char *str;
-	size_t str_len;
+	zend_string *u8str;
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
 
-	if (intl_charFromString(rules, &str, &str_len, BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+	u8str = intl_charFromString(rules, BREAKITER_ERROR_CODE_P(bio));
+	if (!u8str)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",
 				0);
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(str, str_len);
-	//???
-	efree(str);
+	RETVAL_STR(u8str);
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
@@ -211,8 +209,8 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	}
 
 	zend_string *ret_rules = zend_string_alloc(rules_len, 0);
-	memcpy(ret_rules->val, rules, rules_len);
-	ret_rules->val[rules_len] = '\0';
+	memcpy(ZSTR_VAL(ret_rules), rules, rules_len);
+	ZSTR_VAL(ret_rules)[rules_len] = '\0';
 
 	RETURN_STR(ret_rules);
 }

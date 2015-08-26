@@ -94,6 +94,8 @@ int phpdbg_is_auto_global(char *name, int len);
 
 PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
 
+char *phpdbg_short_zval_print(zval *zv, int maxlen);
+
 PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
 
 #ifdef ZTS

@@ -166,24 +166,26 @@ struct _php_stream_wrapper	{
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
 
-#define PHP_STREAM_FLAG_NO_SEEK						1
-#define PHP_STREAM_FLAG_NO_BUFFER					2
+#define PHP_STREAM_FLAG_NO_SEEK						0x1
+#define PHP_STREAM_FLAG_NO_BUFFER					0x2
 
-#define PHP_STREAM_FLAG_EOL_UNIX					0 /* also includes DOS */
-#define PHP_STREAM_FLAG_DETECT_EOL					4
-#define PHP_STREAM_FLAG_EOL_MAC						8
+#define PHP_STREAM_FLAG_EOL_UNIX					0x0 /* also includes DOS */
+#define PHP_STREAM_FLAG_DETECT_EOL					0x4
+#define PHP_STREAM_FLAG_EOL_MAC						0x8
 
 /* set this when the stream might represent "interactive" data.
  * When set, the read buffer will avoid certain operations that
  * might otherwise cause the read to block for much longer than
  * is strictly required. */
-#define PHP_STREAM_FLAG_AVOID_BLOCKING				16
+#define PHP_STREAM_FLAG_AVOID_BLOCKING					0x10
 
-#define PHP_STREAM_FLAG_NO_CLOSE					32
+#define PHP_STREAM_FLAG_NO_CLOSE					0x20
 
-#define PHP_STREAM_FLAG_IS_DIR						64
+#define PHP_STREAM_FLAG_IS_DIR						0x40
 
-#define PHP_STREAM_FLAG_NO_FCLOSE					128
+#define PHP_STREAM_FLAG_NO_FCLOSE					0x80
+
+#define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
 	php_stream_ops *ops;
@@ -408,6 +410,9 @@ END_EXTERN_C()
 /* set or release lock on a stream */
 #define PHP_STREAM_OPTION_LOCKING		6
 
+/* Enable/disable blocking reads on anonymous pipes on Windows. */
+#define PHP_STREAM_OPTION_PIPE_BLOCKING 7
+
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1
 
@@ -543,6 +548,9 @@ END_EXTERN_C()
 
 /* assume the path passed in exists and is fully expanded, avoiding syscalls */
 #define STREAM_ASSUME_REALPATH          0x00004000
+
+/* Allow blocking reads on anonymous pipes on Windows. */
+#define STREAM_USE_BLOCKING_PIPE        0x00008000
 
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0

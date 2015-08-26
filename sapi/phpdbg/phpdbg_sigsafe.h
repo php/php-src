@@ -1,10 +1,7 @@
 #ifndef PHPDBG_SIGSAFE_H
 #define PHPDBG_SIGSAFE_H
 
-//#include "zend_mm_structs.h"
-
-#define PHPDBG_SIGSAFE_MEM_SIZE ZEND_MM_CHUNK_SIZE
-//(1 << 20)
+#define PHPDBG_SIGSAFE_MEM_SIZE (ZEND_MM_CHUNK_SIZE * 2)
 
 #include "zend.h"
 
@@ -13,7 +10,6 @@ typedef struct {
 	zend_bool allocated;
 	zend_mm_heap *heap;
 	zend_mm_heap *old_heap;
-	zend_mm_storage storage;
 } phpdbg_signal_safe_mem;
 
 #include "phpdbg.h"

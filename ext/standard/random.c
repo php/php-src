@@ -104,7 +104,7 @@ static int php_random_bytes(void *bytes, size_t size)
 
 	while (read_bytes < size) {
 		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
-		if (n < 0) {
+		if (n <= 0) {
 			break;
 		}
 		read_bytes += n;
@@ -138,12 +138,12 @@ PHP_FUNCTION(random_bytes)
 
 	bytes = zend_string_alloc(size, 0);
 
-	if (php_random_bytes(bytes->val, size) == FAILURE) {
+	if (php_random_bytes(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release(bytes);
 		RETURN_FALSE;
 	}
 
-	bytes->val[size] = '\0';
+	ZSTR_VAL(bytes)[size] = '\0';
 
 	RETURN_STR(bytes);
 }

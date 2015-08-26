@@ -147,7 +147,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL, E_WARNING, "%s", message->val);
+		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(message));
 	} else if (EG(exception) == NULL) {
 		zval ex;
 		zend_class_entry *def_ex = php_pdo_get_exception_base(1), *pdo_ex = php_pdo_get_exception();
@@ -1262,6 +1262,15 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
+static void cls_method_pdtor(zval *el) /* {{{ */ {
+	zend_function *func = (zend_function*)Z_PTR_P(el);
+	if (func->common.function_name) {
+		zend_string_release(func->common.function_name);
+	}
+	pefree(func, 1);
+}
+/* }}} */
+
 /* {{{ overloaded object handlers for PDO class */
 int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 {
@@ -1283,12 +1292,13 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
 		php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO methods.");
 	}
-	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, cls_method_dtor, dbh->is_persistent, 0);
+	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL,
+			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
-		ifunc->function_name = zend_string_init(funcs->fname, strlen(funcs->fname), 0);
+		ifunc->function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
 		ifunc->scope = dbh_obj->std.ce;
 		ifunc->prototype = NULL;
 		if (funcs->flags) {
@@ -1337,8 +1347,8 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_init(method_name->val, method_name->len, 0);
-	zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
+	lc_method_name = zend_string_init(ZSTR_VAL(method_name), ZSTR_LEN(method_name), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 
 	if ((fbc = std_object_handlers.get_method(object, method_name, key)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
@@ -1364,6 +1374,14 @@ static int dbh_compare(zval *object1, zval *object2)
 	return -1;
 }
 
+static HashTable *dbh_get_gc(zval *object, zval **gc_data, int *gc_count)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(object);
+	*gc_data = &dbh->def_stmt_ctor_args;
+	*gc_count = 1;
+	return zend_std_get_properties(object);
+}
+
 static zend_object_handlers pdo_dbh_object_handlers;
 static void pdo_dbh_free_storage(zend_object *std);
 
@@ -1381,6 +1399,7 @@ void pdo_dbh_init(void)
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
+	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (zend_long)PDO_PARAM_NULL);

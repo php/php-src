@@ -109,7 +109,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	/* first, we have to get the size of all the elements in the hash */
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
-		size_t el_len = str->len;
+		size_t el_len = ZSTR_LEN(str);
 		zend_string_release(str);
 
 		if (el_len == 0) {
@@ -119,10 +119,10 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		sizeenv += el_len + 1;
 
 		if (string_key) {
-			if (string_key->len == 0) {
+			if (ZSTR_LEN(string_key) == 0) {
 				continue;
 			}
-			sizeenv += string_key->len + 1;
+			sizeenv += ZSTR_LEN(string_key) + 1;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -134,19 +134,19 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
 
-		if (str->len == 0) {
+		if (ZSTR_LEN(str) == 0) {
 			goto next_element;
 		}
 
 		if (string_key) {
-			if (string_key->len == 0) {
+			if (ZSTR_LEN(string_key) == 0) {
 				goto next_element;
 			}
 
-			l = string_key->len + str->len + 2;
-			memcpy(p, string_key->val, string_key->len);
+			l = ZSTR_LEN(string_key) + ZSTR_LEN(str) + 2;
+			memcpy(p, ZSTR_VAL(string_key), ZSTR_LEN(string_key));
 			strncat(p, "=", 1);
-			strncat(p, str->val, str->len);
+			strncat(p, ZSTR_VAL(str), ZSTR_LEN(str));
 
 #ifndef PHP_WIN32
 			*ep = p;
@@ -154,12 +154,12 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 			p += l;
 		} else {
-			memcpy(p, str->val, str->len);
+			memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
 #ifndef PHP_WIN32
 			*ep = p;
 			++ep;
 #endif
-			p += str->len + 1;
+			p += ZSTR_LEN(str) + 1;
 		}
 next_element:
 		zend_string_release(str);
@@ -240,6 +240,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	FG(pclose_ret) = -1;
 #endif
 	_php_free_envp(proc->env, proc->is_persistent);
+	pefree(proc->pipes, proc->is_persistent);
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 
@@ -434,7 +435,8 @@ PHP_FUNCTION(proc_open)
 	zval *descitem = NULL;
 	zend_string *str_index;
 	zend_ulong nindex;
-	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	struct php_proc_open_descriptor_item *descriptors = NULL;
+	int ndescriptors_array;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
@@ -459,6 +461,7 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 	int suppress_errors = 0;
 	int bypass_shell = 0;
+	int blocking_pipes = 0;
 #endif
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
@@ -488,6 +491,13 @@ PHP_FUNCTION(proc_open)
 				bypass_shell = 1;
 			}
 		}
+
+		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "blocking_pipes", sizeof("blocking_pipes") - 1);
+		if (item != NULL) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+				blocking_pipes = 1;
+			}
+		}
 	}
 #endif
 
@@ -499,7 +509,11 @@ PHP_FUNCTION(proc_open)
 		memset(&env, 0, sizeof(env));
 	}
 
-	memset(descriptors, 0, sizeof(descriptors));
+	ndescriptors_array = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
+
+	descriptors = safe_emalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors_array, 0);
+
+	memset(descriptors, 0, sizeof(struct php_proc_open_descriptor_item) * ndescriptors_array);
 
 #ifdef PHP_WIN32
 	/* we use this to allow the child to inherit handles */
@@ -669,9 +683,7 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 		}
-
-		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS)
-			break;
+		ndesc++;
 	} ZEND_HASH_FOREACH_END();
 
 #ifdef PHP_WIN32
@@ -875,6 +887,7 @@ PHP_FUNCTION(proc_open)
 	proc = (struct php_process_handle*)pemalloc(sizeof(struct php_process_handle), is_persistent);
 	proc->is_persistent = is_persistent;
 	proc->command = command;
+	proc->pipes = pemalloc(sizeof(zend_resource *) * ndesc, is_persistent);
 	proc->npipes = ndesc;
 	proc->child = child;
 #ifdef PHP_WIN32
@@ -927,6 +940,7 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 				stream = php_stream_fopen_from_fd(_open_osfhandle((zend_intptr_t)descriptors[i].parentend,
 							descriptors[i].mode_flags), mode_string, NULL);
+				php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
 #else
 				stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
 # if defined(F_SETFD) && defined(FD_CLOEXEC)
@@ -952,10 +966,12 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+	efree(descriptors);
 	ZVAL_RES(return_value, zend_register_resource(proc, le_proc_open));
 	return;
 
 exit_fail:
+	efree(descriptors);
 	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
 #if PHP_CAN_DO_PTS

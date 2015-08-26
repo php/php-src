@@ -247,7 +247,7 @@ IC_METHOD(charName) {
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
 	buffer = zend_string_alloc(buffer_len, 0);
 	error = U_ZERO_ERROR;
-	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, buffer->val, buffer->len + 1, &error);
+	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
 		zend_string_free(buffer);
 		INTL_CHECK_STATUS(error, "Failure getting character name");
@@ -533,9 +533,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 	UChar32 cp;
 	zval *zcp;
 	UChar *closure;
-	char *ret;
+	zend_string *u8str;
 	int32_t closure_len;
-	size_t ret_len;
 	UErrorCode error = U_ZERO_ERROR;
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
@@ -556,11 +555,10 @@ IC_METHOD(getFC_NFKC_Closure) {
 	}
 
 	error = U_ZERO_ERROR;
-	intl_convert_utf16_to_utf8(&ret, &ret_len, closure, closure_len, &error);
+	u8str = intl_convert_utf16_to_utf8(closure, closure_len, &error);
 	efree(closure);
 	INTL_CHECK_STATUS(error, "Failed converting output to UTF8");
-	RETVAL_STRINGL(ret, ret_len);
-	efree(ret);
+	RETVAL_NEW_STR(u8str);
 }
 /* }}} */
 

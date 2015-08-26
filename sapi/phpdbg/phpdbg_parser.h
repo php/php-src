@@ -1,21 +1,19 @@
+/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
-/* A Bison parser, made by GNU Bison 2.4.1.  */
-
-/* Skeleton interface for Bison's Yacc-like parsers in C
-
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-
+/* Bison interface for Yacc-like parsers in C
+   
+      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,14 +26,22 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+#ifndef YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+# define YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int phpdbg_debug;
+#endif
 /* "%code requires" blocks.  */
-
-/* Line 1676 of yacc.c  */
-#line 31 "sapi/phpdbg/phpdbg_parser.y"
+/* Line 2060 of yacc.c  */
+#line 36 "/Users/Bob/php-src-X/sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -44,9 +50,8 @@ typedef void* yyscan_t;
 #endif
 
 
-
-/* Line 1676 of yacc.c  */
-#line 50 "sapi/phpdbg/phpdbg_parser.h"
+/* Line 2060 of yacc.c  */
+#line 55 "sapi/phpdbg/phpdbg_parser.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -75,6 +80,26 @@ typedef void* yyscan_t;
      T_REQ_ID = 276
    };
 #endif
+/* Tokens.  */
+#define T_EVAL 258
+#define T_RUN 259
+#define T_SHELL 260
+#define T_IF 261
+#define T_TRUTHY 262
+#define T_FALSY 263
+#define T_STRING 264
+#define T_COLON 265
+#define T_DCOLON 266
+#define T_POUND 267
+#define T_PROTO 268
+#define T_DIGITS 269
+#define T_LITERAL 270
+#define T_ADDR 271
+#define T_OPCODE 272
+#define T_ID 273
+#define T_INPUT 274
+#define T_UNEXPECTED 275
+#define T_REQ_ID 276
 
 
 
@@ -86,5 +111,18 @@ typedef int YYSTYPE;
 #endif
 
 
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int phpdbg_parse (void *YYPARSE_PARAM);
+#else
+int phpdbg_parse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
+int phpdbg_parse (void);
+#else
+int phpdbg_parse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
-
+#endif /* !YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */
