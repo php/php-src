@@ -32,12 +32,12 @@
 
 #if ZEND_DEBUG
 /*
-#define HASH_MASK_CONSISTENCY	0x60
+#define HASH_MASK_CONSISTENCY	0xc0
 */
 #define HT_OK					0x00
-#define HT_IS_DESTROYING		0x20
-#define HT_DESTROYED			0x40
-#define HT_CLEANING				0x60
+#define HT_IS_DESTROYING		0x40
+#define HT_DESTROYED			0x80
+#define HT_CLEANING				0xc0
 
 static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line)
 {
