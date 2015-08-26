@@ -696,19 +696,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	return 0;
 }
 
-int pass_two_wrapper(zval *el)
-{
-	return pass_two((zend_op_array *) Z_PTR_P(el));
-}
-
-int print_class(zend_class_entry *class_entry)
-{
-	printf("Class %s:\n", ZSTR_VAL(class_entry->name));
-	zend_hash_apply(&class_entry->function_table, pass_two_wrapper);
-	printf("End of class %s.\n\n", ZSTR_VAL(class_entry->name));
-	return 0;
-}
-
 ZEND_API unary_op_type get_unary_op(int opcode)
 {
 	switch (opcode) {
