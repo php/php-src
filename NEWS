@@ -24,10 +24,6 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
 
-- OpenSSL:
-  .  Fixed bug #55259 (openssl extension does not get the DH parameters from 
-     DH key resource). (Jakub Zelenka)
-
 - Standard:
   . Fixed bug #70342 (changing configuration with ignore_user_abort(true) isn't
     working). (Laruence)
