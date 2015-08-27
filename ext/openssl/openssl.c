@@ -3629,14 +3629,11 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, pub_key);
-					if (dh->p && dh->g) {
-						if (!dh->pub_key) {
-							DH_generate_key(dh);
-						}
-						if (EVP_PKEY_assign_DH(pkey, dh)) {
-							ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
-							return;
-						}
+					if (dh->p && dh->g &&
+							(dh->pub_key || DH_generate_key(dh)) &&
+							EVP_PKEY_assign_DH(pkey, dh)) {
+						ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
+						return;
 					}
 					DH_free(dh);
 				}
