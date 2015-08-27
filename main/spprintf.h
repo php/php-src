@@ -41,7 +41,7 @@ PHPAPI size_t spprintf( char **pbuf, size_t max_len, const char *format, ...) PH
 
 PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
-PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 2, 0);;
+PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 2, 0);
 
 PHPAPI zend_string *strpprintf(size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
