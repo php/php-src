@@ -7,8 +7,8 @@ PHP                                                                        NEWS
     building extensions). (Adam)
 
 - OpenSSL:
-  .  Fixed bug #55259 (openssl extension does not get the DH parameters from 
-     DH key resource). (Jakub Zelenka)
+  . Fixed bug #55259 (openssl extension does not get the DH parameters from 
+    DH key resource). (Jakub Zelenka)
 
 - Standard:
   . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
