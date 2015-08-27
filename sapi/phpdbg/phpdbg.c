@@ -292,11 +292,11 @@ static PHP_FUNCTION(phpdbg_exec)
 					ZVAL_TRUE(return_value);
 				}
 			} else {
-				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", exec);
+				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", ZSTR_VAL(exec));
 				ZVAL_FALSE(return_value);
 			}
 		} else {
-			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", exec);
+			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", ZSTR_VAL(exec));
 
 			ZVAL_FALSE(return_value);
 		}
