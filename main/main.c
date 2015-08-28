@@ -982,20 +982,16 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 
 	/* store the error if it has changed */
 	if (display) {
-#ifdef ZEND_SIGNALS
-		HANDLE_BLOCK_INTERRUPTIONS();
-#endif
 		if (PG(last_error_message)) {
-			free(PG(last_error_message));
+			char *s = PG(last_error_message);
 			PG(last_error_message) = NULL;
+			free(s);
 		}
 		if (PG(last_error_file)) {
-			free(PG(last_error_file));
+			char *s = PG(last_error_file);
 			PG(last_error_file) = NULL;
+			free(s);
 		}
-#ifdef ZEND_SIGNALS
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-#endif
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
