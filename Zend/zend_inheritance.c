@@ -213,15 +213,11 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		}
 
 		if (strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
-			const char *colon;
-
 			if (fe->common.type != ZEND_USER_FUNCTION) {
 				zend_string_release(proto_class_name);
 				zend_string_release(fe_class_name);
 				return 0;
-			} else if (strchr(ZSTR_VAL(proto_class_name), '\\') != NULL ||
-					(colon = zend_memrchr(ZSTR_VAL(fe_class_name), '\\', ZSTR_LEN(fe_class_name))) == NULL ||
-					strcasecmp(colon+1, ZSTR_VAL(proto_class_name)) != 0) {
+			} else {
 				zend_class_entry *fe_ce, *proto_ce;
 
 				fe_ce = zend_lookup_class(fe_class_name);
