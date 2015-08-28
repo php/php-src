@@ -45,8 +45,11 @@
 #endif
 
 #ifndef ZEND_SIGNALS
-# define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
-# define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+/* block/unblock interruptions callbacks might be used by SAPI, and were used
+ * by mod_php for Apache 1, but now they are not usefull anymore.
+ */
+# define HANDLE_BLOCK_INTERRUPTIONS()		/*if (zend_block_interruptions) { zend_block_interruptions(); }*/
+# define HANDLE_UNBLOCK_INTERRUPTIONS()		/*if (zend_unblock_interruptions) { zend_unblock_interruptions(); }*/
 #else
 # define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
 # define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
