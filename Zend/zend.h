@@ -289,7 +289,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...);
 ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...);
 
-void zenderror(const char *error);
+ZEND_COLD void zenderror(const char *error);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def

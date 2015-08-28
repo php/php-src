@@ -111,10 +111,10 @@ PHPDBG_LIST(class) /* {{{ */
 			if (ce->info.user.filename) {
 				phpdbg_list_file(ce->info.user.filename, ce->info.user.line_end - ce->info.user.line_start + 1, ce->info.user.line_start, 0);
 			} else {
-				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", ce->name);
+				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", ZSTR_VAL(ce->name));
 			}
 		} else {
-			phpdbg_error("list", "type=\"internalclass\" class=\"%s\"", "The class requested (%s) is not user defined", ce->name);
+			phpdbg_error("list", "type=\"internalclass\" class=\"%s\"", "The class requested (%s) is not user defined", ZSTR_VAL(ce->name));
 		}
 	} else {
 		phpdbg_error("list", "type=\"notfound\" class=\"%s\"", "The requested class (%s) could not be found", param->str);
@@ -152,7 +152,7 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 		lastline = data->lines;
 	}
 
-	phpdbg_xml("<list %r file=\"%s\">", filename);
+	phpdbg_xml("<list %r file=\"%s\">", ZSTR_VAL(filename));
 
 	for (line = offset; line < lastline;) {
 		uint linestart = data->line[line++];

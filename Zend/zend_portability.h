@@ -78,6 +78,8 @@
 #include <intrin.h>
 #endif
 
+#include "zend_range_check.h"
+
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
