@@ -1300,6 +1300,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ext_stmt = 0;
 	zend_bool use_mm_wrappers = 0;
 	zend_bool is_exit;
+	int exit_status = 0;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1822,6 +1823,7 @@ phpdbg_interact:
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
 						EG(bailout) = __orig_bailout; /* reset zend_try */
+						exit_status = EG(exit_status);
 						break;
 					}
 				}
@@ -1998,5 +2000,6 @@ phpdbg_out:
 		free(PHPDBG_G(sapi_name_ptr));
 	}
 
-	return 0;
+	/* usually 0; just for -rr */
+	return exit_status;
 } /* }}} */
