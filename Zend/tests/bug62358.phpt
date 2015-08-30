@@ -1,11 +1,5 @@
 --TEST--
 Bug #62358 (Segfault when using traits a lot)
---SKIPIF--
-<?php
-if (getenv("USE_ZEND_ALLOC") !== "0") {
-    die("skip Need Zend MM enabled");
-}
-?>
 --FILE--
 <?php 
 

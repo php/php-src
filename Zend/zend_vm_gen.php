@@ -1133,7 +1133,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#undef DCL_OPLINE\n");
 							out($f,"#undef USE_OPLINE\n");
 							out($f,"#undef LOAD_OPLINE\n");
-							out($f,"#undef LOAD_NEXT_OPLINE()\n");
+							out($f,"#undef LOAD_NEXT_OPLINE\n");
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE opline\n");
 							out($f,"#define DCL_OPLINE const zend_op *opline;\n");
@@ -1634,7 +1634,7 @@ function gen_vm($def, $skel) {
 		out($f,"#undef DCL_OPLINE\n");
 		out($f,"#undef USE_OPLINE\n");
 		out($f,"#undef LOAD_OPLINE\n");
-		out($f,"#undef LOAD_NEXT_OPLINE()\n");
+		out($f,"#undef LOAD_NEXT_OPLINE\n");
 		out($f,"#undef SAVE_OPLINE\n");
 		out($f,"#define OPLINE EX(opline)\n");
 		out($f,"#define DCL_OPLINE\n");

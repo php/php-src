@@ -2314,7 +2314,7 @@ ZEND_METHOD(reflection_generator, getExecutingGenerator)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	current = zend_generator_get_current(generator);
-	++GC_REFCOUNT(current);
+	++GC_REFCOUNT(&current->std);
 
 	ZVAL_OBJ(return_value, (zend_object *) current);
 }

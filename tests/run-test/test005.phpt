@@ -1,8 +1,8 @@
 --TEST--
-Error message handling (without ZendOptimizer)
+Error message handling (with ZendOpcache)
 --SKIPIF--
 <?php
-!extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+extension_loaded("Zend Opcache") or die("skip Zend Opcache is not loaded");
 ?>
 --FILE--
 <?php

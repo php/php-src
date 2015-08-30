@@ -104,7 +104,7 @@ static int php_random_bytes(void *bytes, size_t size)
 
 	while (read_bytes < size) {
 		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
-		if (n < 0) {
+		if (n <= 0) {
 			break;
 		}
 		read_bytes += n;

@@ -209,7 +209,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 					ALLOC_HASHTABLE(intern->node_list);
 					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
 				}
-				GC_REFCOUNT(&retval)++;
+				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);
 				obj = Z_DOMOBJ_P(&retval);
 				nodep = dom_object_get_node(obj);

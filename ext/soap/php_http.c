@@ -815,7 +815,7 @@ try_again:
 				zend_hash_internal_pointer_reset(Z_ARRVAL_P(cookies));
 				smart_str_append_const(&soap_headers, "Cookie: ");
 				for (i = 0; i < n; i++) {
-					ulong numindx;
+					zend_ulong numindx;
 					int res = zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, &numindx);
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
 					

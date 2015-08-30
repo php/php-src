@@ -81,7 +81,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
-	if (--GC_REFCOUNT(iter) > 0) {
+	if (--GC_REFCOUNT(&iter->std) > 0) {
 		return;
 	}
 

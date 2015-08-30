@@ -210,7 +210,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename());
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno());
 	} else {
-		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, ZSTR_VAL(filename));
+		zend_update_property_str(base_ce, &obj, "file", sizeof("file")-1, filename);
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_compiled_lineno());
 	}
 	zend_update_property(base_ce, &obj, "trace", sizeof("trace")-1, &trace);
