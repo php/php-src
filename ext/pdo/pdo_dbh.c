@@ -289,8 +289,14 @@ static PHP_METHOD(PDO, dbh_constructor)
 						Z_STRVAL_PP(v));
 				is_persistent = 1;
 			} else {
-				convert_to_long_ex(v);
-				is_persistent = Z_LVAL_PP(v) ? 1 : 0;
+				if (Z_TYPE_PP(v) != IS_LONG) {
+					zval tmp = **v;
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+					is_persistent = Z_LVAL(tmp)? 1 : 0;
+				} else {
+					is_persistent = Z_LVAL_PP(v)? 1 : 0;
+				}
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
 						username ? username : "",
 						password ? password : "");

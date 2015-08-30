@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
     DH key resource). (Jakub Zelenka)
 
+- PDO:
+  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+
 - Standard:
   . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
 
