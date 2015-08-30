@@ -139,11 +139,15 @@ static inline char *php_fcvt(double value, int ndigit, int *decpt, int *sign) /*
 }
 /* }}} */
 
-static inline char *_php_cvt(double value, int ndigit, char dec_point, char exponent, char *buf, int mode) /* {{{ */
+PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
+	int mode = ndigit > 0 ? 2 : 0;
 
+	if (mode == 0) {
+		ndigit = 17;
+	}
 	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
 	if (decpt == 9999) {
 		/*
@@ -231,18 +235,6 @@ static inline char *_php_cvt(double value, int ndigit, char dec_point, char expo
     }
     zend_freedtoa(digits);
     return (buf);
-}
-/* }}} */
-
-PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
-{
-	return _php_cvt(value, ndigit, dec_point, exponent, buf, 2);
-}
-/* }}} */
-
-PHPAPI char *php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf) /* {{{ */
-{
-	return _php_cvt(value, ndigit, dec_point, exponent, buf, 0);
 }
 /* }}} */
 

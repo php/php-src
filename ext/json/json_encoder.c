@@ -104,11 +104,8 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 {
 	size_t len;
 	char num[PHP_JSON_DOUBLE_MAX_LENGTH];
-	if (JSON_G(precision) == -1) {
-		php_0cvt(d, 17, '.', 'e', num);
-	} else {
-		php_gcvt(d, JSON_G(precision), '.', 'e', num);
-	}
+
+	php_gcvt(d, JSON_G(precision), '.', 'e', num);
 	len = strlen(num);
 	if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_JSON_DOUBLE_MAX_LENGTH - 2) {
 		num[len++] = '.';
