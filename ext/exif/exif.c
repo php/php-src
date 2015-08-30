@@ -2964,13 +2964,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
-						ImageInfo->CopyrightEditor        = estrdup(value_ptr+length+1);
+						ImageInfo->CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);
 						spprintf(&ImageInfo->Copyright, 0, "%s, %s", value_ptr, value_ptr+length+1);
 						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
 					} else {
-						ImageInfo->Copyright = estrdup(value_ptr);
+						ImageInfo->Copyright = estrndup(value_ptr, byte_count);
 					}
 				}
 				break;
