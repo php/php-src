@@ -3,7 +3,7 @@ Type group use declarations should not allow override on inner itens
 --FILE--
 <?php
 
-// should not throw syntax errors
+// should throw syntax errors
 
 use const Foo\Bar\{
     A,
@@ -12,5 +12,4 @@ use const Foo\Bar\{
 };
 
 --EXPECTF--
-
-Parse error: syntax error, unexpected 'const' (T_CONST), expecting identifier (T_STRING) or \\ (T_NS_SEPARATOR) in %s on line 7
+Parse error: syntax error, unexpected 'const' (T_CONST), expecting identifier (T_STRING) in %s on line 7

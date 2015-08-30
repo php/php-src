@@ -19,6 +19,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   s. Resource API changes
   t. Optimized strings concatenation.
   u. Streams changes
+  v. Sort algorithm changes
 
 2. Build system changes
   a. Unix build system changes
@@ -239,6 +240,11 @@ changes. See: https://wiki.php.net/phpng-upgrading
      - It is possible to do blocking reads on Windows pipes. It can be done either
        using context stream option PHP_STREAM_OPTION_PIPE_BLOCKING or 
        adding STREAM_USE_BLOCKING_PIPE when opening the stream.
+
+  v. Sort algorithm changes
+     - Improved zend_qsort(using hybrid sorting algo) for better performance,
+       and also renamed zend_qsort to zend_sort.
+     - Added stable sorting algo zend_insert_sort.
 
 ========================
 2. Build system changes

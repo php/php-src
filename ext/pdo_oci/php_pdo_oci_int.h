@@ -35,6 +35,7 @@ typedef struct {
 	OCIError	*err;
 	OCISvcCtx	*svc;
 	/* OCI9; 0 == use NLS_LANG */
+	ub4			prefetch;
 	ub2			charset;
 	sword		last_err;
 

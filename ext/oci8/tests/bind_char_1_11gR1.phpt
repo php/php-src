@@ -11,7 +11,7 @@ if (!(isset($matches[0]) && $matches[1] < 12)) {
 }
 ?>
 --ENV--
-NLS_LANG=
+NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 
@@ -215,7 +215,9 @@ Test 1.2: Type: AFC.  Length: default
     ::
 Test 1.3: Type: AFC:  Length: 0
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
+    :1:
+    :abc       :
+    ::
 Test 1.4: Type: AFC:  Length: strlen
   Querying:
     :1:
@@ -223,7 +225,6 @@ Test 1.4: Type: AFC:  Length: strlen
     ::
 Test 1.5: Type: AFC.  Length: strlen-1
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
 Test 1.6: Type: AFC.  Length: strlen+1
   Querying:
     :1:
@@ -259,7 +260,9 @@ Test 3.2: Type: AFC.  Length: default
     :abc:
 Test 3.3: Type: AFC:  Length: 0
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
+    :2:
+    ::
+    :abc:
 Test 3.4: Type: AFC:  Length: strlen
   Querying:
     :2:
@@ -267,7 +270,6 @@ Test 3.4: Type: AFC:  Length: strlen
     :abc:
 Test 3.5: Type: AFC.  Length: strlen-1
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
 Test 3.6: Type: AFC.  Length: strlen+1
   Querying:
     :2:

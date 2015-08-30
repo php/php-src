@@ -181,7 +181,7 @@ typedef struct {
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
 	zend_bool                     in_callback;
-	uint32_t                      clone;
+	uint32_t*                     clone;
 } php_curl;
 
 #define CURLOPT_SAFE_UPLOAD -1

@@ -37,18 +37,21 @@
 
 static uint32_t zend_obj_num_elements(HashTable *ht) /* {{{ */
 {
-	Bucket *p;
-	uint idx;
-	uint num;
+	uint num = ht->nNumOfElements;
 
-	num = ht->nNumOfElements;
-	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (Z_TYPE(p->val) == IS_INDIRECT) {
-			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {
-				num--;
+	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		zval *val;
+
+		ZEND_HASH_FOREACH_VAL(ht, val) {
+			if (Z_TYPE_P(val) == IS_UNDEF) continue;
+			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) {
+					num--;
+				}
 			}
+		} ZEND_HASH_FOREACH_END();
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
 		}
 	}
 	return num;
@@ -678,14 +681,24 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 {
 	uint32_t count;
 	zend_bool incomplete_class;
+	HashTable *ht;
 
 	incomplete_class = php_var_serialize_class_name(buf, struc);
 	/* count after serializing name, since php_var_serialize_class_name
 	 * changes the count if the variable is incomplete class */
-	count = zend_hash_num_elements(HASH_OF(retval_ptr));
-	if (incomplete_class) {
-		--count;
+	if (Z_TYPE_P(retval_ptr) == IS_ARRAY) {
+		ht = Z_ARRVAL_P(retval_ptr);
+		count = zend_hash_num_elements(ht);
+	} else if (Z_TYPE_P(retval_ptr) == IS_OBJECT) {
+		ht = Z_OBJPROP_P(retval_ptr);
+		count = zend_obj_num_elements(ht);
+		if (incomplete_class) {
+			--count;
+		}
+	} else {
+		count = 0;
 	}
+
 	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
@@ -694,12 +707,11 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zval *d, *val;
 		zval nval, *nvalp;
 		zend_string *name;
-		HashTable *propers, *ht;
+		HashTable *propers;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
 
-		ht = HASH_OF(retval_ptr);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
 				continue;
@@ -899,16 +911,17 @@ again:
 			zend_bool incomplete_class = 0;
 			if (Z_TYPE_P(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
-				myht = HASH_OF(struc);
+				myht = Z_ARRVAL_P(struc);
+				i = zend_hash_num_elements(myht);
 			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc);
 				myht = Z_OBJPROP_P(struc);
-			}
-			/* count after serializing name, since php_var_serialize_class_name
-			 * changes the count if the variable is incomplete class */
-			i = myht ? zend_hash_num_elements(myht) : 0;
-			if (i > 0 && incomplete_class) {
-				--i;
+				/* count after serializing name, since php_var_serialize_class_name
+				 * changes the count if the variable is incomplete class */
+				i = zend_obj_num_elements(myht);
+				if (i > 0 && incomplete_class) {
+					--i;
+				}
 			}
 			smart_str_append_unsigned(buf, i);
 			smart_str_appendl(buf, ":{", 2);

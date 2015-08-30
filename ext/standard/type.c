@@ -154,8 +154,11 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	ZVAL_DUP(return_value, num);
-	convert_to_long_base(return_value, (int)base);
+	if (Z_TYPE_P(num) != IS_STRING) {
+		RETVAL_LONG(zval_get_long(num));
+	} else {
+		RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
+	}
 }
 /* }}} */
 

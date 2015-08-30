@@ -2641,6 +2641,10 @@ function toolset_setup_common_cflags()
 		if (PHP_DEBUG == "yes") {
 			// Set some debug/release specific options
 			ADD_FLAG('CFLAGS', ' /RTC1 ');
+		} else {
+			if (VCVERS >= 1900) {
+				ADD_FLAG('CFLAGS', "/guard:cf");
+			}
 		}
 
 	} else if (CLANG_TOOLSET) {
@@ -2668,6 +2672,12 @@ function toolset_setup_common_ldlags()
 
 	// we want msvcrt in the PHP DLL
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
+
+	if (VS_TOOLSET) {
+		if (VCVERS >= 1900) {
+			ADD_FLAG('LDFLAGS', "/GUARD:CF");
+		}
+	}
 }
 
 function toolset_setup_common_libs()

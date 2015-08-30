@@ -1520,7 +1520,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
-			ZVAL_DUP(&data, value_ptr);
+			ZVAL_COPY(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
@@ -3292,11 +3292,13 @@ PHP_FUNCTION(array_unique)
 
 	php_set_compare_func(sort_type);
 
-	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 
 	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
+		ZVAL_COPY(return_value, array);
 		return;
 	}
+
+	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);

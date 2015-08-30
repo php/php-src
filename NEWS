@@ -1,8 +1,49 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+03 Sep 2015, PHP 7.0.0 RC 2
+
+- Core:
+  . Fixed bug #70332 (Wrong behavior while returning reference on object).
+    (Laruence, Dmitry)
+  . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
+    (marcio dot web2 at gmail dot com)
+  . Fixed bug #70321 (Magic getter breaks reference to array property).
+    (Laruence)
+  . Fixed bug #70187 (Notice: unserialize(): Unexpected end of serialized data)
+    (Dmitry)
+  . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
+  . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
+    building extensions). (Adam)
+  . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
+
+- Curl:
+  . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
+    (Laruence)
+
+- Pcntl:
+  . Fixed bug #70386 (Can't compile on NetBSD because of missing WCONTINUED
+    and WIFCONTINUED). (Matteo)
+
+- PDO_OCI:
+  . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
+
+- SPL:
+  . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
+
+- Standard:
+  . Fixed bug #70342 (changing configuration with ignore_user_abort(true) isn't
+    working). (Laruence)
+  . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
+  . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
+
+- Reflection:
+  . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
+
 20 Aug 2015, PHP 7.0.0 RC 1
 
 - Core:
+  . Fixed bug #70299 (Memleak while assigning object offsetGet result).
+    (Laruence)
   . Fixed bug #70288 (Apache crash related to ZEND_SEND_REF). (Laruence)
   . Fixed bug #70262 (Accessing array crashes PHP 7.0beta3).
     (Laruence, Dmitry)
@@ -491,7 +532,7 @@ PHP                                                                        NEWS
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
-  . Added wifcontinued and wcontinued. (xilon-jul)
+  . Request #68505 (Added wifcontinued and wcontinued). (xilon-jul)
   . Added rusage support to pcntl_wait() and pcntl_waitpid(). (Anton Stepanenko,
     Tony)
 
