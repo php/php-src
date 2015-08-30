@@ -602,12 +602,12 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	if (driver_options) {
 		zend_long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
 		zend_long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
-		char *init_cmd = NULL;
+		zend_string *init_cmd = NULL;
 #ifndef PDO_USE_MYSQLND
-		char *default_file = NULL, *default_group = NULL;
+		zend_string *default_file = NULL, *default_group = NULL;
 #endif
 		zend_long compress = 0;
-		char *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
+		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
 		H->emulate_prepare = pdo_attr_lval(driver_options,
@@ -658,32 +658,32 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		init_cmd = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_INIT_COMMAND, NULL);
 		if (init_cmd) {
-			if (mysql_options(H->server, MYSQL_INIT_COMMAND, (const char *)init_cmd)) {
-				efree(init_cmd);
+			if (mysql_options(H->server, MYSQL_INIT_COMMAND, (const char *)ZSTR_VAL(init_cmd))) {
+				zend_string_release(init_cmd);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(init_cmd);
+			zend_string_release(init_cmd);
 		}
 #ifndef PDO_USE_MYSQLND
 		default_file = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_FILE, NULL);
 		if (default_file) {
-			if (mysql_options(H->server, MYSQL_READ_DEFAULT_FILE, (const char *)default_file)) {
-				efree(default_file);
+			if (mysql_options(H->server, MYSQL_READ_DEFAULT_FILE, (const char *)ZSTR_VAL(default_file))) {
+				zend_string_release(default_file);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(default_file);
+			zend_string_release(default_file);
 		}
 
-		default_group= pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, NULL);
+		default_group = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_READ_DEFAULT_GROUP, NULL);
 		if (default_group) {
-			if (mysql_options(H->server, MYSQL_READ_DEFAULT_GROUP, (const char *)default_group)) {
-				efree(default_group);
+			if (mysql_options(H->server, MYSQL_READ_DEFAULT_GROUP, (const char *)ZSTR_VAL(default_group))) {
+				zend_string_release(default_group);
 				pdo_mysql_error(dbh);
 				goto cleanup;
 			}
-			efree(default_group);
+			zend_string_release(default_group);
 		}
 #endif
 		compress = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0);
@@ -701,34 +701,39 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		ssl_cipher = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SSL_CIPHER, NULL);
 
 		if (ssl_key || ssl_cert || ssl_ca || ssl_capath || ssl_cipher) {
-			mysql_ssl_set(H->server, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
+			mysql_ssl_set(H->server,
+					ssl_key? ZSTR_VAL(ssl_key) : NULL,
+					ssl_cert? ZSTR_VAL(ssl_cert) : NULL,
+					ssl_ca? ZSTR_VAL(ssl_ca) : NULL,
+					ssl_capath? ZSTR_VAL(ssl_capath) : NULL,
+					ssl_cipher? ZSTR_VAL(ssl_cipher) : NULL);
 			if (ssl_key) {
-				efree(ssl_key);
+				zend_string_release(ssl_key);
 			}
 			if (ssl_cert) {
-				efree(ssl_cert);
+				zend_string_release(ssl_cert);
 			}
 			if (ssl_ca) {
-				efree(ssl_ca);
+				zend_string_release(ssl_ca);
 			}
 			if (ssl_capath) {
-				efree(ssl_capath);
+				zend_string_release(ssl_capath);
 			}
 			if (ssl_cipher) {
-				efree(ssl_cipher);
+				zend_string_release(ssl_cipher);
 			}
 		}
 
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
 		{
-			char *public_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY, NULL);
+			zend_string *public_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY, NULL);
 			if (public_key) {
-				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, public_key)) {
+				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, ZSTR_VAL(public_key))) {
 					pdo_mysql_error(dbh);
-					efree(public_key);
+					zend_string_release(public_key);
 					goto cleanup;
 				}
-				efree(public_key);
+				zend_string_release(public_key);
 			}
 		}
 #endif

@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #70386 (Can't compile on NetBSD because of missing WCONTINUED
     and WIFCONTINUED). (Matteo)
 
+- PDO:
+  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
 
