@@ -473,11 +473,7 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			if (PG(serialize_precision < 0)) {
-				php_0cvt(Z_DVAL_P(struc), 17, '.', 'E', tmp_str);
-			} else {
-				php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			}
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 			smart_str_appends(buf, tmp_str);
 			break;
 		case IS_STRING:
@@ -821,11 +817,7 @@ again:
 		case IS_DOUBLE: {
 			char tmp_str[2048]; /* Use the same magic number of spprintf.c NUM_BUF_SIZE */
 			smart_str_appendl(buf, "d:", 2);
-			if (PG(serialize_precision < 0)) {
-				php_0cvt(Z_DVAL_P(struc), 17, '.', 'E', tmp_str);
-			} else {
-				php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			}
+			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 			smart_str_appends(buf, tmp_str);
 			smart_str_appendc(buf, ';');
 			return;
