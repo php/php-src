@@ -3121,8 +3121,8 @@ static int php_oci_old_create_session(php_oci_connection *connection, char *dbna
 	ub4 statement_cache_size = 0;
 
 	if (OCI_G(statement_cache_size) > 0) {
-		if (OCI_G(statement_cache_size) > UB4MAXVAL-1)
-			statement_cache_size = (ub4) UB4MAXVAL-1;
+		if (OCI_G(statement_cache_size) > SB4MAXVAL)
+			statement_cache_size = (ub4) SB4MAXVAL;
 		else
 			statement_cache_size = (ub4) OCI_G(statement_cache_size);
 	}
@@ -3316,8 +3316,8 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	ub4 statement_cache_size = 0;
 
 	if (OCI_G(statement_cache_size) > 0) {
-		if (OCI_G(statement_cache_size) > UB4MAXVAL-1)
-			statement_cache_size = (ub4) UB4MAXVAL-1;
+		if (OCI_G(statement_cache_size) > SB4MAXVAL)
+			statement_cache_size = (ub4) SB4MAXVAL;
 		else
 			statement_cache_size = (ub4) OCI_G(statement_cache_size);
 	}

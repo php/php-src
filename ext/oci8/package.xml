@@ -15,10 +15,10 @@ in the free Oracle Instant Client available from Oracle.  Oracle's
 standard cross-version connectivity applies.  For example, PHP OCI8
 linked with Instant Client 11.2 can connect to Oracle Database 9.2
 onward.  See Oracle's note "Oracle Client / Server Interoperability
-Support" (ID 207303.1) for details.  PHP OCI8 2.0 can be built with
-PHP 5.2 onward.  Use the older PHP OCI8 1.4.10 when using PHP 4.3.9
-through to PHP 5.1.x, or when only Oracle Database 9.2 client
-libraries are available.
+Support" (ID 207303.1) for details.  PHP OCI8 2.1.0 can be built with
+PHP 7. PHP OCI8 2.0.9 can be built with PHP 5.2 onward.  Use the older
+PHP OCI8 1.4.10 when using PHP 4.3.9 through to PHP 5.1.x, or when
+only Oracle Database 9.2 client libraries are available.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -45,12 +45,12 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2014-03-19</date>
+ <date>2015-01-01</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.9</release>
-   <api>2.0.9</api>
+   <release>2.1.0</release>
+   <api>2.1.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,7 +58,7 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Fixed oci_field_* reflection: $field can be a column name or index
+    PHP 7 Compatibility. This version is for PHP 7 only.
   </notes>
  <contents>
   <dir name="/">
@@ -459,6 +459,21 @@ Fixed oci_field_* reflection: $field can be a column name or index
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.9</release>
+   <api>2.0.9</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Fixed oci_field_* reflection: $field can be a column name or index
+  </notes>
+</release>
 
 <release>
   <version>

@@ -6,7 +6,7 @@ PHP_ARG_ENABLE(phpdbg, for phpdbg support,
 [  --enable-phpdbg            Build phpdbg], yes, yes)
 
 PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
-[  --enable-phpdbg-webhelper  Build phpdbg web SAPI support], yes, yes)
+[  --enable-phpdbg-webhelper  Build phpdbg web SAPI support], no)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
 [  --enable-phpdbg-debug      Build phpdbg in debug mode], no, no)
@@ -19,13 +19,6 @@ if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
     AC_DEFINE(PHPDBG_DEBUG, 1, [ ])
   else
     AC_DEFINE(PHPDBG_DEBUG, 0, [ ])
-  fi
-
-  if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
-    if ! test -d $abs_srcdir/ext/phpdbg_webhelper; then
-      ln -s ../sapi/phpdbg $abs_srcdir/ext/phpdbg_webhelper
-    fi
-    PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
@@ -70,6 +63,10 @@ if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(BUILD_SHARED)
   PHP_SUBST(BUILD_PHPDBG)
   PHP_SUBST(BUILD_PHPDBG_SHARED)
+fi
+
+if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
+  PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
 fi
 
 dnl ## Local Variables:

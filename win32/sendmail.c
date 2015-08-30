@@ -241,25 +241,46 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		RPath = estrdup(mailRPath);
 	} else if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
-	} else if (	headers_lc &&
-				(pos1 = strstr(headers_lc->val, "from:")) &&
-				((pos1 == headers_lc->val) || (*(pos1-1) == '\n'))
-	) {
-		/* Real offset is memaddress from the original headers + difference of
-		 * string found in the lowercase headrs + 5 characters to jump over
-		 * the from: */
-		pos1 = headers + (pos1 - headers_lc->val) + 5;
-		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
-			RPath = estrndup(pos1, strlen(pos1));
-		} else {
-			RPath = estrndup(pos1, pos2 - pos1);
+	} else if (headers_lc) {
+		int found = 0;
+		char *lookup = headers_lc->val;
+
+		while (lookup) {
+			pos1 = strstr(lookup, "from:");
+
+			if (!pos1) {
+				break;
+			} else if (pos1 != headers_lc->val && *(pos1-1) != '\n') {
+				if (strlen(pos1) >= sizeof("from:")) {
+					lookup = pos1 + sizeof("from:");
+					continue;
+				} else {
+					break;
+				}
+			}
+
+			found = 1;
+
+			/* Real offset is memaddress from the original headers + difference of
+			 * string found in the lowercase headrs + 5 characters to jump over
+			 * the from: */
+			pos1 = headers + (pos1 - lookup) + 5;
+			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+				RPath = estrndup(pos1, strlen(pos1));
+			} else {
+				RPath = estrndup(pos1, pos2 - pos1);
+			}
+
+			break;
 		}
-	} else {
-		if (headers_lc) {
-			zend_string_free(headers_lc);
+
+		if (!found) {
+			if (headers_lc) {
+				zend_string_free(headers_lc);
+			}
+			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
+			return FAILURE;
 		}
-		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
-		return FAILURE;
 	}
 
 	/* attempt to connect with mail host */

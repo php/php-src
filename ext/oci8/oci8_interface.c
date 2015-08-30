@@ -385,7 +385,7 @@ PHP_FUNCTION(oci_lob_eof)
 	
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 	
-	if (!php_oci_lob_get_length(descriptor, &lob_length) && lob_length >= 0) {
+	if (!php_oci_lob_get_length(descriptor, &lob_length)) {
 		if (lob_length == descriptor->lob_current_position) {
 			RETURN_TRUE;
 		}
@@ -492,8 +492,7 @@ PHP_FUNCTION(oci_lob_seek)
 				descriptor->lob_current_position = (offset > 0) ? (ub4) offset : 0;
 			break;
 	}	
-	if ((descriptor->lob_current_position < 0) ||
-		(descriptor->lob_current_position > UB4MAXVAL-1)) {
+	if (descriptor->lob_current_position > UB4MAXVAL) {
 		php_error_docref(NULL, E_WARNING, "Invalid offset or LOB position");
 		RETURN_FALSE;
 	}
