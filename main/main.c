@@ -131,7 +131,7 @@ static PHP_INI_MH(OnSetPrecision)
 	zend_long i;
 
 	ZEND_ATOL(i, ZSTR_VAL(new_value));
-	if (i >= 0) {
+	if (i >= -1) {
 		EG(precision) = i;
 		return SUCCESS;
 	} else {
