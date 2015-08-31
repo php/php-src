@@ -333,6 +333,7 @@ zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
 	dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint) * Z_STRLEN_P(source_string));
 	dataptr->buf = estrndup(Z_STRVAL_P(source_string), Z_STRLEN_P(source_string));
 	dataptr->len = Z_STRLEN_P(source_string);
+	dataptr->line[0] = 0;
 	for (line = 0, bufptr = dataptr->buf - 1, endptr = dataptr->buf + dataptr->len; ++bufptr < endptr;) {
 		if (*bufptr == '\n') {
 			dataptr->line[++line] = (uint)(bufptr - dataptr->buf) + 1;
