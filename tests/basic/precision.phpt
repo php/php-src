@@ -14,7 +14,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -26,7 +25,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -37,7 +35,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -48,7 +45,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -59,7 +55,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -70,7 +65,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 
@@ -81,7 +75,6 @@ echo ini_get('precision'), PHP_EOL;
 echo ini_get('serialize_precision'), PHP_EOL;
 echo "OUTPUTS".PHP_EOL;
 echo join($v, ' ').PHP_EOL;
-print join($v, ' ').PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
 --EXPECT--
@@ -89,7 +82,6 @@ INI
 -1
 -1
 OUTPUTS
-123456789.01234567 3.3333333333333335 9.87E+102
 123456789.01234567 3.3333333333333335 9.87E+102
 string(72) "a:3:{i:0;d:123456789.01234567;i:1;d:3.3333333333333335;i:2;d:9.87E+102;}"
 array (
@@ -102,7 +94,6 @@ INI
 0
 OUTPUTS
 1.0E+8 3 1.0E+103
-1.0E+8 3 1.0E+103
 string(47) "a:3:{i:0;d:1.0E+8;i:1;d:3.0E+0;i:2;d:1.0E+103;}"
 array (
   0 => 1.0E+8,
@@ -113,7 +104,6 @@ INI
 9
 9
 OUTPUTS
-123456789 3.33333333 9.87E+102
 123456789 3.33333333 9.87E+102
 string(55) "a:3:{i:0;d:123456789;i:1;d:3.33333333;i:2;d:9.87E+102;}"
 array (
@@ -126,7 +116,6 @@ INI
 14
 OUTPUTS
 123456789.01235 3.3333333333333 9.87E+102
-123456789.01235 3.3333333333333 9.87E+102
 string(66) "a:3:{i:0;d:123456789.01235;i:1;d:3.3333333333333;i:2;d:9.87E+102;}"
 array (
   0 => 123456789.01235,
@@ -137,7 +126,6 @@ INI
 17
 17
 OUTPUTS
-123456789.01234567 3.3333333333333335 9.8700000000000007E+102
 123456789.01234567 3.3333333333333335 9.8700000000000007E+102
 string(86) "a:3:{i:0;d:123456789.01234567;i:1;d:3.3333333333333335;i:2;d:9.8700000000000007E+102;}"
 array (
@@ -150,7 +138,6 @@ INI
 25
 OUTPUTS
 123456789.0123456716537476 3.33333333333333348136307 9.870000000000000687310143E+102
-123456789.0123456716537476 3.33333333333333348136307 9.870000000000000687310143E+102
 string(109) "a:3:{i:0;d:123456789.0123456716537476;i:1;d:3.33333333333333348136307;i:2;d:9.870000000000000687310143E+102;}"
 array (
   0 => 123456789.0123456716537476,
@@ -161,7 +148,6 @@ INI
 100
 100
 OUTPUTS
-123456789.01234567165374755859375 3.333333333333333481363069950020872056484222412109375 9.87000000000000068731014283095442748328521861543465424509123736073120616987695396574376473706259651E+102
 123456789.01234567165374755859375 3.333333333333333481363069950020872056484222412109375 9.87000000000000068731014283095442748328521861543465424509123736073120616987695396574376473706259651E+102
 string(218) "a:3:{i:0;d:123456789.01234567165374755859375;i:1;d:3.333333333333333481363069950020872056484222412109375;i:2;d:9.87000000000000068731014283095442748328521861543465424509123736073120616987695396574376473706259651E+102;}"
 array (
