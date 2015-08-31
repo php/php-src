@@ -79,6 +79,13 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
 	}
+	if (ht->nNumUsed == 0) {
+		efree(HT_GET_DATA_ADDR(ht));
+		ht->nTableMask = HT_MIN_MASK;
+		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
+		return;
+	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
@@ -92,7 +99,11 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		while (hash_size >> 1 > ht->nNumUsed) {
 			hash_size >>= 1;
 		}
+		if (hash_size < -HT_MIN_MASK) {
+			hash_size = -HT_MIN_MASK;
+		}
 		ht->nTableMask = -hash_size;
+		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
 		HT_HASH_RESET(ht);
@@ -120,6 +131,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = ZCG(mem);
 		void *old_data = HT_GET_DATA_ADDR(ht);
 
+		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
 		memcpy(data, old_data, HT_USED_SIZE(ht));
 		efree(old_data);
@@ -149,6 +161,13 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
 	}
+	if (ht->nNumUsed == 0) {
+		efree(HT_GET_DATA_ADDR(ht));
+		ht->nTableMask = HT_MIN_MASK;
+		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
+		return;
+	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
 	} else if (ht->nNumUsed < -(int32_t)ht->nTableMask / 2) {
@@ -160,7 +179,11 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		while (hash_size >> 1 > ht->nNumUsed) {
 			hash_size >>= 1;
 		}
+		if (hash_size < -HT_MIN_MASK) {
+			hash_size = -HT_MIN_MASK;
+		}
 		ht->nTableMask = -hash_size;
+		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + (hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket)));
 		HT_HASH_RESET(ht);
@@ -187,6 +210,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	} else {
 		void *data = ZCG(mem);
 
+		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
 		memcpy(data, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
@@ -869,6 +893,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 {
 	script->mem = ZCG(mem);
 
+	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 	zend_shared_alloc_clear_xlat_table();
 
 	zend_accel_store(script, sizeof(zend_persistent_script));
@@ -880,6 +905,8 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #ifdef __SSE2__
 	/* Align to 64-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+#else
+	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 #endif
 
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);

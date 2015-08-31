@@ -62,7 +62,7 @@ END_EXTERN_C()
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
-	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(_len)), (use_heap)); \
+	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_REFCOUNT(str) = 1; \
 	GC_TYPE_INFO(str) = IS_STRING; \
 	zend_string_forget_hash_val(str); \

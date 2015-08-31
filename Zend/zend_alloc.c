@@ -149,8 +149,6 @@ typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
 	(((size_t)(size)) & ((alignment) - 1))
 #define ZEND_MM_ALIGNED_BASE(size, alignment) \
 	(((size_t)(size)) & ~((alignment) - 1))
-#define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
-	(((size_t)(size) + ((alignment) - 1)) & ~((alignment) - 1))
 #define ZEND_MM_SIZE_TO_NUM(size, alignment) \
 	(((size_t)(size) + ((alignment) - 1)) / (alignment))
 
