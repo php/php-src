@@ -43,12 +43,6 @@
 
 #include "rfc1867.h"
 
-#ifdef PHP_WIN32
-#define STRCASECMP stricmp
-#else
-#define STRCASECMP strcasecmp
-#endif
-
 #include "php_content_types.h"
 
 #ifdef ZTS
@@ -778,7 +772,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		colon_offset = strchr(header_line, ':');
 		if (colon_offset) {
 			*colon_offset = 0;
-			if (!STRCASECMP(header_line, "Content-Type")) {
+			if (!strcasecmp(header_line, "Content-Type")) {
 				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
 				size_t len = header_line_len - (ptr - header_line), newlen;
 				while (*ptr == ' ') {
@@ -810,7 +804,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
-			} else if (!STRCASECMP(header_line, "Content-Length")) {
+			} else if (!strcasecmp(header_line, "Content-Length")) {
 				/* Script is setting Content-length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
 				 * do disable compression altogether. This contributes to making scripts
@@ -820,7 +814,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release(key);
-			} else if (!STRCASECMP(header_line, "Location")) {
+			} else if (!strcasecmp(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 399) &&
 					SG(sapi_headers).http_response_code != 201) {
@@ -836,7 +830,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 						sapi_update_response_code(302);
 					}
 				}
-			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
+			} else if (!strcasecmp(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				sapi_update_response_code(401); /* authentication-required */
 			}
 			if (sapi_header.header==header_line) {
