@@ -143,7 +143,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 {
 	char *digits, *dst, *src;
 	int i, decpt, sign;
-	int mode = ndigit > 0 ? 2 : 0;
+	int mode = ndigit >= 0 ? 2 : 0;
 
 	if (mode == 0) {
 		ndigit = 17;
