@@ -238,8 +238,6 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 }
 /* }}} */
 
-
-
 /* {{{ Apache license */
 /* ====================================================================
  * Copyright (c) 1995-1998 The Apache Group.  All rights reserved.
