@@ -1,8 +1,44 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.29
+?? ??? 2015, PHP 5.5.30
 
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
+
+03 Sep 2015, PHP 5.5.29
+
+- Core:
+  . Fixed bug #70172 (Use After Free Vulnerability in unserialize()). (Stas)
+  . Fixed bug #70219 (Use after free vulnerability in session deserializer). 
+    (taoguangchen at icloud dot com)
+
+- EXIF:
+  . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
+    value of 32 bytes). (Stas) 
+
+- hash:
+  . Fixed bug #70312 (HAVAL gives wrong hashes in specific cases). (letsgolee 
+    at naver dot com)
+
+- PCRE:
+  . Fixed bug #70345 (Multiple vulnerabilities related to PCRE functions).
+    (Anatol Belski)
+
+- SOAP:
+  . Fixed bug #70388 (SOAP serialize_function_call() type confusion / RCE).
+    (Stas)
+  
+- SPL:
+  . Fixed bug #70365 (Use-after-free vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70366 (Use-after-free vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
+
+- XSLT:
+  . Fixed bug #69782 (NULL pointer dereference). (Stas)
+
+- ZIP:
+  . Fixed bug #70350 (ZipArchive::extractTo allows for directory traversal when 
+    creating directories). (neal at fb dot com)
 
 06 Aug 2015, PHP 5.5.28
 
@@ -80,9 +116,10 @@ PHP                                                                        NEWS
     (Matteo)
 
 - Phar:
-  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file). (Stas)
+  . Fixed bug #69958 (Segfault in Phar::convertToData on invalid file).
+    (CVE-2015-5589) (Stas)
   . Fixed bug #69923 (Buffer overflow and stack smashing error in 
-    phar_fix_filepath). (Stas)
+    phar_fix_filepath). (CVE-2015-5590) (Stas)
 
 - SimpleXML:
   . Refactored the fix for bug #66084 (simplexml_load_string() mangles empty
@@ -354,7 +391,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #69085 (SoapClient's __call() type confusion through
-    unserialize()). (andrea dot palazzo at truel dot it, Laruence)
+    unserialize()). (CVE-2015-4147, CVE-2015-4148)
+	(andrea dot palazzo at truel dot it, Laruence)
 
 - SPL:
   . Fixed bug #69108 ("Segmentation fault" when (de)serializing
