@@ -495,21 +495,6 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	add_assoc_string(return_value, "mode", stream->mode);
 
-#if 0	/* TODO: needs updating for new filter API */
-	if (stream->filterhead) {
-		php_stream_filter *filter;
-
-		MAKE_STD_ZVAL(newval);
-		array_init(newval);
-
-		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label);
-		}
-
-		add_assoc_zval(return_value, "filters", newval);
-	}
-#endif
-
 	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 
 	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);

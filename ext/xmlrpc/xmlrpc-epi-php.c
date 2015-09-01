@@ -312,29 +312,6 @@ PHP_MINFO_FUNCTION(xmlrpc)
 /* Utility functions for adding data types to arrays, with or without key (assoc, non-assoc).
  * Could easily be further generalized to work with objects.
  */
-#if 0
-static int add_long(zval* list, char* id, int num) {
-	if(id) return add_assoc_long(list, id, num);
-	else   return add_next_index_long(list, num);
-}
-
-static int add_double(zval* list, char* id, double num) {
-	if(id) return add_assoc_double(list, id, num);
-	else   return add_next_index_double(list, num);
-}
-
-static int add_string(zval* list, char* id, char* string) {
-	if(id) return add_assoc_string(list, id, string);
-	else   return add_next_index_string(list, string);
-}
-
-static int add_stringl(zval* list, char* id, char* string, uint length) {
-	if(id) return add_assoc_stringl(list, id, string, length);
-	else   return add_next_index_stringl(list, string, length);
-}
-
-#endif
-
 static void add_zval(zval* list, const char* id, zval* val)
 {
 	if (list && val) {

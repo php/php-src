@@ -57,9 +57,6 @@
 
 static int fpm_conf_load_ini_file(char *filename);
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset);
-#if 0 /* not used for now */
-static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset);
-#endif
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset);
@@ -262,24 +259,6 @@ static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /
 	return NULL;
 }
 /* }}} */
-
-#if 0 /* not used for now */
-static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {{{ */
-{
-	char *val = Z_STRVAL_P(value);
-	char *p;
-
-	for (p = val; *p; p++) {
-		if ( p == val && *p == '-' ) continue;
-		if (*p < '0' || *p > '9') {
-			return "is not a valid number (greater or equal than zero)";
-		}
-	}
-	* (long int *) ((char *) *config + offset) = atol(val);
-	return NULL;
-}
-/* }}} */
-#endif
 
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {{{ */
 {

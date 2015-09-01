@@ -65,12 +65,8 @@ ZEND_GET_MODULE(pdo_oci)
 #endif
 
 const ub4 PDO_OCI_INIT_MODE =
-#if 0 && defined(OCI_SHARED)
 			/* shared mode is known to be bad for PHP */
-			OCI_SHARED
-#else
 			OCI_DEFAULT
-#endif
 #ifdef OCI_OBJECT
 			|OCI_OBJECT
 #endif

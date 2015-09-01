@@ -340,17 +340,6 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		if (wp->listen_address_domain == FPM_AF_INET) {
 			if (0 > fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
 				cur_lq = 0;
-#if 0
-			} else {
-				if (cur_lq > 0) {
-					if (!wp->warn_lq) {
-						zlog(ZLOG_WARNING, "[pool %s] listening queue is not empty, #%d requests are waiting to be served, consider raising pm.max_children setting (%d)", wp->config->name, cur_lq, wp->config->pm_max_children);
-						wp->warn_lq = 1;
-					}
-				} else {
-					wp->warn_lq = 0;
-				}
-#endif
 			}
 		}
 		fpm_scoreboard_update(idle, active, cur_lq, -1, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);

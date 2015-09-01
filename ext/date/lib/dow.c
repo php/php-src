@@ -161,10 +161,3 @@ int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d)
 	}
 	return 1;
 }
-#if 0
-int main(void)
-{
-	printf("dow = %d\n", timelib_day_of_week(1978, 12, 22)); /* 5 */
-	printf("dow = %d\n", timelib_day_of_week(2005,  2, 19)); /* 6 */
-}
-#endif

@@ -132,12 +132,6 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 					zend_bailout();
 					break;
 
-#if 0
-				case 955:	/* ORA-00955: name is already used by an existing object */
-					*pdo_err = PDO_ERR_ALREADY_EXISTS;
-					break;
-#endif
-
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
 					strcpy(*pdo_err, "42S02");
 					break;

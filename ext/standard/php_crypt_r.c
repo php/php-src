@@ -58,11 +58,6 @@
 MUTEX_T php_crypt_extended_init_lock;
 #endif
 
-/* TODO: enable it when enabling vista/2k8 mode in tsrm */
-#if 0
-CONDITION_VARIABLE initialized;
-#endif
-
 void php_init_crypt_r()
 {
 #ifdef ZTS

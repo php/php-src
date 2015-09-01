@@ -51,9 +51,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#if 0
-} /* fix autoindent */
-#endif
 #endif
 
 #include <zipconf.h>
@@ -168,17 +165,6 @@ extern "C" {
 
 #define ZIP_EM_NONE	       0  /* not encrypted */
 #define ZIP_EM_TRAD_PKWARE     1  /* traditional PKWARE encryption */
-#if 0 /* Strong Encryption Header not parsed yet */
-#define ZIP_EM_DES        0x6601  /* strong encryption: DES */
-#define ZIP_EM_RC2_OLD    0x6602  /* strong encryption: RC2, version < 5.2 */
-#define ZIP_EM_3DES_168   0x6603
-#define ZIP_EM_3DES_112   0x6609
-#define ZIP_EM_AES_128    0x660e
-#define ZIP_EM_AES_192    0x660f
-#define ZIP_EM_AES_256    0x6610
-#define ZIP_EM_RC2        0x6702  /* strong encryption: RC2, version >= 5.2 */
-#define ZIP_EM_RC4        0x6801
-#endif
 #define ZIP_EM_UNKNOWN    0xffff  /* unknown algorithm */
 
 #define ZIP_OPSYS_DOS	  	0x00u

@@ -607,12 +607,6 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 			}
 		}
 		if (tc) {
-#if 0
-			for (i = 0; (i < im->colorsTotal); i++) {
-				trans_values[i] = 255 - ((im->alpha[i] << 1) + (im->alpha[i] >> 6));
-			}
-			png_set_tRNS (png_ptr, info_ptr, trans_values, 256, NULL);
-#endif
 			if (!remap) {
 				remap = TRUE;
 			}

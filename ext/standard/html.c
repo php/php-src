@@ -899,26 +899,18 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 		/* we don't have complete unicode mappings for these yet in entity_decode,
 		 * and we opt to pass through the octet sequences for these in htmlentities
 		 * instead of converting to an int and then converting back. */
-#if 0
-		return php_mb2_int_to_char(buf, code);
-#else
 #if ZEND_DEBUG
 		assert(code <= 0xFFU);
 #endif
 		*buf = code;
 		return 1;
-#endif
 
 	case cs_eucjp:
-#if 0 /* idem */
-		return php_mb2_int_to_char(buf, code);
-#else
 #if ZEND_DEBUG
 		assert(code <= 0xFFU);
 #endif
 		*buf = code;
 		return 1;
-#endif
 
 	default:
 		assert(0);

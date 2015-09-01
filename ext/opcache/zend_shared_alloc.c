@@ -372,13 +372,6 @@ void zend_shared_alloc_lock(void)
 	tsrm_mutex_lock(zts_lock);
 #endif
 
-#if 0
-	/* this will happen once per process, and will un-globalize mem_write_lock */
-	if (mem_write_lock.l_pid == -1) {
-		mem_write_lock.l_pid = getpid();
-	}
-#endif
-
 	while (1) {
 		if (fcntl(lock_file, F_SETLKW, &mem_write_lock) == -1) {
 			if (errno == EINTR) {
