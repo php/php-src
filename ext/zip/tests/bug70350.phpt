@@ -15,7 +15,7 @@ $archive->addEmptyDir("../down2/");
 $archive->close();
 
 $archive2 = new ZipArchive();
-$archive2->open('a.zip');
+$archive2->open("$dir/a.zip");
 $archive2->extractTo($dir);
 $archive2->close();
 var_dump(file_exists("$dir/down2/"));
