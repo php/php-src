@@ -755,10 +755,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 #endif
 
-#ifdef ZEND_SIGNALS
-	zend_signal_startup();
-#endif
-
 	return SUCCESS;
 }
 /* }}} */

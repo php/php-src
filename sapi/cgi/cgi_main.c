@@ -1773,6 +1773,10 @@ int main(int argc, char *argv[])
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 #ifdef ZTS
 	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
 #else

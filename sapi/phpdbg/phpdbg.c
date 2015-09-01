@@ -1332,6 +1332,10 @@ int main(int argc, char **argv) /* {{{ */
 	tsrm_ls = ts_resource(0);
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 phpdbg_main:
 	ini_entries = NULL;
 	ini_entries_len = 0;
