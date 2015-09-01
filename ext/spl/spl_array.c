@@ -529,6 +529,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 					} else {
 						zval_ptr_dtor(data);
 						ZVAL_UNDEF(data);
+						ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 						zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
 						if (spl_array_is_object(intern)) {
 							spl_array_skip_protected(intern, ht);
@@ -1710,7 +1711,7 @@ SPL_METHOD(Array, unserialize)
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval members, zflags;
+	zval *members, *zflags;
 	HashTable *aht;
 	zend_long flags;
 
@@ -1737,14 +1738,15 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&zflags, &p, s + buf_len, &var_hash) || Z_TYPE(zflags) != IS_LONG) {
+	zflags = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(zflags, &p, s + buf_len, &var_hash) || Z_TYPE_P(zflags) != IS_LONG) {
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	flags = Z_LVAL(zflags);
+	flags = Z_LVAL_P(zflags);
 	/* flags needs to be verified and we also need to verify whether the next
-	 * thing we get is ';'. After that we require an 'm' or somethign else
+	 * thing we get is ';'. After that we require an 'm' or something else
 	 * where 'm' stands for members and anything else should be an array. If
 	 * neither 'a' or 'm' follows we have an error. */
 
@@ -1763,6 +1765,7 @@ SPL_METHOD(Array, unserialize)
 		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
+		var_push_dtor(&var_hash, &intern->array);
 	}
 	if (*p != ';') {
 		goto outexcept;
@@ -1775,18 +1778,15 @@ SPL_METHOD(Array, unserialize)
 	}
 	++p;
 
-	ZVAL_UNDEF(&members);
-	if (!php_var_unserialize(&members, &p, s + buf_len, &var_hash) || Z_TYPE(members) != IS_ARRAY) {
-		zval_ptr_dtor(&members);
+	members = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(members, &p, s + buf_len, &var_hash) || Z_TYPE_P(members) != IS_ARRAY) {
 		goto outexcept;
 	}
 
 	/* copy members */
-	object_properties_load(&intern->std, Z_ARRVAL(members));
-	zval_ptr_dtor(&members);
+	object_properties_load(&intern->std, Z_ARRVAL_P(members));
 
 	/* done reading $serialized */
-
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;
 
@@ -1797,8 +1797,8 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ arginfo and function tbale */
-ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
+/* {{{ arginfo and function table */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 

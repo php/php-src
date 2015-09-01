@@ -72,7 +72,7 @@ PHPDBG_INFO(files) /* {{{ */
 
 	phpdbg_try_access {
 		ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), fname) {
-			phpdbg_writeln("includedfile", "name=\"%s\"", "File: %s", fname);
+			phpdbg_writeln("includedfile", "name=\"%s\"", "File: %s", ZSTR_VAL(fname));
 		} ZEND_HASH_FOREACH_END();
 	} phpdbg_catch_access {
 		phpdbg_error("signalsegv", "", "Could not fetch file name, invalid data source, aborting included file listing");
@@ -274,7 +274,7 @@ retry_switch:
 
 #undef VARIABLEINFO
 			} phpdbg_catch_access {
-				phpdbg_writeln("variable", "address=\"%p\" name=\"%s\"", "%p\tn/a\tn/a\t$%s", data, var);
+				phpdbg_writeln("variable", "address=\"%p\" name=\"%s\"", "%p\tn/a\tn/a\t$%s", data, ZSTR_VAL(var));
 			} phpdbg_end_try_access();
 		} ZEND_HASH_FOREACH_END();
 	}

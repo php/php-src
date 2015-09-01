@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -39,8 +40,9 @@
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4)
+#define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 
-#define HASH_MASK_CONSISTENCY      0x60
+#define HASH_MASK_CONSISTENCY      0xc0
 
 typedef struct _zend_hash_key {
 	zend_ulong h;

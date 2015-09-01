@@ -384,6 +384,20 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 }
 /* }}} */
 
+void phpdbg_clean(zend_bool full) /* {{{ */
+{
+	/* this is implicitly required */
+	if (PHPDBG_G(ops)) {
+		destroy_op_array(PHPDBG_G(ops));
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
+
+	if (full) {
+		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
+	}
+} /* }}} */
+
 PHPDBG_COMMAND(exec) /* {{{ */
 {
 	zend_stat_t sb;
@@ -1389,28 +1403,15 @@ int phpdbg_interactive(zend_bool allow_async_unsafe) /* {{{ */
 	return ret;
 } /* }}} */
 
-void phpdbg_clean(zend_bool full) /* {{{ */
-{
-	/* this is implicitly required */
-	if (PHPDBG_G(ops)) {
-		if (destroy_op_array(PHPDBG_G(ops))) {
-			efree(PHPDBG_G(ops));
-		}
-		PHPDBG_G(ops) = NULL;
-	}
-
-	if (full) {
-		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
-	}
-} /* }}} */
-
-/* code may behave weirdly if EG(exception) is set */
+/* code may behave weirdly if EG(exception) is set; thus backup it */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
 	const zend_op *backup_opline; \
+	const zend_op *before_ex; \
 	if (exception) { \
 		if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) { \
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
+		before_ex = EG(opline_before_exception); \
 		++GC_REFCOUNT(exception); \
 		zend_clear_exception(); \
 	} \
@@ -1436,6 +1437,7 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 					Z_OBJ(zv) = exception; \
 					zend_throw_exception_internal(&zv); \
 				} \
+				EG(opline_before_exception) = before_ex; \
 			} \
 			/* fallthrough */ \
 		default: \
@@ -1626,7 +1628,13 @@ void phpdbg_force_interruption(void) /* {{{ */ {
 
 	if (data) {
 		if (data->func) {
-			phpdbg_notice("hardinterrupt", "opline=\"%p\" num=\"%lu\" file=\"%s\" line=\"%u\"", "Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename, data->opline->lineno);
+			if (ZEND_USER_CODE(data->func->type)) {
+				phpdbg_notice("hardinterrupt", "opline=\"%p\" num=\"%lu\" file=\"%s\" line=\"%u\"", "Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename->val, data->opline->lineno);
+			} else if (data->func->internal_function.function_name) {
+				phpdbg_notice("hardinterrupt", "func=\"%s\"", "Current opline: in internal function %s", data->func->internal_function.function_name->val);
+			} else {
+				phpdbg_notice("hardinterrupt", "", "Current opline: executing internal code");
+			}
 		} else {
 			phpdbg_notice("hardinterrupt", "opline=\"%p\"", "Current opline: %p (op_array information unavailable)", data->opline);
 		}

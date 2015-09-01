@@ -54,7 +54,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint idx;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 
@@ -64,6 +64,9 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 
 		while (hash_size >> 1 > ht->nNumUsed) {
 			hash_size >>= 1;
+		}
+		if (hash_size < -HT_MIN_MASK) {
+			hash_size = -HT_MIN_MASK;
 		}
 		ADD_SIZE(hash_size * sizeof(uint32_t) + ht->nNumUsed * sizeof(Bucket));
 	} else {

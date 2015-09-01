@@ -199,20 +199,18 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_long_ex(v);
-		return Z_LVAL_P(v);
+		return zval_get_long(v);
 	}
 	return defval;
 }
-static inline char *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, char *defval)
+static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
 {
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		convert_to_string_ex(v);
-		return estrndup(Z_STRVAL_P(v), Z_STRLEN_P(v));
+		return zval_get_string(v);
 	}
-	return defval ? estrdup(defval) : NULL;
+	return defval ? zend_string_copy(defval) : NULL;
 }
 /* }}} */
 

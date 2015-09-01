@@ -1539,6 +1539,11 @@ PHP_METHOD(SoapServer, handle)
 		return;
 	}
 
+	if (ZEND_NUM_ARGS() > 0 && ZEND_SIZE_T_INT_OVFL(arg_len)) {
+		soap_server_fault("Server", "Input string is too long", NULL, NULL, NULL);
+		return;
+	}
+
 	if (SG(request_info).request_method &&
 	    strcmp(SG(request_info).request_method, "GET") == 0 &&
 	    SG(request_info).query_string &&

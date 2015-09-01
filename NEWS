@@ -1,8 +1,115 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+03 Sep 2015, PHP 7.0.0 RC 2
+
+- Core:
+  . Fixed bug #70332 (Wrong behavior while returning reference on object).
+    (Laruence, Dmitry)
+  . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
+    (marcio dot web2 at gmail dot com)
+  . Fixed bug #70321 (Magic getter breaks reference to array property).
+    (Laruence)
+  . Fixed bug #70187 (Notice: unserialize(): Unexpected end of serialized data)
+    (Dmitry)
+  . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
+  . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
+    building extensions). (Adam)
+  . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
+
+- Curl:
+  . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
+    (Laruence)
+
+- Pcntl:
+  . Fixed bug #70386 (Can't compile on NetBSD because of missing WCONTINUED
+    and WIFCONTINUED). (Matteo)
+
+- PDO:
+  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+
+- PDO_OCI:
+  . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
+
+- SPL:
+  . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
+
+- Standard:
+  . Fixed bug #70342 (changing configuration with ignore_user_abort(true) isn't
+    working). (Laruence)
+  . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
+  . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
+
+- Reflection:
+  . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
+
+20 Aug 2015, PHP 7.0.0 RC 1
+
+- Core:
+  . Fixed bug #70299 (Memleak while assigning object offsetGet result).
+    (Laruence)
+  . Fixed bug #70288 (Apache crash related to ZEND_SEND_REF). (Laruence)
+  . Fixed bug #70262 (Accessing array crashes PHP 7.0beta3).
+    (Laruence, Dmitry)
+  . Fixed bug #70258 (Segfault if do_resize fails to allocated memory).
+    (Laruence)
+  . Fixed bug #70253 (segfault at _efree () in zend_alloc.c:1389). (Laruence)
+  . Fixed bug #70240 (Segfault when doing unset($var());). (Laruence)
+  . Fixed bug #70223 (Incrementing value returned by magic getter). (Laruence)
+  . Fixed bug #70215 (Segfault when __invoke is static). (Bob)
+  . Fixed bug #70207 (Finally is broken with opcache). (Laruence, Dmitry)
+  . Fixed bug #70173 (ZVAL_COPY_VALUE_EX broken for 32bit Solaris Sparc).
+    (Laruence, cmb)
+  . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
+  . Fixed bug #70198 (Checking liveness does not work as expected).
+    (Shafreeck Sea, Anatol Belski)
+  . Fixed bug #70241/#70293 (Skipped assertions affect Generator returns). (Bob)
+  . Fixed bug #70239 (Creating a huge array doesn't result in exhausted,
+    but segfault). (Laruence, Anatol)
+
+- CLI server:
+  . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
+    (wusuopu, cmb)
+  . Fixed bug #70264 (CLI server directory traversal). (cmb)
+
+- Date:
+  . Fixed bug #70245 (strtotime does not emit warning when 2nd parameter is
+    object or string). (cmb)
+  . Fixed bug #70266 (DateInterval::__construct.interval_spec is not supposed to
+    be optional). (cmb)
+  . Fixed bug #70277 (new DateTimeZone($foo) is ignoring text after null byte).
+    (cmb)
+
+- MCrypt:
+  . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
+
+- Opcache:
+  . Fixed bug #70237 (Empty while and do-while segmentation fault with opcode
+    on CLI enabled). (Dmitry, Laruence)
+
+- PCRE:
+  . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
+    match). (cmb)
+
+- PDO:
+  . Fixed bug #70272 (Segfault in pdo_mysql). (Laruence)
+  . Fixed bug #70221 (persistent sqlite connection + custom function
+    segfaults). (Laruence)
+
+- Phpdbg:
+  . Fixed bug #70214 (FASYNC not defined, needs sys/file.h include). (Bob)
+
+- Standard:
+  . Fixed bug #70250 (extract() turns array elements to references).
+    (Laruence)
+  . Fixed bug #70211 (php 7 ZEND_HASH_IF_FULL_DO_RESIZE use after free).
+    (Laruence)
+  . Fixed bug #70208 (Assert breaking access on objects). (Bob)
+
 06 Aug 2015, PHP 7.0.0 Beta 3
 
 - Core:
+  . Fixed "finally" issues. (Nikita, Dmitry)
+  . Fixed bug #70098 (Real memory usage doesn't decrease). (Dmitry)
   . Fixed bug #70159 (__CLASS__ is lost in closures). (Julien)
   . Fixed bug #70156 (Segfault in zend_find_alias_name). (Laruence)
   . Fixed bug #70124 (null ptr deref / seg fault in ZEND_HANDLE_EXCEPTION).
@@ -19,6 +126,12 @@ PHP                                                                        NEWS
     (Hugh Davenport)
   . Fixed bug #70182 (Segfault in ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER).
     (Hugh Davenport)
+  . Fixed bug #69793 (Remotely triggerable stack exhaustion via recursive
+    method calls). (Stas)
+  . Fixed bug #69892 (Different arrays compare indentical due to integer key
+    truncation). (Nikita)
+  . Fixed bug #70121 (unserialize() could lead to unexpected methods execution
+    / NULL pointer deref). (Stas)
 
 - Curl:
   . Fixed bug #70163 (curl_setopt_array() type confusion). (Laruence)
@@ -31,13 +144,36 @@ PHP                                                                        NEWS
   . Fixed bug #70111 (Segfault when a function uses both an explicit return
     type and an explicit cast). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #70014 (openssl_random_pseudo_bytes() is not cryptographically
+    secure). (Stas)
+
+- Phar:
+  . Improved fix for bug #69441. (Anatol Belski)
+  . Fixed bug #70019 (Files extracted from archive may be placed outside of 
+    destination directory). (Anatol Belski)
+
 - Phpdbg: 
   . Fixed bug #70138 (Segfault when displaying memory leaks). (Bob)
 
+- SOAP:
+  . Fixed bug #70081 (SoapClient info leak / null pointer dereference via
+     multiple type confusions). (Stas)
+
+- SPL:
+  . Fixed bug #70068 (Dangling pointer in the unserialization of ArrayObject
+    items). (sean.heelan)
+  . Fixed bug #70166 (Use After Free Vulnerability in unserialize() with
+    SPLArrayObject). (taoguangchen at icloud dot com)
+  . Fixed bug #70168 (Use After Free Vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70169 (Use After Free Vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
+
 - Standard:
   . Fixed bug #70140 (str_ireplace/php_string_tolower - Arbitrary Code
-  . Implemented #70112 (Allow "dirname" to go up various times). (Remi)
     Execution). (Laruence)
+  . Implemented FR #70112 (Allow "dirname" to go up various times). (Remi)
   . Fixed bug #36365 (scandir duplicates file name at every 65535th file). (cmb)
 
 23 Jul 2015, PHP 7.0.0 Beta 2
@@ -294,6 +430,7 @@ PHP                                                                        NEWS
   . Improved zend_qsort(using hybrid sorting algo) for better performance, 
     and also renamed zend_qsort to zend_sort. (Laruence)
   . Added stable sorting algo zend_insert_sort. (Laruence)
+  . Improved zend_memnchr(using sunday algo) for better performance. (Laruence)
   . Implemented the RFC `Scalar Type Decalarations v0.5`. (Anthony)
   . Implemented the RFC `Group Use Declarations`. (Marcio)
   . Implemented the RFC `Continue Output Buffering`. (Mike)
@@ -398,7 +535,7 @@ PHP                                                                        NEWS
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
-  . Added wifcontinued and wcontinued. (xilon-jul)
+  . Request #68505 (Added wifcontinued and wcontinued). (xilon-jul)
   . Added rusage support to pcntl_wait() and pcntl_waitpid(). (Anton Stepanenko,
     Tony)
 

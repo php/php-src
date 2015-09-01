@@ -25,9 +25,9 @@
 #include "zend_smart_str.h"
 #include "zend_inheritance.h"
 
-static void ptr_dtor(zval *zv) /* {{{ */
+static void overriden_ptr_dtor(zval *zv) /* {{{ */
 {
-	efree(Z_PTR_P(zv));
+	efree_size(Z_PTR_P(zv), sizeof(zend_function));
 }
 /* }}} */
 
@@ -213,15 +213,11 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		}
 
 		if (strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
-			const char *colon;
-
 			if (fe->common.type != ZEND_USER_FUNCTION) {
 				zend_string_release(proto_class_name);
 				zend_string_release(fe_class_name);
 				return 0;
-			} else if (strchr(ZSTR_VAL(proto_class_name), '\\') != NULL ||
-					(colon = zend_memrchr(ZSTR_VAL(fe_class_name), '\\', ZSTR_LEN(fe_class_name))) == NULL ||
-					strcasecmp(colon+1, ZSTR_VAL(proto_class_name)) != 0) {
+			} else {
 				zend_class_entry *fe_ce, *proto_ce;
 
 				fe_ce = zend_lookup_class(fe_class_name);
@@ -345,7 +341,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 }
 /* }}} */
 
-static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
+static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
 	if (arg_info->class_name) {
 		const char *class_name;
@@ -387,7 +383,7 @@ static void zend_append_type_hint(smart_str *str, const zend_function *fptr, zen
 }
 /* }}} */
 
-static zend_string *zend_get_function_declaration(const zend_function *fptr) /* {{{ */
+static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function *fptr) /* {{{ */
 {
 	smart_str str = {0};
 
@@ -917,7 +913,13 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
-		ZVAL_MAKE_REF(zv);
+		if (!Z_ISREF_P(zv)) {
+			if (iface->type == ZEND_INTERNAL_CLASS) {
+				ZVAL_NEW_PERSISTENT_REF(zv, zv);
+			} else {
+				ZVAL_NEW_REF(zv, zv);
+			}
+		}
 		Z_ADDREF_P(zv);
 		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1098,7 +1100,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				}
 			} else {
 				ALLOC_HASHTABLE(*overriden);
-				zend_hash_init_ex(*overriden, 8, NULL, ptr_dtor, 0, 0);
+				zend_hash_init_ex(*overriden, 8, NULL, overriden_ptr_dtor, 0, 0);
 			}
 			zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
 			return;

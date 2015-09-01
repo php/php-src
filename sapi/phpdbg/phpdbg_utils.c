@@ -26,11 +26,16 @@
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 
-#if defined(HAVE_SYS_IOCTL_H)
-#	include "sys/ioctl.h"
-#	ifndef GWINSZ_IN_SYS_IOCTL
-#		include <termios.h>
-#	endif
+/* FASYNC under Solaris */
+#ifdef HAVE_SYS_FILE_H
+# include <sys/file.h>
+#endif
+
+#ifdef HAVE_SYS_IOCTL_H
+# include "sys/ioctl.h"
+# ifndef GWINSZ_IN_SYS_IOCTL
+#  include <termios.h>
+# endif
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -347,7 +352,7 @@ PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd) {
-#ifndef _WIN32
+#if !defined(_WIN32) && defined(FASYNC)
 	int flags;
 	fcntl(STDIN_FILENO, F_SETOWN, getpid());
 	flags = fcntl(STDIN_FILENO, F_GETFL);

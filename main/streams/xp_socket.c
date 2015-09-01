@@ -77,10 +77,10 @@ retry:
 	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
 
 	if (didwrite <= 0) {
-		long err = php_socket_errno();
+		int err = php_socket_errno();
 		char *estr;
 
-		if (sock->is_blocked && err == EWOULDBLOCK) {
+		if (sock->is_blocked && (err == EWOULDBLOCK || err == EAGAIN)) {
 			int retval;
 
 			sock->timeout_event = 0;
@@ -152,6 +152,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t nr_bytes = 0;
+	int err;
 
 	if (!sock || sock->socket == -1) {
 		return 0;
@@ -164,8 +165,9 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
+	err = php_socket_errno();
 
-	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK));
+	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && err != EWOULDBLOCK && err != EAGAIN));
 
 	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
@@ -314,7 +316,17 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					if (0 >= recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EWOULDBLOCK) {
+#ifdef PHP_WIN32
+					int ret;
+#else
+					ssize_t ret;
+#endif
+					int err;
+
+					ret = recv(sock->socket, &buf, sizeof(buf), MSG_PEEK);
+					err = php_socket_errno();
+					if (0 == ret || /* the counterpart did properly shutdown*/
+						(0 > ret && err != EWOULDBLOCK && err != EAGAIN)) { /* there was an unrecoverable error */
 						alive = 0;
 					}
 				}
