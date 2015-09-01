@@ -981,7 +981,8 @@ PHP_FUNCTION(unserialize)
 		*old_rval = *return_value;
 		zval_copy_ctor(old_rval);
 		var_push_dtor_no_addref(&var_hash, &return_value);
-		var_push_dtor_no_addref(&var_hash, &old_rval);
+		/* FIXME: old_rval is not freed in some scenarios, see bug #70172
+		   var_push_dtor_no_addref(&var_hash, &old_rval); */
 	} else {
 		var_push_dtor(&var_hash, &return_value);
 	}
