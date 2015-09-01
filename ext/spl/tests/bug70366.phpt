@@ -1,5 +1,5 @@
 --TEST--
-SPL: Bug #70365 use-after-free vulnerability in unserialize() with SplObjectStorage
+SPL: Bug #70366 use-after-free vulnerability in unserialize() with SplDoublyLinkedList
 --FILE--
 <?php
 class obj {
@@ -16,8 +16,8 @@ $fakezval .= "\x01";
 $fakezval .= "\x00";
 $fakezval .= "\x00\x00";
 
-$inner = 'x:i:1;O:8:"stdClass":0:{},i:1;;m:a:0:{}';
-$exploit = 'a:5:{i:0;i:1;i:1;C:16:"SplObjectStorage":'.strlen($inner).':{'.$inner.'}i:2;O:3:"obj":1:{s:4:"ryat";R:3;}i:3;R:6;i:4;s:'.strlen($fakezval).':"'.$fakezval.'";}';
+$inner = 'i:1234;:i:1;';
+$exploit = 'a:5:{i:0;i:1;i:1;C:19:"SplDoublyLinkedList":'.strlen($inner).':{'.$inner.'}i:2;O:3:"obj":1:{s:4:"ryat";R:3;}i:3;a:1:{i:0;R:5;}i:4;s:'.strlen($fakezval).':"'.$fakezval.'";}';
 
 $data = unserialize($exploit);
 
@@ -32,6 +32,7 @@ function ptr2str($ptr)
 	}
 	return $out;
 }
+?>
 --EXPECTF--
 array(5) {
   [0]=>
@@ -44,7 +45,10 @@ array(5) {
     &int(1)
   }
   [3]=>
-  int(1)
+  array(1) {
+    [0]=>
+    int(1)
+  }
   [4]=>
   string(24) "%s"
 }

@@ -1221,6 +1221,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 			zval_ptr_dtor(&elem);
 			goto error;
 		}
+		var_push_dtor(&var_hash, &elem);
 
 		spl_ptr_llist_push(intern->llist, elem TSRMLS_CC);
 	}
