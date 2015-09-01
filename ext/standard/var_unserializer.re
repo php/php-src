@@ -67,7 +67,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 
 	var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+	fprintf(stderr, "var_push_dtor(%p, %ld): %d\n", *rval, var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -98,7 +98,7 @@ PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval **rv
 
     var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor_no_addref(%ld): %d (%d)\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
+	fprintf(stderr, "var_push_dtor_no_addref(%p, %ld): %d (%d)\n", *rval, var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -177,6 +177,9 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
+#if VAR_ENTRIES_DBG
+    fprintf(stderr, "var_destroy dtor(%p, %ld)\n", var_hash->data[i], Z_REFCOUNT_P(var_hash->data[i]));
+#endif
 			zval_ptr_dtor(&var_hash->data[i]);
 		}
 		next = var_hash->next;
@@ -501,7 +504,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	if (*rval != NULL) {
-		zval_ptr_dtor(rval);
+		var_push_dtor_no_addref(var_hash, rval);
 	}
 	*rval = *rval_ref;
 	Z_ADDREF_PP(rval);
@@ -660,6 +663,7 @@ use_double:
 	long elements = parse_iv(start + 2);
 	/* use iv() not uiv() in order to check data range */
 	*p = YYCURSOR;
+    if (!var_hash) return 0;
 
 	if (elements < 0) {
 		return 0;
@@ -677,6 +681,7 @@ use_double:
 }
 
 "o:" iv ":" ["] {
+    if (!var_hash) return 0;
 
 	INIT_PZVAL(*rval);
 
@@ -699,6 +704,7 @@ object ":" uiv ":" ["]	{
 	zval **args[1];
 	zval *arg_func_name;
 
+    if (!var_hash) return 0;
 	if (*start == 'C') {
 		custom_object = 1;
 	}
