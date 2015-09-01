@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
     building extensions). (Adam)
   . Fixed bug causing exception traces with anon classes to be truncated. (Bob)
+  . Fixed bug #70397 (Segmentation fault when using Closure::call and yield).
+    (Bob)
 
 - Curl:
   . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
