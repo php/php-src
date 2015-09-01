@@ -630,7 +630,7 @@ static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned c
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
-	zval zv, *zv_ptr = &zv;
+	zval *zv_ptr;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
 
@@ -640,7 +640,7 @@ static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned c
 	p = buf;
 	max = buf + buf_len;
 
-	INIT_ZVAL(zv);
+	ALLOC_INIT_ZVAL(zv_ptr);
 	if (!php_var_unserialize(&zv_ptr, &p, max, &unserialize_data TSRMLS_CC)
 		|| Z_TYPE_P(zv_ptr) != IS_STRING
 		|| convert_to_gmp(gmpnum, zv_ptr, 10 TSRMLS_CC) == FAILURE
@@ -648,9 +648,9 @@ static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned c
 		zend_throw_exception(NULL, "Could not unserialize number", 0 TSRMLS_CC);
 		goto exit;
 	}
-	zval_dtor(&zv);
+	var_push_dtor_no_addref(&unserialize_data, &zv_ptr);
 
-	INIT_ZVAL(zv);
+	ALLOC_INIT_ZVAL(zv_ptr);
 	if (!php_var_unserialize(&zv_ptr, &p, max, &unserialize_data TSRMLS_CC)
 		|| Z_TYPE_P(zv_ptr) != IS_ARRAY
 	) {
@@ -667,7 +667,7 @@ static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned c
 
 	retval = SUCCESS;
 exit:
-	zval_dtor(&zv);
+	var_push_dtor_no_addref(&unserialize_data, &zv_ptr);
 	PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
 	return retval;
 }
