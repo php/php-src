@@ -859,6 +859,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 			zval_ptr_dtor(&pentry);
 			goto outexcept;
 		}
+		var_push_dtor(&var_hash, &pentry);
 		if(Z_TYPE_P(pentry) != IS_OBJECT) {
 			zval_ptr_dtor(&pentry);
 			goto outexcept;
@@ -870,6 +871,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 				zval_ptr_dtor(&pinf);
 				goto outexcept;
 			}
+			var_push_dtor(&var_hash, &pinf);
 		}
 
 		hash = spl_object_storage_get_hash(intern, getThis(), pentry, &hash_len TSRMLS_CC);
