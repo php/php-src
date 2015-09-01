@@ -216,16 +216,18 @@ static char *php_session_encode(int *newlen TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void php_session_decode(const char *val, int vallen TSRMLS_DC) /* {{{ */
+static int php_session_decode(const char *val, int vallen TSRMLS_DC) /* {{{ */
 {
 	if (!PS(serializer)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
-		return;
+		return FAILURE;
 	}
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed");
+		return FAILURE;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -419,7 +421,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	
+
 	outid = emalloc((size_t)((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5)));
 	j = (int) (bin_to_readable((char *)digest, digest_len, outid, (char)PS(hash_bits_per_character)) - outid);
 	efree(digest);
@@ -946,8 +948,11 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+			} else {
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				return FAILURE;
 			}
-			zval_ptr_dtor(&current);
+			var_push_dtor_no_addref(&var_hash, &current);
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
@@ -1038,8 +1043,13 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+			} else {
+				var_push_dtor_no_addref(&var_hash, &current);
+				efree(name);
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				return FAILURE;
 			}
-			zval_ptr_dtor(&current);
+			var_push_dtor_no_addref(&var_hash, &current);
 		}
 		PS_ADD_VARL(name, namelen);
 skip:
@@ -1863,7 +1873,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 		efree(name);
 	}
-	
+
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
@@ -2043,9 +2053,7 @@ static PHP_FUNCTION(session_decode)
 		return;
 	}
 
-	php_session_decode(str, str_len TSRMLS_CC);
-
-	RETURN_TRUE;
+	RETVAL_BOOL(php_session_decode(str, str_len TSRMLS_CC) == SUCCESS);
 }
 /* }}} */
 
@@ -2660,12 +2668,12 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_START: {
 			multipart_event_file_start *data = (multipart_event_file_start *) event_data;
 
-			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set 
+			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set
 			 * or when we have no session id */
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			/* First FILE_START event, initializing data */
 			if (!progress->data) {
 
@@ -2715,7 +2723,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_zval_ex(progress->current_file, "bytes_processed", sizeof("bytes_processed"), progress->current_file_bytes_processed);
 
 			add_next_index_zval(progress->files, progress->current_file);
-			
+
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
@@ -2727,7 +2735,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
@@ -2740,7 +2748,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			if (data->temp_filename) {
 				add_assoc_string_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename, 1);
 			}
