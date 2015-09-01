@@ -64,6 +64,7 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps)
 
 static int php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
 static int (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
+static void php_session_track_init(void);
 
 /* SessionHandler class */
 zend_class_entry *php_session_class_entry;
@@ -138,6 +139,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 static int php_session_destroy(void) /* {{{ */
 {
 	int retval = SUCCESS;
+	zend_string *var_name;
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Trying to destroy uninitialized session");
@@ -235,6 +237,7 @@ static int php_session_decode(zend_string *data) /* {{{ */
 	}
 	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
 		php_session_destroy();
+		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
 		return FAILURE;
 	}
@@ -952,6 +955,8 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 				var_replace(&var_hash, &current, zv);
 			} else {
 				zval_ptr_dtor(&current);
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				return FAILURE;
 			}
 		}
 		PS_ADD_VARL(name);
@@ -1042,6 +1047,8 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 				var_replace(&var_hash, &current, zv);
 			} else {
 				zval_ptr_dtor(&current);
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				return FAILURE;
 			}
 		}
 		PS_ADD_VARL(name);
@@ -2169,8 +2176,7 @@ static PHP_FUNCTION(session_decode)
 	}
 
 	if (php_session_decode(str) == FAILURE) {
-		/* FIXME: session_decode() should return FALSE */
-		/* RETURN_FALSE; */
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }

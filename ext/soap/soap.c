@@ -1505,7 +1505,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL);
 		}
 		soap_server_fault_ex(function, &exception_object, NULL);
-	} 
+	}
 }
 /* }}} */
 
@@ -2924,8 +2924,10 @@ PHP_METHOD(SoapClient, __call)
 				free_soap_headers = 1;
 			}
 			ZEND_HASH_FOREACH_VAL(default_headers, tmp) {
-				Z_ADDREF_P(tmp);
-				zend_hash_next_index_insert(soap_headers, tmp);
+				if(Z_TYPE_P(tmp) == IS_OBJECT) {
+					Z_ADDREF_P(tmp);
+					zend_hash_next_index_insert(soap_headers, tmp);
+				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			soap_headers = Z_ARRVAL_P(tmp);
@@ -4332,9 +4334,14 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		zval* header;
 
 		ZEND_HASH_FOREACH_VAL(soap_headers, header) {
-			HashTable *ht = Z_OBJPROP_P(header);
+			HashTable *ht;
 			zval *name, *ns, *tmp;
 
+			if (Z_TYPE_P(header) != IS_OBJECT) {
+				continue;
+			}
+
+			ht = Z_OBJPROP_P(header);
 			if ((name = zend_hash_str_find(ht, "name", sizeof("name")-1)) != NULL &&
 			    Z_TYPE_P(name) == IS_STRING &&
 			    (ns = zend_hash_str_find(ht, "namespace", sizeof("namespace")-1)) != NULL &&

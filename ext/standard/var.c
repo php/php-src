@@ -1045,6 +1045,7 @@ PHP_FUNCTION(unserialize)
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
 	HashTable *class_hash = NULL;
+	zval *old_rval = return_value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
