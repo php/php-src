@@ -336,7 +336,7 @@ PHP_HASH_API void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 
 	/* Pad out to 118 mod 128.
 	 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	index = (unsigned int) ((context->count[0] >> 3) & 0x7f);
 	padLen = (index < 118) ? (118 - index) : (246 - index);
 	PHP_HAVALUpdate(context, PADDING, padLen);
 
@@ -390,7 +390,7 @@ PHP_HASH_API void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 
 	/* Pad out to 118 mod 128.
 	 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	index = (unsigned int) ((context->count[0] >> 3) & 0x7f);
 	padLen = (index < 118) ? (118 - index) : (246 - index);
 	PHP_HAVALUpdate(context, PADDING, padLen);
 
@@ -444,7 +444,7 @@ PHP_HASH_API void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 
 	/* Pad out to 118 mod 128.
 	 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	index = (unsigned int) ((context->count[0] >> 3) & 0x7f);
 	padLen = (index < 118) ? (118 - index) : (246 - index);
 	PHP_HAVALUpdate(context, PADDING, padLen);
 
@@ -484,7 +484,7 @@ PHP_HASH_API void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 
 	/* Pad out to 118 mod 128.
 	 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	index = (unsigned int) ((context->count[0] >> 3) & 0x7f);
 	padLen = (index < 118) ? (118 - index) : (246 - index);
 	PHP_HAVALUpdate(context, PADDING, padLen);
 
@@ -525,7 +525,7 @@ PHP_HASH_API void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * conte
 
 	/* Pad out to 118 mod 128.
 	 */
-	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
+	index = (unsigned int) ((context->count[0] >> 3) & 0x7f);
 	padLen = (index < 118) ? (118 - index) : (246 - index);
 	PHP_HAVALUpdate(context, PADDING, padLen);
 

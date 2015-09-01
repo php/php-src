@@ -49,7 +49,7 @@ array(3) {
 }
 
 Warning: session_decode(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
+bool(false)
 array(3) {
   ["foo"]=>
   int(1234567890)
