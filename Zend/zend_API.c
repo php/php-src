@@ -2941,6 +2941,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			if (lmname != Z_STR_P(callable)) {
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
+			fcc->initialized = 1;
 			return 1;
 		} else {
 			if (lmname == Z_STR_P(callable)) {
@@ -2951,6 +2952,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			zend_str_tolower(ZSTR_VAL(lmname), ZSTR_LEN(lmname));
 			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
+				fcc->initialized = 1;
 				return 1;
 			}
 		}
