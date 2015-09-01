@@ -1,5 +1,7 @@
 --TEST--
 recode_string() function - Testing string conversions between latin1, UTF-8 and html
+--SKIPIF--
+<?php if (!extension_loaded("recode")) print "skip"; ?>
 --FILE--
 <?php
 function ascii2hex($ascii) {
