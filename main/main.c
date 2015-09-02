@@ -1767,6 +1767,12 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
+	/* Output buffer handlers may have created new objects. Mark these objects
+           as destructed to avoid calling their dtors too late on shutdown when
+           all dtors were supposed to be cleaned
+        */
+	zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+
 	/* 4. Reset max_execution_time (no longer executing php code after response sent) */
 	zend_try {
 		zend_unset_timeout(TSRMLS_C);
