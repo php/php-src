@@ -5594,11 +5594,14 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), Z_STRLEN_PP(val), "^([+-]{0,1}[0-9]+)|([+-]{0,1}[0-9]*[\\.][0-9]+)|([+-]{0,1}[0-9]+[\\.][0-9]*)$", 0 TSRMLS_CC) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), Z_STRLEN_PP(val), "^([+-]{0,1}[0-9]+)|([+-]{0,1}[0-9]*[\\.][0-9]+)|([+-]{0,1}[0-9]+[\\.][0-9]*)|([+-]{0,1}(inf)(inity){0,1})$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
 								ZVAL_STRING(new_val, Z_STRVAL_PP(val), 1);
+								if(strcasestr(Z_STRVAL_PP(val),"inf")!=0){
+									php_pgsql_add_quotes(new_val, 1 TSRMLS_CC);
+								}
 							}
 						}
 						break;
