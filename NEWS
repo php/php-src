@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
     (Laruence)
 
+- Mysqli:
+  . Fixed bug#32490 (constructor of mysqli has wrong name). (cmb)
+
 - Pcntl:
   . Fixed bug #70386 (Can't compile on NetBSD because of missing WCONTINUED
     and WIFCONTINUED). (Matteo)
