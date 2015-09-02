@@ -133,7 +133,7 @@ PHP_FUNCTION(random_bytes)
 	}
 
 	if (size < 1) {
-		zend_throw_exception(zend_ce_type_error, "Length must be greater than 0", 0);
+		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
 		return;
 	}
 
@@ -164,7 +164,7 @@ PHP_FUNCTION(random_int)
 	}
 
 	if (min >= max) {
-		zend_throw_exception(zend_ce_type_error, "Minimum value must be less than the maximum value", 0);
+		zend_throw_exception(zend_ce_error, "Minimum value must be less than the maximum value", 0);
 		return;
 	}
 

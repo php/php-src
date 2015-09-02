@@ -12,7 +12,7 @@ try {
 
 try {
     $bytes = random_bytes(0);
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage().PHP_EOL;
 }
 

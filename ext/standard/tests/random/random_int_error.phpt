@@ -18,13 +18,13 @@ try {
 
 try {
     $randomInt = random_int(42,0);
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage().PHP_EOL;
 }
 
 try {
     $randomInt = random_int(42,42);
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage().PHP_EOL;
 }
 
