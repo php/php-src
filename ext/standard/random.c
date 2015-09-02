@@ -80,7 +80,7 @@ static int php_random_bytes(void *bytes, size_t size)
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
-		zend_throw_exception(NULL, "Could not gather sufficient random data", 0);
+		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF
@@ -96,7 +96,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		fd = open("/dev/urandom", O_RDONLY);
 #endif
 		if (fd < 0) {
-			zend_throw_exception(NULL, "Cannot open source device", 0);
+			zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
 			return FAILURE;
 		}
 
@@ -112,7 +112,7 @@ static int php_random_bytes(void *bytes, size_t size)
 	}
 
 	if (read_bytes < size) {
-		zend_throw_exception(NULL, "Could not gather sufficient random data", 0);
+		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #endif
@@ -141,7 +141,7 @@ PHP_FUNCTION(random_bytes)
 
 	if (php_random_bytes(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release(bytes);
-		RETURN_FALSE;
+		return;
 	}
 
 	ZSTR_VAL(bytes)[size] = '\0';
@@ -171,7 +171,7 @@ PHP_FUNCTION(random_int)
 	umax = max - min;
 
 	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Special case where no modulus is required */
@@ -190,7 +190,7 @@ PHP_FUNCTION(random_int)
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (result > limit) {
 			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		}
 	}
