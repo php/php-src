@@ -94,13 +94,15 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size = -(int32_t)ht->nTableMask;
+		int32_t hash_size;
 
-		while (hash_size >> 1 > ht->nNumUsed) {
-			hash_size >>= 1;
-		}
-		if (hash_size < -HT_MIN_MASK) {
-			hash_size = -HT_MIN_MASK;
+		if (ht->nNumUsed <= HT_MIN_SIZE) {
+			hash_size = HT_MIN_SIZE;
+		} else {
+			hash_size = -(int32_t)ht->nTableMask;
+			while (hash_size >> 1 > ht->nNumUsed) {
+				hash_size >>= 1;
+			}
 		}
 		ht->nTableMask = -hash_size;
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
@@ -174,13 +176,15 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
-		int32_t hash_size = -(int32_t)ht->nTableMask;
+		int32_t hash_size;
 
-		while (hash_size >> 1 > ht->nNumUsed) {
-			hash_size >>= 1;
-		}
-		if (hash_size < -HT_MIN_MASK) {
-			hash_size = -HT_MIN_MASK;
+		if (ht->nNumUsed <= HT_MIN_SIZE) {
+			hash_size = HT_MIN_SIZE;
+		} else {
+			hash_size = -(int32_t)ht->nTableMask;
+			while (hash_size >> 1 > ht->nNumUsed) {
+				hash_size >>= 1;
+			}
 		}
 		ht->nTableMask = -hash_size;
 		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
