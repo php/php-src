@@ -139,7 +139,6 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 static int php_session_destroy(void) /* {{{ */
 {
 	int retval = SUCCESS;
-	zend_string *var_name;
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Trying to destroy uninitialized session");
@@ -1048,6 +1047,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 			} else {
 				zval_ptr_dtor(&current);
 				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				zend_string_release(name);
 				return FAILURE;
 			}
 		}
