@@ -206,7 +206,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 
 	char *fname = (char*)dbcolname(H->link, colno+1);
 	char computed_buf[16];
-	if (*fname) {
+	if (fname && *fname) {
 		col->name = estrdup(fname);
 	} else {
 		snprintf(computed_buf,16,"computed%d", colno);
