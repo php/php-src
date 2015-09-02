@@ -49,7 +49,7 @@ TSRMLS_CACHE_UPDATE();
 	globals->shm	 = NULL;
 	globals->process_size = 0;
 	globals->shm_size	  = 0;
-	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
+	globals->comspec = _strdup("cmd.exe");
 
 	/* Set it to INVALID_HANDLE_VALUE
 	 * It will be initialized correctly in tsrm_win32_access or set to

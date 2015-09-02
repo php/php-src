@@ -942,7 +942,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 		if ((tmp = zend_hash_find(&EG(symbol_table), name))) {
 			if ((Z_TYPE_P(tmp) == IS_ARRAY && Z_ARRVAL_P(tmp) == &EG(symbol_table)) || tmp == &PS(http_session_vars)) {
-				efree(name);
+				zend_string_release(name);
 				continue;
 			}
 		}
@@ -954,6 +954,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 				var_replace(&var_hash, &current, zv);
 			} else {
 				zval_ptr_dtor(&current);
+				zend_string_release(name);
 				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 				return FAILURE;
 			}
