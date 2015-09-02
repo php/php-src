@@ -964,7 +964,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, int pages_count ZEND_FILE_L
 				/* skip free blocks */
 				while (tmp == 0) {
 					i += ZEND_MM_BITSET_LEN;
-					if (i >= free_tail) {
+					if (i >= free_tail || i == ZEND_MM_PAGES) {
 						len = ZEND_MM_PAGES - page_num;
 						if (len >= pages_count && len < best_len) {
 							chunk->free_tail = page_num + pages_count;
