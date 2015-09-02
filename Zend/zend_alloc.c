@@ -459,7 +459,18 @@ static void *zend_mm_mmap(size_t size)
 	}
 	return ptr;
 #else
-	void *ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr;
+
+#ifdef MAP_HUGETLB
+	if (size == ZEND_MM_CHUNK_SIZE) {
+		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
+		if (ptr != MAP_FAILED) {
+			return ptr;
+		}
+	}
+#endif
+
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR
