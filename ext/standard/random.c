@@ -128,13 +128,13 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
 	}
 
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_type_error, "Length must be greater than 0", 0);
+		return;
 	}
 
 	bytes = zend_string_alloc(size, 0);
@@ -159,13 +159,13 @@ PHP_FUNCTION(random_int)
 	zend_ulong umax;
 	zend_ulong result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
 		return;
 	}
 
 	if (min >= max) {
-		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_type_error, "Minimum value must be less than the maximum value", 0);
+		return;
 	}
 
 	umax = max - min;
@@ -186,7 +186,7 @@ PHP_FUNCTION(random_int)
 	if ((umax & (umax - 1)) != 0) {
 		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
-	
+
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (result > limit) {
 			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
