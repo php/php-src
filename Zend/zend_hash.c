@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -32,12 +33,12 @@
 
 #if ZEND_DEBUG
 /*
-#define HASH_MASK_CONSISTENCY	0x60
+#define HASH_MASK_CONSISTENCY	0xc0
 */
 #define HT_OK					0x00
-#define HT_IS_DESTROYING		0x20
-#define HT_DESTROYED			0x40
-#define HT_CLEANING				0x60
+#define HT_IS_DESTROYING		0x40
+#define HT_DESTROYED			0x80
+#define HT_CLEANING				0xc0
 
 static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line)
 {
@@ -136,7 +137,20 @@ static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
 		(ht)->nTableMask = -(ht)->nTableSize;
 		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), (ht)->u.flags & HASH_FLAG_PERSISTENT));
 		(ht)->u.flags |= HASH_FLAG_INITIALIZED;
-		HT_HASH_RESET(ht);
+		if (EXPECTED(ht->nTableMask == -8)) {
+			Bucket *arData = ht->arData;
+
+			HT_HASH_EX(arData, -8) = -1;
+			HT_HASH_EX(arData, -7) = -1;
+			HT_HASH_EX(arData, -6) = -1;
+			HT_HASH_EX(arData, -5) = -1;
+			HT_HASH_EX(arData, -4) = -1;
+			HT_HASH_EX(arData, -3) = -1;
+			HT_HASH_EX(arData, -2) = -1;
+			HT_HASH_EX(arData, -1) = -1;
+		} else {
+			HT_HASH_RESET(ht);
+		}
 	}
 }
 
@@ -1954,7 +1968,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, H
     uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
@@ -1974,7 +1988,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 	uint32_t idx;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	idx = ht->nNumUsed;
 	while (idx > 0) {
@@ -1993,7 +2007,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (1) {
@@ -2017,7 +2031,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPositi
 	uint32_t idx = *pos;
 
 	IS_CONSISTENT(ht);
-	HT_ASSERT(ht->nInternalPointer != &pos || GC_REFCOUNT(ht) == 1);
+	HT_ASSERT(&ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
 	if (idx != HT_INVALID_IDX) {
 		while (idx > 0) {

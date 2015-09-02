@@ -31,6 +31,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
 #include "php_streams.h"
+#include "zend_exceptions.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -110,10 +111,10 @@ PHPDBG_LIST(class) /* {{{ */
 			if (ce->info.user.filename) {
 				phpdbg_list_file(ce->info.user.filename, ce->info.user.line_end - ce->info.user.line_start + 1, ce->info.user.line_start, 0);
 			} else {
-				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", ce->name);
+				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", ZSTR_VAL(ce->name));
 			}
 		} else {
-			phpdbg_error("list", "type=\"internalclass\" class=\"%s\"", "The class requested (%s) is not user defined", ce->name);
+			phpdbg_error("list", "type=\"internalclass\" class=\"%s\"", "The class requested (%s) is not user defined", ZSTR_VAL(ce->name));
 		}
 	} else {
 		phpdbg_error("list", "type=\"notfound\" class=\"%s\"", "The requested class (%s) could not be found", param->str);
@@ -151,7 +152,7 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 		lastline = data->lines;
 	}
 
-	phpdbg_xml("<list %r file=\"%s\">", filename);
+	phpdbg_xml("<list %r file=\"%s\">", ZSTR_VAL(filename));
 
 	for (line = offset; line < lastline;) {
 		uint linestart = data->line[line++];
@@ -318,6 +319,53 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	return op_array;
 }
 
+zend_op_array *phpdbg_compile_string(zval *source_string, char *filename) {
+	zend_string *fake_name;
+	zend_op_array *op_array;
+	phpdbg_file_source *dataptr;
+	uint line;
+	char *bufptr, *endptr;
+
+	if (PHPDBG_G(flags) & PHPDBG_IN_EVAL) {
+		return PHPDBG_G(compile_string)(source_string, filename);
+	}
+
+	dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint) * Z_STRLEN_P(source_string));
+	dataptr->buf = estrndup(Z_STRVAL_P(source_string), Z_STRLEN_P(source_string));
+	dataptr->len = Z_STRLEN_P(source_string);
+	dataptr->line[0] = 0;
+	for (line = 0, bufptr = dataptr->buf - 1, endptr = dataptr->buf + dataptr->len; ++bufptr < endptr;) {
+		if (*bufptr == '\n') {
+			dataptr->line[++line] = (uint)(bufptr - dataptr->buf) + 1;
+		}
+	}
+	dataptr->lines = ++line;
+	dataptr->line[line] = endptr - dataptr->buf;
+
+	op_array = PHPDBG_G(compile_string)(source_string, filename);
+
+	if (op_array == NULL) {
+		efree(dataptr->buf);
+		efree(dataptr);
+		return NULL;
+	}
+
+	fake_name = strpprintf(0, "%s\0%p", filename, op_array->opcodes);
+
+	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
+	zend_hash_add_ptr(&PHPDBG_G(file_sources), fake_name, dataptr);
+
+	dataptr->filename = estrndup(ZSTR_VAL(fake_name), ZSTR_LEN(fake_name));
+	zend_string_release(fake_name);
+
+	dataptr->op_array = *op_array;
+	if (dataptr->op_array.refcount) {
+		++*dataptr->op_array.refcount;
+	}
+
+	return op_array;
+}
+
 void phpdbg_free_file_source(zval *zv) {
 	phpdbg_file_source *data = Z_PTR_P(zv);
 
@@ -332,8 +380,10 @@ void phpdbg_free_file_source(zval *zv) {
 
 void phpdbg_init_list(void) {
 	PHPDBG_G(compile_file) = zend_compile_file;
+	PHPDBG_G(compile_string) = zend_compile_string;
 	zend_hash_init(&PHPDBG_G(file_sources), 1, NULL, (dtor_func_t) phpdbg_free_file_source, 0);
 	zend_compile_file = phpdbg_compile_file;
+	zend_compile_string = phpdbg_compile_string;
 }
 
 void phpdbg_list_update(void) {

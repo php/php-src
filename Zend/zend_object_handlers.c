@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -82,8 +83,11 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 			zobj->properties->nInternalPointer = 0;
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
-				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
-				    Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) != IS_UNDEF) {
+				    (prop_info->flags & ZEND_ACC_STATIC) == 0) {
+
+					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
+						zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+					}
 
 					_zend_hash_append_ind(zobj->properties, prop_info->name, 
 						OBJ_PROP(zobj, prop_info->offset));
@@ -94,9 +98,12 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 					if (prop_info->ce == ce &&
 					    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
-					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
-						Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) != IS_UNDEF) {
+					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0) {
 						zval zv;
+
+						if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
+							zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+						}
 
 						ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
 						zend_hash_add(zobj->properties, prop_info->name, &zv);
@@ -882,6 +889,9 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			if (Z_TYPE_P(slot) != IS_UNDEF) {
 				zval_ptr_dtor(slot);
 				ZVAL_UNDEF(slot);
+				if (zobj->properties) {
+					zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+				}
 				goto exit;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
@@ -1300,7 +1310,7 @@ undeclared_property:
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
+ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
 {
 	zend_throw_error(NULL, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 	return 0;

@@ -21,7 +21,9 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
-#define HAVE_WCONTINUED defined(WCONTINUED) && defined (WIFCONTINUED)
+#if defined(WCONTINUED) && defined(WIFCONTINUED)
+#define HAVE_WCONTINUED 1
+#endif
 
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry

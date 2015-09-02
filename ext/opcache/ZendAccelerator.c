@@ -917,13 +917,16 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 	/* CWD and include_path don't matter for absolute file names and streams */
     if (IS_ABSOLUTE_PATH(path, path_length)) {
 		/* pass */
+		ZCG(key_len) = 0;
     } else if (UNEXPECTED(is_stream_path(path))) {
 		if (!is_cacheable_stream_path(path)) {
 			return NULL;
 		}
 		/* pass */
+		ZCG(key_len) = 0;
     } else if (UNEXPECTED(!ZCG(accel_directives).use_cwd)) {
 		/* pass */
+		ZCG(key_len) = 0;
     } else {
 		const char *include_path = NULL, *cwd = NULL;
 		int include_path_len = 0, cwd_len = 0;

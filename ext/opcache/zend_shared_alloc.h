@@ -134,13 +134,13 @@ typedef union _align_test {
 } align_test;
 
 #if ZEND_GCC_VERSION >= 2000
-# define PLATFORM_ALIGNMENT (__alignof__ (align_test))
+# define PLATFORM_ALIGNMENT (__alignof__(align_test) < 8 ? 8 : __alignof__(align_test))
 #else
 # define PLATFORM_ALIGNMENT (sizeof(align_test))
 #endif
 
 #define ZEND_ALIGNED_SIZE(size) \
-	((size + PLATFORM_ALIGNMENT - 1) & ~(PLATFORM_ALIGNMENT - 1))
+	ZEND_MM_ALIGNED_SIZE_EX(size, PLATFORM_ALIGNMENT)
 
 /* exclusive locking */
 void zend_shared_alloc_lock(void);

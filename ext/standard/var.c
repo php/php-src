@@ -35,20 +35,30 @@
 #define COMMON (is_ref ? "&" : "")
 /* }}} */
 
-static uint32_t zend_obj_num_elements(HashTable *ht) /* {{{ */
+static uint32_t zend_hash_recalc_elements(HashTable *ht) /* {{{ */
 {
-	Bucket *p;
-	uint idx;
-	uint num;
+	zval *val;
+	uint32_t num = ht->nNumOfElements;
 
-	num = ht->nNumOfElements;
-	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (Z_TYPE(p->val) == IS_INDIRECT) {
-			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {
+	ZEND_HASH_FOREACH_VAL(ht, val) {
+		if (Z_TYPE_P(val) == IS_UNDEF) continue;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) {
 				num--;
 			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return num;
+}
+
+static uint32_t zend_obj_num_elements(HashTable *ht) /* {{{ */
+{
+	uint32_t num = ht->nNumOfElements;
+
+	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		num = zend_hash_recalc_elements(ht);
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
 		}
 	}
 	return num;
@@ -104,6 +114,7 @@ PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
+	uint32_t count;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -138,7 +149,12 @@ again:
 				--myht->u.v.nApplyCount;
 				return;
 			}
-			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
+			if (UNEXPECTED(Z_SYMBOLTABLE_P(struc))) {
+				count = zend_hash_recalc_elements(myht);
+			} else {
+				count = zend_hash_num_elements(myht);
+			}
+			php_printf("%sarray(%d) {\n", COMMON, count);
 			is_temp = 0;
 
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
@@ -272,6 +288,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
+	uint32_t count;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -306,7 +323,12 @@ again:
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		php_printf("%sarray(%d) refcount(%u){\n", COMMON, zend_hash_num_elements(myht), Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
+		if (UNEXPECTED(Z_SYMBOLTABLE_P(struc))) {
+			count = zend_hash_recalc_elements(myht);
+		} else {
+			count = zend_hash_num_elements(myht);
+		}
+		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
@@ -678,14 +700,28 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 {
 	uint32_t count;
 	zend_bool incomplete_class;
+	HashTable *ht;
 
 	incomplete_class = php_var_serialize_class_name(buf, struc);
 	/* count after serializing name, since php_var_serialize_class_name
 	 * changes the count if the variable is incomplete class */
-	count = zend_hash_num_elements(HASH_OF(retval_ptr));
-	if (incomplete_class) {
-		--count;
+	if (Z_TYPE_P(retval_ptr) == IS_ARRAY) {
+		ht = Z_ARRVAL_P(retval_ptr);
+		if (UNEXPECTED(Z_SYMBOLTABLE_P(struc))) {
+			count = zend_hash_recalc_elements(ht);
+		} else {
+			count = zend_hash_num_elements(ht);
+		}
+	} else if (Z_TYPE_P(retval_ptr) == IS_OBJECT) {
+		ht = Z_OBJPROP_P(retval_ptr);
+		count = zend_obj_num_elements(ht);
+		if (incomplete_class) {
+			--count;
+		}
+	} else {
+		count = 0;
 	}
+
 	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
@@ -694,12 +730,11 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zval *d, *val;
 		zval nval, *nvalp;
 		zend_string *name;
-		HashTable *propers, *ht;
+		HashTable *propers;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
 
-		ht = HASH_OF(retval_ptr);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
 				continue;
@@ -899,16 +934,21 @@ again:
 			zend_bool incomplete_class = 0;
 			if (Z_TYPE_P(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
-				myht = HASH_OF(struc);
+				myht = Z_ARRVAL_P(struc);
+				if (UNEXPECTED(Z_SYMBOLTABLE_P(struc))) {
+					i = zend_hash_recalc_elements(myht);
+				} else {
+					i = zend_hash_num_elements(myht);
+				}
 			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc);
 				myht = Z_OBJPROP_P(struc);
-			}
-			/* count after serializing name, since php_var_serialize_class_name
-			 * changes the count if the variable is incomplete class */
-			i = myht ? zend_hash_num_elements(myht) : 0;
-			if (i > 0 && incomplete_class) {
-				--i;
+				/* count after serializing name, since php_var_serialize_class_name
+				 * changes the count if the variable is incomplete class */
+				i = zend_obj_num_elements(myht);
+				if (i > 0 && incomplete_class) {
+					--i;
+				}
 			}
 			smart_str_append_unsigned(buf, i);
 			smart_str_appendl(buf, ":{", 2);
@@ -1005,6 +1045,7 @@ PHP_FUNCTION(unserialize)
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
 	HashTable *class_hash = NULL;
+	zval *old_rval = return_value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;

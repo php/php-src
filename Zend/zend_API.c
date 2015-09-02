@@ -15,6 +15,7 @@
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Andrei Zmievski <andrei@php.net>                            |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -149,7 +150,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array) /
 }
 /* }}} */
 
-ZEND_API void zend_wrong_param_count(void) /* {{{ */
+ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -196,7 +197,7 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 /* }}} */
 
 #ifdef FAST_ZPP
-ZEND_API void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args) /* {{{ */
 {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope ? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -212,7 +213,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int mi
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -226,7 +227,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -236,7 +237,7 @@ ZEND_API void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, 
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -790,7 +791,7 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num, zval *arg, const char 
 	return ret;
 }
 
-static void zend_parse_parameters_debug_error(const char *msg) {
+static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 	zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope
 		? ZSTR_VAL(active_function->common.scope->name) : "";
@@ -1242,26 +1243,35 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 {
     zval *prop, tmp;
    	zend_string *key;
+   	zend_long h;
    	zend_property_info *property_info;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-		property_info = zend_get_property_info(object->ce, key, 1);
-		if (property_info != ZEND_WRONG_PROPERTY_INFO &&
-		    property_info &&
-		    (property_info->flags & ZEND_ACC_STATIC) == 0) {
-			zval *slot = OBJ_PROP(object, property_info->offset);
-			zval_ptr_dtor(slot);
-			ZVAL_COPY_VALUE(slot, prop);
-			zval_add_ref(slot);
-			if (object->properties) {
-				ZVAL_INDIRECT(&tmp, slot);
-				zend_hash_update(object->properties, key, &tmp);
+   	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
+		if(key) {
+			property_info = zend_get_property_info(object->ce, key, 1);
+			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
+				property_info &&
+				(property_info->flags & ZEND_ACC_STATIC) == 0) {
+				zval *slot = OBJ_PROP(object, property_info->offset);
+				zval_ptr_dtor(slot);
+				ZVAL_COPY_VALUE(slot, prop);
+				zval_add_ref(slot);
+				if (object->properties) {
+					ZVAL_INDIRECT(&tmp, slot);
+					zend_hash_update(object->properties, key, &tmp);
+				}
+			} else {
+				if (!object->properties) {
+					rebuild_object_properties(object);
+				}
+				prop = zend_hash_update(object->properties, key, prop);
+				zval_add_ref(prop);
 			}
 		} else {
 			if (!object->properties) {
 				rebuild_object_properties(object);
 			}
-			prop = zend_hash_update(object->properties, key, prop);
+			prop = zend_hash_index_update(object->properties, h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1318,13 +1328,6 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC) /* {{{ */
 {
 	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC);
-}
-/* }}} */
-
-ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS)) /* {{{ */
-{
-	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
-	return FAILURE;
 }
 /* }}} */
 
@@ -2947,6 +2950,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			if (lmname != Z_STR_P(callable)) {
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
+			fcc->initialized = 1;
 			return 1;
 		} else {
 			if (lmname == Z_STR_P(callable)) {
@@ -2957,6 +2961,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			zend_str_tolower(ZSTR_VAL(lmname), ZSTR_LEN(lmname));
 			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
+				fcc->initialized = 1;
 				return 1;
 			}
 		}

@@ -551,7 +551,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(init,mysqli_init_method, arginfo_mysqli_no_params)
 	PHP_FALIAS(kill,mysqli_kill, arginfo_class_mysqli_kill)
 	PHP_FALIAS(multi_query, mysqli_multi_query, arginfo_class_mysqli_query)
-	PHP_FALIAS(mysqli, mysqli_link_construct, arginfo_mysqli_connect)
+	PHP_FALIAS(__construct, mysqli_link_construct, arginfo_mysqli_connect)
 	PHP_FALIAS(more_results, mysqli_more_results, arginfo_mysqli_no_params)
 	PHP_FALIAS(next_result, mysqli_next_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(options, mysqli_options, arginfo_class_mysqli_options)

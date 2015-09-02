@@ -534,6 +534,25 @@ zend_module_entry openssl_module_entry = {
 ZEND_GET_MODULE(openssl)
 #endif
 
+/* number conversion flags checks */
+#define PHP_OPENSSL_CHECK_NUMBER_CONVERSION(_cond, _name) \
+	do { \
+		if (_cond) { \
+			php_error_docref(NULL, E_WARNING, #_name" is too long"); \
+			RETURN_FALSE; \
+		} \
+	} while(0)
+/* check if size_t can be safely casted to int */
+#define PHP_OPENSSL_CHECK_SIZE_T_TO_INT(_var, _name) \
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_INT_OVFL(_var), _name)
+/* check if size_t can be safely casted to unsigned int */
+#define PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(_var, _name) \
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_UINT_OVFL(_var), _name)
+/* check if long can be safely casted to int */
+#define PHP_OPENSSL_CHECK_LONG_TO_INT(_var, _name) \
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_LONG_EXCEEDS_INT(_var), _name)
+
+
 static int le_key;
 static int le_x509;
 static int le_csr;
@@ -2543,6 +2562,8 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	RETVAL_FALSE;
 
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(zp12_len, pkcs12);
+
 	bio_in = BIO_new(BIO_s_mem());
 
 	if(0 >= BIO_write(bio_in, zp12, (int)zp12_len))
@@ -3608,14 +3629,11 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_P(data), dh, pub_key);
-					if (dh->p && dh->g) {
-						if (!dh->pub_key) {
-							DH_generate_key(dh);
-						}
-						if (EVP_PKEY_assign_DH(pkey, dh)) {
-							ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
-							return;
-						}
+					if (dh->p && dh->g &&
+							(dh->pub_key || DH_generate_key(dh)) &&
+							EVP_PKEY_assign_DH(pkey, dh)) {
+						ZVAL_COPY_VALUE(return_value, zend_list_insert(pkey, le_key));
+						return;
 					}
 					DH_free(dh);
 				}
@@ -3660,6 +3678,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		return;
 	}
 	RETVAL_FALSE;
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(passphrase_len, passphrase);
 
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource);
 
@@ -3732,6 +3752,8 @@ PHP_FUNCTION(openssl_pkey_export)
 		return;
 	}
 	RETVAL_FALSE;
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(passphrase_len, passphrase);
 
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, 0, &key_resource);
 
@@ -4022,6 +4044,11 @@ PHP_FUNCTION(openssl_pbkdf2)
 		php_error_docref(NULL, E_WARNING, "Unknown signature algorithm");
 		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_LONG_TO_INT(key_length, key);
+	PHP_OPENSSL_CHECK_LONG_TO_INT(iterations, iterations);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(salt_len, salt);
 
 	out_buffer = zend_string_alloc(key_length, 0);
 
@@ -4481,10 +4508,9 @@ PHP_FUNCTION(openssl_private_encrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key param is not a valid private key");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	cryptedlen = EVP_PKEY_size(pkey);
 	cryptedbuf = zend_string_alloc(cryptedlen, 0);
@@ -4542,10 +4568,9 @@ PHP_FUNCTION(openssl_private_decrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid private key");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	cryptedlen = EVP_PKEY_size(pkey);
 	crypttemp = emalloc(cryptedlen + 1);
@@ -4609,10 +4634,9 @@ PHP_FUNCTION(openssl_public_encrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	cryptedlen = EVP_PKEY_size(pkey);
 	cryptedbuf = zend_string_alloc(cryptedlen, 0);
@@ -4671,10 +4695,9 @@ PHP_FUNCTION(openssl_public_decrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	cryptedlen = EVP_PKEY_size(pkey);
 	crypttemp = emalloc(cryptedlen + 1);
@@ -4822,10 +4845,8 @@ PHP_FUNCTION(openssl_verify)
 		return;
 	}
 
-	if (UINT_MAX < signature_len) {
-		php_error_docref(NULL, E_WARNING, "signature is too long");
-		RETURN_FALSE;
-	}
+	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature);
+
 	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
 		if (method != NULL) {
 			signature_algo = Z_LVAL_P(method);
@@ -4885,10 +4906,9 @@ PHP_FUNCTION(openssl_seal)
 	if (!nkeys) {
 		php_error_docref(NULL, E_WARNING, "Fourth argument to openssl_seal() must be a non-empty array");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	if (method) {
 		cipher = EVP_get_cipherbyname(method);
@@ -5017,13 +5037,10 @@ PHP_FUNCTION(openssl_open)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "unable to coerce parameter 4 into a private key");
 		RETURN_FALSE;
-	} else if (INT_MAX < ekey_len) {
-		php_error_docref(NULL, E_WARNING, "ekey is too long");
-		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(ekey_len, ekey);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	if (method) {
 		cipher = EVP_get_cipherbyname(method);
@@ -5207,10 +5224,9 @@ PHP_FUNCTION(openssl_encrypt)
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
 	if (keylen > password_len) {
@@ -5232,10 +5248,7 @@ PHP_FUNCTION(openssl_encrypt)
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		if (INT_MAX < password_len) {
-			php_error_docref(NULL, E_WARNING, "password is too long");
-			RETURN_FALSE;
-		}
+		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
@@ -5295,10 +5308,9 @@ PHP_FUNCTION(openssl_decrypt)
 	if (!method_len) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
-	} else if (INT_MAX < data_len) {
-		php_error_docref(NULL, E_WARNING, "data is too long");
-		RETURN_FALSE;
 	}
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
@@ -5332,10 +5344,7 @@ PHP_FUNCTION(openssl_decrypt)
 
 	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		if (INT_MAX < password_len) {
-			php_error_docref(NULL, E_WARNING, "password is too long");
-			RETURN_FALSE;
-		}
+		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
@@ -5415,10 +5424,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		RETURN_FALSE;
 	}
 
-	if (INT_MAX < pub_len) {
-		php_error_docref(NULL, E_WARNING, "pub_key is too long");
-		RETURN_FALSE;
-	}
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(pub_len, pub_key);
 	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
 
 	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
@@ -5470,10 +5476,9 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		RETURN_FALSE;
 	}
 #else
-	if (INT_MAX < buffer_length) {
-		php_error_docref(NULL, E_WARNING, "length is too long");
-		RETURN_FALSE;
-	}
+
+	PHP_OPENSSL_CHECK_LONG_TO_INT(buffer_length, length);
+
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
 		zend_string_release(buffer);
 		if (zstrong_result_returned) {

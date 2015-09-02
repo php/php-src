@@ -218,7 +218,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	if (error == 1) {
 		for (i = nargs - 1; i >= 0; i--) {
 			obj = valuePop(ctxt);
-			xmlXPathFreeObject(obj);
+			if (obj) {
+				xmlXPathFreeObject(obj);
+			}
 		}
 		return;
 	}

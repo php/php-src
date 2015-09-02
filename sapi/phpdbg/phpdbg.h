@@ -265,6 +265,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
+	zend_op_array *(*compile_string)(zval *source_string, char *filename);
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */

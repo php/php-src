@@ -35,7 +35,7 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 	register char  *seg2;
 	register char  *seg2p;
 	register int    loop;
-	uint            offset;
+	size_t          offset;
 
 	begin_stack[0] = (char *) base;
 	end_stack[0]   = (char *) base + ((nmemb - 1) * siz);

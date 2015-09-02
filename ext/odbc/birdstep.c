@@ -618,7 +618,7 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-zend_long
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 

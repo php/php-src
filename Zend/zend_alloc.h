@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -40,6 +41,9 @@
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - Z_L(1))
 
 #define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - Z_L(1)) & ZEND_MM_ALIGNMENT_MASK)
+
+#define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
+	(((size) + ((alignment) - Z_L(1))) & ~((alignment) - Z_L(1)))
 
 typedef struct _zend_leak_info {
 	void *addr;

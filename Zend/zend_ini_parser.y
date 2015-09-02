@@ -170,7 +170,7 @@ static void zend_ini_get_var(zval *result, zval *name)
 
 /* {{{ ini_error()
 */
-static void ini_error(const char *msg)
+static ZEND_COLD void ini_error(const char *msg)
 {
 	char *error_buf;
 	int error_buf_len;

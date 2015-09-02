@@ -78,6 +78,8 @@
 #include <intrin.h>
 #endif
 
+#include "zend_range_check.h"
+
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
@@ -216,9 +218,13 @@ char *alloca();
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_COLD __attribute__((cold))
+# define ZEND_HOT __attribute__((hot))
 #else
 # define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_ATTRIBUTE_UNUSED_LABEL
+# define ZEND_COLD
+# define ZEND_HOT
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)

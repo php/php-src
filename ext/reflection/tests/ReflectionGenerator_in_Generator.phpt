@@ -46,7 +46,11 @@ object(ReflectionFunction)#4 (1) {
 NULL
 array(1) {
   [0]=>
-  array(2) {
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["function"]=>
     string(9) "{closure}"
     ["args"]=>

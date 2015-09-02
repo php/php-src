@@ -15,6 +15,7 @@
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
 

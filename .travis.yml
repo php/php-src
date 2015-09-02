@@ -1,9 +1,5 @@
 language: c
 
-branches:
-    except:
-        - phpng
-
 notifications:
     email: 
        on_failure: change

@@ -155,6 +155,11 @@ static void php_phpdbg_destroy_bp_opcode(zval *brake) /* {{{ */
 	efree(Z_PTR_P(brake));
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_opline(zval *brake) /* {{{ */
+{
+	efree(Z_PTR_P(brake));
+} /* }}} */
+
 static void php_phpdbg_destroy_bp_methods(zval *brake) /* {{{ */
 {
 	zend_hash_destroy(Z_ARRVAL_P(brake));
@@ -188,7 +193,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
@@ -220,7 +225,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
 	if (PHPDBG_G(buffer)) {
-		efree(PHPDBG_G(buffer));
+		free(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
 
@@ -287,11 +292,11 @@ static PHP_FUNCTION(phpdbg_exec)
 					ZVAL_TRUE(return_value);
 				}
 			} else {
-				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", exec);
+				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", ZSTR_VAL(exec));
 				ZVAL_FALSE(return_value);
 			}
 		} else {
-			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", exec);
+			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", ZSTR_VAL(exec));
 
 			ZVAL_FALSE(return_value);
 		}
@@ -302,11 +307,17 @@ static PHP_FUNCTION(phpdbg_exec)
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
-	if (zend_parse_parameters_none() == FAILURE && EG(current_execute_data)) {
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
+		ex = ex->prev_execute_data;
+	}
+
+	if (zend_parse_parameters_none() == FAILURE || !ex) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1);
+	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_file(string file, integer line) */
@@ -1085,17 +1096,21 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 		}
 	} else {
 		/* set signalled only when not interactive */
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-			if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
-				char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
+		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+			char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
 
-				phpdbg_set_sigsafe_mem(mem);
-				zend_try {
-					phpdbg_force_interruption();
-				} zend_end_try()
-				phpdbg_clear_sigsafe_mem();
-				return;
+			phpdbg_set_sigsafe_mem(mem);
+			zend_try {
+				phpdbg_force_interruption();
+			} zend_end_try()
+			phpdbg_clear_sigsafe_mem();
+
+			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+			if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+				zend_bailout();
 			}
+		} else {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	}
@@ -1182,9 +1197,13 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 							phpdbg_force_interruption();
 						} zend_end_try();
 						phpdbg_clear_sigsafe_mem();
-						break;
-					}
-					if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+
+						PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+						if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+							zend_bailout();
+						}
+					} else if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 						PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 					}
 					break;
@@ -1281,6 +1300,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ext_stmt = 0;
 	zend_bool use_mm_wrappers = 0;
 	zend_bool is_exit;
+	int exit_status = 0;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1310,6 +1330,10 @@ int main(int argc, char **argv) /* {{{ */
 	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
+#endif
+
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
 #endif
 
 phpdbg_main:
@@ -1803,6 +1827,7 @@ phpdbg_interact:
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
 						EG(bailout) = __orig_bailout; /* reset zend_try */
+						exit_status = EG(exit_status);
 						break;
 					}
 				}
@@ -1979,5 +2004,6 @@ phpdbg_out:
 		free(PHPDBG_G(sapi_name_ptr));
 	}
 
-	return 0;
+	/* usually 0; just for -rr */
+	return exit_status;
 } /* }}} */

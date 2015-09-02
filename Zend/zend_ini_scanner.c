@@ -257,7 +257,7 @@ void shutdown_ini_scanner(void)
 
 /* {{{ zend_ini_scanner_get_lineno()
 */
-int zend_ini_scanner_get_lineno(void)
+ZEND_COLD int zend_ini_scanner_get_lineno(void)
 {
 	return SCNG(lineno);
 }
@@ -265,7 +265,7 @@ int zend_ini_scanner_get_lineno(void)
 
 /* {{{ zend_ini_scanner_get_filename()
 */
-char *zend_ini_scanner_get_filename(void)
+ZEND_COLD char *zend_ini_scanner_get_filename(void)
 {
 	return ini_filename ? ini_filename : "Unknown";
 }

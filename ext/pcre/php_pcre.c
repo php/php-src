@@ -613,6 +613,11 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			RETURN_FALSE;
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		RETURN_FALSE;
@@ -753,7 +758,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+				if ((offsets[1] - offsets[0] < 0) || pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
 					if (subpat_names) {
 						efree(subpat_names);
 					}
@@ -1172,7 +1177,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + start_offset;
 
 		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (EXPECTED(count > 0 && limit)) {
+		if (EXPECTED(count > 0 && (offsets[1] - offsets[0] >= 0) && limit)) {
 			if (UNEXPECTED(replace_count)) {
 				++*replace_count;
 			}
@@ -1354,6 +1359,11 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 
 	/* FIXME: This might need to be changed to ZSTR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 	ZVAL_EMPTY_STRING(&empty_replace);
+
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject_str))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			return NULL;
+	}
 
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
@@ -1699,6 +1709,11 @@ static PHP_FUNCTION(preg_split)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			RETURN_FALSE;
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		RETURN_FALSE;
@@ -1784,7 +1799,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 
 		/* If something matched */
-		if (count > 0) {
+		if (count > 0 && (offsets[1] - offsets[0] >= 0)) {
 			if (!no_empty || &subject[offsets[0]] != last_match) {
 
 				if (offset_capture) {

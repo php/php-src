@@ -755,10 +755,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 #endif
 
-#ifdef ZEND_SIGNALS
-	zend_signal_startup();
-#endif
-
 	return SUCCESS;
 }
 /* }}} */
@@ -880,7 +876,7 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* }}} */
 
 /* this should be compatible with the standard zenderror */
-void zenderror(const char *error) /* {{{ */
+ZEND_COLD void zenderror(const char *error) /* {{{ */
 {
 	if (EG(exception)) {
 		/* An exception was thrown in the lexer, don't throw another in the parser. */
@@ -892,7 +888,7 @@ void zenderror(const char *error) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
+ZEND_API ZEND_COLD void _zend_bailout(char *filename, uint lineno) /* {{{ */
 {
 
 	if (!EG(bailout)) {
@@ -1032,9 +1028,9 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 	} while (0)
 
 #if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 #else
-static void zend_error_va_list(int type, const char *format, va_list args)
+static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
 #endif
 {
 	char *str;
@@ -1274,9 +1270,9 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 
 #ifdef HAVE_NORETURN
 # ifdef HAVE_NORETURN_ALIAS
-void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
+ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
 # else
-ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
 {
 	va_list va;
 
@@ -1285,7 +1281,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	va_end(va);
 }
 
-ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
 	va_list va;
 
@@ -1297,7 +1293,7 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 # endif
 #endif
 
-ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
@@ -1326,7 +1322,7 @@ ZEND_API void zend_throw_error(zend_class_entry *exception_ce, const char *forma
 }
 /* }}} */
 
-ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
@@ -1338,7 +1334,7 @@ ZEND_API void zend_type_error(const char *format, ...) /* {{{ */
 	va_end(va);
 } /* }}} */
 
-ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
@@ -1355,7 +1351,7 @@ ZEND_API void zend_internal_type_error(zend_bool throw_exception, const char *fo
 	va_end(va);
 } /* }}} */
 
-ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
 	va_list args;
