@@ -46,9 +46,9 @@ static inline const char *dtrace_get_executed_filename(void)
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *res;
-	DTRACE_COMPILE_FILE_ENTRY(file_handle->opened_path->val, (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_ENTRY(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
 	res = compile_file(file_handle, type);
-	DTRACE_COMPILE_FILE_RETURN(file_handle->opened_path->val, (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_RETURN(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
 
 	return res;
 }
