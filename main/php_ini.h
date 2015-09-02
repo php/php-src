@@ -36,8 +36,10 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, Hash
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage TSRMLS_DC);
 PHPAPI int php_ini_has_per_dir_config(void);
 PHPAPI int php_ini_has_per_host_config(void);
+PHPAPI int php_ini_has_per_sapi_config(void);
 PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC);
 PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSRMLS_DC);
+PHPAPI void php_ini_activate_per_sapi_config(const char *sapi, uint sapi_len TSRMLS_DC);
 PHPAPI HashTable* php_ini_get_configuration_hash(void);
 END_EXTERN_C()
 

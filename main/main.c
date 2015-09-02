@@ -2252,6 +2252,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 #endif
 
+	/* Activate SAPI specific section. */
+	if (php_ini_has_per_sapi_config() && sapi_module.name) {
+		/* Activate per-sapi-system-configuration defined in php.ini and stored into configuration_hash during startup */
+		php_ini_activate_per_sapi_config(sapi_module.name, strlen(sapi_module.name) + 1 TSRMLS_CC);
+	}
+
 #ifdef ZTS
 	zend_post_startup(TSRMLS_C);
 #endif

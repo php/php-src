@@ -65,6 +65,7 @@ typedef struct _php_extension_lists {
 static int is_special_section = 0;
 static HashTable *active_ini_hash;
 static HashTable configuration_hash;
+static int has_per_sapi_config = 0;
 static int has_per_dir_config = 0;
 static int has_per_host_config = 0;
 PHPAPI char *php_ini_opened_path=NULL;
@@ -282,8 +283,17 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				char *key = NULL;
 				uint key_len;
 
+				/* SAPI sections */
+				if (!strncasecmp(Z_STRVAL_P(arg1), "SAPI", sizeof("SAPI") - 1)) {
+					key = Z_STRVAL_P(arg1);
+					key = key + sizeof("SAPI") - 1;
+					key_len = Z_STRLEN_P(arg1) - sizeof("SAPI") + 1;
+					is_special_section = 1;
+					has_per_sapi_config = 1;
+					zend_str_tolower(key, key_len); /* sapi names are lower-case. */
+
 				/* PATH sections */
-				if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
+				} else if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
 					key = Z_STRVAL_P(arg1);
 					key = key + sizeof("PATH") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
@@ -834,6 +844,29 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSR
 	if (has_per_host_config && host && host_len) {
 		/* Search for source array matching the host from configuration_hash */
 		if (zend_hash_find(&configuration_hash, host, host_len, (void **) &tmp) == SUCCESS) {
+			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ php_ini_has_per_sapi_config
+ */
+PHPAPI int php_ini_has_per_sapi_config(void)
+{
+	return has_per_sapi_config;
+}
+/* }}} */
+
+/* {{{ php_ini_activate_per_sapi_config
+ */
+PHPAPI void php_ini_activate_per_sapi_config(const char *sapi, uint sapi_len TSRMLS_DC)
+{
+	zval *tmp;
+
+	if (has_per_sapi_config && sapi && sapi_len) {
+		/* Search for source array matching the sapi from configuration_hash */
+		if (zend_hash_find(&configuration_hash, sapi, sapi_len, (void **) &tmp) == SUCCESS) {
 			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
 		}
 	}
