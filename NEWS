@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
   . Fixed bug #70198 (Checking liveness does not work as expected).
     (Shafreeck Sea, Anatol Belski)
+  . Fixed bug #70172 (Use After Free Vulnerability in unserialize()). (Stas)
+  . Fixed bug #70219 (Use after free vulnerability in session deserializer).
+    (taoguangchen at icloud dot com)
 
 - CLI server:
   . Fixed bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE).
@@ -35,6 +38,14 @@ PHP                                                                        NEWS
   . Fixed bug #70277 (new DateTimeZone($foo) is ignoring text after null byte).
     (cmb)
 
+- EXIF:
+  . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
+    value of 32 bytes). (Stas)
+
+- hash:
+  . Fixed bug #70312 (HAVAL gives wrong hashes in specific cases). (letsgolee
+    at naver dot com)
+
 - MCrypt:
   . Fixed bug #69833 (mcrypt fd caching not working). (Anatol)
 
@@ -45,20 +56,37 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
     match). (cmb)
+  . Fixed bug #70345 (Multiple vulnerabilities related to PCRE functions).
+    (Anatol Belski)
 
 - Phpdbg:
   . Fix phpdbg_break_next() sometimes not breaking. (Bob)
+
+- SOAP:
+  . Fixed bug #70388 (SOAP serialize_function_call() type confusion / RCE).
+    (Stas)
 
 - SPL:
   . Fixed bug #70290 (Null pointer deref (segfault) in spl_autoload via
     ob_start). (hugh at allthethings dot co dot nz)
   . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
+  . Fixed bug #70365 (Use-after-free vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70366 (Use-after-free vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
 
 - Standard:
   . Fixed bug #70052 (getimagesize() fails for very large and very small WBMP).
     (cmb)
   . Fixed bug #70157 (parse_ini_string() segmentation fault with 
     INI_SCANNER_TYPED). (Tjerk)
+
+- XSLT:
+  . Fixed bug #69782 (NULL pointer dereference). (Stas)
+
+- ZIP:
+  . Fixed bug #70350 (ZipArchive::extractTo allows for directory traversal when
+    creating directories). (neal at fb dot com)
 
 06 Aug 2015, PHP 5.6.12
 
