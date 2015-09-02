@@ -1,9 +1,5 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.30
-
-** PHP 5.5 is in security-only mode , please do not commit to this branch **
-
 03 Sep 2015, PHP 5.5.29
 
 - Core:
