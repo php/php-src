@@ -954,6 +954,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 				var_replace(&var_hash, &current, zv);
 			} else {
 				zval_ptr_dtor(&current);
+				zend_string_release(name);
 				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 				return FAILURE;
 			}
