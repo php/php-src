@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - PDO:
   - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
+- Phpdbg:
+  . Fix phpdbg_break_next() sometimes not breaking. (Bob)
+
 - Standard:
   . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
 
@@ -58,9 +61,6 @@ PHP                                                                        NEWS
     match). (cmb)
   . Fixed bug #70345 (Multiple vulnerabilities related to PCRE functions).
     (Anatol Belski)
-
-- Phpdbg:
-  . Fix phpdbg_break_next() sometimes not breaking. (Bob)
 
 - SOAP:
   . Fixed bug #70388 (SOAP serialize_function_call() type confusion / RCE).
