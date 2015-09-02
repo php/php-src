@@ -204,7 +204,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	unsigned long len=64, szlength;
 	int factor = 1,maxfactor = 16;
 	int status = 0;
-	char *b, *buf = NULL;
+	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
 
 	b = ecalloc(1, len + 1);
@@ -212,7 +212,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	if (php_stream_seek(stream, 5, SEEK_CUR))
 		return NULL;
 
-	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a))
 		return NULL;
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
@@ -232,8 +232,8 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 
 		do {
 			szlength = ZSTR_LEN(bufz) * (1<<factor++);
-			buf = (char *) erealloc(buf, szlength);
-			status = uncompress(buf, &szlength, ZSTR_VAL(bufz), ZSTR_LEN(bufz));
+			buf = erealloc(buf, szlength);
+			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), ZSTR_LEN(bufz));
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
@@ -969,6 +969,10 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		width = (width << 7) | (i & 0x7f);
+        /* maximum valid width for wbmp (although 127 may be a more accurate one) */
+        if (width > 2048) {
+            return 0;
+        }
 	} while (i & 0x80);
 
 	/* get height */
@@ -978,10 +982,13 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		height = (height << 7) | (i & 0x7f);
+        /* maximum valid heigth for wbmp (although 127 may be a more accurate one) */
+        if (height > 2048) {
+            return 0;
+        }
 	} while (i & 0x80);
 
-	/* maximum valid sizes for wbmp (although 127x127 may be a more accurate one) */
-	if (!height || !width || height > 2048 || width > 2048) {
+	if (!height || !width) {
 		return 0;
 	}
 
@@ -1223,6 +1230,7 @@ PHP_FUNCTION(image_type_to_extension)
 PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 {
 	char tmp[12];
+    int twelve_bytes_read;
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
@@ -1273,12 +1281,11 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_ICO;
 	}
 
-	if (php_stream_read(stream, filetype+4, 8) != 8) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
-		return IMAGE_FILETYPE_UNKNOWN;
-	}
+    /* WBMP may be smaller than 12 bytes, so delay error */
+	twelve_bytes_read = (php_stream_read(stream, filetype+4, 8) == 8);
+    
 /* BYTES READ: 12 */
-   	if (!memcmp(filetype, php_sig_jp2, 12)) {
+   	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
 	}
 
@@ -1286,6 +1293,10 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 	if (php_get_wbmp(stream, NULL, 1)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
+    if (!twelve_bytes_read) {
+		php_error_docref(NULL, E_NOTICE, "Read error!");
+		return IMAGE_FILETYPE_UNKNOWN;
+    }
 	if (php_get_xbm(stream, NULL)) {
 		return IMAGE_FILETYPE_XBM;
 	}

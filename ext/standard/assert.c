@@ -39,11 +39,7 @@ ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 static zend_class_entry *assertion_error_ce;
 
-#ifdef ZTS
-#define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
-#else
-#define ASSERTG(v) (assert_globals.v)
-#endif
+#define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -168,6 +164,7 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
+		zend_class_entry *orig_scope = EG(scope);
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -196,6 +193,8 @@ PHP_FUNCTION(assert)
 		if (ASSERTG(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
 		}
+
+		EG(scope) = orig_scope;
 
 		convert_to_boolean(&retval);
 		val = Z_TYPE(retval) == IS_TRUE;

@@ -30,8 +30,8 @@
 # define accel_xlat_set(old, new)	zend_hash_index_add_new_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	(zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new))
-# define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new)))
+# define accel_xlat_set(old, new)	zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (old))
+# define accel_xlat_get(old)	    zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*))
 #endif
 
 #define ARENA_REALLOC(ptr) \
@@ -658,16 +658,17 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	do {
 		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
+		_mm_prefetch(dqdest + 4, _MM_HINT_T0);
 
 		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
 		__m128i xmm1 = _mm_load_si128(dqsrc + 1);
 		__m128i xmm2 = _mm_load_si128(dqsrc + 2);
 		__m128i xmm3 = _mm_load_si128(dqsrc + 3);
 		dqsrc  += 4;
-		_mm_stream_si128(dqdest + 0, xmm0);
-		_mm_stream_si128(dqdest + 1, xmm1);
-		_mm_stream_si128(dqdest + 2, xmm2);
-		_mm_stream_si128(dqdest	+ 3, xmm3);
+		_mm_store_si128(dqdest + 0, xmm0);
+		_mm_store_si128(dqdest + 1, xmm1);
+		_mm_store_si128(dqdest + 2, xmm2);
+		_mm_store_si128(dqdest + 3, xmm3);
 		dqdest += 4;
 	} while (dqsrc != end);
 }

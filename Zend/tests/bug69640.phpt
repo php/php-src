@@ -5,4 +5,4 @@ Bug #69640 Unhandled Error thrown from userland do not produce any output
 throw new \ParseError('I mess everything up! :trollface:');
 ?>
 --EXPECTF--
-Fatal error: I mess everything up! :trollface: in %sbug69640.php on line 2
+Parse error: I mess everything up! :trollface: in %sbug69640.php on line 2

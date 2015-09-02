@@ -263,9 +263,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 }
 /* }}} */
 
-static zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
+static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(zend_ce_error, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
+	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
 
 	return NULL;
 }
@@ -273,7 +273,7 @@ static zend_function *zend_generator_get_constructor(zend_object *object) /* {{{
 
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr)
 {
-	if (!ptr->func && ptr->prev_execute_data && Z_OBJ(ptr->This)) {
+	if (!ptr->func && Z_OBJ(ptr->This)) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
 			zend_generator *root = (generator->node.children < 1 ? generator : generator->node.ptr.leaf)->node.ptr.root;
@@ -463,13 +463,13 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 	}
 }
 
-void zend_generator_yield_from(zend_generator *this, zend_generator *from)
+void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 {
-	zend_generator_add_child(from, this);
+	zend_generator_add_child(from, generator);
 
-	this->node.parent = from;
-	zend_generator_get_current(this);
-	--GC_REFCOUNT(from);
+	generator->node.parent = from;
+	zend_generator_get_current(generator);
+	--GC_REFCOUNT(&from->std);
 }
 
 ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator)
@@ -637,7 +637,7 @@ ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
 
 try_again:
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
-		zend_throw_error(zend_ce_error, "Cannot resume an already running generator");
+		zend_throw_error(NULL, "Cannot resume an already running generator");
 		return;
 	}
 

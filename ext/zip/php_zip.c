@@ -171,7 +171,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	/* it is a directory only, see #40228 */
 	if (path_cleaned_len > 1 && IS_SLASH(path_cleaned[path_cleaned_len - 1])) {
-		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file);
+		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, path_cleaned);
 		is_dir_only = 1;
 	} else {
 		memcpy(file_dirname, path_cleaned, path_cleaned_len);
@@ -996,7 +996,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	}
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context");
+			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
 			return;
 		}
 		intern->za = NULL;
@@ -2292,13 +2292,13 @@ static ZIPARCHIVE_METHOD(setCompressionName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l",
 			&name, &name_len, &comp_method, &comp_flags) == FAILURE) {
 		return;
 	}
 
 	if (name_len < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Empty string as entry name");
+		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
 	}
 
 	idx = zip_name_locate(intern, name, 0);
@@ -2329,7 +2329,7 @@ static ZIPARCHIVE_METHOD(setCompressionIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&index, &comp_method, &comp_flags) == FAILURE) {
 		return;
 	}

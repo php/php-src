@@ -390,9 +390,11 @@ next_step:
 					}
 				}
 			}
-			zend_iterator_dtor(iterator);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
+			if (object->level > 0) {
+				zend_iterator_dtor(iterator);
+				zval_ptr_dtor(&object->iterators[object->level].zobject);
+				object->level--;
+			}
 		} else {
 			return; /* done completeley */
 		}

@@ -27,7 +27,6 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init);
 int phpdbg_interactive(zend_bool allow_async_unsafe);
 int phpdbg_compile(void);
-void phpdbg_clean(zend_bool full);
 void phpdbg_force_interruption(void);
 /* }}} */
 
@@ -64,11 +63,6 @@ PHPDBG_COMMAND(wait); /* }}} */
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
 
-/* {{{ */
-#if PHP_VERSION_ID >= 50500
 void phpdbg_execute_ex(zend_execute_data *execute_data);
-#else
-void phpdbg_execute_ex(zend_op_array *op_array);
-#endif /* }}} */
 
 #endif /* PHPDBG_PROMPT_H */

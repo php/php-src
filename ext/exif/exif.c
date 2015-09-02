@@ -152,14 +152,10 @@ ZEND_BEGIN_MODULE_GLOBALS(exif)
 ZEND_END_MODULE_GLOBALS(exif)
 
 ZEND_DECLARE_MODULE_GLOBALS(exif)
+#define EXIF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(exif, v)
 
-#ifdef ZTS
-#define EXIF_G(v) ZEND_TSRMG(exif_globals_id, zend_exif_globals *, v)
-#ifdef COMPILE_DL_EXIF
+#if defined(ZTS) && defined(COMPILE_DL_EXIF)
 ZEND_TSRMLS_CACHE_DEFINE();
-#endif
-#else
-#define EXIF_G(v) (exif_globals.v)
 #endif
 
 /* {{{ PHP_INI
@@ -2949,13 +2945,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
-						ImageInfo->CopyrightEditor        = estrdup(value_ptr+length+1);
+						ImageInfo->CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);
 						spprintf(&ImageInfo->Copyright, 0, "%s, %s", value_ptr, value_ptr+length+1);
 						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
 					} else {
-						ImageInfo->Copyright = estrdup(value_ptr);
+						ImageInfo->Copyright = estrndup(value_ptr, byte_count);
 					}
 				}
 				break;
@@ -3046,10 +3042,10 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_MAKE:
-				ImageInfo->make = estrdup(value_ptr);
+				ImageInfo->make = estrndup(value_ptr, byte_count);
 				break;
 			case TAG_MODEL:
-				ImageInfo->model = estrdup(value_ptr);
+				ImageInfo->model = estrndup(value_ptr, byte_count);
 				break;
 
 			case TAG_MAKER_NOTE:

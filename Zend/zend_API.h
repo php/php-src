@@ -15,6 +15,7 @@
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Andrei Zmievski <andrei@php.net>                            |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -158,6 +159,8 @@ typedef struct _zend_fcall_info_cache {
 	extern ts_rsrc_id module_name##_globals_id;
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
 	ts_allocate_id(&module_name##_globals_id, sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
+#define ZEND_MODULE_GLOBALS_ACCESSOR(module_name, v) ZEND_TSRMG(module_name##_globals_id, zend_##module_name##_globals *, v)
+#define ZEND_MODULE_GLOBALS_BULK(module_name) TSRMG_BULK(module_name##_globals_id, zend_##module_name##_globals *)
 
 #else
 
@@ -167,6 +170,8 @@ typedef struct _zend_fcall_info_cache {
 	extern zend_##module_name##_globals module_name##_globals;
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
 	globals_ctor(&module_name##_globals);
+#define ZEND_MODULE_GLOBALS_ACCESSOR(module_name, v) (module_name##_globals.v)
+#define ZEND_MODULE_GLOBALS_BULK(module_name) (&module_name##_globals)
 
 #endif
 
@@ -296,7 +301,7 @@ ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zen
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
 
-ZEND_API void zend_wrong_param_count(void);
+ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
 #define IS_CALLABLE_CHECK_NO_ACCESS   (1<<1)
@@ -381,9 +386,6 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties);
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties);
-
-/* no longer supported */
-ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
 ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n);
 ZEND_API int add_assoc_null_ex(zval *arg, const char *key, size_t key_len);
@@ -690,10 +692,10 @@ typedef enum _zend_expected_type {
 	Z_EXPECTED_LAST
 } zend_expected_type;
 
-ZEND_API void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args);
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg);
-ZEND_API void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg);
-ZEND_API void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error);
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1

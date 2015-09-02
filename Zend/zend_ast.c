@@ -203,7 +203,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
 			break;
 		default:
-			zend_throw_error(zend_ce_error, "Illegal offset type");
+			zend_throw_error(NULL, "Illegal offset type");
 			return FAILURE;
  	}
 	return SUCCESS;
@@ -405,7 +405,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		default:
-			zend_throw_error(zend_ce_error, "Unsupported constant expression");
+			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;
 	}
 	return ret;
@@ -783,6 +783,10 @@ static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int in
 
 static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 {
+	if (!ast) {
+		return;
+	}
+
 	if (ast->kind == ZEND_AST_STMT_LIST ||
 	    ast->kind == ZEND_AST_TRAIT_ADAPTATIONS) {
 		zend_ast_list *list = (zend_ast_list*)ast;

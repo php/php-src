@@ -333,17 +333,17 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		if (class_name_len == sizeof("self")-1 &&
 		    !memcmp(lcname, "self", sizeof("self")-1)) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(zend_ce_error, "Cannot access self:: when no class scope is active");
+				zend_throw_error(NULL, "Cannot access self:: when no class scope is active");
 				return NULL;
 			}
 			ce = scope;
 		} else if (class_name_len == sizeof("parent")-1 &&
 		           !memcmp(lcname, "parent", sizeof("parent")-1)) {
 			if (UNEXPECTED(!scope)) {
-				zend_throw_error(zend_ce_error, "Cannot access parent:: when no class scope is active");
+				zend_throw_error(NULL, "Cannot access parent:: when no class scope is active");
 				return NULL;
 			} else if (UNEXPECTED(!scope->parent)) {
-				zend_throw_error(zend_ce_error, "Cannot access parent:: when current class scope has no parent");
+				zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
 				return NULL;
 			} else {
 				ce = scope->parent;
@@ -352,7 +352,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		           !memcmp(lcname, "static", sizeof("static")-1)) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
-				zend_throw_error(zend_ce_error, "Cannot access static:: when no class scope is active");
+				zend_throw_error(NULL, "Cannot access static:: when no class scope is active");
 				return NULL;
 			}
 		} else {
@@ -363,7 +363,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
 			if (ret_constant == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(zend_ce_error, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 					zend_string_release(class_name);
 					zend_string_free(constant_name);
 					return NULL;

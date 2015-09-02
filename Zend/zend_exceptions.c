@@ -120,7 +120,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
@@ -203,14 +203,14 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 		array_init(&trace);
 	}
 	Z_SET_REFCOUNT(trace, 0);
-	
+
 	base_ce = i_get_exception_base(&obj);
 
 	if (EXPECTED(class_type != zend_ce_parse_error || !(filename = zend_get_compiled_filename()))) {
 		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename());
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno());
 	} else {
-		zend_update_property_string(base_ce, &obj, "file", sizeof("file")-1, ZSTR_VAL(filename));
+		zend_update_property_str(base_ce, &obj, "file", sizeof("file")-1, filename);
 		zend_update_property_long(base_ce, &obj, "line", sizeof("line")-1, zend_get_compiled_lineno());
 	}
 	zend_update_property(base_ce, &obj, "trace", sizeof("trace")-1, &trace);
@@ -233,7 +233,7 @@ static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{
 
 /* {{{ proto Exception|Error Exception|Error::__clone()
    Clone the exception object */
-ZEND_METHOD(exception, __clone)
+ZEND_COLD ZEND_METHOD(exception, __clone)
 {
 	/* Should never be executable */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0);
@@ -261,7 +261,7 @@ ZEND_METHOD(exception, __construct)
 		} else {
 			ce = base_ce;
 		}
-		zend_throw_error(zend_ce_error, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
 		return;
 	}
 
@@ -276,6 +276,32 @@ ZEND_METHOD(exception, __construct)
 	if (previous) {
 		zend_update_property(base_ce, object, "previous", sizeof("previous")-1, previous);
 	}
+}
+/* }}} */
+
+/* {{{ proto Exception::__wakeup()
+   Exception unserialize checks */
+#define CHECK_EXC_TYPE(name, type) \
+	ZVAL_UNDEF(&value); \
+	pvalue = zend_read_property(i_get_exception_base(object), (object), name, sizeof(name) - 1, 1, &value); \
+	if(Z_TYPE_P(pvalue) != IS_UNDEF && Z_TYPE_P(pvalue) != type) { \
+		zval tmp; \
+		ZVAL_STRINGL(&tmp, name, sizeof(name) - 1); \
+		Z_OBJ_HANDLER_P(object, unset_property)(object, &tmp, NULL); \
+		zval_ptr_dtor(&tmp); \
+	}
+
+ZEND_METHOD(exception, __wakeup)
+{
+	zval value, *pvalue;
+	zval *object = getThis();
+	CHECK_EXC_TYPE("message", IS_STRING);
+	CHECK_EXC_TYPE("string", IS_STRING);
+	CHECK_EXC_TYPE("code", IS_LONG);
+	CHECK_EXC_TYPE("file", IS_STRING);
+	CHECK_EXC_TYPE("line", IS_LONG);
+	CHECK_EXC_TYPE("trace", IS_ARRAY);
+	CHECK_EXC_TYPE("previous", IS_OBJECT);
 }
 /* }}} */
 
@@ -297,7 +323,7 @@ ZEND_METHOD(error_exception, __construct)
 		} else {
 			ce = zend_ce_error_exception;
 		}
-		zend_throw_error(zend_ce_error, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
 		return;
 	}
 
@@ -416,7 +442,7 @@ ZEND_METHOD(error_exception, getSeverity)
 				zend_error(E_WARNING, "Value for %s is no string", key);    \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
-				smart_str_append(str, Z_STR_P(tmp));   \
+				smart_str_appends(str, Z_STRVAL_P(tmp));   \
 			}                                                               \
 		} \
 	} while (0)
@@ -530,7 +556,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			break;
 		case IS_OBJECT:
 			smart_str_appends(str, "Object(");
-			smart_str_append(str, Z_OBJCE_P(arg)->name);
+			smart_str_appends(str, ZSTR_VAL(Z_OBJCE_P(arg)->name));
 			smart_str_appends(str, "), ");
 			break;
 	}
@@ -608,7 +634,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	uint32_t num = 0;
 
 	DEFAULT_0_PARAMS;
-	
+
 	object = getThis();
 	base_ce = i_get_exception_base(object);
 
@@ -686,7 +712,7 @@ ZEND_METHOD(exception, __toString)
 	exception = getThis();
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);
 
-	while (exception && Z_TYPE_P(exception) == IS_OBJECT) {
+	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
 		zend_string *prev_str = str;
 		zend_string *message = zval_get_string(GET_PROPERTY(exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY(exception, "file"));
@@ -782,6 +808,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(exception, __wakeup, NULL, ZEND_ACC_PUBLIC)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getFile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -812,7 +839,7 @@ static const zend_function_entry error_exception_functions[] = {
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_class_entry ce;
-	
+
 	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -868,7 +895,7 @@ void zend_register_default_exception(void) /* {{{ */
 /* }}} */
 
 /* {{{ Deprecated - Use zend_ce_exception directly instead */
-ZEND_API zend_class_entry *zend_exception_get_default(void) 
+ZEND_API zend_class_entry *zend_exception_get_default(void)
 {
 	return zend_ce_exception;
 }
@@ -881,7 +908,7 @@ ZEND_API zend_class_entry *zend_get_error_exception(void)
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_long code) /* {{{ */
 {
 	zval ex;
 
@@ -908,7 +935,7 @@ ZEND_API zend_object *zend_throw_exception(zend_class_entry *exception_ce, const
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, zend_long code, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	char *message;
@@ -923,7 +950,7 @@ ZEND_API zend_object *zend_throw_exception_ex(zend_class_entry *exception_ce, ze
 }
 /* }}} */
 
-ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_long code, int severity) /* {{{ */
+ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_long code, int severity) /* {{{ */
 {
 	zval ex;
 	zend_object *obj = zend_throw_exception(exception_ce, message, code);
@@ -953,7 +980,7 @@ static void zend_error_helper(int type, const char *filename, const uint lineno,
 }
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
@@ -965,9 +992,8 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, "message"));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
-		zend_long code = zval_get_long(GET_PROPERTY_SILENT(&exception, "code"));
 
-		zend_error_helper(code? code : E_ERROR, ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
+		zend_error_helper(E_PARSE, ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
 
 		zend_string_release(file);
 		zend_string_release(message);
@@ -981,7 +1007,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 			if (Z_TYPE(tmp) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
 			} else {
-				zend_update_property_string(i_get_exception_base(&exception), &exception, "string", sizeof("string")-1, EG(exception) ? ZSTR_VAL(ce_exception->name) : Z_STRVAL(tmp));
+				zend_update_property(i_get_exception_base(&exception), &exception, "string", sizeof("string")-1, &tmp);
 			}
 		}
 		zval_ptr_dtor(&tmp);
@@ -1022,7 +1048,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_throw_exception_object(zval *exception) /* {{{ */
+ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 {
 	zend_class_entry *exception_ce;
 
@@ -1033,7 +1059,7 @@ ZEND_API void zend_throw_exception_object(zval *exception) /* {{{ */
 	exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, zend_ce_throwable)) {
-		zend_throw_error(zend_ce_error, "Cannot throw objects that do not implement Throwable");
+		zend_throw_error(NULL, "Cannot throw objects that do not implement Throwable");
 		return;
 	}
 	zend_throw_exception_internal(exception);

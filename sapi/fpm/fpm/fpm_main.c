@@ -1589,6 +1589,10 @@ int main(int argc, char *argv[])
 	tsrm_ls = ts_resource(0);
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;

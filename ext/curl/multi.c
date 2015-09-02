@@ -116,7 +116,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 		return;
 	}
 
-	zend_list_close(Z_RES_P(z_ch));
+	zend_list_delete(Z_RES_P(z_ch));
 }
 /* }}} */
 
@@ -151,7 +151,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	}
 
 	RETVAL_LONG((zend_long)curl_multi_remove_handle(mh->multi, ch->cp));
-	zend_llist_del_element(&mh->easyh, &z_ch, (int (*)(void *, void *))curl_compare_resources);
+	zend_llist_del_element(&mh->easyh, z_ch, (int (*)(void *, void *))curl_compare_resources);
 
 }
 /* }}} */

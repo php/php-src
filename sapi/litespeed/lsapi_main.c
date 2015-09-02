@@ -1005,6 +1005,10 @@ int main( int argc, char * argv[] )
     tsrm_startup(1, 1, 0, NULL);
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {

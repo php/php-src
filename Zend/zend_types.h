@@ -15,6 +15,7 @@
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Xinchen Hui <xinchen.h@zend.com>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -67,6 +68,14 @@ typedef enum {
 typedef intptr_t zend_intptr_t;
 typedef uintptr_t zend_uintptr_t;
 
+#ifdef ZTS
+#define ZEND_TLS static TSRM_TLS
+#define ZEND_EXT_TLS TSRM_TLS
+#else
+#define ZEND_TLS static
+#define ZEND_EXT_TLS
+#endif
+
 typedef struct _zend_object_handlers zend_object_handlers;
 typedef struct _zend_class_entry     zend_class_entry;
 typedef union  _zend_function        zend_function;
@@ -104,9 +113,8 @@ typedef union _zend_value {
 	zend_class_entry *ce;
 	zend_function    *func;
 	struct {
-		ZEND_ENDIAN_LOHI(
-			uint32_t w1,
-			uint32_t w2)
+		uint32_t w1;
+		uint32_t w2;
 	} ww;
 } zend_value;
 
@@ -133,7 +141,7 @@ struct _zval_struct {
 	} u2;
 };
 
-struct _zend_refcounted {
+typedef struct _zend_refcounted_h {
 	uint32_t         refcount;			/* reference counter 32-bit */
 	union {
 		struct {
@@ -144,10 +152,14 @@ struct _zend_refcounted {
 		} v;
 		uint32_t type_info;
 	} u;
+} zend_refcounted_h;
+
+struct _zend_refcounted {
+	zend_refcounted_h gc;
 };
 
 struct _zend_string {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
 	char              val[1];
@@ -162,7 +174,7 @@ typedef struct _Bucket {
 typedef struct _zend_array HashTable;
 
 struct _zend_array {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
@@ -228,16 +240,18 @@ struct _zend_array {
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arData, idx)
 
-#define HT_HASH_SIZE(ht) \
-	(((size_t)(uint32_t)-(int32_t)(ht)->nTableMask) * sizeof(uint32_t))
-#define HT_DATA_SIZE(ht) \
-	((size_t)(ht)->nTableSize * sizeof(Bucket))
+#define HT_HASH_SIZE(nTableMask) \
+	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
+#define HT_DATA_SIZE(nTableSize) \
+	((size_t)(nTableSize) * sizeof(Bucket))
+#define HT_SIZE_EX(nTableSize, nTableMask) \
+	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
 #define HT_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + HT_DATA_SIZE(ht))
+	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
 #define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE(ht) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
+	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
 #define HT_HASH_RESET(ht) \
-	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht))
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
 #define HT_HASH_RESET_PACKED(ht) do { \
 		HT_HASH(ht, -2) = HT_INVALID_IDX; \
 		HT_HASH(ht, -1) = HT_INVALID_IDX; \
@@ -246,10 +260,10 @@ struct _zend_array {
 	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
 
 #define HT_SET_DATA_ADDR(ht, ptr) do { \
-		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE(ht)); \
+		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
 	} while (0)
 #define HT_GET_DATA_ADDR(ht) \
-	((char*)((ht)->arData) - HT_HASH_SIZE(ht))
+	((char*)((ht)->arData) - HT_HASH_SIZE((ht)->nTableMask))
 
 typedef uint32_t HashPosition;
 
@@ -259,7 +273,7 @@ typedef struct _HashTableIterator {
 } HashTableIterator;
 
 struct _zend_object {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
@@ -268,19 +282,19 @@ struct _zend_object {
 };
 
 struct _zend_resource {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	int               handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
 
 struct _zend_reference {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zval              val;
 };
 
 struct _zend_ast_ref {
-	zend_refcounted   gc;
+	zend_refcounted_h gc;
 	zend_ast         *ast;
 };
 
@@ -354,11 +368,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
-#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
-#define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
-#define GC_FLAGS(p)					((zend_refcounted*)(p))->u.v.flags
-#define GC_INFO(p)					((zend_refcounted*)(p))->u.v.gc_info
-#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->u.type_info
+#define GC_REFCOUNT(p)				(p)->gc.refcount
+#define GC_TYPE(p)					(p)->gc.u.v.type
+#define GC_FLAGS(p)					(p)->gc.u.v.flags
+#define GC_INFO(p)					(p)->gc.u.v.gc_info
+#define GC_TYPE_INFO(p)				(p)->gc.u.type_info
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
@@ -476,6 +490,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_OPT_IMMUTABLE(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_IMMUTABLE << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_IMMUTABLE_P(zval_p)	Z_OPT_IMMUTABLE(*(zval_p))
+
+#define Z_OPT_ISREF(zval)			(Z_OPT_TYPE(zval) == IS_REFERENCE)
+#define Z_OPT_ISREF_P(zval_p)		Z_OPT_ISREF(*(zval_p))
 
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
 #define Z_ISREF_P(zval_p)			Z_ISREF(*(zval_p))
@@ -867,6 +884,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define ZVAL_DEREF(z) do {								\
 		if (UNEXPECTED(Z_ISREF_P(z))) {					\
+			(z) = Z_REFVAL_P(z);						\
+		}												\
+	} while (0)
+
+#define ZVAL_OPT_DEREF(z) do {							\
+		if (UNEXPECTED(Z_OPT_ISREF_P(z))) {				\
 			(z) = Z_REFVAL_P(z);						\
 		}												\
 	} while (0)

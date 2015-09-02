@@ -101,7 +101,7 @@ define dump_bt
 					____print_str $zvalue->value.str->val $zvalue->value.str->len
 				end
 				if $type == 7
-					printf "array(%d)[%p]", $zvalue->value.arr->ht->nNumOfElements, $zvalue
+					printf "array(%d)[%p]", $zvalue->value.arr->nNumOfElements, $zvalue
 				end
 				if $type == 8
 					printf "object[%p]", $zvalue
@@ -152,8 +152,8 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	# 15 == IS_INDIRECT
-	if $type >= 5 && $type != 15
-		printf "(refcount=%d) ", $zvalue->value.counted->refcount
+	if $type > 5 && $type != 15
+		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
 
 	if $type == 0
@@ -181,7 +181,7 @@ define ____printzv_contents
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.arr
+			____print_ht $zvalue->value.arr 1
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0

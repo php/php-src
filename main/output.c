@@ -909,7 +909,6 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 {
 	php_output_handler_status_t status;
 	int original_op = context->op;
-	PHP_OUTPUT_TSRMLS(context);
 
 #if PHP_OUTPUT_DEBUG
 	fprintf(stderr, ">>> op(%d, "
@@ -1249,7 +1248,6 @@ static inline int php_output_stack_pop(int flags)
 static int php_output_handler_compat_func(void **handler_context, php_output_context *output_context)
 {
 	php_output_handler_func_t func = *(php_output_handler_func_t *) handler_context;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (func) {
 		char *out_str = NULL;

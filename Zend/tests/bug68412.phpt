@@ -1,5 +1,11 @@
 --TEST--
 Bug #68412 (Infinite recursion with __call can make the program crash/segfault)
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") !== "1") {
+    die("skip Need Zend MM enabled");
+}
+?>
 --FILE--
 <?php
 class C {

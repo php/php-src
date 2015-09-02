@@ -1,6 +1,4 @@
-﻿$Id$
-
-PHP X.Y UPGRADE NOTES
+﻿PHP 7.0 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -429,12 +427,12 @@ Other language changes
 Standard library changes
 ========================
 
+  . substr() now returns an empty string instead of FALSE when the truncation happens on boundaries.
   . call_user_method() and call_user_method_array() no longer exists.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
-  . Improved zend_qsort(using hybrid sorting algo) for better performance,
-    and also renamed zend_qsort to zend_sort.
-  . Added stable sorting algo zend_insert_sort.
+  . The internal sorting algorithm has been improved, what may result in
+    different sort order of elements that compare as equal.
   . Removed dl() function on fpm-fcgi.
   . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
 
@@ -570,6 +568,13 @@ Other
     and ReflectionFunctionAbstract::getReturnType() methods both return an
     instance of ReflectionType.
 
+- Stream:
+  . New Windows only stream context options was added to allow blocking reads
+    on pipes. To enable it, pass array("pipe" => array("blocking" => true))
+    when creating the stream context. Be aware, that this option can under
+    circumstances cause dead locks on the pipe buffer. However it can be useful
+    in several CLI use case scenarios.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -625,6 +630,13 @@ Other
   on pipes. This option should be used carefully because due to the
   platform restrictions dead locks on pipe buffers are possible.
 
+- dirname()
+  A new optional argument ($levels) allow to go up various times
+  dirname(dirname($foo)) => dirname($foo, 2);
+
+- debug_zval_dump
+  It prints now "int" instead of "long", and "float" instead of "double".
+
 ========================================
 6. New Functions
 ========================================
@@ -638,6 +650,10 @@ Other
 - Standard
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
+
+- Zip:
+  . Added ZipArchive::setCompressionIndex() and ZipArchive::setCompressionName()
+    for setting the compression method.
 
 - Zlib:
   . Added deflate_init(), deflate_add(), inflate_init(), inflate_add()
@@ -688,12 +704,20 @@ out, that the corresponding SDK isn't available anymore.
   Mhash is not an extension anymore, use function_exists("mhash") to check whether
   it is avaliable.
 
+- GD
+  The bundled libgd requires libwebp instead of libvpx for the WebP functionality.
+
 ========================================
 10. New Global Constants
 ========================================
 
 - Core
   . PHP_INT_MIN added.
+
+- PCRE
+  . This error constant is added to signal errors due to stack size limitations
+    when PCRE JIT support is enabled:
+  . PREG_JIT_STACKLIMIT_ERROR
 
 - Zlib
   . These constants are added to control flush behavior with the new
@@ -745,6 +769,9 @@ out, that the corresponding SDK isn't available anymore.
   . For SSL support, the dependency on the openssl extension was abolished. Instead
     it depends alone on the openssl library. If it's present at the compile time,
     ftp_ssl_connect() is enabled automatically.
+
+- imap
+  . Static building of ext/imap is disabled
 
 - odbc
   . The odbc extension is always shipped shared

@@ -780,7 +780,8 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval entry, pmembers, pcount, inf;
+	zval entry, inf;
+	zval *pcount, *pmembers;
 	spl_SplObjectStorageElement *element;
 	zend_long count;
 
@@ -801,16 +802,13 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 	++p;
 
-	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash)) {
-		goto outexcept;
-	}
-	if (Z_TYPE(pcount) != IS_LONG) {
-		zval_ptr_dtor(&pcount);
+	pcount = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(pcount, &p, s + buf_len, &var_hash) || Z_TYPE_P(pcount) != IS_LONG) {
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	count = Z_LVAL(pcount);
+	count = Z_LVAL_P(pcount);
 
 	while (count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
@@ -823,7 +821,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		if(*p != 'O' && *p != 'C' && *p != 'r') {
 			goto outexcept;
 		}
-		/* sore reference to allow cross-references between different elements */
+		/* store reference to allow cross-references between different elements */
 		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
 			goto outexcept;
 		}
@@ -837,6 +835,8 @@ SPL_METHOD(SplObjectStorage, unserialize)
 				zval_ptr_dtor(&entry);
 				goto outexcept;
 			}
+		} else {
+			ZVAL_UNDEF(&inf);
 		}
 
 		hash = spl_object_storage_get_hash(intern, getThis(), &entry);
@@ -855,7 +855,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 				var_push_dtor(&var_hash, &pelement->obj);
 			}
 		}
-		element = spl_object_storage_attach(intern, getThis(), &entry, &inf);
+		element = spl_object_storage_attach(intern, getThis(), &entry, Z_ISUNDEF(inf)?NULL:&inf);
 		var_replace(&var_hash, &entry, &element->obj);
 		var_replace(&var_hash, &inf, &element->inf);
 		zval_ptr_dtor(&entry);
@@ -873,9 +873,8 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	}
 	++p;
 
-	ZVAL_UNDEF(&pmembers);
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash) || Z_TYPE(pmembers) != IS_ARRAY) {
-		zval_ptr_dtor(&pmembers);
+	pmembers = var_tmp_var(&var_hash);
+	if (!php_var_unserialize(pmembers, &p, s + buf_len, &var_hash) || Z_TYPE_P(pmembers) != IS_ARRAY) {
 		goto outexcept;
 	}
 
@@ -883,8 +882,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
 	}
-	zend_hash_copy(intern->std.properties, Z_ARRVAL(pmembers), (copy_ctor_func_t) zval_add_ref);
-	zval_ptr_dtor(&pmembers);
+	zend_hash_copy(intern->std.properties, Z_ARRVAL_P(pmembers), (copy_ctor_func_t) zval_add_ref);
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;
@@ -1182,7 +1180,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 					add_index_zval(return_value, Z_LVAL(element->inf), &retval);
 					break;
 				case IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
+					zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
 					break;
 				default:
 					zval_ptr_dtor(&retval);

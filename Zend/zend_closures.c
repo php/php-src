@@ -32,7 +32,7 @@
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
-	zend_throw_error(zend_ce_error, "Closure object cannot have properties")
+	zend_throw_error(NULL, "Closure object cannot have properties")
 
 typedef struct _zend_closure {
 	zend_object       std;
@@ -53,7 +53,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		efree(arguments);
-		zend_throw_error(zend_ce_error, "Cannot get arguments for calling closure");
+		zend_throw_error(NULL, "Cannot get arguments for calling closure");
 		RETVAL_FALSE;
 	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
 		RETVAL_FALSE;
@@ -87,7 +87,7 @@ ZEND_METHOD(Closure, call)
 	}
 
 	zclosure = getThis();
-	closure = (zend_closure *)Z_OBJ_P(zclosure);
+	closure = (zend_closure *) Z_OBJ_P(zclosure);
 
 	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
@@ -122,22 +122,32 @@ ZEND_METHOD(Closure, call)
 	fci.object = fci_cache.object = newobj;
 	fci_cache.initialized = 1;
 
-	my_function = *fci_cache.function_handler;
-	/* use scope of passed object */
-	my_function.common.scope = Z_OBJCE_P(newthis);
-	fci_cache.function_handler = &my_function;
+	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
+		zval new_closure;
+		zend_create_closure(&new_closure, fci_cache.function_handler, Z_OBJCE_P(newthis), closure->called_scope, newthis);
+		closure = (zend_closure *) Z_OBJ(new_closure);
+		fci_cache.function_handler = &closure->func;
+	} else {
+		memcpy(&my_function, fci_cache.function_handler, fci_cache.function_handler->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		/* use scope of passed object */
+		my_function.common.scope = Z_OBJCE_P(newthis);
+		fci_cache.function_handler = &my_function;
 
-	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
-	if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
-		my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
-		memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
+		/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
+		if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+			my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
+			memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
+		}
 	}
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		ZVAL_COPY_VALUE(return_value, &closure_result);
 	}
 
-	if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
+	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
+		/* copied upon generator creation */
+		--GC_REFCOUNT(&closure->std);
+	} else if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
 		efree(my_function.op_array.run_time_cache);
 	}
 }
@@ -205,9 +215,9 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
-static zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
+static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
-	zend_throw_error(zend_ce_error, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 	return NULL;
 }
 /* }}} */
@@ -448,9 +458,9 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 
 /* {{{ proto Closure::__construct()
    Private constructor preventing instantiation */
-ZEND_METHOD(Closure, __construct)
+ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
-	zend_throw_error(zend_ce_error, "Instantiation of 'Closure' is not allowed");
+	zend_throw_error(NULL, "Instantiation of 'Closure' is not allowed");
 }
 /* }}} */
 

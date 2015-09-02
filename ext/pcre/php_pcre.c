@@ -44,13 +44,19 @@
 
 #define PCRE_CACHE_SIZE 4096
 
+/* not fully functional workaround for libpcre < 8.0, see bug #70232 */
+#ifndef PCRE_NOTEMPTY_ATSTART
+# define PCRE_NOTEMPTY_ATSTART PCRE_NOTEMPTY
+#endif
+
 enum {
 	PHP_PCRE_NO_ERROR = 0,
 	PHP_PCRE_INTERNAL_ERROR,
 	PHP_PCRE_BACKTRACK_LIMIT_ERROR,
 	PHP_PCRE_RECURSION_LIMIT_ERROR,
 	PHP_PCRE_BAD_UTF8_ERROR,
-	PHP_PCRE_BAD_UTF8_OFFSET_ERROR
+	PHP_PCRE_BAD_UTF8_OFFSET_ERROR,
+	PHP_PCRE_JIT_STACKLIMIT_ERROR
 };
 
 
@@ -77,6 +83,12 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 		case PCRE_ERROR_BADUTF8_OFFSET:
 			preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
 			break;
+		
+#ifdef PCRE_STUDY_JIT_COMPILE
+		case PCRE_ERROR_JIT_STACKLIMIT:
+			preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
+			break;
+#endif
 
 		default:
 			preg_code = PHP_PCRE_INTERNAL_ERROR;
@@ -169,6 +181,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", (char *)pcre_version(), CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
@@ -600,6 +613,11 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			RETURN_FALSE;
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		RETURN_FALSE;
@@ -740,7 +758,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
+				if ((offsets[1] - offsets[0] < 0) || pcre_get_substring_list(subject, offsets, count, &stringlist) < 0) {
 					if (subpat_names) {
 						efree(subpat_names);
 					}
@@ -868,7 +886,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 				pcre_free((void *) stringlist);
 			}
 		} else if (count == PCRE_ERROR_NOMATCH) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -885,10 +903,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
@@ -1159,7 +1177,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		piece = subject + start_offset;
 
 		/* if (EXPECTED(count > 0 && (limit == -1 || limit > 0))) */
-		if (EXPECTED(count > 0 && limit)) {
+		if (EXPECTED(count > 0 && (offsets[1] - offsets[0] >= 0) && limit)) {
 			if (UNEXPECTED(replace_count)) {
 				++*replace_count;
 			}
@@ -1263,7 +1281,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				limit--;
 			}
 		} else if (count == PCRE_ERROR_NOMATCH || UNEXPECTED(limit == 0)) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -1305,10 +1323,10 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		}
 
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 
 		/* Advance to the next piece. */
 		start_offset = offsets[1];
@@ -1341,6 +1359,11 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 
 	/* FIXME: This might need to be changed to ZSTR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 	ZVAL_EMPTY_STRING(&empty_replace);
+
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject_str))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			return NULL;
+	}
 
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
@@ -1686,6 +1709,11 @@ static PHP_FUNCTION(preg_split)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+			php_error_docref(NULL, E_WARNING, "Subject is too long");
+			RETURN_FALSE;
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		RETURN_FALSE;
@@ -1771,7 +1799,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 
 		/* If something matched */
-		if (count > 0) {
+		if (count > 0 && (offsets[1] - offsets[0] >= 0)) {
 			if (!no_empty || &subject[offsets[0]] != last_match) {
 
 				if (offset_capture) {
@@ -1807,7 +1835,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 				}
 			}
 		} else if (count == PCRE_ERROR_NOMATCH) {
-			/* If we previously set PCRE_NOTEMPTY after a null match,
+			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
@@ -1841,10 +1869,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 
 		/* If we have matched an empty string, mimic what Perl's /g options does.
-		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY_ATSTART and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];

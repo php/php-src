@@ -302,15 +302,13 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 
 	}
 
-	prefetch = pdo_oci_sanitize_prefetch((long) pdo_attr_lval(driver_options, PDO_ATTR_PREFETCH, PDO_OCI_PREFETCH_DEFAULT));
-	if (prefetch) {
+	prefetch = H->prefetch;  /* Note 0 is allowed so in future REF CURSORs can be used & then passed with no row loss*/
+	H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
+							 OCI_ATTR_PREFETCH_ROWS, H->err);
+	if (!H->last_err) {
+		prefetch *= PDO_OCI_PREFETCH_ROWSIZE;
 		H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
-			OCI_ATTR_PREFETCH_ROWS, H->err);
-		if (!H->last_err) {
-			prefetch *= PDO_OCI_PREFETCH_ROWSIZE;
-			H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
-				OCI_ATTR_PREFETCH_MEMORY, H->err);
-		}
+								 OCI_ATTR_PREFETCH_MEMORY, H->err);
 	}
 
 	stmt->driver_data = S;
@@ -460,6 +458,10 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 
 		dbh->auto_commit = (unsigned int) (Z_LVAL_P(val)) ? 1 : 0;
 		return 1;
+	} else if (attr == PDO_ATTR_PREFETCH) {
+		convert_to_long(val);
+		H->prefetch = pdo_oci_sanitize_prefetch(Z_LVAL_P(val));
+		return 1;
 	} else {
 		return 0;
 	}
@@ -524,6 +526,9 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 			ZVAL_BOOL(return_value, dbh->auto_commit);
 			return TRUE;
 
+		case PDO_ATTR_PREFETCH:
+			ZVAL_LONG(return_value, H->prefetch);
+			return TRUE;
 		default:
 			return FALSE;
 
@@ -601,6 +606,8 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	dbh->driver_data = H;
+
+	H->prefetch = PDO_OCI_PREFETCH_DEFAULT;
 
 	/* allocate an environment */
 #if HAVE_OCIENVNLSCREATE

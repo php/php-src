@@ -133,6 +133,7 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savexml, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 1)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_construct, 0, 0, 0)
@@ -1492,6 +1493,14 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
 		RETURN_FALSE;
 	}
+	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
 
 	newdoc = dom_document_parser(id, mode, source, source_len, options);
 
@@ -1810,7 +1819,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
@@ -1910,7 +1919,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
 		}
-		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
 			php_error_docref(NULL, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
@@ -2000,6 +2009,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
 	if (mode == DOM_LOAD_FILE) {
 		if (CHECK_NULL_PATH(source, source_len)) {
 			php_error_docref(NULL, E_WARNING, "Invalid file source");
@@ -2008,7 +2022,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
 		source_len = xmlStrlen((xmlChar *) source);
-		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
+		if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+		}
+		ctxt = htmlCreateMemoryParserCtxt(source, (int)source_len);
 	}
 
 	if (!ctxt) {
@@ -2016,7 +2034,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (options) {
-		htmlCtxtUseOptions(ctxt, options);
+		htmlCtxtUseOptions(ctxt, (int)options);
 	}
 
 	ctxt->vctxt.error = php_libxml_ctx_error;

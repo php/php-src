@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -39,8 +40,9 @@
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4)
+#define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 
-#define HASH_MASK_CONSISTENCY      0x60
+#define HASH_MASK_CONSISTENCY      0xc0
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
@@ -884,7 +886,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
-		__fill_ht->nInternalPointer = 0; \
+		__fill_ht->nInternalPointer = __fill_idx ? 0 : HT_INVALID_IDX; \
 	} while (0)
 
 static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *key, zval *zv)

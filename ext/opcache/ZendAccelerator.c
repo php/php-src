@@ -917,13 +917,16 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 	/* CWD and include_path don't matter for absolute file names and streams */
     if (IS_ABSOLUTE_PATH(path, path_length)) {
 		/* pass */
+		ZCG(key_len) = 0;
     } else if (UNEXPECTED(is_stream_path(path))) {
 		if (!is_cacheable_stream_path(path)) {
 			return NULL;
 		}
 		/* pass */
+		ZCG(key_len) = 0;
     } else if (UNEXPECTED(!ZCG(accel_directives).use_cwd)) {
 		/* pass */
+		ZCG(key_len) = 0;
     } else {
 		const char *include_path = NULL, *cwd = NULL;
 		int include_path_len = 0, cwd_len = 0;
@@ -1068,15 +1071,6 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 	zend_persistent_script *persistent_script;
 
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
-#ifdef HAVE_OPCACHE_FILE_CACHE
-		if (ZCG(accel_directives).file_cache) {
-			realpath = accelerator_orig_zend_resolve_path(filename, filename_len);
-			if (realpath) {
-				zend_file_cache_invalidate(realpath);
-				zend_string_release(realpath);
-			}
-		}
-#endif
 		return FAILURE;
 	}
 
@@ -2290,7 +2284,7 @@ static void accel_deactivate(void)
 	ZCG(counted) = 0;
 
 #if !ZEND_DEBUG
-	if (ZCG(accel_directives).fast_shutdown) {
+	if (ZCG(accel_directives).fast_shutdown && is_zend_mm()) {
 		zend_accel_fast_shutdown();
 	}
 #endif

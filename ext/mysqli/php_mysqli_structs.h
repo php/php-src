@@ -342,14 +342,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
+#define MyG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mysqli, v)
 
-#ifdef ZTS
-#define MyG(v) ZEND_TSRMG(mysqli_globals_id, zend_mysqli_globals *, v)
-#ifdef COMPILE_DL_MYSQLI
+#if defined(ZTS) && defined(COMPILE_DL_MYSQLI)
 ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define MyG(v) (mysqli_globals.v)
 #endif
 
 #define my_estrdup(x) (x) ? estrdup(x) : NULL

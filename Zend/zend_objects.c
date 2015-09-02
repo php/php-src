@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -94,7 +95,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 					zend_class_entry *ce = object->ce;
 
 					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+						zend_throw_error(NULL,
 							"Call to private %s::__destruct() from context '%s'",
 							ZSTR_VAL(ce->name),
 							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
@@ -113,7 +114,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 					zend_class_entry *ce = object->ce;
 
 					if (EG(current_execute_data)) {
-						zend_throw_error(zend_ce_error,
+						zend_throw_error(NULL,
 							"Call to protected %s::__destruct() from context '%s'",
 							ZSTR_VAL(ce->name),
 							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
@@ -203,6 +204,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		} else {
 			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
+
+		new_object->properties->u.v.flags |=
+			old_object->properties->u.v.flags & HASH_FLAG_HAS_EMPTY_IND;
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {

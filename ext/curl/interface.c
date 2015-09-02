@@ -1739,7 +1739,8 @@ static php_curl *alloc_curl_handle()
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 	ch->handlers->fnmatch      = NULL;
 #endif
-	ch->clone 				   = 1;
+	ch->clone 				   = emalloc(sizeof(uint32_t));
+	*ch->clone                 = 1;
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
@@ -1994,9 +1995,11 @@ PHP_FUNCTION(curl_copy_handle)
 	efree(dupch->to_free->slist);
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;
+	efree(dupch->clone);
+	dupch->clone = ch->clone;
 
 	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
-	ch->clone++;
+	(*ch->clone)++;
 
 	ZVAL_RES(return_value, zend_register_resource(dupch, le_curl));
 	dupch->res = Z_RES_P(return_value);
@@ -2580,7 +2583,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					return FAILURE;
 				}
 
-				if (ch->clone == 0) {
+				if ((*ch->clone) == 1) {
 					zend_llist_clean(&ch->to_free->post);
 				}
 				zend_llist_add_element(&ch->to_free->post, &first);
@@ -2791,7 +2794,7 @@ PHP_FUNCTION(curl_setopt_array)
 	zend_ulong	option;
 	zend_string	*string_key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "za", &zid, &arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &zid, &arr) == FAILURE) {
 		return;
 	}
 
@@ -2904,7 +2907,11 @@ PHP_FUNCTION(curl_getinfo)
 
 	if (ZEND_NUM_ARGS() < 2) {
 		char *s_code;
-		zend_long l_code;
+		/* libcurl expects long datatype. So far no cases are known where
+		   it would be an issue. Using zend_long would truncate a 64-bit
+		   var on Win64, so the exact long datatype fits everywhere, as
+		   long as there's no 32-bit int overflow. */
+		long l_code;
 		double d_code;
 #if LIBCURL_VERSION_NUM >  0x071301
 		struct curl_certinfo *ci = NULL;
@@ -3186,12 +3193,13 @@ static void _php_curl_close_ex(php_curl *ch)
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (--ch->clone == 0) {
+	if (--(*ch->clone) == 0) {
 		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
 		zend_hash_destroy(ch->to_free->slist);
 		efree(ch->to_free->slist);
 		efree(ch->to_free);
+		efree(ch->clone);
 	}
 
 	smart_str_free(&ch->handlers->write->buf);

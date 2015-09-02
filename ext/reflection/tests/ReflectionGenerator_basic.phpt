@@ -39,7 +39,11 @@ object(Generator)#2 (0) {
 }
 array(1) {
   [0]=>
-  array(2) {
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["function"]=>
     string(3) "foo"
     ["args"]=>

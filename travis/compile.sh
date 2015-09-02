@@ -57,7 +57,6 @@ $TS \
 --with-imap \
 --with-imap-ssl \
 --with-freetype-dir=/usr \
---with-t1lib=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
