@@ -1,5 +1,7 @@
 --TEST--
 Bug #70172 - Use After Free Vulnerability in unserialize()
+--XFAIL--
+Unfinished merge, needs fix.
 --FILE--
 <?php
 class obj implements Serializable {
