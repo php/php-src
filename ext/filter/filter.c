@@ -380,7 +380,13 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 
 		ce = Z_OBJCE_PP(value);
 		if (!ce->__tostring) {
-			ZVAL_FALSE(*value);
+			zval_ptr_dtor(value);
+			/* #67167: doesn't return null on failure for objects */
+			if (flags & FILTER_NULL_ON_FAILURE) {
+				ZVAL_NULL(*value);
+			} else {
+				ZVAL_FALSE(*value);
+			}
 			return;
 		}
 	}
