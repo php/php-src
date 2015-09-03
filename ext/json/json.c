@@ -48,7 +48,7 @@ static PHP_FUNCTION(json_last_error_msg);
 
 PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
-ZEND_DECLARE_MODULE_GLOBALS(json)
+PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
