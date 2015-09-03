@@ -24,6 +24,14 @@ PHP                                                                        NEWS
   . Fixed bug #70330 (Segmentation Fault with multiple "curl_copy_handle").
     (Laruence)
 
+- EXIF:
+  . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
+    value of 32 bytes). (Stas)
+
+- hash:
+  . Fixed bug #70312 (HAVAL gives wrong hashes in specific cases). (letsgolee
+    at naver dot com)
+
 - Mysqli:
   . Fixed bug #32490 (constructor of mysqli has wrong name). (cmb)
 
@@ -31,11 +39,21 @@ PHP                                                                        NEWS
   . Fixed bug #70386 (Can't compile on NetBSD because of missing WCONTINUED
     and WIFCONTINUED). (Matteo)
 
+- PCRE:
+  . Fixed bug #70232 (Incorrect bump-along behavior with \K and empty string
+    match). (cmb)
+  . Fixed bug #70345 (Multiple vulnerabilities related to PCRE functions).
+    (Anatol Belski)
+
 - PDO:
   - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
+
+- SOAP:
+  . Fixed bug #70388 (SOAP serialize_function_call() type confusion / RCE).
+    (Stas)
 
 - SPL:
   . Fixed bug #70303 (Incorrect constructor reflection for ArrayObject). (cmb)
@@ -45,9 +63,20 @@ PHP                                                                        NEWS
     working). (Laruence)
   . Fixed bug #70295 (Segmentation fault with setrawcookie). (Bob)
   . Fixed bug #67131 (setcookie() conditional for empty values not met). (cmb)
+  . Fixed bug #70365 (Use-after-free vulnerability in unserialize() with
+    SplObjectStorage). (taoguangchen at icloud dot com)
+  . Fixed bug #70366 (Use-after-free vulnerability in unserialize() with
+    SplDoublyLinkedList). (taoguangchen at icloud dot com)
 
 - Reflection:
   . Fixed bug causing bogus traces for ReflectionGenerator::getTrace(). (Bob)
+
+- XSLT:
+  . Fixed bug #69782 (NULL pointer dereference). (Stas)
+
+- ZIP:
+  . Fixed bug #70350 (ZipArchive::extractTo allows for directory traversal when
+    creating directories). (neal at fb dot com)
 
 20 Aug 2015, PHP 7.0.0 RC 1
 
