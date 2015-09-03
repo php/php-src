@@ -30,7 +30,7 @@ var_dump($_SESSION);
 --EXPECTF--
 array(2) {
   [0]=>
-  &object(obj)#%d (1) {
+  object(obj)#%d (1) {
     ["data"]=>
     NULL
   }
