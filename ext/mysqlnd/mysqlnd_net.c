@@ -61,6 +61,27 @@ mysqlnd_set_sock_no_delay(php_stream * stream TSRMLS_DC)
 /* }}} */
 
 
+/* {{{ mysqlnd_set_sock_keepalive */
+static int
+mysqlnd_set_sock_keepalive(php_stream * stream TSRMLS_DC)
+{
+
+	int socketd = ((php_netstream_data_t*)stream->abstract)->socket;
+	int ret = SUCCESS;
+	int flag = 1;
+	int result = setsockopt(socketd, SOL_SOCKET, SO_KEEPALIVE, (char *) &flag, sizeof(int));
+
+	DBG_ENTER("mysqlnd_set_sock_keepalive");
+
+	if (result == -1) {
+		ret = FAILURE;
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_net::network_read_ex */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar * const buffer, const size_t count,
@@ -252,6 +273,8 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 		if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
 			/* TCP -> Set TCP_NODELAY */
 			mysqlnd_set_sock_no_delay(net_stream TSRMLS_CC);
+			/* TCP -> Set SO_KEEPALIVE */
+			mysqlnd_set_sock_keepalive(net_stream TSRMLS_CC);
 		}
 	}
 
