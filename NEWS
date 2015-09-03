@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
+  . Fixed bug #70398 (SIGSEGV, Segmentation fault zend_ast_destroy_ex)
+    (Dmitry, Bob, Laruence)
   . Fixed bug #70332 (Wrong behavior while returning reference on object).
     (Laruence, Dmitry)
   . Fixed bug #70300 (Syntactical inconsistency with new group use syntax).
