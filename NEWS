@@ -46,7 +46,7 @@ PHP                                                                        NEWS
     (Anatol Belski)
 
 - PDO:
-  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+  . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)
