@@ -780,10 +780,11 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			if (!Z_IMMUTABLE_P(val)) {
 				copy_constant_array(new_val, val);
 			}
-		} else if (Z_TYPE_INFO_P(val) == IS_RESOURCE_EX) {
-			Z_TYPE_INFO_P(new_val) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
 		} else if (Z_REFCOUNTED_P(val)) {
 			Z_ADDREF_P(val);
+			if (UNEXPECTED(Z_TYPE_INFO_P(val) == IS_RESOURCE_EX)) {
+				Z_TYPE_INFO_P(new_val) &= ~(IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
 }
