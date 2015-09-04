@@ -68,6 +68,10 @@ typedef enum {
 #define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR (1<<9)
 #define PHP_JSON_PRESERVE_ZERO_FRACTION  (1<<10)
 
+/* json_decode() options */
+#define PHP_JSON_OBJECT_AS_ARRAY         (1<<0)
+#define PHP_JSON_BIGINT_AS_STRING        (1<<1)
+
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0
 #define PHP_JSON_OUTPUT_OBJECT	1
@@ -87,10 +91,6 @@ PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json);
 #if defined(ZTS) && defined(COMPILE_DL_JSON)
 ZEND_TSRMLS_CACHE_EXTERN();
 #endif
-
-/* json_decode() options */
-#define PHP_JSON_OBJECT_AS_ARRAY    (1<<0)
-#define PHP_JSON_BIGINT_AS_STRING   (1<<1)
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth);
