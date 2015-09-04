@@ -65,8 +65,8 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 		while (hash_size >> 1 > ht->nNumUsed) {
 			hash_size >>= 1;
 		}
-		if (hash_size < -HT_MIN_MASK) {
-			hash_size = -HT_MIN_MASK;
+		if (hash_size < HT_MIN_SIZE) {
+			hash_size = HT_MIN_SIZE;
 		}
 		ADD_SIZE(hash_size * sizeof(uint32_t) + ht->nNumUsed * sizeof(Bucket));
 	} else {

@@ -81,7 +81,7 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 	php_json_error_code error_code;
 ZEND_END_MODULE_GLOBALS(json)
 
-ZEND_EXTERN_MODULE_GLOBALS(json);
+PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json);
 #define JSON_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(json, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_JSON)

@@ -585,44 +585,42 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
-	zval zv;
+	zval *zv;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
 
-	ZVAL_UNDEF(&zv);
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum);
 
 	p = buf;
 	max = buf + buf_len;
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_STRING
-		|| convert_to_gmp(gmpnum, &zv, 10) == FAILURE
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_STRING
+		|| convert_to_gmp(gmpnum, zv, 10) == FAILURE
 	) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		goto exit;
 	}
-	zval_dtor(&zv);
-	ZVAL_UNDEF(&zv);
 
-	if (!php_var_unserialize(&zv, &p, max, &unserialize_data)
-		|| Z_TYPE(zv) != IS_ARRAY
+	zv = var_tmp_var(&unserialize_data);
+	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
+		|| Z_TYPE_P(zv) != IS_ARRAY
 	) {
 		zend_throw_exception(NULL, "Could not unserialize properties", 0);
 		goto exit;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL(zv)) != 0) {
+	if (zend_hash_num_elements(Z_ARRVAL_P(zv)) != 0) {
 		zend_hash_copy(
-			zend_std_get_properties(object), Z_ARRVAL(zv),
+			zend_std_get_properties(object), Z_ARRVAL_P(zv),
 			(copy_ctor_func_t) zval_add_ref
 		);
 	}
 
 	retval = SUCCESS;
 exit:
-	zval_dtor(&zv);
 	PHP_VAR_UNSERIALIZE_DESTROY(unserialize_data);
 	return retval;
 }

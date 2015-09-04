@@ -1243,26 +1243,35 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 {
     zval *prop, tmp;
    	zend_string *key;
+   	zend_long h;
    	zend_property_info *property_info;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-		property_info = zend_get_property_info(object->ce, key, 1);
-		if (property_info != ZEND_WRONG_PROPERTY_INFO &&
-		    property_info &&
-		    (property_info->flags & ZEND_ACC_STATIC) == 0) {
-			zval *slot = OBJ_PROP(object, property_info->offset);
-			zval_ptr_dtor(slot);
-			ZVAL_COPY_VALUE(slot, prop);
-			zval_add_ref(slot);
-			if (object->properties) {
-				ZVAL_INDIRECT(&tmp, slot);
-				zend_hash_update(object->properties, key, &tmp);
+   	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
+		if(key) {
+			property_info = zend_get_property_info(object->ce, key, 1);
+			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
+				property_info &&
+				(property_info->flags & ZEND_ACC_STATIC) == 0) {
+				zval *slot = OBJ_PROP(object, property_info->offset);
+				zval_ptr_dtor(slot);
+				ZVAL_COPY_VALUE(slot, prop);
+				zval_add_ref(slot);
+				if (object->properties) {
+					ZVAL_INDIRECT(&tmp, slot);
+					zend_hash_update(object->properties, key, &tmp);
+				}
+			} else {
+				if (!object->properties) {
+					rebuild_object_properties(object);
+				}
+				prop = zend_hash_update(object->properties, key, prop);
+				zval_add_ref(prop);
 			}
 		} else {
 			if (!object->properties) {
 				rebuild_object_properties(object);
 			}
-			prop = zend_hash_update(object->properties, key, prop);
+			prop = zend_hash_index_update(object->properties, h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();

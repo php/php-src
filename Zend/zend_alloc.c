@@ -459,7 +459,18 @@ static void *zend_mm_mmap(size_t size)
 	}
 	return ptr;
 #else
-	void *ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr;
+
+#ifdef MAP_HUGETLB
+	if (size == ZEND_MM_CHUNK_SIZE) {
+		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
+		if (ptr != MAP_FAILED) {
+			return ptr;
+		}
+	}
+#endif
+
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR
@@ -964,7 +975,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, int pages_count ZEND_FILE_L
 				/* skip free blocks */
 				while (tmp == 0) {
 					i += ZEND_MM_BITSET_LEN;
-					if (i >= free_tail) {
+					if (i >= free_tail || i == ZEND_MM_PAGES) {
 						len = ZEND_MM_PAGES - page_num;
 						if (len >= pages_count && len < best_len) {
 							chunk->free_tail = page_num + pages_count;

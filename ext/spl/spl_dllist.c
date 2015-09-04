@@ -1210,6 +1210,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 		if (!php_var_unserialize(elem, &p, s + buf_len, &var_hash)) {
 			goto error;
 		}
+		var_push_dtor(&var_hash, elem);
 
 		spl_ptr_llist_push(intern->llist, elem);
 	}

@@ -1,5 +1,7 @@
 --TEST--
 filter_var_array() on array with reference
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 

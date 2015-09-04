@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #ifdef HAVE_DTRACE
-ZEND_API zend_op_array *(*zend_dtrace_compile_file)(zend_file_handle *file_handle, int type);
-ZEND_API void (*zend_dtrace_execute)(zend_op_array *op_array);
-ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+ZEND_API extern zend_op_array *(*zend_dtrace_compile_file)(zend_file_handle *file_handle, int type);
+ZEND_API extern void (*zend_dtrace_execute)(zend_op_array *op_array);
+ZEND_API extern void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type);
 ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data);
