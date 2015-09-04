@@ -1495,6 +1495,7 @@ static ZIPARCHIVE_METHOD(close)
 	struct zip *intern;
 	zval *self = getThis();
 	ze_zip_object *ze_obj;
+	int err;
 
 	if (!self) {
 		RETURN_FALSE;
@@ -1504,7 +1505,8 @@ static ZIPARCHIVE_METHOD(close)
 
 	ze_obj = Z_ZIP_P(self);
 
-	if (zip_close(intern)) {
+	if (err = zip_close(intern)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, zip_strerror(intern));
 		zip_discard(intern);
 	}
 
@@ -1513,7 +1515,11 @@ static ZIPARCHIVE_METHOD(close)
 	ze_obj->filename_len = 0;
 	ze_obj->za = NULL;
 
-	RETURN_TRUE;
+	if (!err) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
