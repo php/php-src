@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)
 
+- Zip:
+  . Fixed bug #70322 (ZipArchive::close() doesn't indicate errors). (cmb)
+
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
