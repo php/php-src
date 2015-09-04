@@ -10,6 +10,12 @@ class Obj
     const TRAIT = 'trait';
     const EXTENDS = 'extends';
     const IMPLEMENTS = 'implements';
+    const STATIC = 'static';
+    const ABSTRACT = 'abstract';
+    const FINAL = 'final';
+    const PUBLIC = 'public';
+    const PROTECTED = 'protected';
+    const PRIVATE = 'private';
     const CONST = 'const';
     const ENDDECLARE = 'enddeclare';
     const ENDFOR = 'endfor';
@@ -63,12 +69,17 @@ class Obj
     const DIE = 'die';
     const SELF = 'self';
     const PARENT = 'parent';
-    const PUBLIC = 'public';
-    const PROTECTED = 'protected';
-    const PRIVATE = 'private';
-    const STATIC = 'static';
-    const ABSTRACT = 'abstract';
-    const FINAL = 'final';
+    const ISSET = 'isset';
+    const UNSET = 'unset';
+    const __CLASS__ = '__CLASS__';
+    const __TRAIT__ = '__TRAIT__';
+    const __FUNCTION__ = '__FUNCTION__';
+    const __METHOD__ = '__METHOD__';
+    const __LINE__ = '__LINE__';
+    const __FILE__ = '__FILE__';
+    const __DIR__ = '__DIR__';
+    const __NAMESPACE__ = '__NAMESPACE__';
+    const __HALT_COMPILER = '__halt_compiler';
 }
 
 echo Obj::EMPTY, PHP_EOL;
@@ -76,6 +87,12 @@ echo Obj::CALLABLE, PHP_EOL;
 echo Obj::TRAIT, PHP_EOL;
 echo Obj::EXTENDS, PHP_EOL;
 echo Obj::IMPLEMENTS, PHP_EOL;
+echo Obj::STATIC, PHP_EOL;
+echo Obj::ABSTRACT, PHP_EOL;
+echo Obj::FINAL, PHP_EOL;
+echo Obj::PUBLIC, PHP_EOL;
+echo Obj::PROTECTED, PHP_EOL;
+echo Obj::PRIVATE, PHP_EOL;
 echo Obj::CONST, PHP_EOL;
 echo Obj::ENDDECLARE, PHP_EOL;
 echo Obj::ENDFOR, PHP_EOL;
@@ -129,12 +146,17 @@ echo Obj::CATCH, PHP_EOL;
 echo Obj::DIE, PHP_EOL;
 echo Obj::SELF, PHP_EOL;
 echo Obj::PARENT, PHP_EOL;
-echo Obj::PUBLIC, PHP_EOL;
-echo Obj::PROTECTED, PHP_EOL;
-echo Obj::PRIVATE, PHP_EOL;
-echo Obj::STATIC, PHP_EOL;
-echo Obj::ABSTRACT, PHP_EOL;
-echo Obj::FINAL, PHP_EOL;
+echo Obj::ISSET, PHP_EOL;
+echo Obj::UNSET, PHP_EOL;
+echo Obj::__CLASS__, PHP_EOL;
+echo Obj::__TRAIT__, PHP_EOL;
+echo Obj::__FUNCTION__, PHP_EOL;
+echo Obj::__METHOD__, PHP_EOL;
+echo Obj::__LINE__, PHP_EOL;
+echo Obj::__FILE__, PHP_EOL;
+echo Obj::__DIR__, PHP_EOL;
+echo Obj::__NAMESPACE__, PHP_EOL;
+echo Obj::__HALT_COMPILER, PHP_EOL;
 
 echo "\nDone\n";
 
@@ -144,6 +166,12 @@ callable
 trait
 extends
 implements
+static
+abstract
+final
+public
+protected
+private
 const
 enddeclare
 endfor
@@ -197,11 +225,16 @@ catch
 die
 self
 parent
-public
-protected
-private
-static
-abstract
-final
+isset
+unset
+__CLASS__
+__TRAIT__
+__FUNCTION__
+__METHOD__
+__LINE__
+__FILE__
+__DIR__
+__NAMESPACE__
+__halt_compiler
 
 Done
