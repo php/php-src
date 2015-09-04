@@ -39,18 +39,20 @@ echo "-- Test: requests with 'header' as string --\n";
 do_test(array('header' => "X-Foo: bar\r\nContent-Type: text/plain", 'method' => 'POST', 'content' => 'ohai'));
 
 ?>
---EXPECT--
+--EXPECTF--
 -- Test: requests with 'header' as array --
-string(103) "POST / HTTP/1.0
+string(%d) "POST / HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 Content-Length: 4
 X-Foo: bar
 Content-Type: text/plain
 
 ohai"
 -- Test: requests with 'header' as string --
-string(103) "POST / HTTP/1.0
+string(%d) "POST / HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 Content-Length: 4
 X-Foo: bar
 Content-Type: text/plain

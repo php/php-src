@@ -7,9 +7,16 @@ class Obj
 {
     static function empty(){ echo __METHOD__, PHP_EOL; }
     static function callable(){ echo __METHOD__, PHP_EOL; }
+    static function class(){ echo __METHOD__, PHP_EOL; }
     static function trait(){ echo __METHOD__, PHP_EOL; }
     static function extends(){ echo __METHOD__, PHP_EOL; }
     static function implements(){ echo __METHOD__, PHP_EOL; }
+    static function static(){ echo __METHOD__, PHP_EOL; }
+    static function abstract(){ echo __METHOD__, PHP_EOL; }
+    static function final(){ echo __METHOD__, PHP_EOL; }
+    static function public(){ echo __METHOD__, PHP_EOL; }
+    static function protected(){ echo __METHOD__, PHP_EOL; }
+    static function private(){ echo __METHOD__, PHP_EOL; }
     static function const(){ echo __METHOD__, PHP_EOL; }
     static function enddeclare(){ echo __METHOD__, PHP_EOL; }
     static function endfor(){ echo __METHOD__, PHP_EOL; }
@@ -22,6 +29,7 @@ class Obj
     static function instanceof(){ echo __METHOD__, PHP_EOL; }
     static function insteadof(){ echo __METHOD__, PHP_EOL; }
     static function interface(){ echo __METHOD__, PHP_EOL; }
+    static function namespace(){ echo __METHOD__, PHP_EOL; }
     static function new(){ echo __METHOD__, PHP_EOL; }
     static function or(){ echo __METHOD__, PHP_EOL; }
     static function xor(){ echo __METHOD__, PHP_EOL; }
@@ -62,20 +70,31 @@ class Obj
     static function die(){ echo __METHOD__, PHP_EOL; }
     static function self(){ echo __METHOD__, PHP_EOL; }
     static function parent(){ echo __METHOD__, PHP_EOL; }
-    static function public(){ echo __METHOD__, PHP_EOL; }
-    static function protected(){ echo __METHOD__, PHP_EOL; }
-    static function private(){ echo __METHOD__, PHP_EOL; }
-    static function static(){ echo __METHOD__, PHP_EOL; }
-    static function abstract(){ echo __METHOD__, PHP_EOL; }
-    static function final(){ echo __METHOD__, PHP_EOL; }
-    static function class(){ echo __METHOD__, PHP_EOL; }
+    static function isset(){ echo __METHOD__, PHP_EOL; }
+    static function unset(){ echo __METHOD__, PHP_EOL; }
+    static function __CLASS__(){ echo __METHOD__, PHP_EOL; }
+    static function __TRAIT__(){ echo __METHOD__, PHP_EOL; }
+    static function __FUNCTION__(){ echo __METHOD__, PHP_EOL; }
+    static function __METHOD__(){ echo __METHOD__, PHP_EOL; }
+    static function __LINE__(){ echo __METHOD__, PHP_EOL; }
+    static function __FILE__(){ echo __METHOD__, PHP_EOL; }
+    static function __DIR__(){ echo __METHOD__, PHP_EOL; }
+    static function __NAMESPACE__(){ echo __METHOD__, PHP_EOL; }
+    static function __halt_compiler(){ echo __METHOD__, PHP_EOL; }
 }
 
 Obj::empty();
 Obj::callable();
+Obj::class();
 Obj::trait();
 Obj::extends();
 Obj::implements();
+Obj::static();
+Obj::abstract();
+Obj::final();
+Obj::public();
+Obj::protected();
+Obj::private();
 Obj::const();
 Obj::enddeclare();
 Obj::endfor();
@@ -88,6 +107,7 @@ Obj::goto();
 Obj::instanceof();
 Obj::insteadof();
 Obj::interface();
+Obj::namespace();
 Obj::new();
 Obj::or();
 Obj::xor();
@@ -128,22 +148,33 @@ Obj::catch();
 Obj::die();
 Obj::self();
 Obj::parent();
-Obj::public();
-Obj::protected();
-Obj::private();
-Obj::static();
-Obj::abstract();
-Obj::final();
-Obj::class();
+Obj::isset();
+Obj::unset();
+Obj::__CLASS__();
+Obj::__TRAIT__();
+Obj::__FUNCTION__();
+Obj::__METHOD__();
+Obj::__LINE__();
+Obj::__FILE__();
+Obj::__DIR__();
+Obj::__NAMESPACE__();
+Obj::__halt_compiler();
 
 echo "\nDone\n";
 
 --EXPECTF--
 Obj::empty
 Obj::callable
+Obj::class
 Obj::trait
 Obj::extends
 Obj::implements
+Obj::static
+Obj::abstract
+Obj::final
+Obj::public
+Obj::protected
+Obj::private
 Obj::const
 Obj::enddeclare
 Obj::endfor
@@ -156,6 +187,7 @@ Obj::goto
 Obj::instanceof
 Obj::insteadof
 Obj::interface
+Obj::namespace
 Obj::new
 Obj::or
 Obj::xor
@@ -196,12 +228,16 @@ Obj::catch
 Obj::die
 Obj::self
 Obj::parent
-Obj::public
-Obj::protected
-Obj::private
-Obj::static
-Obj::abstract
-Obj::final
-Obj::class
+Obj::isset
+Obj::unset
+Obj::__CLASS__
+Obj::__TRAIT__
+Obj::__FUNCTION__
+Obj::__METHOD__
+Obj::__LINE__
+Obj::__FILE__
+Obj::__DIR__
+Obj::__NAMESPACE__
+Obj::__halt_compiler
 
 Done

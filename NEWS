@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 17 Sep 2015, PHP 7.0.0 RC 3
 
-
+- Streams:
+  . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
+    (Niklas Keller)
 
 03 Sep 2015, PHP 7.0.0 RC 2
 
