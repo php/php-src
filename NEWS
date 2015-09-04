@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
     building extensions). (Adam)
 
+- DOM:
+  . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
+    encoding). (cmb)
+
 - OpenSSL:
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
     DH key resource). (Jakub Zelenka)
