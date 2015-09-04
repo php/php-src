@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 17 Sep 2015, PHP 7.0.0 RC 3
 
+- DOM:
+  . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
+    encoding). (cmb)
+
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)
