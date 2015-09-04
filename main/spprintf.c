@@ -306,8 +306,8 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					} else if (*fmt == '*') {
 						precision = va_arg(ap, int);
 						fmt++;
-						if (precision < 0)
-							precision = 0;
+						if (precision < -1)
+							precision = -1;
 					} else
 						precision = 0;
 
