@@ -45,11 +45,11 @@ static int _win32_rename_temp_a(_zip_source_win32_read_file_t *ctx);
 static int _win32_remove_a(const void *fname);
 
 static _zip_source_win32_file_ops_t win32_ops_a = {
-    .op_strdup         = _win32_strdup_a,
-    .op_open           = _win32_open_a,
-    .op_create_temp    = _win32_create_temp_a,
-    .op_rename_temp    = _win32_rename_temp_a,
-    .op_remove         = _win32_remove_a
+    _win32_strdup_a,
+    _win32_open_a,
+    _win32_create_temp_a,
+    _win32_rename_temp_a,
+    _win32_remove_a
 };
 
 ZIP_EXTERN zip_source_t *
