@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
     DH key resource). (Jakub Zelenka)
+  . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
 
 - PDO:
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
