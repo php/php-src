@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
     building extensions). (Adam)
 
+- CLI server:
+  . Fixed bug #68291 (404 on urls with '+'). (cmb)
+
 - DOM:
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
