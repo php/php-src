@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #70029 (nodeValue of DOMElement list content of children nodes).
     (cmb)
 
+- OpenSSL:
+  . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
+
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)
