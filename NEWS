@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 17 Sep 2015, PHP 7.0.0 RC 3
 
+- CLI server:
+  . Fixed bug #68291 (404 on urls with '+'). (cmb)
+
 - DOM:
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
