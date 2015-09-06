@@ -8,8 +8,6 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
-  . Fixed bug #70029 (nodeValue of DOMElement list content of children nodes).
-    (cmb)
 
 - OpenSSL:
   . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
