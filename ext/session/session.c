@@ -2052,13 +2052,14 @@ static PHP_FUNCTION(session_regenerate_id)
 		} else {
 			ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
 		}
-		PS(mod)->s_close(&PS(mod_data));
 		if (ret == FAILURE) {
+			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
 			php_error_docref(NULL, E_WARNING, "Session write failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			RETURN_FALSE;
 		}
 	}
+	PS(mod)->s_close(&PS(mod_data));
 
 	/* New session data */
 	if (PS(session_vars)) {
