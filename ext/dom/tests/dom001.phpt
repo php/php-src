@@ -108,7 +108,7 @@ Num Children: 4
 Node Name: title
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Title
 
 Node Name: #text
 Node Type: 3
@@ -142,7 +142,7 @@ Num Children: 4
 Node Name: title
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Title
 
 Node Name: #text
 Node Type: 3
@@ -186,7 +186,7 @@ Node Content: en
 Node Name: Silly
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Symphony
 
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE chapter SYSTEM "/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd" [
@@ -214,24 +214,24 @@ Node Content:
 Node Name: Silly
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Symphony
 
     Using elem
 Node Name: Silly
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Symphony
 
 --------- Unlink Node
 Node Name: Silly
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Symphony
 
 Node Name: title
 Node Type: 1
 Num Children: 1
-Node Content: 
+Node Content: Title
 
 Node Name: #text
 Node Type: 3

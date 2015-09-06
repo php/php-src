@@ -81,7 +81,11 @@ object(DOMElement)#%d (17) {
   ["nodeName"]=>
   string(5) "form1"
   ["nodeValue"]=>
-  NULL
+  string(39) "
+    Value A
+    Value B
+    Value C
+  "
   ["nodeType"]=>
   int(1)
   ["parentNode"]=>

@@ -450,9 +450,6 @@ Other
   . dba_delete() now returns false if the key was not found for the inifile
     handler, too.
 
-- DOM:
-  . DOMElement::nodeValue is now null, according to W3C DOM Core Level 3.
-
 - GMP
   . Requires libgmp version 4.2 or newer now.
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making

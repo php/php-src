@@ -297,6 +297,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_TEXT_NODE:
+		case XML_ELEMENT_NODE:
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
