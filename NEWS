@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     encoding). (cmb)
 
 - OpenSSL
+  . Fixed bug #55259 (openssl extension does not get the DH parameters from
+    DH key resource). (Jakub Zelenka)
+  . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
+  . Fixed bug #60632 (openssl_seal fails with AES). (Jakub Zelenka)
   . Implemented FR #70438 (Add IV parameter for openssl_seal and openssl_open)
     (Jakub Zelenka)
 
