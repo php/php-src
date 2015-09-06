@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- OpenSSL
+  . Implemented FR #70438 (Add IV parameter for openssl_seal and openssl_open)
+    (Jakub Zelenka)
+
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)

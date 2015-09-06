@@ -358,6 +358,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_seal, 0, 0, 4)
     ZEND_ARG_INFO(1, ekeys) /* arary */
     ZEND_ARG_INFO(0, pubkeys) /* array */
 	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(1, iv)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
@@ -365,6 +366,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
     ZEND_ARG_INFO(1, opendata)
     ZEND_ARG_INFO(0, ekey)
     ZEND_ARG_INFO(0, privkey)
+	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_get_md_methods, 0, 0, 0)
@@ -4886,12 +4888,12 @@ PHP_FUNCTION(openssl_verify)
    Seals data */
 PHP_FUNCTION(openssl_seal)
 {
-	zval *pubkeys, *pubkey, *sealdata, *ekeys;
+	zval *pubkeys, *pubkey, *sealdata, *ekeys, *iv = NULL;
 	HashTable *pubkeysht;
 	EVP_PKEY **pkeys;
 	zend_resource ** key_resources;	/* so we know what to cleanup */
-	int i, len1, len2, *eksl, nkeys;
-	unsigned char *buf = NULL, **eks;
+	int i, len1, len2, *eksl, nkeys, iv_len;
+	unsigned char iv_buf[EVP_MAX_IV_LENGTH + 1], *buf = NULL, **eks;
 	char * data;
 	size_t data_len;
 	char *method =NULL;
@@ -4899,7 +4901,8 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|s", &data, &data_len, &sealdata, &ekeys, &pubkeys, &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|sz/", &data, &data_len,
+				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}
 	pubkeysht = HASH_OF(pubkeys);
@@ -4917,12 +4920,15 @@ PHP_FUNCTION(openssl_seal)
 			php_error_docref(NULL, E_WARNING, "Unknown signature algorithm.");
 			RETURN_FALSE;
 		}
-		if (EVP_CIPHER_iv_length(cipher) > 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ciphers with modes requiring IV are not supported");
-			RETURN_FALSE;
-		}
 	} else {
 		cipher = EVP_rc4();
+	}
+
+	iv_len = EVP_CIPHER_iv_length(cipher);
+	if (!iv && iv_len > 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Cipher algorithm requires an IV to be supplied as a sixth parameter");
+		RETURN_FALSE;
 	}
 
 	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
@@ -4951,16 +4957,12 @@ PHP_FUNCTION(openssl_seal)
 		goto clean_exit;
 	}
 
-#if 0
-	/* Need this if allow ciphers that require initialization vector */
-	ivlen = EVP_CIPHER_CTX_iv_length(&ctx);
-	iv = ivlen ? emalloc(ivlen + 1) : NULL;
-#endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
 	EVP_CIPHER_CTX_cleanup(&ctx);
 
-	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
+	if (!EVP_SealInit(&ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
+			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
 		RETVAL_FALSE;
 		efree(buf);
 		EVP_CIPHER_CTX_cleanup(&ctx);
@@ -4983,17 +4985,12 @@ PHP_FUNCTION(openssl_seal)
 			efree(eks[i]);
 			eks[i] = NULL;
 		}
-#if 0
-		/* If allow ciphers that need IV, we need this */
-		zval_dtor(*ivec);
-		if (ivlen) {
-			iv[ivlen] = '\0';
-			ZVAL_STRINGL(*ivec, iv, ivlen);
-			efree(iv);
-		} else {
-			ZVAL_EMPTY_STRING(*ivec);
+
+		if (iv) {
+			zval_dtor(iv);
+			iv_buf[iv_len] = '\0';
+			ZVAL_NEW_STR(iv, zend_string_init((char*)iv_buf, iv_len, 0));
 		}
-#endif
 	} else {
 		efree(buf);
 	}
@@ -5022,19 +5019,20 @@ PHP_FUNCTION(openssl_open)
 {
 	zval *privkey, *opendata;
 	EVP_PKEY *pkey;
-	int len1, len2;
-	unsigned char *buf;
+	int len1, len2, cipher_iv_len;
+	unsigned char *buf, *iv_buf;
 	zend_resource *keyresource = NULL;
 	EVP_CIPHER_CTX ctx;
 	char * data;
 	size_t data_len;
 	char * ekey;
 	size_t ekey_len;
-	char *method =NULL;
-	size_t method_len = 0;
+	char *method = NULL, *iv = NULL;
+	size_t method_len = 0, iv_len = 0;
 	const EVP_CIPHER *cipher;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/sz|s", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey, &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/sz|ss", &data, &data_len, &opendata,
+				&ekey, &ekey_len, &privkey, &method, &method_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
 
@@ -5057,9 +5055,26 @@ PHP_FUNCTION(openssl_open)
 		cipher = EVP_rc4();
 	}
 
+	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
+	if (cipher_iv_len > 0) {
+		if (!iv) {
+			php_error_docref(NULL, E_WARNING,
+					"Cipher algorithm requires an IV to be supplied as a sixth parameter");
+			RETURN_FALSE;
+		}
+		if (cipher_iv_len != iv_len) {
+			php_error_docref(NULL, E_WARNING, "IV length is invalid");
+			RETURN_FALSE;
+		}
+		iv_buf = (unsigned char *)iv;
+	} else {
+		iv_buf = NULL;
+	}
+
 	buf = emalloc(data_len + 1);
 
-	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, (int)ekey_len, NULL, pkey) && EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
+	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, (int)ekey_len, iv_buf, pkey) &&
+			EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
 		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
 			efree(buf);
 			RETVAL_FALSE;

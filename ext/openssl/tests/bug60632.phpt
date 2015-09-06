@@ -21,5 +21,5 @@ $result = openssl_seal('test phrase', $encrypted, $ekeys, array($pubkey), 'AES-2
 echo "Done";
 ?>
 --EXPECTF--
-Warning: openssl_seal(): Ciphers with modes requiring IV are not supported in %s on line %d
+Warning: openssl_seal(): Cipher algorithm requires an IV to be supplied as a sixth parameter in %s on line %d
 Done
