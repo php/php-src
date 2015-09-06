@@ -4917,6 +4917,10 @@ PHP_FUNCTION(openssl_seal)
 			php_error_docref(NULL, E_WARNING, "Unknown signature algorithm.");
 			RETURN_FALSE;
 		}
+		if (EVP_CIPHER_iv_length(cipher) > 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ciphers with modes requiring IV are not supported");
+			RETURN_FALSE;
+		}
 	} else {
 		cipher = EVP_rc4();
 	}

@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
+  . Fixed bug #60632 (openssl_seal fails with AES). (Jakub Zelenka)
 
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
