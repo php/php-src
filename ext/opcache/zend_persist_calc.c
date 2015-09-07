@@ -71,7 +71,6 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 			}
 		}
 		ADD_SIZE(hash_size * sizeof(uint32_t) + ht->nNumUsed * sizeof(Bucket));
-		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 	} else {
 		ADD_SIZE(HT_USED_SIZE(ht));
 	}
