@@ -24,6 +24,7 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_strict.h"
 #include "zend_portability.h"
 #include "zend_long.h"
 
@@ -220,9 +221,9 @@ struct _zend_refcounted {
 
 struct _zend_string {
 	zend_refcounted_h gc;
-	zend_ulong        h;                /* hash value */
-	size_t            len;
-	char              val[1];
+	zend_ulong        _ZSTRICT_FIELD(zend_string,h);                /* hash value */
+	size_t            _ZSTRICT_FIELD(zend_string,len);
+	char              _ZSTRICT_FIELD(zend_string,val)[1];
 };
 
 typedef struct _Bucket {
