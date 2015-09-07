@@ -1626,8 +1626,8 @@ static ZIPARCHIVE_METHOD(close)
 
 	ze_obj = (ze_zip_object*) zend_object_store_get_object(this TSRMLS_CC);
 
-	if (err = zip_close(intern)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, zip_strerror(intern));
+	if ((err = zip_close(intern))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zip_strerror(intern));
 		zip_discard(intern);
 	}
 
