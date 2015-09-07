@@ -479,7 +479,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &digit, &radix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &digit, &radix) == FAILURE) {
 		return;
 	}
 
