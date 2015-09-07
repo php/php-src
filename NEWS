@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Implemented FR #70438 (Add IV parameter for openssl_seal and openssl_open)
     (Jakub Zelenka)
 
+- Phpdbg:
+  . Fixed bug #70449 (PHP won't compile on 10.4 and 10.5 because of missing
+    constants). (Bob)
+
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)
