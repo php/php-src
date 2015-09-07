@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- Intl:
+  . Fixed bug #70453 (IntlChar::foldCase() incorrect arguments and missing
+    constants). (cmb)
+
 - Opcache:
   . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
 
