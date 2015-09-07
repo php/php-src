@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- Opcache:
+  . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
+
 - OpenSSL
   . Fixed bug #55259 (openssl extension does not get the DH parameters from
     DH key resource). (Jakub Zelenka)
