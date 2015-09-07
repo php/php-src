@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #70453 (IntlChar::foldCase() incorrect arguments and missing
     constants). (cmb)
+  . Fixed bug #70454 (IntlChar::forDigit second parameter should be optional).
+    (cmb, colinodell)
 
 - Opcache:
   . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
