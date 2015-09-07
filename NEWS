@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
     (Niklas Keller)
 
+- XMLReader:
+  . Fixed bug #70309 (XmlReader read generates extra output). (Anatol)
+
 - Zip:
   . Fixed bug #70322 (ZipArchive::close() doesn't indicate errors). (cmb)
 
