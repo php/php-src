@@ -270,9 +270,9 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 	if (!func) {
 		zend_string *rt_name;
 		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, func) {
-			if (func->type == ZEND_USER_FUNCTION && *rt_name->val == '\0') {
-				if (func->op_array.function_name->len == len && !zend_binary_strcasecmp(function, len, func->op_array.function_name->val, func->op_array.function_name->len)) {
-					phpdbg_print_opcodes_function(rt_name->val, rt_name->len);
+			if (func->type == ZEND_USER_FUNCTION && *ZSTR_VAL(rt_name) == '\0') {
+				if (ZSTR_LEN(func->op_array.function_name) == len && !zend_binary_strcasecmp(function, len, ZSTR_VAL(func->op_array.function_name), ZSTR_LEN(func->op_array.function_name))) {
+					phpdbg_print_opcodes_function(ZSTR_VAL(rt_name), ZSTR_LEN(rt_name));
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -288,7 +288,7 @@ static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *fun
 	zend_function *func;
 
 	if (ce->type != ZEND_USER_CLASS) {
-		phpdbg_out("function name: %s::%s (internal)\n", ce->name->val, function);
+		phpdbg_out("function name: %s::%s (internal)\n", ZSTR_VAL(ce->name), function);
 		return;
 	}
 
@@ -296,7 +296,7 @@ static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *fun
 		return;
 	}
 
-	phpdbg_out("function name: %s::%s\n", ce->name->val, function);
+	phpdbg_out("function name: %s::%s\n", ZSTR_VAL(ce->name), function);
 	phpdbg_print_function_helper(func);
 }
 
@@ -306,8 +306,8 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
 		zend_string *rt_name;
 		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
-			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
-				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
+			if (ce->type == ZEND_USER_CLASS && *ZSTR_VAL(rt_name) == '\0') {
+				if (ZSTR_LEN(ce->name) == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name))) {
 					phpdbg_print_opcodes_method_ce(ce, function);
 				}
 			}
@@ -364,8 +364,8 @@ void phpdbg_print_opcodes_class(const char *class) {
 	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
 		zend_string *rt_name;
 		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
-			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
-				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
+			if (ce->type == ZEND_USER_CLASS && *ZSTR_VAL(rt_name) == '\0') {
+				if (ZSTR_LEN(ce->name) == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name))) {
 					phpdbg_print_opcodes_ce(ce);
 				}
 			}

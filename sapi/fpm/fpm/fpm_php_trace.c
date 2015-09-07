@@ -109,7 +109,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					ZEND_ASSERT(0);
 				}
 			} else {
-				if (0 > fpm_trace_get_strz(buf, buf_size, function_name + offsetof(zend_string, val))) {
+				if (0 > fpm_trace_get_strz(buf, buf_size, function_name + (long)ZSTR_VAL((zend_string *)NULL))) {
 					return -1;
 				}
 
@@ -155,7 +155,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 				file_name = l;
 
-				if (0 > fpm_trace_get_strz(buf, buf_size, file_name + offsetof(zend_string, val))) {
+				if (0 > fpm_trace_get_strz(buf, buf_size, file_name + (long)ZSTR_VAL((zend_string *)NULL))) {
 					return -1;
 				}
 
