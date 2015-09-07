@@ -480,9 +480,18 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
+/* The macro cast string comparison tuples to zend_long arrays comparison truncating the length to multiple of
+ * zend_long size. This is acceptable for hash string comparisons as the ignored trailing bytes are already
+ * implicitly checked by hash value matching.
+ * Hash value function ensures (see zend_inline_hash_func() in zend_string.h):
+ * - strings with lengths < SIZEOF_ZEND_LONG will generate unique hash values
+ * - strings with identical length differing only in last (SIZEOF_ZEND_LONG-1) bytes will always generate
+ *   different hash values.
+ */
 #define ZEND_STR2LONG_MEMEQ(s1, s2 ,len ) \
 		zend_ulong_memeq((const zend_ulong *)(s1), (const zend_ulong *)(s2), (len) >> (SIZEOF_ZEND_LONG_LOG2))
 
+/* returns 1 if the zend_log arrays are equal, 0 otherwise; empty arrays are considered equal. */
 static zend_always_inline zend_bool zend_ulong_memeq(const zend_ulong *arr1, const zend_ulong *arr2, size_t len)
 {
 	while (len != 0) {
@@ -493,7 +502,7 @@ static zend_always_inline zend_bool zend_ulong_memeq(const zend_ulong *arr1, con
 		arr2++;
 		len --;
 	}
-	return 1; /* strings are equal */
+	return 1; /* equal arrays */
 }
 
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
