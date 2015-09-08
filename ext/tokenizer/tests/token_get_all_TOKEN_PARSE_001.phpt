@@ -11,6 +11,7 @@ $x->$continue;
 X::continue();
 $x->continue();
 X::class;
+$x->__halt_compiler();
 
 class X {
     const CONTINUE = 1;
@@ -60,22 +61,28 @@ L7: T_STRING X
 L7: T_DOUBLE_COLON ::
 L7: T_STRING class
 ;
-L9: T_CLASS class
-L9: T_STRING X
-{
-L10: T_CONST const
-L10: T_STRING CONTINUE
-=
-L10: T_LNUMBER 1
+L8: T_VARIABLE $x
+L8: T_OBJECT_OPERATOR ->
+L8: T_STRING __halt_compiler
+(
+)
 ;
-L11: T_PUBLIC public
-L11: T_VARIABLE $x
-=
-L11: T_STRING self
-L11: T_DOUBLE_COLON ::
+L10: T_CLASS class
+L10: T_STRING X
+{
+L11: T_CONST const
 L11: T_STRING CONTINUE
-+
+=
 L11: T_LNUMBER 1
+;
+L12: T_PUBLIC public
+L12: T_VARIABLE $x
+=
+L12: T_STRING self
+L12: T_DOUBLE_COLON ::
+L12: T_STRING CONTINUE
++
+L12: T_LNUMBER 1
 ;
 }
 Done

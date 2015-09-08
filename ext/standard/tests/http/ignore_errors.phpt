@@ -27,7 +27,7 @@ function do_test($context_options) {
 		if ($fd) {
 			$meta_data = stream_get_meta_data($fd);
 			var_dump($meta_data['wrapper_data']);
-	
+
 			var_dump(stream_get_contents($fd));
 		}
 
@@ -62,16 +62,18 @@ array(2) {
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 
 Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: HTTP request failed! HTTP/1.0 404 Not found
  in %s on line %d
 bool(false)
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: requests with ignore_errors --
@@ -83,8 +85,9 @@ array(2) {
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 resource(%d) of type (stream)
@@ -95,8 +98,9 @@ array(2) {
   string(10) "X-bar: baz"
 }
 string(1) "2"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 -- Test: requests with ignore_errors (2) --
@@ -108,8 +112,9 @@ array(2) {
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "
 resource(%d) of type (stream)
@@ -120,7 +125,8 @@ array(2) {
   string(10) "X-bar: baz"
 }
 string(1) "2"
-string(48) "GET /foo/bar HTTP/1.0
+string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 "

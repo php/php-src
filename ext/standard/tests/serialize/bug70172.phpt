@@ -1,7 +1,5 @@
 --TEST--
 Bug #70172 - Use After Free Vulnerability in unserialize()
---XFAIL--
-Memory leak on debug build, needs fix.
 --FILE--
 <?php
 class obj implements Serializable {

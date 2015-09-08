@@ -55,210 +55,210 @@ array(0) {
 
 -- Iteration 4 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 5 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 6 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 7 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 8 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 9 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 10 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 11 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 12 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 13 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 14 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 15 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 16 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 17 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 18 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 19 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 20 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 21 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 22 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 23 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 24 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 25 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 26 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 27 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 28 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 29 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 30 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 31 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 32 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 33 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
@@ -335,28 +335,28 @@ array(1) {
 
 -- Iteration 39 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 40 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 41 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 42 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
@@ -478,32 +478,32 @@ array(2) {
 
 -- Iteration 48 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 49 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 50 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
 -- Iteration 51 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s/session_decode_error2.php on line %d
+Warning: session_destroy(): Trying to destroy uninitialized session in %s%esession_decode_error2.php on line %d
 bool(false)
 Done
