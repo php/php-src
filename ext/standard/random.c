@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include "php.h"
+#include "zend_exceptions.h"
 #include "php_random.h"
 
 #if PHP_WIN32
@@ -132,8 +133,8 @@ PHP_FUNCTION(random_bytes)
 	}
 
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Length must be greater than 0", 0);
+		return;
 	}
 
 	bytes = zend_string_alloc(size, 0);
@@ -162,9 +163,13 @@ PHP_FUNCTION(random_int)
 		return;
 	}
 
-	if (min >= max) {
-		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
-		RETURN_FALSE;
+	if (min > max) {
+		zend_throw_exception(NULL, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (min == max) {
+		RETURN_LONG(min);
 	}
 
 	umax = max - min;

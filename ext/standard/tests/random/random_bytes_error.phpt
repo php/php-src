@@ -6,12 +6,18 @@ Test error operation of random_bytes()
 
 var_dump(random_bytes());
 
-var_dump(random_bytes(-1));
+$bytes = null;
+try {
+    $bytes = random_bytes(0);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+var_dump($bytes);
 
 ?>
 --EXPECTF--
+
 Warning: random_bytes() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
-
-Warning: random_bytes(): Length must be greater than 0 in %s on line %d
-bool(false)
+string(29) "Length must be greater than 0"
+NULL
