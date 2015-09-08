@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include "php.h"
+#include "zend_exceptions.h"
 #include "php_random.h"
 
 #if PHP_WIN32
@@ -79,7 +80,7 @@ static int php_random_bytes(void *bytes, size_t size)
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF
@@ -95,7 +96,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		fd = open("/dev/urandom", O_RDONLY);
 #endif
 		if (fd < 0) {
-			php_error_docref(NULL, E_WARNING, "Cannot open source device");
+			zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
 			return FAILURE;
 		}
 
@@ -111,7 +112,7 @@ static int php_random_bytes(void *bytes, size_t size)
 	}
 
 	if (read_bytes < size) {
-		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
 #endif
@@ -127,20 +128,20 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
 	}
 
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
+		return;
 	}
 
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release(bytes);
-		RETURN_FALSE;
+		return;
 	}
 
 	ZSTR_VAL(bytes)[size] = '\0';
@@ -158,19 +159,23 @@ PHP_FUNCTION(random_int)
 	zend_ulong umax;
 	zend_ulong result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
 		return;
 	}
 
-	if (min >= max) {
-		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
-		RETURN_FALSE;
+	if (min > max) {
+		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (min == max) {
+		RETURN_LONG(min);
 	}
 
 	umax = max - min;
 
 	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Special case where no modulus is required */
@@ -185,11 +190,11 @@ PHP_FUNCTION(random_int)
 	if ((umax & (umax - 1)) != 0) {
 		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
-	
+
 		/* Discard numbers over the limit to avoid modulo bias */
 		while (result > limit) {
 			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		}
 	}
