@@ -173,7 +173,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || offset > length) {
+	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
 		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
@@ -183,7 +183,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 		count = length - offset;
 	}
 
-	substring = xmlUTF8Strsub(cur, offset, count);
+	substring = xmlUTF8Strsub(cur, (int)offset, (int)count);
 	xmlFree(cur);
 
 	if (substring) {
@@ -257,14 +257,14 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || offset > length) {
+	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || offset > length) {
 		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
-	first = xmlUTF8Strndup(cur, offset);
-	second = xmlUTF8Strsub(cur, offset, length - offset);
+	first = xmlUTF8Strndup(cur, (int)offset);
+	second = xmlUTF8Strsub(cur, (int)offset, length - (int)offset);
 	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
@@ -304,14 +304,14 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || offset > length) {
+	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
 		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
 	if (offset > 0) {
-		substring = xmlUTF8Strsub(cur, 0, offset);
+		substring = xmlUTF8Strsub(cur, 0, (int)offset);
 	} else {
 		substring = NULL;
 	}
@@ -320,7 +320,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 		count = length - offset;
 	}
 
-	second = xmlUTF8Strsub(cur, offset + count, length - offset);
+	second = xmlUTF8Strsub(cur, (int)offset + (int)count, length - (int)offset);
 	substring = xmlStrcat(substring, second);
 
 	xmlNodeSetContent(node, substring);
@@ -361,14 +361,14 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || offset > length) {
+	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
 		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
 	if (offset > 0) {
-		substring = xmlUTF8Strsub(cur, 0, offset);
+		substring = xmlUTF8Strsub(cur, 0, (int)offset);
 	} else {
 		substring = NULL;
 	}
@@ -378,7 +378,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	}
 
 	if (offset < length) {
-		second = xmlUTF8Strsub(cur, offset + count, length - offset);
+		second = xmlUTF8Strsub(cur, (int)offset + count, length - (int)offset);
 	}
 
 	substring = xmlStrcat(substring, (xmlChar *) arg);
