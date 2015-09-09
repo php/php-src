@@ -1763,6 +1763,15 @@ static inline void zend_free_obj_get_result(zval *op) /* {{{ */
 }
 /* }}} */
 
+static int ZEND_FASTCALL convert_compare_result_to_long(zval *result)
+{
+	if (Z_TYPE_P(result) == IS_DOUBLE) {
+		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+	} else {
+		convert_to_long(result);
+	}
+}
+
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	int ret;
@@ -1849,9 +1858,17 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, compare)) {
-					return Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2);
+					ret = Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2);
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_LONG)) {
+						convert_compare_result_to_long(result);
+					}
+					return ret;
 				} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, compare)) {
-					return Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2);
+					ret = Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2);
+					if (UNEXPECTED(Z_TYPE_P(result) != IS_LONG)) {
+						convert_compare_result_to_long(result);
+					}
+					return ret;
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
@@ -1947,7 +1964,10 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 
 ZEND_API int zval_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	return compare_function(result, op1, op2);
+	int ret = compare_function(result, op1, op2);
+
+	ZEND_ASSERT(Z_TYPE_P(result) == IS_LONG);
+	return ret;
 }
 /* }}} */
 

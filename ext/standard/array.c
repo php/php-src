@@ -83,8 +83,6 @@
 #define INTERSECT_COMP_KEY_USER      1
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
-
-static int regular_compare_function(zval *result, zval *a, zval *b);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
@@ -166,7 +164,7 @@ static void php_set_compare_func(zend_long sort_type) /* {{{ */
 
 		case PHP_SORT_REGULAR:
 		default:
-			ARRAYG(compare_func) = regular_compare_function;
+			ARRAYG(compare_func) = zval_compare_function;
 			break;
 	}
 }
@@ -3380,17 +3378,6 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	} else {
 		return 0;
 	}
-}
-/* }}} */
-
-static int regular_compare_function(zval *result, zval *a, zval *b) /* {{{ */ {
-	int ret = zval_compare_function(result, a, b);
-	if (ret == SUCCESS) {
-		if (Z_TYPE_P(result) == IS_DOUBLE) {
-			ZVAL_LONG(result, Z_DVAL_P(result) > 0? 1 : (Z_DVAL_P(result) < 0? -1 : 0));
-		}
-	}
-	return ret;
 }
 /* }}} */
 
