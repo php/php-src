@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #70454 (IntlChar::forDigit second parameter should be optional).
     (cmb, colinodell)
 
+- Mysqlnd:
+  . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
+    a server). (Sergei Turchanov)
+
 - Opcache:
   . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
 
