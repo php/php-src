@@ -32,7 +32,7 @@ static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	return SUCCESS;
 }
 
-/* {{{ proto string IntlChar::chr(int|string $char)
+/* {{{ proto string IntlChar::chr(int|string $codepoint)
  * Converts a numeric codepoint to UTF-8
  * Acts as an identify function when given a valid UTF-8 encoded codepoint
  */
@@ -59,7 +59,7 @@ IC_METHOD(chr) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::ord(int|string $codepoint)
+/* {{{ proto int IntlChar::ord(int|string $character)
  * Converts a UTf-8 encoded codepoint to its integer U32 value
  * Acts as an identity function when passed a valid integer codepoint
  */
@@ -79,7 +79,7 @@ IC_METHOD(ord) {
 }
 /* }}} */
 
-/* {{{ proto bool IntlChar::hasBinaryProperty(int|string $char, int $property) */
+/* {{{ proto bool IntlChar::hasBinaryProperty(int|string $codepoint, int $property) */
 ZEND_BEGIN_ARG_INFO_EX(hasBinaryProperty_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, property)
@@ -98,7 +98,7 @@ IC_METHOD(hasBinaryProperty) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getIntPropertyValue(int|string $char, int $property) */
+/* {{{ proto int IntlChar::getIntPropertyValue(int|string $codepoint, int $property) */
 ZEND_BEGIN_ARG_INFO_EX(getIntPropertyValue_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, property)
@@ -147,7 +147,7 @@ IC_METHOD(getIntPropertyMaxValue) {
 }
 /* }}} */
 
-/* {{{ proto float IntlChar::getNumericValue(int|string $char) */
+/* {{{ proto float IntlChar::getNumericValue(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getNumericValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -164,7 +164,7 @@ IC_METHOD(getNumericValue) {
 }
 /* }}} */
 
-/* {{{ proto void IntlChar::enumCharTypes(callable $cb) */
+/* {{{ proto void IntlChar::enumCharTypes(callable $callback) */
 ZEND_BEGIN_ARG_INFO_EX(enumCharTypes_arginfo, 0, ZEND_RETURN_VALUE, 0)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO();
@@ -209,7 +209,7 @@ IC_METHOD(enumCharTypes) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getBlockCode(int|string $char) */
+/* {{{ proto int IntlChar::getBlockCode(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getBlockCode_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO()
@@ -226,7 +226,7 @@ IC_METHOD(getBlockCode) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::charName(int|string $char, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
+/* {{{ proto string IntlChar::charName(int|string $codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(charName_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, nameChoice)
@@ -256,7 +256,7 @@ IC_METHOD(charName) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::charFromName(string $name, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
+/* {{{ proto int IntlChar::charFromName(string $characterName, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(charFromName_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, characterName)
 	ZEND_ARG_INFO(0, nameChoice)
@@ -374,7 +374,7 @@ IC_METHOD(getPropertyEnum) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::getPropertyValueName(int $prop, int $val[, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
+/* {{{ proto string IntlChar::getPropertyValueName(int $property, int $value[, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
 ZEND_BEGIN_ARG_INFO_EX(getPropertyValueName_arginfo, 0, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, property)
 	ZEND_ARG_INFO(0, value)
@@ -417,9 +417,9 @@ IC_METHOD(getPropertyValueEnum) {
 }
 /* }}} */
 
-/* {{{ proto int|string IntlChar::foldCase(int|string $char, int $options = IntlChar::FOLD_CASE_DEFAULT) */
+/* {{{ proto int|string IntlChar::foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) */
 ZEND_BEGIN_ARG_INFO_EX(foldCase_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, foldCase)
+	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 IC_METHOD(foldCase) {
@@ -445,7 +445,7 @@ IC_METHOD(foldCase) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::digit(int|string $char[, int $radix = 10]) */
+/* {{{ proto int IntlChar::digit(int|string $codepoint[, int $radix = 10]) */
 ZEND_BEGIN_ARG_INFO_EX(digit_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 	ZEND_ARG_INFO(0, radix)
@@ -487,7 +487,7 @@ IC_METHOD(forDigit) {
 }
 /* }}} */
 
-/* {{{ proto array IntlChar::charAge(int|string $char) */
+/* {{{ proto array IntlChar::charAge(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(charAge_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -526,7 +526,7 @@ IC_METHOD(getUnicodeVersion) {
 }
 /* }}} */
 
-/* {{{ proto string IntlChar::getFC_NFKC_Closure(int|string $char) */
+/* {{{ proto string IntlChar::getFC_NFKC_Closure(int|string $codepoint) */
 ZEND_BEGIN_ARG_INFO_EX(getFC_NFKC_Closure_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO();
@@ -563,7 +563,7 @@ IC_METHOD(getFC_NFKC_Closure) {
 }
 /* }}} */
 
-/* {{{ proto bool IntlChar::<name>(int|string $char) */
+/* {{{ proto bool IntlChar::<name>(int|string $codepoint) */
 #define IC_BOOL_METHOD_CHAR(name) \
 ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 	ZEND_ARG_INFO(0, codepoint) \
@@ -605,7 +605,7 @@ IC_BOOL_METHOD_CHAR(isJavaIDPart)
 #undef IC_BOOL_METHOD_CHAR
 /* }}} */
 
-/* {{{ proto int IntlChar::<name>(int|string $char) */
+/* {{{ proto int IntlChar::<name>(int|string $codepoint) */
 #define IC_INT_METHOD_CHAR(name) \
 ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 	ZEND_ARG_INFO(0, codepoint) \
@@ -623,7 +623,7 @@ IC_INT_METHOD_CHAR(charDigitValue)
 #undef IC_INT_METHOD_CHAR
 /* }}} */
 
-/* {{{ proto int|string IntlChar::<name>(int|string $char)
+/* {{{ proto int|string IntlChar::<name>(int|string $codepoint)
  * Returns a utf-8 character if codepoint was passed as a utf-8 sequence
  * Returns an int otherwise
  */
