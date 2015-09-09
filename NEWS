@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- Mysqlnd:
+  . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
+    a server). (Sergei Turchanov)
+
 - OpenSSL:
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
     DH key resource). (Jakub Zelenka)
