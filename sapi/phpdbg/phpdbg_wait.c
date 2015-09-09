@@ -50,7 +50,7 @@ typedef struct {
 
 static int phpdbg_array_data_compare(const void *a, const void *b) {
 	Bucket *f, *s;
-	zval result;
+	int result;
 	zval *first, *second;
 
 	f = *((Bucket **) a);
@@ -59,13 +59,11 @@ static int phpdbg_array_data_compare(const void *a, const void *b) {
 	first = &f->val;
 	second = &s->val;
 
-	if (string_compare_function(&result, first, second) == FAILURE) {
-		return 0;
-	}
+	result = string_compare_function(first, second);
 
-	if (Z_LVAL(result) < 0) {
+	if (result < 0) {
 		return -1;
-	} else if (Z_LVAL(result) > 0) {
+	} else if (result > 0) {
 		return 1;
 	}
 

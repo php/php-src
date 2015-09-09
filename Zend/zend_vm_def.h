@@ -380,7 +380,7 @@ ZEND_VM_HANDLER(17, ZEND_IS_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
 					}
 				} else {
-					result = (zendi_smart_strcmp(op1, op2) == 0);
+					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
 				}
 				FREE_OP1();
 				FREE_OP2();
@@ -448,7 +448,7 @@ ZEND_VM_HANDLER(18, ZEND_IS_NOT_EQUAL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
 					}
 				} else {
-					result = (zendi_smart_strcmp(op1, op2) != 0);
+					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
 				}
 				FREE_OP1();
 				FREE_OP2();
@@ -4832,7 +4832,7 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
 					}
 				} else {
-					result = (zendi_smart_strcmp(op1, op2) == 0);
+					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
 				}
 				FREE_OP2();
 			} else {

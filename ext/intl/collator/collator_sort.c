@@ -144,7 +144,6 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
  */
 static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 {
-	int rc     = SUCCESS;
 	zval num1, num2;
 	zval *num1_p = NULL;
 	zval *num2_p = NULL;
@@ -161,14 +160,14 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 		op2 = num2_p;
 	}
 
-	rc = numeric_compare_function( result, op1, op2);
+	ZVAL_LONG(result, numeric_compare_function(op1, op2));
 
 	if( num1_p )
 		zval_ptr_dtor( num1_p );
 	if( num2_p )
 		zval_ptr_dtor( num2_p );
 
-	return rc;
+	return SUCCESS;
 }
 /* }}} */
 
