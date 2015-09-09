@@ -2792,6 +2792,37 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #endif
 }
 
+static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
+{
+	fprintf(stderr, "Out of memory\n");
+	exit(1);
+}
+
+ZEND_API void * __zend_malloc(size_t len)
+{
+	void *tmp = malloc(len);
+	if (EXPECTED(tmp)) {
+		return tmp;
+	}
+	zend_out_of_memory();
+}
+
+ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
+{
+	void *tmp = _safe_malloc(nmemb, len, 0);
+	memset(tmp, 0, nmemb * len);
+	return tmp;
+}
+
+ZEND_API void * __zend_realloc(void *p, size_t len)
+{
+	p = realloc(p, len);
+	if (EXPECTED(p)) {
+		return p;
+	}
+	zend_out_of_memory();
+}
+
 /*
  * Local variables:
  * tab-width: 4
