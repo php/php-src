@@ -115,29 +115,21 @@ PHP_FUNCTION(pack)
 	int num_args, i;
 	int currentarg;
 	char *format;
-	int formatlen;
+	size_t formatlen;
 	char *formatcodes;
 	int *formatargs;
 	int formatcount = 0;
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &argv, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s+", &format, &formatlen, &argv, &num_args) == FAILURE) {
 		return;
 	}
-
-	if (Z_ISREF(argv[0])) {
-		SEPARATE_ZVAL(&argv[0]);
-	}
-	convert_to_string_ex(&argv[0]);
-
-	format = Z_STRVAL(argv[0]);
-	formatlen = Z_STRLEN(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
 	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
-	currentarg = 1;
+	currentarg = 0;
 
 	/* Preprocess format into formatcodes and formatargs */
 	for (i = 0; i < formatlen; formatcount++) {
@@ -187,10 +179,7 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					if (Z_ISREF(argv[currentarg])) {
-						SEPARATE_ZVAL(&argv[currentarg]);
-					}
-					convert_to_string_ex(&argv[currentarg]);
+					convert_to_string(&argv[currentarg]);
 					arg = Z_STRLEN(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
@@ -334,7 +323,7 @@ PHP_FUNCTION(pack)
 
 	output = zend_string_alloc(outputsize, 0);
 	outputpos = 0;
-	currentarg = 1;
+	currentarg = 0;
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
