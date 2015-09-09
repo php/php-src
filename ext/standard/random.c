@@ -30,6 +30,9 @@
 #if PHP_WIN32
 # include "win32/winutil.h"
 #endif
+#ifdef __linux__
+# include <linux/random.h>
+#endif
 
 #ifdef ZTS
 int random_globals_id;
@@ -75,6 +78,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ */
+
 static int php_random_bytes(void *bytes, size_t size)
 {
 #if PHP_WIN32
@@ -85,26 +89,75 @@ static int php_random_bytes(void *bytes, size_t size)
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF
 	arc4random_buf(bytes, size);
+#elif HAVE_DECL_GETRANDOM
+	/* Linux getrandom(2) syscall */
+	size_t read_bytes = 0;
+	size_t amount_to_read = 0;
+	ssize_t n;
+
+	/* Keep reading until we get enough entropy */
+	do {
+		amount_to_read = size - read_bytes;
+		/* Below, (bytes + read_bytes)  is pointer arithmetic.
+
+		   bytes   read_bytes  size
+		     |      |           |
+		    [#######=============] (we're going to write over the = region)
+		             \\\\\\\\\\\\\
+		              amount_to_read
+
+		*/
+		n = getrandom(bytes + read_bytes, amount_to_read, 0);
+
+		if (n == -1) {
+			if (errno == EINTR || errno == EAGAIN) {
+				/* Try again */
+				continue;
+			}
+			/*
+				If the syscall fails, we are doomed. The loop that calls
+				php_random_bytes should be terminated by the exception instead
+				of proceeding to demand more entropy.
+			*/
+			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", errno);
+			return FAILURE;
+		}
+
+		read_bytes += (size_t) n;
+	} while (read_bytes < size);
 #else
 	int    fd = RANDOM_G(fd);
+	struct stat st;
 	size_t read_bytes = 0;
+	ssize_t n;
 
 	if (fd < 0) {
-#if HAVE_DEV_ARANDOM
-		fd = open("/dev/arandom", O_RDONLY);
-#elif HAVE_DEV_URANDOM
+#if HAVE_DEV_URANDOM
 		fd = open("/dev/urandom", O_RDONLY);
 #endif
 		if (fd < 0) {
 			zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
 			return FAILURE;
 		}
-
+		/* Does the file exist and is it a character device? */
+		if (fstat(fd, &st) != 0 || !S_ISCHR(st.st_mode)) {
+			close(fd);
+			zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+			return FAILURE;
+		}
+#ifdef __linux__
+		// Make sure that /dev/urandom is the proper urandom device on Linux
+		if (st.st_rdev != makedev(1, 9)) {
+			close(fd);
+			zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+			return FAILURE;
+		}
+#endif
 		RANDOM_G(fd) = fd;
 	}
 
 	while (read_bytes < size) {
-		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
+		n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n <= 0) {
 			break;
 		}
