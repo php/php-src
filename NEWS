@@ -65,6 +65,10 @@ PHP                                                                        NEWS
   . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
     value of 32 bytes). (Stas)
 
+- GMP:
+  . Fixed bug #70284 (Use after free vulnerability in unserialize() with GMP).
+    (stas)
+
 - hash:
   . Fixed bug #70312 (HAVAL gives wrong hashes in specific cases). (letsgolee
     at naver dot com)
