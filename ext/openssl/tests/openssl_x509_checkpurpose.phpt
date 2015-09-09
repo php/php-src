@@ -37,7 +37,6 @@ var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_ENCRYPT));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_CRL_SIGN));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_ANY));
 
-
 /* int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo = array() ] ); */
 var_dump(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, array($cpca)));
 var_dump(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, array($cpca)));
