@@ -6102,10 +6102,11 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-ZEND_VM_C_LABEL(fe_fetch_r_exit):
-		if (EXPECTED(!EG(exception))) {
-			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
 		}
+ZEND_VM_C_LABEL(fe_fetch_r_exit):
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
 
@@ -6293,10 +6294,11 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-ZEND_VM_C_LABEL(fe_fetch_w_exit):
-		if (EXPECTED(!EG(exception))) {
-			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
 		}
+ZEND_VM_C_LABEL(fe_fetch_w_exit):
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
 
