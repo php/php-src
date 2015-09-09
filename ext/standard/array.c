@@ -83,6 +83,8 @@
 #define INTERSECT_COMP_KEY_USER      1
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
+
+static int regular_compare_function(zval *result, zval *a, zval *b);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
@@ -164,7 +166,7 @@ static void php_set_compare_func(zend_long sort_type) /* {{{ */
 
 		case PHP_SORT_REGULAR:
 		default:
-			ARRAYG(compare_func) = zval_compare_function;
+			ARRAYG(compare_func) = regular_compare_function;
 			break;
 	}
 }
@@ -197,13 +199,8 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 		return 0;
 	}
 
-	if (EXPECTED(Z_TYPE(result) == IS_LONG)) {
-		return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
-	} else if (Z_TYPE(result) == IS_DOUBLE) {
-		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
-	}
-
-	return ZEND_NORMALIZE_BOOL(zval_get_long(&result));
+	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -384,23 +381,18 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 	first = &f->val;
 	second = &s->val;
 
-	if (Z_TYPE_P(first) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
 	}
-	if (Z_TYPE_P(second) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(second) == IS_INDIRECT)) {
 		second = Z_INDIRECT_P(second);
 	}
 	if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
 		return 0;
 	}
 
-	if (EXPECTED(Z_TYPE(result) == IS_LONG)) {
-		return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
-	} else if (Z_TYPE(result) == IS_DOUBLE) {
-		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
-	}
-
-	return ZEND_NORMALIZE_BOOL(zval_get_long(&result));
+	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -1013,7 +1005,6 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive)
 		 *zv;
 
 	/* Set up known arguments */
-	ZVAL_UNDEF(&retval);
 	ZVAL_UNDEF(&args[1]);
 	if (userdata) {
 		ZVAL_COPY(&args[2], userdata);
@@ -3348,21 +3339,16 @@ static int zval_compare(zval *first, zval *second) /* {{{ */
 {
 	zval result;
 
-	if (Z_TYPE_P(first) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
 	}
-	if (Z_TYPE_P(second) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(second) == IS_INDIRECT)) {
 		second = Z_INDIRECT_P(second);
 	}
 	if (string_compare_function(&result, first, second) == FAILURE) {
 		return 0;
 	}
 
-	if (Z_TYPE(result) == IS_DOUBLE) {
-		return ZEND_NORMALIZE_BOOL(Z_DVAL(result));
-	}
-
-	convert_to_long(&result);
 	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
@@ -3372,10 +3358,10 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	zval args[2];
 	zval retval;
 
-	if (Z_TYPE_P(a) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(a) == IS_INDIRECT)) {
 		a = Z_INDIRECT_P(a);
 	}
-	if (Z_TYPE_P(b) == IS_INDIRECT) {
+	if (UNEXPECTED(Z_TYPE_P(b) == IS_INDIRECT)) {
 		b = Z_INDIRECT_P(b);
 	}
 
@@ -3394,6 +3380,17 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 	} else {
 		return 0;
 	}
+}
+/* }}} */
+
+static int regular_compare_function(zval *result, zval *a, zval *b) /* {{{ */ {
+	int ret = zval_compare_function(result, a, b);
+	if (ret == SUCCESS) {
+		if (Z_TYPE_P(result) == IS_DOUBLE) {
+			ZVAL_LONG(result, Z_DVAL_P(result) > 0? 1 : (Z_DVAL_P(result) < 0? -1 : 0));
+		}
+	}
+	return ret;
 }
 /* }}} */
 
