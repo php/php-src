@@ -50,6 +50,7 @@ static uint32_t zend_hash_recalc_elements(HashTable *ht) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	return num;
 }
+/* }}} */
 
 static uint32_t zend_obj_num_elements(HashTable *ht) /* {{{ */
 {
@@ -590,7 +591,6 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 }
 /* }}} */
 
-
 /* {{{ proto mixed var_export(mixed var [, bool return])
    Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
@@ -1045,7 +1045,6 @@ PHP_FUNCTION(unserialize)
 	php_unserialize_data_t var_hash;
 	zval *options = NULL, *classes = NULL;
 	HashTable *class_hash = NULL;
-	zval *old_rval = return_value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
