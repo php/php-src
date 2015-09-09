@@ -667,7 +667,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 	/* timelimit */
 	if (timelimit > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP
-		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_timelimit);
+		ldap_get_option(ldap, LDAP_OPT_TIMELIMIT, old_timelimit);
 		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
 #else
 		*old_timelimit = ldap->ld_timelimit;
@@ -678,7 +678,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 	/* deref */
 	if (deref > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP
-		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_deref);
+		ldap_get_option(ldap, LDAP_OPT_DEREF, old_deref);
 		ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
 #else
 		*old_deref = ldap->ld_deref;
