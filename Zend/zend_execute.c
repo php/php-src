@@ -233,8 +233,6 @@ static zend_never_inline ZEND_COLD void zval_undefined_cv(uint32_t var, const ze
 
 static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int type, const zend_execute_data *execute_data)
 {
-	zend_string *cv;
-
 	switch (type) {
 		case BP_VAR_R:
 		case BP_VAR_UNSET:
