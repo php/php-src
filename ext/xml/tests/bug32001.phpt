@@ -4,6 +4,8 @@ Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect), 
 <?php
 require_once("skipif.inc");
 if (!extension_loaded('iconv')) die ("skip iconv extension not available");
+if (ICONV_IMPL == 'glibc' && version_compare(ICONV_VERSION, '2.12', '<='))
+	die("skip iconv of glibc <= 2.12 is buggy");
 ?>
 --FILE--
 <?php
