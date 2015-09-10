@@ -474,7 +474,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 #endif
 
 #if LIBXML_VERSION >= 20703
-	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX);
+	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_HUGE);
 #endif
 
 	parser->parser->replaceEntities = 1;
