@@ -5295,13 +5295,8 @@ PHP_FUNCTION(substr_count)
 	if (offset < 0) {
 		offset += (zend_long)haystack_len;
 	}
-	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset should be greater than or equal to 0");
-		RETURN_FALSE;
-	}
-
-	if ((size_t)offset > haystack_len) {
-		php_error_docref(NULL, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
+	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 	p += offset;
@@ -5311,12 +5306,8 @@ PHP_FUNCTION(substr_count)
 		if (length <= 0) {
 			length += (haystack_len - offset);
 		}
-		if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length should be greater than 0");
-			RETURN_FALSE;
-		}
-		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL, E_WARNING, "Length value " ZEND_LONG_FMT " exceeds string length", length);
+		if ((length <= 0) || (length > (haystack_len - offset))) {
+			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
 		endp = p + length;

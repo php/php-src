@@ -40,18 +40,18 @@ NULL
 Warning: substr_count() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
-Warning: substr_count(): Offset should be greater than or equal to 0 in %s on line %d
+Warning: substr_count(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: substr_count(): Offset value 25 exceeds string length in %s on line %d
+Warning: substr_count(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: substr_count(): Length value 7 exceeds string length in %s on line %d
+Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)
 
 Warning: substr_count() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
-Warning: substr_count(): Length should be greater than 0 in %s on line %d
+Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)
 Done
