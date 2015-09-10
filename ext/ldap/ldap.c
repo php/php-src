@@ -2252,7 +2252,7 @@ PHP_FUNCTION(ldap_set_option)
 			struct timeval timeout;
 
 			convert_to_long_ex(newval);
-			timeout.tv_sec = Z_LVAL_PP(newval);
+			timeout.tv_sec = Z_LVAL_P(newval);
 			timeout.tv_usec = 0;
 			if (ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
 				RETURN_FALSE;
