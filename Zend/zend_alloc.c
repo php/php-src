@@ -2147,6 +2147,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 
 	/* free huge blocks */
 	list = heap->huge_list;
+	heap->huge_list = NULL;
 	while (list) {
 		zend_mm_huge_list *q = list;
 		list = list->next;
