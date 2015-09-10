@@ -282,47 +282,46 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op);
 
 static zend_always_inline int i_zend_is_true(zval *op)
 {
-	int result;
+	int result = 0;
 
 again:
 	switch (Z_TYPE_P(op)) {
-		case IS_UNDEF:
-		case IS_NULL:
-		case IS_FALSE:
-			result = 0;
-			break;
 		case IS_TRUE:
 			result = 1;
 			break;
 		case IS_LONG:
-			result = (Z_LVAL_P(op)?1:0);
-			break;
-		case IS_RESOURCE:
-			result = (Z_RES_HANDLE_P(op)?1:0);
+			if (Z_LVAL_P(op)) {
+				result = 1;
+			}
 			break;
 		case IS_DOUBLE:
-			result = (Z_DVAL_P(op) ? 1 : 0);
+			if (Z_DVAL_P(op)) {
+				result = 1;
+			}
 			break;
 		case IS_STRING:
-			if (Z_STRLEN_P(op) == 0
-				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
-				result = 0;
-			} else {
+			if (Z_STRLEN_P(op) > 1 || (Z_STRLEN_P(op) && Z_STRVAL_P(op)[0] != '0')) {
 				result = 1;
 			}
 			break;
 		case IS_ARRAY:
-			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+			if (zend_hash_num_elements(Z_ARRVAL_P(op))) {
+				result = 1;
+			}
 			break;
 		case IS_OBJECT:
 			result = zend_object_is_true(op);
+			break;
+		case IS_RESOURCE:
+			if (EXPECTED(Z_RES_HANDLE_P(op))) {
+				result = 1;
+			}
 			break;
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto again;
 			break;
 		default:
-			result = 0;
 			break;
 	}
 	return result;
