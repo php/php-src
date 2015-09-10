@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 17 Sep 2015, PHP 7.0.0 RC 3
 
 - Core:
-  . Fixed bug #70431 (Memory leak in php_ini.c). (Sixed, Laruence)
+  . Fixed bug #70431 (Memory leak in php_ini.c). (Sixd, Laruence)
 
 - CLI server:
   . Fixed bug #68291 (404 on urls with '+'). (cmb)
