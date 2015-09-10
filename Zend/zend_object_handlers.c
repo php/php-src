@@ -602,11 +602,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	retval = &EG(uninitialized_zval);
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
-		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+	if (Z_REFCOUNTED(tmp_member)) {
 		zval_ptr_dtor(&tmp_member);
-		if (Z_REFCOUNTED_P(retval)) Z_DELREF_P(retval);
 	}
+
 	return retval;
 }
 /* }}} */
@@ -703,7 +702,7 @@ write_std_property:
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
+	if (Z_REFCOUNTED(tmp_member)) {
 		zval_ptr_dtor(&tmp_member);
 	}
 }
@@ -935,7 +934,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_NULL)) {
+	if (Z_REFCOUNTED(tmp_member)) {
 		zval_ptr_dtor(&tmp_member);
 	}
 }
@@ -1507,7 +1506,7 @@ found:
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
+	if (Z_REFCOUNTED(tmp_member)) {
 		zval_ptr_dtor(&tmp_member);
 	}
 	return result;
