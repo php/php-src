@@ -1759,7 +1759,7 @@ static inline void zend_free_obj_get_result(zval *op) /* {{{ */
 }
 /* }}} */
 
-static void ZEND_FASTCALL convert_compare_result_to_long(zval *result)
+static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 {
 	if (Z_TYPE_P(result) == IS_DOUBLE) {
 		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
@@ -1767,6 +1767,7 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result)
 		convert_to_long(result);
 	}
 }
+/* }}} */
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
