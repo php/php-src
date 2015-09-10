@@ -385,8 +385,7 @@ int php_init_config(void)
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
-	zend_string *opened_path = NULL;
-
+	
 	zend_hash_init(&configuration_hash, 8, NULL, config_zval_dtor, 1);
 
 	if (sapi_module.ini_defaults) {
@@ -596,11 +595,7 @@ int php_init_config(void)
 
 			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
-			if (opened_path) {
-				zend_string_release(opened_path);
-			} else {
-				efree((char *)fh.filename);
-			}
+			efree((char *)fh.filename);
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
 	}
