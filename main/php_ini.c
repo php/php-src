@@ -553,7 +553,6 @@ int php_init_config(void)
 					fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fh.handle.fp) {
 						fh.filename = expand_filepath(php_ini_file_name, NULL);
-						opened_path = zend_string_init(fh.filename, strlen(fh.filename), 0);
 					}
 				}
 			}
@@ -599,6 +598,8 @@ int php_init_config(void)
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
 				zend_string_release(opened_path);
+			} else {
+				efree((char *)fh.filename);
 			}
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
