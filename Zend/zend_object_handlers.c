@@ -488,7 +488,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 /* }}} */
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
-	efree(Z_PTR_P(el));
+	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
 }
 /* }}} */
 
