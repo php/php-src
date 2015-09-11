@@ -87,7 +87,7 @@ var_dump($c);
 
 echo "Test 9\n";
 
-$c = oci_pconnect('/', '', 'c', null, OCI_SYSDBA+OCI_CRED_EXT);
+$c = oci_pconnect('/', '', 'd', null, OCI_SYSDBA+OCI_CRED_EXT);
 if (!$c) {
 	$m = oci_error();
 	var_dump($m);
@@ -96,7 +96,7 @@ var_dump($c);
 
 echo "Test 10\n";
 
-$c = oci_pconnect('/', '', 'c', null, OCI_SYSOPER+OCI_CRED_EXT);
+$c = oci_pconnect('/', '', 'd', null, OCI_SYSOPER+OCI_CRED_EXT);
 if (!$c) {
 	$m = oci_error();
 	var_dump($m);

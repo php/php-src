@@ -42,6 +42,11 @@
 #error Use PHP OCI8 1.4 for your version of PHP
 #endif
 
+/* PHP 7 is the minimum supported version for OCI8 2.1 */
+#if PHP_MAJOR_VERSION < 7
+#error Use PHP OCI8 2.0 for your version of PHP
+#endif
+
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 #include "zend_hash.h"
@@ -2629,6 +2634,8 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args)
 {
 	zval *z_statement, *array;
+	zval *placeholder;
+/*	zend_array *temp_array = (zend_array *) NULL;*/
 	php_oci_statement *statement;		  /* statement that will be fetched from */
 #if (OCI_MAJOR_VERSION >= 12)
 	php_oci_statement *invokedstatement;  /* statement this function was invoked with */
@@ -2736,53 +2743,16 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
     }
 #endif /* OCI_MAJOR_VERSION */
 
-#if 0
-	if (expected_args > 2)
-	{
-		array_init(array);
-
-		for (i = 0; i < statement->ncolumns; i++) {
-
-			column = php_oci_statement_get_column(statement, i + 1, NULL, 0);
-
-			if (column == NULL) {
-				continue;
-			}
-			if ((column->indicator == -1) && ((fetch_mode & PHP_OCI_RETURN_NULLS) == 0)) {
-				continue;
-			}
-
-			if (!(column->indicator == -1)) {
-				zval element;
-
-				php_oci_column_to_zval(column, &element, fetch_mode);
-
-				if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
-					add_index_zval(array, i, &element);
-				}
-				if (fetch_mode & PHP_OCI_ASSOC) {
-					if (fetch_mode & PHP_OCI_NUM) {
-						Z_TRY_ADDREF_P(&element);
-					}
-					add_assoc_zval(array, column->name, &element);
-				}
-
-			} else {
-				if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
-					add_index_null(array, i);
-				}
-				if (fetch_mode & PHP_OCI_ASSOC) {
-					add_assoc_null(array, column->name);
-				}
-			}
-		}
-
-		/* RETURN_LONG(statement->ncolumns); */
+	if (expected_args > 2) {
+		if (Z_ISREF_P(array))
+			placeholder = Z_REFVAL_P(array);
+		else
+			placeholder = array;
+	} else {
+		placeholder = return_value;
 	}
-	else
-#endif
-	{
-		array_init(return_value);
+
+	array_init(placeholder);
 
 	for (i = 0; i < statement->ncolumns; i++) {
 
@@ -2801,31 +2771,41 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			php_oci_column_to_zval(column, &element, (int) fetch_mode);
 
 			if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
-				add_index_zval(return_value, i, &element);
+				add_index_zval(placeholder, i, &element);
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
 				if (fetch_mode & PHP_OCI_NUM) {
 					Z_TRY_ADDREF_P(&element);
 				}
-				add_assoc_zval(return_value, column->name, &element);
+				add_assoc_zval(placeholder, column->name, &element);
 			}
 
 		} else {
 			if (fetch_mode & PHP_OCI_NUM || !(fetch_mode & PHP_OCI_ASSOC)) {
-				add_index_null(return_value, i);
+				add_index_null(placeholder, i);
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
-				add_assoc_null(return_value, column->name);
+				add_assoc_null(placeholder, column->name);
 			}
 		}
 	}
 
 	if (expected_args > 2) {
 		/* Only for ocifetchinto BC.  In all other cases we return array, not long */
-		ZVAL_COPY(array, return_value); /* copy return_value to given reference */
-		/* zval_dtor(return_value); */
+#if 0		
+		zval *temp_array;
+		if (Z_ISREF_P(array))
+			temp_array = Z_REFVAL_P(array);
+		else /* PHP7 will pass user buffer through 'array' as reference type.
+			  * So this part of code may not be reached. */
+			temp_array = array; 
+
+		/* copy array content in return_value into user buffer passed through
+		 * reference variable 'array' */
+		ZVAL_ARR(temp_array, Z_ARRVAL_P(return_value));
+		zval_ptr_dtor(return_value);
+#endif
 		RETURN_LONG(statement->ncolumns);
-	}
 	}
 }
 /* }}} */
