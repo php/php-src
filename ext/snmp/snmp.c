@@ -346,7 +346,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
 	ZEND_ARG_INFO(0, priv_passphrase)
 	ZEND_ARG_INFO(0, contextName)
 	ZEND_ARG_INFO(0, contextEngineID)
-	ZEND_ARG_INFO(0, )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get, 0, 0, 1)
@@ -2343,16 +2342,16 @@ static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval 
 
 /* {{{ php_snmp_class_methods[] */
 static zend_function_entry php_snmp_class_methods[] = {
-	PHP_ME(snmp,	 __construct,			arginfo_snmp_create,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 close,				arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 setSecurity,			arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 __construct,		arginfo_snmp_create,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 close,				arginfo_snmp_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 setSecurity,		arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
 
-	PHP_ME(snmp,	 get,				arginfo_snmp_get,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 set,				arginfo_snmp_set,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getError,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 get,				arginfo_snmp_get,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 set,				arginfo_snmp_set,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getError,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
 
 	PHP_FE_END
 };
