@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70431 (Memory leak in php_ini.c). (Senthil, Laruence)
+  . Fixed bug #70478 (**= does no longer work). (Bob)
 
 - CLI server:
   . Fixed bug #68291 (404 on urls with '+'). (cmb)
