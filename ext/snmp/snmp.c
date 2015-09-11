@@ -338,7 +338,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_snmp_void, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
-	ZEND_ARG_INFO(0, session)
 	ZEND_ARG_INFO(0, sec_level)
 	ZEND_ARG_INFO(0, auth_protocol)
 	ZEND_ARG_INFO(0, auth_passphrase)
