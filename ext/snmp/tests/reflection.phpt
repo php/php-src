@@ -41,15 +41,14 @@ Method [ <internal:snmp> public method close ] {
 
 Method [ <internal:snmp> public method setSecurity ] {
 
-  - Parameters [8] {
-    Parameter #0 [ <required> $session ]
-    Parameter #1 [ <required> $sec_level ]
-    Parameter #2 [ <required> $auth_protocol ]
-    Parameter #3 [ <required> $auth_passphrase ]
-    Parameter #4 [ <required> $priv_protocol ]
-    Parameter #5 [ <required> $priv_passphrase ]
-    Parameter #6 [ <required> $contextName ]
-    Parameter #7 [ <required> $contextEngineID ]
+  - Parameters [7] {
+    Parameter #0 [ <required> $sec_level ]
+    Parameter #1 [ <required> $auth_protocol ]
+    Parameter #2 [ <required> $auth_passphrase ]
+    Parameter #3 [ <required> $priv_protocol ]
+    Parameter #4 [ <required> $priv_passphrase ]
+    Parameter #5 [ <required> $contextName ]
+    Parameter #6 [ <required> $contextEngineID ]
   }
 }
 
