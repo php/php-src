@@ -214,6 +214,11 @@ PHP_FUNCTION(dom_namednodemap_item)
 		return;
 	}
 	if (index >= 0) {
+		if (ZEND_LONG_INT_OVFL(index)) {
+			php_error_docref(NULL, E_WARNING, "Invalid index");
+			RETURN_NULL();
+		}
+
 		intern = Z_DOMOBJ_P(id);
 
 		objmap = (dom_nnodemap_object *)intern->ptr;
