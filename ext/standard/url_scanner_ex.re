@@ -114,37 +114,73 @@ alphadash = ([a-zA-Z] | "-");
 
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator)
 {
-	register const char *p, *q;
-	const char *bash = NULL;
-	const char *sep = "?";
+	php_url *url_parts;
 
-	q = (p = ZSTR_VAL(url->s)) + ZSTR_LEN(url->s);
+	smart_str_0(url); /* FIXME: Bug #70480 php_url_prase_ex() crashes by processing chars exceed len */
+	url_parts = php_url_parse_ex(ZSTR_VAL(url->s), ZSTR_LEN(url->s));
 
-scan:
-/*!re2c
-  ":"		{ smart_str_append_smart_str(dest, url); return; }
-  "?"		{ sep = separator; goto scan; }
-  "#"		{ bash = p - 1; goto done; }
-  (any\[:?#])+		{ goto scan; }
-*/
-done:
-
-	/* Don't modify URLs of the format "#mark" */
-	if (bash && bash - ZSTR_VAL(url->s) == 0) {
+	if (!url_parts) {
+		/* Ignore malformed URLs */
 		smart_str_append_smart_str(dest, url);
 		return;
 	}
 
-	if (bash)
-		smart_str_appendl(dest, ZSTR_VAL(url->s), bash - ZSTR_VAL(url->s));
-	else
+	if (url_parts->scheme ||
+		*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
+		/* Current URL scanner works only with relative local path */
 		smart_str_append_smart_str(dest, url);
+		php_url_free(url_parts);
+		return;
+	}
 
-	smart_str_appends(dest, sep);
-	smart_str_append_smart_str(dest, url_app);
+	if (!url_parts->path) {
+		/* URL is http://php.net or like */
+		smart_str_append_smart_str(dest, url);
+		smart_str_appendc(dest, '/');
+		smart_str_appendc(dest, '?');
+		smart_str_append_smart_str(dest, url_app);
+		/* There should not be fragment. Just return */
+		php_url_free(url_parts);
+		return;
+	}
 
-	if (bash)
-		smart_str_appendl(dest, bash, q - bash);
+	/* Schema/host/etc are handled for full path support in the future  */
+	if (url_parts->scheme) {
+		smart_str_appends(dest, url_parts->scheme);
+	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
+		smart_str_appends(dest, "//");
+	}
+	if (url_parts->user) {
+		smart_str_appends(dest, url_parts->user);
+		if (url_parts->pass) {
+			smart_str_appends(dest, url_parts->pass);
+			smart_str_appendc(dest, ':');
+		}
+		smart_str_appendc(dest, '@');
+	}
+	if (url_parts->host) {
+				smart_str_appends(dest, url_parts->host);
+	}
+	if (url_parts->port) {
+		smart_str_appendc(dest, ':');
+		smart_str_append_unsigned(dest, (long)url_parts->port);
+	}
+	if (url_parts->path) {
+		smart_str_appends(dest, url_parts->path);
+	}
+	smart_str_appendc(dest, '?');
+	if (url_parts->query) {
+		smart_str_appends(dest, url_parts->query);
+		smart_str_appends(dest, separator);
+		smart_str_append_smart_str(dest, url_app);
+	} else {
+		smart_str_append_smart_str(dest, url_app);
+	}
+	if (url_parts->fragment) {
+		smart_str_appendc(dest, '#');
+		smart_str_appends(dest, url_parts->fragment);
+	}
+	php_url_free(url_parts);
 }
 
 
@@ -536,17 +572,98 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 	return SUCCESS;
 }
 
-PHPAPI int php_url_scanner_reset_vars(void)
-{
+static inline void php_url_scanner_clear(void) {
 	if (BG(url_adapt_state_ex).form_app.s) {
 		ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) = 0;
 	}
 	if (BG(url_adapt_state_ex).url_app.s) {
 		ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) = 0;
 	}
+}
 
+PHPAPI int php_url_scanner_reset_vars(void)
+{
+	php_url_scanner_clear();
 	return SUCCESS;
 }
+
+PHPAPI int php_url_scanner_reset_var(zend_string *name, zend_string *value, int urlencode)
+{
+	char *found;
+	smart_str sname = {0};
+	smart_str svalue = {0};
+	smart_str url_app = {0};
+	smart_str form_app = {0};
+	zend_string *encoded;
+	int ret = SUCCESS;
+
+	/* Short circuit check. Only check url_app. */
+	if (!BG(url_adapt_state_ex).url_app.s || !ZSTR_LEN(BG(url_adapt_state_ex).url_app.s)) {
+		return SUCCESS;
+	}
+
+	if (urlencode) {
+		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		zend_string_free(encoded);
+		encoded = php_raw_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
+		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		zend_string_free(encoded);
+	} else {
+		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_appendl(&svalue, ZSTR_VAL(value), ZSTR_LEN(value));
+	}
+
+	smart_str_append_smart_str(&url_app, &sname);
+	smart_str_appendc(&url_app, '=');
+	smart_str_append_smart_str(&url_app, &svalue);
+
+	smart_str_appends(&form_app, "<input type=\"hidden\" name=\"");
+	smart_str_append_smart_str(&form_app, &sname);
+	smart_str_appends(&form_app, "\" value=\"");
+	smart_str_append_smart_str(&form_app, &svalue);
+	smart_str_appends(&form_app, "\" />");
+
+	/* Short circuit check. Only check url_app. */
+	found = (char *)php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).url_app.s),
+								ZSTR_VAL(url_app.s), 1,
+								ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).url_app.s));
+	if (!found) {
+		ret = FAILURE;
+		goto finish;
+	}
+	if (ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) == ZSTR_LEN(url_app.s)) {
+		php_url_scanner_clear();
+		goto finish;
+	}
+
+	/* Remove partially */
+	memmove(found,
+			found + ZSTR_LEN(url_app.s),
+			found - ZSTR_VAL(BG(url_adapt_state_ex).url_app.s) - ZSTR_LEN(url_app.s));
+	ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) = ZSTR_LEN(BG(url_adapt_state_ex).url_app.s) - ZSTR_LEN(url_app.s);
+
+	found= (char *)php_memnstr(ZSTR_VAL(BG(url_adapt_state_ex).form_app.s),
+							   ZSTR_VAL(form_app.s), 1,
+							   ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) + ZSTR_LEN(BG(url_adapt_state_ex).form_app.s));
+	if (!found) {
+		/* Should not happen */
+		ret = FAILURE;
+		goto finish;
+	}
+	memmove(found,
+			found + ZSTR_LEN(form_app.s),
+			found - ZSTR_VAL(BG(url_adapt_state_ex).form_app.s) - ZSTR_LEN(form_app.s));
+	ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) = ZSTR_LEN(BG(url_adapt_state_ex).form_app.s) - ZSTR_LEN(form_app.s);
+
+finish:
+	smart_str_free(&url_app);
+	smart_str_free(&form_app);
+	smart_str_free(&sname);
+	smart_str_free(&svalue);
+	return ret;
+}
+
 
 PHP_MINIT_FUNCTION(url_scanner)
 {
