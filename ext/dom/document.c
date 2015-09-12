@@ -1728,9 +1728,14 @@ PHP_FUNCTION(dom_document_xinclude)
 		return;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+		php_error_docref(NULL, E_WARNING, "Invalid flags");
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	err = xmlXIncludeProcessFlags(docp, flags);
+	err = xmlXIncludeProcessFlags(docp, (int)flags);
 
 	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
 	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document
