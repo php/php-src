@@ -59,5 +59,10 @@ $TS \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
+<<<<<<< HEAD
 make -j2 --quiet
 make install
+=======
+make -j2 -k --quiet
+sudo make install
+>>>>>>> 633312d... Add '-k' option to the 'make' command to display *every* error
