@@ -45,6 +45,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_SUB:
 			case ZEND_MUL:
 			case ZEND_DIV:
+			case ZEND_POW:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
@@ -55,6 +56,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
+			case ZEND_ASSIGN_POW:
 				if (opline->extended_value != 0) {
 					/* object tristate op - don't attempt to optimize it! */
 					break;
