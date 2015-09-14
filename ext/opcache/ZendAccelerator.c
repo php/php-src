@@ -2585,7 +2585,7 @@ static int accel_startup(zend_extension *extension)
 #endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
-	if (ZCG(accel_directives).enable_huge_code_pages &&
+	if (ZCG(accel_directives).huge_code_pages &&
 	    (strcmp(sapi_module.name, "cli") == 0 ||
 	     strcmp(sapi_module.name, "cli-server") == 0 ||
 		 strcmp(sapi_module.name, "cgi-fcgi") == 0 ||
