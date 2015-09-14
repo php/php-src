@@ -168,9 +168,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
 			*is_temp = 1;
-			ALLOC_HASHTABLE(ht);
-			*ht = *Z_ARRVAL(retval);
-			efree_size(Z_ARR(retval), sizeof(zend_array));
+			ht = Z_ARR(retval);
 			return ht;
 		} else {
 			*is_temp = 0;
