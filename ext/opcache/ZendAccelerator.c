@@ -2499,20 +2499,15 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 {
 	void *ret = MAP_FAILED;
 	void *mem;
-	int fd;
 
-	fd = open(name, O_RDONLY);
-	if (fd < 0) {
-		return -1;
-	}
 	mem = mmap(NULL, size,
-		PROT_READ,
-		MAP_PRIVATE | MAP_FILE | MAP_POPULATE,
-		fd, offset);
+		PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS,
+		-1, 0);
 	if (mem == MAP_FAILED) {
-		close(fd);
 		return -1;
 	}
+	memcpy(mem, start, size);
 
 #ifdef MAP_HUGETLB
 	ret = mmap(start, size,
@@ -2534,7 +2529,6 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 	}
 	munmap(mem, size);
-	close(fd);
 
 	return (ret == start) ? 0 : -1;
 }
