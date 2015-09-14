@@ -548,8 +548,6 @@ typedef struct _zend_utility_functions {
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
 	void (*message_handler)(long message, const void *data TSRMLS_DC);
-	void (*block_interruptions)(void);
-	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds TSRMLS_DC);
@@ -723,8 +721,8 @@ END_EXTERN_C()
 #define ZEND_UV(name) (zend_uv.name)
 
 #ifndef ZEND_SIGNALS
-#define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
-#define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+#define HANDLE_BLOCK_INTERRUPTIONS()
+#define HANDLE_UNBLOCK_INTERRUPTIONS()
 #else
 #include "zend_signal.h"
 

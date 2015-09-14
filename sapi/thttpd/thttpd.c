@@ -397,8 +397,6 @@ static sapi_module_struct thttpd_sapi_module = {
 	NULL,									/* Child terminate */
 
 	NULL,									/* php.ini path override */
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
 
 	NULL,
 	NULL,
