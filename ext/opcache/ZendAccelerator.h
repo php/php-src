@@ -219,6 +219,9 @@ typedef struct _zend_accel_directives {
 	zend_bool      file_cache_only;
 	zend_bool      file_cache_consistency_checks;
 #endif
+#ifdef HAVE_HUGE_CODE_PAGES
+	zend_bool      enable_huge_code_pages;
+#endif
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {

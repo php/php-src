@@ -2480,6 +2480,92 @@ static void accel_gen_system_id(void)
 }
 #endif
 
+#ifdef HAVE_HUGE_CODE_PAGES
+# ifndef _WIN32
+#  include <sys/mman.h>
+#  include <sys/prctl.h>
+#  ifndef MAP_ANON
+#   ifdef MAP_ANONYMOUS
+#    define MAP_ANON MAP_ANONYMOUS
+#   endif
+#  endif
+#  ifndef MAP_FAILED
+#   define MAP_FAILED ((void*)-1)
+#  endif
+# endif
+
+# if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
+static int accel_remap_huge_pages(void *start, size_t size, const char *name, size_t offset)
+{
+	void *ret = MAP_FAILED;
+	void *mem;
+	int fd;
+
+	fd = open(name, O_RDONLY);
+	if (fd < 0) {
+		return -1;
+	}
+	mem = mmap(NULL, size,
+		PROT_READ,
+		MAP_PRIVATE | MAP_FILE | MAP_POPULATE,
+		fd, offset);
+	if (mem == MAP_FAILED) {
+		close(fd);
+		return -1;
+	}
+
+#ifdef MAP_HUGETLB
+	ret = mmap(start, size,
+		PROT_READ | PROT_WRITE | PROT_EXEC,
+		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
+		-1, 0);
+#endif
+#ifdef MADV_HUGEPAGE
+	if (ret == MAP_FAILED) {
+		ret = mmap(start, size,
+			PROT_READ | PROT_WRITE | PROT_EXEC,
+			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+			-1, 0);
+		madvise(start, size, MADV_HUGEPAGE);
+	}
+#endif
+	if (ret == start) {
+	    memcpy(start, mem, size);
+		mprotect(start, size, PROT_READ | PROT_EXEC);
+	}
+	munmap(mem, size);
+	close(fd);
+
+	return (ret == start) ? 0 : -1;
+}
+
+static void accel_move_code_to_huge_pages(void)
+{
+	FILE *f;
+	long unsigned int huge_page_size = 2 * 1024 * 1024;
+
+	f = fopen("/proc/self/maps", "r");
+	if (f) {
+		long unsigned int  start, end, offset, inode;
+		char perm[5], dev[6], name[MAXPATHLEN];
+		int ret;
+
+		ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+		if (ret == 7 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
+			long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
+			long unsigned int  seg_end = (end & ~(huge_page_size-1L));
+
+			if (seg_end > seg_start) {
+				zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
+				accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, name, offset + seg_start - start);
+			}
+		}
+		fclose(f);
+	}
+}
+# endif
+#endif /* HAVE_HUGE_CODE_PAGES */
+
 static int accel_startup(zend_extension *extension)
 {
 	zend_function *func;
@@ -2503,6 +2589,16 @@ static int accel_startup(zend_extension *extension)
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	accel_gen_system_id();
+#endif
+
+#ifdef HAVE_HUGE_CODE_PAGES
+	if (ZCG(accel_directives).enable_huge_code_pages &&
+	    (strcmp(sapi_module.name, "cli") == 0 ||
+	     strcmp(sapi_module.name, "cli-server") == 0 ||
+		 strcmp(sapi_module.name, "cgi-fcgi") == 0 ||
+		 strcmp(sapi_module.name, "fpm-fcgi") == 0)) {
+		accel_move_code_to_huge_pages();
+	}
 #endif
 
 	/* no supported SAPI found - disable acceleration and stop initialization */
