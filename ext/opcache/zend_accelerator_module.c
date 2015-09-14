@@ -310,7 +310,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_HUGE_CODE_PAGES
-	STD_PHP_INI_BOOLEAN("opcache.enable_huge_code_pages"      , "1"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.enable_huge_code_pages,        zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
 
