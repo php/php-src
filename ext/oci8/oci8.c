@@ -2748,6 +2748,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			placeholder = Z_REFVAL_P(array);
 		else
 			placeholder = array;
+		zval_dtor(placeholder);
 	} else {
 		placeholder = return_value;
 	}

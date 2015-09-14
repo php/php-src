@@ -3,6 +3,10 @@ Bind with SQLT_NUM
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
+preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
+if (!(isset($matches[0]) && $matches[0] >= 12)) { 
+    die("skip works only with Oracle 12c or greater version of Oracle client libraries");
+}
 ?>
 --FILE--
 <?php
@@ -215,7 +219,7 @@ array(1) {
   ["NUMBER_T"]=>
   array(1) {
     [0]=>
-    string(127) "-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    string(2) "-~"
   }
 }
 
