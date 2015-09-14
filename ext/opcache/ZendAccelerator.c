@@ -2483,7 +2483,6 @@ static void accel_gen_system_id(void)
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
 #  include <sys/mman.h>
-#  include <sys/prctl.h>
 #  ifndef MAP_ANON
 #   ifdef MAP_ANONYMOUS
 #    define MAP_ANON MAP_ANONYMOUS
