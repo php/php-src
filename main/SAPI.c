@@ -469,7 +469,12 @@ SAPI_API void sapi_activate(void)
 		if (PG(enable_post_data_reading)
 		&& 	SG(request_info).content_type
 		&&  SG(request_info).request_method
-		&& !strcmp(SG(request_info).request_method, "POST")) {
+		&&
+			(!strcmp(SG(request_info).request_method, "POST") ||
+			!strcmp(SG(request_info).request_method, "PUT") ||
+			!strcmp(SG(request_info).request_method, "PATCH") ||
+			!strcmp(SG(request_info).request_method, "DELETE"))
+		) {
 			/* HTTP POST may contain form data to be processed into variables
 			 * depending on given content type */
 			sapi_read_post_data();

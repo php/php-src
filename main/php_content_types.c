@@ -37,7 +37,13 @@ static sapi_post_entry php_post_entries[] = {
  */
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 {
-	if (!strcmp(SG(request_info).request_method, "POST")) {
+	if (
+        !strcmp(SG(request_info).request_method, "POST") ||
+        !strcmp(SG(request_info).request_method, "PUT") ||
+        !strcmp(SG(request_info).request_method, "PATCH") ||
+        !strcmp(SG(request_info).request_method, "DELETE")
+        ) {
+
 		if (NULL == SG(request_info).post_entry) {
 			/* no post handler registered, so we just swallow the data */
 			sapi_read_standard_form_data();
