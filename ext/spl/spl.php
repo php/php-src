@@ -1124,7 +1124,7 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, C
  *
  * For a detailed explanation see Observer pattern in
  * <em>
- * Gamma, Helm, Johnson, Vlissides<br />
+ * Gamma, Helm, Johnson, Vlissides<br>
  * Design Patterns
  * </em>
  */

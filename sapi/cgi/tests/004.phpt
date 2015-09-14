@@ -12,7 +12,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__).'/004.test.php';
+$filename = dirname(__FILE__) . '/004.test.php';
 $code ='
 <?php
 
@@ -39,7 +39,7 @@ string(%d) "
 <b>Fatal error</b>:  Uncaught Error: Cannot access private property test::$pri in %s004.test.php:8
 Stack trace:
 #0 {main}
-  thrown in <b>%s004.test.php</b> on line <b>8</b><br />
+  thrown in <b>%s004.test.php</b> on line <b>8</b><br>
 "
 string(25) "No input file specified.
 "

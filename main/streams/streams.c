@@ -165,7 +165,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 
 			if (PG(html_errors)) {
 				brlen = 7;
-				br = "<br />\n";
+				br = "<br>\n";
 			} else {
 				brlen = 1;
 				br = "\n";

@@ -16,7 +16,8 @@ var_dump(phpcredits(CREDITS_GROUP));
 
 ?>
 --EXPECTF--
-<!DOCTYPE %a>%s</html>
+<!doctype html>
+%a</html>
 bool(true)
 
 Warning: phpcredits() expects parameter 1 to be integer, array given in %sphpcredits2.php on line 4

@@ -50,4 +50,4 @@ Content-type: text/html; charset=UTF-8
 Stack trace:
 #0 %sindex.php(%d): require()
 #1 {main}
-  thrown in <b>%ssyntax_error.php</b> on line <b>%d</b><br />
+  thrown in <b>%ssyntax_error.php</b> on line <b>%d</b><br>
