@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 - Standard:
   . Implemented the RFC `Random Functions Throwing Exceptions in PHP 7`.
     (Sammy Kaye Powers, Anthony)
+  . Fixed bug #70487 (pack('x') produces an error). (Nikita)
 
 - Streams:
   . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).

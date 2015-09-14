@@ -112,7 +112,7 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 PHP_FUNCTION(pack)
 {
 	zval *argv = NULL;
-	int num_args, i;
+	int num_args = 0, i;
 	int currentarg;
 	char *format;
 	size_t formatlen;
@@ -122,7 +122,7 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s+", &format, &formatlen, &argv, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s*", &format, &formatlen, &argv, &num_args) == FAILURE) {
 		return;
 	}
 
