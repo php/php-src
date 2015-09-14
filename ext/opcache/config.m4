@@ -8,8 +8,9 @@ PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
 PHP_ARG_ENABLE(opcache-file, whether to enable file based caching,
 [  --disable-opcache-file  Disable file based caching], yes)
 
-PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES (experimental),
-[  --enable-huge-code-pages Enable copying PHP CODE pages into HUGE PAGES], no)
+PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES,
+[  --disable-huge-code-pages
+                          Disable copying PHP CODE pages into HUGE PAGES], yes)
 
 if test "$PHP_OPCACHE" != "no"; then
 
