@@ -2110,6 +2110,8 @@ static PHP_FUNCTION(session_regenerate_id)
 
 /* {{{ proto void session_create_id([string prefix])
    Generate new session ID. Intended for user save handlers. */
+#if 0
+/* This is not used yet */
 static PHP_FUNCTION(session_create_id)
 {
 	zend_string *prefix = NULL, *new_id;
@@ -2147,6 +2149,7 @@ static PHP_FUNCTION(session_create_id)
 	RETVAL_NEW_STR(id.s);
 	smart_str_free(&id);
 }
+#endif
 /* }}} */
 
 /* {{{ proto string session_cache_limiter([string new_cache_limiter])
