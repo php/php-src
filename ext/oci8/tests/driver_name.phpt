@@ -8,8 +8,9 @@ if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to 
 if ($test_drcp) die("skip as Output might vary with DRCP");
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && ($matches[1] == 12 && $matches[2] == 1 && $matches[3] >= 0
-	&& $matches[4] >= 2) || ($matches[1] == 12 && $matches[2] > 1)))
+if (!(isset($matches[0]) &&
+     ($matches[1] == 12 && $matches[2] == 1 && $matches[3] >= 0
+     && $matches[4] >= 2) || ($matches[1] == 12 && $matches[2] > 1))) {
     die("skip test expected to work only with Oracle 12.1.0.2 database or its later patchsets");
 }
 
