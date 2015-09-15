@@ -554,7 +554,7 @@ Other
     without SHM at all, using opcache.file_cache_only=1 (this may be useful for
     sharing hosting), and disable file cache consistency check, to speedup
     loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
-  . Added an experemental ability to move PHP code pages (PHP TEXT segment) into
+  . Added an experimental ability to move PHP code pages (PHP TEXT segment) into
     HUGE pages. To enable it, PHP should be configured and built with
     --enable-huge-code-pages, OS should be configured to provide huge pages.
     It's possible to enable/disable this feature in php.ini through
