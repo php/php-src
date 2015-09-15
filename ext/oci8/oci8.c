@@ -2634,7 +2634,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args)
 {
 	zval *z_statement, *array;
-	zval *placeholder;
+	zval *placeholder = (zval*) NULL;
 /*	zend_array *temp_array = (zend_array *) NULL;*/
 	php_oci_statement *statement;		  /* statement that will be fetched from */
 #if (OCI_MAJOR_VERSION >= 12)
@@ -2655,6 +2655,12 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (ZEND_NUM_ARGS() == 2) {
 			fetch_mode = mode;
 		}
+
+		if (Z_ISREF_P(array))
+			placeholder = Z_REFVAL_P(array);
+		else
+			placeholder = array;
+
 	} else if (expected_args == 2) {
 		/* only for oci_fetch_array() */
 
@@ -2743,14 +2749,10 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
     }
 #endif /* OCI_MAJOR_VERSION */
 
-	if (expected_args > 2) {
-		if (Z_ISREF_P(array))
-			placeholder = Z_REFVAL_P(array);
-		else
-			placeholder = array;
-		zval_dtor(placeholder);
-	} else {
+	if (placeholder == NULL) {
 		placeholder = return_value;
+	} else {
+		zval_dtor(placeholder);
 	}
 
 	array_init(placeholder);
@@ -2792,20 +2794,6 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	}
 
 	if (expected_args > 2) {
-		/* Only for ocifetchinto BC.  In all other cases we return array, not long */
-#if 0		
-		zval *temp_array;
-		if (Z_ISREF_P(array))
-			temp_array = Z_REFVAL_P(array);
-		else /* PHP7 will pass user buffer through 'array' as reference type.
-			  * So this part of code may not be reached. */
-			temp_array = array; 
-
-		/* copy array content in return_value into user buffer passed through
-		 * reference variable 'array' */
-		ZVAL_ARR(temp_array, Z_ARRVAL_P(return_value));
-		zval_ptr_dtor(return_value);
-#endif
 		RETURN_LONG(statement->ncolumns);
 	}
 }
