@@ -21,7 +21,7 @@
 
 
 define('REPORT_LEVEL', 2); // 0 reports less false-positives. up to level 5.
-define('VERSION', '5.2');  // minimum is 5.2
+define('VERSION', '7.0');  // minimum is 7.0
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
 
@@ -33,30 +33,26 @@ ini_set('pcre.backtrack_limit', 10000000);
 
 
 $API_params = array(
-	'a' => array('zval**'), // array as zval*
+	'a' => array('zval**'), // array
+	'A' => array('zval**'), // array or object
 	'b' => array('zend_bool*'), // boolean
 	'C' => array('zend_class_entry**'), // class
 	'd' => array('double*'), // double
 	'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
 	'h' => array('HashTable**'), // array as an HashTable*
-	'l' => array('long*'), // long
+	'H' => array('HashTable**'), // array or HASH_OF(object)
+	'l' => array('zend_long*'), // long
+	//TODO 'L' => array('zend_long*, '), // long
 	'o' => array('zval**'), //object
 	'O' => array('zval**', 'zend_class_entry*'), // object of given type
+	'p' => array('char**', 'size_t*'), // valid path
+	'P' => array('zend_string**'), // valid path
 	'r' => array('zval**'), // resource
-	's' => array('char**', 'int*'), // string
+	's' => array('char**', 'size_t*'), // string
+	'S' => array('zend_string**'), // string
 	'z' => array('zval**'), // zval*
 	'Z' => array('zval***') // zval**
 );
-
-// specific to PHP >= 6
-if (version_compare(VERSION, '6', 'ge')) {
-	$API_params['S'] = $API_params['s']; // binary string
-	$API_params['t'] = array('zstr*', 'int*', 'zend_uchar*'); // text
-	$API_params['T'] = $API_params['t'];
-	$API_params['u'] = array('UChar**', 'int*'); // unicode
-	$API_params['U'] = $API_params['u'];
-}
-
 
 /** reports an error, according to its level */
 function error($str, $level = 0)
@@ -65,7 +61,7 @@ function error($str, $level = 0)
 
 	if ($level <= REPORT_LEVEL) {
 		if (strpos($current_file,PHPDIR) === 0) {
-			$filename = substr($current_file, strlen(PHPDIR)+1); 
+			$filename = substr($current_file, strlen(PHPDIR)+1);
 		} else {
 			$filename = $current_file;
 		}
@@ -243,31 +239,15 @@ function check_function($name, $txt, $offset)
 						}
 					break;
 
-					case '&':
-						if (version_compare(VERSION, '6', 'ge')) {
-							if ($last_char == 's' || ($last_last_char == 's' && $last_char == '!')) {
-								check_param($params, ++$j, 'UConverter*', $optional);
-
-							} else {
-								error("the '&' specifier cannot be applied to '$last_char'");
-							}
-						} else {
-							error("unknown char ('&') at column $i");
-						}
-					break;
-
+					// variadic arguments
 					case '+':
 					case '*':
-						if (version_compare(VERSION, '6', 'ge')) {
-							if ($varargs) {
-								error("A varargs specifier can only be used once. repeated char at column $i");
-							} else {
-								check_param($params, ++$j, 'zval****', $optional);
-								check_param($params, ++$j, 'int*', $optional);
-								$varargs = true;
-							}
+						if ($varargs) {
+							error("A varargs specifier can only be used once. repeated char at column $i");
 						} else {
-							error("unknown char ('$char') at column $i");
+							check_param($params, ++$j, 'zval**', $optional);
+							check_param($params, ++$j, 'int*', $optional);
+							$varargs = true;
 						}
 					break;
 
@@ -306,8 +286,10 @@ function recurse($path)
 
 		$txt = file_get_contents($file);
 		// remove comments (but preserve the number of lines)
-		$txt = preg_replace(array('@//.*@S', '@/\*.*\*/@SsUe'), array('', 'preg_replace("/[^\r\n]+/S", "", \'$0\')'), $txt);
-
+		$txt = preg_replace('@//.*@S', '', $txt);
+		$txt = preg_replace_callback('@/\*.*\*/@SsU', function($matches) {
+			return preg_replace("/[^\r\n]+/S", "", $matches[0]);
+		}, $txt);
 
 		$split = preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', $txt, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE);
 
@@ -352,7 +334,7 @@ HELP;
 	for ($i = 1; $i < $argc; $i++) {
 		$dirs[] = $argv[$i];
 	}
-} else { 
+} else {
 	$dirs[] = PHPDIR;
 }
 
