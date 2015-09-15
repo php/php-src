@@ -532,7 +532,8 @@ Other
   . Closure::call() method added (works only with userland classes).
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
-  . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
+  . define() now supports arrays as constant values, fixing an oversight where
+    define() did not support arrays yet const syntax did.
   . Added the comparison operator (<=>), aka the spaceship operator.
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
   . Added the yield from operator for delegating Generators like coroutines.
@@ -553,6 +554,11 @@ Other
     without SHM at all, using opcache.file_cache_only=1 (this may be useful for
     sharing hosting), and disable file cache consistency check, to speedup
     loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
+  . Added an experemental ability to move PHP code pages (PHP TEXT segment) into
+    HUGE pages. To enable it, PHP should be configured and built with
+    --enable-huge-code-pages, OS should be configured to provide huge pages.
+    It's possible to enable/disable this feature in php.ini through
+    opcache.huge_code_pages=0/1.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
