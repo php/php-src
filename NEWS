@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #70449 (PHP won't compile on 10.4 and 10.5 because of missing
     constants). (Bob)
 
+- Session:
+  . Fixed bug #70013 (Reference to $_SESSION is lost after a call to
+    session_regenerate_id()). (Yasuo)
+
 - Standard:
   . Implemented the RFC `Random Functions Throwing Exceptions in PHP 7`.
     (Sammy Kaye Powers, Anthony)
