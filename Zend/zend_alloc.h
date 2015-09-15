@@ -187,33 +187,9 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 #define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
-zend_always_inline static void * __zend_malloc(size_t len)
-{
-	void *tmp = malloc(len);
-	if (tmp) {
-		return tmp;
-	}
-	fprintf(stderr, "Out of memory\n");
-	exit(1);
-}
-
-zend_always_inline static void * __zend_calloc(size_t nmemb, size_t len)
-{
-	void *tmp = _safe_malloc(nmemb, len, 0);
-	memset(tmp, 0, nmemb * len);
-	return tmp;
-}
-
-zend_always_inline static void * __zend_realloc(void *p, size_t len)
-{
-	p = realloc(p, len);
-	if (p) {
-		return p;
-	}
-	fprintf(stderr, "Out of memory\n");
-	exit(1);
-}
-
+ZEND_API void * __zend_malloc(size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API void * __zend_calloc(size_t nmemb, size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))

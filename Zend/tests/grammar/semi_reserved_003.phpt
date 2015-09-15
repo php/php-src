@@ -69,6 +69,18 @@ class Obj
     var $catch = 'catch';
     var $die = 'die';
     var $self = 'self';
+    var $parent = 'parent';
+    var $isset = 'isset';
+    var $unset = 'unset';
+    var $__CLASS__ = '__CLASS__';
+    var $__TRAIT__ = '__TRAIT__';
+    var $__FUNCTION__ = '__FUNCTION__';
+    var $__METHOD__ = '__METHOD__';
+    var $__LINE__ = '__LINE__';
+    var $__FILE__ = '__FILE__';
+    var $__DIR__ = '__DIR__';
+    var $__NAMESPACE__ = '__NAMESPACE__';
+    var $__halt_compiler = '__halt_compiler';
 }
 
 $obj = new Obj;
@@ -137,6 +149,18 @@ echo $obj->as, PHP_EOL;
 echo $obj->catch, PHP_EOL;
 echo $obj->die, PHP_EOL;
 echo $obj->self, PHP_EOL;
+echo $obj->parent, PHP_EOL;
+echo $obj->isset, PHP_EOL;
+echo $obj->unset, PHP_EOL;
+echo $obj->__CLASS__, PHP_EOL;
+echo $obj->__TRAIT__, PHP_EOL;
+echo $obj->__FUNCTION__, PHP_EOL;
+echo $obj->__METHOD__, PHP_EOL;
+echo $obj->__LINE__, PHP_EOL;
+echo $obj->__FILE__, PHP_EOL;
+echo $obj->__DIR__, PHP_EOL;
+echo $obj->__NAMESPACE__, PHP_EOL;
+echo $obj->__halt_compiler, PHP_EOL;
 
 echo "\nDone\n";
 
@@ -206,5 +230,17 @@ as
 catch
 die
 self
+parent
+isset
+unset
+__CLASS__
+__TRAIT__
+__FUNCTION__
+__METHOD__
+__LINE__
+__FILE__
+__DIR__
+__NAMESPACE__
+__halt_compiler
 
 Done

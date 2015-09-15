@@ -58,7 +58,8 @@ only Oracle Database 9.2 client libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    PHP 7 Compatibility. This version is for PHP 7 only.
+This version is for PHP 7 only.
+Updated driver name format.    
   </notes>
  <contents>
   <dir name="/">

@@ -53,6 +53,7 @@ do_test('1.1', 'keep-alive');
 HTTP/1.0, default behaviour:
 GET / HTTP/1.0
 Host: 127.0.0.1:12342
+Connection: close
 
 HTTP/1.0, connection: close:
 GET / HTTP/1.0
@@ -78,4 +79,3 @@ HTTP/1.1, connection: keep-alive:
 GET / HTTP/1.1
 Host: 127.0.0.1:12342
 Connection: keep-alive
-

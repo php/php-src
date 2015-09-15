@@ -1,5 +1,62 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+17 Sep 2015, PHP 7.0.0 RC 3
+
+- Core:
+  . Fixed bug #70431 (Memory leak in php_ini.c). (Senthil, Laruence)
+  . Fixed bug #70478 (**= does no longer work). (Bob)
+
+- CLI server:
+  . Fixed bug #68291 (404 on urls with '+'). (cmb)
+
+- DOM:
+  . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
+    encoding). (cmb)
+
+- Intl:
+  . Fixed bug #70453 (IntlChar::foldCase() incorrect arguments and missing
+    constants). (cmb)
+  . Fixed bug #70454 (IntlChar::forDigit second parameter should be optional).
+    (cmb, colinodell)
+
+- Mysqlnd:
+  . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
+    a server). (Sergei Turchanov)
+
+- Opcache:
+  . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
+
+- OpenSSL
+  . Fixed bug #55259 (openssl extension does not get the DH parameters from
+    DH key resource). (Jakub Zelenka)
+  . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
+  . Fixed bug #60632 (openssl_seal fails with AES). (Jakub Zelenka)
+  . Implemented FR #70438 (Add IV parameter for openssl_seal and openssl_open)
+    (Jakub Zelenka)
+
+- Phpdbg:
+  . Fixed bug #70449 (PHP won't compile on 10.4 and 10.5 because of missing
+    constants). (Bob)
+
+- Session:
+  . Fixed bug #70013 (Reference to $_SESSION is lost after a call to
+    session_regenerate_id()). (Yasuo)
+
+- Standard:
+  . Implemented the RFC `Random Functions Throwing Exceptions in PHP 7`.
+    (Sammy Kaye Powers, Anthony)
+  . Fixed bug #70487 (pack('x') produces an error). (Nikita)
+
+- Streams:
+  . Fixed bug #70361 (HTTP stream wrapper doesn't close keep-alive connections).
+    (Niklas Keller)
+
+- XMLReader:
+  . Fixed bug #70309 (XmlReader read generates extra output). (Anatol)
+
+- Zip:
+  . Fixed bug #70322 (ZipArchive::close() doesn't indicate errors). (cmb)
+
 03 Sep 2015, PHP 7.0.0 RC 2
 
 - Core:
@@ -11,8 +68,8 @@ PHP                                                                        NEWS
     (marcio dot web2 at gmail dot com)
   . Fixed bug #70321 (Magic getter breaks reference to array property).
     (Laruence)
-  . Fixed bug #70187 (Notice: unserialize(): Unexpected end of serialized data)
-    (Dmitry)
+  . Fixed bug #70187 (Notice: unserialize(): Unexpected end of serialized
+    data). (Dmitry)
   . Fixed bug #70145 (From field incorrectly parsed from headers). (Anatol)
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
     building extensions). (Adam)
@@ -27,6 +84,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #70385 (Buffer over-read in exif_read_data with TIFF IFD tag byte
     value of 32 bytes). (Stas)
+
+- GMP:
+  . Fixed bug #70284 (Use after free vulnerability in unserialize() with GMP).
+    (stas)
 
 - hash:
   . Fixed bug #70312 (HAVAL gives wrong hashes in specific cases). (letsgolee
@@ -46,7 +107,7 @@ PHP                                                                        NEWS
     (Anatol Belski)
 
 - PDO:
-  - Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+  . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
 - PDO_OCI:
   . Fixed bug #70308 (PDO::ATTR_PREFETCH is ignored). (Chris Jones)

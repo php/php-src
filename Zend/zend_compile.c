@@ -319,7 +319,7 @@ void init_compiler(void) /* {{{ */
 	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures();
 	zend_init_rsrc_list();
-	zend_hash_init(&CG(filenames_table), 8, NULL, free_string_zval, 0);
+	zend_hash_init(&CG(filenames_table), 8, NULL, ZVAL_PTR_DTOR, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 }
@@ -337,17 +337,19 @@ void shutdown_compiler(void) /* {{{ */
 
 ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename) /* {{{ */
 {
-	zend_string *p;
+	zval *p, rv;
 
-	p = zend_hash_find_ptr(&CG(filenames_table), new_compiled_filename);
-	if (p != NULL) {
-		CG(compiled_filename) = p;
-		return p;
+	if ((p = zend_hash_find(&CG(filenames_table), new_compiled_filename))) {
+		ZEND_ASSERT(Z_TYPE_P(p) == IS_STRING);
+		CG(compiled_filename) = Z_STR_P(p);
+		return Z_STR_P(p);
 	}
-	p = zend_string_copy(new_compiled_filename);
-	zend_hash_update_ptr(&CG(filenames_table), new_compiled_filename, p);
-	CG(compiled_filename) = p;
-	return p;
+
+	ZVAL_STR_COPY(&rv, new_compiled_filename);
+	zend_hash_update(&CG(filenames_table), new_compiled_filename, &rv);
+
+	CG(compiled_filename) = new_compiled_filename;
+	return new_compiled_filename;
 }
 /* }}} */
 

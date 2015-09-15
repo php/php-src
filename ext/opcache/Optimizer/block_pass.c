@@ -1866,6 +1866,7 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 					case ZEND_ASSIGN_SUB:
 					case ZEND_ASSIGN_MUL:
 					case ZEND_ASSIGN_DIV:
+					case ZEND_ASSIGN_POW:
 					case ZEND_ASSIGN_MOD:
 					case ZEND_ASSIGN_SL:
 					case ZEND_ASSIGN_SR:

@@ -848,7 +848,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	zval retval;
 	int ret;
 
-	ZVAL_UNDEF(&retval);
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
 	collation->fci.fci.function_table = EG(function_table);
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
@@ -881,7 +880,7 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 		// (the result of a comparison, i.e. most likely -1, 0, or 1)
 		//I suppose we could accept any scalar return type, though.
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback (invalid return type).  Collation behaviour is undefined.");
-	}else{
+	} else {
 		ret = Z_LVAL(retval);
 	}
 

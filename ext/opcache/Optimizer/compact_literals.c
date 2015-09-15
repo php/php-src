@@ -263,6 +263,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_ASSIGN_SUB:
 				case ZEND_ASSIGN_MUL:
 				case ZEND_ASSIGN_DIV:
+				case ZEND_ASSIGN_POW:
 				case ZEND_ASSIGN_MOD:
 				case ZEND_ASSIGN_SL:
 				case ZEND_ASSIGN_SR:

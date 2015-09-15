@@ -168,9 +168,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
 			*is_temp = 1;
-			ALLOC_HASHTABLE(ht);
-			*ht = *Z_ARRVAL(retval);
-			efree_size(Z_ARR(retval), sizeof(zend_array));
+			ht = Z_ARR(retval);
 			return ht;
 		} else {
 			*is_temp = 0;
@@ -488,7 +486,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 /* }}} */
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
-	efree(Z_PTR_P(el));
+	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
 }
 /* }}} */
 
@@ -602,11 +600,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	retval = &EG(uninitialized_zval);
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
-		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+	if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
 		zval_ptr_dtor(&tmp_member);
-		if (Z_REFCOUNTED_P(retval)) Z_DELREF_P(retval);
 	}
+
 	return retval;
 }
 /* }}} */
@@ -703,7 +700,7 @@ write_std_property:
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
+	if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
 		zval_ptr_dtor(&tmp_member);
 	}
 }
@@ -935,7 +932,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_NULL)) {
+	if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
 		zval_ptr_dtor(&tmp_member);
 	}
 }
@@ -1507,7 +1504,7 @@ found:
 	}
 
 exit:
-	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
+	if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
 		zval_ptr_dtor(&tmp_member);
 	}
 	return result;
