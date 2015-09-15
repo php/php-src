@@ -311,11 +311,15 @@ static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* 
 
 
 #ifdef ZEND_VM_FP_GLOBAL_REG
+#pragma GCC diagnostic ignored "-Wvolatile-register-var"
 register zend_execute_data* volatile execute_data __asm__(ZEND_VM_FP_GLOBAL_REG);
+#pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
 #ifdef ZEND_VM_IP_GLOBAL_REG
+#pragma GCC diagnostic ignored "-Wvolatile-register-var"
 register const zend_op* volatile opline __asm__(ZEND_VM_IP_GLOBAL_REG);
+#pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
 #ifdef ZEND_VM_FP_GLOBAL_REG
