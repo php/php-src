@@ -44,11 +44,9 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 			p++;
 		} while (p != end);
 	}
-	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
-		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
-		Z_PTR_P(p) = NULL;
-		ZVAL_UNDEF(p);
-	}
+	GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
+	Z_PTR_P(p) = NULL;
+	ZVAL_UNDEF(p);
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object)
