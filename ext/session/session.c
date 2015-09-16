@@ -2102,6 +2102,9 @@ static PHP_FUNCTION(session_regenerate_id)
 		zend_string_release(data);
 	}
 
+	if (PS(use_cookies)) {
+		PS(send_cookie) = 1;
+	}
 	php_session_reset_id();
 
 	RETURN_TRUE;
