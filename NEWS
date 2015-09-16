@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.6.14
+?? ??? 2015, PHP 5.6.15
+
+01 Oct 2015, PHP 5.6.14
 
 - Core:
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
