@@ -1467,13 +1467,6 @@ void free_estring(char **str_p) /* {{{ */
 }
 /* }}} */
 
-void free_string_zval(zval *zv) /* {{{ */
-{
-	zend_string *str = Z_PTR_P(zv);
-	zend_string_release(str);
-}
-/* }}} */
-
 /*
  * Local variables:
  * tab-width: 4

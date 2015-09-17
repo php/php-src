@@ -21,6 +21,11 @@
 
 #include "phpdbg.h"
 
+/* Older versions of glibc <= 2.3.0 and <= OS X 10.5 do not have this constant defined */
+#ifndef AI_NUMERICSERV
+#define AI_NUMERICSERV 0
+#endif
+
 PHPDBG_API int phpdbg_consume_stdin_line(char *buf);
 
 PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo);

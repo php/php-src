@@ -4,14 +4,19 @@ Test error operation of random_bytes()
 <?php
 //-=-=-=-
 
-var_dump(random_bytes());
+try {
+    $bytes = random_bytes();
+} catch (TypeError $e) {
+    echo $e->getMessage().PHP_EOL;
+}
 
-var_dump(random_bytes(-1));
+try {
+    $bytes = random_bytes(0);
+} catch (Error $e) {
+    echo $e->getMessage().PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: random_bytes() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: random_bytes(): Length must be greater than 0 in %s on line %d
-bool(false)
+--EXPECT--
+random_bytes() expects exactly 1 parameter, 0 given
+Length must be greater than 0

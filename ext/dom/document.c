@@ -382,7 +382,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 int dom_document_standalone_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	int standalone;
+	zend_long standalone;
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -978,9 +978,9 @@ PHP_FUNCTION(dom_document_import_node)
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
 	int ret;
-	zend_long recursive = 0;
+	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|l", &id, dom_document_class_entry, &node, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &id, dom_document_class_entry, &node, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1728,9 +1728,14 @@ PHP_FUNCTION(dom_document_xinclude)
 		return;
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+		php_error_docref(NULL, E_WARNING, "Invalid flags");
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	err = xmlXIncludeProcessFlags(docp, flags);
+	err = xmlXIncludeProcessFlags(docp, (int)flags);
 
 	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
 	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document

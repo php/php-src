@@ -1,6 +1,6 @@
 ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
-ARG_ENABLE("opcache-file", "whether to enable file based caching (experimental)", "no");
+ARG_ENABLE("opcache-file", "whether to enable file based caching", "yes");
 
 var PHP_OPCACHE_PGO = false;
 

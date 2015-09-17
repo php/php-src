@@ -4,19 +4,26 @@ Test error operation of random_int()
 <?php
 //-=-=-=-
 
-var_dump(random_int());
+try {
+    $randomInt = random_int();
+} catch (TypeError $e) {
+    echo $e->getMessage().PHP_EOL;
+}
 
-var_dump(random_int(10));
+try {
+    $randomInt = random_int(42);
+} catch (TypeError $e) {
+    echo $e->getMessage().PHP_EOL;
+}
 
-var_dump(random_int(10, 0));
+try {
+    $randomInt = random_int(42,0);
+} catch (Error $e) {
+    echo $e->getMessage().PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: random_int() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: random_int() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: random_int(): Minimum value must be less than the maximum value in %s on line %d
-bool(false)
+--EXPECT--
+random_int() expects exactly 2 parameters, 0 given
+random_int() expects exactly 2 parameters, 1 given
+Minimum value must be less than or equal to the maximum value

@@ -121,7 +121,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
  * Name passed to Oracle for tracing.  Note some DB views only show
  * the first nine characters of the driver name.
  */
-#define PHP_OCI8_DRIVER_NAME "PHP OCI8 " PHP_OCI8_VERSION
+#define PHP_OCI8_DRIVER_NAME     "PHP OCI8 : " PHP_OCI8_VERSION
 
 /* }}} */
 
