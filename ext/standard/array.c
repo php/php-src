@@ -3308,6 +3308,9 @@ PHP_FUNCTION(array_keys)
 		}
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
+		if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {
+			return;
+		}
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			/* Go through input array and add keys to the return array */
@@ -3343,6 +3346,11 @@ PHP_FUNCTION(array_values)
 
 	/* Initialize return array */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
+
+	if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {
+		return;
+	}
+
 	zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 
 	/* Go through input array and add values to the return array */
