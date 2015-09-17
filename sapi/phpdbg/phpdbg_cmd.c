@@ -434,8 +434,9 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
 
-	if (!next)
+	if (!next) {
 		return;
+	}
 
 	*(next) = *(param);
 
@@ -454,6 +455,16 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 	stack->len++;
 } /* }}} */
 
+/* {{{ */
+PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param) {
+	phpdbg_param_t *stack = calloc(1, sizeof(phpdbg_param_t));
+
+	stack->type = STACK_PARAM;
+	stack->next = param->next;
+	param->next = stack;
+	stack->top = param->top;
+} /* }}} */
+
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack) {
 	if (command) {
 		char buffer[128] = {0,};
@@ -466,7 +477,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 
 		/* check for arg spec */
 		if (!(arg) || !(*arg)) {
-			if (!top) {
+			if (!top || top->type == STACK_PARAM) {
 				return SUCCESS;
 			}
 
@@ -506,6 +517,10 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 }
 
 		while (arg && *arg) {
+			if (top && top->type == STACK_PARAM) {
+				break;
+			}
+
 			current++;
 
 			switch (*arg) {
@@ -528,9 +543,11 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 				case '*': { /* do nothing */ } break;
 			}
 
-			if (top ) {
+			if (top) {
 				top = top->next;
-			} else break;
+			} else {
+				break;
+			}
 
 			received++;
 			arg++;
@@ -644,22 +661,9 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	return NULL;
 } /* }}} */
 
-/* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
-	phpdbg_param_t *top = NULL;
+static int phpdbg_internal_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
 	const phpdbg_command_t *handler = NULL;
-
-	if (stack->type != STACK_PARAM) {
-		phpdbg_error("command", "type=\"nostack\"", "The passed argument was not a stack !");
-		return FAILURE;
-	}
-
-	if (!stack->len) {
-		phpdbg_error("command", "type=\"emptystack\"", "The stack contains nothing !");
-		return FAILURE;
-	}
-
-	top = (phpdbg_param_t *) stack->next;
+	phpdbg_param_t *top = (phpdbg_param_t *) stack->next;
 
 	switch (top->type) {
 		case EVAL_PARAM:
@@ -705,6 +709,31 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 			phpdbg_error("command", "type=\"invalidcommand\"", "The first parameter makes no sense !");
 			return FAILURE;
 	}
+
+	return SUCCESS;
+} /* }}} */
+
+/* {{{ */
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
+	phpdbg_param_t *top = stack;
+
+	if (stack->type != STACK_PARAM) {
+		phpdbg_error("command", "type=\"nostack\"", "The passed argument was not a stack !");
+		return FAILURE;
+	}
+
+	if (!stack->len) {
+		phpdbg_error("command", "type=\"emptystack\"", "The stack contains nothing !");
+		return FAILURE;
+	}
+
+	do {
+		if (top->type == STACK_PARAM) {
+			if (phpdbg_internal_stack_execute(top, allow_async_unsafe) == FAILURE) {
+				return FAILURE;
+			}
+		}
+	} while ((top = top->next));
 
 	return SUCCESS;
 } /* }}} */

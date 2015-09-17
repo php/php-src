@@ -63,7 +63,7 @@ ID          [^ \r\n\t:#\000]+
 GENERIC_ID  ([^ \r\n\t:#\000]|":\\")+
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
-INPUT       [^\n\000]+
+INPUT       [^\n\000#]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
@@ -84,12 +84,19 @@ INPUT       [^\n\000]+
 	return T_IF;
 }
 
-<NORMAL>"#" {
+<NORMAL>"#"/{DIGITS} {
 	return T_POUND;
 }
+
+<*>"#" {
+	YYSETCONDITION(INITIAL);
+	return T_SEPARATOR;
+}
+
 <NORMAL>"::" {
 	return T_DCOLON;
 }
+
 <NORMAL>":"/[^\\] {
 	return T_COLON;
 }
@@ -157,25 +164,27 @@ INPUT       [^\n\000]+
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
+
 <INITIAL>{T_SHELL}{WS} {
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
+
 <INITIAL>({T_RUN}|{T_RUN_SHORT}){WS} {
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
 }
 
-<PRE_RAW>. {
+<PRE_RAW>[^ ] {
 	YYSETCONDITION(RAW);
 
 	YYCURSOR = LEX(text);
 	goto restart;
 }
 
-<INITIAL>. {
+<INITIAL>[^ ] {
 	YYSETCONDITION(NORMAL);
 
 	YYCURSOR = LEX(text);
