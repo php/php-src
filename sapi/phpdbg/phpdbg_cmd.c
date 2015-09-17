@@ -729,8 +729,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 
 	do {
 		if (top->type == STACK_PARAM) {
-			if (phpdbg_internal_stack_execute(top, allow_async_unsafe) == FAILURE) {
-				return FAILURE;
+			int result;
+			if ((result = phpdbg_internal_stack_execute(top, allow_async_unsafe)) != SUCCESS) {
+				return result;
 			}
 		}
 	} while ((top = top->next));

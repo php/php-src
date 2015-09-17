@@ -37,6 +37,25 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 	LEX(len) = strlen(input);
 }
 
+static int unescape_string(char *s) {
+	switch (*s) {
+		case '\'':
+		case '\"': {
+			char start = *s;
+			size_t off = 1;
+			do {
+				if (s[off] == '\\') {
+					off++;
+				}
+				*s = s[off];
+			} while ((++s)[off] != start);
+			return off + 1;
+		}
+	}
+
+	return 0;
+}
+
 int phpdbg_lex (phpdbg_param_t* yylval) {
 
 restart:
@@ -60,10 +79,10 @@ T_RUN_SHORT "r"
 WS          [ \r\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
-GENERIC_ID  ([^ \r\n\t:#\000]|":\\")+
+GENERIC_ID  ([^ \r\n\t:#\000"']|":\\")+|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+[']
 ADDR        [0][x][a-fA-F0-9]+
 OPCODE      (ZEND_|zend_)([A-Za-z])+
-INPUT       [^\n\000#]+
+INPUT       ([^\n\000#"']|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+['])+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
@@ -141,14 +160,14 @@ INPUT       [^\n\000#]+
 
 <NORMAL>{GENERIC_ID} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
 }
 
 <RAW>{INPUT} {
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_INPUT;
 }

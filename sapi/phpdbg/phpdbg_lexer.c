@@ -39,13 +39,32 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 	LEX(len) = strlen(input);
 }
 
+static int unescape_string(char *s) {
+	switch (*s) {
+		case '\'':
+		case '\"': {
+			char start = *s;
+			size_t off = 1;
+			do {
+				if (s[off] == '\\') {
+					off++;
+				}
+				*s = s[off];
+			} while ((++s)[off] != start);
+			return off + 1;
+		}
+	}
+
+	return 0;
+}
+
 int phpdbg_lex (phpdbg_param_t* yylval) {
 
 restart:
 	LEX(text) = YYCURSOR;
 
 
-#line 49 "sapi/phpdbg/phpdbg_lexer.c"
+#line 68 "sapi/phpdbg/phpdbg_lexer.c"
 {
 	YYCTYPE yych;
 	unsigned int yyaccept = 0;
@@ -152,14 +171,14 @@ yy2:
 yy3:
 		YYDEBUG(3, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 187 "sapi/phpdbg/phpdbg_lexer.l"
+#line 206 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(NORMAL);
 
 	YYCURSOR = LEX(text);
 	goto restart;
 }
-#line 163 "sapi/phpdbg/phpdbg_lexer.c"
+#line 182 "sapi/phpdbg/phpdbg_lexer.c"
 yy4:
 		YYDEBUG(4, *YYCURSOR);
 		++YYCURSOR;
@@ -171,13 +190,13 @@ yy4:
 		}
 		YYDEBUG(6, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 156 "sapi/phpdbg/phpdbg_lexer.l"
+#line 175 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	/* ignore whitespace */
 
 	goto restart;
 }
-#line 181 "sapi/phpdbg/phpdbg_lexer.c"
+#line 200 "sapi/phpdbg/phpdbg_lexer.c"
 yy7:
 		YYDEBUG(7, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -265,13 +284,13 @@ yy17:
 		}
 		YYDEBUG(19, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 174 "sapi/phpdbg/phpdbg_lexer.l"
+#line 193 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
 }
-#line 275 "sapi/phpdbg/phpdbg_lexer.c"
+#line 294 "sapi/phpdbg/phpdbg_lexer.c"
 yy20:
 		YYDEBUG(20, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -295,13 +314,13 @@ yy21:
 		}
 		YYDEBUG(23, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 168 "sapi/phpdbg/phpdbg_lexer.l"
+#line 187 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
-#line 305 "sapi/phpdbg/phpdbg_lexer.c"
+#line 324 "sapi/phpdbg/phpdbg_lexer.c"
 yy24:
 		YYDEBUG(24, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -325,141 +344,130 @@ yy25:
 		}
 		YYDEBUG(27, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 162 "sapi/phpdbg/phpdbg_lexer.l"
+#line 181 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
-#line 335 "sapi/phpdbg/phpdbg_lexer.c"
+#line 354 "sapi/phpdbg/phpdbg_lexer.c"
 	}
 /* *********************************** */
 yyc_NORMAL:
 	{
 		static const unsigned char yybm[] = {
-			  0,  16,  16,  16,  16,  16,  16,  16, 
-			 16,   8,   0,  16,  16,   8,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			  8,  16,  16,   0,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  48,  16, 
-			176, 176, 176, 176, 176, 176, 176, 176, 
-			176, 176,   0,  16,  16,  16,  16,  16, 
-			 16, 208, 208, 208, 208, 208, 208,  80, 
-			 80,  80,  80,  80,  80,  80,  80,  80, 
-			 80,  80,  80,  80,  80,  80,  80,  80, 
-			 80,  80,  80,  16,  16,  16,  16,  16, 
-			 16, 208, 208, 208, 208, 208, 208,  80, 
-			 80,  80,  80,  80,  80,  80,  80,  80, 
-			 80,  80,  80,  80,  80,  80,  80,  80, 
-			 80,  80,  80,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
-			 16,  16,  16,  16,  16,  16,  16,  16, 
+			/* table 1 .. 8: 0 */
+			  0, 242, 242, 242, 242, 242, 242, 242, 
+			242, 160,   0, 242, 242, 160, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			160, 242,  50, 160, 242, 242, 242, 194, 
+			242, 242, 242, 242, 242, 242, 243, 242, 
+			251, 251, 251, 251, 251, 251, 251, 251, 
+			251, 251, 160, 242, 242, 242, 242, 242, 
+			242, 254, 254, 254, 254, 254, 254, 246, 
+			246, 246, 246, 246, 246, 246, 246, 246, 
+			246, 246, 246, 246, 246, 246, 246, 246, 
+			246, 246, 246, 242,   2, 242, 242, 242, 
+			242, 254, 254, 254, 254, 254, 254, 246, 
+			246, 246, 246, 246, 246, 246, 246, 246, 
+			246, 246, 246, 246, 246, 246, 246, 246, 
+			246, 246, 246, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			242, 242, 242, 242, 242, 242, 242, 242, 
+			/* table 9 .. 10: 256 */
+			  0, 128, 128, 128, 128, 128, 128, 128, 
+			128,  64,   0, 128, 128,  64, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			 64, 128,   0,   0, 128, 128, 128,   0, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128,   0, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
+			128, 128, 128, 128, 128, 128, 128, 128, 
 		};
 		YYDEBUG(28, *YYCURSOR);
 		YYFILL(11);
 		yych = *YYCURSOR;
-		if (yybm[0+yych] & 8) {
+		if (yybm[256+yych] & 64) {
 			goto yy30;
 		}
-		if (yych <= 'N') {
-			if (yych <= '0') {
-				if (yych <= '#') {
-					if (yych <= '\t') {
-						if (yych <= 0x00) goto yy35;
-						goto yy41;
-					} else {
-						if (yych <= '\n') goto yy35;
-						if (yych <= '"') goto yy41;
-						goto yy33;
-					}
-				} else {
-					if (yych <= '-') {
-						if (yych <= ',') goto yy41;
-						goto yy37;
-					} else {
-						if (yych <= '.') goto yy43;
-						if (yych <= '/') goto yy41;
-						goto yy46;
-					}
-				}
-			} else {
-				if (yych <= 'E') {
-					if (yych <= ':') {
-						if (yych <= '9') goto yy43;
-						goto yy40;
-					} else {
-						if (yych <= 'C') goto yy41;
-						if (yych <= 'D') goto yy47;
-						goto yy48;
-					}
-				} else {
-					if (yych <= 'H') {
-						if (yych <= 'F') goto yy49;
-						goto yy41;
-					} else {
-						if (yych <= 'I') goto yy39;
-						if (yych <= 'M') goto yy41;
-						goto yy50;
-					}
-				}
-			}
-		} else {
-			if (yych <= 'f') {
-				if (yych <= 'Y') {
-					if (yych <= 'S') {
-						if (yych <= 'O') goto yy51;
-						goto yy41;
-					} else {
-						if (yych <= 'T') goto yy52;
-						if (yych <= 'X') goto yy41;
-						goto yy53;
-					}
-				} else {
-					if (yych <= 'c') {
-						if (yych <= 'Z') goto yy54;
-						goto yy41;
-					} else {
-						if (yych <= 'd') goto yy47;
-						if (yych <= 'e') goto yy48;
-						goto yy49;
-					}
-				}
-			} else {
-				if (yych <= 'o') {
-					if (yych <= 'i') {
-						if (yych <= 'h') goto yy41;
-						goto yy39;
-					} else {
-						if (yych <= 'm') goto yy41;
-						if (yych <= 'n') goto yy50;
-						goto yy51;
-					}
-				} else {
-					if (yych <= 'x') {
-						if (yych == 't') goto yy52;
-						goto yy41;
-					} else {
-						if (yych <= 'y') goto yy53;
-						if (yych <= 'z') goto yy55;
-						goto yy41;
-					}
-				}
-			}
+		YYDEBUG(-1, yych);
+		switch (yych) {
+		case 0x00:
+		case '\n':	goto yy35;
+		case '"':	goto yy43;
+		case '#':	goto yy33;
+		case '\'':	goto yy45;
+		case '-':	goto yy37;
+		case '.':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':	goto yy46;
+		case '0':	goto yy49;
+		case ':':	goto yy40;
+		case 'D':
+		case 'd':	goto yy50;
+		case 'E':
+		case 'e':	goto yy51;
+		case 'F':
+		case 'f':	goto yy52;
+		case 'I':
+		case 'i':	goto yy39;
+		case 'N':
+		case 'n':	goto yy53;
+		case 'O':
+		case 'o':	goto yy54;
+		case 'T':
+		case 't':	goto yy55;
+		case 'Y':
+		case 'y':	goto yy56;
+		case 'Z':	goto yy57;
+		case 'z':	goto yy58;
+		default:	goto yy41;
 		}
 yy30:
 		YYDEBUG(30, *YYCURSOR);
@@ -467,18 +475,18 @@ yy30:
 		YYFILL(1);
 		yych = *YYCURSOR;
 		YYDEBUG(31, *YYCURSOR);
-		if (yybm[0+yych] & 8) {
+		if (yybm[256+yych] & 64) {
 			goto yy30;
 		}
 		YYDEBUG(32, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 156 "sapi/phpdbg/phpdbg_lexer.l"
+#line 175 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	/* ignore whitespace */
 
 	goto restart;
 }
-#line 482 "sapi/phpdbg/phpdbg_lexer.c"
+#line 490 "sapi/phpdbg/phpdbg_lexer.c"
 yy33:
 		YYDEBUG(33, *YYCURSOR);
 		YYCTXMARKER = YYCURSOR + 1;
@@ -486,65 +494,65 @@ yy33:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '.') {
 			if (yych <= ',') goto yy34;
-			if (yych <= '-') goto yy122;
-			goto yy123;
+			if (yych <= '-') goto yy147;
+			goto yy148;
 		} else {
 			if (yych <= '/') goto yy34;
-			if (yych <= '9') goto yy123;
+			if (yych <= '9') goto yy148;
 		}
 yy34:
 		YYDEBUG(34, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 91 "sapi/phpdbg/phpdbg_lexer.l"
+#line 110 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(INITIAL);
 	return T_SEPARATOR;
 }
-#line 504 "sapi/phpdbg/phpdbg_lexer.c"
+#line 512 "sapi/phpdbg/phpdbg_lexer.c"
 yy35:
 		YYDEBUG(35, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(36, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 70 "sapi/phpdbg/phpdbg_lexer.l"
+#line 89 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	return 0;
 }
-#line 514 "sapi/phpdbg/phpdbg_lexer.c"
+#line 522 "sapi/phpdbg/phpdbg_lexer.c"
 yy37:
 		YYDEBUG(37, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy43;
+		if (yybm[0+yych] & 1) {
+			goto yy46;
 		}
-		if (yych == 'r') goto yy112;
+		if (yych == 'r') goto yy137;
 		goto yy42;
 yy38:
 		YYDEBUG(38, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 142 "sapi/phpdbg/phpdbg_lexer.l"
+#line 161 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
 }
-#line 534 "sapi/phpdbg/phpdbg_lexer.c"
+#line 542 "sapi/phpdbg/phpdbg_lexer.c"
 yy39:
 		YYDEBUG(39, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'F') goto yy108;
-		if (yych == 'f') goto yy108;
+		if (yych == 'F') goto yy133;
+		if (yych == 'f') goto yy133;
 		goto yy42;
 yy40:
 		YYDEBUG(40, *YYCURSOR);
 		YYCTXMARKER = YYCURSOR + 1;
 		yych = *++YYCURSOR;
-		if (yych == ':') goto yy106;
-		if (yych == '\\') goto yy60;
-		goto yy104;
+		if (yych == ':') goto yy131;
+		if (yych == '\\') goto yy67;
+		goto yy129;
 yy41:
 		YYDEBUG(41, *YYCURSOR);
 		yyaccept = 1;
@@ -553,157 +561,22 @@ yy41:
 		yych = *YYCURSOR;
 yy42:
 		YYDEBUG(42, *YYCURSOR);
-		if (yybm[0+yych] & 16) {
+		if (yybm[256+yych] & 128) {
 			goto yy41;
 		}
-		if (yych <= '9') goto yy38;
-		goto yy57;
+		if (yych == '"') goto yy61;
+		if (yych <= '#') goto yy38;
+		if (yych <= '9') goto yy61;
+		goto yy60;
 yy43:
 		YYDEBUG(43, *YYCURSOR);
-		yyaccept = 2;
-		YYMARKER = ++YYCURSOR;
-		YYFILL(3);
-		yych = *YYCURSOR;
-		YYDEBUG(44, *YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy43;
-		}
-		if (yych <= 0x1F) {
-			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy45;
-				if (yych <= 0x08) goto yy41;
-			} else {
-				if (yych != '\r') goto yy41;
-			}
-		} else {
-			if (yych <= '#') {
-				if (yych <= ' ') goto yy45;
-				if (yych <= '"') goto yy41;
-			} else {
-				if (yych == ':') goto yy57;
-				goto yy41;
-			}
-		}
-yy45:
-		YYDEBUG(45, *YYCURSOR);
-		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 123 "sapi/phpdbg/phpdbg_lexer.l"
-		{
-	phpdbg_init_param(yylval, NUMERIC_PARAM);
-	yylval->num = atoi(yytext);
-	return T_DIGITS;
-}
-#line 597 "sapi/phpdbg/phpdbg_lexer.c"
-yy46:
-		YYDEBUG(46, *YYCURSOR);
-		yyaccept = 2;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy43;
-		}
-		if (yych <= 0x1F) {
-			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy45;
-				if (yych <= 0x08) goto yy42;
-				goto yy45;
-			} else {
-				if (yych == '\r') goto yy45;
-				goto yy42;
-			}
-		} else {
-			if (yych <= '#') {
-				if (yych <= ' ') goto yy45;
-				if (yych <= '"') goto yy42;
-				goto yy45;
-			} else {
-				if (yych == 'x') goto yy100;
-				goto yy42;
-			}
-		}
-yy47:
-		YYDEBUG(47, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'I') goto yy94;
-		if (yych == 'i') goto yy94;
-		goto yy42;
-yy48:
-		YYDEBUG(48, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'N') goto yy89;
-		if (yych == 'n') goto yy89;
-		goto yy42;
-yy49:
-		YYDEBUG(49, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'A') goto yy86;
-		if (yych == 'a') goto yy86;
-		goto yy42;
-yy50:
-		YYDEBUG(50, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'O') goto yy82;
-		if (yych == 'o') goto yy82;
-		goto yy42;
-yy51:
-		YYDEBUG(51, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= 'N') {
-			if (yych == 'F') goto yy81;
-			if (yych <= 'M') goto yy42;
-			goto yy75;
-		} else {
-			if (yych <= 'f') {
-				if (yych <= 'e') goto yy42;
-				goto yy81;
-			} else {
-				if (yych == 'n') goto yy75;
-				goto yy42;
-			}
-		}
-yy52:
-		YYDEBUG(52, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'R') goto yy79;
-		if (yych == 'r') goto yy79;
-		goto yy42;
-yy53:
-		YYDEBUG(53, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy74;
-		if (yych == 'e') goto yy74;
-		goto yy42;
-yy54:
-		YYDEBUG(54, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy71;
-		goto yy42;
-yy55:
-		YYDEBUG(55, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych != 'e') goto yy42;
-		YYDEBUG(56, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'n') goto yy65;
-		goto yy42;
-yy57:
-		YYDEBUG(57, *YYCURSOR);
 		yych = *++YYCURSOR;
-		if (yych == '/') goto yy59;
-		if (yych == '\\') goto yy60;
-yy58:
-		YYDEBUG(58, *YYCURSOR);
+		if (yych == '"') goto yy61;
+		goto yy121;
+yy44:
+		YYDEBUG(44, *YYCURSOR);
 		YYCURSOR = YYMARKER;
-		if (yyaccept <= 2) {
+		if (yyaccept <= 3) {
 			if (yyaccept <= 1) {
 				if (yyaccept <= 0) {
 					goto yy34;
@@ -711,254 +584,397 @@ yy58:
 					goto yy38;
 				}
 			} else {
-				goto yy45;
+				if (yyaccept <= 2) {
+					goto yy48;
+				} else {
+					goto yy75;
+				}
 			}
 		} else {
-			if (yyaccept <= 4) {
-				if (yyaccept <= 3) {
-					goto yy70;
+			if (yyaccept <= 5) {
+				if (yyaccept <= 4) {
+					goto yy108;
 				} else {
-					goto yy103;
+					goto yy66;
 				}
 			} else {
-				goto yy118;
+				goto yy143;
 			}
 		}
-yy59:
-		YYDEBUG(59, *YYCURSOR);
+yy45:
+		YYDEBUG(45, *YYCURSOR);
 		yych = *++YYCURSOR;
-		if (yych == '/') goto yy63;
-		goto yy58;
-yy60:
-		YYDEBUG(60, *YYCURSOR);
-		yyaccept = 1;
+		if (yych == '\'') goto yy61;
+		goto yy110;
+yy46:
+		YYDEBUG(46, *YYCURSOR);
+		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
-		YYFILL(1);
+		YYFILL(3);
 		yych = *YYCURSOR;
-		YYDEBUG(61, *YYCURSOR);
+		YYDEBUG(47, *YYCURSOR);
+		if (yybm[0+yych] & 1) {
+			goto yy46;
+		}
+		if (yych <= ' ') {
+			if (yych <= '\n') {
+				if (yych <= 0x00) goto yy48;
+				if (yych <= 0x08) goto yy41;
+			} else {
+				if (yych == '\r') goto yy48;
+				if (yych <= 0x1F) goto yy41;
+			}
+		} else {
+			if (yych <= '&') {
+				if (yych <= '!') goto yy41;
+				if (yych <= '"') goto yy61;
+				if (yych >= '$') goto yy41;
+			} else {
+				if (yych <= '\'') goto yy61;
+				if (yych == ':') goto yy60;
+				goto yy41;
+			}
+		}
+yy48:
+		YYDEBUG(48, *YYCURSOR);
+		yyleng = (size_t) YYCURSOR - (size_t) yytext;
+#line 142 "sapi/phpdbg/phpdbg_lexer.l"
+		{
+	phpdbg_init_param(yylval, NUMERIC_PARAM);
+	yylval->num = atoi(yytext);
+	return T_DIGITS;
+}
+#line 648 "sapi/phpdbg/phpdbg_lexer.c"
+yy49:
+		YYDEBUG(49, *YYCURSOR);
+		yyaccept = 2;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yybm[0+yych] & 1) {
+			goto yy46;
+		}
 		if (yych <= 0x1F) {
 			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy38;
-				if (yych <= 0x08) goto yy60;
-				goto yy38;
+				if (yych <= 0x00) goto yy48;
+				if (yych <= 0x08) goto yy42;
+				goto yy48;
 			} else {
-				if (yych == '\r') goto yy38;
-				goto yy60;
+				if (yych == '\r') goto yy48;
+				goto yy42;
 			}
 		} else {
 			if (yych <= '#') {
-				if (yych <= ' ') goto yy38;
-				if (yych <= '"') goto yy60;
-				goto yy38;
+				if (yych <= ' ') goto yy48;
+				if (yych <= '"') goto yy42;
+				goto yy48;
 			} else {
-				if (yych != ':') goto yy60;
+				if (yych == 'x') goto yy105;
+				goto yy42;
 			}
 		}
-		YYDEBUG(62, *YYCURSOR);
+yy50:
+		YYDEBUG(50, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'I') goto yy99;
+		if (yych == 'i') goto yy99;
+		goto yy42;
+yy51:
+		YYDEBUG(51, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'N') goto yy94;
+		if (yych == 'n') goto yy94;
+		goto yy42;
+yy52:
+		YYDEBUG(52, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'A') goto yy91;
+		if (yych == 'a') goto yy91;
+		goto yy42;
+yy53:
+		YYDEBUG(53, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'O') goto yy87;
+		if (yych == 'o') goto yy87;
+		goto yy42;
+yy54:
+		YYDEBUG(54, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 'N') {
+			if (yych == 'F') goto yy86;
+			if (yych <= 'M') goto yy42;
+			goto yy80;
+		} else {
+			if (yych <= 'f') {
+				if (yych <= 'e') goto yy42;
+				goto yy86;
+			} else {
+				if (yych == 'n') goto yy80;
+				goto yy42;
+			}
+		}
+yy55:
+		YYDEBUG(55, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'R') goto yy84;
+		if (yych == 'r') goto yy84;
+		goto yy42;
+yy56:
+		YYDEBUG(56, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'E') goto yy79;
+		if (yych == 'e') goto yy79;
+		goto yy42;
+yy57:
+		YYDEBUG(57, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'E') goto yy76;
+		goto yy42;
+yy58:
+		YYDEBUG(58, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych != 'e') goto yy42;
+		YYDEBUG(59, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'n') goto yy70;
+		goto yy42;
+yy60:
+		YYDEBUG(60, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych == '/') goto yy64;
+		if (yych == '\\') goto yy67;
+		goto yy44;
+yy61:
+		YYDEBUG(61, *YYCURSOR);
 		++YYCURSOR;
-		YYFILL(1);
+		YYFILL(3);
 		yych = *YYCURSOR;
-		if (yych == '\\') goto yy60;
-		goto yy58;
+yy62:
+		YYDEBUG(62, *YYCURSOR);
+		if (yybm[0+yych] & 2) {
+			goto yy61;
+		}
+		if (yych <= '9') goto yy44;
 yy63:
 		YYDEBUG(63, *YYCURSOR);
-		++YYCURSOR;
+		yych = *++YYCURSOR;
+		if (yych != '/') goto yy44;
+yy64:
 		YYDEBUG(64, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych != '/') goto yy44;
+		YYDEBUG(65, *YYCURSOR);
+		++YYCURSOR;
+yy66:
+		YYDEBUG(66, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 104 "sapi/phpdbg/phpdbg_lexer.l"
+#line 123 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_PROTO;
 }
-#line 776 "sapi/phpdbg/phpdbg_lexer.c"
-yy65:
-		YYDEBUG(65, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych != 'd') goto yy42;
-		YYDEBUG(66, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych != '_') goto yy42;
+#line 787 "sapi/phpdbg/phpdbg_lexer.c"
 yy67:
 		YYDEBUG(67, *YYCURSOR);
 		yyaccept = 1;
+		YYMARKER = ++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		YYDEBUG(68, *YYCURSOR);
+		if (yych <= ' ') {
+			if (yych <= '\n') {
+				if (yych <= 0x00) goto yy38;
+				if (yych <= 0x08) goto yy67;
+				goto yy38;
+			} else {
+				if (yych == '\r') goto yy38;
+				if (yych <= 0x1F) goto yy67;
+				goto yy38;
+			}
+		} else {
+			if (yych <= '&') {
+				if (yych <= '!') goto yy67;
+				if (yych <= '#') goto yy38;
+				goto yy67;
+			} else {
+				if (yych <= '\'') goto yy38;
+				if (yych != ':') goto yy67;
+			}
+		}
+		YYDEBUG(69, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yych == '\\') goto yy67;
+		goto yy44;
+yy70:
+		YYDEBUG(70, *YYCURSOR);
+		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy68;
+		if (yych != 'd') goto yy42;
+		YYDEBUG(71, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych != '_') goto yy42;
+yy72:
+		YYDEBUG(72, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yybm[0+yych] & 4) {
+			goto yy73;
 		}
 		goto yy42;
-yy68:
-		YYDEBUG(68, *YYCURSOR);
+yy73:
+		YYDEBUG(73, *YYCURSOR);
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(3);
 		yych = *YYCURSOR;
-		YYDEBUG(69, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy68;
+		YYDEBUG(74, *YYCURSOR);
+		if (yybm[0+yych] & 4) {
+			goto yy73;
 		}
-		if (yych <= 0x1F) {
+		if (yych <= ' ') {
 			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy70;
+				if (yych <= 0x00) goto yy75;
 				if (yych <= 0x08) goto yy41;
 			} else {
-				if (yych != '\r') goto yy41;
+				if (yych == '\r') goto yy75;
+				if (yych <= 0x1F) goto yy41;
 			}
 		} else {
-			if (yych <= '#') {
-				if (yych <= ' ') goto yy70;
-				if (yych <= '"') goto yy41;
+			if (yych <= '&') {
+				if (yych <= '!') goto yy41;
+				if (yych <= '"') goto yy61;
+				if (yych >= '$') goto yy41;
 			} else {
-				if (yych == ':') goto yy57;
+				if (yych <= '\'') goto yy61;
+				if (yych == ':') goto yy60;
 				goto yy41;
 			}
 		}
-yy70:
-		YYDEBUG(70, *YYCURSOR);
+yy75:
+		YYDEBUG(75, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 135 "sapi/phpdbg/phpdbg_lexer.l"
+#line 154 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, OP_PARAM);
 	yylval->str = estrndup(yytext, yyleng);
 	yylval->len = yyleng;
 	return T_OPCODE;
 }
-#line 830 "sapi/phpdbg/phpdbg_lexer.c"
-yy71:
-		YYDEBUG(71, *YYCURSOR);
+#line 877 "sapi/phpdbg/phpdbg_lexer.c"
+yy76:
+		YYDEBUG(76, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych != 'N') goto yy42;
-		YYDEBUG(72, *YYCURSOR);
+		YYDEBUG(77, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych != 'D') goto yy42;
-		YYDEBUG(73, *YYCURSOR);
+		YYDEBUG(78, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == '_') goto yy67;
+		if (yych == '_') goto yy72;
 		goto yy42;
-yy74:
-		YYDEBUG(74, *YYCURSOR);
+yy79:
+		YYDEBUG(79, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'S') goto yy75;
+		if (yych == 'S') goto yy80;
 		if (yych != 's') goto yy42;
-yy75:
-		YYDEBUG(75, *YYCURSOR);
+yy80:
+		YYDEBUG(80, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '\f') {
 			if (yych != '\t') goto yy42;
 		} else {
-			if (yych <= '\r') goto yy76;
+			if (yych <= '\r') goto yy81;
 			if (yych != ' ') goto yy42;
 		}
-yy76:
-		YYDEBUG(76, *YYCURSOR);
+yy81:
+		YYDEBUG(81, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(77, *YYCURSOR);
+		YYDEBUG(82, *YYCURSOR);
 		if (yych <= '\f') {
-			if (yych == '\t') goto yy76;
+			if (yych == '\t') goto yy81;
 		} else {
-			if (yych <= '\r') goto yy76;
-			if (yych == ' ') goto yy76;
+			if (yych <= '\r') goto yy81;
+			if (yych == ' ') goto yy81;
 		}
-		YYDEBUG(78, *YYCURSOR);
+		YYDEBUG(83, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 111 "sapi/phpdbg/phpdbg_lexer.l"
+#line 130 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 1;
 	return T_TRUTHY;
 }
-#line 881 "sapi/phpdbg/phpdbg_lexer.c"
-yy79:
-		YYDEBUG(79, *YYCURSOR);
+#line 928 "sapi/phpdbg/phpdbg_lexer.c"
+yy84:
+		YYDEBUG(84, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'U') goto yy80;
+		if (yych == 'U') goto yy85;
 		if (yych != 'u') goto yy42;
-yy80:
-		YYDEBUG(80, *YYCURSOR);
+yy85:
+		YYDEBUG(85, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy75;
-		if (yych == 'e') goto yy75;
+		if (yych == 'E') goto yy80;
+		if (yych == 'e') goto yy80;
 		goto yy42;
-yy81:
-		YYDEBUG(81, *YYCURSOR);
+yy86:
+		YYDEBUG(86, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'F') goto yy82;
+		if (yych == 'F') goto yy87;
 		if (yych != 'f') goto yy42;
-yy82:
-		YYDEBUG(82, *YYCURSOR);
+yy87:
+		YYDEBUG(87, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '\f') {
 			if (yych != '\t') goto yy42;
 		} else {
-			if (yych <= '\r') goto yy83;
+			if (yych <= '\r') goto yy88;
 			if (yych != ' ') goto yy42;
 		}
-yy83:
-		YYDEBUG(83, *YYCURSOR);
+yy88:
+		YYDEBUG(88, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(84, *YYCURSOR);
+		YYDEBUG(89, *YYCURSOR);
 		if (yych <= '\f') {
-			if (yych == '\t') goto yy83;
+			if (yych == '\t') goto yy88;
 		} else {
-			if (yych <= '\r') goto yy83;
-			if (yych == ' ') goto yy83;
+			if (yych <= '\r') goto yy88;
+			if (yych == ' ') goto yy88;
 		}
-		YYDEBUG(85, *YYCURSOR);
+		YYDEBUG(90, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 117 "sapi/phpdbg/phpdbg_lexer.l"
+#line 136 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 0;
 	return T_FALSY;
 }
-#line 931 "sapi/phpdbg/phpdbg_lexer.c"
-yy86:
-		YYDEBUG(86, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'L') goto yy87;
-		if (yych != 'l') goto yy42;
-yy87:
-		YYDEBUG(87, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'S') goto yy88;
-		if (yych != 's') goto yy42;
-yy88:
-		YYDEBUG(88, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy82;
-		if (yych == 'e') goto yy82;
-		goto yy42;
-yy89:
-		YYDEBUG(89, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'A') goto yy90;
-		if (yych != 'a') goto yy42;
-yy90:
-		YYDEBUG(90, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'B') goto yy91;
-		if (yych != 'b') goto yy42;
+#line 978 "sapi/phpdbg/phpdbg_lexer.c"
 yy91:
 		YYDEBUG(91, *YYCURSOR);
 		yyaccept = 1;
@@ -969,281 +985,519 @@ yy92:
 		YYDEBUG(92, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy93;
-		if (yych != 'e') goto yy42;
+		if (yych == 'S') goto yy93;
+		if (yych != 's') goto yy42;
 yy93:
 		YYDEBUG(93, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'D') goto yy75;
-		if (yych == 'd') goto yy75;
+		if (yych == 'E') goto yy87;
+		if (yych == 'e') goto yy87;
 		goto yy42;
 yy94:
 		YYDEBUG(94, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'S') goto yy95;
-		if (yych != 's') goto yy42;
+		if (yych == 'A') goto yy95;
+		if (yych != 'a') goto yy42;
 yy95:
 		YYDEBUG(95, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'A') goto yy96;
-		if (yych != 'a') goto yy42;
+		if (yych == 'B') goto yy96;
+		if (yych != 'b') goto yy42;
 yy96:
 		YYDEBUG(96, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'B') goto yy97;
-		if (yych != 'b') goto yy42;
+		if (yych == 'L') goto yy97;
+		if (yych != 'l') goto yy42;
 yy97:
 		YYDEBUG(97, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'L') goto yy98;
-		if (yych != 'l') goto yy42;
+		if (yych == 'E') goto yy98;
+		if (yych != 'e') goto yy42;
 yy98:
 		YYDEBUG(98, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'E') goto yy99;
-		if (yych != 'e') goto yy42;
+		if (yych == 'D') goto yy80;
+		if (yych == 'd') goto yy80;
+		goto yy42;
 yy99:
 		YYDEBUG(99, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'D') goto yy82;
-		if (yych == 'd') goto yy82;
-		goto yy42;
+		if (yych == 'S') goto yy100;
+		if (yych != 's') goto yy42;
 yy100:
 		YYDEBUG(100, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy101;
-		}
-		goto yy42;
+		if (yych == 'A') goto yy101;
+		if (yych != 'a') goto yy42;
 yy101:
 		YYDEBUG(101, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'B') goto yy102;
+		if (yych != 'b') goto yy42;
+yy102:
+		YYDEBUG(102, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'L') goto yy103;
+		if (yych != 'l') goto yy42;
+yy103:
+		YYDEBUG(103, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'E') goto yy104;
+		if (yych != 'e') goto yy42;
+yy104:
+		YYDEBUG(104, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych == 'D') goto yy87;
+		if (yych == 'd') goto yy87;
+		goto yy42;
+yy105:
+		YYDEBUG(105, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yybm[0+yych] & 8) {
+			goto yy106;
+		}
+		goto yy42;
+yy106:
+		YYDEBUG(106, *YYCURSOR);
 		yyaccept = 4;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(3);
 		yych = *YYCURSOR;
-		YYDEBUG(102, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy101;
+		YYDEBUG(107, *YYCURSOR);
+		if (yybm[0+yych] & 8) {
+			goto yy106;
 		}
-		if (yych <= 0x1F) {
+		if (yych <= ' ') {
 			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy103;
+				if (yych <= 0x00) goto yy108;
 				if (yych <= 0x08) goto yy41;
 			} else {
-				if (yych != '\r') goto yy41;
+				if (yych == '\r') goto yy108;
+				if (yych <= 0x1F) goto yy41;
 			}
 		} else {
-			if (yych <= '#') {
-				if (yych <= ' ') goto yy103;
-				if (yych <= '"') goto yy41;
+			if (yych <= '&') {
+				if (yych <= '!') goto yy41;
+				if (yych <= '"') goto yy61;
+				if (yych >= '$') goto yy41;
 			} else {
-				if (yych == ':') goto yy57;
+				if (yych <= '\'') goto yy61;
+				if (yych == ':') goto yy60;
 				goto yy41;
 			}
 		}
-yy103:
-		YYDEBUG(103, *YYCURSOR);
+yy108:
+		YYDEBUG(108, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 129 "sapi/phpdbg/phpdbg_lexer.l"
+#line 148 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, ADDR_PARAM);
 	yylval->addr = strtoul(yytext, 0, 16);
 	return T_ADDR;
 }
-#line 1062 "sapi/phpdbg/phpdbg_lexer.c"
-yy104:
-		YYDEBUG(104, *YYCURSOR);
+#line 1112 "sapi/phpdbg/phpdbg_lexer.c"
+yy109:
+		YYDEBUG(109, *YYCURSOR);
 		++YYCURSOR;
-		YYDEBUG(105, *YYCURSOR);
+		YYFILL(4);
+		yych = *YYCURSOR;
+yy110:
+		YYDEBUG(110, *YYCURSOR);
+		if (yybm[0+yych] & 16) {
+			goto yy109;
+		}
+		if (yych <= '\n') {
+			if (yych <= 0x00) goto yy44;
+			if (yych >= '\n') goto yy44;
+		} else {
+			if (yych <= '&') goto yy111;
+			if (yych <= '\'') goto yy119;
+			if (yych <= '[') goto yy113;
+			goto yy114;
+		}
+yy111:
+		YYDEBUG(111, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+yy112:
+		YYDEBUG(112, *YYCURSOR);
+		if (yybm[0+yych] & 32) {
+			goto yy111;
+		}
+		if (yych <= '&') goto yy44;
+		if (yych <= '\'') goto yy116;
+		goto yy117;
+yy113:
+		YYDEBUG(113, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych == '/') goto yy115;
+		goto yy112;
+yy114:
+		YYDEBUG(114, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(3);
+		yych = *YYCURSOR;
+		if (yych <= '"') {
+			if (yych <= '\f') {
+				if (yych <= 0x00) goto yy44;
+				if (yych <= 0x08) goto yy61;
+				if (yych <= '\n') goto yy44;
+				goto yy61;
+			} else {
+				if (yych <= '\r') goto yy44;
+				if (yych == ' ') goto yy44;
+				goto yy61;
+			}
+		} else {
+			if (yych <= '9') {
+				if (yych <= '#') goto yy44;
+				if (yych == '\'') goto yy109;
+				goto yy61;
+			} else {
+				if (yych <= ':') goto yy63;
+				if (yych == '\\') goto yy109;
+				goto yy61;
+			}
+		}
+yy115:
+		YYDEBUG(115, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych == '/') goto yy118;
+		goto yy112;
+yy116:
+		YYDEBUG(116, *YYCURSOR);
+		yych = *++YYCURSOR;
+		goto yy38;
+yy117:
+		YYDEBUG(117, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yych == '\'') goto yy111;
+		if (yych == '\\') goto yy111;
+		goto yy44;
+yy118:
+		YYDEBUG(118, *YYCURSOR);
+		yyaccept = 5;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x00) goto yy66;
+		if (yych == '\n') goto yy66;
+		goto yy112;
+yy119:
+		YYDEBUG(119, *YYCURSOR);
+		yyaccept = 1;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= '\r') {
+			if (yych <= 0x08) {
+				if (yych <= 0x00) goto yy38;
+				goto yy62;
+			} else {
+				if (yych <= '\n') goto yy38;
+				if (yych <= '\f') goto yy62;
+				goto yy38;
+			}
+		} else {
+			if (yych <= ' ') {
+				if (yych <= 0x1F) goto yy62;
+				goto yy38;
+			} else {
+				if (yych == '#') goto yy38;
+				goto yy62;
+			}
+		}
+yy120:
+		YYDEBUG(120, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(4);
+		yych = *YYCURSOR;
+yy121:
+		YYDEBUG(121, *YYCURSOR);
+		if (yybm[0+yych] & 64) {
+			goto yy120;
+		}
+		if (yych <= '!') {
+			if (yych <= 0x00) goto yy44;
+			if (yych == '\n') goto yy44;
+		} else {
+			if (yych <= '"') goto yy119;
+			if (yych <= '#') goto yy122;
+			if (yych <= '[') goto yy124;
+			goto yy125;
+		}
+yy122:
+		YYDEBUG(122, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+yy123:
+		YYDEBUG(123, *YYCURSOR);
+		if (yybm[0+yych] & 128) {
+			goto yy122;
+		}
+		if (yych <= '!') goto yy44;
+		if (yych <= '"') goto yy116;
+		goto yy127;
+yy124:
+		YYDEBUG(124, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych == '/') goto yy126;
+		goto yy123;
+yy125:
+		YYDEBUG(125, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(3);
+		yych = *YYCURSOR;
+		if (yych <= ' ') {
+			if (yych <= '\n') {
+				if (yych <= 0x00) goto yy44;
+				if (yych <= 0x08) goto yy61;
+				goto yy44;
+			} else {
+				if (yych == '\r') goto yy44;
+				if (yych <= 0x1F) goto yy61;
+				goto yy44;
+			}
+		} else {
+			if (yych <= '9') {
+				if (yych <= '!') goto yy61;
+				if (yych <= '"') goto yy120;
+				if (yych <= '#') goto yy44;
+				goto yy61;
+			} else {
+				if (yych <= ':') goto yy63;
+				if (yych == '\\') goto yy120;
+				goto yy61;
+			}
+		}
+yy126:
+		YYDEBUG(126, *YYCURSOR);
+		yych = *++YYCURSOR;
+		if (yych == '/') goto yy128;
+		goto yy123;
+yy127:
+		YYDEBUG(127, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yych == '"') goto yy122;
+		if (yych == '\\') goto yy122;
+		goto yy44;
+yy128:
+		YYDEBUG(128, *YYCURSOR);
+		yyaccept = 5;
+		yych = *(YYMARKER = ++YYCURSOR);
+		if (yych <= 0x00) goto yy66;
+		if (yych == '\n') goto yy66;
+		goto yy123;
+yy129:
+		YYDEBUG(129, *YYCURSOR);
+		++YYCURSOR;
+		YYDEBUG(130, *YYCURSOR);
 		YYCURSOR = YYCTXMARKER;
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 100 "sapi/phpdbg/phpdbg_lexer.l"
+#line 119 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	return T_COLON;
 }
-#line 1073 "sapi/phpdbg/phpdbg_lexer.c"
-yy106:
-		YYDEBUG(106, *YYCURSOR);
+#line 1317 "sapi/phpdbg/phpdbg_lexer.c"
+yy131:
+		YYDEBUG(131, *YYCURSOR);
 		++YYCURSOR;
-		YYDEBUG(107, *YYCURSOR);
+		YYDEBUG(132, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 96 "sapi/phpdbg/phpdbg_lexer.l"
+#line 115 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	return T_DCOLON;
 }
-#line 1083 "sapi/phpdbg/phpdbg_lexer.c"
-yy108:
-		YYDEBUG(108, *YYCURSOR);
+#line 1327 "sapi/phpdbg/phpdbg_lexer.c"
+yy133:
+		YYDEBUG(133, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '\f') {
 			if (yych != '\t') goto yy42;
 		} else {
-			if (yych <= '\r') goto yy109;
+			if (yych <= '\r') goto yy134;
 			if (yych != ' ') goto yy42;
 		}
-yy109:
-		YYDEBUG(109, *YYCURSOR);
+yy134:
+		YYDEBUG(134, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(110, *YYCURSOR);
+		YYDEBUG(135, *YYCURSOR);
 		if (yych <= '\f') {
-			if (yych == '\t') goto yy109;
+			if (yych == '\t') goto yy134;
 		} else {
-			if (yych <= '\r') goto yy109;
-			if (yych == ' ') goto yy109;
+			if (yych <= '\r') goto yy134;
+			if (yych == ' ') goto yy134;
 		}
-		YYDEBUG(111, *YYCURSOR);
+		YYDEBUG(136, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 81 "sapi/phpdbg/phpdbg_lexer.l"
+#line 100 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_IF;
 }
-#line 1114 "sapi/phpdbg/phpdbg_lexer.c"
-yy112:
-		YYDEBUG(112, *YYCURSOR);
+#line 1358 "sapi/phpdbg/phpdbg_lexer.c"
+yy137:
+		YYDEBUG(137, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= ' ') {
 			if (yych <= '\f') {
 				if (yych != '\t') goto yy42;
 			} else {
-				if (yych <= '\r') goto yy113;
+				if (yych <= '\r') goto yy138;
 				if (yych <= 0x1F) goto yy42;
 			}
 		} else {
 			if (yych <= '.') {
 				if (yych <= ',') goto yy42;
-				if (yych <= '-') goto yy115;
-				goto yy116;
+				if (yych <= '-') goto yy140;
+				goto yy141;
 			} else {
 				if (yych <= '/') goto yy42;
-				if (yych <= '9') goto yy116;
+				if (yych <= '9') goto yy141;
 				goto yy42;
 			}
 		}
-yy113:
-		YYDEBUG(113, *YYCURSOR);
+yy138:
+		YYDEBUG(138, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-		YYDEBUG(114, *YYCURSOR);
+		YYDEBUG(139, *YYCURSOR);
 		if (yych <= ' ') {
 			if (yych <= '\f') {
-				if (yych == '\t') goto yy113;
-				goto yy58;
+				if (yych == '\t') goto yy138;
+				goto yy44;
 			} else {
-				if (yych <= '\r') goto yy113;
-				if (yych <= 0x1F) goto yy58;
-				goto yy113;
+				if (yych <= '\r') goto yy138;
+				if (yych <= 0x1F) goto yy44;
+				goto yy138;
 			}
 		} else {
 			if (yych <= '.') {
-				if (yych <= ',') goto yy58;
-				if (yych <= '-') goto yy119;
-				goto yy120;
+				if (yych <= ',') goto yy44;
+				if (yych <= '-') goto yy144;
+				goto yy145;
 			} else {
-				if (yych <= '/') goto yy58;
-				if (yych <= '9') goto yy120;
-				goto yy58;
+				if (yych <= '/') goto yy44;
+				if (yych <= '9') goto yy145;
+				goto yy44;
 			}
 		}
-yy115:
-		YYDEBUG(115, *YYCURSOR);
+yy140:
+		YYDEBUG(140, *YYCURSOR);
 		yyaccept = 1;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == '.') goto yy116;
+		if (yych == '.') goto yy141;
 		if (yych <= '/') goto yy42;
 		if (yych >= ':') goto yy42;
-yy116:
-		YYDEBUG(116, *YYCURSOR);
-		yyaccept = 5;
+yy141:
+		YYDEBUG(141, *YYCURSOR);
+		yyaccept = 6;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(3);
 		yych = *YYCURSOR;
-		YYDEBUG(117, *YYCURSOR);
-		if (yych <= ' ') {
-			if (yych <= '\n') {
-				if (yych <= 0x00) goto yy118;
+		YYDEBUG(142, *YYCURSOR);
+		if (yych <= '"') {
+			if (yych <= '\f') {
+				if (yych <= 0x00) goto yy143;
 				if (yych <= 0x08) goto yy41;
+				if (yych >= '\v') goto yy41;
 			} else {
-				if (yych == '\r') goto yy118;
-				if (yych <= 0x1F) goto yy41;
+				if (yych <= 0x1F) {
+					if (yych >= 0x0E) goto yy41;
+				} else {
+					if (yych <= ' ') goto yy143;
+					if (yych <= '!') goto yy41;
+					goto yy61;
+				}
 			}
 		} else {
-			if (yych <= '.') {
-				if (yych == '#') goto yy118;
-				if (yych <= '-') goto yy41;
-				goto yy116;
-			} else {
-				if (yych <= '/') goto yy41;
-				if (yych <= '9') goto yy116;
-				if (yych <= ':') goto yy57;
+			if (yych <= '-') {
+				if (yych <= '#') goto yy143;
+				if (yych == '\'') goto yy61;
 				goto yy41;
+			} else {
+				if (yych <= '/') {
+					if (yych <= '.') goto yy141;
+					goto yy41;
+				} else {
+					if (yych <= '9') goto yy141;
+					if (yych <= ':') goto yy60;
+					goto yy41;
+				}
 			}
 		}
-yy118:
-		YYDEBUG(118, *YYCURSOR);
+yy143:
+		YYDEBUG(143, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 74 "sapi/phpdbg/phpdbg_lexer.l"
+#line 93 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	char *text = yytext + 2;
 	while (*++text < '0');
 	yylval->num = atoi(text);
 	return T_REQ_ID;
 }
-#line 1207 "sapi/phpdbg/phpdbg_lexer.c"
-yy119:
-		YYDEBUG(119, *YYCURSOR);
+#line 1461 "sapi/phpdbg/phpdbg_lexer.c"
+yy144:
+		YYDEBUG(144, *YYCURSOR);
 		yych = *++YYCURSOR;
-		if (yych == '.') goto yy120;
-		if (yych <= '/') goto yy58;
-		if (yych >= ':') goto yy58;
-yy120:
-		YYDEBUG(120, *YYCURSOR);
+		if (yych == '.') goto yy145;
+		if (yych <= '/') goto yy44;
+		if (yych >= ':') goto yy44;
+yy145:
+		YYDEBUG(145, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(121, *YYCURSOR);
-		if (yych == '.') goto yy120;
-		if (yych <= '/') goto yy118;
-		if (yych <= '9') goto yy120;
-		goto yy118;
-yy122:
-		YYDEBUG(122, *YYCURSOR);
+		YYDEBUG(146, *YYCURSOR);
+		if (yych == '.') goto yy145;
+		if (yych <= '/') goto yy143;
+		if (yych <= '9') goto yy145;
+		goto yy143;
+yy147:
+		YYDEBUG(147, *YYCURSOR);
 		yych = *++YYCURSOR;
-		if (yych == '.') goto yy123;
-		if (yych <= '/') goto yy58;
-		if (yych >= ':') goto yy58;
-yy123:
-		YYDEBUG(123, *YYCURSOR);
+		if (yych == '.') goto yy148;
+		if (yych <= '/') goto yy44;
+		if (yych >= ':') goto yy44;
+yy148:
+		YYDEBUG(148, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(124, *YYCURSOR);
-		if (yych == '.') goto yy123;
-		if (yych <= '/') goto yy125;
-		if (yych <= '9') goto yy123;
-yy125:
-		YYDEBUG(125, *YYCURSOR);
+		YYDEBUG(149, *YYCURSOR);
+		if (yych == '.') goto yy148;
+		if (yych <= '/') goto yy150;
+		if (yych <= '9') goto yy148;
+yy150:
+		YYDEBUG(150, *YYCURSOR);
 		YYCURSOR = YYCTXMARKER;
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 87 "sapi/phpdbg/phpdbg_lexer.l"
+#line 106 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	return T_POUND;
 }
-#line 1247 "sapi/phpdbg/phpdbg_lexer.c"
+#line 1501 "sapi/phpdbg/phpdbg_lexer.c"
 	}
 /* *********************************** */
 yyc_PRE_RAW:
@@ -1282,239 +1536,314 @@ yyc_PRE_RAW:
 			  0,   0,   0,   0,   0,   0,   0,   0, 
 			  0,   0,   0,   0,   0,   0,   0,   0, 
 		};
-		YYDEBUG(126, *YYCURSOR);
+		YYDEBUG(151, *YYCURSOR);
 		YYFILL(2);
 		yych = *YYCURSOR;
 		if (yych <= '\r') {
 			if (yych <= '\t') {
-				if (yych <= 0x00) goto yy134;
-				if (yych <= 0x08) goto yy136;
+				if (yych <= 0x00) goto yy159;
+				if (yych <= 0x08) goto yy161;
 			} else {
-				if (yych <= '\n') goto yy134;
-				if (yych <= '\f') goto yy136;
+				if (yych <= '\n') goto yy159;
+				if (yych <= '\f') goto yy161;
 			}
 		} else {
 			if (yych <= '"') {
-				if (yych == ' ') goto yy130;
-				goto yy136;
+				if (yych == ' ') goto yy155;
+				goto yy161;
 			} else {
-				if (yych <= '#') goto yy133;
-				if (yych == '-') goto yy135;
-				goto yy136;
+				if (yych <= '#') goto yy158;
+				if (yych == '-') goto yy160;
+				goto yy161;
 			}
 		}
-		YYDEBUG(128, *YYCURSOR);
+		YYDEBUG(153, *YYCURSOR);
 		++YYCURSOR;
 		if (yybm[0+(yych = *YYCURSOR)] & 64) {
-			goto yy130;
+			goto yy155;
 		}
-yy129:
-		YYDEBUG(129, *YYCURSOR);
+yy154:
+		YYDEBUG(154, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 180 "sapi/phpdbg/phpdbg_lexer.l"
+#line 199 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(RAW);
 
 	YYCURSOR = LEX(text);
 	goto restart;
 }
-#line 1322 "sapi/phpdbg/phpdbg_lexer.c"
-yy130:
-		YYDEBUG(130, *YYCURSOR);
+#line 1576 "sapi/phpdbg/phpdbg_lexer.c"
+yy155:
+		YYDEBUG(155, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(131, *YYCURSOR);
+		YYDEBUG(156, *YYCURSOR);
 		if (yybm[0+yych] & 64) {
-			goto yy130;
+			goto yy155;
 		}
-		YYDEBUG(132, *YYCURSOR);
+		YYDEBUG(157, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 156 "sapi/phpdbg/phpdbg_lexer.l"
+#line 175 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	/* ignore whitespace */
 
 	goto restart;
 }
-#line 1340 "sapi/phpdbg/phpdbg_lexer.c"
-yy133:
-		YYDEBUG(133, *YYCURSOR);
+#line 1594 "sapi/phpdbg/phpdbg_lexer.c"
+yy158:
+		YYDEBUG(158, *YYCURSOR);
 		yych = *++YYCURSOR;
-		goto yy129;
-yy134:
-		YYDEBUG(134, *YYCURSOR);
+		goto yy154;
+yy159:
+		YYDEBUG(159, *YYCURSOR);
 		yych = *++YYCURSOR;
-		goto yy129;
-yy135:
-		YYDEBUG(135, *YYCURSOR);
+		goto yy154;
+yy160:
+		YYDEBUG(160, *YYCURSOR);
 		yyaccept = 0;
 		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych == 'r') goto yy137;
-		goto yy129;
-yy136:
-		YYDEBUG(136, *YYCURSOR);
+		if (yych == 'r') goto yy162;
+		goto yy154;
+yy161:
+		YYDEBUG(161, *YYCURSOR);
 		yych = *++YYCURSOR;
-		goto yy129;
-yy137:
-		YYDEBUG(137, *YYCURSOR);
+		goto yy154;
+yy162:
+		YYDEBUG(162, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-		YYDEBUG(138, *YYCURSOR);
+		YYDEBUG(163, *YYCURSOR);
 		if (yybm[0+yych] & 128) {
-			goto yy141;
+			goto yy166;
 		}
 		if (yych <= '\r') {
-			if (yych == '\t') goto yy137;
-			if (yych >= '\r') goto yy137;
+			if (yych == '\t') goto yy162;
+			if (yych >= '\r') goto yy162;
 		} else {
 			if (yych <= ' ') {
-				if (yych >= ' ') goto yy137;
+				if (yych >= ' ') goto yy162;
 			} else {
-				if (yych == '-') goto yy140;
+				if (yych == '-') goto yy165;
 			}
 		}
-yy139:
-		YYDEBUG(139, *YYCURSOR);
+yy164:
+		YYDEBUG(164, *YYCURSOR);
 		YYCURSOR = YYMARKER;
-		goto yy129;
-yy140:
-		YYDEBUG(140, *YYCURSOR);
+		goto yy154;
+yy165:
+		YYDEBUG(165, *YYCURSOR);
 		yych = *++YYCURSOR;
 		if (yybm[0+yych] & 128) {
-			goto yy141;
+			goto yy166;
 		}
-		goto yy139;
-yy141:
-		YYDEBUG(141, *YYCURSOR);
+		goto yy164;
+yy166:
+		YYDEBUG(166, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(142, *YYCURSOR);
+		YYDEBUG(167, *YYCURSOR);
 		if (yybm[0+yych] & 128) {
-			goto yy141;
+			goto yy166;
 		}
-		YYDEBUG(143, *YYCURSOR);
+		YYDEBUG(168, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 74 "sapi/phpdbg/phpdbg_lexer.l"
+#line 93 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	char *text = yytext + 2;
 	while (*++text < '0');
 	yylval->num = atoi(text);
 	return T_REQ_ID;
 }
-#line 1407 "sapi/phpdbg/phpdbg_lexer.c"
+#line 1661 "sapi/phpdbg/phpdbg_lexer.c"
 	}
 /* *********************************** */
 yyc_RAW:
 	{
 		static const unsigned char yybm[] = {
-			  0, 128, 128, 128, 128, 128, 128, 128, 
-			128, 192,   0, 128, 128, 192, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			192, 128, 128,   0, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
-			128, 128, 128, 128, 128, 128, 128, 128, 
+			  0, 224, 224, 224, 224, 224, 224, 224, 
+			224, 240,   0, 224, 224, 240, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			240, 224,  64, 192, 224, 224, 224, 128, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224,  32, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
+			224, 224, 224, 224, 224, 224, 224, 224, 
 		};
-		YYDEBUG(144, *YYCURSOR);
+		YYDEBUG(169, *YYCURSOR);
 		YYFILL(1);
 		yych = *YYCURSOR;
-		if (yybm[0+yych] & 64) {
-			goto yy146;
+		if (yybm[0+yych] & 16) {
+			goto yy171;
 		}
-		if (yych <= '\n') {
-			if (yych <= 0x00) goto yy151;
-			if (yych <= '\t') goto yy153;
-			goto yy151;
+		if (yych <= '!') {
+			if (yych <= 0x00) goto yy176;
+			if (yych == '\n') goto yy176;
+			goto yy178;
 		} else {
-			if (yych == '#') goto yy149;
-			goto yy153;
+			if (yych <= '#') {
+				if (yych <= '"') goto yy180;
+				goto yy174;
+			} else {
+				if (yych == '\'') goto yy182;
+				goto yy178;
+			}
 		}
-yy146:
-		YYDEBUG(146, *YYCURSOR);
-		++YYCURSOR;
+yy171:
+		YYDEBUG(171, *YYCURSOR);
+		yyaccept = 0;
+		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(147, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy146;
+		YYDEBUG(172, *YYCURSOR);
+		if (yybm[0+yych] & 16) {
+			goto yy171;
 		}
-		if (yych <= '\n') {
-			if (yych <= 0x00) goto yy148;
-			if (yych <= '\t') goto yy153;
+		if (yych <= '!') {
+			if (yych <= 0x00) goto yy173;
+			if (yych != '\n') goto yy178;
 		} else {
-			if (yych != '#') goto yy153;
+			if (yych <= '#') {
+				if (yych <= '"') goto yy180;
+			} else {
+				if (yych == '\'') goto yy182;
+				goto yy178;
+			}
 		}
-yy148:
-		YYDEBUG(148, *YYCURSOR);
+yy173:
+		YYDEBUG(173, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 149 "sapi/phpdbg/phpdbg_lexer.l"
+#line 168 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = estrndup(yytext, yyleng);
+	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_INPUT;
 }
-#line 1485 "sapi/phpdbg/phpdbg_lexer.c"
-yy149:
-		YYDEBUG(149, *YYCURSOR);
+#line 1750 "sapi/phpdbg/phpdbg_lexer.c"
+yy174:
+		YYDEBUG(174, *YYCURSOR);
 		++YYCURSOR;
-		YYDEBUG(150, *YYCURSOR);
+		YYDEBUG(175, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 91 "sapi/phpdbg/phpdbg_lexer.l"
+#line 110 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	YYSETCONDITION(INITIAL);
 	return T_SEPARATOR;
 }
-#line 1496 "sapi/phpdbg/phpdbg_lexer.c"
-yy151:
-		YYDEBUG(151, *YYCURSOR);
+#line 1761 "sapi/phpdbg/phpdbg_lexer.c"
+yy176:
+		YYDEBUG(176, *YYCURSOR);
 		++YYCURSOR;
-		YYDEBUG(152, *YYCURSOR);
+		YYDEBUG(177, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
-#line 70 "sapi/phpdbg/phpdbg_lexer.l"
+#line 89 "sapi/phpdbg/phpdbg_lexer.l"
 		{
 	return 0;
 }
-#line 1506 "sapi/phpdbg/phpdbg_lexer.c"
-yy153:
-		YYDEBUG(153, *YYCURSOR);
+#line 1771 "sapi/phpdbg/phpdbg_lexer.c"
+yy178:
+		YYDEBUG(178, *YYCURSOR);
+		yyaccept = 0;
+		YYMARKER = ++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		YYDEBUG(179, *YYCURSOR);
+		if (yybm[0+yych] & 32) {
+			goto yy178;
+		}
+		if (yych == '"') goto yy180;
+		if (yych <= '#') goto yy173;
+		goto yy182;
+yy180:
+		YYDEBUG(180, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-		YYDEBUG(154, *YYCURSOR);
 		if (yybm[0+yych] & 128) {
-			goto yy153;
+			goto yy186;
 		}
-		goto yy148;
+		if (yych >= '\\') goto yy188;
+yy181:
+		YYDEBUG(181, *YYCURSOR);
+		YYCURSOR = YYMARKER;
+		goto yy173;
+yy182:
+		YYDEBUG(182, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yybm[0+yych] & 64) {
+			goto yy183;
+		}
+		if (yych <= '[') goto yy181;
+		goto yy185;
+yy183:
+		YYDEBUG(183, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		YYDEBUG(184, *YYCURSOR);
+		if (yybm[0+yych] & 64) {
+			goto yy183;
+		}
+		if (yych <= '&') goto yy181;
+		if (yych <= '\'') goto yy178;
+yy185:
+		YYDEBUG(185, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yych == '\'') goto yy183;
+		if (yych == '\\') goto yy183;
+		goto yy181;
+yy186:
+		YYDEBUG(186, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		YYDEBUG(187, *YYCURSOR);
+		if (yybm[0+yych] & 128) {
+			goto yy186;
+		}
+		if (yych <= '!') goto yy181;
+		if (yych <= '"') goto yy178;
+yy188:
+		YYDEBUG(188, *YYCURSOR);
+		++YYCURSOR;
+		YYFILL(1);
+		yych = *YYCURSOR;
+		if (yych == '"') goto yy186;
+		if (yych == '\\') goto yy186;
+		goto yy181;
 	}
 }
-#line 194 "sapi/phpdbg/phpdbg_lexer.l"
+#line 213 "sapi/phpdbg/phpdbg_lexer.l"
 
 }
