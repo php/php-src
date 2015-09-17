@@ -546,19 +546,16 @@ Other
     (RFC: https://wiki.php.net/rfc/easy_userland_csprng)
 
 - Opcache
-  . Added second level file based opcode cache (experimental - disabled by
-    default). To enable it, PHP should be configured and built with 
-    --enable-opcache-file, then opcache.file_cache=<DIR> configuration directive
-    should be set in php.ini. The second level cache may improve performance
-    at server restart or SHM reset. In addition, it's possibe to use file cache
-    without SHM at all, using opcache.file_cache_only=1 (this may be useful for
-    sharing hosting), and disable file cache consistency check, to speedup
-    loading at the cost of safety, using opcache.file_cache_consistency_checks=0.
-  . Added an experimental ability to move PHP code pages (PHP TEXT segment) into
-    HUGE pages. To enable it, PHP should be configured and built with
-    --enable-huge-code-pages, OS should be configured to provide huge pages.
+  . Added second level file based opcode cache. It may be enabled by setting
+    opcache.file_cache=<DIR> configuration directive in php.ini. The second
+    level cache may improve performance when SHM is full, at server restart or
+    SHM reset. In addition, it's possibe to use file cache without SHM at all,
+    using opcache.file_cache_only=1 (this may be useful for sharing hosting),
+    and disable file cache consistency check, to speedup loading at the cost of
+    safety, using opcache.file_cache_consistency_checks=0.
+  . Added ability to move PHP code pages (PHP TEXT segment) into HUGE pages.
     It's possible to enable/disable this feature in php.ini through
-    opcache.huge_code_pages=0/1.
+    opcache.huge_code_pages=0/1. OS should be configured to provide huge pages.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
