@@ -2,5 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0
 
+- Core:
+  . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
+    (Laruence)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
