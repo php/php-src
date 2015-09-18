@@ -230,14 +230,14 @@ _mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC)
 
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent)
 {
-	*stats = calloc(1, sizeof(MYSQLND_STATS));
+	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	if (*stats == NULL) {
 		return;
 	}
-	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
-	(*stats)->triggers = calloc(statistic_count, sizeof(mysqlnd_stat_trigger));
+	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
+	(*stats)->triggers = pecalloc(statistic_count, sizeof(mysqlnd_stat_trigger), persistent);
 	(*stats)->in_trigger = FALSE;
 	(*stats)->count = statistic_count;
 #ifdef ZTS
@@ -249,15 +249,15 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 
 /* {{{ mysqlnd_stats_end */
 PHPAPI void
-mysqlnd_stats_end(MYSQLND_STATS * stats)
+mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
-	free(stats->triggers);
-	free(stats->values);
+	pefree(stats->triggers, persistent);
+	pefree(stats->values, persistent);
 	/* mnd_free will reference LOCK_access and crash...*/
-	free(stats);
+	pefree(stats, persistent);
 }
 /* }}} */
 

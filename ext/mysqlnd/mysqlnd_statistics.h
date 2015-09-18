@@ -159,8 +159,8 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
 
-PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count);
-PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
+PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent);
+PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent);
 
 PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger);
 PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats);
