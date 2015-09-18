@@ -1244,6 +1244,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 } /* }}} */
 #endif
 
+void phpdbg_sighup_handler(int sig) /* {{{ */
+{
+	exit(0);
+} /* }}} */
+
 void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
 	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1613,6 +1618,11 @@ phpdbg_main:
 
 			/* set remote flag to stop service shutting down upon quit */
 			remote = 1;
+#ifndef _WIN32
+		} else {
+
+			signal(SIGHUP, phpdbg_sighup_handler);
+#endif
 		}
 
 		mm_heap = zend_mm_get_heap();

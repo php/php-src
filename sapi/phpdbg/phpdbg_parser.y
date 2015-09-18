@@ -53,7 +53,8 @@ typedef void* yyscan_t;
 %token T_STRING     "string (some input, perhaps)"
 %token T_COLON      ": (colon)"
 %token T_DCOLON     ":: (double colon)"
-%token T_POUND      "# (pound sign)"
+%token T_POUND      "# (pound sign followed by digits)"
+%token T_SEPARATOR  "# (pound sign)"
 %token T_PROTO      "protocol (file://)"
 %token T_DIGITS     "digits (numbers)"
 %token T_LITERAL    "literal (string)"
@@ -67,14 +68,19 @@ typedef void* yyscan_t;
 %% /* Rules */
 
 input
-	: parameters
-	| full_expression { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); }
+	: command { $$ = $1; }
+	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
 	| /* nothing */
 	;
 
+command
+	: parameters { $$.top = PHPDBG_G(parser_stack)->top; }
+	| full_expression { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); $$.top = PHPDBG_G(parser_stack)->top; }
+	;
+
 parameters
-	: parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); }
-	| parameters parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$2); }
+	: parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); $$.top = PHPDBG_G(parser_stack)->top; }
+	| parameters parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$2); $$.top = PHPDBG_G(parser_stack)->top; }
 	| parameters req_id { $$ = $1; }
 	;
 
