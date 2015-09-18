@@ -686,6 +686,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
+	zend_get_property_guard = zend_std_get_property_guard;
 
 	/* Set up the default garbage collection implementation. */
 	gc_collect_cycles = zend_gc_collect_cycles;

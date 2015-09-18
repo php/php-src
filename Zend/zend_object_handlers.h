@@ -170,6 +170,7 @@ ZEND_API HashTable *zend_std_get_properties(zval *object);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type);
 ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+ZEND_API zend_long *zend_std_get_property_guard(zend_object *zobj, zend_string *member);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, zend_string *function_name);
@@ -179,6 +180,8 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name);
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
+
+ZEND_API zend_long* (*zend_get_property_guard)(zend_object *zobj, zend_string *member);
 
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
