@@ -2166,7 +2166,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (UNEXPECTED(!op_array->run_time_cache) && op_array->cache_size) {
+	if (UNEXPECTED(!op_array->run_time_cache)) {
 		op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
@@ -2193,7 +2193,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (!op_array->run_time_cache && op_array->cache_size) {
+	if (!op_array->run_time_cache) {
 		op_array->run_time_cache = emalloc(op_array->cache_size);
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}

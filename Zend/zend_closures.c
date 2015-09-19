@@ -134,7 +134,7 @@ ZEND_METHOD(Closure, call)
 		fci_cache.function_handler = &my_function;
 
 		/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
-		if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis) && my_function.op_array.cache_size) {
+		if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
 			my_function.op_array.run_time_cache = emalloc(my_function.op_array.cache_size);
 			memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
 		}
@@ -206,7 +206,7 @@ ZEND_METHOD(Closure, bind)
 	new_closure = (zend_closure *) Z_OBJ_P(return_value);
 
 	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
-	if (ZEND_USER_CODE(closure->func.type) && (closure->func.common.scope != new_closure->func.common.scope || (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA)) && new_closure->func.op_array.cache_size) {
+	if (ZEND_USER_CODE(closure->func.type) && (closure->func.common.scope != new_closure->func.common.scope || (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA))) {
 		new_closure->func.op_array.run_time_cache = emalloc(new_closure->func.op_array.cache_size);
 		memset(new_closure->func.op_array.run_time_cache, 0, new_closure->func.op_array.cache_size);
 
@@ -543,7 +543,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			zend_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_apply_with_arguments(static_variables, zval_copy_static_var, 1, closure->func.op_array.static_variables);
 		}
-		if (UNEXPECTED(!closure->func.op_array.run_time_cache) && func->op_array.cache_size) {
+		if (UNEXPECTED(!closure->func.op_array.run_time_cache)) {
 			closure->func.op_array.run_time_cache = func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 			memset(func->op_array.run_time_cache, 0, func->op_array.cache_size);
 		}
