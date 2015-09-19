@@ -63,9 +63,9 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_
 #define phpdbg_writeln_ex(out, tag, xmlfmt, strfmt, ...)    phpdbg_print(P_WRITELN, out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_write_ex(out, tag, xmlfmt, strfmt, ...)      phpdbg_print(P_WRITE  , out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_script_ex(out, type, fmt, ...)               phpdbg_print(type     , out, NULL, NULL,   fmt,    ##__VA_ARGS__)
-#define phpdbg_log_ex(out, fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
-#define phpdbg_xml_ex(out, fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
-#define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_log_ex(out, fmt, ...) phpdbg_log_internal(out, fmt, ##__VA_ARGS__)
+#define phpdbg_xml_ex(out, fmt, ...) phpdbg_xml_internal(out, fmt, ##__VA_ARGS__)
+#define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(out, fmt, ##__VA_ARGS__)
 
 #define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd, fmt, ##__VA_ARGS__)
 

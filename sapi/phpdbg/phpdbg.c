@@ -1752,6 +1752,7 @@ phpdbg_main:
 				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
+			oplog_file = NULL;
 		}
 
 		/* set default colors */
