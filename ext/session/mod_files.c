@@ -519,6 +519,7 @@ PS_READ_FUNC(files)
 		return FAILURE;
 	}
 
+	ZSTR_VAL(*val)[ZSTR_LEN(*val)] = '\0';
 	return SUCCESS;
 }
 

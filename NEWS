@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
     (Laruence)
 
+- Session:
+  . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
+    (Yasuo)
+
 
 17 Sep 2015, PHP 7.0.0 RC 3
 
