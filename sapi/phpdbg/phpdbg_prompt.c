@@ -518,26 +518,23 @@ PHPDBG_COMMAND(continue) /* {{{ */
 } /* }}} */
 
 int phpdbg_skip_line_helper() /* {{{ */ {
+	const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
+	const zend_op *opline = op_array->opcodes;
+
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
 	PHPDBG_G(seek_ex) = EG(current_execute_data);
-	{
-		const zend_op *opline = EG(current_execute_data)->opline;
-		const zend_op_array *op_array = &EG(current_execute_data)->func->op_array;
-
-		while (++opline < op_array->opcodes + op_array->last) {
-			if (opline->lineno != EG(current_execute_data)->opline->lineno
-			 || opline->opcode == ZEND_RETURN
-			 || opline->opcode == ZEND_FAST_RET
-			 || opline->opcode == ZEND_GENERATOR_RETURN
-			 || opline->opcode == ZEND_EXIT
-			 || opline->opcode == ZEND_YIELD
-			 || opline->opcode == ZEND_YIELD_FROM
-			) {
-				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
-				break;
-			}
+	do {
+		if (opline->lineno != EG(current_execute_data)->opline->lineno
+		 || opline->opcode == ZEND_RETURN
+		 || opline->opcode == ZEND_FAST_RET
+		 || opline->opcode == ZEND_GENERATOR_RETURN
+		 || opline->opcode == ZEND_EXIT
+		 || opline->opcode == ZEND_YIELD
+		 || opline->opcode == ZEND_YIELD_FROM
+		) {
+			zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
 		}
-	}
+	} while (++opline < op_array->opcodes + op_array->last);
 
 	return PHPDBG_UNTIL;
 }
@@ -578,7 +575,6 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
-				return;
 		}
 	} while (++opline < op_array->opcodes + op_array->last);
 }
