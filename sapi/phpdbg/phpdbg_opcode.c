@@ -190,7 +190,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, zend_bool ignore_fl
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s",
+			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %s %s\n",
 				opline->lineno,
 				opline,
 				decode,
