@@ -110,7 +110,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 static zend_always_inline zend_generator *zend_generator_get_current(zend_generator *generator)
 {
 	zend_generator *leaf;
-	zend_generator *root, *old_root;
+	zend_generator *root;
 
 	if (EXPECTED(generator->node.parent == NULL)) {
 		/* we're not in yield from mode */
