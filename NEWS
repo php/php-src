@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
     (Laruence)
 
+- OpenSSL
+  . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
+
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
     (Yasuo)

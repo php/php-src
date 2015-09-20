@@ -3420,7 +3420,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 					}
 				}
 				break;
-#if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
+#if !defined(NO_DSA)
 			case OPENSSL_KEYTYPE_DSA:
 				{
 					DSA *dsaparam = NULL;
