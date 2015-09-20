@@ -65,15 +65,11 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
 {
-	if (EXPECTED(Z_TYPE(generator->value) != IS_UNDEF)) {
-		zval_ptr_dtor(&generator->value);
-		ZVAL_UNDEF(&generator->value);
-	}
+	zval_ptr_dtor(&generator->value);
+	ZVAL_UNDEF(&generator->value);
 
-	if (EXPECTED(Z_TYPE(generator->key) != IS_UNDEF)) {
-		zval_ptr_dtor(&generator->key);
-		ZVAL_UNDEF(&generator->key);
-	}
+	zval_ptr_dtor(&generator->key);
+	ZVAL_UNDEF(&generator->key);
 
 	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
 		zval_ptr_dtor(&generator->values);
@@ -931,7 +927,7 @@ ZEND_METHOD(Generator, getReturn)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
-	}	
+	}
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
