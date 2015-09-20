@@ -115,6 +115,37 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
+static void zend_std_property_guard_dtor(zval *el) /* {{{ */ {
+	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
+}
+/* }}} */
+
+ZEND_API zend_long *zend_std_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
+{
+	HashTable *guards;
+	zend_long stub, *guard;
+	zval tmp;
+
+	ZEND_ASSERT(GC_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
+	if (GC_FLAGS(zobj) & IS_OBJ_HAS_GUARDS) {
+		guards = Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]);
+		ZEND_ASSERT(guards != NULL);
+		if ((guard = (zend_long *)zend_hash_find_ptr(guards, member)) != NULL) {
+			return guard;
+		}
+	} else {
+		ALLOC_HASHTABLE(guards);
+		zend_hash_init(guards, 8, NULL, zend_std_property_guard_dtor, 0);
+		ZVAL_PTR(&tmp, guards);
+		Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]) = guards;
+		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
+	}
+
+	stub = 0;
+	return (zend_long *)zend_hash_add_mem(guards, member, &stub, sizeof(zend_ulong));
+}
+/* }}} */
+
 ZEND_API HashTable *zend_std_get_properties(zval *object) /* {{{ */
 {
 	zend_object *zobj;
@@ -482,37 +513,6 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		}
 	}
 	return zend_verify_property_access(property_info, zobj->ce) ? SUCCESS : FAILURE;
-}
-/* }}} */
-
-static void zend_property_guard_dtor(zval *el) /* {{{ */ {
-	efree_size(Z_PTR_P(el), sizeof(zend_ulong));
-}
-/* }}} */
-
-static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
-{
-	HashTable *guards;
-	zend_long stub, *guard;
-	zval tmp;
-
-	ZEND_ASSERT(GC_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
-	if (GC_FLAGS(zobj) & IS_OBJ_HAS_GUARDS) {
-		guards = Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]);
-		ZEND_ASSERT(guards != NULL);
-		if ((guard = (zend_long *)zend_hash_find_ptr(guards, member)) != NULL) {
-			return guard;
-		}
-	} else {
-		ALLOC_HASHTABLE(guards);
-		zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
-		ZVAL_PTR(&tmp, guards);
-		Z_PTR(zobj->properties_table[zobj->ce->default_properties_count]) = guards;
-		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
-	}
-
-	stub = 0;
-	return (zend_long *)zend_hash_add_mem(guards, member, &stub, sizeof(zend_ulong));
 }
 /* }}} */
 

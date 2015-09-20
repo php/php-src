@@ -26,6 +26,8 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"
 
+ZEND_API zend_long* (*zend_get_property_guard)(zend_object *zobj, zend_string *member);
+
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
 	objects->object_buckets = (zend_object **) emalloc(init_size * sizeof(zend_object*));
