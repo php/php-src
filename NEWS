@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
+  . Fixed bug #70528 (assert() with instanceof adds apostrophes around class
+    name). (Laruence)
   . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
     (Laruence)
 
