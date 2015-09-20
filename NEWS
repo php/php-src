@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - XMLRPC
   . Fixed bug #70526 (xmlrpc_set_type returns false on success). (Laruence)
 
+- XSL:
+  . Fixed bug #70535 (XSLT: free(): invalid pointer). (Laruence)
+
 17 Sep 2015, PHP 7.0.0 RC 3
 
 - Core:

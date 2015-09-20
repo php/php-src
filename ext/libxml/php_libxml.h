@@ -86,7 +86,7 @@ typedef struct _php_libxml_node_object {
 
 
 static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *obj) {
-	return (php_libxml_node_object *)((char*)(obj) - XtOffsetOf(php_libxml_node_object, std));
+	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
