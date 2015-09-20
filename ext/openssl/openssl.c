@@ -389,6 +389,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, iv)
+	ZEND_ARG_INFO(1, tag)
+	ZEND_ARG_INFO(0, aad)
+	ZEND_ARG_INFO(0, tag_length)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
@@ -397,6 +400,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, iv)
+	ZEND_ARG_INFO(1, tag)
+	ZEND_ARG_INFO(0, aad)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_cipher_iv_length, 0)
@@ -5189,6 +5194,16 @@ PHP_FUNCTION(openssl_digest)
 }
 /* }}} */
 
+/* Cipher mode info */
+struct php_openssl_cipher_mode {
+	zend_bool is_aead;
+	zend_bool is_single_run_aead;
+	int aead_ivlen_flag;
+	int aead_set_tag_flag;
+	int aead_get_tag_flag;
+};
+
+
 static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len)
 {
 	char *iv_new;
@@ -5223,7 +5238,7 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 
 }
 
-/* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv='']])
+/* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, long $tag_length = 16]]]]])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
 {
@@ -5306,7 +5321,7 @@ PHP_FUNCTION(openssl_encrypt)
 }
 /* }}} */
 
-/* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = '']])
+/* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = ''[, string $tag = ''[, string $aad = '']]]])
    Takes raw or base64 encoded string and decrypts it using given method and key */
 PHP_FUNCTION(openssl_decrypt)
 {
