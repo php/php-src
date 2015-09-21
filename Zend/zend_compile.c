@@ -6335,6 +6335,8 @@ void zend_compile_include_or_eval(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* Compiles isset(), empty(), and exists() */
+
 void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -6342,7 +6344,8 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	znode var_node;
 	zend_op *opline = NULL;
 
-	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY);
+	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY
+		|| ast->kind == ZEND_AST_EXISTS);
 
 	if (!zend_is_variable(var_ast) || zend_is_call(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
@@ -6350,10 +6353,13 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			zend_ast *not_ast = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
 			zend_compile_expr(result, not_ast);
 			return;
-		} else {
+		} else if (ast->kind == ZEND_AST_ISSET) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use isset() on the result of an expression "
 				"(you can use \"null !== expression\" instead)");
+		} else {	/* ZEND_AST_EXISTS */
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use exists() on the result of an expression ");
 		}
 	}
 
@@ -6383,7 +6389,8 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	result->op_type = opline->result_type = IS_TMP_VAR;
-	opline->extended_value |= ast->kind == ZEND_AST_ISSET ? ZEND_ISSET : ZEND_ISEMPTY;
+	opline->extended_value |= (ast->kind == ZEND_AST_ISSET ? ZEND_ISSET :
+		(ast->kind == ZEND_AST_EMPTY ? ZEND_ISEMPTY : ZEND_EXISTS));
 }
 /* }}} */
 
@@ -7178,6 +7185,7 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_ISSET:
 		case ZEND_AST_EMPTY:
+		case ZEND_AST_EXISTS:
 			zend_compile_isset_or_empty(result, ast);
 			return;
 		case ZEND_AST_SILENCE:

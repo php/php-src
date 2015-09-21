@@ -6377,6 +6377,8 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED|CONST|VAR)
 			result =
 				Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+		} else if (opline->extended_value & ZEND_EXISTS) {
+			result = (Z_TYPE_P(value) != IS_UNDEF);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			SAVE_OPLINE();
 			result = !i_zend_is_true(value);
@@ -6453,6 +6455,8 @@ ZEND_VM_C_LABEL(is_var_return):
 		if (opline->extended_value & ZEND_ISSET) {
 			result = value && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+		} else if (opline->extended_value & ZEND_EXISTS) {
+			result = value && (Z_TYPE_P(value) != IS_UNDEF);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = !value || !i_zend_is_true(value);
 		}
@@ -6535,6 +6539,8 @@ ZEND_VM_C_LABEL(num_index_prop):
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+		} else if (opline->extended_value & ZEND_EXISTS) {
+			result = value && (Z_TYPE_P(value) != IS_UNDEF);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -6554,8 +6560,8 @@ ZEND_VM_C_LABEL(num_index_prop):
 	    (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(container) == IS_OBJECT))) {
 		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
 			result =
-				((opline->extended_value & ZEND_ISSET) == 0) ^
-				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0);
+				((opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) == 0) ^
+				Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) == 0);
 		} else {
 			zend_error(E_NOTICE, "Trying to check element of non-array");
 			ZEND_VM_C_GOTO(isset_not_found);
@@ -6567,7 +6573,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			lval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(isset_str_offset):
 			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
-				if (opline->extended_value & ZEND_ISSET) {
+				if (opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) {
 					result = 1;
 				} else {
 					result = (Z_STRVAL_P(container)[lval] == '0');
@@ -6589,7 +6595,7 @@ ZEND_VM_C_LABEL(isset_str_offset):
 		}
 	} else {
 ZEND_VM_C_LABEL(isset_not_found):
-		result = ((opline->extended_value & ZEND_ISSET) == 0);
+		result = ((opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) == 0);
 	}
 
 ZEND_VM_C_LABEL(isset_dim_obj_exit):
@@ -6633,11 +6639,13 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|CV, CONST|
 	if (UNEXPECTED(!Z_OBJ_HT_P(container)->has_property)) {
 		zend_error(E_NOTICE, "Trying to check property of non-object");
 ZEND_VM_C_LABEL(isset_no_object):
-		result = ((opline->extended_value & ZEND_ISSET) == 0);
+		result = ((opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) == 0);
 	} else {
 		result =
-			((opline->extended_value & ZEND_ISSET) == 0) ^
-			Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
+			((opline->extended_value & (ZEND_ISSET | ZEND_EXISTS)) == 0) ^
+			Z_OBJ_HT_P(container)->has_property(container, offset,
+			((opline->extended_value & ZEND_EXISTS) ? 3 : ((opline->extended_value & ZEND_ISSET) == 0)),
+			((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 	}
 
 	FREE_OP2();

@@ -1422,6 +1422,13 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
+/* has_set_exists: defines the logic to implement (caller) :
+   0: isset()           (defined and not null)
+   1: !empty()          (defined and value is true)
+   2: property_exists() (don't call __isset() magic method)
+   3: exists()          (defined)
+*/
+
 static int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
@@ -1455,10 +1462,11 @@ found:
 					ZVAL_DEREF(value);
 					result = (Z_TYPE_P(value) != IS_NULL);
 					break;
-				default:
+				default: /* 1 */
 					result = zend_is_true(value);
 					break;
 				case 2:
+				case 3:
 					result = 1;
 					break;
 			}
@@ -1484,7 +1492,7 @@ found:
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv);
 				zval_ptr_dtor(&rv);
-				if (has_set_exists && result) {
+				if ((has_set_exists == 1) && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
 						zend_std_call_getter(&tmp_object, member, &rv);

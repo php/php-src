@@ -1417,6 +1417,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_EMPTY);
 }
 
+<ST_IN_SCRIPTING>"exists" {
+	RETURN_TOKEN(T_EXISTS);
+}
+
 <ST_IN_SCRIPTING>"__halt_compiler" {
 	RETURN_TOKEN(T_HALT_COMPILER);
 }
