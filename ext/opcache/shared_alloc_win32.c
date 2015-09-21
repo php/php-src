@@ -39,6 +39,7 @@ static void *mapping_base;
 
 static void zend_win_error_message(int type, char *msg, int err)
 {
+	// TODO opcache.name_prefix
 	LPVOID lpMsgBuf;
 	HANDLE h;
 	char *ev_msgs[2];
@@ -76,6 +77,7 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
+	// TODO opcache.name_prefix
 	static char newname[MAXPATHLEN + UNLEN + 4];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
@@ -87,6 +89,7 @@ static char *create_name_with_username(char *name)
 
 static char *get_mmap_base_file(void)
 {
+	// TODO opcache.name_prefix
 	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
@@ -123,50 +126,67 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
+static int zend_shared_alloc_parse_file(size_t requested_size, char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
 	char *mmap_base_file = get_mmap_base_file();
 	FILE *fp = fopen(mmap_base_file, "r");
-	MEMORY_BASIC_INFORMATION info;
-
+	
+	// TODO clarify error msgs
 	err = GetLastError();
 	if (!fp) {
 		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open base address file", err);
-		*error_in="fopen";
+		*error_in = "fopen";
 		return ALLOC_FAILURE;
 	}
 	if (!fscanf(fp, "%p", &wanted_mapping_base)) {
 		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read base address", err);
-		*error_in="read mapping base";
+		*error_in = "read mapping base";
 		fclose(fp);
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
 
+	return wanted_mapping_base;
+}
+
+#define ACCEL_LOG_DEBUG_EXTRA ACCEL_LOG_DEBUG+1
+static void** zend_shared_alloc_map(void **wanted_mapping_base, size_t requested_size)
+{
+	MEMORY_BASIC_INFORMATION info;
+	int err;
+
+	zend_accel_error(ACCEL_LOG_DEBUG_EXTRA, "zend_shared_alloc_map %p", wanted_mapping_base);
+
+
 	/* Check if the requested address space is free */
+	// TODO report which condition caused failure
+
+	// access denied?? - shouldn't happen
 	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
-	    info.State != MEM_FREE ||
-	    info.RegionSize < requested_size) {
-	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
+		// out of memory? - try closing some programs
+		info.State != MEM_FREE ||
+		// not enough memory available - try smaller cache size
+		info.RegionSize < requested_size) {
+		err = ERROR_INVALID_ADDRESS;
+		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address (VirtualQuery for memory info)", err);
 		return ALLOC_FAILURE;
-   	}
+	}
 
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
 	err = GetLastError();
 
 	if (mapping_base == NULL) {
 		if (err == ERROR_INVALID_ADDRESS) {
-			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
+			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address (MapViewOfFileEx to map file to memory address)", err);
 			return ALLOC_FAILURE;
 		}
 		return ALLOC_FAIL_MAPPING;
 	}
-	smm_shared_globals = (zend_smm_shared_globals *) mapping_base;
+	smm_shared_globals = (zend_smm_shared_globals *)mapping_base;
 
 	return SUCCESSFULLY_REATTACHED;
 }
@@ -178,45 +198,102 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
 	/* TODO:
-	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway
-	  through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if
-	  desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)
+	improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway
+	through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if
+	desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)
 	*/
 #if defined(_WIN64)
-	void *vista_mapping_base_set[] = { (void *) 0x0000100000000000, (void *) 0x0000200000000000, (void *) 0x0000300000000000, (void *) 0x0000700000000000, 0 };
+	void *vista_mapping_base_set[] = { (void *)0x0000100000000000, (void *)0x0000200000000000, (void *)0x0000300000000000, (void *)0x0000700000000000, 0 };
 #else
-	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
+	void *vista_mapping_base_set[] = { (void *)0x20000000, (void *)0x21000000, (void *)0x30000000, (void *)0x31000000, (void *)0x50000000, 0 };
 #endif
 	void **wanted_mapping_base = default_mapping_base_set;
 
 	zend_shared_alloc_lock_win32();
 	/* Mapping retries: When Apache2 restarts, the parent process startup routine
-	   can be called before the child process is killed. In this case, the map will fail
-	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
-	do {
-		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
-		err = GetLastError();
-		if (memfile == NULL) {
-			break;
+	can be called before the child process is killed. In this case, the map will fail
+	and we have to sleep some time (until the child releases the mapping object) and retry.*/
+
+	memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
+	err = GetLastError();
+	if (memfile != NULL) {
+		char *mmap_base_file = get_mmap_base_file();
+		// TODO error msg - if app pool is failing, make sure file is deleted for trying to restart again
+		zend_accel_error(ACCEL_LOG_DEBUG_EXTRA, "about to read base address file %s", mmap_base_file);
+
+		// don't need to reread the `base address file` every time (may replace the base address anyway)
+		FILE *fp = fopen(mmap_base_file, "r");
+
+		if (fp) {
+			if (!fscanf(fp, "%p", &wanted_mapping_base)) {
+				err = GetLastError();
+				zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read base address", err);
+				*error_in = "read mapping base";
+				fclose(fp);
+				CloseHandle(memfile);
+				return ALLOC_FAILURE;
+			}
+			fclose(fp);
 		}
 
-		ret =  zend_shared_alloc_reattach(requested_size, error_in);
-		err = GetLastError();
-		if (ret == ALLOC_FAIL_MAPPING) {
-			/* Mapping failed, wait for mapping object to get freed and retry */
-            CloseHandle(memfile);
-			memfile = NULL;
-			Sleep(1000 * (map_retries + 1));
-		} else {
-			zend_shared_alloc_unlock_win32();
-			return ret;
+		zend_accel_error(ACCEL_LOG_DEBUG_EXTRA, "Read base address from file %p", wanted_mapping_base);
+	
+		//
+		while (++map_retries < MAX_MAP_RETRIES) {
+			// try address from base address file first
+			ret = zend_shared_alloc_map(wanted_mapping_base, requested_size);
+			err = GetLastError();
+			if (ret == ALLOC_FAIL_MAPPING) {
+				/* Mapping failed, wait for mapping object to get freed and retry */
+				CloseHandle(memfile);
+				memfile = NULL;
+
+				if (map_retries < 6) {
+					// re-search memory addresses
+					wanted_mapping_base = vista_mapping_base_set[map_retries];
+					//  don't want to continue trying to attach to different base addresses forever ... may be proper reason to not attach (out of memory, etc...)
+					//  don't want to get stuck in an infinite loop
+					//
+					// the original loop was an objection to restarting the search for a new base address
+					// the original loop seems to only exist to deal with the `Apache2` situation above, however, without unlocking
+					// around Sleep(), it won't deal with the `Apache2` situation, so that objection may be invalid
+				}
+
+				// without unlocking around sleep, loop won't handle the `Apache2` situation above
+				// while locked, other process(fe: Apache2) would never get to call UnmapViewOfFile() or CloseHandle() in detach_segment()
+				//
+				// some process managers (FastCGI or PFTT) may kill off the other process(after timeout), in which case, memfile is never explicitly closed,
+				// so memfile and possibly membase(the view) may remain open for an undefined amount of time (memfile might not be closed for a while after
+				// process killed or crash, depends on Windows SKU/memory manager optimization, memory pressure or other factors at the time)
+				//
+				// @see Remark #3 on https://msdn.microsoft.com/en-us/library/windows/desktop/aa366882%28v=vs.85%29.aspx
+				zend_shared_alloc_unlock_win32();
+				Sleep(1000 * (map_retries + 1));
+				//
+				zend_shared_alloc_lock_win32();
+			} else {
+				zend_shared_alloc_unlock_win32();
+				return ret;
+			}
+
+
+			memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
+			err = GetLastError();
+			if (memfile == NULL) {
+				// break out of loop to create new `memfile`
+				break;
+			}
 		}
-	} while (++map_retries < MAX_MAP_RETRIES);
+	}
+	zend_accel_error(ACCEL_LOG_DEBUG_EXTRA, "out of mapping loop");
+
+
 
 	if (map_retries == MAX_MAP_RETRIES) {
 		zend_shared_alloc_unlock_win32();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open file mapping", err);
 		*error_in = "OpenFileMapping";
+		CloseHandle(memfile);
 		return ALLOC_FAILURE;
 	}
 
@@ -304,6 +381,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		if (!fp) {
 			zend_shared_alloc_unlock_win32();
 			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
+			// TODO better error message
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);
 			return ALLOC_FAILURE;
 		}
