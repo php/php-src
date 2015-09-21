@@ -601,7 +601,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-		char *path_info = FCGI_GETENV(request, "PATH_INFO");
+		char *path_info = request? FCGI_GETENV(request, "PATH_INFO") : NULL;
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
