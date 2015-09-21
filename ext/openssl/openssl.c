@@ -5243,8 +5243,9 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 PHP_FUNCTION(openssl_encrypt)
 {
 	zend_long options = 0;
-	char *data, *method, *password, *iv = "";
-	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len;
+	char *data, *method, *password, *iv = "", *aad = "";
+	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len, aad_len = 0, tag_len = 16;
+	zval *tag;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i=0, outlen, keylen;
@@ -5252,9 +5253,11 @@ PHP_FUNCTION(openssl_encrypt)
 	unsigned char *key;
 	zend_bool free_iv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsz/sl", &data, &data_len, &method, &method_len,
+					&password, &password_len, &options, &iv, &iv_len, &tag, &aad, &aad_len, &tag_len) == FAILURE) {
 		return;
 	}
+
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
@@ -5262,6 +5265,8 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
+	PHP_OPENSSL_CHECK_LONG_TO_INT(tag_len, tag_len);
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
 	if (keylen > password_len) {
@@ -5326,8 +5331,8 @@ PHP_FUNCTION(openssl_encrypt)
 PHP_FUNCTION(openssl_decrypt)
 {
 	zend_long options = 0;
-	char *data, *method, *password, *iv = "";
-	size_t data_len, method_len, password_len, iv_len = 0;
+	char *data, *method, *password, *iv = "", *tag = "", aad = "";
+	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
 	int i, outlen, keylen;
@@ -5336,7 +5341,8 @@ PHP_FUNCTION(openssl_decrypt)
 	zend_string *base64_str = NULL;
 	zend_bool free_iv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|ls", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsss", &data, &data_len, &method, &method_len,
+					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
 		return;
 	}
 
@@ -5346,6 +5352,8 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(tag_len, tag);
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
