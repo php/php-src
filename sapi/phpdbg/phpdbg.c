@@ -1305,7 +1305,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ext_stmt = 0;
 	zend_bool use_mm_wrappers = 0;
 	zend_bool is_exit;
-	int exit_status = 0;
+	int exit_status;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1359,6 +1359,7 @@ phpdbg_main:
 	php_optind = 1;
 	opt = 0;
 	sapi_name = NULL;
+	exit_status = 0;
 	if (settings) {
 		exec = settings->exec;
 	}
@@ -1752,6 +1753,7 @@ phpdbg_main:
 				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
+			oplog_file = NULL;
 		}
 
 		/* set default colors */
@@ -1969,6 +1971,10 @@ phpdbg_out:
 		zend_try {
 			php_request_shutdown(NULL);
 		} zend_end_try();
+
+		if (exit_status == 0) {
+			exit_status = EG(exit_status);
+		}
 
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 			if (PHPDBG_G(in_execution) || is_exit) {

@@ -589,7 +589,6 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 
 static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 {
-	fcgi_request *request = (fcgi_request*) SG(server_context);
 	size_t php_self_len;
 	char *php_self;
 
@@ -601,7 +600,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-		char *path_info = FCGI_GETENV(request, "PATH_INFO");
+		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1);
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
