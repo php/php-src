@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
     (Laruence)
 
+- FPM:
+  . Fixed bug #70538 ("php-fpm -i" crashes). (rainer dot jung at
+    kippdata dot de)
+
 - OpenSSL
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
 
