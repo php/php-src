@@ -427,9 +427,9 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 
 					tz->dst = gmt_offset->is_dst;
 					if (tz->tz_abbr) {
-						free(tz->tz_abbr);
+						timelib_free(tz->tz_abbr);
 					}
-					tz->tz_abbr = strdup(gmt_offset->abbr);
+					tz->tz_abbr = timelib_strdup(gmt_offset->abbr);
 					timelib_time_offset_dtor(gmt_offset);
 				}
 				return tmp;

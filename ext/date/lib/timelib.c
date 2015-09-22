@@ -28,7 +28,7 @@
 
 #define TIMELIB_TIME_FREE(m) 	\
 	if (m) {		\
-		free(m);	\
+		timelib_free(m);	\
 		m = NULL;	\
 	}			\
 
@@ -39,7 +39,7 @@
 timelib_time* timelib_time_ctor(void)
 {
 	timelib_time *t;
-	t = calloc(1, sizeof(timelib_time));
+	t = timelib_calloc(1, sizeof(timelib_time));
 
 	return t;
 }
@@ -47,7 +47,7 @@ timelib_time* timelib_time_ctor(void)
 timelib_rel_time* timelib_rel_time_ctor(void)
 {
 	timelib_rel_time *t;
-	t = calloc(1, sizeof(timelib_rel_time));
+	t = timelib_calloc(1, sizeof(timelib_rel_time));
 
 	return t;
 }
@@ -57,7 +57,7 @@ timelib_time* timelib_time_clone(timelib_time *orig)
 	timelib_time *tmp = timelib_time_ctor();
 	memcpy(tmp, orig, sizeof(timelib_time));
 	if (orig->tz_abbr) {
-		tmp->tz_abbr = strdup(orig->tz_abbr);
+		tmp->tz_abbr = timelib_strdup(orig->tz_abbr);
 	}
 	if (orig->tz_info) {
 		tmp->tz_info = orig->tz_info;
@@ -78,7 +78,7 @@ void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 	size_t tz_abbr_len = strlen(tz_abbr);
 
 	TIMELIB_TIME_FREE(tm->tz_abbr);
-	tm->tz_abbr = strdup(tz_abbr);
+	tm->tz_abbr = timelib_strdup(tz_abbr);
 	for (i = 0; i < tz_abbr_len; i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
 	}
@@ -98,7 +98,7 @@ void timelib_rel_time_dtor(timelib_rel_time* t)
 timelib_time_offset* timelib_time_offset_ctor(void)
 {
 	timelib_time_offset *t;
-	t = calloc(1, sizeof(timelib_time_offset));
+	t = timelib_calloc(1, sizeof(timelib_time_offset));
 
 	return t;
 }
@@ -112,8 +112,8 @@ void timelib_time_offset_dtor(timelib_time_offset* t)
 timelib_tzinfo* timelib_tzinfo_ctor(char *name)
 {
 	timelib_tzinfo *t;
-	t = calloc(1, sizeof(timelib_tzinfo));
-	t->name = strdup(name);
+	t = timelib_calloc(1, sizeof(timelib_tzinfo));
+	t->name = timelib_strdup(name);
 
 	return t;
 }
@@ -128,18 +128,18 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 	tmp->bit32.typecnt = tz->bit32.typecnt;
 	tmp->bit32.charcnt = tz->bit32.charcnt;
 
-	tmp->trans = (int32_t *) malloc(tz->bit32.timecnt * sizeof(int32_t));
-	tmp->trans_idx = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
+	tmp->trans = (int32_t *) timelib_malloc(tz->bit32.timecnt * sizeof(int32_t));
+	tmp->trans_idx = (unsigned char*) timelib_malloc(tz->bit32.timecnt * sizeof(unsigned char));
 	memcpy(tmp->trans, tz->trans, tz->bit32.timecnt * sizeof(int32_t));
 	memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 
-	tmp->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
 	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
 
-	tmp->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
+	tmp->timezone_abbr = (char*) timelib_malloc(tz->bit32.charcnt);
 	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);
 
-	tmp->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
+	tmp->leap_times = (tlinfo*) timelib_malloc(tz->bit32.leapcnt * sizeof(tlinfo));
 	memcpy(tmp->leap_times, tz->leap_times, tz->bit32.leapcnt * sizeof(tlinfo));
 
 	return tmp;
@@ -171,14 +171,14 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	int i;
 
 	for (i = 0; i < errors->warning_count; i++) {
-		free(errors->warning_messages[i].message);
+		timelib_free(errors->warning_messages[i].message);
 	}
-	free(errors->warning_messages);
+	timelib_free(errors->warning_messages);
 	for (i = 0; i < errors->error_count; i++) {
-		free(errors->error_messages[i].message);
+		timelib_free(errors->error_messages[i].message);
 	}
-	free(errors->error_messages);
-	free(errors);
+	timelib_free(errors->error_messages);
+	timelib_free(errors);
 }
 
 timelib_long timelib_date_to_int(timelib_time *d, int *error)

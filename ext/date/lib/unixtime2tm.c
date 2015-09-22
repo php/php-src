@@ -221,7 +221,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset)
 {
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
 	t->tz_abbr = NULL;
 
@@ -235,9 +235,9 @@ void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset)
 void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info)
 {
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
-	t->tz_abbr = strdup(abbr_info.abbr);
+	t->tz_abbr = timelib_strdup(abbr_info.abbr);
 
 	t->z = abbr_info.utc_offset;
 	t->have_zone = 1;
@@ -261,9 +261,9 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
 	t->dst = gmt_offset->is_dst;
 	t->tz_info = tz;
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
-	t->tz_abbr = strdup(gmt_offset->abbr);
+	t->tz_abbr = timelib_strdup(gmt_offset->abbr);
 	timelib_time_offset_dtor(gmt_offset);
 
 	t->have_zone = 1;
