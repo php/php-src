@@ -2065,10 +2065,6 @@ SPL_METHOD(RegexIterator, accept)
 
 		case REGIT_MODE_ALL_MATCHES:
 		case REGIT_MODE_GET_MATCH:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_match_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &zcount,
@@ -2077,10 +2073,6 @@ SPL_METHOD(RegexIterator, accept)
 			break;
 
 		case REGIT_MODE_SPLIT:
-//???			if (!use_copy) {
-//???				subject = estrndup(subject, subject_len);
-//???				use_copy = 1;
-//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_split_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &intern->current.data, -1, intern->u.regex.preg_flags);
