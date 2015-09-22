@@ -585,11 +585,6 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
-//???		zval offset_tmp;
-//???		ZVAL_COPY_VALUE(&offset_tmp, offset);
-//???		SEPARATE_ARG_IF_REF(&offset_tmp);
-//???		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, &offset_tmp);
-//???		zval_ptr_dtor(&offset_tmp);
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(offset);
