@@ -3806,32 +3806,28 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			ZEND_VM_C_GOTO(fcall_end);
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
-		EG(scope) = fbc->common.scope;
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-
 		/* Not sure what should be done here if it's a static method */
 		object = Z_OBJ(call->This);
-		if (EXPECTED(object != NULL)) {
-			call->prev_execute_data = execute_data;
-			EG(current_execute_data) = call;
-			object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
-			EG(current_execute_data) = call->prev_execute_data;
-		} else {
-			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
-#if 0
-			//TODO: implement clean exit ???
+		if (UNEXPECTED(object == NULL)) {
 			zend_vm_stack_free_args(call);
-
-			zend_vm_stack_free_call_frame(call);
-
 			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
 				zend_string_release(fbc->common.function_name);
 			}
 			efree(fbc);
-#endif
+			zend_vm_stack_free_call_frame(call);
+
+			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
 			HANDLE_EXCEPTION();
 		}
+
+		EG(scope) = fbc->common.scope;
+
+		ZVAL_NULL(EX_VAR(opline->result.var));
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+		object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
+		EG(current_execute_data) = call->prev_execute_data;
 
 		zend_vm_stack_free_args(call);
 
