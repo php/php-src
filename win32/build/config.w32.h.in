@@ -183,3 +183,4 @@
 
 #define HAVE_GETRUSAGE
 
+#define HAVE_FTOK 1
