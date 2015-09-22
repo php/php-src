@@ -101,7 +101,6 @@ struct _spl_filesystem_object {
 			char               escape;
 		} file;
 	} u;
-	spl_filesystem_iterator    *it;
 	zend_object        std;
 };
 
@@ -114,10 +113,12 @@ static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /
 
 static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
 {
-	obj->it = ecalloc(1, sizeof(spl_filesystem_iterator));
-	obj->it->object = (void *)obj;
-	zend_iterator_init(&obj->it->intern);
-	return obj->it;
+	spl_filesystem_iterator    *it;
+
+	it = ecalloc(1, sizeof(spl_filesystem_iterator));
+	it->object = (void *)obj;
+	zend_iterator_init(&it->intern);
+	return it;
 }
 
 static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
