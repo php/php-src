@@ -75,7 +75,7 @@ typedef unsigned char uchar;
 
 #define   RET(i)       {s->cur = cursor; return i;}
 
-#define timelib_string_free free
+#define timelib_string_free timelib_free
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
 #define TIMELIB_DEINIT timelib_string_free(str)
@@ -111,24 +111,24 @@ typedef struct Scanner {
 static void add_warning(Scanner *s, char *error)
 {
 	s->errors->warning_count++;
-	s->errors->warning_messages = realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
+	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
 	s->errors->warning_messages[s->errors->warning_count - 1].position = s->tok ? s->tok - s->str : 0;
 	s->errors->warning_messages[s->errors->warning_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->warning_messages[s->errors->warning_count - 1].message = strdup(error);
+	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
 }
 
 static void add_error(Scanner *s, char *error)
 {
 	s->errors->error_count++;
-	s->errors->error_messages = realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
+	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
 	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
 	s->errors->error_messages[s->errors->error_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->error_messages[s->errors->error_count - 1].message = strdup(error);
+	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
 }
 
 static char *timelib_string(Scanner *s)
 {
-	char *tmp = calloc(1, s->cur - s->tok + 1);
+	char *tmp = timelib_calloc(1, s->cur - s->tok + 1);
 	memcpy(tmp, s->tok, s->cur - s->tok);
 
 	return tmp;
@@ -152,10 +152,10 @@ static timelib_sll timelib_get_nr(char **ptr, int max_length)
 		++len;
 	}
 	end = *ptr;
-	str = calloc(1, end - begin + 1);
+	str = timelib_calloc(1, end - begin + 1);
 	memcpy(str, begin, end - begin);
 	tmp_nr = strtoll(str, NULL, 10);
-	free(str);
+	timelib_free(str);
 	return tmp_nr;
 }
 
@@ -232,10 +232,10 @@ static timelib_long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int 
 #define timelib_split_free(arg) {       \
 	int i;                         \
 	for (i = 0; i < arg.c; i++) {  \
-		free(arg.v[i]);            \
+		timelib_free(arg.v[i]);    \
 	}                              \
 	if (arg.v) {                   \
-		free(arg.v);               \
+		timelib_free(arg.v);       \
 	}                              \
 }
 
@@ -414,7 +414,7 @@ void timelib_strtointerval(char *s, size_t len,
 	char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;
@@ -440,7 +440,7 @@ void timelib_strtointerval(char *s, size_t len,
 	e++;
 
 	/* init cursor */
-	in.str = malloc((e - s) + YYMAXFILL);
+	in.str = timelib_malloc((e - s) + YYMAXFILL);
 	memset(in.str, 0, (e - s) + YYMAXFILL);
 	memcpy(in.str, s, (e - s));
 	in.lim = in.str + (e - s) + YYMAXFILL;
@@ -494,7 +494,7 @@ void timelib_strtointerval(char *s, size_t len,
 #endif
 	} while(t != EOI);
 
-	free(in.str);
+	timelib_free(in.str);
 	if (errors) {
 		*errors = in.errors;
 	} else {

@@ -110,7 +110,7 @@ typedef unsigned char uchar;
 
 #define   RET(i)       {s->cur = cursor; return i;}
 
-#define timelib_string_free free
+#define timelib_string_free timelib_free
 
 #define TIMELIB_HAVE_TIME() { if (s->time->have_time) { add_error(s, "Double time specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_time = 1; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; } }
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
@@ -322,7 +322,7 @@ uchar *fill(Scanner *s, uchar *cursor){
 			s->lim -= cnt;
 		}
 		if((s->top - s->lim) < BSIZE){
-			uchar *buf = (uchar*) malloc(((s->lim - s->bot) + BSIZE)*sizeof(uchar));
+			uchar *buf = (uchar*) timelib_malloc(((s->lim - s->bot) + BSIZE)*sizeof(uchar));
 			memcpy(buf, s->tok, s->lim - s->tok);
 			s->tok = buf;
 			s->ptr = &buf[s->ptr - s->bot];
@@ -330,7 +330,7 @@ uchar *fill(Scanner *s, uchar *cursor){
 			s->pos = &buf[s->pos - s->bot];
 			s->lim = &buf[s->lim - s->bot];
 			s->top = &s->lim[BSIZE];
-			free(s->bot);
+			timelib_free(s->bot);
 			s->bot = buf;
 		}
 		if((cnt = read(s->fd, (char*) s->lim, BSIZE)) != BSIZE){
@@ -345,37 +345,37 @@ uchar *fill(Scanner *s, uchar *cursor){
 static void add_warning(Scanner *s, char *error)
 {
 	s->errors->warning_count++;
-	s->errors->warning_messages = realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
+	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
 	s->errors->warning_messages[s->errors->warning_count - 1].position = s->tok ? s->tok - s->str : 0;
 	s->errors->warning_messages[s->errors->warning_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->warning_messages[s->errors->warning_count - 1].message = strdup(error);
+	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
 }
 
 static void add_error(Scanner *s, char *error)
 {
 	s->errors->error_count++;
-	s->errors->error_messages = realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
+	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
 	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
 	s->errors->error_messages[s->errors->error_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->error_messages[s->errors->error_count - 1].message = strdup(error);
+	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
 }
 
 static void add_pbf_warning(Scanner *s, char *error, char *sptr, char *cptr)
 {
 	s->errors->warning_count++;
-	s->errors->warning_messages = realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
+	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
 	s->errors->warning_messages[s->errors->warning_count - 1].position = cptr - sptr;
 	s->errors->warning_messages[s->errors->warning_count - 1].character = *cptr;
-	s->errors->warning_messages[s->errors->warning_count - 1].message = strdup(error);
+	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
 }
 
 static void add_pbf_error(Scanner *s, char *error, char *sptr, char *cptr)
 {
 	s->errors->error_count++;
-	s->errors->error_messages = realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
+	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
 	s->errors->error_messages[s->errors->error_count - 1].position = cptr - sptr;
 	s->errors->error_messages[s->errors->error_count - 1].character = *cptr;
-	s->errors->error_messages[s->errors->error_count - 1].message = strdup(error);
+	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
 }
 
 static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
@@ -439,7 +439,7 @@ static timelib_sll timelib_meridian_with_check(char **ptr, timelib_sll h)
 
 static char *timelib_string(Scanner *s)
 {
-	char *tmp = calloc(1, s->cur - s->tok + 1);
+	char *tmp = timelib_calloc(1, s->cur - s->tok + 1);
 	memcpy(tmp, s->tok, s->cur - s->tok);
 
 	return tmp;
@@ -466,10 +466,10 @@ static timelib_sll timelib_get_nr_ex(char **ptr, int max_length, int *scanned_le
 	if (scanned_length) {
 		*scanned_length = end - begin;
 	}
-	str = calloc(1, end - begin + 1);
+	str = timelib_calloc(1, end - begin + 1);
 	memcpy(str, begin, end - begin);
 	tmp_nr = strtoll(str, NULL, 10);
-	free(str);
+	timelib_free(str);
 	return tmp_nr;
 }
 
@@ -506,13 +506,13 @@ static double timelib_get_frac_nr(char **ptr, int max_length)
 		++len;
 	}
 	end = *ptr;
-	str = calloc(1, end - begin + 1);
+	str = timelib_calloc(1, end - begin + 1);
 	memcpy(str, begin, end - begin);
 	if (str[0] == ':') {
 		str[0] = '.';
 	}
 	tmp_nr = strtod(str, NULL);
-	free(str);
+	timelib_free(str);
 	return tmp_nr;
 }
 
@@ -548,7 +548,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 		++*ptr;
 	}
 	end = *ptr;
-	word = calloc(1, end - begin + 1);
+	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_reltext_lookup; tp->name; tp++) {
@@ -558,7 +558,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 		}
 	}
 
-	free(word);
+	timelib_free(word);
 	return value;
 }
 
@@ -581,7 +581,7 @@ static timelib_long timelib_lookup_month(char **ptr)
 		++*ptr;
 	}
 	end = *ptr;
-	word = calloc(1, end - begin + 1);
+	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_month_lookup; tp->name; tp++) {
@@ -590,7 +590,7 @@ static timelib_long timelib_lookup_month(char **ptr)
 		}
 	}
 
-	free(word);
+	timelib_free(word);
 	return value;
 }
 
@@ -628,7 +628,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 		++*ptr;
 	}
 	end = *ptr;
-	word = calloc(1, end - begin + 1);
+	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_relunit_lookup; tp->name; tp++) {
@@ -638,7 +638,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 		}
 	}
 
-	free(word);
+	timelib_free(word);
 	return value;
 }
 
@@ -723,7 +723,7 @@ static timelib_long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, in
 		++*ptr;
 	}
 	end = *ptr;
-	word = calloc(1, end - begin + 1);
+	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
 	if ((tp = abbr_search(word, -1, 0))) {
@@ -790,7 +790,7 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
 				found++;
 			}
 		}
-		free(tz_abbr);
+		timelib_free(tz_abbr);
 		*tz_not_found = (found == 0);
 		retval = offset;
 	}
@@ -803,10 +803,10 @@ timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_n
 #define timelib_split_free(arg) {       \
 	int i;                         \
 	for (i = 0; i < arg.c; i++) {  \
-		free(arg.v[i]);            \
+		timelib_free(arg.v[i]);    \
 	}                              \
 	if (arg.v) {                   \
-		free(arg.v);               \
+		timelib_free(arg.v);       \
 	}                              \
 }
 
@@ -1734,7 +1734,7 @@ timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_contai
 	char *e = s + len - 1;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;
@@ -1762,7 +1762,7 @@ timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_contai
 	}
 	e++;
 
-	in.str = malloc((e - s) + YYMAXFILL);
+	in.str = timelib_malloc((e - s) + YYMAXFILL);
 	memset(in.str, 0, (e - s) + YYMAXFILL);
 	memcpy(in.str, s, (e - s));
 	in.lim = in.str + (e - s) + YYMAXFILL;
@@ -1798,7 +1798,7 @@ timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_contai
 		add_warning(&in, "The parsed date was invalid");
 	}
 
-	free(in.str);
+	timelib_free(in.str);
 	if (errors) {
 		*errors = in.errors;
 	} else {
@@ -1849,7 +1849,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 	int allow_extra = 0;
 
 	memset(&in, 0, sizeof(in));
-	in.errors = malloc(sizeof(struct timelib_error_container));
+	in.errors = timelib_malloc(sizeof(struct timelib_error_container));
 	in.errors->warning_count = 0;
 	in.errors->warning_messages = NULL;
 	in.errors->error_count = 0;
@@ -2192,14 +2192,14 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 	if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
 
 	if (!parsed->tz_abbr) {
-		parsed->tz_abbr = now->tz_abbr ? strdup(now->tz_abbr) : NULL;
+		parsed->tz_abbr = now->tz_abbr ? timelib_strdup(now->tz_abbr) : NULL;
 	}
 	if (!parsed->tz_info) {
 		parsed->tz_info = now->tz_info ? (!(options & TIMELIB_NO_CLONE) ? timelib_tzinfo_clone(now->tz_info) : now->tz_info) : NULL;
 	}
 	if (parsed->zone_type == 0 && now->zone_type != 0) {
 		parsed->zone_type = now->zone_type;
-/*		parsed->tz_abbr = now->tz_abbr ? strdup(now->tz_abbr) : NULL;
+/*		parsed->tz_abbr = now->tz_abbr ? timelib_strdup(now->tz_abbr) : NULL;
 		parsed->tz_info = now->tz_info ? timelib_tzinfo_clone(now->tz_info) : NULL;
 */		parsed->is_localtime = 1;
 	}
