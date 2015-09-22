@@ -36,13 +36,27 @@
 #endif
 
 /* from postgresql/src/include/catalog/pg_type.h */
+#define BOOLLABEL   "bool"
 #define BOOLOID     16
+#define BYTEALABEL  "bytea"
 #define BYTEAOID    17
-#define INT8OID     20
+#define DATELABEL   "date"
+#define DATEOID     1082
+#define INT2LABEL   "int2"
 #define INT2OID     21
+#define INT4LABEL   "int4"
 #define INT4OID     23
-#define TEXTOID     25
+#define INT8LABEL   "int8"
+#define INT8OID     20
 #define OIDOID      26
+#define TEXTLABEL   "text"
+#define TEXTOID     25
+#define TIMESTAMPLABEL "timestamp"
+#define TIMESTAMPOID   1114
+#define VARCHARLABEL "varchar"
+#define VARCHAROID   1043
+
+
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -591,29 +605,46 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
-	/* Fetch metadata from Postgres system catalogue */
-	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
-	res = PQexec(S->H->server, q);
-	efree(q);
-
-	status = PQresultStatus(res);
-
-	if (status != PGRES_TUPLES_OK) {
-		/* Failed to get system catalogue, but return success
-		 * with the data we have collected so far
-		 */
-		goto done;
-	}
-
-	/* We want exactly one row returned */
-	if (1 != PQntuples(res)) {
-		goto done;
-	}
-
-	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
-done:
-	PQclear(res);
-	return 1;
+  switch (S->cols[colno].pgsql_type) {
+    case BOOLOID:
+      add_assoc_string(return_value, "native_type", BOOLLABEL);
+      break;
+    case BYTEAOID:
+      add_assoc_string(return_value, "native_type", BYTEALABEL);
+      break;
+    case INT8OID:
+      add_assoc_string(return_value, "native_type", INT8LABEL);
+      break;
+    case INT2OID:
+      add_assoc_string(return_value, "native_type", INT2LABEL);
+      break;
+    case INT4OID:
+      add_assoc_string(return_value, "native_type", INT4LABEL);
+      break;
+    case TEXTOID:
+      add_assoc_string(return_value, "native_type", TEXTLABEL);
+      break;
+    case VARCHAROID:
+      add_assoc_string(return_value, "native_type", VARCHARLABEL);
+      break;
+    case DATEOID:
+      add_assoc_string(return_value, "native_type", DATELABEL);
+      break;
+    case TIMESTAMPOID:
+      add_assoc_string(return_value, "native_type", TIMESTAMPLABEL);
+      break;
+    default:
+      /* Fetch metadata from Postgres system catalogue */
+      spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
+      res = PQexec(S->H->server, q);
+      efree(q);
+      status = PQresultStatus(res);
+      if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
+        add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
+      }
+      PQclear(res);
+   }
+   return 1;
 }
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
