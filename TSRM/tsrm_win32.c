@@ -437,6 +437,7 @@ static shm_pair *shm_get(int key, void *addr)
 	TWG(shm) = newptr;
 	ptr = newptr + TWG(shm_size);
 	TWG(shm_size)++;
+	memset(ptr, 0, sizeof(*ptr));
 	return ptr;
 }
 
