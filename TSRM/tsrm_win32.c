@@ -599,8 +599,10 @@ TSRM_API int shmget(int key, int size, int flags)
 		return -1;
 	}
 
-	sprintf(shm_segment, "TSRM_SHM_SEGMENT:%d", key);
-	sprintf(shm_info, "TSRM_SHM_DESCRIPTOR:%d", key);
+	snprintf(shm_segment, sizeof(shm_segment)-1, "TSRM_SHM_SEGMENT:%d", key);
+	snprintf(shm_info, sizeof(shm_info)-1, "TSRM_SHM_DESCRIPTOR:%d", key);
+	shm_segment[sizeof(shm_segment)-1] = '\0';
+	shm_info[sizeof(shm_info)-1] = '\0';
 
 	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
 	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
