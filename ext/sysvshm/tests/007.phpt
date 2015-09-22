@@ -17,7 +17,6 @@ var_dump(shm_remove(0));
 var_dump(shm_remove(""));
 
 var_dump(shm_remove($s));
-var_dump(shm_remove($s));
 
 shm_detach($s);
 var_dump(shm_remove($s));
@@ -37,7 +36,6 @@ NULL
 
 Warning: shm_remove() expects parameter 1 to be resource, string given in %s007.php on line %d
 NULL
-bool(true)
 bool(true)
 
 Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s007.php on line %d
