@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #70538 ("php-fpm -i" crashes). (rainer dot jung at
     kippdata dot de)
+  . Fixed bug #70279 (HTTP Authorization Header is sometimes passed to newer
+    reqeusts). (Laruence)
 
 - OpenSSL
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
