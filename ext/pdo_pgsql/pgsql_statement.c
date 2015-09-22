@@ -607,31 +607,31 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
   switch (S->cols[colno].pgsql_type) {
     case BOOLOID:
-      add_assoc_string(return_value, "native_type", BOOLLABEL, 1);
+      add_assoc_string(return_value, "native_type", BOOLLABEL);
       break;
     case BYTEAOID:
-      add_assoc_string(return_value, "native_type", BYTEALABEL, 1);
+      add_assoc_string(return_value, "native_type", BYTEALABEL);
       break;
     case INT8OID:
-      add_assoc_string(return_value, "native_type", INT8LABEL, 1);
+      add_assoc_string(return_value, "native_type", INT8LABEL);
       break;
     case INT2OID:
-      add_assoc_string(return_value, "native_type", INT2LABEL, 1);
+      add_assoc_string(return_value, "native_type", INT2LABEL);
       break;
     case INT4OID:
-      add_assoc_string(return_value, "native_type", INT4LABEL, 1);
+      add_assoc_string(return_value, "native_type", INT4LABEL);
       break;
     case TEXTOID:
-      add_assoc_string(return_value, "native_type", TEXTLABEL, 1);
+      add_assoc_string(return_value, "native_type", TEXTLABEL);
       break;
     case VARCHAROID:
-      add_assoc_string(return_value, "native_type", VARCHARLABEL, 1);
+      add_assoc_string(return_value, "native_type", VARCHARLABEL);
       break;
     case DATEOID:
-      add_assoc_string(return_value, "native_type", DATELABEL, 1);
+      add_assoc_string(return_value, "native_type", DATELABEL);
       break;
     case TIMESTAMPOID:
-      add_assoc_string(return_value, "native_type", TIMESTAMPLABEL, 1);
+      add_assoc_string(return_value, "native_type", TIMESTAMPLABEL);
       break;
     default:
       /* Fetch metadata from Postgres system catalogue */
@@ -640,7 +640,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
       efree(q);
       status = PQresultStatus(res);
       if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
-        add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
+        add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
         PQclear(res);
       }
    }
