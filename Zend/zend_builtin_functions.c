@@ -502,9 +502,13 @@ ZEND_FUNCTION(func_get_args)
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
 					q = p;
-					ZVAL_DEREF(q);
-					if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
-					ZEND_HASH_FILL_ADD(q);
+					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+						ZVAL_DEREF(q);
+						if (Z_OPT_REFCOUNTED_P(q)) { 
+							Z_ADDREF_P(q);
+						}
+						ZEND_HASH_FILL_ADD(q);
+					}
 					p++;
 					i++;
 				}
@@ -512,9 +516,13 @@ ZEND_FUNCTION(func_get_args)
 			}
 			while (i < arg_count) {
 				q = p;
-				ZVAL_DEREF(q);
-				if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
-				ZEND_HASH_FILL_ADD(q);
+				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) { 
+						Z_ADDREF_P(q);
+					}
+					ZEND_HASH_FILL_ADD(q);
+				}
 				p++;
 				i++;
 			}
@@ -2233,7 +2241,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
 					while (i < first_extra_arg) {
-						if (Z_TYPE_INFO_P(p) != IS_UNDEF) {
+						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							if (Z_OPT_REFCOUNTED_P(p)) {
 								Z_ADDREF_P(p);
 							}
@@ -2247,7 +2255,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			}
 
 			while (i < num_args) {
-				if (Z_TYPE_INFO_P(p) != IS_UNDEF) {
+				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 					if (Z_OPT_REFCOUNTED_P(p)) {
 						Z_ADDREF_P(p);
 					}
