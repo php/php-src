@@ -19,6 +19,8 @@ var_dump((($b, ...$a) ~> [$b] + $a)(1, 2, 3));
 
 var_dump(($b ~> $a ~> $a + $b)(1)(2));
 
+var_dump(($a ~> $b)(1));
+
 var_dump($a ~> $b);
 
 ?>
@@ -39,11 +41,10 @@ array(2) {
 int(3)
 
 Notice: Undefined variable: b in %s on line %d
+NULL
 object(Closure)#%d (2) {
   ["static"]=>
-  array(1) {
-    ["b"]=>
-    NULL
+  array(%d) {
   }
   ["parameter"]=>
   array(1) {

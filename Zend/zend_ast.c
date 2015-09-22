@@ -772,7 +772,7 @@ static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int in
 		if (i != 0) {
 			smart_str_appends(str, ", ");
 		}
-		if (list->child[i]->attr) {
+		if (list->child[i]->attr & IS_LEXICAL_REF) {
 			smart_str_appendc(str, '&');
 		}
 		smart_str_appendc(str, '$');

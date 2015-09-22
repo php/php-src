@@ -4597,7 +4597,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 static inline void zend_compile_closure_use(zend_ast *var_ast) {
 	zend_string *name = zend_ast_get_str(var_ast);
-	zend_bool by_ref = var_ast->attr;
+	zend_uchar fetch_type = var_ast->attr;
 	zval zv;
 
 	if (zend_string_equals_literal(name, "this")) {
@@ -4605,9 +4605,9 @@ static inline void zend_compile_closure_use(zend_ast *var_ast) {
 	}
 
 	ZVAL_NULL(&zv);
-	Z_CONST_FLAGS(zv) = by_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
+	Z_CONST_FLAGS(zv) = fetch_type;
 
-	zend_compile_static_var_common(var_ast, &zv, by_ref);
+	zend_compile_static_var_common(var_ast, &zv, (fetch_type & IS_LEXICAL_REF) != 0);
 }
 
 static void zend_compile_closure_search_use_variables(zend_ast* ast, HashTable *used) {
@@ -4616,14 +4616,13 @@ static void zend_compile_closure_search_use_variables(zend_ast* ast, HashTable *
 	}
 	if (ast->kind == ZEND_AST_VAR) {
 		zend_ast *var_ast = ast->child[0];
-		zend_bool by_ref = var_ast->attr;
+		uint16_t fetch_type = var_ast->attr;
 		zend_string *name = Z_STR_P(zend_ast_get_zval(var_ast));
 		if (!zend_hash_find(used, name)) {
 			/* We need a FETCH_IS to silence any warnings, but a simple ASSIGN op to not have references */
-			var_ast->attr = 0;
+			var_ast->attr = IS_LEXICAL_IMPLICIT;
 			zend_compile_closure_use(var_ast);
-			CG(active_op_array)->opcodes[CG(active_op_array)->last - 2].opcode = ZEND_FETCH_IS;
-			var_ast->attr = by_ref;
+			var_ast->attr = fetch_type;
 			zend_hash_add_empty_element(used, name);
 		}
 	} else if (zend_ast_is_list(ast)) {

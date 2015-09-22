@@ -272,10 +272,12 @@ ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash
 	zend_array *symbol_table;
 	HashTable *target = va_arg(args, HashTable*);
 	zend_bool is_ref;
+	zend_bool is_implicit;
 	zval tmp;
 
-	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
+	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF|IS_LEXICAL_IMPLICIT)) {
 		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
+		is_implicit = Z_CONST_FLAGS_P(p) & IS_LEXICAL_IMPLICIT;
 
 		symbol_table = zend_rebuild_symbol_table();
 		p = zend_hash_find(symbol_table, key->key);
@@ -286,19 +288,24 @@ ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash
 				ZVAL_NEW_REF(&tmp, &tmp);
 				zend_hash_add_new(symbol_table, key->key, &tmp);
 				Z_ADDREF_P(p);
+			} else if (is_implicit) {
+				ZVAL_UNDEF(&tmp);
 			} else {
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
+				zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(key->key));
 			}
 		} else {
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
 				p = Z_INDIRECT_P(p);
 				if (Z_TYPE_P(p) == IS_UNDEF) {
-					if (!is_ref) {
-						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
+					if (is_ref) {
+						ZVAL_NULL(p);
+					} else if (is_implicit) {
+						p = &tmp;
+						ZVAL_UNDEF(&tmp);
+					} else {
+						zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(key->key));
 						p = &tmp;
 						ZVAL_NULL(&tmp);
-					} else {
-						ZVAL_NULL(p);
 					}
 				}
 			}

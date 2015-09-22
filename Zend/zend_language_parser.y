@@ -1059,8 +1059,8 @@ lexical_var_list:
 ;
 
 lexical_var:
-		T_VARIABLE		{ $$ = $1; }
-	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = 1; }
+		T_VARIABLE		{ $$ = $1; $$->attr = IS_LEXICAL_VAR; }
+	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = IS_LEXICAL_REF; }
 ;
 
 function_call:
