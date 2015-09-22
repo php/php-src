@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 #include <ctype.h>
@@ -71,10 +75,11 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
-	
+	size_t tz_abbr_len = strlen(tz_abbr);
+
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
-	for (i = 0; i < strlen(tz_abbr); i++) {
+	for (i = 0; i < tz_abbr_len; i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
 	}
 }
@@ -176,13 +181,13 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	free(errors);
 }
 
-signed long timelib_date_to_int(timelib_time *d, int *error)
+timelib_long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
 	ts = d->sse;
 
-	if (ts < LONG_MIN || ts > LONG_MAX) {
+	if (ts < TIMELIB_LONG_MIN || ts > TIMELIB_LONG_MAX) {
 		if (error) {
 			*error = 1;
 		}
@@ -191,7 +196,7 @@ signed long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (signed long) d->sse;
+	return (timelib_long) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
@@ -286,10 +291,10 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 	printf("\n");
 }
 
-long timelib_parse_tz_cor(char **ptr)
+timelib_long timelib_parse_tz_cor(char **ptr)
 {
         char *begin = *ptr, *end;
-        long  tmp;
+        timelib_long  tmp;
 
         while (isdigit(**ptr) || **ptr == ':') {
                 ++*ptr;

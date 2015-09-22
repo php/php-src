@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
@@ -119,6 +123,24 @@ typedef unsigned __int64  uint64_t;
 #include <string.h>
 #else
 #include <strings.h>
+#endif
+
+#if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+typedef int64_t timelib_long;
+typedef uint64_t timelib_ulong;
+# define TIMELIB_LONG_MAX INT64_MAX
+# define TIMELIB_LONG_MIN INT64_MIN
+# define TIMELIB_ULONG_MAX UINT64_MAX
+# define TIMELIB_LONG_FMT "%" PRId64
+# define TIMELIB_ULONG_FMT "%" PRIu64
+#else
+typedef int32_t timelib_long;
+typedef uint32_t timelib_ulong;
+# define TIMELIB_LONG_MAX INT32_MAX
+# define TIMELIB_LONG_MIN INT32_MIN
+# define TIMELIB_ULONG_MAX UINT32_MAX
+# define TIMELIB_LONG_FMT "%" PRId32
+# define TIMELIB_ULONG_FMT "%" PRIu32
 #endif
 
 #if defined(_MSC_VER)
@@ -249,10 +271,10 @@ typedef struct timelib_error_message {
 } timelib_error_message;
 
 typedef struct timelib_error_container {
-	int                           warning_count;
+	struct timelib_error_message *error_messages;
 	struct timelib_error_message *warning_messages;
 	int                           error_count;
-	struct timelib_error_message *error_messages;
+	int                           warning_count;
 } timelib_error_container;
 
 typedef struct _timelib_tz_lookup_table {
