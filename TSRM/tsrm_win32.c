@@ -620,6 +620,11 @@ TSRM_API int shmget(int key, int size, int flags)
 	}
 
 	shm = shm_get(key, NULL);
+	if (!shm) {
+		UnmapViewOfFile(shm_handle);
+		UnmapViewOfFile(shm_handle);
+		return -1;
+	}
 	shm->segment = shm_handle;
 	shm->info	 = info_handle;
 	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
