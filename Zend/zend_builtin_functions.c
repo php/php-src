@@ -2233,8 +2233,12 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
 					while (i < first_extra_arg) {
-						if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-						ZEND_HASH_FILL_ADD(p);
+						if (Z_TYPE_INFO_P(p) != IS_UNDEF) {
+							if (Z_OPT_REFCOUNTED_P(p)) {
+								Z_ADDREF_P(p);
+							}
+							ZEND_HASH_FILL_ADD(p);
+						}
 						p++;
 						i++;
 					}
@@ -2243,8 +2247,12 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			}
 
 			while (i < num_args) {
-				if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-				ZEND_HASH_FILL_ADD(p);
+				if (Z_TYPE_INFO_P(p) != IS_UNDEF) {
+					if (Z_OPT_REFCOUNTED_P(p)) {
+						Z_ADDREF_P(p);
+					}
+					ZEND_HASH_FILL_ADD(p);
+				}
 				p++;
 				i++;
 			}
