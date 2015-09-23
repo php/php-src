@@ -1005,6 +1005,9 @@ END_EXTERN_C()
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
 
+/* force IS_OBJ_USE_GUARDS for all classes */
+#define ZEND_COMPILE_GUARDS						(1<<9)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 
