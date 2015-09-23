@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70555 (fun_get_arg() on unsetted vars return UNKNOW). (Laruence)
+  . Fixed bug #70548 (Redundant information printed in case of uncaught engine
+    exception). (Laruence)
   . Fixed bug #70547 (unsetting function variables corrupts backtrace).
     (Laruence)
   . Fixed bug #70528 (assert() with instanceof adds apostrophes around class
