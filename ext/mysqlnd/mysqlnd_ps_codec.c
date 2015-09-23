@@ -437,6 +437,12 @@ void _mysqlnd_init_ps_fetch_subsystem()
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].php_type= IS_STRING;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TIMESTAMP].can_ret_as_str_in_uni	= TRUE;
 
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].func	= ps_fetch_string;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].php_type = IS_STRING;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].is_possibly_blob = TRUE;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_JSON].can_ret_as_str_in_uni	= TRUE;
+
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].func	= ps_fetch_string;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].pack_len= MYSQLND_PS_SKIP_RESULT_STR;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY_BLOB].php_type = IS_STRING;

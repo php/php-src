@@ -2215,6 +2215,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn TS
 PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
 {
 	switch(field_type) {
+		case FIELD_TYPE_JSON:
+			return "json";
 		case FIELD_TYPE_STRING:
 		case FIELD_TYPE_VAR_STRING:
 			return "string";

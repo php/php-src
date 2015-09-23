@@ -153,6 +153,7 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_datetime") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_timestamp") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_string") },
+	{ MYSQLND_STR_W_LEN("proto_binary_fetched_json") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_blob") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_enum") },
 	{ MYSQLND_STR_W_LEN("proto_binary_fetched_set") },
