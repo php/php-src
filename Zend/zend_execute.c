@@ -926,14 +926,8 @@ static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const ch
 		fclass = "";
 	}
 
-	if (zf->common.type == ZEND_USER_FUNCTION) {
-		zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned in %s on line %d",
-			fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind,
-			ZSTR_VAL(zf->op_array.filename), EG(current_execute_data)->opline->lineno);
-	} else {
-		zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
-			fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
-	}
+	zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
+		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
 static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
