@@ -3,17 +3,30 @@ PHP                                                                        NEWS
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
+  . Fixed bug #70557 (Memleak on return type verifying failed). (Laruence)
+  . Fixed bug #70555 (fun_get_arg() on unsetted vars return UNKNOW). (Laruence)
+  . Fixed bug #70548 (Redundant information printed in case of uncaught engine
+    exception). (Laruence)
+  . Fixed bug #70547 (unsetting function variables corrupts backtrace).
+    (Laruence)
   . Fixed bug #70528 (assert() with instanceof adds apostrophes around class
     name). (Laruence)
   . Fixed bug #70481 (Memory leak in auto_global_copy_ctor() in ZTS build).
     (Laruence)
 
 - DOM:
-  . Fixed bug #70558 ("Couldn't fetch" error in
-    DOMDocument::registerNodeClass()). (Laruence)
+  . Fixed bug #70558 ("Couldn't fetch" error in 
+    DOMDocument::registerNodeClass()). (Laruence) 
+
+- FPM:
+  . Fixed bug #70538 ("php-fpm -i" crashes). (rainer dot jung at
+    kippdata dot de)
+  . Fixed bug #70279 (HTTP Authorization Header is sometimes passed to newer
+    reqeusts). (Laruence)
 
 - OpenSSL
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
+  . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
