@@ -1057,7 +1057,8 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
-	//??? if (basenode)
+	ZEND_ASSERT(basenode != NULL);
+
 	ZVAL_OBJ(&mapptr->baseobj_zv, &basenode->std);
 	Z_ADDREF(mapptr->baseobj_zv);
 
