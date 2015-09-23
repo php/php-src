@@ -2180,12 +2180,14 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	zend_attach_symbol_table(execute_data);
-
-	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+			GC_REFCOUNT(Z_OBJ(EX(This)))--;
+		}
 	}
+
+	zend_attach_symbol_table(execute_data);
 
 	if (!op_array->run_time_cache) {
 		op_array->run_time_cache = emalloc(op_array->cache_size);
@@ -2208,6 +2210,13 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
+		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+			GC_REFCOUNT(Z_OBJ(EX(This)))++;
+			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+				GC_REFCOUNT(Z_OBJ(EX(This)))--;
+			}
+		}
+
 		zend_attach_symbol_table(execute_data);
 	} else {
 		uint32_t first_extra_arg, num_args;
@@ -2258,11 +2267,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 				var++;
 			} while (var != end);
 		}
-	}
 
-	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
-		GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+			GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		}
 	}
 
 	if (!op_array->run_time_cache) {
