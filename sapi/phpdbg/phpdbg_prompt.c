@@ -744,6 +744,8 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		if (restore) {
+			zend_exception_restore();
+			zend_try_exception_handler();
 			if (EG(exception)) {
 				phpdbg_handle_exception();
 			}
@@ -1473,6 +1475,11 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			zend_timeout(0);
 		}
 #endif
+
+		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
+			phpdbg_print_opline_ex(execute_data, 0);
+			goto next;
+		}
 
 		/* check for uncaught exceptions */
 		if (exception && PHPDBG_G(handled_exception) != exception && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
