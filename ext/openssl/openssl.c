@@ -5198,13 +5198,39 @@ PHP_FUNCTION(openssl_digest)
 struct php_openssl_cipher_mode {
 	zend_bool is_aead;
 	zend_bool is_single_run_aead;
-	int aead_ivlen_flag;
-	int aead_set_tag_flag;
 	int aead_get_tag_flag;
+	int aead_set_tag_flag;
+	int aead_ivlen_flag;
 };
 
+static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type) /* {{{ */
+{
+	switch (EVP_CIPHER_mode(cipher_type)) {
+#ifdef EVP_CIPH_GCM_MODE
+		case EVP_CIPH_GCM_MODE:
+			mode->is_aead = 1;
+			mode->is_single_run_aead = 0;
+			mode->aead_get_tag_flag = EVP_CTRL_GCM_GET_TAG;
+			mode->aead_set_tag_flag = EVP_CTRL_GCM_SET_TAG;
+			mode->aead_ivlen_flag = EVP_CTRL_GCM_SET_IVLEN;
+			break;
+#endif
+#ifdef EVP_CIPH_CCM_MODE
+		case EVP_CIPH_CCM_MODE:
+			mode->is_aead = 1;
+			mode->is_single_run_aead = 1;
+			mode->aead_get_tag_flag = EVP_CTRL_CCM_GET_TAG;
+			mode->aead_set_tag_flag = EVP_CTRL_CCM_SET_TAG;
+			mode->aead_ivlen_flag = EVP_CTRL_CCM_SET_IVLEN;
+			break;
+#endif
+		default:
+			memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
+	}
+}
+/* }}} */
 
-static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len)
+static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len) /* {{{ */
 {
 	char *iv_new;
 
@@ -5237,6 +5263,7 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 	return 1;
 
 }
+/* }}} */
 
 /* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, long $tag_length = 16]]]]])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
@@ -5248,6 +5275,7 @@ PHP_FUNCTION(openssl_encrypt)
 	zval *tag;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
+	struct php_openssl_cipher_mode mode;
 	int i=0, outlen, keylen;
 	zend_string *outbuf;
 	unsigned char *key;
@@ -5276,6 +5304,8 @@ PHP_FUNCTION(openssl_encrypt)
 	} else {
 		key = (unsigned char*)password;
 	}
+
+	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
 	if (iv_len == 0 && max_iv_len > 0) {
@@ -5331,10 +5361,11 @@ PHP_FUNCTION(openssl_encrypt)
 PHP_FUNCTION(openssl_decrypt)
 {
 	zend_long options = 0;
-	char *data, *method, *password, *iv = "", *tag = "", aad = "";
+	char *data, *method, *password, *iv = "", *tag = "", *aad = "";
 	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX cipher_ctx;
+	struct php_openssl_cipher_mode mode;
 	int i, outlen, keylen;
 	zend_string *outbuf;
 	unsigned char *key;
@@ -5360,6 +5391,7 @@ PHP_FUNCTION(openssl_decrypt)
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
 	}
+	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (!(options & OPENSSL_RAW_DATA)) {
 		base64_str = php_base64_decode((unsigned char*)data, (int)data_len);
