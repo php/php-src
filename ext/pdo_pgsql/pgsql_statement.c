@@ -641,8 +641,8 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
       status = PQresultStatus(res);
       if (status == PGRES_TUPLES_OK && 1 == PQntuples(res)) {
         add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
-        PQclear(res);
       }
+      PQclear(res);
    }
    return 1;
 }
