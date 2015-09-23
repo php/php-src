@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 
 - Phpdbg:
   . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
+  . Fixed bug #70531 (Run and quit mode (-qrr) should not fallback to
+    interactive mode). (Bob)
 
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
