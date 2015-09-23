@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
   . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
+- Phpdbg:
+  . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
+
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
     (Yasuo)

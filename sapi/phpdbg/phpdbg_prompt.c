@@ -744,6 +744,8 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		if (restore) {
+			zend_exception_restore();
+			zend_try_exception_handler();
 			if (EG(exception)) {
 				phpdbg_handle_exception();
 			}
