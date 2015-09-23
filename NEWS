@@ -24,6 +24,7 @@ PHP                                                                        NEWS
     DH key resource). (Jakub Zelenka)
   . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
   . Fixed bug #60632 (openssl_seal fails with AES). (Jakub Zelenka)
+  . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
 - PDO:
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
