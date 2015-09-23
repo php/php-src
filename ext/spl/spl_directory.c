@@ -845,7 +845,8 @@ SPL_METHOD(DirectoryIterator, seek)
 			retval = NULL;
 		}
 		if (!valid) {
-			break;
+			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", pos);
+			return;
 		}
 		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_next, "next", &retval);
 		if (retval) {
