@@ -63,6 +63,8 @@ PHP                                                                        NEWS
     (cmb, colinodell)
 
 - Mysqlnd:
+  . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
+   (Andrey)
   . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
     a server). (Sergei Turchanov)
 
