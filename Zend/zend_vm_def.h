@@ -3923,7 +3923,11 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			FREE_OP1();
+			if (OP1_TYPE == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
+				FREE_OP1();
+			}
 		}
 #endif
 	}

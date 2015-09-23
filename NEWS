@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
+  . Fixed bug #70557 (Memleak on return type verifying failed). (Laruence)
   . Fixed bug #70555 (fun_get_arg() on unsetted vars return UNKNOW). (Laruence)
   . Fixed bug #70548 (Redundant information printed in case of uncaught engine
     exception). (Laruence)
