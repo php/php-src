@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
+  . Fixed bug #70555 (fun_get_arg() on unsetted vars return UNKNOW). (Laruence)
   . Fixed bug #70547 (unsetting function variables corrupts backtrace).
     (Laruence)
   . Fixed bug #70528 (assert() with instanceof adds apostrophes around class
