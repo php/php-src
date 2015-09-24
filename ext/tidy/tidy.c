@@ -70,7 +70,7 @@
 #define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
     if(_val) { \
         if(Z_TYPE_P(_val) == IS_ARRAY) { \
-            _php_tidy_apply_config_array(_doc, HASH_OF(_val)); \
+            _php_tidy_apply_config_array(_doc, Z_ARRVAL_P(_val)); \
         } else { \
             convert_to_string_ex(_val); \
             TIDY_OPEN_BASE_DIR_CHECK(Z_STRVAL_P(_val)); \

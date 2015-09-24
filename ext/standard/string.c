@@ -3453,7 +3453,7 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (ac == 2) {
-		HashTable *pats = HASH_OF(from);
+		HashTable *pats = Z_ARRVAL_P(from);
 
 		if (zend_hash_num_elements(pats) < 1) {
 			RETURN_STR_COPY(str);

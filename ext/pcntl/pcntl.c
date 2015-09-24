@@ -871,7 +871,7 @@ PHP_FUNCTION(pcntl_exec)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		/* Build argument list */
-		args_hash = HASH_OF(args);
+		args_hash = Z_ARRVAL_P(args);
 		argc = zend_hash_num_elements(args_hash);
 
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
@@ -893,7 +893,7 @@ PHP_FUNCTION(pcntl_exec)
 
 	if ( ZEND_NUM_ARGS() == 3 ) {
 		/* Build environment pair list */
-		envs_hash = HASH_OF(envs);
+		envs_hash = Z_ARRVAL_P(envs);
 		envc = zend_hash_num_elements(envs_hash);
 
 		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
