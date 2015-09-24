@@ -1674,11 +1674,9 @@ SPL_METHOD(Array, serialize)
 		rebuild_object_properties(&intern->std);
 	}
 
-	ZVAL_ARR(&members, zend_array_dup(intern->std.properties));
+	ZVAL_ARR(&members, intern->std.properties);
 
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
-
-	zval_ptr_dtor(&members);
 
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
