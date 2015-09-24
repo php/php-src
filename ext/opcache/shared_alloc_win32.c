@@ -204,7 +204,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		err = GetLastError();
 		if (ret == ALLOC_FAIL_MAPPING) {
 			/* Mapping failed, wait for mapping object to get freed and retry */
-            CloseHandle(memfile);
+			CloseHandle(memfile);
 			memfile = NULL;
 			if (++map_retries >= MAX_MAP_RETRIES) {
 				break;
