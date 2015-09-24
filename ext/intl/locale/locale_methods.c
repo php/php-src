@@ -826,7 +826,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
-			HashTable *arr = HASH_OF(ele_value);
+			HashTable *arr = Z_ARRVAL_P(ele_value);
 			zval *data;
 
 			ZEND_HASH_FOREACH_VAL(arr, data) {
@@ -922,7 +922,7 @@ PHP_FUNCTION(locale_compose)
 		RETURN_FALSE;
 	}
 
-	hash_arr = HASH_OF( arr );
+	hash_arr = Z_ARRVAL_P( arr );
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 )
 		RETURN_FALSE;
@@ -1551,7 +1551,7 @@ PHP_FUNCTION(locale_lookup)
 		loc_range = intl_locale_get_default();
 	}
 
-	hash_arr = HASH_OF(arr);
+	hash_arr = Z_ARRVAL_P(arr);
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 ) {
 		RETURN_EMPTY_STRING();
