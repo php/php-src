@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #70279 (HTTP Authorization Header is sometimes passed to newer
     reqeusts). (Laruence)
 
+- Opcache
+  . Attmpt to fix "Unable to reattach to base address" problem. (Matt Ficken)
+
 - OpenSSL
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
   . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
