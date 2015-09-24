@@ -40,6 +40,9 @@ PHP                                                                        NEWS
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
     (Yasuo)
 
+- SQLite3:
+  . Fixed bug #70571 (Memory leak in sqlite3_do_callback). (Adam)
+
 - XMLRPC
   . Fixed bug #70526 (xmlrpc_set_type returns false on success). (Laruence)
 
