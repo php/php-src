@@ -1044,7 +1044,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 		/* resize buffer if it's much larger than the result.
 		 * Only needed if the user requested a buffer size. */
-		if (line_len < len / 2) {
+		if (line_len < (size_t)len / 2) {
 			str = zend_string_truncate(str, line_len, 0);
 		} else {
 			ZSTR_LEN(str) = line_len;

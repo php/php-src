@@ -7422,7 +7422,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				} else if (Z_TYPE_P(dim) != IS_STRING || is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, 1) != IS_LONG) {
 					return;
 				}
-				if (offset < 0 || offset >= Z_STRLEN_P(container)) {
+				if (offset < 0 || (size_t)offset >= Z_STRLEN_P(container)) {
 					return;
 				}
 				c = (zend_uchar) Z_STRVAL_P(container)[offset];
