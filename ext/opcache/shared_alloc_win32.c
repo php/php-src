@@ -329,10 +329,13 @@ static int detach_segment(zend_shared_segment *shared_segment)
 	zend_shared_alloc_lock_win32();
 	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
+		mapping_base = NULL;
 	}
 	CloseHandle(memfile);
+	memfile = NULL;
 	zend_shared_alloc_unlock_win32();
 	CloseHandle(memory_mutex);
+	memory_mutex = NULL;
 	return 0;
 }
 
