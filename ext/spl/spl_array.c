@@ -386,12 +386,10 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 		}
 	}
 	ret = spl_array_get_dimension_ptr(check_inherited, object, offset, type);
-	//!!! FIXME?
-	//	ZVAL_COPY(result, ret);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
-	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1)
+	 * by separating (if necessary) and returning as IS_REFERENCE (with refcount == 1)
 	 */
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
@@ -868,9 +866,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_get_dimension_ptr(1, object, member, type);
 	}
-	//!!! FIXME
-	//return std_object_handlers.get_property_ptr_ptr(object, member, type, key);
-	return NULL;
+	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
 } /* }}} */
 
 static int spl_array_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
@@ -1665,7 +1661,6 @@ SPL_METHOD(Array, serialize)
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
-	//!!! php_var_serialize need to be modified
 	php_var_serialize(&buf, &flags, &var_hash);
 
 	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF)) {
