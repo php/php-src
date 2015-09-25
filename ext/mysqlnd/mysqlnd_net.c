@@ -206,8 +206,10 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		if (hashed_details) {
 			mnd_sprintf_free(hashed_details);
 		}
-		errcode = CR_CONNECTION_ERROR;
-		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
+		SET_CLIENT_ERROR(*error_info,
+						 CR_CONNECTION_ERROR,
+						 UNKNOWN_SQLSTATE,
+						 errstr? errstr:"Unknown error while connecting");
 		if (errstr) {
 			/* no mnd_ since we don't allocate it */
 			efree(errstr);
