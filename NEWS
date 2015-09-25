@@ -76,6 +76,7 @@ PHP                                                                        NEWS
    (Andrey)
   . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
     a server). (Sergei Turchanov)
+  . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
 
 - Opcache:
   . Fixed bug #70423 (Warning Internal error: wrong size calculation). (Anatol)
