@@ -337,8 +337,12 @@ register const zend_op* volatile opline __asm__(ZEND_VM_IP_GLOBAL_REG);
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 # define ZEND_OPCODE_HANDLER_RET void
 # define ZEND_VM_TAIL_CALL(call) call; return
-# define ZEND_VM_CONTINUE()      return
-# define ZEND_VM_RETURN()        opline = NULL; ZEND_VM_CONTINUE()
+# ifdef ZEND_VM_TAIL_CALL_DISPATCH
+#  define ZEND_VM_CONTINUE()     ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return
+# else
+#  define ZEND_VM_CONTINUE()     return
+# endif
+# define ZEND_VM_RETURN()        opline = NULL; return
 #else
 # define ZEND_OPCODE_HANDLER_RET int
 # define ZEND_VM_TAIL_CALL(call) return call
