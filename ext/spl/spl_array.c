@@ -1099,11 +1099,19 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			ZVAL_COPY(&intern->array, array);
 			if (handler != std_object_handlers.get_properties
 				|| !spl_array_get_hash_table(intern, 0)) {
+				ZVAL_UNDEF(&intern->array);
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
 			}
+			//??? TODO: try to avoid array duplication
+			if (Z_OBJ_P(array)->properties && GC_REFCOUNT(Z_OBJ_P(array)->properties) > 1) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array)->properties)--;
+				}
+				Z_OBJ_P(array)->properties = zend_array_dup(Z_OBJ_P(array)->properties);
+			}
+			ZVAL_COPY(&intern->array, array);
 		}
 	}
 
