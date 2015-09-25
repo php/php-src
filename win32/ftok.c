@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include "ftok.h"
+#include "ipc.h"
 
 #include <windows.h>
 #include <sys/stat.h>

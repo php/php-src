@@ -27,7 +27,7 @@
 #endif
 
 #ifdef PHP_WIN32
-#include "win32/ftok.h"
+#include "win32/ipc.h"
 #endif
 
 #if HAVE_FTOK
