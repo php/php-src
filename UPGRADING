@@ -710,6 +710,9 @@ out, that the corresponding SDK isn't available anymore.
 - GD
   The bundled libgd requires libwebp instead of libvpx for the WebP functionality.
 
+- Openssl
+  minimum supported OpenSSL version series was raised to 0.9.8
+
 ========================================
 10. New Global Constants
 ========================================
