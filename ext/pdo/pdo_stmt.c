@@ -2210,14 +2210,21 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	zend_function *fbc = NULL;
 	zend_string *lc_method_name;
 	zend_object *object = *object_pp;
+	zend_function *fbc_fallback = NULL;
 
 	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
 	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 
 	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
+
+		/* Prepare fallback by running standard method for functions.
+		 * If the function does not find a method to instanciate it will return this fallback method. */
+		fbc_fallback = std_object_handlers.get_method(object_pp, method_name, key);
+
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 		/* instance not created by PDO object */
 		if (!stmt->dbh) {
+			fbc = fbc_fallback;
 			goto out;
 		}
 		/* not a pre-defined method, nor a user-defined method; check
@@ -2226,11 +2233,13 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 			if (!pdo_hash_methods(Z_PDO_OBJECT_P(&stmt->database_object_handle),
 				PDO_DBH_DRIVER_METHOD_KIND_STMT)
 				|| !stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
+				fbc = fbc_fallback;
 				goto out;
 			}
 		}
 
 		if ((fbc = zend_hash_find_ptr(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT], lc_method_name)) == NULL) {
+			fbc = fbc_fallback;
 			goto out;
 		}
 		/* got it */
