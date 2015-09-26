@@ -1049,24 +1049,17 @@ static PHP_METHOD(PDO, errorInfo)
 
 	if (dbh->query_stmt) {
 		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
-		if(!strncmp(dbh->query_stmt->error_code, PDO_ERR_NONE, 5)) {
-			add_next_index_null(return_value);
-			add_next_index_null(return_value);
-			return;
-		}
+		if(!strncmp(dbh->error_code, PDO_ERR_NONE, 5)) goto fill_array;
 	} else {
 		add_next_index_string(return_value, dbh->error_code, 1);
-		if(!strncmp(dbh->error_code, PDO_ERR_NONE, 5)) {
-			add_next_index_null(return_value);
-			add_next_index_null(return_value);
-			return;
-		}
+		if(!strncmp(dbh->error_code, PDO_ERR_NONE, 5)) goto fill_array;
 	}
 
 	if (dbh->methods->fetch_err) {
 		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value TSRMLS_CC);
 	}
 
+fill_array:
 	/**
 	 * In order to be consistent, we have to make sure we add the good amount
 	 * of nulls depending on the current number of elements. We make a simple
