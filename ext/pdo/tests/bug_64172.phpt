@@ -33,7 +33,7 @@ var_dump($db->errorInfo());
 --EXPECTF--
 ===FAIL===
 
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 1 no such table: test in /home/danielp/phpwork/php-src5/ext/pdo/tests/bug_64172.php on line 8
+Warning: PDO::exec(): SQLSTATE[HY000]: General error: 1 no such table: test in %s on line %d
 array(3) {
   [0]=>
   string(5) "HY000"
@@ -53,7 +53,7 @@ array(3) {
 }
 ===FAIL===
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 1 no such table: test in /home/danielp/phpwork/php-src5/ext/pdo/tests/bug_64172.php on line 15
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 1 no such table: test in %s on line %d
 array(3) {
   [0]=>
   string(5) "HY000"
