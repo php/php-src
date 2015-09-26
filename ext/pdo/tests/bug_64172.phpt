@@ -33,14 +33,14 @@ var_dump($db->errorInfo());
 --EXPECTF--
 ===FAIL===
 
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 1 no such table: test in %s on line %d
+Warning: PDO::exec(): SQLSTATE[%s]: %s
 array(3) {
   [0]=>
-  string(5) "HY000"
+  string(5) "%s"
   [1]=>
   int(1)
   [2]=>
-  string(19) "no such table: test"
+  string(%d) "%s"
 }
 ===GOOD===
 array(3) {
@@ -53,14 +53,14 @@ array(3) {
 }
 ===FAIL===
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 1 no such table: test in %s on line %d
+Warning: PDO::query(): SQLSTATE[%s]: %s
 array(3) {
   [0]=>
-  string(5) "HY000"
+  string(5) "%s"
   [1]=>
   int(1)
   [2]=>
-  string(19) "no such table: test"
+  string(%d) "%s"
 }
 ===GOOD===
 array(3) {
