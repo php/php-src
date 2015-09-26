@@ -1049,8 +1049,18 @@ static PHP_METHOD(PDO, errorInfo)
 
 	if (dbh->query_stmt) {
 		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
+		if(!strncmp(dbh->query_stmt->error_code, PDO_ERR_NONE, 5)) {
+			add_next_index_null(return_value);
+			add_next_index_null(return_value);
+			return;
+		}
 	} else {
 		add_next_index_string(return_value, dbh->error_code, 1);
+		if(!strncmp(dbh->error_code, PDO_ERR_NONE, 5)) {
+			add_next_index_null(return_value);
+			add_next_index_null(return_value);
+			return;
+		}
 	}
 
 	if (dbh->methods->fetch_err) {
