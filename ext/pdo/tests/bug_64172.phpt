@@ -17,14 +17,18 @@ $db = PDOTest::factory();
 
 echo "===FAIL===\n";
 $db->exec("SELECT * FROM test");
-var_dump($db->errorInfo());
+var_dump(is_string($db->errorInfo()[0])) . "\n";
+var_dump(is_int($db->errorInfo()[1])) . "\n";
+var_dump(is_string($db->errorInfo()[2])) . "\n";
 echo "===GOOD===\n";
 $db->exec("SELECT 123");
 var_dump($db->errorInfo());
 
 echo "===FAIL===\n";
 $db->query('SELECT * FROM test');
-var_dump($db->errorInfo());
+var_dump(is_string($db->errorInfo()[0])) . "\n";
+var_dump(is_int($db->errorInfo()[1])) . "\n";
+var_dump(is_string($db->errorInfo()[2])) . "\n";
 echo "===GOOD===\n";
 $db->query('SELECT 123');
 var_dump($db->errorInfo());
@@ -34,14 +38,9 @@ var_dump($db->errorInfo());
 ===FAIL===
 
 Warning: PDO::exec(): SQLSTATE[%s]: %s
-array(3) {
-  [0]=>
-  string(5) "%s"
-  [1]=>
-  int(1)
-  [2]=>
-  string(%d) "%s"
-}
+bool(true)
+bool(true)
+bool(true)
 ===GOOD===
 array(3) {
   [0]=>
@@ -54,14 +53,9 @@ array(3) {
 ===FAIL===
 
 Warning: PDO::query(): SQLSTATE[%s]: %s
-array(3) {
-  [0]=>
-  string(5) "%s"
-  [1]=>
-  int(1)
-  [2]=>
-  string(%d) "%s"
-}
+bool(true)
+bool(true)
+bool(true)
 ===GOOD===
 array(3) {
   [0]=>
