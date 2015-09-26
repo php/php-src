@@ -2252,6 +2252,7 @@ static union _zend_function *dbstmt_method_get(
 	char *lc_method_name;
 #if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
+	zend_function *fbc_fallback = NULL;
 #endif
 
 	lc_method_name = emalloc(method_len + 1);
@@ -2259,9 +2260,19 @@ static union _zend_function *dbstmt_method_get(
 
 	if (zend_hash_find(&Z_OBJCE_P(object)->function_table, lc_method_name,
 			method_len+1, (void**)&fbc) == FAILURE) {
+
+		/* Prepare fallback by running standard method for functions.
+		 * If the function does not find a method to instanciate it will return this fallback method. */
+		#if PHP_API_VERSION >= 20041225
+		fbc_fallback = std_object_handlers.get_method(object_pp, method_name, method_len, key TSRMLS_DC);
+		#endif
+
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 		/* instance not created by PDO object */
 		if (!stmt->dbh) {
+			#if PHP_API_VERSION >= 20041225
+			fbc = fbc_fallback;
+			#endif
 			goto out;
 		}
 		/* not a pre-defined method, nor a user-defined method; check
@@ -2270,13 +2281,18 @@ static union _zend_function *dbstmt_method_get(
 			if (!pdo_hash_methods(stmt->dbh,
 				PDO_DBH_DRIVER_METHOD_KIND_STMT TSRMLS_CC)
 				|| !stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
+				#if PHP_API_VERSION >= 20041225
+				fbc = fbc_fallback;
+				#endif
 				goto out;
 			}
 		}
 
 		if (zend_hash_find(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT],
 				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-			fbc = NULL;
+			#if PHP_API_VERSION >= 20041225
+			fbc = fbc_fallback;
+			#endif
 			goto out;
 		}
 		/* got it */
