@@ -1016,14 +1016,17 @@ static PHP_METHOD(PDO, errorInfo)
 
 	if (dbh->query_stmt) {
 		add_next_index_string(return_value, dbh->query_stmt->error_code);
+		if(!strncmp(dbh->query_stmt->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) goto fill_array;
 	} else {
 		add_next_index_string(return_value, dbh->error_code);
+		if(!strncmp(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) goto fill_array;
 	}
 
 	if (dbh->methods->fetch_err) {
 		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value);
 	}
 
+fill_array:
 	/**
 	 * In order to be consistent, we have to make sure we add the good amount
 	 * of nulls depending on the current number of elements. We make a simple
