@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
   . Fixed bug #70531 (Run and quit mode (-qrr) should not fallback to
     interactive mode). (Bob)
+  . Fixed bug #70533 (Help overview (-h) does not rpint anything under Windows).
+    (Anatol)
 
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
