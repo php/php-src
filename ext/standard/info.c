@@ -863,7 +863,6 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
 #ifdef COMPILER
 		php_info_print_table_row(2, "Compiler", COMPILER);
 #endif
