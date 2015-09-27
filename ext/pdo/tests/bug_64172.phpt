@@ -15,29 +15,37 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
 
+
 echo "===FAIL===\n";
-$db->exec("SELECT * FROM test");
+$db->query('SELECT * FROM bad_table');
+echo "\n";
+echo "===TEST===\n";
+var_dump(is_string($db->errorInfo()[0])) . "\n";
+var_dump(is_int($db->errorInfo()[1])) . "\n";
+var_dump(is_string($db->errorInfo()[2])) . "\n";
+echo "===GOOD===\n";
+$stmt = $db->query('SELECT 123');
+$stmt->fetchAll();
+var_dump($db->errorInfo());
+
+echo "===FAIL===\n";
+$db->exec("SELECT * FROM bad_table");
+echo "\n";
+echo "===TEST===\n";
 var_dump(is_string($db->errorInfo()[0])) . "\n";
 var_dump(is_int($db->errorInfo()[1])) . "\n";
 var_dump(is_string($db->errorInfo()[2])) . "\n";
 echo "===GOOD===\n";
 $db->exec("SELECT 123");
 var_dump($db->errorInfo());
-
-echo "===FAIL===\n";
-$db->query('SELECT * FROM test');
-var_dump(is_string($db->errorInfo()[0])) . "\n";
-var_dump(is_int($db->errorInfo()[1])) . "\n";
-var_dump(is_string($db->errorInfo()[2])) . "\n";
-echo "===GOOD===\n";
-$db->query('SELECT 123');
-var_dump($db->errorInfo());
 ?>
 ===DONE===
 --EXPECTF--
 ===FAIL===
 
-Warning: PDO::exec(): SQLSTATE[%s]: %s
+Warning: PDO::query(): SQLSTATE[%s]: %s
+%A
+===TEST===
 bool(true)
 bool(true)
 bool(true)
@@ -52,7 +60,9 @@ array(3) {
 }
 ===FAIL===
 
-Warning: PDO::query(): SQLSTATE[%s]: %s
+Warning: PDO::exec(): SQLSTATE[%s]: %s
+%A
+===TEST===
 bool(true)
 bool(true)
 bool(true)
