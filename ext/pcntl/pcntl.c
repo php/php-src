@@ -513,7 +513,7 @@ PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
-	php_add_tick_function(pcntl_signal_dispatch);
+	php_add_tick_function(pcntl_signal_dispatch, NULL);
 
 	return SUCCESS;
 }
