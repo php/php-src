@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- ldap
+  . Fixed bug #70465 (Bug in ldap_search() modifies LDAP_OPT_TIMELIMIT/DEREF's values). (Tyson Andre)
+  . Fixed bug #69574 (ldap timeouts not enforced). (Côme Bernigaud)
+
 - Mysqlnd:
   . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
    (Andrey)
