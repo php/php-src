@@ -494,7 +494,11 @@ really_get_entry:
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1 TSRMLS_CC);
 	if (entry->link) {
-		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry TSRMLS_CC) TSRMLS_CC);
+		phar_entry_info *link = phar_get_link_source(entry TSRMLS_CC);
+		if(!link) {
+			return FAILURE;
+		}
+		(*ret)->zero = phar_get_fp_offset(link TSRMLS_CC);
 	} else {
 		(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
 	}
