@@ -145,14 +145,6 @@ static int php_random_bytes(void *bytes, size_t size)
 			zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
 			return FAILURE;
 		}
-#ifdef __linux__
-		// Make sure that /dev/urandom is the proper urandom device on Linux
-		if (st.st_rdev != makedev(1, 9)) {
-			close(fd);
-			zend_throw_exception(zend_ce_exception, "Entropy source device is invalid", 0);
-			return FAILURE;
-		}
-#endif
 		RANDOM_G(fd) = fd;
 	}
 
