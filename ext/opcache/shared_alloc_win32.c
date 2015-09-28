@@ -74,18 +74,18 @@ static void zend_win_error_message(int type, char *msg, int err)
 	zend_accel_error(type, msg);
 }
 
-static char *create_name_with_username(char *name)
+static char *create_name_with_username(char *name, int num)
 {
 	static char newname[MAXPATHLEN + UNLEN + 4];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
+	snprintf(newname, sizeof(newname) - 1, "%s@%s%d", name, uname, num);
 	return newname;
 }
 
-static char *get_mmap_base_file(void)
+static char *get_mmap_base_file(int num)
 {
 	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
 	char uname[UNLEN + 1];
@@ -95,13 +95,13 @@ static char *get_mmap_base_file(void)
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname, num);
 	return windir;
 }
 
 void zend_shared_alloc_create_lock(void)
 {
-	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
+	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME, 0));
 	if (!memory_mutex) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex");
 		return;
@@ -123,11 +123,11 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
+static int zend_shared_alloc_reattach(size_t requested_size, int num, char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
-	char *mmap_base_file = get_mmap_base_file();
+	char *mmap_base_file = get_mmap_base_file(num);
 	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
 
@@ -194,13 +194,13 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   can be called before the child process is killed. In this case, the map will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
-		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
+		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME, map_retries>>2));
 		err = GetLastError();
 		if (memfile == NULL) {
 			break;
 		}
 
-		ret =  zend_shared_alloc_reattach(requested_size, error_in);
+		ret =  zend_shared_alloc_reattach(requested_size, map_retries>>2, error_in);
 		err = GetLastError();
 		if (ret == ALLOC_FAIL_MAPPING) {
 			/* Mapping failed, wait for mapping object to get freed and retry */
@@ -235,7 +235,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	(*shared_segments_p)[0] = shared_segment;
 
 	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
-								create_name_with_username(ACCEL_FILEMAP_NAME));
+								create_name_with_username(ACCEL_FILEMAP_NAME, map_retries>>2));
 	err = GetLastError();
 	if (memfile == NULL) {
 		zend_shared_alloc_unlock_win32();
@@ -300,7 +300,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		*error_in = "MapViewOfFile";
 		return ALLOC_FAILURE;
 	} else {
-		char *mmap_base_file = get_mmap_base_file();
+		char *mmap_base_file = get_mmap_base_file(map_retries>>2);
 		FILE *fp = fopen(mmap_base_file, "w");
 		err = GetLastError();
 		if (!fp) {
