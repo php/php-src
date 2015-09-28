@@ -122,10 +122,6 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		spl_filesystem_file_free_line(intern);
 		break;
 	}
-
-	if (intern->it) {
-		//????zend_iterator_dtor(&intern->it->intern);
-	}
 } /* }}} */
 
 /* {{{ spl_ce_dir_object_new */
@@ -1646,8 +1642,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(object);
 	}
 	/* Otherwise we were called from the owning object free storage handler as
-	 * it sets
-	 * iterator->intern.data to NULL.
+	 * it sets iterator->intern.data to IS_UNDEF.
 	 * We don't even need to destroy iterator->current as we didn't add a
 	 * reference to it in move_forward or get_iterator */
 }

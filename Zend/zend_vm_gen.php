@@ -1058,8 +1058,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
 							out($f,"# define ZEND_OPCODE_HANDLER_RET void\n");
 							out($f,"# define ZEND_VM_TAIL_CALL(call) call; return\n");
-							out($f,"# define ZEND_VM_CONTINUE()      return\n");
-							out($f,"# define ZEND_VM_RETURN()        opline = NULL; ZEND_VM_CONTINUE()\n");
+							out($f,"# ifdef ZEND_VM_TAIL_CALL_DISPATCH\n");
+							out($f,"#  define ZEND_VM_CONTINUE()     ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return\n");
+							out($f,"# else\n");
+							out($f,"#  define ZEND_VM_CONTINUE()     return\n");
+							out($f,"# endif\n");
+							out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
 							out($f,"#else\n");
 							out($f,"# define ZEND_OPCODE_HANDLER_RET int\n");
 							out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");

@@ -55,6 +55,8 @@ typedef void (*fcall_end_handler_func_t)(zend_op_array *op_array);
 
 typedef void (*op_array_ctor_func_t)(zend_op_array *op_array);
 typedef void (*op_array_dtor_func_t)(zend_op_array *op_array);
+typedef size_t (*op_array_persist_calc_func_t)(zend_op_array *op_array);
+typedef size_t (*op_array_persist_func_t)(zend_op_array *op_array, void *mem);
 
 struct _zend_extension {
 	char *name;
@@ -81,8 +83,8 @@ struct _zend_extension {
 
 	int (*api_no_check)(int api_no);
 	int (*build_id_check)(const char* build_id);
-	void *reserved3;
-	void *reserved4;
+	op_array_persist_calc_func_t op_array_persist_calc;
+	op_array_persist_func_t op_array_persist;
 	void *reserved5;
 	void *reserved6;
 	void *reserved7;
@@ -109,6 +111,13 @@ END_EXTERN_C()
 
 
 ZEND_API extern zend_llist zend_extensions;
+ZEND_API extern uint32_t zend_extension_flags;
+
+#define ZEND_EXTENSIONS_HAVE_OP_ARRAY_CTOR         (1<<0)
+#define ZEND_EXTENSIONS_HAVE_OP_ARRAY_DTOR         (1<<1)
+#define ZEND_EXTENSIONS_HAVE_OP_ARRAY_HANDLER      (1<<2)
+#define ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST_CALC (1<<3)
+#define ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST      (1<<4)
 
 void zend_extension_dtor(zend_extension *extension);
 ZEND_API void zend_append_version_info(const zend_extension *extension);
@@ -120,6 +129,8 @@ BEGIN_EXTERN_C()
 ZEND_API int zend_load_extension(const char *path);
 ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
+ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array);
+ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *mem);
 END_EXTERN_C()
 
 #endif /* ZEND_EXTENSIONS_H */

@@ -2035,7 +2035,7 @@ PHP_FUNCTION(socket_set_option)
 			const char l_linger_key[] = "l_linger";
 
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", l_onoff_key);
@@ -2063,7 +2063,7 @@ PHP_FUNCTION(socket_set_option)
 			const char usec_key[] = "usec";
 
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", sec_key);

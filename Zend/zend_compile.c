@@ -1608,6 +1608,10 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	ce->refcount = 1;
 	ce->ce_flags = ZEND_ACC_CONSTANTS_UPDATED;
 
+	if (CG(compiler_options) & ZEND_COMPILE_GUARDS) {
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	}
+
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
 	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
@@ -7418,7 +7422,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				} else if (Z_TYPE_P(dim) != IS_STRING || is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, 1) != IS_LONG) {
 					return;
 				}
-				if (offset < 0 || offset >= Z_STRLEN_P(container)) {
+				if (offset < 0 || (size_t)offset >= Z_STRLEN_P(container)) {
 					return;
 				}
 				c = (zend_uchar) Z_STRVAL_P(container)[offset];

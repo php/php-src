@@ -97,40 +97,6 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
     return &var_hash->data[var_hash->used_slots++];
 }
 
-//???
-#if 0
-PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval)
-{
-	var_entries *var_hash;
-
-    if (!var_hashx || !*var_hashx) {
-        return;
-    }
-
-    var_hash = (*var_hashx)->last_dtor;
-#if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor_no_addref(%p, %ld): %d (%d)\n", *rval, var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
-#endif
-
-	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
-		var_hash = emalloc(sizeof(var_dtor_entries));
-		var_hash->used_slots = 0;
-		var_hash->next = 0;
-
-		if (!(*var_hashx)->first_dtor) {
-			(*var_hashx)->first_dtor = var_hash;
-		} else {
-			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
-		}
-
-		(*var_hashx)->last_dtor = var_hash;
-	}
-
-	ZVAL_COPY_VALUE(&var_hash->data[var_hash->used_slots], rval);
-	var_hash->used_slots++;
-}
-#endif
-
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
 {
 	zend_long i;
@@ -577,14 +543,7 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-//???
-//???	if (rval == rval_ref) return 0;
-
-//???	if (!ZVAL_IS_UNDEF(rval)) {
-//???		var_push_dtor_no_addref(var_hash, rval);
-//???	}
 	ZVAL_COPY(rval, rval_ref);
-//???	Z_UNSET_ISREF_PP(rval);
 
 	return 1;
 }
@@ -734,8 +693,6 @@ use_double:
 "o:" iv ":" ["] {
     if (!var_hash) return 0;
 
-//???	INIT_PZVAL(rval);
-
 	return object_common2(UNSERIALIZE_PASSTHRU,
 			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
@@ -759,7 +716,6 @@ object ":" uiv ":" ["]	{
 		custom_object = 1;
 	}
 
-//???	INIT_PZVAL(rval);
 	len2 = len = parse_uiv(start + 2);
 	maxlen = max - YYCURSOR;
 	if (maxlen < len || len == 0) {

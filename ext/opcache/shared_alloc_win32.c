@@ -206,6 +206,12 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			/* Mapping failed, wait for mapping object to get freed and retry */
             CloseHandle(memfile);
 			memfile = NULL;
+<<<<<<< HEAD
+=======
+			if (++map_retries >= MAX_MAP_RETRIES) {
+				break;
+			}
+>>>>>>> upstream/master
 			zend_shared_alloc_unlock_win32();
 			Sleep(1000 * (map_retries + 1));
 			zend_shared_alloc_lock_win32();
@@ -213,7 +219,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			zend_shared_alloc_unlock_win32();
 			return ret;
 		}
-	} while (++map_retries < MAX_MAP_RETRIES);
+	} while (1);
 
 	if (map_retries == MAX_MAP_RETRIES) {
 		zend_shared_alloc_unlock_win32();
@@ -326,10 +332,13 @@ static int detach_segment(zend_shared_segment *shared_segment)
 	zend_shared_alloc_lock_win32();
 	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
+		mapping_base = NULL;
 	}
 	CloseHandle(memfile);
+	memfile = NULL;
 	zend_shared_alloc_unlock_win32();
 	CloseHandle(memory_mutex);
+	memory_mutex = NULL;
 	return 0;
 }
 

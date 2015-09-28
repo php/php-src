@@ -415,8 +415,6 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	if (UNEXPECTED(object_init_ex(object, dbstmt_ce) != SUCCESS)) {
 		return NULL;
 	}
-	// ??? Z_SET_REFCOUNT_P(object, 1);
-	//Z_SET_ISREF_P(object);
 
 	return object;
 } /* }}} */

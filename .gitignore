@@ -288,3 +288,4 @@ win32/*.positions
 win32/ext
 win32/phpts.def
 win32/wsyslog.h
+ext/opcache/shared_alloc_win32.c

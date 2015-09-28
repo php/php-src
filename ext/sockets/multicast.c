@@ -171,7 +171,7 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 			mcast_req_fun = &php_mcast_leave;
 mcast_req_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 				&glen) == FAILURE) {
@@ -207,7 +207,7 @@ mcast_req_fun:
 			mcast_sreq_fun = &php_mcast_leave_source;
 		mcast_sreq_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 					&glen) == FAILURE) {

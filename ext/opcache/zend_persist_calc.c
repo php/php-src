@@ -254,6 +254,8 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			ADD_INTERNED_STRING(op_array->vars[i], 0);
 		}
 	}
+
+	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 }
 
 static void zend_persist_op_array_calc(zval *zv)

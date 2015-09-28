@@ -1500,6 +1500,10 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				PHPDBG_G(flags) = 0;
+				/* It ain't gonna proceed to real execution anyway,
+					but the correct descriptor is needed already. */
+				PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+				PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 				phpdbg_do_help(NULL);
 				sapi_deactivate();
@@ -1835,6 +1839,11 @@ phpdbg_interact:
 				if (phpdbg_startup_run) {
 					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
+					if (quit_immediately) {
+						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+					} else {
+						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
+					}
 					PHPDBG_COMMAND_HANDLER(run)(NULL);
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */

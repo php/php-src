@@ -667,6 +667,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	} else {
 		op_array->prototype = NULL;
 	}
+
+	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
 }
 
 static void zend_persist_op_array(zval *zv)
