@@ -493,7 +493,11 @@ really_get_entry:
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1);
 	if (entry->link) {
-		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry));
+		phar_entry_info *link = phar_get_link_source(entry);
+		if(!link) {
+			return FAILURE;
+		}
+		(*ret)->zero = phar_get_fp_offset(link);
 	} else {
 		(*ret)->zero = phar_get_fp_offset(entry);
 	}
