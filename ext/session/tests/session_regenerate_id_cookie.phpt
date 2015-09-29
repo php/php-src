@@ -64,7 +64,7 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing session_regenerate_id() : basic functionality for cookie ***
-string(483) "X-Powered-By: PHP/7.%s
+string(%d) "X-Powered-By: PHP/7.%s
 Expires: %s
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
