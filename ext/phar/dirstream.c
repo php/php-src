@@ -199,7 +199,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	zend_hash_internal_pointer_reset(manifest);
 
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
-		if (HASH_KEY_IS_STRING != zend_hash_get_current_key(manifest, &str_key, &unused)) {
+		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key(manifest, &str_key, &unused)) {
 			break;
 		}
 
