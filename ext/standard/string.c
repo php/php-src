@@ -3973,7 +3973,6 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
 			ZVAL_DEREF(search_entry);
-			SEPARATE_ZVAL_NOREF(search_entry);
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {

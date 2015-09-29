@@ -506,7 +506,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	ZVAL_DEREF(arg);
 	while (1) {
 		if (*spec_walk == '/') {
-			SEPARATE_ZVAL(arg);
+			SEPARATE_ZVAL_NOREF(arg);
 			real_arg = arg;
 		} else if (*spec_walk == '!') {
 			check_null = 1;

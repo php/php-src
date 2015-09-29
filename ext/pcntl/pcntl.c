@@ -1040,11 +1040,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
-		if (Z_TYPE_P(user_signo) != IS_LONG) {
-			SEPARATE_ZVAL(user_signo);
-			convert_to_long_ex(user_signo);
-		}
-		signo = Z_LVAL_P(user_signo);
+		signo = zval_get_long(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -1105,11 +1101,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
-		if (Z_TYPE_P(user_signo) != IS_LONG) {
-			SEPARATE_ZVAL(user_signo);
-			convert_to_long_ex(user_signo);
-		}
-		signo = Z_LVAL_P(user_signo);
+		signo = zval_get_long(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
