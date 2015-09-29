@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.15
 
+- Mysqlnd:
+  . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
+   (Andrey)
+  . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
+
 01 Oct 2015, PHP 5.6.14
 
 - Core:
@@ -16,11 +21,8 @@ PHP                                                                        NEWS
     encoding). (cmb)
 
 - Mysqlnd:
-  . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
-   (Andrey)
   . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
     a server). (Sergei Turchanov)
-  . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
 
 - OpenSSL:
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
