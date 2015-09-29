@@ -153,7 +153,6 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 			return NULL;
 		} else {
 			if (Z_TYPE_P(value) != IS_STRING) {
-				SEPARATE_ZVAL(value);
 				convert_to_string(value);
 			}
 
@@ -762,7 +761,6 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;
 			}
-			SEPARATE_ZVAL(entry);
 			convert_to_string_ex(entry);
 			if (Z_REFCOUNTED_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -850,7 +848,6 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		intern = Z_XSL_P(id);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
-			SEPARATE_ZVAL(entry);
 			convert_to_string_ex(entry);
 			ZVAL_LONG(&new_string ,1);
 			zend_hash_update(intern->registered_phpfunctions, Z_STR_P(entry), &new_string);
