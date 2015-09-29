@@ -32,6 +32,11 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
 
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
+
 - Phpdbg:
   . Fix phpdbg_break_next() sometimes not breaking. (Bob)
 
