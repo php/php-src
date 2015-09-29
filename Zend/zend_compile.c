@@ -3612,12 +3612,14 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 
 void zend_compile_echo(zend_ast *ast) /* {{{ */
 {
+	zend_op *opline;
 	zend_ast *expr_ast = ast->child[0];
 
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+	opline = zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+	opline->extended_value = ZEND_ECHO;
 }
 /* }}} */
 
@@ -6214,12 +6216,14 @@ void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 
 void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 {
+	zend_op *opline;
 	zend_ast *expr_ast = ast->child[0];
 
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+	opline = zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+	opline->extended_value = ZEND_PRINT;
 
 	result->op_type = IS_CONST;
 	ZVAL_LONG(&result->u.constant, 1);
