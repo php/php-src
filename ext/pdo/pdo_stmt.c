@@ -2264,7 +2264,7 @@ static union _zend_function *dbstmt_method_get(
 #if PHP_API_VERSION >= 20041225
 		/* Prepare fallback by running standard method for functions.
 		 * If the function does not find a method to instanciate it will return this fallback method. */
-		fbc_fallback = std_object_handlers.get_method(object_pp, method_name, method_len, key TSRMLS_DC);
+		fbc_fallback = std_object_handlers.get_method(object_pp, method_name, method_len, key TSRMLS_CC);
 #endif
 
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
