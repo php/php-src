@@ -496,6 +496,7 @@ really_get_entry:
 	if (entry->link) {
 		phar_entry_info *link = phar_get_link_source(entry TSRMLS_CC);
 		if(!link) {
+			efree(*ret);
 			return FAILURE;
 		}
 		(*ret)->zero = phar_get_fp_offset(link TSRMLS_CC);
