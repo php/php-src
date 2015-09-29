@@ -396,7 +396,9 @@ foundit:
 
 		if (entry.filename[entry.filename_len - 1] == '/') {
 			entry.is_dir = 1;
-			entry.filename_len--;
+			if(entry.filename_len > 1) {
+				entry.filename_len--;
+			}
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		} else {
 			entry.is_dir = 0;
