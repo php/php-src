@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-17 Sep 2015, PHP 5.6.14RC1
+01 Oct 2015, PHP 5.6.14
 
 - Core:
   . Fixed bug #70370 (Bundled libtool.m4 doesn't handle FreeBSD 10 when
@@ -22,9 +22,15 @@ PHP                                                                        NEWS
     DH key resource). (Jakub Zelenka)
   . Fixed bug #70395 (Missing ARG_INFO for openssl_seal()). (cmb)
   . Fixed bug #60632 (openssl_seal fails with AES). (Jakub Zelenka)
+  . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
 - PDO:
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
 
 - Phpdbg:
   . Fix phpdbg_break_next() sometimes not breaking. (Bob)
