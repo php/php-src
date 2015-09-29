@@ -1,8 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+** PHP 5.5 is in security-only mode , please do not commit to this branch **
+
 ?? ??? 2015, PHP 5.5.30
 
-** PHP 5.5 is in security-only mode , please do not commit to this branch **
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
 
 03 Sep 2015, PHP 5.5.29
 
