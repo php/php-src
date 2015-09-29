@@ -396,6 +396,7 @@ typedef struct _zend_internal_function {
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	struct _zend_module_entry *module;
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
