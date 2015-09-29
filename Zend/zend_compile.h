@@ -954,9 +954,10 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO 253
-#define ZEND_BRK  254
-#define ZEND_CONT 255
+#define ZEND_PRINT 252
+#define ZEND_GOTO  253
+#define ZEND_BRK   254
+#define ZEND_CONT  255
 
 
 END_EXTERN_C()
