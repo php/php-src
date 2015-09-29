@@ -383,7 +383,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-I**                          Ignore default .phpdbginit" CR
 "  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
-"  **-rr**                         Run execution context and quit after execution" CR
+"  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
 "  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR

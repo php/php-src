@@ -81,8 +81,7 @@ PHP_METHOD(SessionHandler, read)
 	}
 
 	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, PS(gc_maxlifetime)) == FAILURE) {
-		RETVAL_FALSE;
-		return;
+		RETURN_FALSE;
 	}
 
 	RETURN_STR(val);

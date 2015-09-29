@@ -199,7 +199,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 	}
 
 	if (conn->stats) {
-		mysqlnd_stats_end(conn->stats);
+		mysqlnd_stats_end(conn->stats, conn->persistent);
 	}
 
 	mnd_pefree(conn, conn->persistent);
@@ -2212,6 +2212,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
 {
 	switch(field_type) {
+		case FIELD_TYPE_JSON:
+			return "json";
 		case FIELD_TYPE_STRING:
 		case FIELD_TYPE_VAR_STRING:
 			return "string";
@@ -2971,7 +2973,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, init)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::init");
-	mysqlnd_stats_init(&conn->stats, STAT_LAST);
+	mysqlnd_stats_init(&conn->stats, STAT_LAST, conn->persistent);
 	SET_ERROR_AFF_ROWS(conn);
 
 	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, conn->error_info);

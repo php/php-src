@@ -1,7 +1,0 @@
-Regenerating Parser
-===================
-
-Make sure you use re2c 0.9.10 or higher:
-
-re2c -d -b -o ext/date/lib/parse_date.c ext/date/lib/parse_date.re
-re2c -d -b -o ext/date/lib/parse_iso_intervals.c ext/date/lib/parse_iso_intervals.re

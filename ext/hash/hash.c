@@ -849,9 +849,7 @@ PHP_FUNCTION(mhash)
 		return;
 	}
 
-	SEPARATE_ZVAL(z_algorithm);
-	convert_to_long_ex(z_algorithm);
-	algorithm = Z_LVAL_P(z_algorithm);
+	algorithm = zval_get_long(z_algorithm);
 
 	/* need to convert the first parameter from int constant to string algorithm name */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {

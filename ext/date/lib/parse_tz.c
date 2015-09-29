@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 
@@ -103,7 +107,7 @@ static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 	unsigned char *cbuffer = NULL;
 
 	if (tz->bit32.timecnt) {
-		buffer = (int32_t*) malloc(tz->bit32.timecnt * sizeof(int32_t));
+		buffer = (int32_t*) timelib_malloc(tz->bit32.timecnt * sizeof(int32_t));
 		if (!buffer) {
 			return;
 		}
@@ -113,9 +117,9 @@ static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 			buffer[i] = timelib_conv_int(buffer[i]);
 		}
 
-		cbuffer = (unsigned char*) malloc(tz->bit32.timecnt * sizeof(unsigned char));
+		cbuffer = (unsigned char*) timelib_malloc(tz->bit32.timecnt * sizeof(unsigned char));
 		if (!cbuffer) {
-			free(buffer);
+			timelib_free(buffer);
 			return;
 		}
 		memcpy(cbuffer, *tzf, sizeof(unsigned char) * tz->bit32.timecnt);
@@ -147,16 +151,16 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	int32_t *leap_buffer;
 	unsigned int i, j;
 
-	buffer = (unsigned char*) malloc(tz->bit32.typecnt * sizeof(unsigned char) * 6);
+	buffer = (unsigned char*) timelib_malloc(tz->bit32.typecnt * sizeof(unsigned char) * 6);
 	if (!buffer) {
 		return;
 	}
 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit32.typecnt);
 	*tzf += sizeof(unsigned char) * 6 * tz->bit32.typecnt;
 
-	tz->type = (ttinfo*) malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	tz->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
 	if (!tz->type) {
-		free(buffer);
+		timelib_free(buffer);
 		return;
 	}
 
@@ -166,9 +170,9 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 		tz->type[i].isdst = buffer[j + 4];
 		tz->type[i].abbr_idx = buffer[j + 5];
 	}
-	free(buffer);
+	timelib_free(buffer);
 
-	tz->timezone_abbr = (char*) malloc(tz->bit32.charcnt);
+	tz->timezone_abbr = (char*) timelib_malloc(tz->bit32.charcnt);
 	if (!tz->timezone_abbr) {
 		return;
 	}
@@ -176,27 +180,27 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(char) * tz->bit32.charcnt;
 
 	if (tz->bit32.leapcnt) {
-		leap_buffer = (int32_t *) malloc(tz->bit32.leapcnt * 2 * sizeof(int32_t));
+		leap_buffer = (int32_t *) timelib_malloc(tz->bit32.leapcnt * 2 * sizeof(int32_t));
 		if (!leap_buffer) {
 			return;
 		}
 		memcpy(leap_buffer, *tzf, sizeof(int32_t) * tz->bit32.leapcnt * 2);
 		*tzf += sizeof(int32_t) * tz->bit32.leapcnt * 2;
 
-		tz->leap_times = (tlinfo*) malloc(tz->bit32.leapcnt * sizeof(tlinfo));
+		tz->leap_times = (tlinfo*) timelib_malloc(tz->bit32.leapcnt * sizeof(tlinfo));
 		if (!tz->leap_times) {
-			free(leap_buffer);
+			timelib_free(leap_buffer);
 			return;
 		}
 		for (i = 0; i < tz->bit32.leapcnt; i++) {
 			tz->leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);
 			tz->leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);
 		}
-		free(leap_buffer);
+		timelib_free(leap_buffer);
 	}
 
 	if (tz->bit32.ttisstdcnt) {
-		buffer = (unsigned char*) malloc(tz->bit32.ttisstdcnt * sizeof(unsigned char));
+		buffer = (unsigned char*) timelib_malloc(tz->bit32.ttisstdcnt * sizeof(unsigned char));
 		if (!buffer) {
 			return;
 		}
@@ -206,11 +210,11 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 		for (i = 0; i < tz->bit32.ttisstdcnt; i++) {
 			tz->type[i].isstdcnt = buffer[i];
 		}
-		free(buffer);
+		timelib_free(buffer);
 	}
 
 	if (tz->bit32.ttisgmtcnt) {
-		buffer = (unsigned char*) malloc(tz->bit32.ttisgmtcnt * sizeof(unsigned char));
+		buffer = (unsigned char*) timelib_malloc(tz->bit32.ttisgmtcnt * sizeof(unsigned char));
 		if (!buffer) {
 			return;
 		}
@@ -220,7 +224,7 @@ static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 		for (i = 0; i < tz->bit32.ttisgmtcnt; i++) {
 			tz->type[i].isgmtcnt = buffer[i];
 		}
-		free(buffer);
+		timelib_free(buffer);
 	}
 }
 
@@ -249,7 +253,7 @@ static void read_location(const unsigned char **tzf, timelib_tzinfo *tz)
 	comments_len = timelib_conv_int(buffer[2]);
 	*tzf += sizeof(buffer);
 
-	tz->location.comments = malloc(comments_len + 1);
+	tz->location.comments = timelib_malloc(comments_len + 1);
 	memcpy(tz->location.comments, *tzf, comments_len);
 	tz->location.comments[comments_len] = '\0';
 	*tzf += comments_len;
@@ -263,12 +267,12 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
 	printf("BC:                %s\n",  tz->bc ? "" : "yes");
-	printf("UTC/Local count:   %lu\n", (unsigned long) tz->bit32.ttisgmtcnt);
-	printf("Std/Wall count:    %lu\n", (unsigned long) tz->bit32.ttisstdcnt);
-	printf("Leap.sec. count:   %lu\n", (unsigned long) tz->bit32.leapcnt);
-	printf("Trans. count:      %lu\n", (unsigned long) tz->bit32.timecnt);
-	printf("Local types count: %lu\n", (unsigned long) tz->bit32.typecnt);
-	printf("Zone Abbr. count:  %lu\n", (unsigned long) tz->bit32.charcnt);
+	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisgmtcnt);
+	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.ttisstdcnt);
+	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.leapcnt);
+	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.timecnt);
+	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.typecnt);
+	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit32.charcnt);
 
 	printf ("%8s (%12s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 		"", "", 0,
@@ -306,7 +310,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 
 	tmp = setlocale(LC_CTYPE, NULL);
 	if (tmp) {
-		cur_locale = strdup(tmp);
+		cur_locale = timelib_strdup(tmp);
 	}
 	setlocale(LC_CTYPE, "C");
 #endif
@@ -323,7 +327,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 			(*tzf) = &(tzdb->data[tzdb->index[mid].pos]);
 #ifdef HAVE_SETLOCALE
 			setlocale(LC_CTYPE, cur_locale);
-			if (cur_locale) free(cur_locale);
+			if (cur_locale) timelib_free(cur_locale);
 #endif
 			return 1;
 		}
@@ -332,7 +336,7 @@ static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const 
 
 #ifdef HAVE_SETLOCALE
 	setlocale(LC_CTYPE, cur_locale);
-	if (cur_locale) free(cur_locale);
+	if (cur_locale) timelib_free(cur_locale);
 #endif
 	return 0;
 }
@@ -424,13 +428,13 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 
 		*transition_time = 0;
 		j = 0;
-		while (j < tz->bit32.timecnt && tz->type[j].isdst) {
+		while (j < tz->bit32.timecnt && tz->type[tz->trans_idx[j]].isdst) {
 			++j;
 		}
 		if (j == tz->bit32.timecnt) {
 			j = 0;
 		}
-		return &(tz->type[j]);
+		return &(tz->type[tz->trans_idx[j]]);
 	}
 
 	/* In all other cases we loop through the available transtion times to find
@@ -499,7 +503,7 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 
 	tmp->offset = offset;
 	tmp->leap_secs = leap_secs;
-	tmp->abbr = abbr ? strdup(abbr) : strdup("GMT");
+	tmp->abbr = abbr ? timelib_strdup(abbr) : timelib_strdup("GMT");
 
 	return tmp;
 }

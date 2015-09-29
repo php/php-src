@@ -1,22 +1,26 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2015 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Derick Rethans
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
-/* $Id$ */
 
 #include "timelib.h"
 
@@ -217,7 +221,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset)
 {
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
 	t->tz_abbr = NULL;
 
@@ -231,9 +235,9 @@ void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset)
 void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info)
 {
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
-	t->tz_abbr = strdup(abbr_info.abbr);
+	t->tz_abbr = timelib_strdup(abbr_info.abbr);
 
 	t->z = abbr_info.utc_offset;
 	t->have_zone = 1;
@@ -257,9 +261,9 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
 	t->dst = gmt_offset->is_dst;
 	t->tz_info = tz;
 	if (t->tz_abbr) {
-		free(t->tz_abbr);
+		timelib_free(t->tz_abbr);
 	}
-	t->tz_abbr = strdup(gmt_offset->abbr);
+	t->tz_abbr = timelib_strdup(gmt_offset->abbr);
 	timelib_time_offset_dtor(gmt_offset);
 
 	t->have_zone = 1;

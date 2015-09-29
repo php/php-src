@@ -1244,6 +1244,11 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 } /* }}} */
 #endif
 
+void phpdbg_sighup_handler(int sig) /* {{{ */
+{
+	exit(0);
+} /* }}} */
+
 void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
 	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1300,7 +1305,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool ext_stmt = 0;
 	zend_bool use_mm_wrappers = 0;
 	zend_bool is_exit;
-	int exit_status = 0;
+	int exit_status;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1354,6 +1359,7 @@ phpdbg_main:
 	php_optind = 1;
 	opt = 0;
 	sapi_name = NULL;
+	exit_status = 0;
 	if (settings) {
 		exec = settings->exec;
 	}
@@ -1494,6 +1500,10 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				PHPDBG_G(flags) = 0;
+				/* It ain't gonna proceed to real execution anyway,
+					but the correct descriptor is needed already. */
+				PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+				PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 				phpdbg_do_help(NULL);
 				sapi_deactivate();
@@ -1613,6 +1623,11 @@ phpdbg_main:
 
 			/* set remote flag to stop service shutting down upon quit */
 			remote = 1;
+#ifndef _WIN32
+		} else {
+
+			signal(SIGHUP, phpdbg_sighup_handler);
+#endif
 		}
 
 		mm_heap = zend_mm_get_heap();
@@ -1742,6 +1757,7 @@ phpdbg_main:
 				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
+			oplog_file = NULL;
 		}
 
 		/* set default colors */
@@ -1823,6 +1839,11 @@ phpdbg_interact:
 				if (phpdbg_startup_run) {
 					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
+					if (quit_immediately) {
+						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+					} else {
+						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
+					}
 					PHPDBG_COMMAND_HANDLER(run)(NULL);
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
@@ -1959,6 +1980,10 @@ phpdbg_out:
 		zend_try {
 			php_request_shutdown(NULL);
 		} zend_end_try();
+
+		if (exit_status == 0) {
+			exit_status = EG(exit_status);
+		}
 
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 			if (PHPDBG_G(in_execution) || is_exit) {

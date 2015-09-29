@@ -2366,6 +2366,7 @@ static int zend_accel_init_shm(void)
 	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
 	ZSMMG(app_shared_globals) = accel_shared_globals;
@@ -2383,6 +2384,7 @@ static int zend_accel_init_shm(void)
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 		if (!data || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+			zend_shared_alloc_unlock();
 			return FAILURE;
 		}
 		HT_SET_DATA_ADDR(&ZCSG(interned_strings), data);
@@ -2630,8 +2632,8 @@ static int accel_startup(zend_extension *extension)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
-				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				zend_shared_alloc_lock();
+				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				orig_new_interned_string = zend_new_interned_string;
 				orig_interned_strings_snapshot = zend_interned_strings_snapshot;
 				orig_interned_strings_restore = zend_interned_strings_restore;

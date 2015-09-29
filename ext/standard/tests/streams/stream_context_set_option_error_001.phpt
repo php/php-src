@@ -14,8 +14,8 @@ var_dump(stream_context_set_option($context, 'http'));
 var_dump(stream_context_set_option($context, array(), 'foo', 'bar'));
 ?>
 --EXPECTF--
-Warning: stream_context_set_option(): called with wrong number or type of parameters; please RTM in %s on line %d
+Warning: stream_context_set_option() expects parameter 2 to be array, string given in %s on line %d
 bool(false)
 
-Warning: stream_context_set_option(): called with wrong number or type of parameters; please RTM in %s on line %d
+Warning: stream_context_set_option() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
