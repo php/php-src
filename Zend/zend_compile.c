@@ -3619,7 +3619,7 @@ void zend_compile_echo(zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	opline = zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
-	opline->extended_value = ZEND_ECHO;
+	opline->extended_value = 0;
 }
 /* }}} */
 
@@ -6223,7 +6223,7 @@ void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	opline = zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
-	opline->extended_value = ZEND_PRINT;
+	opline->extended_value = 1;
 
 	result->op_type = IS_CONST;
 	ZVAL_LONG(&result->u.constant, 1);
