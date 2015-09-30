@@ -26,7 +26,11 @@ var_dump(test::$pri);
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -f "$filename" 2>/dev/null`);
+if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
+	var_dump(`$php -n -f "$filename"`);
+} else {
+	var_dump(`$php -n -f "$filename" 2>/dev/null`);
+}
 var_dump(`$php -n -f "wrong"`);
 
 @unlink($filename);
