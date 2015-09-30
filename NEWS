@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ** PHP 5.5 is in security-only mode , please do not commit to this branch **
 
-?? ??? 2015, PHP 5.5.30
+?? ??? 2015, PHP 5.5.31
+
+01 Oct 2015, PHP 5.5.30
 
 - Phar:
   . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
