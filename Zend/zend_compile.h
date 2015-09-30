@@ -431,17 +431,17 @@ struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
-	zend_function       *func;             /* executed op_array              */
-	zval                 This;
-#if ZEND_EX_USE_RUN_TIME_CACHE
-	void               **run_time_cache;
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;
-#endif
+	zend_function       *func;             /* executed funcrion              */
+	zval                 This;             /* this + call_info + num_args    */
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
