@@ -36,6 +36,11 @@ PHP                                                                        NEWS
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
   . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
+
 - Phpdbg:
   . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
   . Fixed bug #70531 (Run and quit mode (-qrr) should not fallback to
