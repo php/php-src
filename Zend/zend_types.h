@@ -99,6 +99,7 @@ typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t)
 typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
+<<<<<<< HEAD
 /*
  * zend_type - is an abstraction layer to represent information about type hint.
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
@@ -156,6 +157,9 @@ typedef uintptr_t zend_type;
 	ZEND_TYPE_ENCODE_CLASS_CONST_Q2(ZEND_TYPE_ENCODE_CLASS_CONST_ ##allow_null, class_name)
 #define ZEND_TYPE_ENCODE_CLASS_CONST(class_name, allow_null) \
 	ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name)
+=======
+/* Use Z_xxx() macros (defined below) to access zend_value and zval elements */
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
@@ -167,7 +171,7 @@ typedef union _zend_value {
 	zend_resource    *res;
 	zend_reference   *ref;
 	zend_ast_ref     *ast;
-	zval             *zv;
+	zval             *zv;				/* Access using Z_INDIRECT() */
 	void             *ptr;
 	zend_class_entry *ce;
 	zend_function    *func;
@@ -178,7 +182,7 @@ typedef union _zend_value {
 } zend_value;
 
 struct _zval_struct {
-	zend_value        value;			/* value */
+	zend_value        _ZSTRICT_FIELD(zval_struct,value);	/* value */
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
@@ -187,8 +191,8 @@ struct _zval_struct {
 				zend_uchar    const_flags,
 				zend_uchar    reserved)	    /* call info for EX(This) */
 		} v;
-		uint32_t type_info;
-	} u1;
+		uint32_t type_info;					/* Access using Z_TYPE_INFO() */
+	} _ZSTRICT_FIELD(zval_struct,u1);
 	union {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
@@ -196,14 +200,20 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
+<<<<<<< HEAD
 		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
 		uint32_t     extra;                /* not further specified */
 	} u2;
+=======
+	} _ZSTRICT_FIELD(zval_struct,u2);
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 };
 
+/* Access struct elements via the GC_xxx() macros (defined below) */
+
 typedef struct _zend_refcounted_h {
-	uint32_t         refcount;			/* reference counter 32-bit */
+	uint32_t         _ZSTRICT_FIELD(refcounted,refcount); /* reference counter 32-bit */
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -212,16 +222,18 @@ typedef struct _zend_refcounted_h {
 				uint16_t      gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
 		uint32_t type_info;
-	} u;
+	} _ZSTRICT_FIELD(refcounted,u);
 } zend_refcounted_h;
 
 struct _zend_refcounted {
 	zend_refcounted_h gc;
 };
 
+/* Use ZSTR_xxx() (zend_string.h) macros to access zend_string fields */
+
 struct _zend_string {
 	zend_refcounted_h gc;
-	zend_ulong        _ZSTRICT_FIELD(zend_string,h);                /* hash value */
+	zend_ulong        _ZSTRICT_FIELD(zend_string,h);	/* hash value */
 	size_t            _ZSTRICT_FIELD(zend_string,len);
 	char              _ZSTRICT_FIELD(zend_string,val)[1];
 };
@@ -388,7 +400,7 @@ struct _zend_ast_ref {
 #define _IS_ERROR					20
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
-	return pz->u1.v.type;
+	return pz->_ZSTRICT_FIELD(zval_struct,u1).v.type;
 }
 
 #define ZEND_SAME_FAKE_TYPE(faketype, realtype) ( \
@@ -396,31 +408,49 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	|| ((faketype) == _IS_BOOL && ((realtype) == IS_TRUE || (realtype) == IS_FALSE)) \
 )
 
+/* The offset in bytes between the value and type fields of a zval */
+#define ZVAL_OFFSETOF_TYPE	\
+	(offsetof(zval, _ZSTRICT_FIELD(zval_struct,u1).type_info) - offsetof(zval, _ZSTRICT_FIELD(zval_struct,value)))
+
 /* we should never set just Z_TYPE, we should set Z_TYPE_INFO */
 #define Z_TYPE(zval)				zval_get_type(&(zval))
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
 
-#define Z_TYPE_FLAGS(zval)			(zval).u1.v.type_flags
+#define Z_TYPE_FLAGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u1).v.type_flags
 #define Z_TYPE_FLAGS_P(zval_p)		Z_TYPE_FLAGS(*(zval_p))
 
-#define Z_CONST_FLAGS(zval)			(zval).u1.v.const_flags
+#define Z_CONST_FLAGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u1).v.const_flags
 #define Z_CONST_FLAGS_P(zval_p)		Z_CONST_FLAGS(*(zval_p))
 
+<<<<<<< HEAD
 #define Z_TYPE_INFO(zval)			(zval).u1.type_info
+=======
+#define Z_TYPE_INFO(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u1).type_info
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
-#define Z_NEXT(zval)				(zval).u2.next
+#define Z_VAR_FLAGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u2).var_flags
+#define Z_VAR_FLAGS_P(zval_p)		Z_VAR_FLAGS(*(zval_p))
+
+#define Z_NEXT(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
 
-#define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
+#define Z_CACHE_SLOT(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u2).cache_slot
 #define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))
 
-#define Z_FE_POS(zval)				(zval).u2.fe_pos
+#define Z_LINENO(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).lineno
+#define Z_LINENO_P(zval_p)			Z_LINENO(*(zval_p))
+
+#define Z_NUM_ARGS(zval)			(zval)._ZSTRICT_FIELD(zval_struct,u2).num_args
+#define Z_NUM_ARGS_P(zval_p)		Z_NUM_ARGS(*(zval_p))
+
+#define Z_FE_POS(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).fe_pos
 #define Z_FE_POS_P(zval_p)			Z_FE_POS(*(zval_p))
 
-#define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
+#define Z_FE_ITER(zval)				(zval)._ZSTRICT_FIELD(zval_struct,u2).fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
+<<<<<<< HEAD
 #define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
 #define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
 
@@ -428,6 +458,12 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_EXTRA_P(zval_p)			Z_EXTRA(*(zval_p))
 
 #define Z_COUNTED(zval)				(zval).value.counted
+=======
+#define _Z_VALUE(zval)				(zval)._ZSTRICT_FIELD(zval_struct,value)
+#define _Z_VALUE_P(zval_p)			_Z_VALUE(*(zval_p))
+
+#define Z_COUNTED(zval)				_Z_VALUE(zval).counted
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
 #define Z_TYPE_MASK					0xff
@@ -435,11 +471,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
-#define GC_REFCOUNT(p)				(p)->gc.refcount
-#define GC_TYPE(p)					(p)->gc.u.v.type
-#define GC_FLAGS(p)					(p)->gc.u.v.flags
-#define GC_INFO(p)					(p)->gc.u.v.gc_info
-#define GC_TYPE_INFO(p)				(p)->gc.u.type_info
+#define GC_REFCOUNT(p)				(p)->gc._ZSTRICT_FIELD(refcounted,refcount)
+#define GC_TYPE(p)					(p)->gc._ZSTRICT_FIELD(refcounted,u).v.type
+#define GC_FLAGS(p)					(p)->gc._ZSTRICT_FIELD(refcounted,u).v.flags
+#define GC_INFO(p)					(p)->gc._ZSTRICT_FIELD(refcounted,u).v.gc_info
+#define GC_TYPE_INFO(p)				(p)->gc._ZSTRICT_FIELD(refcounted,u).type_info
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
@@ -489,7 +525,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define MARK_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
 #define RESET_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
-/* string flags (zval.value->gc.u.flags) */
+/* string flags (zval.value.str->gc.u.v.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
 #define IS_STR_INTERNED				(1<<1) /* interned string          */
 #define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
@@ -497,10 +533,15 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_STR_CONSTANT             (1<<3) /* constant index */
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
 
+<<<<<<< HEAD
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			(1<<1)
+=======
+/* array flags (zval.value.arr->gc.u.v.flags) */
+#define IS_ARRAY_IMMUTABLE			(1<<1) /* the same as IS_TYPE_IMMUTABLE */
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 
-/* object flags (zval.value->gc.u.flags) */
+/* object flags (zval.value.obj->gc.u.v.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
 #define IS_OBJ_FREE_CALLED			(1<<4)
@@ -561,16 +602,20 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_ISNULL(zval)				(Z_TYPE(zval) == IS_NULL)
 #define Z_ISNULL_P(zval_p)			Z_ISNULL(*(zval_p))
 
+<<<<<<< HEAD
 #define Z_ISERROR(zval)				(Z_TYPE(zval) == _IS_ERROR)
 #define Z_ISERROR_P(zval_p)			Z_ISERROR(*(zval_p))
 
 #define Z_LVAL(zval)				(zval).value.lval
+=======
+#define Z_LVAL(zval)				_Z_VALUE(zval).lval
+>>>>>>> b5b51df... Protect gc/refcount and zval fields
 #define Z_LVAL_P(zval_p)			Z_LVAL(*(zval_p))
 
-#define Z_DVAL(zval)				(zval).value.dval
+#define Z_DVAL(zval)				_Z_VALUE(zval).dval
 #define Z_DVAL_P(zval_p)			Z_DVAL(*(zval_p))
 
-#define Z_STR(zval)					(zval).value.str
+#define Z_STR(zval)					_Z_VALUE(zval).str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
 
 #define Z_STRVAL(zval)				ZSTR_VAL(Z_STR(zval))
@@ -582,13 +627,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STRHASH(zval)				ZSTR_HASH(Z_STR(zval))
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
 
-#define Z_ARR(zval)					(zval).value.arr
+#define Z_ARR(zval)					_Z_VALUE(zval).arr
 #define Z_ARR_P(zval_p)				Z_ARR(*(zval_p))
 
 #define Z_ARRVAL(zval)				Z_ARR(zval)
 #define Z_ARRVAL_P(zval_p)			Z_ARRVAL(*(zval_p))
 
-#define Z_OBJ(zval)					(zval).value.obj
+#define Z_OBJ(zval)					_Z_VALUE(zval).obj
 #define Z_OBJ_P(zval_p)				Z_OBJ(*(zval_p))
 
 #define Z_OBJ_HT(zval)				Z_OBJ(zval)->handlers
@@ -609,7 +654,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJDEBUG(zval,tmp)		(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&tmp):(tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
 #define Z_OBJDEBUG_P(zval_p,tmp)	Z_OBJDEBUG(*(zval_p), tmp)
 
-#define Z_RES(zval)					(zval).value.res
+#define Z_RES(zval)					_Z_VALUE(zval).res
 #define Z_RES_P(zval_p)				Z_RES(*zval_p)
 
 #define Z_RES_HANDLE(zval)			Z_RES(zval)->handle
@@ -621,28 +666,28 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_RES_VAL(zval)				Z_RES(zval)->ptr
 #define Z_RES_VAL_P(zval_p)			Z_RES_VAL(*zval_p)
 
-#define Z_REF(zval)					(zval).value.ref
+#define Z_REF(zval)					_Z_VALUE(zval).ref
 #define Z_REF_P(zval_p)				Z_REF(*(zval_p))
 
 #define Z_REFVAL(zval)				&Z_REF(zval)->val
 #define Z_REFVAL_P(zval_p)			Z_REFVAL(*(zval_p))
 
-#define Z_AST(zval)					(zval).value.ast
+#define Z_AST(zval)					_Z_VALUE(zval).ast
 #define Z_AST_P(zval_p)				Z_AST(*(zval_p))
 
-#define Z_ASTVAL(zval)				(zval).value.ast->ast
+#define Z_ASTVAL(zval)				_Z_VALUE(zval).ast->ast
 #define Z_ASTVAL_P(zval_p)			Z_ASTVAL(*(zval_p))
 
-#define Z_INDIRECT(zval)			(zval).value.zv
+#define Z_INDIRECT(zval)			_Z_VALUE(zval).zv
 #define Z_INDIRECT_P(zval_p)		Z_INDIRECT(*(zval_p))
 
-#define Z_CE(zval)					(zval).value.ce
+#define Z_CE(zval)					_Z_VALUE(zval).ce
 #define Z_CE_P(zval_p)				Z_CE(*(zval_p))
 
-#define Z_FUNC(zval)				(zval).value.func
+#define Z_FUNC(zval)				_Z_VALUE(zval).func
 #define Z_FUNC_P(zval_p)			Z_FUNC(*(zval_p))
 
-#define Z_PTR(zval)					(zval).value.ptr
+#define Z_PTR(zval)					_Z_VALUE(zval).ptr
 #define Z_PTR_P(zval_p)				Z_PTR(*(zval_p))
 
 #define ZVAL_UNDEF(z) do {				\
@@ -895,9 +940,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #if SIZEOF_SIZE_T == 4
 # define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
 	do {												\
-		uint32_t _w2 = v->value.ww.w2;					\
+		uint32_t _w2 = _Z_VALUE_P(v).ww.w2;					\
 		Z_COUNTED_P(z) = gc;							\
-		z->value.ww.w2 = _w2;							\
+		_Z_VALUE_P(z).ww.w2 = _w2;							\
 		Z_TYPE_INFO_P(z) = t;							\
 	} while (0)
 #elif SIZEOF_SIZE_T == 8

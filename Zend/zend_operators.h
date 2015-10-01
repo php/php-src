@@ -435,10 +435,6 @@ ZEND_API void zend_update_current_locale(void);
 #define zend_update_current_locale()
 #endif
 
-/* The offset in bytes between the value and type fields of a zval */
-#define ZVAL_OFFSETOF_TYPE	\
-	(offsetof(zval, u1.type_info) - offsetof(zval, value))
-
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
 #if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
@@ -466,7 +462,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		"movl %1, %c2(%0)\n"
 		"0:"
 		:
-		: "r"(&op1->value),
+		: "r"(&_Z_VALUE_P(op1)),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc", "memory");
@@ -479,7 +475,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		"movl %1, %c2(%0)\n"
 		"0:"
 		:
-		: "r"(&op1->value),
+		: "r"(&_Z_VALUE_P(op1)),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc", "memory");
@@ -520,7 +516,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		"movl %1,%c2(%0)\n"
 		"0:"
 		:
-		: "r"(&op1->value),
+		: "r"(&_Z_VALUE_P(op1)),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc", "memory");
@@ -533,7 +529,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		"movl %1,%c2(%0)\n"
 		"0:"
 		:
-		: "r"(&op1->value),
+		: "r"(&_Z_VALUE_P(op1)),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "cc", "memory");
@@ -582,9 +578,9 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		"fstpl	(%0)\n"
 		"1:"
 		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
+		: "r"(&_Z_VALUE_P(result)),
+		  "r"(&_Z_VALUE_P(op1)),
+		  "r"(&_Z_VALUE_P(op2)),
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
@@ -605,9 +601,9 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 		"fstpl	(%0)\n"
 		"1:"
 		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
+		: "r"(&_Z_VALUE_P(result)),
+		  "r"(&_Z_VALUE_P(op1)),
+		  "r"(&_Z_VALUE_P(op2)),
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
@@ -689,9 +685,9 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		"fstpl	(%0)\n"
 		"1:"
 		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
+		: "r"(&_Z_VALUE_P(result)),
+		  "r"(&_Z_VALUE_P(op1)),
+		  "r"(&_Z_VALUE_P(op2)),
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)
@@ -716,9 +712,9 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 		"fstpl	(%0)\n"
 		"1:"
 		:
-		: "r"(&result->value),
-		  "r"(&op1->value),
-		  "r"(&op2->value),
+		: "r"(&_Z_VALUE_P(result)),
+		  "r"(&_Z_VALUE_P(op1)),
+		  "r"(&_Z_VALUE_P(op2)),
 		  "n"(IS_LONG),
 		  "n"(IS_DOUBLE),
 		  "n"(ZVAL_OFFSETOF_TYPE)

@@ -279,9 +279,9 @@ static void destroy_server_data(xmlrpc_server_data *server)
 static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
-		rsrc->gc.refcount++;
+		GC_REFCOUNT(rsrc)++;
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
-		rsrc->gc.refcount--;
+		GC_REFCOUNT(rsrc)--;
 	}
 }
 
