@@ -45,13 +45,12 @@ $API_params = array(
 	//TODO 'L' => array('zend_long*, '), // long
 	'o' => array('zval**'), //object
 	'O' => array('zval**', 'zend_class_entry*'), // object of given type
-	'p' => array('char**', 'size_t*'), // valid path
 	'P' => array('zend_string**'), // valid path
 	'r' => array('zval**'), // resource
-	's' => array('char**', 'size_t*'), // string
 	'S' => array('zend_string**'), // string
 	'z' => array('zval**'), // zval*
 	'Z' => array('zval***') // zval**
+	// 's', 'p' handled separately
 );
 
 /** reports an error, according to its level */
@@ -131,7 +130,7 @@ function get_vars($txt)
 
 
 /** run diagnostic checks against one var. */
-function check_param($db, $idx, $exp, $optional)
+function check_param_allow_uninit($db, $idx, $exp, $optional)
 {
 	global $error_few_vars_given;
 
@@ -149,14 +148,18 @@ function check_param($db, $idx, $exp, $optional)
 		error("{$db[$idx][0]}: expected '$exp' but got '{$db[$idx][1]}' [".($idx+1).']');
 	}
 
-	if ($optional && !$db[$idx][2]) {
-		error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
-
-	} elseif (!$optional && $db[$idx][2]) {
+	if (!$optional && $db[$idx][2]) {
 		error("not optional var is initialized: {$db[$idx][0]} [".($idx+1).']', 2);
 	}
 }
 
+function check_param($db, $idx, $exp, $optional)
+{
+	check_param_allow_uninit($db, $idx, $exp, $optional);
+	if ($optional && !$db[$idx][2]) {
+		error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
+	}
+}
 
 /** fetch params passed to zend_parse_params*() */
 function get_params($vars, $str)
@@ -227,15 +230,15 @@ function check_function($name, $txt, $offset)
 
 					// separate_zval_if_not_ref
 					case '/':
-						if (!in_array($last_char, array('r', 'z'))) {
-							error("the '/' specifier cannot be applied to '$last_char'");
+						if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+							error("the '/' specifier should not be applied to '$last_char'");
 						}
 					break;
 
 					// nullable arguments
 					case '!':
-						if (!in_array($last_char, array('a', 'C', 'f', 'h', 'o', 'O', 'r', 's', 't', 'z', 'Z'))) {
-							error("the '!' specifier cannot be applied to '$last_char'");
+						if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+							check_param($params, ++$j, 'zend_bool*', $optional);
 						}
 					break;
 
@@ -248,6 +251,15 @@ function check_function($name, $txt, $offset)
 							check_param($params, ++$j, 'zval**', $optional);
 							check_param($params, ++$j, 'int*', $optional);
 							$varargs = true;
+						}
+					break;
+
+					case 's':
+					case 'p':
+						check_param_allow_uninit($params, ++$j, 'char**', $optional);
+						check_param_allow_uninit($params, ++$j, 'size_t*', $optional);
+						if ($optional && !$params[$j-1][2] && !$params[$j][2]) {
+							error("one of optional vars {$params[$j-1][0]} or {$params[$j][0]} must be initialized", 1);
 						}
 					break;
 
