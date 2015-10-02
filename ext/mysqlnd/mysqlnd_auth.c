@@ -36,7 +36,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const size_t passwd_len,
 							  const char * const db,
 							  const size_t db_len,
-							  const MYSQLND_OPTIONS * const options,
+							  const MYSQLND_SESSION_OPTIONS * const session_options,
 							  zend_ulong mysql_flags,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
@@ -83,8 +83,8 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
 
 		auth_packet->client_flags = mysql_flags;
-		auth_packet->max_packet_size = options->max_allowed_packet;
-		if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
+		auth_packet->max_packet_size = session_options->max_allowed_packet;
+		if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
 			auth_packet->charset_no	= charset->nr;
 		} else {
 			auth_packet->charset_no	= server_charset_no;
@@ -359,8 +359,8 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-								  const MYSQLND_OPTIONS * const options,
-								  const MYSQLND_NET_OPTIONS * const net_options,
+								  const MYSQLND_SESSION_OPTIONS * const session_options,
+								  const MYSQLND_IO_OPTIONS * const io_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -419,8 +419,8 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-							   const MYSQLND_OPTIONS * const options,
-							   const MYSQLND_NET_OPTIONS * const net_options,
+							   const MYSQLND_SESSION_OPTIONS * const session_options,
+							   const MYSQLND_IO_OPTIONS * const io_options,
 							   zend_ulong mysql_flags
 							  )
 {
@@ -480,18 +480,18 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 /* {{{ mysqlnd_sha256_get_rsa_key */
 static RSA *
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
-						   const MYSQLND_OPTIONS * const options,
-						   const MYSQLND_NET_OPTIONS * const net_options
+						   const MYSQLND_SESSION_OPTIONS * const session_options,
+						   const MYSQLND_IO_OPTIONS * const io_options
 						  )
 {
 	RSA * ret = NULL;
-	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')?
-								net_options->sha256_server_public_key:
+	const char * fname = (io_options->sha256_server_public_key && io_options->sha256_server_public_key[0] != '\0')?
+								io_options->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
 	php_stream * stream;
 	DBG_ENTER("mysqlnd_sha256_get_rsa_key");
 	DBG_INF_FMT("options_s256_pk=[%s] MYSQLND_G(sha256_server_public_key)=[%s]",
-				 net_options->sha256_server_public_key? net_options->sha256_server_public_key:"n/a",
+				 io_options->sha256_server_public_key? io_options->sha256_server_public_key:"n/a",
 				 MYSQLND_G(sha256_server_public_key)? MYSQLND_G(sha256_server_public_key):"n/a");
 	if (!fname || fname[0] == '\0') {
 		MYSQLND_PACKET_SHA256_PK_REQUEST * pk_req_packet = NULL;
@@ -569,8 +569,8 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-								  const MYSQLND_OPTIONS * const options,
-								  const MYSQLND_NET_OPTIONS * const net_options,
+								  const MYSQLND_SESSION_OPTIONS * const session_options,
+								  const MYSQLND_IO_OPTIONS * const io_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -588,7 +588,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		memcpy(ret, passwd, passwd_len);
 	} else {
 		*auth_data_len = 0;
-		server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options);
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, io_options);
 
 		if (server_public_key) {
 			int server_public_key_len;

@@ -156,7 +156,7 @@ typedef struct st_mysqlnd_infile
 	void	(*local_infile_end)(void *ptr);
 } MYSQLND_INFILE;
 
-typedef struct st_mysqlnd_options
+typedef struct st_mysqlnd_session_options
 {
 	ulong		flags;
 
@@ -175,9 +175,9 @@ typedef struct st_mysqlnd_options
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
 	HashTable	* connect_attr;
+	char		* unused1;
+	char		* unused2;
 	char		* unused3;
-	char		* unused4;
-	char		* unused5;
 
 	enum_mysqlnd_protocol_type protocol;
 
@@ -188,9 +188,9 @@ typedef struct st_mysqlnd_options
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
 #endif
-} MYSQLND_OPTIONS;
+} MYSQLND_SESSION_OPTIONS;
 
-typedef struct st_mysqlnd_net_options
+typedef struct st_mysqlnd_io_options
 {
 	/* timeouts */
 	unsigned int timeout_connect;
@@ -216,12 +216,7 @@ typedef struct st_mysqlnd_net_options
 	uint64_t	flags;
 
 	char *		sha256_server_public_key;
-
-	char *		unused1;
-	char *		unused2;
-	char *		unused3;
-	char *		unused4;
-} MYSQLND_NET_OPTIONS;
+} MYSQLND_IO_OPTIONS;
 
 
 
@@ -866,7 +861,7 @@ struct st_mysqlnd_net_data
 #else
 	zend_uchar			unused_pad1;
 #endif
-	MYSQLND_NET_OPTIONS	options;
+	MYSQLND_IO_OPTIONS	options;
 
 	unsigned int		refcount;
 
@@ -969,8 +964,8 @@ struct st_mysqlnd_connection_data
 	unsigned int	field_count;
 
 	/* options */
-	MYSQLND_OPTIONS	* options;
-	MYSQLND_OPTIONS	options_impl;
+	MYSQLND_SESSION_OPTIONS	* options;
+	MYSQLND_SESSION_OPTIONS	options_impl;
 
 	/* stats */
 	MYSQLND_STATS	* stats;
@@ -1225,8 +1220,8 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_OPTIONS * const options,
-														const MYSQLND_NET_OPTIONS * const net_options, zend_ulong mysql_flags
+														const MYSQLND_SESSION_OPTIONS * const session_options,
+														const MYSQLND_IO_OPTIONS * const io_options, zend_ulong mysql_flags
 														);
 
 struct st_mysqlnd_authentication_plugin

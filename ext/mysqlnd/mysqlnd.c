@@ -439,7 +439,7 @@ static enum_func_status
 mysqlnd_switch_to_ssl_if_needed(
 			MYSQLND_CONN_DATA * conn,
 			const MYSQLND_PACKET_GREET * const greet_packet,
-			const MYSQLND_OPTIONS * const options,
+			const MYSQLND_SESSION_OPTIONS * const session_options,
 			zend_ulong mysql_flags)
 {
 	enum_func_status ret = FAIL;
@@ -481,7 +481,7 @@ mysqlnd_switch_to_ssl_if_needed(
 	auth_packet->client_flags = mysql_flags;
 	auth_packet->max_packet_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 
-	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
+	if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
 		auth_packet->charset_no	= greet_packet->charset_no;
@@ -562,7 +562,7 @@ mysqlnd_run_authentication(
 			const size_t auth_plugin_data_len,
 			const char * const auth_protocol,
 			unsigned int charset_no,
-			const MYSQLND_OPTIONS * const options,
+			const MYSQLND_SESSION_OPTIONS * const session_options,
 			zend_ulong mysql_flags,
 			zend_bool silent,
 			zend_bool is_change_user
@@ -627,12 +627,13 @@ mysqlnd_run_authentication(
 			/* The data should be allocated with malloc() */
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags);
+												   plugin_data, plugin_data_len, session_options,
+												   &conn->net->data->options, mysql_flags);
 			if (conn->error_info->error_no) {
 				goto end;
 			}
 			if (FALSE == is_change_user) {
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
+				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, session_options, mysql_flags,
 											charset_no,
 											first_call,
 											requested_protocol,
@@ -694,18 +695,18 @@ mysqlnd_connect_run_authentication(
 			size_t db_len,
 			size_t passwd_len,
 			const MYSQLND_PACKET_GREET * const greet_packet,
-			const MYSQLND_OPTIONS * const options,
+			const MYSQLND_SESSION_OPTIONS * const session_options,
 			zend_ulong mysql_flags
 			)
 {
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_connect_run_authentication");
 
-	ret = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, options, mysql_flags);
+	ret = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, session_options, mysql_flags);
 	if (PASS == ret) {
 		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
 										 greet_packet->auth_plugin_data, greet_packet->auth_plugin_data_len, greet_packet->auth_protocol,
-										 greet_packet->charset_no, options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
+										 greet_packet->charset_no, session_options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
 	}
 	DBG_RETURN(ret);
 }
