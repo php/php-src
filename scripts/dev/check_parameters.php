@@ -20,7 +20,7 @@
 /* $Id$ */
 
 
-define('REPORT_LEVEL', 2); // 0 reports less false-positives. up to level 5.
+define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
@@ -36,7 +36,6 @@ $API_params = array(
 	'a' => array('zval**'), // array
 	'A' => array('zval**'), // array or object
 	'b' => array('zend_bool*'), // boolean
-	'C' => array('zend_class_entry**'), // class
 	'd' => array('double*'), // double
 	'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
 	'h' => array('HashTable**'), // array as an HashTable*
@@ -50,7 +49,7 @@ $API_params = array(
 	'S' => array('zend_string**'), // string
 	'z' => array('zval**'), // zval*
 	'Z' => array('zval***') // zval**
-	// 's', 'p' handled separately
+	// 's', 'p', 'C' handled separately
 );
 
 /** reports an error, according to its level */
@@ -130,7 +129,7 @@ function get_vars($txt)
 
 
 /** run diagnostic checks against one var. */
-function check_param_allow_uninit($db, $idx, $exp, $optional)
+function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
 {
 	global $error_few_vars_given;
 
@@ -151,12 +150,7 @@ function check_param_allow_uninit($db, $idx, $exp, $optional)
 	if (!$optional && $db[$idx][2]) {
 		error("not optional var is initialized: {$db[$idx][0]} [".($idx+1).']', 2);
 	}
-}
-
-function check_param($db, $idx, $exp, $optional)
-{
-	check_param_allow_uninit($db, $idx, $exp, $optional);
-	if ($optional && !$db[$idx][2]) {
+	if (!$allow_uninit && $optional && !$db[$idx][2]) {
 		error("optional var not initialized: {$db[$idx][0]} [".($idx+1).']', 1);
 	}
 }
@@ -199,7 +193,15 @@ function check_function($name, $txt, $offset)
 {
 	global $API_params;
 
-	if (preg_match_all('/zend_parse_parameters(?:_ex\s*\([^,]+,[^,]+|\s*\([^,]+),\s*"([^"]*)"\s*,\s*([^{;]*)/S', $txt, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+	$regex = '/
+		(?: zend_parse_parameters(?:_throw)?               \s*\([^,]+
+		|   zend_parse_(?:parameters_ex|method_parameters) \s*\([^,]+,[^,]+
+		|   zend_parse_method_parameters_ex                \s*\([^,]+,[^,]+,[^,+]
+		)
+		,\s*"([^"]*)"\s*
+		,\s*([^{;]*)
+	/Sx';
+	if (preg_match_all($regex, $txt, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
 
 		$GLOBALS['current_function'] = $name;
 
@@ -210,12 +212,14 @@ function check_function($name, $txt, $offset)
 			$vars = get_vars(substr($txt, 0, $m[0][1])); // limit var search to current location
 			$params = get_params($vars, $m[2][0]);
 			$optional = $varargs = false;
-			$last_last_char = $last_char = '';
+			$last_char = '';
 			$j = -1;
-			$len = strlen($m[1][0]);
 
+			$spec = $m[1][0];
+			$len = strlen($spec);
 			for ($i = 0; $i < $len; ++$i) {
-				switch($char = $m[1][0][$i]) {
+				$char = $spec[$i];
+				switch ($char = $spec[$i]) {
 					// separator for optional parameters
 					case '|':
 						if ($optional) {
@@ -256,24 +260,34 @@ function check_function($name, $txt, $offset)
 
 					case 's':
 					case 'p':
-						check_param_allow_uninit($params, ++$j, 'char**', $optional);
-						check_param_allow_uninit($params, ++$j, 'size_t*', $optional);
-						if ($optional && !$params[$j-1][2] && !$params[$j][2]) {
+						check_param($params, ++$j, 'char**', $optional, $allow_uninit=true);
+						check_param($params, ++$j, 'size_t*', $optional, $allow_uninit=true);
+						if ($optional && !$params[$j-1][2] && !$params[$j][2]
+								&& $params[$j-1][0] !== '**dummy**' && $params[$j][0] !== '**dummy**') {
 							error("one of optional vars {$params[$j-1][0]} or {$params[$j][0]} must be initialized", 1);
 						}
 					break;
 
+					case 'C':
+						// C must always be initialized, independently of whether it's optional
+						check_param($params, ++$j, 'zend_class_entry**', false);
+					break;
+
 					default:
-						if (isset($API_params[$char])) {
-							foreach($API_params[$char] as $exp) {
-								check_param($params, ++$j, $exp, $optional);
-							}
-						} else {
+						if (!isset($API_params[$char])) {
 							error("unknown char ('$char') at column $i");
+						}
+
+						// If an is_null flag is in use, only that flag is required to be
+						// initialized
+						$allow_uninit = $i+1 < $len && $spec[$i+1] === '!'
+								&& in_array($char, array('l', 'L', 'd', 'b'));
+
+						foreach ($API_params[$char] as $exp) {
+							check_param($params, ++$j, $exp, $optional, $allow_uninit);
 						}
 				}
 
-				$last_last_char = $last_char;
 				$last_char = $char;
 			}
 		}
