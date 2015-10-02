@@ -2042,6 +2042,7 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 void zend_emit_final_return(zval *zv) /* {{{ */
 {
 	znode zn;
+	zend_op *ret;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
@@ -2055,7 +2056,8 @@ void zend_emit_final_return(zval *zv) /* {{{ */
 		ZVAL_NULL(&zn.u.constant);
 	}
 
-	zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN, &zn, NULL);
+	ret = zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN, &zn, NULL);
+	ret->extended_value = -1;
 }
 /* }}} */
 
