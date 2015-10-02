@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.15
 
+- Date:
+  . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
+
 - Mysqlnd:
   . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
    (Andrey)
