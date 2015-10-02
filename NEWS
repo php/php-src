@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 15 Oct 2015, PHP 7.0.0 RC 5
 
-
+- Phpdbg
+  . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
 
 01 Oct 2015, PHP 7.0.0 RC 4
 

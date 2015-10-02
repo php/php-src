@@ -649,9 +649,10 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), 1, &rv));
 	}
 
-	phpdbg_writeln("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT "\n%s", ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line, ZSTR_VAL(msg));
-	zend_string_release(msg);
+	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
 	zend_string_release(file);
+	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", ZSTR_VAL(msg));
+	zend_string_release(msg);
 
 	if (EG(prev_exception)) {
 		OBJ_RELEASE(EG(prev_exception));
@@ -659,6 +660,8 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	}
 	OBJ_RELEASE(ex);
 	EG(opline_before_exception) = NULL;
+
+	EG(exit_status) = 255;
 } /* }}} */
 
 PHPDBG_COMMAND(run) /* {{{ */
