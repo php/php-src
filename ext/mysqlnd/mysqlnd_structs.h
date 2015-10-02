@@ -179,7 +179,7 @@ typedef struct st_mysqlnd_session_options
 	char		* unused2;
 	char		* unused3;
 
-	enum_mysqlnd_protocol_type protocol;
+	enum_mysqlnd_session_protocol_type protocol;
 
 	char 		*charset_name;
 	/* maximum allowed packet size for communication */

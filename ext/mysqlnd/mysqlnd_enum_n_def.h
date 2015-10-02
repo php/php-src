@@ -234,7 +234,7 @@ typedef enum mysqlnd_client_option
 	MYSQLND_OPT_AUTH_PROTOCOL = 211
 } enum_mysqlnd_client_option;
 
-typedef enum mysqlnd_protocol_type
+typedef enum mysqlnd_session_protocol_type
 {
 	MYSQL_PROTOCOL_DEFAULT = 0,
 	MYSQL_PROTOCOL_TCP,		/* all, supported */
@@ -242,7 +242,7 @@ typedef enum mysqlnd_protocol_type
 	MYSQL_PROTOCOL_PIPE,	/* win32, not-supported */
 	MYSQL_PROTOCOL_MEMORY,	/* win32, not-supported */
 	MYSQL_PROTOCOL_LAST
-} enum_mysqlnd_protocol_type;
+} enum_mysqlnd_session_protocol_type;
 
 typedef enum mysqlnd_field_types
 {
