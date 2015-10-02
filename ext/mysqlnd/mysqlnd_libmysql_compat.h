@@ -59,7 +59,7 @@
 #define mysql_field_count(r)			mysqlnd_field_count((r))
 #define mysql_field_seek(r,o)			mysqlnd_field_seek((r), (o))
 #define mysql_field_tell(r)				mysqlnd_field_tell((r))
-#define mysql_init(a)					mysqlnd_init((a))
+#define mysql_init(a)					mysqlnd_connection_init((a), false)
 #define mysql_insert_id(r)				mysqlnd_insert_id((r))
 #define mysql_kill(r,n)					mysqlnd_kill((r), (n))
 #define mysql_list_dbs(c, wild)			mysqlnd_list_dbs((c), (wild))

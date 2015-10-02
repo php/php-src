@@ -83,18 +83,22 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-PHPAPI MYSQLND * mysqlnd_init(unsigned int client_flags, zend_bool persistent);
-PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
-						  const char * host, const char * user,
-						  const char * passwd, unsigned int passwd_len,
-						  const char * db, unsigned int db_len,
-						  unsigned int port,
-						  const char * socket_or_pipe,
-						  unsigned int mysql_flags,
-						  unsigned int client_api_flags
-						 );
+#define mysqlnd_init(flags, persistent)		mysqlnd_connection_init((flags), (persistent))
+#define mysqlnd_connect(conn, host, user, pass, pass_len, db, db_len, port, socket, mysql_flags, client_api_flags) \
+			mysqlnd_connection_connect((conn), (host), (user), (pass), (pass_len), (db), (db_len), (port), (socket), (mysql_flags), (client_api_flags))
 
-#define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)))
+PHPAPI MYSQLND * mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent);
+PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
+											const char * host, const char * user,
+											const char * passwd, unsigned int passwd_len,
+											const char * db, unsigned int db_len,
+											unsigned int port,
+											const char * socket_or_pipe,
+											unsigned int mysql_flags,
+											unsigned int client_api_flags
+										);
+
+#define mysqlnd_change_user(conn, user, passwd, db, silent)					((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)))
 #define mysqlnd_change_user_ex(conn, user, passwd, db, silent, passwd_len)	((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), (passwd_len))
 
 PHPAPI void mysqlnd_debug(const char *mode);

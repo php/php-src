@@ -1148,14 +1148,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 
 
 /* {{{ mysqlnd_connect */
-PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
-						 const char * host, const char * user,
-						 const char * passwd, unsigned int passwd_len,
-						 const char * db, unsigned int db_len,
-						 unsigned int port,
-						 const char * socket_or_pipe,
-						 unsigned int mysql_flags,
-						 unsigned int client_api_flags
+PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
+											const char * host, const char * user,
+											const char * passwd, unsigned int passwd_len,
+											const char * db, unsigned int db_len,
+											unsigned int port,
+											const char * socket_or_pipe,
+											unsigned int mysql_flags,
+											unsigned int client_api_flags
 						)
 {
 	enum_func_status ret = FAIL;
@@ -1166,7 +1166,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 
 	if (!conn_handle) {
 		self_alloced = TRUE;
-		if (!(conn_handle = mysqlnd_init(client_api_flags, FALSE))) {
+		if (!(conn_handle = mysqlnd_connection_init(client_api_flags, FALSE))) {
 			/* OOM */
 			DBG_RETURN(NULL);
 		}
@@ -3161,15 +3161,15 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_init */
+/* {{{ mysqlnd_connection_init */
 PHPAPI MYSQLND *
-mysqlnd_init(unsigned int flags, zend_bool persistent)
+mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent)
 {
 	MYSQLND * ret;
-	DBG_ENTER("mysqlnd_init");
+	DBG_ENTER("mysqlnd_connection_init");
 	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_connection(persistent);
 	if (ret && ret->data) {
-		ret->data->m->negotiate_client_api_capabilities(ret->data, flags);
+		ret->data->m->negotiate_client_api_capabilities(ret->data, client_flags);
 	}
 	DBG_RETURN(ret);
 }
