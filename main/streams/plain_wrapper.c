@@ -94,6 +94,12 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 		flags |= O_RDONLY;
 	}
 
+#if defined(O_CLOEXEC)
+	if (strchr(mode, 'e')) {
+		flags |= O_CLOEXEC;
+	}
+#endif
+
 #if defined(O_NONBLOCK)
 	if (strchr(mode, 'n')) {
 		flags |= O_NONBLOCK;
