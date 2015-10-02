@@ -1337,6 +1337,9 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x072e00 /* Available since 7.46.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_STREAM_WEIGHT);
+	REGISTER_CURL_CONSTANT(CURLMOPT_PUSHFUNCTION);
+	REGISTER_CURL_CONSTANT(CURL_PUSH_OK);
+	REGISTER_CURL_CONSTANT(CURL_PUSH_DENY);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x072f00 /* Available since 7.47.0 */
@@ -1853,7 +1856,7 @@ PHP_FUNCTION(curl_version)
 
 /* {{{ alloc_curl_handle
  */
-static php_curl *alloc_curl_handle()
+php_curl *alloc_curl_handle()
 {
 	php_curl *ch               = ecalloc(1, sizeof(php_curl));
 	ch->to_free                = ecalloc(1, sizeof(struct _php_curl_free));
@@ -3399,10 +3402,12 @@ static void _php_curl_close_ex(php_curl *ch)
 	 *
 	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2
 	 */
-	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
-	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
+	if (ch->cp != NULL) {
+		curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
+		curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
 
-	curl_easy_cleanup(ch->cp);
+		curl_easy_cleanup(ch->cp);
+	}
 
 	/* cURL destructors should be invoked only by last curl handle */
 	if (--(*ch->clone) == 0) {
