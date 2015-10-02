@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 15 Oct 2015, PHP 7.0.0 RC 5
 
-- Date:
-  . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
-
 - Phpdbg
   . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
 
