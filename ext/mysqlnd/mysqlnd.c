@@ -193,9 +193,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 		conn->net = NULL;
 	}
 
-	if (conn->protocol) {
-		mysqlnd_protocol_free(conn->protocol);
-		conn->protocol = NULL;
+	if (conn->payload_decoder_factory) {
+		mysqlnd_protocol_payload_decoder_factory_free(conn->payload_decoder_factory);
+		conn->payload_decoder_factory = NULL;
 	}
 
 	if (conn->stats) {
@@ -222,7 +222,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DAT
 
 	switch (ok_packet) {
 		case PROT_OK_PACKET:{
-			MYSQLND_PACKET_OK * ok_response = conn->protocol->m.get_ok_packet(conn->protocol, FALSE);
+			MYSQLND_PACKET_OK * ok_response = conn->payload_decoder_factory->m.get_ok_packet(conn->payload_decoder_factory, FALSE);
 			if (!ok_response) {
 				SET_OOM_ERROR(*conn->error_info);
 				break;
@@ -268,7 +268,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DAT
 			break;
 		}
 		case PROT_EOF_PACKET:{
-			MYSQLND_PACKET_EOF * ok_response = conn->protocol->m.get_eof_packet(conn->protocol, FALSE);
+			MYSQLND_PACKET_EOF * ok_response = conn->payload_decoder_factory->m.get_eof_packet(conn->payload_decoder_factory, FALSE);
 			if (!ok_response) {
 				SET_OOM_ERROR(*conn->error_info);
 				break;
@@ -338,7 +338,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request)(MYSQLND_CONN_DATA * c
 	SET_ERROR_AFF_ROWS(conn);
 	SET_EMPTY_ERROR(*conn->error_info);
 
-	cmd_packet = conn->protocol->m.get_command_packet(conn->protocol, FALSE);
+	cmd_packet = conn->payload_decoder_factory->m.get_command_packet(conn->payload_decoder_factory, FALSE);
 	if (!cmd_packet) {
 		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL);
@@ -473,7 +473,7 @@ mysqlnd_switch_to_ssl_if_needed(
 	DBG_INF_FMT("CLIENT_SSL_VERIFY_SERVER_CERT=	%d", mysql_flags & CLIENT_SSL_VERIFY_SERVER_CERT? 1:0);
 	DBG_INF_FMT("CLIENT_REMEMBER_OPTIONS=		%d", mysql_flags & CLIENT_REMEMBER_OPTIONS? 1:0);
 
-	auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
+	auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
 	if (!auth_packet) {
 		SET_OOM_ERROR(*conn->error_info);
 		goto end;
@@ -800,7 +800,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	greet_packet = conn->protocol->m.get_greet_packet(conn->protocol, FALSE);
+	greet_packet = conn->payload_decoder_factory->m.get_greet_packet(conn->payload_decoder_factory, FALSE);
 	if (!greet_packet) {
 		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL); /* OOM */
@@ -1761,7 +1761,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 			if (FAIL == ret) {
 				break;
 			}
-			stats_header = conn->protocol->m.get_stats_packet(conn->protocol, FALSE);
+			stats_header = conn->payload_decoder_factory->m.get_stats_packet(conn->payload_decoder_factory, FALSE);
 			if (!stats_header) {
 				SET_OOM_ERROR(*conn->error_info);
 				break;
@@ -2983,9 +2983,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, init)(MYSQLND_CONN_DATA * conn)
 	SET_ERROR_AFF_ROWS(conn);
 
 	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, conn->error_info);
-	conn->protocol = mysqlnd_protocol_init(conn->persistent);
+	conn->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(conn->persistent);
 
-	DBG_RETURN(conn->stats && conn->net && conn->protocol? PASS:FAIL);
+	DBG_RETURN(conn->stats && conn->net && conn->payload_decoder_factory? PASS:FAIL);
 }
 /* }}} */
 

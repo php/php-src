@@ -43,7 +43,7 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_R
 PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id);
 #define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id);
+PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, unsigned int plugin_id);
 #define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id))
 
 PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id);

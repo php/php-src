@@ -110,14 +110,14 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_R
 
 /* {{{ _mysqlnd_plugin_get_plugin_protocol_data */
 PHPAPI void **
-_mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id)
+_mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, unsigned int plugin_id)
 {
 	DBG_ENTER("_mysqlnd_plugin_get_plugin_protocol_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!protocol || plugin_id >= mysqlnd_plugin_count()) {
+	if (!factory || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)((char *)protocol + sizeof(MYSQLND_PROTOCOL) + plugin_id * sizeof(void *)));
+	DBG_RETURN((void *)((char *)factory + sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -253,20 +253,20 @@ mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)
 /* }}} */
 
 
-/* {{{ mysqlnd_protocol_get_methods */
-PHPAPI struct st_mysqlnd_protocol_methods *
-mysqlnd_protocol_get_methods()
+/* {{{ mysqlnd_protocol_payload_decoder_factory_get_methods */
+PHPAPI struct st_mysqlnd_protocol_payload_decoder_factory_methods *
+mysqlnd_protocol_payload_decoder_factory_get_methods()
 {
-	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol);
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_protocol_set_methods */
+/* {{{ mysqlnd_protocol_payload_decoder_factory_set_methods */
 PHPAPI void
-mysqlnd_protocol_set_methods(struct st_mysqlnd_protocol_methods * methods)
+mysqlnd_protocol_payload_decoder_factory_set_methods(struct st_mysqlnd_protocol_payload_decoder_factory_methods * methods)
 {
-	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol) = *methods;
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory) = *methods;
 }
 /* }}} */
 

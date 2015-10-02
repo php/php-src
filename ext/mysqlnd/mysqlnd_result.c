@@ -411,7 +411,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 
 	ret = FAIL;
 	do {
-		rset_header = conn->protocol->m.get_rset_header_packet(conn->protocol, FALSE);
+		rset_header = conn->payload_decoder_factory->m.get_rset_header_packet(conn->payload_decoder_factory, FALSE);
 		if (!rset_header) {
 			SET_OOM_ERROR(*conn->error_info);
 			ret = FAIL;
@@ -542,7 +542,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				}
 
 				/* Check for SERVER_STATUS_MORE_RESULTS if needed */
-				fields_eof = conn->protocol->m.get_eof_packet(conn->protocol, FALSE);
+				fields_eof = conn->payload_decoder_factory->m.get_eof_packet(conn->payload_decoder_factory, FALSE);
 				if (!fields_eof) {
 					SET_OOM_ERROR(*conn->error_info);
 					ret = FAIL;
@@ -944,7 +944,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	  this to be not NULL.
 	*/
 	/* FALSE = non-persistent */
-	result->unbuf->row_packet = result->conn->protocol->m.get_row_packet(result->conn->protocol, FALSE);
+	result->unbuf->row_packet = result->conn->payload_decoder_factory->m.get_row_packet(result->conn->payload_decoder_factory, FALSE);
 	if (!result->unbuf->row_packet) {
 		goto oom;
 	}
@@ -1295,7 +1295,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	set->references	= 1;
 
 	/* non-persistent */
-	row_packet = conn->protocol->m.get_row_packet(conn->protocol, FALSE);
+	row_packet = conn->payload_decoder_factory->m.get_row_packet(conn->payload_decoder_factory, FALSE);
 	if (!row_packet) {
 		SET_OOM_ERROR(*conn->error_info);
 		ret = FAIL;

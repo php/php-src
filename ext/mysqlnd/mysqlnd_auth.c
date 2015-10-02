@@ -57,7 +57,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 
 	DBG_ENTER("mysqlnd_auth_handshake");
 
-	auth_resp_packet = conn->protocol->m.get_auth_response_packet(conn->protocol, FALSE);
+	auth_resp_packet = conn->payload_decoder_factory->m.get_auth_response_packet(conn->payload_decoder_factory, FALSE);
 
 	if (!auth_resp_packet) {
 		SET_OOM_ERROR(*conn->error_info);
@@ -65,7 +65,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE);
+		change_auth_resp_packet = conn->payload_decoder_factory->m.get_change_auth_response_packet(conn->payload_decoder_factory, FALSE);
 		if (!change_auth_resp_packet) {
 			SET_OOM_ERROR(*conn->error_info);
 			goto end;
@@ -80,7 +80,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 			goto end;
 		}
 	} else {
-		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
+		auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
 
 		auth_packet->client_flags = mysql_flags;
 		auth_packet->max_packet_size = session_options->max_allowed_packet;
@@ -178,7 +178,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 
 	DBG_ENTER("mysqlnd_auth_change_user");
 
-	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE);
+	chg_user_resp = conn->payload_decoder_factory->m.get_change_user_response_packet(conn->payload_decoder_factory, FALSE);
 
 	if (!chg_user_resp) {
 		SET_OOM_ERROR(*conn->error_info);
@@ -186,7 +186,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 	}
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE);
+		change_auth_resp_packet = conn->payload_decoder_factory->m.get_change_auth_response_packet(conn->payload_decoder_factory, FALSE);
 		if (!change_auth_resp_packet) {
 			SET_OOM_ERROR(*conn->error_info);
 			goto end;
@@ -201,7 +201,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			goto end;
 		}
 	} else {
-		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
+		auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
 
 		if (!auth_packet) {
 			SET_OOM_ERROR(*conn->error_info);
@@ -260,7 +260,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		  When it gets fixed, there should be one more check here
 		*/
 		if (conn->m->get_server_version(conn) > 50113L &&conn->m->get_server_version(conn) < 50118L) {
-			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE);
+			MYSQLND_PACKET_OK * redundant_error_packet = conn->payload_decoder_factory->m.get_ok_packet(conn->payload_decoder_factory, FALSE);
 			if (redundant_error_packet) {
 				PACKET_READ(redundant_error_packet, conn);
 				PACKET_FREE(redundant_error_packet);
@@ -499,12 +499,12 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 
 		do {
 			DBG_INF("requesting the public key from the server");
-			pk_req_packet = conn->protocol->m.get_sha256_pk_request_packet(conn->protocol, FALSE);
+			pk_req_packet = conn->payload_decoder_factory->m.get_sha256_pk_request_packet(conn->payload_decoder_factory, FALSE);
 			if (!pk_req_packet) {
 				SET_OOM_ERROR(*conn->error_info);
 				break;
 			}
-			pk_resp_packet = conn->protocol->m.get_sha256_pk_request_response_packet(conn->protocol, FALSE);
+			pk_resp_packet = conn->payload_decoder_factory->m.get_sha256_pk_request_response_packet(conn->payload_decoder_factory, FALSE);
 			if (!pk_resp_packet) {
 				SET_OOM_ERROR(*conn->error_info);
 				PACKET_FREE(pk_req_packet);

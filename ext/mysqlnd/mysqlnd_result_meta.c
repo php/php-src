@@ -57,7 +57,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
-	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE);
+	field_packet = conn->payload_decoder_factory->m.get_result_field_packet(conn->payload_decoder_factory, FALSE);
 	if (!field_packet) {
 		SET_OOM_ERROR(*conn->error_info);
 		DBG_RETURN(FAIL);

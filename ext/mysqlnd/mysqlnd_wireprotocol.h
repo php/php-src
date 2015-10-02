@@ -320,8 +320,8 @@ enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent);
-PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol);
+PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(zend_bool persistent);
+PHPAPI void mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

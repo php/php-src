@@ -282,18 +282,18 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 /* }}} */
 
 
-/* {{{ mysqlnd_object_factory::get_protocol_decoder */
-static MYSQLND_PROTOCOL *
-MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent)
+/* {{{ mysqlnd_object_factory::get_protocol_payload_decoder_factory */
+static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
+MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(zend_bool persistent)
 {
-	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_PROTOCOL *ret = mnd_pecalloc(1, alloc_size, persistent);
+	size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *ret = mnd_pecalloc(1, alloc_size, persistent);
 
-	DBG_ENTER("mysqlnd_object_factory::get_protocol_decoder");
+	DBG_ENTER("mysqlnd_object_factory::get_protocol_payload_decoder_factory");
 	DBG_INF_FMT("persistent=%u", persistent);
 	if (ret) {
 		ret->persistent = persistent;
-		ret->m = mysqlnd_mysqlnd_protocol_methods;
+		ret->m = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
 	}
 
 	DBG_RETURN(ret);
@@ -306,7 +306,7 @@ PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel),
-	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)
+	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;
 
 /*

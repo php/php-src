@@ -265,12 +265,12 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s)
 	MYSQLND_PACKET_RES_FIELD * field_packet;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
-	if (!stmt || !stmt->conn || !stmt->conn->protocol) {
+	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	field_packet = stmt->conn->protocol->m.get_result_field_packet(stmt->conn->protocol, FALSE);
+	field_packet = stmt->conn->payload_decoder_factory->m.get_result_field_packet(stmt->conn->payload_decoder_factory, FALSE);
 	if (!field_packet) {
 		SET_OOM_ERROR(*stmt->error_info);
 		SET_OOM_ERROR(*stmt->conn->error_info);
@@ -300,12 +300,12 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_read_prepare_response");
-	if (!stmt || !stmt->conn || !stmt->conn->protocol) {
+	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	prepare_resp = stmt->conn->protocol->m.get_prepare_response_packet(stmt->conn->protocol, FALSE);
+	prepare_resp = stmt->conn->payload_decoder_factory->m.get_prepare_response_packet(stmt->conn->payload_decoder_factory, FALSE);
 	if (!prepare_resp) {
 		SET_OOM_ERROR(*stmt->error_info);
 		SET_OOM_ERROR(*stmt->conn->error_info);
@@ -344,12 +344,12 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_prepare_read_eof");
-	if (!stmt || !stmt->conn || !stmt->conn->protocol) {
+	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	fields_eof = stmt->conn->protocol->m.get_eof_packet(stmt->conn->protocol, FALSE);
+	fields_eof = stmt->conn->payload_decoder_factory->m.get_eof_packet(stmt->conn->payload_decoder_factory, FALSE);
 	if (!fields_eof) {
 		SET_OOM_ERROR(*stmt->error_info);
 		SET_OOM_ERROR(*stmt->conn->error_info);
