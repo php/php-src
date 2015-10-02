@@ -748,12 +748,20 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		if (restore) {
 			zend_exception_restore();
-			zend_try_exception_handler();
+			zend_try {
+				zend_try_exception_handler();
+				PHPDBG_G(in_execution) = 1;
+			} zend_catch {
+				PHPDBG_G(in_execution) = 0;
+
+				if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+					zend_bailout();
+				}
+			} zend_end_try();
+
 			if (EG(exception)) {
 				phpdbg_handle_exception();
 			}
-
-			PHPDBG_G(in_execution) = 1;
 		}
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
