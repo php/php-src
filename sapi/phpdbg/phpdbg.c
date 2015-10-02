@@ -793,7 +793,7 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 {
 	/*
-	* We must not request TSRM before being boot
+	* We must not request TSRM before being booted
 	*/
 	if (phpdbg_booted) {
 		if (PHPDBG_G(flags) & PHPDBG_IN_EVAL) {
@@ -802,6 +802,10 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 		}
 
 		phpdbg_error("php", "msg=\"%s\"", "%s", message);
+
+		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
+			return;
+		}
 
 		switch (PG(last_error_type)) {
 			case E_ERROR:
@@ -813,7 +817,7 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 				const char *file_char = zend_get_executed_filename();
 				zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
 				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
-				efree(file);
+				zend_string_release(file);
 
 				if (!phpdbg_fully_started) {
 					return;
@@ -1936,7 +1940,7 @@ phpdbg_out:
 
 		/* In case we aborted during script execution, we may not reset CG(unclean_shutdown) */
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
-			is_exit = !PHPDBG_G(in_execution) && EG(exit_status) != 255;
+			is_exit = !PHPDBG_G(in_execution);
 			CG(unclean_shutdown) = is_exit || PHPDBG_G(unclean_eval);
 		}
 
