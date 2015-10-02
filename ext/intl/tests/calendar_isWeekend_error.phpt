@@ -21,6 +21,7 @@ var_dump(intlcal_is_weekend($c, "jj"));
 var_dump(intlcal_is_weekend(1));
 
 --EXPECTF--
+Warning: IntlCalendar::isWeekend() expects at most 1 parameter, 2 given in %s on line %d
 
 Warning: IntlCalendar::isWeekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
