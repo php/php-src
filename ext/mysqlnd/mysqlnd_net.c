@@ -724,7 +724,7 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 
 /* {{{ mysqlnd_net::set_client_option */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mysqlnd_option option, const char * const value)
+MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum_mysqlnd_client_option option, const char * const value)
 {
 	DBG_ENTER("mysqlnd_net::set_client_option");
 	DBG_INF_FMT("option=%u", option);

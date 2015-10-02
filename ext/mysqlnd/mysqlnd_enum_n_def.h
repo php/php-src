@@ -186,7 +186,7 @@ typedef enum mysqlnd_parse_exec_response_type
 	MYSQLND_PARSE_EXEC_RESPONSE_EXPLICIT,
 } enum_mysqlnd_parse_exec_response_type;
 
-typedef enum mysqlnd_option
+typedef enum mysqlnd_client_option
 {
 	MYSQL_OPT_CONNECT_TIMEOUT,
 	MYSQL_OPT_COMPRESS,
@@ -232,7 +232,7 @@ typedef enum mysqlnd_option
 	MYSQLND_OPT_SSL_PASSPHRASE = 209,
 	MYSQLND_OPT_MAX_ALLOWED_PACKET = 210,
 	MYSQLND_OPT_AUTH_PROTOCOL = 211
-} enum_mysqlnd_option;
+} enum_mysqlnd_client_option;
 
 typedef enum mysqlnd_protocol_type
 {

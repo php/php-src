@@ -2321,7 +2321,7 @@ end:
 /* {{{ mysqlnd_conn_data::set_client_option */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const conn,
-												enum mysqlnd_option option,
+												enum_mysqlnd_client_option option,
 												const char * const value
 												)
 {
@@ -2491,7 +2491,7 @@ end:
 /* {{{ mysqlnd_conn_data::set_client_option_2d */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
-														enum mysqlnd_option option,
+														enum_mysqlnd_client_option option,
 														const char * const key,
 														const char * const value
 														)
