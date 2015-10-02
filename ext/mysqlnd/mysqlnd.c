@@ -209,15 +209,15 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::simple_command_handle_response */
+/* {{{ mysqlnd_conn_data::send_command_handle_response */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response)(MYSQLND_CONN_DATA * conn, enum mysqlnd_packet_type ok_packet,
+MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DATA * conn, enum mysqlnd_packet_type ok_packet,
 															 zend_bool silent, enum php_mysqlnd_server_command command,
 															 zend_bool ignore_upsert_status)
 {
 	enum_func_status ret = FAIL;
 
-	DBG_ENTER("mysqlnd_conn_data::simple_command_handle_response");
+	DBG_ENTER("mysqlnd_conn_data::send_command_handle_response");
 	DBG_INF_FMT("silent=%u packet=%u command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
 
 	switch (ok_packet) {
@@ -311,13 +311,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response)(MYSQLND_CONN_D
 
 /* {{{ mysqlnd_conn_data::simple_command_send_request */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
 			   const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet;
 
-	DBG_ENTER("mysqlnd_conn_data::simple_command_send_request");
+	DBG_ENTER("mysqlnd_conn_data::send_command_do_request");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
@@ -370,16 +370,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA
 
 /* {{{ mysqlnd_conn_data::simple_command */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+MYSQLND_METHOD(mysqlnd_conn_data, send_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
 			   const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
 			   zend_bool ignore_upsert_status)
 {
 	enum_func_status ret;
-	DBG_ENTER("mysqlnd_conn_data::simple_command");
+	DBG_ENTER("mysqlnd_conn_data::send_command");
 
-	ret = conn->m->simple_command_send_request(conn, command, arg, arg_len, silent, ignore_upsert_status);
+	ret = conn->m->send_command_do_request(conn, command, arg, arg_len, silent, ignore_upsert_status);
 	if (PASS == ret && ok_packet != PROT_LAST) {
-		ret = conn->m->simple_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status);
+		ret = conn->m->send_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status);
 	}
 
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
@@ -399,7 +399,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 
 		int2store(buffer, (unsigned int) option);
-		ret = conn->m->simple_command(conn, COM_SET_OPTION, buffer, sizeof(buffer), PROT_EOF_PACKET, FALSE, TRUE);
+		ret = conn->m->send_command(conn, COM_SET_OPTION, buffer, sizeof(buffer), PROT_EOF_PACKET, FALSE, TRUE);
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1230,7 +1230,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->simple_command(conn, COM_QUERY, (zend_uchar *) query, query_len,
+		ret = conn->m->send_command(conn, COM_QUERY, (zend_uchar *) query, query_len,
 									  PROT_LAST /* we will handle the OK packet*/,
 									  FALSE, FALSE);
 		if (PASS == ret) {
@@ -1497,7 +1497,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 				*p++ = '\0';
 			}
 
-			if (PASS != conn->m->simple_command(conn, COM_FIELD_LIST, buff, p - buff,
+			if (PASS != conn->m->send_command(conn, COM_FIELD_LIST, buff, p - buff,
 											   PROT_LAST /* we will handle the OK packet*/,
 											   FALSE, TRUE)) {
 				conn->m->local_tx_end(conn, 0, FAIL);
@@ -1672,7 +1672,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	DBG_ENTER("mysqlnd_conn_data::dump_debug_info");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->simple_command(conn, COM_DEBUG, NULL, 0, PROT_EOF_PACKET, FALSE, TRUE);
+		ret = conn->m->send_command(conn, COM_DEBUG, NULL, 0, PROT_EOF_PACKET, FALSE, TRUE);
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1693,7 +1693,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 	DBG_INF_FMT("conn=%llu db=%s", conn->thread_id, db);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->simple_command(conn, COM_INIT_DB, (zend_uchar*) db, db_len, PROT_OK_PACKET, FALSE, TRUE);
+		ret = conn->m->send_command(conn, COM_INIT_DB, (zend_uchar*) db, db_len, PROT_OK_PACKET, FALSE, TRUE);
 		/*
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
@@ -1729,7 +1729,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->simple_command(conn, COM_PING, NULL, 0, PROT_OK_PACKET, TRUE, TRUE);
+		ret = conn->m->send_command(conn, COM_PING, NULL, 0, PROT_OK_PACKET, TRUE, TRUE);
 		/*
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
@@ -1757,7 +1757,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
-			ret = conn->m->simple_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE);
+			ret = conn->m->send_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE);
 			if (FAIL == ret) {
 				break;
 			}
@@ -1798,13 +1798,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 
 		/* If we kill ourselves don't expect OK packet, PROT_LAST will skip it */
 		if (pid != conn->thread_id) {
-			ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_OK_PACKET, FALSE, TRUE);
+			ret = conn->m->send_command(conn, COM_PROCESS_KILL, buff, 4, PROT_OK_PACKET, FALSE, TRUE);
 			/*
 			  The server sends 0 but libmysql doesn't read it and has established
 			  a protocol of giving back -1. Thus we have to follow it :(
 			*/
 			SET_ERROR_AFF_ROWS(conn);
-		} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE))) {
+		} else if (PASS == (ret = conn->m->send_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE))) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 			conn->m->send_close(conn);
 		}
@@ -1868,7 +1868,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		int1store(bits, options);
 
-		ret = conn->m->simple_command(conn, COM_REFRESH, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
+		ret = conn->m->send_command(conn, COM_REFRESH, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1890,7 +1890,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		int1store(bits, level);
 
-		ret = conn->m->simple_command(conn, COM_SHUTDOWN, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
+		ret = conn->m->send_command(conn, COM_SHUTDOWN, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1923,7 +1923,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
-				ret = conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE);
+				ret = conn->m->send_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE);
 				net->data->m.close_stream(net, conn->stats, conn->error_info);
 			}
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
@@ -3056,8 +3056,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, simple_command),
-	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response),
+	MYSQLND_METHOD(mysqlnd_conn_data, send_command),
+	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn_data, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, end_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, send_close),
@@ -3078,7 +3078,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands),
 	MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags),
 	MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake),
-	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request),
+	MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request),
 	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d),

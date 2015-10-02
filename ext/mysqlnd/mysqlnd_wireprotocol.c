@@ -643,9 +643,9 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 		}
 	}
 	if (packet->is_change_user_packet) {
-		if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer + MYSQLND_HEADER_SIZE, p - buffer - MYSQLND_HEADER_SIZE,
-										   PROT_LAST /* the caller will handle the OK packet */,
-										   packet->silent, TRUE)) {
+		if (PASS != conn->m->send_command(conn, COM_CHANGE_USER, buffer + MYSQLND_HEADER_SIZE, p - buffer - MYSQLND_HEADER_SIZE,
+									      PROT_LAST /* the caller will handle the OK packet */,
+										  packet->silent, TRUE)) {
 			DBG_RETURN(0);
 		}
 		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);

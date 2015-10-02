@@ -212,7 +212,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 
 infile_error:
 	/* get response from server and update upsert values */
-	if (FAIL == conn->m->simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE)) {
+	if (FAIL == conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE)) {
 		result = FAIL;
 	}
 
