@@ -1848,7 +1848,9 @@ phpdbg_interact:
 					} else {
 						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 					}
-					PHPDBG_COMMAND_HANDLER(run)(NULL);
+					zend_try {
+						PHPDBG_COMMAND_HANDLER(run)(NULL);
+					} zend_end_try();
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
 						EG(bailout) = __orig_bailout; /* reset zend_try */
