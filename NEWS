@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
 
+- Mcrypt:
+  . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
+    specified under RC4). (Nikita)
+
 - Mysqlnd:
   . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
    (Andrey)
