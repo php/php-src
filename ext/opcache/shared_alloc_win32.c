@@ -266,7 +266,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			GetSystemInfo(&si);
 
 			/* Are we running Vista ? */
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
+			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion >= 6) {
 				wanted_mapping_base = vista_mapping_base_set;
 			}
 		} while (0);
