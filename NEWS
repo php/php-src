@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 15 Oct 2015, PHP 7.0.0 RC 5
 
+- Mcrypt:
+  . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
+    specified under RC4). (Nikita)
+
 - Phpdbg
   . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
 
