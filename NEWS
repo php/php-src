@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
 
 - Opcache:
+  . Fixed bug #70632 (Third one of segfault in gc_remove_from_buffer).
+    (Laruence)
   . Fixed bug #70631 (Another Segfault in gc_remove_from_buffer()). (Laruence)
   . Fixed bug #70601 (Segfault in gc_remove_from_buffer()). (Laruence)
 
