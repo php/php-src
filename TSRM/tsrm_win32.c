@@ -612,6 +612,12 @@ TSRM_API int shmget(int key, int size, int flags)
 			created		= TRUE;
 		}
 		if (!shm_handle || !info_handle) {
+			if (shm_handle) {
+				CloseHandle(shm_handle);
+			}
+			if (info_handle) {
+				CloseHandle(info_handle);
+			}
 			return -1;
 		}
 	} else {
