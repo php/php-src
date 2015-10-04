@@ -1804,7 +1804,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-		INCREMENT(hits);
+#ifdef _M_X64
+		InterlockedIncrement64(&ZCSG(hits));
+#else
+		InterlockedIncrement(&ZCSG(hits));
+#endif
 		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
