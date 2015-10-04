@@ -314,9 +314,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
 								break;
 							}
-						} else {
+						} else if (Z_TYPE_PP(c) <= IS_BOOL || Z_TYPE_PP(c) == IS_STRING) {
 							t = **c;
 							zval_copy_ctor(&t);
+						} else {
+							break;
 						}
 
 						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
