@@ -750,14 +750,18 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			zend_class_entry *old_scope;
 
 			string_write(str, " = ", sizeof(" = ")-1);
-			ALLOC_ZVAL(zv);
-			*zv = *precv->op2.zv;
-			zval_copy_ctor(zv);
-			INIT_PZVAL(zv);
-			old_scope = EG(scope);
-			EG(scope) = fptr->common.scope;
-			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
-			EG(scope) = old_scope;
+			if (IS_CONSTANT_TYPE(Z_TYPE_P(precv->op2.zv))) {
+				ALLOC_ZVAL(zv);
+				*zv = *precv->op2.zv;
+				zval_copy_ctor(zv);
+				INIT_PZVAL(zv);
+				old_scope = EG(scope);
+				EG(scope) = fptr->common.scope;
+				zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+				EG(scope) = old_scope;
+			} else {
+				zv = precv->op2.zv;
+			}
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
@@ -782,7 +786,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 					zval_dtor(&zv_copy);
 				}
 			}
-			zval_ptr_dtor(&zv);
+			if (zv != precv->op2.zv) {
+				zval_ptr_dtor(&zv);
+			}
 		}
 	}
 	string_write(str, " ]", sizeof(" ]")-1);
