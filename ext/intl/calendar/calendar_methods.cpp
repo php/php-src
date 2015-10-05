@@ -923,15 +923,11 @@ U_CFUNC PHP_FUNCTION(intlcal_is_set)
 U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 {
 	double date;
-	zval *rawDate = NULL;
+	zend_bool date_is_null = 1;
 	CALENDAR_METHOD_INIT_VARS;
 
-	if (zend_parse_method_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS(), getThis(),
-			"O|z!", &object, Calendar_ce_ptr, &rawDate) == FAILURE
-			|| (rawDate != NULL &&
-				zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-				"O|d", &object, Calendar_ce_ptr, &date) == FAILURE)) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
+				"O|d!", &object, Calendar_ce_ptr, &date, &date_is_null) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_is_weekend: bad arguments", 0);
 		RETURN_FALSE;
@@ -939,7 +935,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_weekend)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (rawDate == NULL) {
+	if (date_is_null) {
 		RETURN_BOOL((int)co->ucal->isWeekend());
 	} else {
 		UBool ret = co->ucal->isWeekend((UDate)date, CALENDAR_ERROR_CODE(co));

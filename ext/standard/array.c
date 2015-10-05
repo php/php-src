@@ -1455,12 +1455,9 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive)
 			zend_fcall_info orig_array_walk_fci;
 			zend_fcall_info_cache orig_array_walk_fci_cache;
 
-			if (Z_ISREF_P(zv)) {
-				thash = Z_ARRVAL_P(Z_REFVAL_P(zv));
-			} else {
-				SEPARATE_ZVAL(zv);
-				thash = Z_ARRVAL_P(zv);
-			}
+			ZVAL_DEREF(zv);
+			SEPARATE_ARRAY(zv);
+			thash = Z_ARRVAL_P(zv);
 			if (thash->u.v.nApplyCount > 1) {
 				php_error_docref(NULL, E_WARNING, "recursion detected");
 				if (userdata) {
@@ -1616,7 +1613,6 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 
 	if (strict) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-			ZVAL_DEREF(entry);
 			if (fast_is_identical_function(value, entry)) {
 				if (behavior == 0) {
 					RETURN_TRUE;

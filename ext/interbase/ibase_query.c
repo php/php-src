@@ -1061,7 +1061,8 @@ PHP_FUNCTION(ibase_query)
 {
 	zval *zlink, *ztrans, *bind_args = NULL;
 	char *query;
-	int bind_i, query_len, bind_num;
+	size_t query_len;
+	int bind_i, bind_num;
 	long trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
@@ -1073,7 +1074,7 @@ PHP_FUNCTION(ibase_query)
 	RETVAL_FALSE;
 
 	switch (ZEND_NUM_ARGS()) {
-		long l;
+		zend_long l;
 
 		default:
 		    if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3, "rrs",
@@ -1472,7 +1473,8 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) /* {{{ */
 {
 	zval *result_arg;
-	long i, array_cnt = 0, flag = 0;
+	zend_long flag = 0;
+	long i, array_cnt = 0;
 	ibase_result *ib_result;
 
 	RESET_ERRMSG;
@@ -1684,7 +1686,7 @@ PHP_FUNCTION(ibase_name_result)
 {
 	zval *result_arg;
 	char *name_arg;
-	int name_arg_len;
+	size_t name_arg_len;
 	ibase_result *ib_result;
 
 	RESET_ERRMSG;
@@ -1998,7 +2000,7 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 PHP_FUNCTION(ibase_field_info)
 {
 	zval *result_arg;
-	long field_arg;
+	zend_long field_arg;
 	int type;
 	XSQLDA *sqlda;
 
@@ -2062,7 +2064,7 @@ PHP_FUNCTION(ibase_num_params)
 PHP_FUNCTION(ibase_param_info)
 {
 	zval *result_arg;
-	long field_arg;
+	zend_long field_arg;
 	ibase_query *ib_query;
 
 	RESET_ERRMSG;

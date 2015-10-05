@@ -71,7 +71,7 @@ PHPAPI PHP_FUNCTION(dl)
 	}
 
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
-	if (Z_LVAL_P(return_value) == 1) {
+	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
 }
@@ -237,7 +237,7 @@ PHP_MINFO_FUNCTION(dl)
 PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
-	RETURN_FALSE;
+	RETVAL_FALSE;
 }
 
 PHP_MINFO_FUNCTION(dl)

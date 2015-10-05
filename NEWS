@@ -1,8 +1,22 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+15 Oct 2015, PHP 7.0.0 RC 5
+
+- Core
+  . Fixed bug #70630 (Closure::call/bind() crash with
+    ReflectionFunction->getClosure()). (Bob)
+
+- Mcrypt:
+  . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
+    specified under RC4). (Nikita)
+
+- Phpdbg
+  . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
+
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
+  . Added zend_internal_function.reserved[] fields. (Dmitry)
   . Fixed bug #70557 (Memleak on return type verifying failed). (Laruence)
   . Fixed bug #70555 (fun_get_arg() on unsetted vars return UNKNOW). (Laruence)
   . Fixed bug #70548 (Redundant information printed in case of uncaught engine
@@ -31,10 +45,17 @@ PHP                                                                        NEWS
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
   . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
 
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
+
 - Phpdbg:
   . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
   . Fixed bug #70531 (Run and quit mode (-qrr) should not fallback to
     interactive mode). (Bob)
+  . Fixed bug #70533 (Help overview (-h) does not rpint anything under Windows).
+    (Anatol)
 
 - Session:
   . Fixed bug #70529 (Session read causes "String is not zero-terminated" error).
