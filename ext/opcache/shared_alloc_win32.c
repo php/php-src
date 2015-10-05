@@ -152,7 +152,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
+		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region", err);
 		return ALLOC_FAILURE;
    	}
 
@@ -251,29 +251,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   be taken (fail to map). So under Vista, we try to map into a hard coded predefined addresses
 	   in high memory. */
 	if (!ZCG(accel_directives).mmap_base || !*ZCG(accel_directives).mmap_base) {
-		do {
-			OSVERSIONINFOEX osvi;
-			SYSTEM_INFO si;
-
-			ZeroMemory(&si, sizeof(SYSTEM_INFO));
-			ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-
-			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-			if (! GetVersionEx ((OSVERSIONINFO *) &osvi)) {
-				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-				if (!GetVersionEx((OSVERSIONINFO *)&osvi)) {
-					break;
-				}
-			}
-
-			GetSystemInfo(&si);
-
-			/* Are we running Vista ? */
-			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
-				wanted_mapping_base = vista_mapping_base_set;
-			}
-		} while (0);
+		wanted_mapping_base = vista_mapping_base_set;
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
