@@ -612,6 +612,12 @@ TSRM_API int shmget(int key, int size, int flags)
 			created		= TRUE;
 		}
 		if (!shm_handle || !info_handle) {
+			if (shm_handle) {
+				CloseHandle(shm_handle);
+			}
+			if (info_handle) {
+				CloseHandle(info_handle);
+			}
 			return -1;
 		}
 	} else {
@@ -622,8 +628,8 @@ TSRM_API int shmget(int key, int size, int flags)
 
 	shm = shm_get(key, NULL);
 	if (!shm) {
-		UnmapViewOfFile(shm_handle);
-		UnmapViewOfFile(info_handle);
+		CloseHandle(shm_handle);
+		CloseHandle(info_handle);
 		return -1;
 	}
 	shm->segment = shm_handle;
