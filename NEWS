@@ -2,6 +2,24 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.15
 
+- Date:
+  . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
+
+- Mcrypt:
+  . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
+    specified under RC4). (Nikita)
+
+- Mysqlnd:
+  . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
+   (Andrey)
+  . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
+
+- Opcache:
+  . Fixed bug #70632 (Third one of segfault in gc_remove_from_buffer).
+    (Laruence)
+  . Fixed bug #70631 (Another Segfault in gc_remove_from_buffer()). (Laruence)
+  . Fixed bug #70601 (Segfault in gc_remove_from_buffer()). (Laruence)
+
 01 Oct 2015, PHP 5.6.14
 
 - Core:
@@ -15,12 +33,13 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
+- ldap
+  . Fixed bug #70465 (Bug in ldap_search() modifies LDAP_OPT_TIMELIMIT/DEREF's values). (Tyson Andre)
+  . Fixed bug #69574 (ldap timeouts not enforced). (Côme Bernigaud)
+
 - Mysqlnd:
-  . Fixed bug #70384 (mysqli_real_query():Unknown type 245 sent by the server).
-   (Andrey)
   . Fixed bug #70456 (mysqlnd doesn't activate TCP keep-alive when connecting to
     a server). (Sergei Turchanov)
-  . Fixed bug #70572 segfault in mysqlnd_connect. (Andrey, Remi)
 
 - OpenSSL:
   . Fixed bug #55259 (openssl extension does not get the DH parameters from 
@@ -31,6 +50,11 @@ PHP                                                                        NEWS
 
 - PDO:
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
+
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
 
 - Phpdbg:
   . Fix phpdbg_break_next() sometimes not breaking. (Bob)

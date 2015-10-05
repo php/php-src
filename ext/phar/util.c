@@ -494,7 +494,12 @@ really_get_entry:
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1 TSRMLS_CC);
 	if (entry->link) {
-		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry TSRMLS_CC) TSRMLS_CC);
+		phar_entry_info *link = phar_get_link_source(entry TSRMLS_CC);
+		if(!link) {
+			efree(*ret);
+			return FAILURE;
+		}
+		(*ret)->zero = phar_get_fp_offset(link TSRMLS_CC);
 	} else {
 		(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
 	}
@@ -1965,7 +1970,7 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;
-		if (FAILURE == zend_hash_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+		if (!filename_len || FAILURE == zend_hash_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
 			break;
 		}
 	}

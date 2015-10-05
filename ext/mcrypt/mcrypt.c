@@ -1237,6 +1237,10 @@ static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, int iv_size TSR
 {
 	if (mcrypt_enc_mode_has_iv(td) == 1) {
 		int expected_iv_size = mcrypt_enc_get_iv_size(td);
+		if (expected_iv_size == 0) {
+			/* Algorithm does not use IV, even though mode supports it */
+			return SUCCESS;
+		}
 
 		if (!iv) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,

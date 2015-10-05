@@ -242,6 +242,25 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 /* }}} */
 #endif
 
+static void reflection_zval_deep_copy(zval **p)
+{
+	zval *value;
+
+	ALLOC_ZVAL(value);
+	*value = **p;
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		HashTable *ht;
+
+		ALLOC_HASHTABLE(ht);
+		zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(value)), NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(ht, Z_ARRVAL_P(value), (copy_ctor_func_t) reflection_zval_deep_copy, NULL, sizeof(zval *));
+		Z_ARRVAL_P(value) = ht;
+	} else {
+		zval_copy_ctor(value);
+	}
+	INIT_PZVAL(value);
+	*p = value;
+}
 static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC) /* {{{ */
 {
 	zend_uint num_interfaces = ++class_entry->num_interfaces;
@@ -731,14 +750,18 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			zend_class_entry *old_scope;
 
 			string_write(str, " = ", sizeof(" = ")-1);
-			ALLOC_ZVAL(zv);
-			*zv = *precv->op2.zv;
-			zval_copy_ctor(zv);
-			INIT_PZVAL(zv);
-			old_scope = EG(scope);
-			EG(scope) = fptr->common.scope;
-			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
-			EG(scope) = old_scope;
+			if (IS_CONSTANT_TYPE(Z_TYPE_P(precv->op2.zv))) {
+				ALLOC_ZVAL(zv);
+				*zv = *precv->op2.zv;
+				zval_copy_ctor(zv);
+				INIT_PZVAL(zv);
+				old_scope = EG(scope);
+				EG(scope) = fptr->common.scope;
+				zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+				EG(scope) = old_scope;
+			} else {
+				zv = precv->op2.zv;
+			}
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
@@ -763,7 +786,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 					zval_dtor(&zv_copy);
 				}
 			}
-			zval_ptr_dtor(&zv);
+			if (zv != precv->op2.zv) {
+				zval_ptr_dtor(&zv);
+			}
 		}
 	}
 	string_write(str, " ]", sizeof(" ]")-1);
@@ -2606,7 +2631,16 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
 	if (!IS_CONSTANT_TYPE(Z_TYPE_P(return_value))) {
-		zval_copy_ctor(return_value);
+		if (Z_TYPE_P(return_value) != IS_ARRAY) {
+			zval_copy_ctor(return_value);
+		} else {
+			HashTable *ht;
+
+			ALLOC_HASHTABLE(ht);
+			zend_hash_init(ht, zend_hash_num_elements(Z_ARRVAL_P(return_value)), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(ht, Z_ARRVAL_P(return_value), (copy_ctor_func_t) reflection_zval_deep_copy, NULL, sizeof(zval *));
+			Z_ARRVAL_P(return_value) = ht;
+		}
 	}
 	old_scope = EG(scope);
 	EG(scope) = param->fptr->common.scope;
