@@ -21,9 +21,15 @@
 #include "php.h"
 #include "php_ticks.h"
 
+struct st_tick_function
+{
+	void (*func)(int, void *);
+	void *arg;
+};
+
 int php_startup_ticks(void)
 {
-	zend_llist_init(&PG(tick_functions), sizeof(void(*)(int)), NULL, 1);
+	zend_llist_init(&PG(tick_functions), sizeof(struct st_tick_function), NULL, 1);
 	return SUCCESS;
 }
 
@@ -39,30 +45,27 @@ void php_shutdown_ticks(void)
 
 static int php_compare_tick_functions(void *elem1, void *elem2)
 {
-	void(*func1)(int);
-	void(*func2)(int);
-	memcpy(&func1, elem1, sizeof(void(*)(int)));
-	memcpy(&func2, elem2, sizeof(void(*)(int)));
-	return (func1 == func2);
+  struct st_tick_function *e1 = (struct st_tick_function *)elem1;
+  struct st_tick_function *e2 = (struct st_tick_function *)elem2;
+  return e1->func == e2->func && e1->arg == e2->arg;
 }
 
-PHPAPI void php_add_tick_function(void (*func)(int))
+PHPAPI void php_add_tick_function(void (*func)(int, void*), void * arg)
 {
-	zend_llist_add_element(&PG(tick_functions), (void *)&func);
+	struct st_tick_function tmp = {func, arg};
+	zend_llist_add_element(&PG(tick_functions), (void *)&tmp);
 }
 
-PHPAPI void php_remove_tick_function(void (*func)(int))
+PHPAPI void php_remove_tick_function(void (*func)(int, void *), void * arg)
 {
-	zend_llist_del_element(&PG(tick_functions), (void *)func,
-						   (int(*)(void*, void*))php_compare_tick_functions);
+	struct st_tick_function tmp = {func, arg};
+	zend_llist_del_element(&PG(tick_functions), (void *)&tmp, (int(*)(void*, void*))php_compare_tick_functions);
 }
 
-static void php_tick_iterator(void *data, void *arg)
+static void php_tick_iterator(void *d, void *arg)
 {
-	void (*func)(int);
-
-	memcpy(&func, data, sizeof(void(*)(int)));
-	func(*((int *)arg));
+	struct st_tick_function *data = (struct st_tick_function *)d;
+	data->func(*((int *)arg), data->arg);
 }
 
 void php_run_ticks(int count)

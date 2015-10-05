@@ -1500,6 +1500,10 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				PHPDBG_G(flags) = 0;
+				/* It ain't gonna proceed to real execution anyway,
+					but the correct descriptor is needed already. */
+				PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+				PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 				phpdbg_do_help(NULL);
 				sapi_deactivate();

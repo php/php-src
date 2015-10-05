@@ -795,3 +795,11 @@ out, that the corresponding SDK isn't available anymore.
     always say "integer" and "float" instead of "long" and "double".
   . Output buffering now continues to work for an aborted connection if
     ignore_user_abort is set to true.
+  . Zend Extensions API was extended with zend_extension.op_array_persist_calc()
+    and zend_extensions.op_array_persist() handlers. They allow to store (or
+    reset) associated with op_array addition information in Opcache Shared
+    Memory.
+  . zend_internal_function.reserved[] array was introduced to allow association
+    of aditional information with internal functions. In PHP-5 it was possible
+    to use zend_function.op_array.reserved[] even for internal functions, but
+    now we don't allocate extra space.

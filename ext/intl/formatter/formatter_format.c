@@ -68,7 +68,6 @@ PHP_FUNCTION( numfmt_format )
 	}
 
 	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
-		SEPARATE_ZVAL_IF_NOT_REF(number);
 		convert_scalar_to_number(number );
 	}
 
