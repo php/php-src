@@ -53,9 +53,9 @@ $d = $nonstaticScoped->bindTo(null); $d(); echo "\n";
 $d->bindTo($d);
 
 echo "After binding, with same-class instance for the bound ones", "\n";
-$d = $staticUnscoped->bindTo(new A); $d(); echo "\n";
+$d = $staticUnscoped->bindTo(new A); /* $d(); */ echo "\n";
 $d = $nonstaticUnscoped->bindTo(new A); $d(); echo " (should be scoped to dummy class)\n";
-$d = $staticScoped->bindTo(new A); $d(); echo "\n";
+$d = $staticScoped->bindTo(new A); /* $d(); */ echo "\n";
 $d = $nonstaticScoped->bindTo(new A); $d(); echo "\n";
 
 echo "After binding, with different instance for the bound ones", "\n";
@@ -64,6 +64,7 @@ $d = $nonstaticScoped->bindTo(new B); $d(); echo "\n";
 
 echo "Done.\n";
 
+?>
 --EXPECTF--
 Before binding
 scoped to A: bool(false)
@@ -86,14 +87,12 @@ bound: no
 After binding, with same-class instance for the bound ones
 
 Warning: Cannot bind an instance to a static closure in %s on line %d
-scoped to A: bool(false)
-bound: no
+
 scoped to A: bool(false)
 bound: A (should be scoped to dummy class)
 
 Warning: Cannot bind an instance to a static closure in %s on line %d
-scoped to A: bool(true)
-bound: no
+
 scoped to A: bool(true)
 bound: A
 After binding, with different instance for the bound ones
