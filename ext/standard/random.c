@@ -30,9 +30,6 @@
 #if PHP_WIN32
 # include "win32/winutil.h"
 #endif
-#ifdef __linux__
-# include <linux/random.h>
-#endif
 
 #ifdef ZTS
 int random_globals_id;
