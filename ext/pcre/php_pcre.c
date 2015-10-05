@@ -1446,12 +1446,10 @@ static int preg_replace_impl(zval *return_value, zval *regex, zval *replace, zva
 	int			 replace_count = 0, old_replace_count;
 
 	if (Z_TYPE_P(replace) != IS_ARRAY && (Z_TYPE_P(replace) != IS_OBJECT || !is_callable_replace)) {
-		SEPARATE_ZVAL(replace);
 		convert_to_string_ex(replace);
 	}
 
 	if (Z_TYPE_P(regex) != IS_ARRAY) {
-		SEPARATE_ZVAL(regex);
 		convert_to_string_ex(regex);
 	}
 

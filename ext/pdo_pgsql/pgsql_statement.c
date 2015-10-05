@@ -376,10 +376,10 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 		/* We need to manually convert to a pg native boolean value */
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
-			SEPARATE_ZVAL(&param->parameter);
+			const char *s = zend_is_true(&param->parameter) ? "t" : "f";
 			param->param_type = PDO_PARAM_STR;
-			convert_to_boolean(&param->parameter);
-			ZVAL_STRINGL(&param->parameter, Z_TYPE_P(&param->parameter) == IS_TRUE ? "t" : "f", 1);
+			zval_ptr_dtor(&param->parameter);
+			ZVAL_STRINGL(&param->parameter, s, 1);
 		}
 	}
 	return 1;
