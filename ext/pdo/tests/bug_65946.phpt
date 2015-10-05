@@ -16,7 +16,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $limitStatement = ' LIMIT :limit';
-if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+    $limitStatement = ' ROWS :limit';
+} else if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
     $limitStatement = ' where ROWNUM <= :limit';
 }
 
