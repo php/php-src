@@ -1,5 +1,5 @@
 --TEST--
-Closure::call() or Closure::bind() to independent class must fail
+Closure::call() or Closure::bind() to independent class
 --FILE--
 <?php
 
@@ -53,11 +53,4 @@ var_dump($baz->getVar());
 --EXPECTF--
 string(3) "baz"
 string(3) "bar"
-
-Warning: Cannot bind function foo::initClass to object of class baz in %s on line %d
-
-Fatal error: Uncaught Error: Function name must be a string in %s:%d
-Stack trace:
-#0 %s(%d): callMethodOn('foo', 'initClass', Object(baz))
-#1 {main}
-  thrown in %s on line %d
+string(3) "foo"

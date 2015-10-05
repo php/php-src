@@ -4,7 +4,7 @@ Bug #70630 (Closure::call/bind() crash with ReflectionFunction->getClosure())
 <?php
 
 class a {}
-function foo() {}
+function foo() { print "ok\n"; }
 
 foreach (["substr", "foo"] as $fn) {
 	$x = (new ReflectionFunction($fn))->getClosure();
@@ -15,10 +15,9 @@ foreach (["substr", "foo"] as $fn) {
 ?>
 --EXPECTF--
 
-Warning: Cannot bind function substr to an object in %s on line %d
+Warning: substr() expects at least 2 parameters, 0 given in %s on line %d
 
-Warning: Cannot bind function substr to an object or class in %s on line %d
+Warning: Cannot bind function substr to a class scope in %s on line %d
+ok
 
-Warning: Cannot bind function foo to an object in %s on line %d
-
-Warning: Cannot bind function foo to an object or class in %s on line %d
+Warning: Cannot bind function foo to a class scope in %s on line %d
