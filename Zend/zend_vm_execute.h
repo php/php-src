@@ -5618,7 +5618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -5721,11 +5721,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_CONST != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -7586,7 +7591,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -7689,11 +7694,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_CONST != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -9324,7 +9334,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -9427,11 +9437,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_CONST != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -11127,7 +11142,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -11230,11 +11245,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_CONST != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -17481,7 +17501,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -17584,11 +17604,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_VAR != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -19116,7 +19141,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -19219,11 +19244,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_VAR != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -20738,7 +20768,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -20841,11 +20871,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_VAR != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -22303,7 +22338,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		/* no function found. try a static method in class */
 		ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 		if (UNEXPECTED(ce == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op1)), EX_CONSTANT(opline->op1) + 1, ZEND_FETCH_CLASS_DEFAULT |  ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
@@ -22406,11 +22441,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 	}
 
-	if (opline->extended_value & ZEND_FETCH_CLASS_FORWARD) {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value & ~ZEND_FETCH_CLASS_FORWARD, EX(called_scope), object);
-	} else {
-		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION, fbc, opline->extended_value, ce, object);
+	if (IS_VAR != IS_CONST) {
+		/* previous opcode is ZEND_FETCH_CLASS */
+		if (((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
+		    ((opline-1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			ce = EX(called_scope);
+		}
 	}
+
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
