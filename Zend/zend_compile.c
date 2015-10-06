@@ -2368,21 +2368,12 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 
 	znode class_node, prop_node;
 	zend_op *opline;
-	uint32_t fetch_type = class_ast->kind == ZEND_AST_ZVAL ? zend_get_class_fetch_type_ast(class_ast) : -1;
 
-	if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		/* we do not have any reference to the extends_ast/name of parent at compile-time, hence only resolving self:: for now */
-		if (zend_is_scope_known() && fetch_type == ZEND_FETCH_CLASS_SELF) {
-			zend_ensure_valid_class_fetch_type(fetch_type);
-
-			class_node.op_type = IS_CONST;
-			ZVAL_STR_COPY(&class_node.u.constant, CG(active_class_entry)->name);
-		} else {
-			zend_compile_class_ref(&class_node, class_ast, 1);
-		}
+		zend_compile_class_ref(&class_node, class_ast, 1);
 	}
 
 	zend_compile_expr(&prop_node, prop_ast);
@@ -3324,7 +3315,7 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			class_node.op_type = IS_CONST;
 			ZVAL_STR_COPY(&class_node.u.constant, CG(active_class_entry)->name);
 		} else {
-			zend_compile_class_ref(&class_node, class_ast, 1);
+			opline = zend_compile_class_ref(&class_node, class_ast, 1);
 		}
 	}
 
