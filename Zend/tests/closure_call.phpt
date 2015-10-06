@@ -36,6 +36,7 @@ $elePHPant->x = 7;
 // Try on a StdClass
 var_dump($bar->call($elePHPant));
 
+
 $beta = function ($z) {
     return $this->x * $z;
 };
@@ -59,6 +60,8 @@ $foo->call(new FooBar);
 int(0)
 int(0)
 int(3)
-int(7)
+
+Warning: Cannot bind closure to object of internal class stdClass in %s line %d
+NULL
 int(21)
 int(3)

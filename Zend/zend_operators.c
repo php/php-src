@@ -1959,24 +1959,52 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 }
 /* }}} */
 
+static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
+{
+	zval result;
+
+	/* is_identical_function() returns 1 in case of identity and 0 in case
+	 * of a difference;
+	 * whereas this comparison function is expected to return 0 on identity,
+	 * and non zero otherwise.
+	 */
+	ZVAL_DEREF(z1);
+	ZVAL_DEREF(z2);
+	if (is_identical_function(&result, z1, z2)==FAILURE) {
+		return 1;
+	}
+	return Z_TYPE(result) != IS_TRUE;
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		if (EXPECTED(Z_TYPE_P(op2) != IS_REFERENCE)) {
-			if (EXPECTED(Z_TYPE_P(op1) != IS_REFERENCE)) {
-				return 0;
-			} else {
-				op1 = Z_REFVAL_P(op1);
-			}
-		} else {
-			op2 = Z_REFVAL_P(op2);
-		}
-		if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-			return 0;
-		}
+		return 0;
 	}
-
-	return zend_is_same_type_identical(op1, op2);
+	switch (Z_TYPE_P(op1)) {
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			return 1;
+		case IS_LONG:
+			return (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+		case IS_RESOURCE:
+			return (Z_RES_P(op1) == Z_RES_P(op2));
+		case IS_DOUBLE:
+			return (Z_DVAL_P(op1) == Z_DVAL_P(op2));
+		case IS_STRING:
+			return (Z_STR_P(op1) == Z_STR_P(op2) ||
+				(Z_STRLEN_P(op1) == Z_STRLEN_P(op2) &&
+				 memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0));
+		case IS_ARRAY:
+			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
+				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
+		case IS_OBJECT:
+			return (Z_OBJ_P(op1) == Z_OBJ_P(op2) && Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2));
+		default:
+			return 0;
+	}
 }
 /* }}} */
 
