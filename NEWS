@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 15 Oct 2015, PHP 7.0.0 RC 5
 
-- Core
-  . Fixed bug #70630 (Closure::call/bind() crash with
-    ReflectionFunction->getClosure()). (Bob)
-
 - Mcrypt:
   . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
     specified under RC4). (Nikita)

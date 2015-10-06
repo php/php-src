@@ -4854,7 +4854,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
 	if (decl->kind == ZEND_AST_CLOSURE) {
-		op_array->fn_flags |= ZEND_ACC_CLOSURE | ZEND_ACC_REAL_CLOSURE;
+		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
 	if (is_method) {
