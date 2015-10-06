@@ -440,7 +440,7 @@ U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
 
 U_CFUNC PHP_FUNCTION(intltz_get_offset)
 {
-	UDate		date;
+	double		date;
 	zend_bool	local;
 	zval		*rawOffsetArg,
 				*dstOffsetArg;
@@ -458,7 +458,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
-	to->utimezone->getOffset(date, (UBool) local, rawOffset, dstOffset,
+	to->utimezone->getOffset((UDate) date, (UBool) local, rawOffset, dstOffset,
 		TIMEZONE_ERROR_CODE(to));
 
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
