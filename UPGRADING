@@ -435,8 +435,6 @@ Standard library changes
     different sort order of elements that compare as equal.
   . Removed dl() function on fpm-fcgi.
   . setcookie() with an empty cookie name now issues a WARNING and doesn't send an empty set-cookie header line anymore.
-  . Closure::call() and Closure::bindTo() do no longer accept foreign scopes for Closures of functions and methods
-    generated via ReflectionFunctionAbstract::getClosure().
 
 Other
 =====

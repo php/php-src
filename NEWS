@@ -13,10 +13,6 @@ PHP                                                                        NEWS
 - Phpdbg
   . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
 
-- Standard:
-  . Fixed bug #70641 (Compile fails for ext/standard/random.c).
-    (Scott Arciszewski)
-
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
@@ -68,7 +64,7 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug #70571 (Memory leak in sqlite3_do_callback). (Adam)
 
-- SPL:
+-SPL:
   . Fixed bug #70573 (Cloning SplPriorityQueue leads to memory leaks). (Dmitry)
 
 - XMLRPC
