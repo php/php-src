@@ -323,8 +323,8 @@ ZEND_VM_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	int result;
 
 	SAVE_OPLINE();
-	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	result = fast_is_identical_function(op1, op2);
 	FREE_OP1();
 	FREE_OP2();
@@ -344,8 +344,8 @@ ZEND_VM_HANDLER(16, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	int result;
 
 	SAVE_OPLINE();
-	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	result = fast_is_not_identical_function(op1, op2);
 	FREE_OP1();
 	FREE_OP2();
