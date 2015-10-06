@@ -522,48 +522,28 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 
 U_CFUNC PHP_FUNCTION(intlcal_clear)
 {
-	zval	args_a[2] = {0},
-			*args		= &args_a[0];
-	zend_long	field;
-	int		variant;
+	zend_long field;
+	zend_bool field_is_null = 1;
 	CALENDAR_METHOD_INIT_VARS;
 
-	if (ZEND_NUM_ARGS() > (getThis() ? 1 : 2) ||
-			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_clear: too many arguments", 0);
-		RETURN_FALSE;
-	}
-	if (!getThis()) {
-		args++;
-	}
-	if (Z_ISUNDEF(args[0]) || Z_TYPE(args[0]) == IS_NULL) {
-		zval *dummy; /* we know it's null */
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(),
-				getThis(), "O|z", &object, Calendar_ce_ptr, &dummy) == FAILURE) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intlcal_clear: bad arguments", 0);
-			RETURN_FALSE;
-		}
-		variant = 0;
-	} else if (zend_parse_method_parameters(ZEND_NUM_ARGS(),
-			getThis(), "Ol", &object, Calendar_ce_ptr, &field) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(),
+			getThis(), "O|l!", &object, Calendar_ce_ptr, &field, &field_is_null) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_clear: bad arguments", 0);
 		RETURN_FALSE;
-	} else if (field < 0 || field >= UCAL_FIELD_COUNT) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_clear: invalid field", 0);
-		RETURN_FALSE;
-	} else {
-		variant = 1;
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (variant == 0) {
+	if (field_is_null) {
 		co->ucal->clear();
 	} else {
+		if (field < 0 || field >= UCAL_FIELD_COUNT) {
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+				"intlcal_clear: invalid field", 0);
+			RETURN_FALSE;
+		}
+
 		co->ucal->clear((UCalendarDateFields)field);
 	}
 
@@ -614,7 +594,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_actual_minimum)
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 {
-	zend_ulong	dow;
+	zend_long	dow;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
