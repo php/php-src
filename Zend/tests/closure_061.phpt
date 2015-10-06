@@ -56,8 +56,9 @@ string(3) "bar"
 
 Warning: Cannot bind function foo::initClass to object of class baz in %s on line %d
 
-Fatal error: Uncaught Error: Function name must be a string in %s:%d
+Fatal error: Uncaught Error: Using $this when not in object context in %s:%d
 Stack trace:
-#0 %s(%d): callMethodOn('foo', 'initClass', Object(baz))
-#1 {main}
+#0 %s(%d): initClass()
+#1 %s(%d): callMethodOn('foo', 'initClass', Object(baz))
+#2 {main}
   thrown in %s on line %d

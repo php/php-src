@@ -17,8 +17,8 @@ foreach (["substr", "foo"] as $fn) {
 
 Warning: Cannot bind function substr to an object in %s on line %d
 
-Warning: Cannot bind function substr to an object or class in %s on line %d
+Warning: Cannot bind function substr to an object in %s on line %d
 
 Warning: Cannot bind function foo to an object in %s on line %d
 
-Warning: Cannot bind function foo to an object or class in %s on line %d
+Warning: Cannot bind function foo to an object in %s on line %d
