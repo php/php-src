@@ -6,8 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
     specified under RC4). (Nikita)
 
-- Phpdbg
+- Phpdbg:
   . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
+
+- Reflection:
+  . Fixed bug #70650 (Wrong docblock assignment). (Marcio)
 
 01 Oct 2015, PHP 7.0.0 RC 4
 
