@@ -238,7 +238,7 @@ typedef struct _zend_try_catch_element {
 /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
-
+#define ZEND_ACC_REAL_CLOSURE         0x40
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
 

@@ -2,9 +2,26 @@
 Bug #70630 (Closure::call/bind() crash with ReflectionFunction->getClosure())
 --FILE--
 <?php
+
 class a {}
-$x = (new ReflectionFunction("substr"))->getClosure();
-$x->call(new a);
+function foo() { print "ok\n"; }
+
+foreach (["substr", "foo"] as $fn) {
+	$x = (new ReflectionFunction($fn))->getClosure();
+	$x->call(new a);
+	Closure::bind($x, new a)();
+	Closure::bind($x, new a, "a");
+}
+
 ?>
 --EXPECTF--
-Warning: a::substr() expects at least 2 parameters, 0 given in %s on line %d
+
+Warning: substr() expects at least 2 parameters, 0 given in %s on line %d
+
+Warning: substr() expects at least 2 parameters, 0 given in %s on line %d
+
+Warning: Cannot bind function substr to a class scope in %s on line %d
+ok
+ok
+
+Warning: Cannot bind function foo to a class scope in %s on line %d
