@@ -20,13 +20,14 @@ $pdo->exec ("INSERT INTO test (id, n) VALUES (1, 'hi')");
 $pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_CLASS);
 $stmt = $pdo->prepare ("SELECT * FROM test");
 $stmt->execute();
-var_dump($stmt->fetchAll());
 
-$pdo = PDOTest::factory();
+var_dump($stmt->fetchAll());
 
 if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci' || $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'odbc') {
     $type = "clob";
-} else{
+} else if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+    $type = 'BLOB SUB_TYPE TEXT';
+} else {
     $type = "text";
 }
 
@@ -37,7 +38,6 @@ $pdo->setAttribute (PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_FUNC);
 $stmt = $pdo->prepare ("SELECT * FROM test2");
 $stmt->execute();
 var_dump($stmt->fetchAll());
-
 ?>
 --EXPECTF--
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch class specified in %s on line %d
