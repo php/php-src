@@ -1540,6 +1540,10 @@ try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
+		if (type == BP_VAR_W) {
+			return zend_hash_index_add_or_return(ht, hval, &EG(uninitialized_zval));
+		}
+
 		ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
 		return retval;
 num_undef:
@@ -1567,6 +1571,17 @@ num_undef:
 			}
 		}
 str_index:
+		if (type == BP_VAR_W) {
+			retval = zend_hash_add_or_return(ht, offset_key, &EG(uninitialized_zval));
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+				retval = Z_INDIRECT_P(retval);
+				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+					ZVAL_NULL(retval);
+				}
+			}
+			return retval;
+		}
+
 		retval = zend_hash_find(ht, offset_key);
 		if (retval) {
 			/* support for $GLOBALS[...] */
@@ -1583,10 +1598,9 @@ str_index:
 							break;
 						case BP_VAR_RW:
 							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
-							/* break missing intentionally */
-						case BP_VAR_W:
 							ZVAL_NULL(retval);
 							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
 					}
 				}
 			}
@@ -1603,9 +1617,7 @@ str_index:
 					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
 					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
 					break;
-				case BP_VAR_W:
-					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
-					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
 	} else {

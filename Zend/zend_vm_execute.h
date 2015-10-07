@@ -7061,68 +7061,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	}
 
 	target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
-	retval = zend_hash_find(target_symbol_table, name);
-	if (retval == NULL) {
-		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result;
+
+	if (type == BP_VAR_W) {
+		retval = zend_hash_add_or_return(target_symbol_table, name, &EG(uninitialized_zval));
+		if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_find(target_symbol_table, name);
+		if (retval == NULL) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				zval *result;
 
 fetch_this:
-			result = EX_VAR(opline->result.var);
-			switch (type) {
-				case BP_VAR_R:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-						zend_error(E_NOTICE,"Undefined variable: this");
-					}
-					break;
-				case BP_VAR_IS:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-					}
-					break;
-				case BP_VAR_RW:
-				case BP_VAR_W:
-					zend_throw_error(NULL, "Cannot re-assign $this");
-					break;
-				case BP_VAR_UNSET:
-					zend_throw_error(NULL, "Cannot unset $this");
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-			if (IS_CONST != IS_CONST) {
-				zend_string_release(name);
-			}
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
-		switch (type) {
-			case BP_VAR_R:
-			case BP_VAR_UNSET:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			case BP_VAR_W:
-				retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
-	/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
-		retval = Z_INDIRECT_P(retval);
-		if (Z_TYPE_P(retval) == IS_UNDEF) {
-			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-				goto fetch_this;
+				result = EX_VAR(opline->result.var);
+				switch (type) {
+					case BP_VAR_R:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+							zend_error(E_NOTICE,"Undefined variable: this");
+						}
+						break;
+					case BP_VAR_IS:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+						}
+						break;
+					case BP_VAR_RW:
+						zend_throw_error(NULL, "Cannot re-assign $this");
+						break;
+					case BP_VAR_UNSET:
+						zend_throw_error(NULL, "Cannot unset $this");
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+				if (IS_CONST != IS_CONST) {
+					zend_string_release(name);
+				}
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 			switch (type) {
 				case BP_VAR_R:
@@ -7134,11 +7119,50 @@ fetch_this:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
-				case BP_VAR_W:
-					ZVAL_NULL(retval);
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+					goto fetch_this;
+				}
+				switch (type) {
+					case BP_VAR_R:
+					case BP_VAR_UNSET:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+			/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+			} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+				retval = Z_INDIRECT_P(retval);
+				if (Z_TYPE_P(retval) == IS_UNDEF) {
+					switch (type) {
+						case BP_VAR_R:
+						case BP_VAR_UNSET:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							/* break missing intentionally */
+						case BP_VAR_IS:
+							retval = &EG(uninitialized_zval);
+							break;
+						case BP_VAR_RW:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							ZVAL_NULL(retval);
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+				}
 			}
 		}
 	}
@@ -41728,68 +41752,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	}
 
 	target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
-	retval = zend_hash_find(target_symbol_table, name);
-	if (retval == NULL) {
-		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result;
+
+	if (type == BP_VAR_W) {
+		retval = zend_hash_add_or_return(target_symbol_table, name, &EG(uninitialized_zval));
+		if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_find(target_symbol_table, name);
+		if (retval == NULL) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				zval *result;
 
 fetch_this:
-			result = EX_VAR(opline->result.var);
-			switch (type) {
-				case BP_VAR_R:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-						zend_error(E_NOTICE,"Undefined variable: this");
-					}
-					break;
-				case BP_VAR_IS:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-					}
-					break;
-				case BP_VAR_RW:
-				case BP_VAR_W:
-					zend_throw_error(NULL, "Cannot re-assign $this");
-					break;
-				case BP_VAR_UNSET:
-					zend_throw_error(NULL, "Cannot unset $this");
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-			if (IS_CV != IS_CONST) {
-				zend_string_release(name);
-			}
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
-		switch (type) {
-			case BP_VAR_R:
-			case BP_VAR_UNSET:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			case BP_VAR_W:
-				retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
-	/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
-		retval = Z_INDIRECT_P(retval);
-		if (Z_TYPE_P(retval) == IS_UNDEF) {
-			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-				goto fetch_this;
+				result = EX_VAR(opline->result.var);
+				switch (type) {
+					case BP_VAR_R:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+							zend_error(E_NOTICE,"Undefined variable: this");
+						}
+						break;
+					case BP_VAR_IS:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+						}
+						break;
+					case BP_VAR_RW:
+						zend_throw_error(NULL, "Cannot re-assign $this");
+						break;
+					case BP_VAR_UNSET:
+						zend_throw_error(NULL, "Cannot unset $this");
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+				if (IS_CV != IS_CONST) {
+					zend_string_release(name);
+				}
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 			switch (type) {
 				case BP_VAR_R:
@@ -41801,11 +41810,50 @@ fetch_this:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
-				case BP_VAR_W:
-					ZVAL_NULL(retval);
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+					goto fetch_this;
+				}
+				switch (type) {
+					case BP_VAR_R:
+					case BP_VAR_UNSET:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+			/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+			} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+				retval = Z_INDIRECT_P(retval);
+				if (Z_TYPE_P(retval) == IS_UNDEF) {
+					switch (type) {
+						case BP_VAR_R:
+						case BP_VAR_UNSET:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							/* break missing intentionally */
+						case BP_VAR_IS:
+							retval = &EG(uninitialized_zval);
+							break;
+						case BP_VAR_RW:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							ZVAL_NULL(retval);
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+				}
 			}
 		}
 	}
@@ -53530,68 +53578,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	}
 
 	target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
-	retval = zend_hash_find(target_symbol_table, name);
-	if (retval == NULL) {
-		if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-			zval *result;
+
+	if (type == BP_VAR_W) {
+		retval = zend_hash_add_or_return(target_symbol_table, name, &EG(uninitialized_zval));
+		if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				ZVAL_NULL(retval);
+			}
+		}
+	} else {
+		retval = zend_hash_find(target_symbol_table, name);
+		if (retval == NULL) {
+			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+				zval *result;
 
 fetch_this:
-			result = EX_VAR(opline->result.var);
-			switch (type) {
-				case BP_VAR_R:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-						zend_error(E_NOTICE,"Undefined variable: this");
-					}
-					break;
-				case BP_VAR_IS:
-					if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
-						ZVAL_OBJ(result, Z_OBJ(EX(This)));
-						Z_ADDREF_P(result);
-					} else {
-						ZVAL_NULL(result);
-					}
-					break;
-				case BP_VAR_RW:
-				case BP_VAR_W:
-					zend_throw_error(NULL, "Cannot re-assign $this");
-					break;
-				case BP_VAR_UNSET:
-					zend_throw_error(NULL, "Cannot unset $this");
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-			if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
-				zend_string_release(name);
-			}
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		}
-		switch (type) {
-			case BP_VAR_R:
-			case BP_VAR_UNSET:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			case BP_VAR_W:
-				retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
-	/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
-		retval = Z_INDIRECT_P(retval);
-		if (Z_TYPE_P(retval) == IS_UNDEF) {
-			if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
-				goto fetch_this;
+				result = EX_VAR(opline->result.var);
+				switch (type) {
+					case BP_VAR_R:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+							zend_error(E_NOTICE,"Undefined variable: this");
+						}
+						break;
+					case BP_VAR_IS:
+						if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+							ZVAL_OBJ(result, Z_OBJ(EX(This)));
+							Z_ADDREF_P(result);
+						} else {
+							ZVAL_NULL(result);
+						}
+						break;
+					case BP_VAR_RW:
+						zend_throw_error(NULL, "Cannot re-assign $this");
+						break;
+					case BP_VAR_UNSET:
+						zend_throw_error(NULL, "Cannot unset $this");
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+					zend_string_release(name);
+				}
+				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
 			switch (type) {
 				case BP_VAR_R:
@@ -53603,11 +53636,50 @@ fetch_this:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
-				case BP_VAR_W:
-					ZVAL_NULL(retval);
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				if (UNEXPECTED(zend_string_equals(name, CG(known_strings)[ZEND_STR_THIS]))) {
+					goto fetch_this;
+				}
+				switch (type) {
+					case BP_VAR_R:
+					case BP_VAR_UNSET:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+						retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+			/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+			} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+				retval = Z_INDIRECT_P(retval);
+				if (Z_TYPE_P(retval) == IS_UNDEF) {
+					switch (type) {
+						case BP_VAR_R:
+						case BP_VAR_UNSET:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							/* break missing intentionally */
+						case BP_VAR_IS:
+							retval = &EG(uninitialized_zval);
+							break;
+						case BP_VAR_RW:
+							zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
+							ZVAL_NULL(retval);
+							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+				}
 			}
 		}
 	}

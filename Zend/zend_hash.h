@@ -34,6 +34,7 @@
 #define HASH_UPDATE_INDIRECT	(1<<2)
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
+#define HASH_ADD_OR_RETURN      (1<<5)
 
 #define HASH_FLAG_PERSISTENT       (1<<0)
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
@@ -72,6 +73,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_update(HashTable *ht, zend_string *key,z
 ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_return(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC);
 
 #define zend_hash_update(ht, key, pData) \
 		_zend_hash_update(ht, key, pData ZEND_FILE_LINE_CC)
@@ -81,6 +83,8 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key,
 		_zend_hash_add(ht, key, pData ZEND_FILE_LINE_CC)
 #define zend_hash_add_new(ht, key, pData) \
 		_zend_hash_add_new(ht, key, pData ZEND_FILE_LINE_CC)
+#define zend_hash_add_or_return(ht, key, pData) \
+		_zend_hash_add_or_return(ht, key, pData ZEND_FILE_LINE_CC)
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *key, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC);
@@ -100,6 +104,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_new(HashTable *ht, const char *k
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_update(HashTable *ht, zend_ulong h, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_new(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_return(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
 ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC);
@@ -108,6 +113,8 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_next_index_insert_new(HashTable *ht, zva
 		_zend_hash_index_add(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_hash_index_add_new(ht, h, pData) \
 		_zend_hash_index_add_new(ht, h, pData ZEND_FILE_LINE_CC)
+#define zend_hash_index_add_or_return(ht, h, pData) \
+		_zend_hash_index_add_or_return(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_hash_index_update(ht, h, pData) \
 		_zend_hash_index_update(ht, h, pData ZEND_FILE_LINE_CC)
 #define zend_hash_next_index_insert(ht, pData) \
@@ -150,7 +157,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *key,
 ZEND_API int ZEND_FASTCALL zend_hash_index_del(HashTable *ht, zend_ulong h);
 ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 
-/* Data retreival */
+/* Data retrieval */
 ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key);
 ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
