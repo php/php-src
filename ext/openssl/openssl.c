@@ -5274,7 +5274,7 @@ PHP_FUNCTION(openssl_encrypt)
 	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len, aad_len = 0, tag_len = 16;
 	zval *tag;
 	const EVP_CIPHER *cipher_type;
-	EVP_CIPHER_CTX cipher_ctx;
+	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
 	int i=0, outlen, keylen;
 	zend_string *outbuf;
@@ -5286,15 +5286,22 @@ PHP_FUNCTION(openssl_encrypt)
 		return;
 	}
 
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
+	PHP_OPENSSL_CHECK_LONG_TO_INT(tag_len, tag_len);
+
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
 	}
 
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
-	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
-	PHP_OPENSSL_CHECK_LONG_TO_INT(tag_len, tag_len);
+	cipher_ctx = EVP_CIPHER_CTX_new();
+	if (!cipher_ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
+		RETURN_FALSE;
+	}
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
 	if (keylen > password_len) {
@@ -5316,20 +5323,19 @@ PHP_FUNCTION(openssl_encrypt)
 	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
-	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	EVP_EncryptInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL);
 	if (password_len > keylen) {
-		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
-	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
+	EVP_EncryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
-		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
 	}
 	if (data_len > 0) {
-		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
+		EVP_EncryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	}
 	outlen = i;
-	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			ZSTR_VAL(outbuf)[outlen] = '\0';
@@ -5352,7 +5358,8 @@ PHP_FUNCTION(openssl_encrypt)
 	if (free_iv) {
 		efree(iv);
 	}
-	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+	EVP_CIPHER_CTX_cleanup(cipher_ctx);
+	EVP_CIPHER_CTX_free(cipher_ctx);
 }
 /* }}} */
 
@@ -5364,7 +5371,7 @@ PHP_FUNCTION(openssl_decrypt)
 	char *data, *method, *password, *iv = "", *tag = "", *aad = "";
 	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	const EVP_CIPHER *cipher_type;
-	EVP_CIPHER_CTX cipher_ctx;
+	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
 	int i, outlen, keylen;
 	zend_string *outbuf;
@@ -5383,6 +5390,7 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(data_len, data);
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(aad_len, aad);
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(tag_len, tag);
 
@@ -5391,12 +5399,20 @@ PHP_FUNCTION(openssl_decrypt)
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
 	}
+
+	cipher_ctx = EVP_CIPHER_CTX_new();
+	if (!cipher_ctx) {
+		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
+		RETURN_FALSE;
+	}
+
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (!(options & OPENSSL_RAW_DATA)) {
 		base64_str = php_base64_decode((unsigned char*)data, (int)data_len);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
+			EVP_CIPHER_CTX_free(cipher_ctx);
 			RETURN_FALSE;
 		}
 		data_len = ZSTR_LEN(base64_str);
@@ -5417,18 +5433,17 @@ PHP_FUNCTION(openssl_decrypt)
 	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
-	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
+	EVP_DecryptInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL);
 	if (password_len > keylen) {
-		PHP_OPENSSL_CHECK_SIZE_T_TO_INT(password_len, password);
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
 	}
-	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
+	EVP_DecryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
-		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
+		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
+	EVP_DecryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	outlen = i;
-	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
@@ -5446,7 +5461,8 @@ PHP_FUNCTION(openssl_decrypt)
 	if (base64_str) {
 		zend_string_release(base64_str);
 	}
- 	EVP_CIPHER_CTX_cleanup(&cipher_ctx);
+	EVP_CIPHER_CTX_cleanup(cipher_ctx);
+	EVP_CIPHER_CTX_free(cipher_ctx);
 }
 /* }}} */
 
