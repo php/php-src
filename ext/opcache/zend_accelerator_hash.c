@@ -23,6 +23,7 @@
 #include "zend_accelerator_hash.h"
 #include "zend_hash.h"
 #include "zend_shared_alloc.h"
+#include "zend_hash_func.h"
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
 static uint prime_numbers[] =

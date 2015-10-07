@@ -80,6 +80,9 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sf->ini_entries = NULL;
 	sapi_module = *sf;
 
+	/* TODO: Check if there's a better place to do this initialization */
+	zend_initialize_siphash_key();
+
 #ifdef ZTS
 	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 # ifdef PHP_WIN32

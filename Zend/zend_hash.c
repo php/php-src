@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
+#include "zend_hash_func.h"
 
 #define HT_HAS_STR_KEY(p) zend_bucket_has_str_key(p)
 
@@ -140,7 +141,17 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 #endif
 }
 
-static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
+ZEND_API unsigned char zend_siphash_key[16];
+void zend_initialize_siphash_key()
+{
+	/* TODO Initialize to actually random data... */
+	int i = 0;
+	for (i = 0; i < 16; ++i) {
+		zend_siphash_key[i] = i;
+	}
+}
+
+static void zend_always_inline zend_hash_real_init_ex(HashTable *ht, int packed)
 {
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	ZEND_ASSERT(!((ht)->u.flags & HASH_FLAG_INITIALIZED));

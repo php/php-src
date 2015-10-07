@@ -20,6 +20,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_hash_func.h"
 
 ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str);
 ZEND_API void (*zend_interned_strings_snapshot)(void);

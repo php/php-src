@@ -53,6 +53,8 @@ typedef zend_bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_dat
 
 BEGIN_EXTERN_C()
 
+void zend_initialize_siphash_key(void);
+
 /* startup/shutdown */
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
 ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
