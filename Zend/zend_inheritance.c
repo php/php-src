@@ -154,6 +154,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 
 char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
+	if (fn_flags & ZEND_ACC_ABSTRACT) {
+		return "abstract";
+	}
 	if (fn_flags & ZEND_ACC_PRIVATE) {
 		return "private";
 	}
@@ -269,7 +272,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	}
 
 	/* If both methods are private do not enforce a signature */
-    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+	if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
 		return 1;
 	}
 
@@ -536,7 +539,9 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	/* Disallow making an inherited method abstract. */
 	if (UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+		if (UNEXPECTED((child_flags & ZEND_ACC_CHANGED) == 0)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+		}
 	}
 
 	if (parent_flags & ZEND_ACC_CHANGED) {
@@ -545,7 +550,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		/* Prevent derived classes from restricting access that was available in parent classes
 		 */
 		if (UNEXPECTED((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags & ZEND_ACC_PPP_MASK), ZEND_FN_SCOPE_NAME(parent), (parent_flags & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (((child_flags & ZEND_ACC_PPP_MASK) < (parent_flags & ZEND_ACC_PPP_MASK))
 			&& ((parent_flags & ZEND_ACC_PPP_MASK) & ZEND_ACC_PRIVATE)) {
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
@@ -618,7 +623,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags), ZSTR_VAL(ce->parent->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ZSTR_VAL(ce->name), ZSTR_VAL(key), zend_visibility_string(parent_info->flags & ZEND_ACC_PPP_MASK), ZSTR_VAL(ce->parent->name), (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
@@ -1088,7 +1093,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 								ZSTR_VAL(zend_get_function_declaration(fn)),
 								ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 						}
-					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+					} else if ((fn->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_CHANGED)) == ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
@@ -1112,7 +1117,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					ZSTR_VAL(zend_get_function_declaration(fn)),
 					ZSTR_VAL(zend_get_function_declaration(existing_fn)));
 			}
-		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		} else if ((fn->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_CHANGED)) == ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (UNEXPECTED(!zend_traits_method_compatibility_check(existing_fn, fn))) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
@@ -1143,6 +1148,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_fn, fn, sizeof(zend_op_array));
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
+
+	if (fn->common.fn_flags & ZEND_ACC_CHANGED) {
+		fn->common.fn_flags &= ZEND_ACC_CHANGED ^ ~ZEND_ACC_ABSTRACT;
+	}
+
 	zend_add_magic_methods(ce, key, fn);
 }
 /* }}} */
@@ -1150,7 +1160,6 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* {{{ */
 {
 	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-
 		fn->common.scope = ce;
 
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
@@ -1491,7 +1500,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					zend_string_release(coliding_prop->name);
 					if (coliding_prop->doc_comment) {
 						zend_string_release(coliding_prop->doc_comment);
-                    }
+					}
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
@@ -1537,9 +1546,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			zend_declare_property_ex(ce, prop_name,
-									 prop_value, flags,
-								     doc_comment);
+			zend_declare_property_ex(ce, prop_name, prop_value, flags & ~ZEND_ACC_ABSTRACT, doc_comment);
 			zend_string_release(prop_name);
 		} ZEND_HASH_FOREACH_END();
 	}

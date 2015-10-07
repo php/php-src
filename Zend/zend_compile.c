@@ -4647,6 +4647,9 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (!has_body) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body",
 			ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	} else if (in_trait) {
+		/* force abstract in traits to prevent the_trait::static_method() from being allowed to be called */
+		op_array->fn_flags |= ZEND_ACC_ABSTRACT | ZEND_ACC_CHANGED;
 	}
 
 	op_array->scope = ce;
@@ -4922,6 +4925,10 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 	if (flags & ZEND_ACC_ABSTRACT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
+
+	if ((ce->ce_flags & ZEND_ACC_TRAIT) && !(flags & ZEND_ACC_PRIVATE)) {
+		flags |= ZEND_ACC_ABSTRACT;
 	}
 
 	/* Doc comment has been appended as last element in property list */
