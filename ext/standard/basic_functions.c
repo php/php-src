@@ -5477,15 +5477,9 @@ PHP_FUNCTION(print_r)
 	}
 
 	if (do_return) {
-		php_output_start_default();
-	}
-
-	zend_print_zval_r(var, 0);
-
-	if (do_return) {
-		php_output_get_contents(return_value);
-		php_output_discard();
+		RETURN_STR(zend_print_zval_r_to_str(var, 0));
 	} else {
+		zend_print_zval_r(var, 0);
 		RETURN_TRUE;
 	}
 }
