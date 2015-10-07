@@ -26,6 +26,8 @@
 #include <process.h>
 #include <LMCONS.H>
 
+#define ZEND_WIN32_SIDESTEP_TEST 0
+
 #define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea"
 #define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex"
 #define ACCEL_FILEMAP_BASE_DEFAULT 0x01000000
@@ -33,6 +35,7 @@
 #define ACCEL_EVENT_SOURCE "Zend OPcache"
 
 static HANDLE memfile = NULL, memory_mutex = NULL;
+static bool using_sidestep = false;
 static void *mapping_base;
 
 #define MAX_MAP_RETRIES 25
@@ -74,18 +77,18 @@ static void zend_win_error_message(int type, char *msg, int err)
 	zend_accel_error(type, msg);
 }
 
-static char *create_name_with_username(char *name, int num)
+static char *create_name_with_username(char *name)
 {
 	static char newname[MAXPATHLEN + UNLEN + 4];
 	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname) - 1, "%s@%s%d", name, uname, num);
+	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
 	return newname;
 }
 
-static char *get_mmap_base_file(int num)
+static char *get_mmap_base_file(void)
 {
 	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
 	char uname[UNLEN + 1];
@@ -95,13 +98,13 @@ static char *get_mmap_base_file(int num)
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname, num);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
 	return windir;
 }
 
 void zend_shared_alloc_create_lock(void)
 {
-	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME, 0));
+	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
 	if (!memory_mutex) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex");
 		return;
@@ -123,11 +126,11 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, int num, char **error_in)
+static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
-	char *mmap_base_file = get_mmap_base_file(num);
+	char *mmap_base_file = get_mmap_base_file();
 	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
 
@@ -152,8 +155,8 @@ static int zend_shared_alloc_reattach(size_t requested_size, int num, char **err
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
 	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region", err);
-		return ALLOC_FAILURE;
+		zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region", err);
+		return ALLOC_FAIL_SIDESTEP;
    	}
 
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
@@ -161,8 +164,8 @@ static int zend_shared_alloc_reattach(size_t requested_size, int num, char **err
 
 	if (mapping_base == NULL) {
 		if (err == ERROR_INVALID_ADDRESS) {
-			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
-			return ALLOC_FAILURE;
+			zend_win_error_message(ACCEL_LOG_WARNING, "Unable to reattach to base address", err);
+			return ALLOC_FAIL_SIDESTEP;
 		}
 		return ALLOC_FAIL_MAPPING;
 	}
@@ -194,26 +197,74 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   can be called before the child process is killed. In this case, the map will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
-		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME, map_retries>>2));
+		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
 		err = GetLastError();
 		if (memfile == NULL) {
 			break;
 		}
 
-		ret =  zend_shared_alloc_reattach(requested_size, map_retries>>2, error_in);
+		ret =  zend_shared_alloc_reattach(requested_size, error_in);
 		err = GetLastError();
+		/* directive for easy testing of side-step feature */
+#if !ZEND_WIN32_SIDESTEP_TEST
 		if (ret == ALLOC_FAIL_MAPPING) {
 			/* Mapping failed, wait for mapping object to get freed and retry */
 			CloseHandle(memfile);
 			memfile = NULL;
+			if (++map_retries >= MAX_MAP_RETRIES) {
+				break;
+			}
 			zend_shared_alloc_unlock_win32();
 			Sleep(1000 * (map_retries + 1));
 			zend_shared_alloc_lock_win32();
+		} else if (ret==ALLOC_FAIL_SIDESTEP) {
+#endif
+			if (++map_retries >= MAX_MAP_RETRIES) {
+				break;
+			}
+			
+			/* map memfile to any available address - only need fields from this struct, for SAFETY limit number of
+			 * bytes mapped to prevent corrupting other areas of existing SHM */
+			/* mapping_base = MapViewOfFile(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0); */
+			mapping_base = MapViewOfFile(memfile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(zend_accel_shared_globals));
+			
+			/* zend_accel_shared_globals is struct on existing SHM used for IPC to avoid cache consistency issues with
+			 * other processes using normal OpCache or side-step
+			 *
+			 * zend_smm_shared_globals is the side-step OpCache only in this process's heap */
+			accel_shared_globals = (zend_accel_shared_globals *) mapping_base;
+			ZCSG(sidestep_count)++;
+			
+			using_sidestep = true;
+			
+			zend_shared_alloc_unlock_win32();
+					
+			*shared_segments_count = 1;
+			*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment)+sizeof(void *));
+			if (!*shared_segments_p) {
+				zend_shared_alloc_unlock_win32();
+				zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed (SIDE-STEP OpCache)", GetLastError());
+				*error_in = "calloc";
+				return ALLOC_FAILURE;
+			}
+			shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
+			(*shared_segments_p)[0] = shared_segment;
+
+			/* pointers in memfile will now be useless, `side step` this problem by creating a
+			 * side-step OpCache on heap */
+			shared_segment->p = mapping_base = emalloc(requested_size);
+
+			shared_segment->pos = 0;
+			shared_segment->size = requested_size;
+			
+			return ALLOC_SUCCESS;
+#if !ZEND_WIN32_SIDESTEP_TEST
 		} else {
 			zend_shared_alloc_unlock_win32();
 			return ret;
 		}
-	} while (++map_retries < MAX_MAP_RETRIES);
+#endif
+	} while (1);
 
 	if (map_retries == MAX_MAP_RETRIES) {
 		zend_shared_alloc_unlock_win32();
@@ -235,7 +286,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	(*shared_segments_p)[0] = shared_segment;
 
 	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
-								create_name_with_username(ACCEL_FILEMAP_NAME, map_retries>>2));
+								create_name_with_username(ACCEL_FILEMAP_NAME));
 	err = GetLastError();
 	if (memfile == NULL) {
 		zend_shared_alloc_unlock_win32();
@@ -278,7 +329,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		*error_in = "MapViewOfFile";
 		return ALLOC_FAILURE;
 	} else {
-		char *mmap_base_file = get_mmap_base_file(map_retries>>2);
+		char *mmap_base_file = get_mmap_base_file();
 		FILE *fp = fopen(mmap_base_file, "w");
 		err = GetLastError();
 		if (!fp) {
@@ -302,12 +353,19 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 static int detach_segment(zend_shared_segment *shared_segment)
 {
 	zend_shared_alloc_lock_win32();
+	if (using_sidestep) {
+		ZCSG(sidestep_count)--;
+		using_sidestep = false;
+	}
 	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
+		mapping_base = NULL;
 	}
 	CloseHandle(memfile);
+	memfile = NULL;
 	zend_shared_alloc_unlock_win32();
 	CloseHandle(memory_mutex);
+	memory_mutex = NULL;
 	return 0;
 }
 
