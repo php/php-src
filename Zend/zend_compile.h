@@ -238,7 +238,7 @@ typedef struct _zend_try_catch_element {
 /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
-#define ZEND_ACC_REAL_CLOSURE         0x40
+
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
 
@@ -791,18 +791,17 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 /* END: OPCODES */
 
 /* class fetches */
-#define ZEND_FETCH_CLASS_DEFAULT     0
-#define ZEND_FETCH_CLASS_SELF        1
-#define ZEND_FETCH_CLASS_PARENT      2
-#define ZEND_FETCH_CLASS_STATIC      3
-#define ZEND_FETCH_CLASS_AUTO        4
-#define ZEND_FETCH_CLASS_INTERFACE   5
-#define ZEND_FETCH_CLASS_TRAIT       6
+#define ZEND_FETCH_CLASS_DEFAULT	0
+#define ZEND_FETCH_CLASS_SELF		1
+#define ZEND_FETCH_CLASS_PARENT		2
+#define ZEND_FETCH_CLASS_STATIC		3
+#define ZEND_FETCH_CLASS_AUTO		4
+#define ZEND_FETCH_CLASS_INTERFACE	5
+#define ZEND_FETCH_CLASS_TRAIT		6
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
-#define ZEND_FETCH_CLASS_FORWARD     (1<<31)
 
 /* variable parsing type (compile-time) */
 #define ZEND_PARSED_MEMBER				(1<<0)

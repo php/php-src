@@ -851,9 +851,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);
-			if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE)) {
-        			OBJ_RELEASE((zend_object*)func->op_array.prototype);
-			}
 		} else {
 			zend_generator_create_zval(call, &func->op_array, fci->retval);
 		}

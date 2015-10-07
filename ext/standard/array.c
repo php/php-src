@@ -1613,6 +1613,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 
 	if (strict) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZVAL_DEREF(entry);
 			if (fast_is_identical_function(value, entry)) {
 				if (behavior == 0) {
 					RETURN_TRUE;
