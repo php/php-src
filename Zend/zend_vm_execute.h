@@ -5024,7 +5024,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -6945,7 +6946,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -7441,7 +7443,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -31092,7 +31095,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -33305,7 +33309,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -34242,7 +34247,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -41434,7 +41440,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -42415,7 +42422,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -42816,7 +42824,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;

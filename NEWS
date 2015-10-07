@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 15 Oct 2015, PHP 7.0.0 RC 5
 
+- Core:
+  . Fixed bug #70662 (Duplicate array key via undefined index error handler).
+    (Nikita)
+
 - Mcrypt:
   . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
     specified under RC4). (Nikita)

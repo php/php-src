@@ -1557,7 +1557,8 @@ num_index:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					/* break missing intentionally */
+					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
@@ -1605,7 +1606,8 @@ str_index:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
-					/* break missing intentionally */
+					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;
