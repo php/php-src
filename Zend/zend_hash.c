@@ -459,12 +459,25 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
-static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
+/* To protect against HashDos attacks, we count collisions during the "find
+ * existing bucket with this key" phase of insertion operations. The check
+ * against MAX_COLLISIONS is only performed if *no* matching bucket is found,
+ * as that corresponds to insert operations (as opposed to updates).
+ *
+ * An important caveat of the implementation is that collisions will *not*
+ * be counted for add_new operations. find+add_new operations should be replaced
+ * with add_or_return operations.
+ */
+#define HT_MAX_COLLISIONS 1000
+
+static zend_always_inline Bucket *zend_hash_find_bucket(
+		const HashTable *ht, zend_string *key, zend_bool for_insert)
 {
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	h = zend_string_hash_val(key);
 	arData = ht->arData;
@@ -481,15 +494,21 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
+	}
+	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
+		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
 	}
 	return NULL;
 }
 
-static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht, const char *str, size_t len, zend_ulong h)
+static zend_always_inline Bucket *zend_hash_str_find_bucket(
+		const HashTable *ht, const char *str, size_t len, zend_ulong h, zend_bool for_insert)
 {
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
@@ -504,15 +523,21 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
+	}
+	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
+		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
 	}
 	return NULL;
 }
 
-static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *ht, zend_ulong h)
+static zend_always_inline Bucket *zend_hash_index_find_bucket(
+		const HashTable *ht, zend_ulong h, zend_bool for_insert)
 {
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
+	uint32_t num_collisions = 0;
 
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
@@ -524,6 +549,10 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		num_collisions++;
+	}
+	if (for_insert && UNEXPECTED(num_collisions > HT_MAX_COLLISIONS)) {
+		zend_error_noreturn(E_ERROR, "Too many collisions in hashtable");
 	}
 	return NULL;
 }
@@ -544,13 +573,16 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_find_bucket(ht, key);
+		p = zend_hash_find_bucket(ht, key, 1);
 
 		if (p) {
 			zval *data;
 
 			if (flag & HASH_ADD) {
 				return NULL;
+			}
+			if (flag & HASH_ADD_OR_RETURN) {
+				return &p->val;
 			}
 			ZEND_ASSERT(&p->val != pData);
 			data = &p->val;
@@ -617,6 +649,11 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_update_ind(HashTable *ht, zend_string *k
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_return(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_OR_RETURN ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
@@ -706,6 +743,9 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 				if (flag & HASH_ADD) {
 					return NULL;
 				}
+				if (flag & HASH_ADD_OR_RETURN) {
+					return &p->val;
+				}
 				if (ht->pDestructor) {
 					ht->pDestructor(&p->val);
 				}
@@ -761,10 +801,13 @@ add_to_packed:
 convert_to_hash:
 		zend_hash_packed_to_hash(ht);
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_index_find_bucket(ht, h);
+		p = zend_hash_index_find_bucket(ht, h, 1);
 		if (p) {
 			if (flag & HASH_ADD) {
 				return NULL;
+			}
+			if (flag & HASH_ADD_OR_RETURN) {
+				return &p->val;
 			}
 			ZEND_ASSERT(&p->val != pData);
 			HANDLE_BLOCK_INTERRUPTIONS();
@@ -818,6 +861,11 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, z
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_new(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
 {
 	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_return(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_ADD_OR_RETURN ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
@@ -1923,7 +1971,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -1935,7 +1983,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char 
 	IS_CONSISTENT(ht);
 
 	h = zend_inline_hash_func(str, len);
-	p = zend_hash_str_find_bucket(ht, str, len, h);
+	p = zend_hash_str_find_bucket(ht, str, len, h, 0);
 	return p ? &p->val : NULL;
 }
 
@@ -1945,7 +1993,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_stri
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
 	return p ? 1 : 0;
 }
 
@@ -1957,7 +2005,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_str_exists(const HashTable *ht, const
 	IS_CONSISTENT(ht);
 
 	h = zend_inline_hash_func(str, len);
-	p = zend_hash_str_find_bucket(ht, str, len, h);
+	p = zend_hash_str_find_bucket(ht, str, len, h, 0);
 	return p ? 1 : 0;
 }
 
@@ -1977,10 +2025,9 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulon
 		return NULL;
 	}
 
-	p = zend_hash_index_find_bucket(ht, h);
+	p = zend_hash_index_find_bucket(ht, h, 0);
 	return p ? &p->val : NULL;
 }
-
 
 ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 {
@@ -1997,7 +2044,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zen
 		return 0;
 	}
 
-	p = zend_hash_index_find_bucket(ht, h);
+	p = zend_hash_index_find_bucket(ht, h, 0);
 	return p ? 1 : 0;
 }
 
