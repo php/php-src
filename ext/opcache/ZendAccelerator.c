@@ -846,6 +846,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	if (ZCSG(sidestep_invalidate_count)>0) {
 		/* if non-zero, indicates number of processes using side-step in which do_validate_timestamps() hasn't been called yet */
 		ZCSG(sidestep_invalidate_count)--;
+		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
 	zend_shared_alloc_unlock();
