@@ -607,7 +607,7 @@ void phpdbg_watch_parent_ht(phpdbg_watch_element *element) {
 
 		zend_hash_internal_pointer_end_ex(hti->ht, &pos);
 		hti->last = hti->ht->arData + pos;
-		hti->last_str = hti->last->key;
+		hti->last_str = hti->last->key.str; // ???
 		hti->last_idx = hti->last->h;
 
 		zend_hash_add_ptr(&hti->watches, element->name_in_parent, element);
@@ -1012,7 +1012,11 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 		return;
 	}
 	if (watch->type == WATCH_ON_BUCKET) {
-		if (watch->backup.bucket.key != watch->addr.bucket->key || (watch->backup.bucket.key != NULL && watch->backup.bucket.h != watch->addr.bucket->h)) {
+		zend_bool same_key = watch->backup.bucket.h == watch->addr.bucket->h
+			&& (zend_bucket_has_str_key(&watch->backup.bucket)
+					? watch->backup.bucket.key.str == watch->addr.bucket->key.str
+					: watch->backup.bucket.key.num == watch->addr.bucket->key.num);
+		if (!same_key) {
 			phpdbg_watch_element *element;
 			zval *new;
 

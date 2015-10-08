@@ -166,10 +166,15 @@ struct _zend_string {
 	char              val[1];
 };
 
+typedef union _zend_bucket_key {
+	zend_string *str;
+	zend_ulong   num;
+} zend_bucket_key;
+
 typedef struct _Bucket {
 	zval              val;
-	zend_ulong        h;                /* hash value (or numeric index)   */
-	zend_string      *key;              /* string key or NULL for numerics */
+	zend_ulong        h;                /* hash value */
+	zend_bucket_key   key;
 } Bucket;
 
 typedef struct _zend_array HashTable;
@@ -218,6 +223,7 @@ struct _zend_array {
 
 #if SIZEOF_SIZE_T == 4
 # define HT_MAX_SIZE 0x04000000 /* small enough to avoid overflow checks */
+# define HT_IS_STR_BIT Z_UL(0x80000000)
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((Bucket*)((char*)(data) + (idx)))
 # define HT_IDX_TO_HASH(idx) \
@@ -226,6 +232,7 @@ struct _zend_array {
 	((idx) / sizeof(Bucket))
 #elif SIZEOF_SIZE_T == 8
 # define HT_MAX_SIZE 0x80000000
+# define HT_IS_STR_BIT Z_UL(0x8000000000000000)
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((data) + (idx))
 # define HT_IDX_TO_HASH(idx) \

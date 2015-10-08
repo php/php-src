@@ -904,7 +904,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		uint to_len = strlen(resource_to->path+1);
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->manifest, b) {
-			str_key = b->key;
+			str_key = b->key.str;
 			entry = Z_PTR(b->val);
 			if (!entry->is_deleted &&
 				ZSTR_LEN(str_key) > from_len &&
@@ -925,13 +925,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
-				b->key = new_str_key;
+				b->key.str = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_rehash(&phar->manifest);
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->virtual_dirs, b) {
-			str_key = b->key;
+			str_key = b->key.str;
 			if (ZSTR_LEN(str_key) >= from_len &&
 				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
@@ -943,13 +943,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
-				b->key = new_str_key;
+				b->key.str = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_rehash(&phar->virtual_dirs);
 
 		ZEND_HASH_FOREACH_BUCKET(&phar->mounted_dirs, b) {
-			str_key = b->key;
+			str_key = b->key.str;
 			if (ZSTR_LEN(str_key) >= from_len &&
 				memcmp(ZSTR_VAL(str_key), resource_from->path+1, from_len) == 0 &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
@@ -961,7 +961,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 				zend_string_release(str_key);
 				b->h = zend_string_hash_val(new_str_key);
-				b->key = new_str_key;
+				b->key.str = new_str_key;
 			}
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_rehash(&phar->mounted_dirs);

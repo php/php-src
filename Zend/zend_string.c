@@ -143,10 +143,10 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	idx = HT_HASH(&CG(interned_strings), nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(&CG(interned_strings), idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == ZSTR_LEN(str))) {
-			if (!memcmp(ZSTR_VAL(p->key), ZSTR_VAL(str), ZSTR_LEN(str))) {
+		if ((p->h == h) && (ZSTR_LEN(p->key.str) == ZSTR_LEN(str))) {
+			if (!memcmp(ZSTR_VAL(p->key.str), ZSTR_VAL(str), ZSTR_LEN(str))) {
 				zend_string_release(str);
-				return p->key;
+				return p->key.str;
 			}
 		}
 		idx = Z_NEXT(p->val);
@@ -181,7 +181,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	CG(interned_strings).nNumOfElements++;
 	p = CG(interned_strings).arData + idx;
 	p->h = h;
-	p->key = str;
+	p->key.str = str;
 	Z_STR(p->val) = str;
 	Z_TYPE_INFO(p->val) = IS_INTERNED_STRING_EX;
 	nIndex = h | CG(interned_strings).nTableMask;
@@ -204,8 +204,8 @@ static void zend_interned_strings_snapshot_int(void)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		ZEND_ASSERT(GC_FLAGS(p->key) & IS_STR_PERSISTENT);
-		GC_FLAGS(p->key) |= IS_STR_PERMANENT;
+		ZEND_ASSERT(GC_FLAGS(p->key.str) & IS_STR_PERSISTENT);
+		GC_FLAGS(p->key.str) |= IS_STR_PERMANENT;
 	}
 #endif
 }
@@ -221,13 +221,13 @@ static void zend_interned_strings_restore_int(void)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		if (GC_FLAGS(p->key) & IS_STR_PERMANENT) break;
+		if (GC_FLAGS(p->key.str) & IS_STR_PERMANENT) break;
 		CG(interned_strings).nNumUsed--;
 		CG(interned_strings).nNumOfElements--;
 
-		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
-		GC_REFCOUNT(p->key) = 1;
-		zend_string_free(p->key);
+		GC_FLAGS(p->key.str) &= ~IS_STR_INTERNED;
+		GC_REFCOUNT(p->key.str) = 1;
+		zend_string_free(p->key.str);
 
 		nIndex = p->h | CG(interned_strings).nTableMask;
 		if (HT_HASH(&CG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {
