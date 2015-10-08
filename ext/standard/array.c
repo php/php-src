@@ -48,6 +48,7 @@
 #include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
+#include "zend_hash_func.h"
 #include "ext/spl/spl_array.h"
 
 /* {{{ defines */
@@ -4962,7 +4963,7 @@ PHP_FUNCTION(array_multisort)
 			hash->arData[k] = indirect[k][i];
 			if (!zend_bucket_has_str_key(&hash->arData[k])) {
 				hash->arData[k].key.num = n;
-				hash->arData[k].h = zend_hash_integer(n);
+				hash->arData[k].h = zend_hash_integer(n); /* TODO */
 				n++;
 			} else {
 				repack = 0;
