@@ -523,7 +523,7 @@ static void zend_closure_internal_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ *
 	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	OBJ_RELEASE((zend_object*)closure);
-	EX(func)->common.prototype = NULL;
+	EX(func) = NULL;
 }
 /* }}} */
 
