@@ -34,6 +34,8 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+- get_headers() has an extra parameter which allows passing a custom stream
+  context.
 
 ========================================
 6. New Functions

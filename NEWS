@@ -2,4 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0
 
+Standard
+  . Implemented FR #55716 (Add an option to pass a custom stream context to
+    get_headers()). (Ferenc)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
