@@ -564,7 +564,14 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		/* wrap internal function handler to avoid memory leak */
-		closure->orig_internal_handler = closure->func.internal_function.handler;
+		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
+			/* avoid infinity recursion, by taking handler from nested closure */
+			zend_closure *nested = (zend_closure*)((char*)func - XtOffsetOf(zend_closure, func));
+			ZEND_ASSERT(nested->std.ce == zend_ce_closure);
+			closure->orig_internal_handler = nested->orig_internal_handler;
+		} else {
+			closure->orig_internal_handler = closure->func.internal_function.handler;
+		}
 		closure->func.internal_function.handler = zend_closure_internal_handler;
 		/* verify that we aren't binding internal function to a wrong scope */
 		if(func->common.scope != NULL) {
