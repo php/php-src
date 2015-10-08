@@ -2356,7 +2356,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			zend_string_release(p->key.str);
 		}
 		p->key.num = j;
-		p->h = zend_hash_integer(j);
+		p->h = 0;
 	}
 	hash->nNextFreeElement = n_elems;
 	if (!(hash->u.flags & HASH_FLAG_PACKED)) {
@@ -2666,7 +2666,7 @@ PHP_FUNCTION(array_shift)
 				if (idx != k) {
 					Bucket *q = Z_ARRVAL_P(stack)->arData + k;
 					q->key.num = k;
-					q->h = zend_hash_integer(k);
+					q->h = 0;
 					ZVAL_COPY_VALUE(&q->val, &p->val);
 					ZVAL_UNDEF(&p->val);
 				}
@@ -2681,7 +2681,7 @@ PHP_FUNCTION(array_shift)
 				if (idx != k) {
 					Bucket *q = Z_ARRVAL_P(stack)->arData + k;
 					q->key.num = k;
-					q->h = zend_hash_integer(k);
+					q->h = 0;
 					ZVAL_COPY_VALUE(&q->val, &p->val);
 					ZVAL_UNDEF(&p->val);
 					if (idx == iter_pos) {

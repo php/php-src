@@ -767,8 +767,14 @@ static zend_always_inline zend_bool zend_bucket_has_str_key(const Bucket *p) {
 	return (p->h & HT_IS_STR_BIT) != 0;
 }
 
-static zend_always_inline zend_ulong zend_hash_integer(zend_ulong num) {
-	return num & ~HT_IS_STR_BIT;
+static zend_always_inline zend_ulong zend_hash_integer(zend_ulong h) {
+	/* Use Murmur64 finalizer for testing */
+	h ^= h >> 32;
+	h *= Z_UL(0xff51afd7ed558ccd);
+	h ^= h >> 32;
+	h *= Z_UL(0xc4ceb9fe1a85ec53);
+	h ^= h >> 32;
+	return h & ~HT_IS_STR_BIT;
 }
 
 #define ZEND_HASH_EXTRACT_KEY(_p, _key, _h) \
@@ -929,7 +935,7 @@ static zend_always_inline zend_ulong zend_hash_integer(zend_ulong num) {
 #define ZEND_HASH_FILL_ADD(_val) do { \
 		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
 		__fill_bkt->key.num = (__fill_idx); \
-		__fill_bkt->h = zend_hash_integer(__fill_idx); \
+		__fill_bkt->h = 0; \
 		__fill_bkt++; \
 		__fill_idx++; \
 	} while (0)
