@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #70650 (Wrong docblock assignment). (Marcio)
 
+- Standard:
+  . Fixed bug #70667 (strtr() causes invalid writes and a crashes). (Dmitry)
+
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
