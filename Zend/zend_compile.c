@@ -1703,18 +1703,6 @@ zend_ast *zend_ast_append_str(zend_ast *left_ast, zend_ast *right_ast) /* {{{ */
 }
 /* }}} */
 
-/* A hacky way that is used to store the doc comment for properties */
-zend_ast *zend_ast_append_doc_comment(zend_ast *list) /* {{{ */
-{
-	if (CG(doc_comment)) {
-		list = zend_ast_list_add(list, zend_ast_create_zval_from_str(CG(doc_comment)));
-		CG(doc_comment) = NULL;
-	}
-
-	return list;
-}
-/* }}} */
-
 void zend_verify_namespace(void) /* {{{ */
 {
 	if (FC(has_bracketed_namespaces) && !FC(in_namespace)) {
@@ -4914,7 +4902,6 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 	uint32_t flags = list->attr;
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
-	zend_string *doc_comment = NULL;
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -4924,18 +4911,19 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
-	/* Doc comment has been appended as last element in property list */
-	if (list->child[children - 1]->kind == ZEND_AST_ZVAL) {
-		doc_comment = zend_string_copy(zend_ast_get_str(list->child[children - 1]));
-		children -= 1;
-	}
-
 	for (i = 0; i < children; ++i) {
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast *value_ast = prop_ast->child[1];
+		zend_ast *doc_comment_ast = prop_ast->child[2];
 		zend_string *name = zend_ast_get_str(name_ast);
+		zend_string *doc_comment = NULL;
 		zval value_zv;
+
+		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
+		if (doc_comment_ast) {
+			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
+		}
 
 		if (flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
@@ -4956,9 +4944,6 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 
 		name = zend_new_interned_string_safe(name);
 		zend_declare_property_ex(ce, name, &value_zv, flags, doc_comment);
-
-		/* Doc comment is only assigned to first property */
-		doc_comment = NULL;
 	}
 }
 /* }}} */

@@ -698,7 +698,6 @@ void zend_emit_final_return(zval *zv);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
