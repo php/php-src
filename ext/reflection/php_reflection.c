@@ -365,6 +365,101 @@ static zval *reflection_instantiate(zend_class_entry *pce, zval *object) /* {{{ 
 }
 /* }}} */
 
+static zend_op_array get_internal_function_wrapper(zend_internal_function *ifunc) {
+	int i;
+	zend_op *op;
+	zend_op_array op_array;
+	init_op_array(&op_array, ZEND_USER_FUNCTION, 6 + ifunc->num_args);
+	op_array.last = 6 + ifunc->num_args;
+	op_array.literals = emalloc(3 * sizeof(zval));
+	op_array.fn_flags &= ~ZEND_ACC_HAS_TYPE_HINTS;
+	op = op_array.opcodes;
+
+	((zend_function *) &op_array)->common = ((zend_function *) ifunc)->common;
+	op_array.type = ZEND_USER_FUNCTION;
+
+	++GC_REFCOUNT(op_array.function_name);
+	op_array.arg_info = emalloc(sizeof(zend_arg_info) * op_array.num_args);
+	memcpy(op_array.arg_info, ifunc->arg_info, sizeof(zend_arg_info) * op_array.num_args);
+	for (i = 0; i < op_array.num_args; i++) {
+		op_array.arg_info[i].name = ifunc->arg_info[i].name ? zend_string_init(ifunc->arg_info[i].name, strlen(ifunc->arg_info[i].name), 0) : ZSTR_EMPTY_ALLOC();
+		if (ifunc->arg_info[i].class_name) {
+			op_array.arg_info[i].class_name = zend_string_init(ifunc->arg_info[i].class_name, strlen(ifunc->arg_info[i].class_name), 0);
+		}
+	}
+
+	for (i = 0; i < op_array.num_args; i++) {
+		op[i].opcode = ZEND_RECV;
+		op[i].op1.num = 0;
+		op[i].op1_type = IS_UNUSED;
+		op[i].op2_type = IS_UNUSED;
+		op[i].result.var = i;
+		op[i].result_type = IS_VAR;
+		op[i].extended_value = 0;
+	}
+
+	i = op_array.num_args + 0;
+	op[i].opcode = ZEND_INIT_FCALL;
+	op[i].op1.num = ZEND_CALL_FRAME_SLOT;
+	op[i].op1_type = IS_UNUSED;
+	Z_CACHE_SLOT(op_array.literals[0]) = 0;
+	ZVAL_NEW_STR(&op_array.literals[0], zend_string_init(ZEND_STRL("func_get_args"), 0));
+	op[i].op2.constant = 0;
+	op[i].op2_type = IS_CONST;
+	op[i].result_type = IS_UNUSED;
+	op[i].extended_value = 0;
+
+	i = op_array.num_args + 1;
+	op[i].opcode = ZEND_DO_ICALL;
+	op[i].op1_type = IS_UNUSED;
+	op[i].op2_type = IS_UNUSED;
+	op[i].result.var = op_array.num_args + 0;
+	op[i].result_type = IS_VAR;
+
+	i = op_array.num_args + 2;
+	op[i].opcode = ifunc->scope ? ZEND_INIT_METHOD_CALL : ZEND_INIT_FCALL_BY_NAME;
+	op[i].op1_type = IS_UNUSED;
+	Z_CACHE_SLOT(op_array.literals[1]) = sizeof(void *) * (ifunc->scope ? 2 /* POLYMORPHIC_CACHE_SLOT_SIZE */ : 1);
+	ZVAL_STR_COPY(&op_array.literals[1], ifunc->function_name);
+	ZVAL_NEW_STR(&op_array.literals[2], zend_string_tolower(ifunc->function_name));
+	op[i].op2.constant = 1;
+	op[i].op2_type = IS_CONST;
+	op[i].result_type = IS_UNUSED;
+	op[i].extended_value = 0;
+
+	i = op_array.num_args + 3;
+	op[i].opcode = ZEND_SEND_ARRAY;
+	op[i].op1.var = op_array.num_args + 0;
+	op[i].op1_type = IS_VAR;
+	op[i].op2_type = IS_UNUSED;
+	op[i].result_type = IS_UNUSED;
+
+	i = op_array.num_args + 4;
+	op[i].opcode = ZEND_DO_FCALL;
+	op[i].op1_type = IS_UNUSED;
+	op[i].op2_type = IS_UNUSED;
+	op[i].result.var = op_array.num_args + 1;
+	op[i].result_type = IS_VAR;
+
+	i = op_array.num_args + 5;
+	op[i].opcode = (ifunc->fn_flags & ZEND_ACC_RETURN_REFERENCE) ? ZEND_RETURN_BY_REF : ZEND_RETURN;
+	op[i].op1.var = op_array.num_args + 1;
+	op[i].op1_type = IS_VAR;
+	op[i].op2_type = IS_UNUSED;
+	op[i].result_type = IS_UNUSED;
+	op[i].extended_value = ZEND_RETURNS_FUNCTION;
+
+	op_array.T = op_array.num_args + 2;
+	op_array.filename = ZSTR_EMPTY_ALLOC();
+	CG(context).literals_size = 3;
+	op_array.last_literal = 3;
+	op_array.cache_size = sizeof(void *) * 2;
+
+	pass_two(&op_array);
+
+	return op_array;
+}
+
 static void _const_string(string *str, char *name, zval *value, char *indent);
 static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent);
@@ -1756,13 +1851,23 @@ ZEND_METHOD(reflection_function, getClosure)
 {
 	reflection_object *intern;
 	zend_function *fptr;
+	zend_op_array op_array;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+		op_array = get_internal_function_wrapper(&fptr->internal_function);
+		fptr = (zend_function *) &op_array;
+	}
+
 	zend_create_closure(return_value, fptr, NULL, NULL, NULL);
+
+	if (&fptr->op_array == &op_array) {
+		destroy_op_array(&op_array);
+	}
 }
 /* }}} */
 
@@ -3139,12 +3244,15 @@ ZEND_METHOD(reflection_method, getClosure)
 	reflection_object *intern;
 	zval *obj;
 	zend_function *mptr;
+	zend_class_entry *called_scope;
+	zend_op_array op_array;
 
 	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
-		zend_create_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
+		obj = NULL;
+		called_scope = mptr->common.scope;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 			return;
@@ -3160,9 +3268,21 @@ ZEND_METHOD(reflection_method, getClosure)
 			(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 		{
 			ZVAL_COPY(return_value, obj);
-		} else {
-			zend_create_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
+			return;
 		}
+
+		called_scope = Z_OBJCE_P(obj);
+	}
+
+	if (mptr->type == ZEND_INTERNAL_FUNCTION) {
+		op_array = get_internal_function_wrapper(&mptr->internal_function);
+		mptr = (zend_function *) &op_array;
+	}
+
+	zend_create_closure(return_value, mptr, mptr->common.scope, called_scope, obj);
+
+	if (&mptr->op_array == &op_array) {
+		destroy_op_array(&op_array);
 	}
 }
 /* }}} */
