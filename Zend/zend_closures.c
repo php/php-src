@@ -39,6 +39,7 @@ typedef struct _zend_closure {
 	zend_function     func;
 	zval              this_ptr;
 	zend_class_entry *called_scope;
+	void (*orig_internal_handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_closure;
 
 /* non-static since it needs to be referenced */
@@ -517,6 +518,15 @@ void zend_register_closure_ce(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_closure_internal_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+{
+	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
+	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	OBJ_RELEASE((zend_object*)closure);
+	EX(func)->common.prototype = NULL;
+}
+/* }}} */
+
 ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
 {
 	zend_closure *closure;
@@ -525,17 +535,16 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 
-	memcpy(&closure->func, func, func->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
-	closure->func.common.prototype = (zend_function*)closure;
-	closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
-
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
 		/* use dummy scope if we're binding an object without specifying a scope */
 		/* maybe it would be better to create one for this purpose */
 		scope = zend_ce_closure;
 	}
 
-	if (closure->func.type == ZEND_USER_FUNCTION) {
+	if (func->type == ZEND_USER_FUNCTION) {
+		memcpy(&closure->func, func, sizeof(zend_op_array));
+		closure->func.common.prototype = (zend_function*)closure;
+		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		if (closure->func.op_array.static_variables) {
 			HashTable *static_variables = closure->func.op_array.static_variables;
 
@@ -551,6 +560,12 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			(*closure->func.op_array.refcount)++;
 		}
 	} else {
+		memcpy(&closure->func, func, sizeof(zend_internal_function));
+		closure->func.common.prototype = (zend_function*)closure;
+		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
+		/* wrap internal function handler to avoid memory leak */
+		closure->orig_internal_handler = closure->func.internal_function.handler;
+		closure->func.internal_function.handler = zend_closure_internal_handler;
 		/* verify that we aren't binding internal function to a wrong scope */
 		if(func->common.scope != NULL) {
 			if(scope && !instanceof_function(scope, func->common.scope)) {
