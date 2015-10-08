@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #70667 (strtr() causes invalid writes and a crashes). (Dmitry)
+  . Fixed bug #70668 (array_keys() doesn't respect references when $strict is
+    true). (Bob, Dmitry)
+
 
 01 Oct 2015, PHP 7.0.0 RC 4
 
