@@ -89,7 +89,7 @@ ZEND_METHOD(Closure, bind)
 	}
 
 	if (newthis == NULL && !(closure->func.common.fn_flags & ZEND_ACC_STATIC)
-			&& closure->func.type == ZEND_INTERNAL_FUNCTION) {
+			&& closure->func.common.scope && closure->func.type == ZEND_INTERNAL_FUNCTION) {
 		zend_error(E_WARNING, "Cannot unbind $this of internal method");
 		return;
 	}
