@@ -146,11 +146,35 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
-
 	/* Check if the requested address space is free */
 	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
+#if ENABLE_FILE_CACHE_FALLBACK
+		if (ZCG(accel_directives).file_cache && ZCG(accel_directives).file_cache_fallback) {
+			size_t pre_size, wanted_mb_save;
+
+			wanted_mb_save = (size_t)wanted_mapping_base;
+
+			err = ERROR_INVALID_ADDRESS;
+			zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
+
+			pre_size = ZEND_ALIGNED_SIZE(sizeof(zend_smm_shared_globals)) + ZEND_ALIGNED_SIZE(sizeof(zend_shared_segment)) + ZEND_ALIGNED_SIZE(sizeof(void *)) + ZEND_ALIGNED_SIZE(sizeof(int));
+			/* Map only part of SHM to have access opcache shared globals */
+			mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, pre_size + ZEND_ALIGNED_SIZE(sizeof(zend_accel_shared_globals)), NULL);
+			if (mapping_base == NULL) {
+				err = GetLastError();
+				zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to opcache shared globals", err);
+				return ALLOC_FAILURE;
+			}
+			accel_shared_globals = (zend_accel_shared_globals *)((char *)((zend_smm_shared_globals *)mapping_base)->app_shared_globals + ((char *)mapping_base - (char *)wanted_mb_save));
+
+			/* Make this process to use file-cache only */
+			ZCG(accel_directives).file_cache_only = 1;
+
+			return ALLOC_FALLBACK;
+		}
+#endif
 	    err = ERROR_INVALID_ADDRESS;
 		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region", err);
 		return ALLOC_FAILURE;
