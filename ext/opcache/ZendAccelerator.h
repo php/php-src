@@ -282,6 +282,8 @@ typedef struct _zend_accel_shared_globals {
 #ifdef ZEND_WIN32
 	LONGLONG   mem_usage;
 	LONGLONG   restart_in;
+	int sidestep_count;
+	int sidestep_invalidate_count;
 #endif
 	zend_bool       restart_in_progress;
 	/* Interned Strings Support */

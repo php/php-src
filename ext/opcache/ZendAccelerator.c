@@ -841,6 +841,17 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	zend_file_handle ps_handle;
 	zend_string *full_path_ptr = NULL;
 
+#if ZEND_WIN32
+	zend_shared_alloc_lock();
+	if (ZCSG(sidestep_invalidate_count)>0) {
+		/* if non-zero, indicates number of processes using side-step in which do_validate_timestamps() hasn't been called yet */
+		ZCSG(sidestep_invalidate_count)--;
+		zend_shared_alloc_unlock();
+		return FAILURE;
+	}
+	zend_shared_alloc_unlock();
+#endif
+	
 	/** check that the persistent script is indeed the same file we cached
 	 * (if part of the path is a symlink than it possible that the user will change it)
 	 * See bug #15140
@@ -1109,6 +1120,9 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 					zend_accel_schedule_restart_if_necessary(reason);
 				}
 			}
+#ifdef ZEND_WIN32
+			ZCSG(sidestep_invalidate_count) = ZCSG(sidestep_count);
+#endif
 			zend_shared_alloc_unlock();
 			SHM_PROTECT();
 		}
@@ -1713,6 +1727,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (persistent_script && ZCG(accel_directives).validate_timestamps) {
 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {
 			zend_shared_alloc_lock();
+#ifdef ZEND_WIN32
+			ZCSG(sidestep_invalidate_count) = ZCSG(sidestep_count);
+#endif			
 			if (!persistent_script->corrupted) {
 				persistent_script->corrupted = 1;
 				persistent_script->timestamp = 0;
@@ -2795,6 +2812,11 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
 	ZCSG(accelerator_enabled) = 0;
+#ifdef ZEND_WIN32
+	zend_shared_alloc_lock();
+	ZCSG(sidestep_invalidate_count) = ZCSG(sidestep_count);
+	zend_shared_alloc_unlock();
+#endif
 
 	if (ZCG(accel_directives).force_restart_timeout) {
 		ZCSG(force_restart_time) = zend_accel_get_time() + ZCG(accel_directives).force_restart_timeout;
