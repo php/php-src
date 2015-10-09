@@ -173,6 +173,12 @@ ZEND_METHOD(Closure, bind)
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
 	}
 
+	if (newthis == NULL && !(closure->func.common.fn_flags & ZEND_ACC_STATIC)
+			&& closure->func.type == ZEND_INTERNAL_FUNCTION) {
+		zend_error(E_WARNING, "Cannot unbind $this of internal method");
+		return;
+	}
+
 	if (scope_arg != NULL) { /* scope argument was given */
 		if (Z_TYPE_P(scope_arg) == IS_OBJECT) {
 			ce = Z_OBJCE_P(scope_arg);
