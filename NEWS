@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70631 (Another Segfault in gc_remove_from_buffer()). (Laruence)
   . Fixed bug #70601 (Segfault in gc_remove_from_buffer()). (Laruence)
+  . Fixed compatibility with Windows 10 (see also bug #70652). (Anatol)
 
 01 Oct 2015, PHP 5.6.14
 
