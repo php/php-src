@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
     specified under RC4). (Nikita)
 
+- Opcache:
+  . Fixed compatibility with Windows 10 (see also bug #70652). (Anatol)
+
 - Phpdbg:
   . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
 
