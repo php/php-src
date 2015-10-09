@@ -7,6 +7,8 @@ $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
+$db = PDOTest::factory();
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'dblib') die('skip DBLIB driver does not support PDO::ATTR_PERSISTENT');
 ?>
 --FILE--
 <?php
