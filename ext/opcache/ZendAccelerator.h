@@ -139,6 +139,9 @@ extern int lock_file;
 #define DO_ALLOCA(x)	do_alloca(x, use_heap)
 #define FREE_ALLOCA(x)	free_alloca(x, use_heap)
 
+#if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
+# define ENABLE_FILE_CACHE_FALLBACK 1
+#endif
 
 #if ZEND_WIN32
 typedef unsigned __int64 accel_time_t;
@@ -219,6 +222,9 @@ typedef struct _zend_accel_directives {
 	zend_bool      file_cache_only;
 	zend_bool      file_cache_consistency_checks;
 #endif
+#if ENABLE_FILE_CACHE_FALLBACK
+	zend_bool      file_cache_fallback;
+#endif
 #ifdef HAVE_HUGE_CODE_PAGES
 	zend_bool      huge_code_pages;
 #endif
@@ -293,6 +299,9 @@ typedef struct _zend_accel_shared_globals {
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
+#if ENABLE_FILE_CACHE_FALLBACK
+extern zend_bool fallback_process;
+#endif
 
 extern zend_accel_shared_globals *accel_shared_globals;
 #define ZCSG(element)   (accel_shared_globals->element)
