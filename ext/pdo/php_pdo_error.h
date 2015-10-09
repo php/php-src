@@ -24,6 +24,7 @@
 #include "php_pdo_driver.h"
 
 PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
+PDO_API zval *pdo_throw_exception_ex(zend_class_entry *exception_ce, pdo_error_type *pdo_err TSRMLS_DC, long code TSRMLS_DC, const char *format, ...);
 
 #define PDO_DBH_CLEAR_ERR()             do { \
 	strlcpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
