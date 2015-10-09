@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     getClosure()). (Dmitry, Bob)
   . Fixed bug #70662 (Duplicate array key via undefined index error handler).
     (Nikita)
+  . Fixed buf #70681 (Segfault when binding $this of internal instance method
+    to null). (Nikita)
 
 - Mcrypt:
   . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
