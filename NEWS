@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.15
 
+- Core:
+  . Fixed bug #70681 (Segfault when binding $this of internal instance method
+    to null). (Nikita)
+
 - Date:
   . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
 
