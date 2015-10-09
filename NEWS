@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 15 Oct 2015, PHP 7.0.0 RC 5
 
 - Core:
+  . Fixed bug #70630 (Closure::call/bind() crash with ReflectionFunction->
+    getClosure()). (Dmitry, Bob)
   . Fixed bug #70662 (Duplicate array key via undefined index error handler).
     (Nikita)
 
