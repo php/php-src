@@ -98,6 +98,7 @@ ZEND_METHOD(Closure, call)
 	if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
 		/* verify that we aren't binding internal function to a wrong object */
 		if ((closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+				closure->func.common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), closure->func.common.scope)) {
 			zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", ZSTR_VAL(closure->func.common.scope->name), ZSTR_VAL(closure->func.common.function_name), ZSTR_VAL(Z_OBJCE_P(newthis)->name));
 			return;
