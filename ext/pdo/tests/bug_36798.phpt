@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #36798 (Error parsing named parameters with queries containing high-ascii chars)
 --SKIPIF--
-<?php  
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,13 +10,11 @@ PDOTest::skip();
 
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))){
     if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for Oracle with WE8MSWIN1252 character set');
-
 }
-
 ?>
 --FILE--
 <?php
-
+putenv('DB2CODEPAGE=850'); // needed for DB2
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
@@ -32,7 +30,7 @@ $row = $stmt->fetch(PDO::FETCH_NUM);
 var_dump( $row );
 
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   [0]=>
   string(1) "Ã"
