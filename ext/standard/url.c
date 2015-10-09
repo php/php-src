@@ -708,22 +708,24 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format])
+/* {{{ proto array get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	size_t url_len;
-	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
 	zend_long format = 0;
+	zval *zcontext = NULL;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
