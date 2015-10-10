@@ -457,14 +457,13 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		memset(newType, 0, sizeof(sdlType));
 
 		{
-			smart_str anonymous = {0};
+			char buf[MAX_LENGTH_OF_LONG + 1];
+			char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
+			char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
 
-			smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
-			smart_str_0(&anonymous);
-			// TODO: avoid reallocation ???
-			newType->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
-			smart_str_free(&anonymous);
+			memcpy(str, "anonymous", sizeof("anonymous")-1);
+			memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+			newType->name = str;
 		}
 		newType->namens = estrdup((char*)tns->children->content);
 
@@ -555,14 +554,13 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			memset(newType, 0, sizeof(sdlType));
 
 			{
-				smart_str anonymous = {0};
+				char buf[MAX_LENGTH_OF_LONG + 1];
+				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
+				char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
 
-				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
-				smart_str_0(&anonymous);
-				// TODO: avoid reallocation ???
-				newType->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
-				smart_str_free(&anonymous);
+				memcpy(str, "anonymous", sizeof("anonymous")-1);
+				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+				newType->name = str;
 			}
 			newType->namens = estrdup((char*)tns->children->content);
 
@@ -1928,14 +1926,13 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
 			{
-				smart_str anonymous = {0};
+				char buf[MAX_LENGTH_OF_LONG + 1];
+				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
+				char *str = emalloc(sizeof("anonymous") + buf + sizeof(buf) - 1 - res);
 
-				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
-				smart_str_0(&anonymous);
-				// TODO: avoid reallocation ???
-				dummy_type->name = estrndup(ZSTR_VAL(anonymous.s), ZSTR_LEN(anonymous.s));
-				smart_str_free(&anonymous);
+				memcpy(str, "anonymous", sizeof("anonymous")-1);
+				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+				dummy_type->name = str;
 			}
 			dummy_type->namens = estrdup((char*)tns->children->content);
 			schema_simpleType(sdl, tns, trav, dummy_type);

@@ -1922,6 +1922,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_append_unsigned_ex(&hashed_details, session_mode, 0);
 	smart_str_0(&hashed_details);
 
+	if (persistent) {
+		smart_str_appendl_ex(&hashed_details, "pc", sizeof("pc") - 1, 0);
+	}
+
 	/* make it lowercase */
 	/* PHPNG TODO is this safe to do? What about interned strings? */
 	php_strtolower(hashed_details.s->val, hashed_details.s->len);
@@ -1996,14 +2000,20 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 						if (!ping_done && (*(connection->next_pingp) > 0) && (timestamp >= *(connection->next_pingp)) && !php_oci_connection_ping(connection)) {
 							/* server died */
 						} else {
-							php_oci_connection *tmp;
+							php_oci_connection *tmp = (php_oci_connection *) NULL;
+							zval *tmp_val = (zval *) NULL;
 
 							/* okay, the connection is open and the server is still alive */
 							connection->used_this_request = 1;
-							tmp = (php_oci_connection *)connection->id->ptr;
-
-							if (tmp != NULL && tmp->hash_key->len == hashed_details.s->len &&
-								memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0) {
+							tmp_val = zend_hash_index_find(&EG(regular_list), connection->id->handle);
+							if ((tmp_val != NULL) && (Z_TYPE_P(tmp_val) == IS_RESOURCE)) {
+								tmp = Z_RES_VAL_P(tmp_val);
+							}
+							
+							if ((tmp_val != NULL) && (tmp != NULL) &&
+								(tmp->hash_key->len == hashed_details.s->len) &&
+								(memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0)) {
+								connection = tmp;
 								++GC_REFCOUNT(connection->id);
 								/* do nothing */
 							} else {
@@ -2364,6 +2374,10 @@ static int php_oci_connection_close(php_oci_connection *connection)
 	 */
 		php_oci_spool_close(connection->private_spool);
 		connection->private_spool = NULL;
+	}
+
+	if (GC_REFCOUNT(connection->hash_key) >= 2) {
+		zend_hash_del(&EG(regular_list), connection->hash_key);
 	}
 
 	if (connection->hash_key) {

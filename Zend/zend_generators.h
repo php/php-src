@@ -104,8 +104,29 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 ZEND_API void zend_generator_resume(zend_generator *generator);
 
 void zend_generator_yield_from(zend_generator *generator, zend_generator *from);
-ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator);
 ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);
+
+ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf);
+static zend_always_inline zend_generator *zend_generator_get_current(zend_generator *generator)
+{
+	zend_generator *leaf;
+	zend_generator *root;
+
+	if (EXPECTED(generator->node.parent == NULL)) {
+		/* we're not in yield from mode */
+		return generator;
+	}
+
+	leaf = generator->node.children ? generator->node.ptr.leaf : generator;
+	root = leaf->node.ptr.root;
+
+	if (EXPECTED(root->execute_data && root->node.parent == NULL)) {
+		/* generator still running */
+		return root;
+	}
+
+	return zend_generator_update_current(generator, leaf);
+}
 
 END_EXTERN_C()
 

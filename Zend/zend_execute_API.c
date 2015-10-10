@@ -839,15 +839,16 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	}
 	Z_OBJ(call->This) = fci->object;
 
+	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
+		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
+		ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
+	}
+
 	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
-		if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
-			ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
-			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_CLOSURE);
-		}
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
 			zend_init_execute_data(call, &func->op_array, fci->retval);
 			zend_execute_ex(call);

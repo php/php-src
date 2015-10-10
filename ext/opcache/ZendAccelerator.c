@@ -108,6 +108,9 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
+#if ENABLE_FILE_CACHE_FALLBACK
+zend_bool fallback_process = 0; /* process uses file cache fallback */
+#endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
@@ -1804,7 +1807,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-		INCREMENT(hits);
+#ifdef _M_X64
+		InterlockedIncrement64(&ZCSG(hits));
+#else
+		InterlockedIncrement(&ZCSG(hits));
+#endif
 		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
@@ -2366,6 +2373,7 @@ static int zend_accel_init_shm(void)
 	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
 	ZSMMG(app_shared_globals) = accel_shared_globals;
@@ -2383,6 +2391,7 @@ static int zend_accel_init_shm(void)
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 		if (!data || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+			zend_shared_alloc_unlock();
 			return FAILURE;
 		}
 		HT_SET_DATA_ADDR(&ZCSG(interned_strings), data);
@@ -2630,8 +2639,8 @@ static int accel_startup(zend_extension *extension)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
-				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				zend_shared_alloc_lock();
+				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				orig_new_interned_string = zend_new_interned_string;
 				orig_interned_strings_snapshot = zend_interned_strings_snapshot;
 				orig_interned_strings_restore = zend_interned_strings_restore;
@@ -2649,6 +2658,15 @@ static int accel_startup(zend_extension *extension)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
 				return SUCCESS;
 				break;
+#if ENABLE_FILE_CACHE_FALLBACK
+			case ALLOC_FALLBACK:
+				zend_shared_alloc_lock();
+				fallback_process = 1;
+				zend_accel_init_auto_globals();
+				zend_shared_alloc_unlock();
+				goto file_cache_fallback;
+				break;
+#endif
 		}
 
 		/* from this point further, shared memory is supposed to be OK */
@@ -2676,6 +2694,9 @@ static int accel_startup(zend_extension *extension)
 		zend_accel_init_auto_globals();
 #endif
 	}
+#if ENABLE_FILE_CACHE_FALLBACK
+file_cache_fallback:
+#endif
 
 	/* Override compiler */
 	accelerator_orig_compile_file = zend_compile_file;

@@ -1829,6 +1829,21 @@ ldap.max_links = -1
 ; errors.
 ;opcache.mmap_base=
 
+; Enables and sets the second level cache directory.
+; It should improve performance when SHM memory is full, at server restart or
+; SHM reset. The default "" disables file based caching.
+;opcache.file_cache=
+
+; Enables or disables opcode caching in shared memory.
+;opcache.file_cache_only=0
+
+; Enables or disables checksum validation when script loaded from file cache.
+;opcache.file_cache_consistency_checks=1
+
+; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
+; This should improve performance, but requires appropriate OS configuration.
+;opcache.huge_code_pages=0
+
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.

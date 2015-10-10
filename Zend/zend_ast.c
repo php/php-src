@@ -1349,7 +1349,11 @@ simple_list:
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, ')');
 			break;
-		case ZEND_AST_INSTANCEOF: BINARY_OP(" instanceof ", 230, 231, 231);
+		case ZEND_AST_INSTANCEOF:
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			smart_str_appends(str, " instanceof ");
+			zend_ast_export_ns_name(str, ast->child[1], 0, indent);
+			break;
 		case ZEND_AST_YIELD:
 			if (priority > 70) smart_str_appendc(str, '(');
 			smart_str_appends(str, "yield ");

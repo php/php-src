@@ -1202,17 +1202,19 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 	n = zend_mm_small_size_to_bit(size - 1);
 	return ((size-1) >> f1[n]) + f2[n];
 #else
-	int t1, t2, t3;
+	unsigned int t1, t2;
 
-	if (UNEXPECTED(size <= 8)) return 0;
-	t1 = (int)(size - 1);
-	t2 = zend_mm_small_size_to_bit(t1);
-	t3 = t2 - 6;
-	t3 = (t3 < 0) ? 0 : t3;
-	t2 = t3 + 3;
-	t1 = t1 >> t2;
-	t3 = t3 << 2;
-	return t1 + t3;
+	if (size <= 64) {
+		/* we need to support size == 0 ... */
+		return (size - !!size) >> 3;
+	} else {
+		t1 = size - 1;
+		t2 = zend_mm_small_size_to_bit(t1) - 3;
+		t1 = t1 >> t2;
+		t2 = t2 - 3;
+		t2 = t2 << 2;
+		return (int)(t1 + t2);
+	}
 #endif
 }
 
@@ -2012,6 +2014,27 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, int i,
 	return count;
 }
 
+static zend_long zend_mm_find_leaks_huge(zend_mm_heap *heap, zend_mm_huge_list *list)
+{
+	zend_long count = 0;
+	zend_mm_huge_list *prev = list;
+	zend_mm_huge_list *p = list->next;
+
+	while (p) {
+		if (p->dbg.filename == list->dbg.filename && p->dbg.lineno == list->dbg.lineno) {
+			prev->next = p->next;
+			zend_mm_chunk_free(heap, p->ptr, p->size);
+			zend_mm_free_heap(heap, p, NULL, 0, NULL, 0);
+			count++;
+		} else {
+			prev = p;
+		}
+		p = prev->next;
+	}
+
+	return count;
+}
+
 static void zend_mm_check_leaks(zend_mm_heap *heap)
 {
 	zend_mm_huge_list *list;
@@ -2026,8 +2049,6 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 	while (list) {
 		zend_mm_huge_list *q = list;
 
-		heap->huge_list = list->next;
-
 		leak.addr = list->ptr;
 		leak.size = list->dbg.size;
 		leak.filename = list->dbg.filename;
@@ -2037,13 +2058,13 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 		zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
-//???		repeated = zend_mm_find_leaks_huge(segment, p);
+		repeated = zend_mm_find_leaks_huge(heap, list);
 		total += 1 + repeated;
 		if (repeated) {
 			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 		}
 
-		list = list->next;
+		heap->huge_list = list = list->next;
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 		zend_mm_free_heap(heap, q, NULL, 0, NULL, 0);
 	}
@@ -2374,7 +2395,6 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 {
 
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
-	// TODO: use size???
 	zend_mm_free_huge(AG(mm_heap), ptr);
 }
 #endif

@@ -57,7 +57,7 @@ PHPAPI void mysqlnd_library_end(void)
 {
 	if (mysqlnd_library_initted == TRUE) {
 		mysqlnd_plugin_subsystem_end();
-		mysqlnd_stats_end(mysqlnd_global_stats);
+		mysqlnd_stats_end(mysqlnd_global_stats, 1);
 		mysqlnd_global_stats = NULL;
 		mysqlnd_library_initted = FALSE;
 		mysqlnd_reverse_api_end();
@@ -75,7 +75,7 @@ PHPAPI void mysqlnd_library_init(void)
 		mysqlnd_conn_data_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn_data));
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
-		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
+		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST, 1);
 		mysqlnd_plugin_subsystem_init();
 		{
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;

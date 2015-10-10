@@ -76,7 +76,7 @@ PHP_FUNCTION(com_create_instance)
 
 		/* decode the data from the array */
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Server", sizeof("Server")-1))) {
 			convert_to_string_ex(tmp);
 			server_name = Z_STRVAL_P(tmp);
@@ -84,28 +84,28 @@ PHP_FUNCTION(com_create_instance)
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Username", sizeof("Username")-1))) {
 			convert_to_string_ex(tmp);
 			user_name = Z_STRVAL_P(tmp);
 			user_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Password", sizeof("Password")-1))) {
 			convert_to_string_ex(tmp);
 			password = Z_STRVAL_P(tmp);
 			password_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Domain", sizeof("Domain")-1))) {
 			convert_to_string_ex(tmp);
 			domain_name = Z_STRVAL_P(tmp);
 			domain_name_len = Z_STRLEN_P(tmp);
 		}
 
-		if (NULL != (tmp = zend_hash_str_find(HASH_OF(server_params),
+		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Flags", sizeof("Flags")-1))) {
 			convert_to_long_ex(tmp);
 			ctx = (CLSCTX)Z_LVAL_P(tmp);

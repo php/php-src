@@ -199,6 +199,10 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 	}
 
+	if ($IS_MYSQLND) {
+		$expected_constants["MYSQLI_TYPE_JSON"]	= true;
+	}
+
 	$unexpected_constants = array();
 
 	foreach ($constants as $group => $consts) {
