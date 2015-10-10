@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #70681 (Segfault when binding $this of internal instance method
     to null). (Nikita)
+  . Fixed bug #70685 (Segfault for getClosure() internal method rebind with
+    invalid $this). (Nikita)
 
 - Date:
   . Fixed bug #70619 (DateTimeImmutable segfault). (Laruence)
