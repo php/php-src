@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 
 
-key_t
+PHPAPI key_t
 ftok(const char *pathname, int proj_id)
 {
 	HANDLE fh;

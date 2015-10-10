@@ -19,9 +19,11 @@
 #ifndef PHP_WIN32_IPC_H
 #define PHP_WIN32_IPC_H 1
 
+#include "php.h"
+
 typedef int key_t;
 
-key_t ftok(const char *path, int id);
+PHPAPI key_t ftok(const char *path, int id);
 
 
 #endif /* PHP_WIN32_IPC_H */
