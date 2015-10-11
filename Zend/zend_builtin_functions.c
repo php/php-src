@@ -487,7 +487,7 @@ ZEND_FUNCTION(func_get_args)
 	uint32_t i, n;
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+	if (!ex || ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
