@@ -502,7 +502,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 	conn = stmt->conn;
 	CONN_SET_STATE(conn, CONN_QUERY_SENT);
 
-	ret = mysqlnd_query_read_result_set_header(stmt->conn, s);
+	ret = stmt->conn->m->query_read_result_set_header(stmt->conn, s);
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
 		memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
