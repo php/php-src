@@ -148,6 +148,21 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsi
 /* }}} */
 
 
+/* {{{ mysqlnd_conn_get_methods */
+PHPAPI struct st_mysqlnd_object_factory_methods *
+mysqlnd_object_factory_get_methods()
+{
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_set_methods */
+PHPAPI void mysqlnd_object_factory_set_methods(struct st_mysqlnd_object_factory_methods *methods)
+{
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory) = *methods;
+}
+/* }}} */
+
 
 /* {{{ mysqlnd_conn_get_methods */
 PHPAPI struct st_mysqlnd_conn_methods *

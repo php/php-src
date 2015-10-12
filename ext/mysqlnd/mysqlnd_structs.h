@@ -357,6 +357,7 @@ struct st_mysqlnd_packet_auth_pam;
 struct st_mysqlnd_packet_sha256_pk_request;
 struct st_mysqlnd_packet_sha256_pk_request_response;
 
+typedef MYSQLND_CONN_DATA *						(*func_mysqlnd_protocol_payload_decoder_factory__get_mysqlnd_conn_data)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory);
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
@@ -375,6 +376,7 @@ typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_prot
 
 struct st_mysqlnd_protocol_payload_decoder_factory_methods
 {
+	func_mysqlnd_protocol_payload_decoder_factory__get_mysqlnd_conn_data get_mysqlnd_conn_data;
 	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet get_auth_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet get_auth_response_packet;
@@ -401,7 +403,7 @@ typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(zend_bool persi
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn);
 typedef MYSQLND_NET * (*func_mysqlnd_object_factory__get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
-typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(zend_bool persistent);
+typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 
 
 struct st_mysqlnd_object_factory_methods
@@ -414,7 +416,6 @@ struct st_mysqlnd_object_factory_methods
 };
 
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__init)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect)(MYSQLND_CONN_DATA * conn, const char * host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket_or_pipe, unsigned int mysql_flags);
 typedef zend_ulong			(*func_mysqlnd_conn_data__escape_string)(MYSQLND_CONN_DATA * const conn, char *newstr, const char *escapestr, size_t escapestr_len);
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_charset)(MYSQLND_CONN_DATA * const conn, const char * const charset);
@@ -510,7 +511,6 @@ typedef unsigned int		(*func_mysqlnd_conn_data__get_client_api_capabilities)(con
 
 struct st_mysqlnd_conn_data_methods
 {
-	func_mysqlnd_conn_data__init init;
 	func_mysqlnd_conn_data__connect connect;
 	func_mysqlnd_conn_data__escape_string escape_string;
 	func_mysqlnd_conn_data__set_charset set_charset;
@@ -894,6 +894,7 @@ struct st_mysqlnd_net
 
 struct st_mysqlnd_protocol_payload_decoder_factory
 {
+	MYSQLND_CONN_DATA * conn;
 	zend_bool persistent;
 	struct st_mysqlnd_protocol_payload_decoder_factory_methods m;
 };

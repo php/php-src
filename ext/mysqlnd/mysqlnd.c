@@ -2974,27 +2974,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, size_t
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::init */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, init)(MYSQLND_CONN_DATA * conn)
-{
-	DBG_ENTER("mysqlnd_conn_data::init");
-	mysqlnd_stats_init(&conn->stats, STAT_LAST, conn->persistent);
-	SET_ERROR_AFF_ROWS(conn);
-
-	conn->net = mysqlnd_net_init(conn->persistent, conn->stats, conn->error_info);
-	conn->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(conn->persistent);
-
-	DBG_RETURN(conn->stats && conn->net && conn->payload_decoder_factory? PASS:FAIL);
-}
-/* }}} */
-
-
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND_CONN_DATA * const conn);
 
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
-	MYSQLND_METHOD(mysqlnd_conn_data, init),
 	MYSQLND_METHOD(mysqlnd_conn_data, connect),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, escape_string),

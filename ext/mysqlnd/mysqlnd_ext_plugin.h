@@ -50,6 +50,9 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsi
 #define mysqlnd_plugin_get_plugin_net_data(n, p_id) _mysqlnd_plugin_get_plugin_net_data((n), (p_id))
 
 
+PHPAPI struct st_mysqlnd_object_factory_methods * mysqlnd_object_factory_get_methods();
+PHPAPI void mysqlnd_object_factory_set_methods(struct st_mysqlnd_object_factory_methods * methods);
+
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
 PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods * methods);
 

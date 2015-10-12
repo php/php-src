@@ -142,17 +142,22 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
 	CONN_SET_STATE(data, CONN_ALLOCED);
 	data->m->get_reference(data);
 
-	if (PASS != data->m->init(data)) {
-		new_object->m->dtor(new_object);
-		DBG_RETURN(NULL);
-	}
-
 	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
 	if (!data->error_info->error_list) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
-	} else {
-		zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
+	}
+	zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
+
+	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
+	SET_ERROR_AFF_ROWS(data);
+
+	data->net = mysqlnd_net_init(persistent, data->stats, data->error_info);
+	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
+
+	if (!data->net || !data->payload_decoder_factory) {
+		new_object->m->dtor(new_object);
+		DBG_RETURN(NULL);
 	}
 
 	DBG_RETURN(new_object);
@@ -284,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 
 /* {{{ mysqlnd_object_factory::get_protocol_payload_decoder_factory */
 static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
-MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *ret = mnd_pecalloc(1, alloc_size, persistent);
@@ -293,6 +298,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(zen
 	DBG_INF_FMT("persistent=%u", persistent);
 	if (ret) {
 		ret->persistent = persistent;
+		ret->conn = conn;
 		ret->m = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
 	}
 
