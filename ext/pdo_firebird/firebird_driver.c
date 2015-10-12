@@ -695,7 +695,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		pdo_throw_exception_ex(php_pdo_get_exception(), "HY000" TSRMLS_CC, H->isc_status[1] TSRMLS_CC, "SQLSTATE[%s] [%d] %s", "HY000", H->isc_status[1], errmsg);
+		pdo_throw_exception_ex(php_pdo_get_exception(), "HY000", H->isc_status[1] TSRMLS_CC, "SQLSTATE[%s] [%d] %s", "HY000", H->isc_status[1], errmsg);
 	}
 
 	if (!ret) {

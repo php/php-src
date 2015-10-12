@@ -38,7 +38,7 @@
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_DC);
 
-PDO_API zval *pdo_throw_exception_ex(zend_class_entry *exception_ce, pdo_error_type *pdo_err TSRMLS_DC, long code TSRMLS_DC, const char *format, ...) /* {{{ */
+PDO_API zval *pdo_throw_exception_ex(zend_class_entry *exception_ce, pdo_error_type *pdo_err, long code TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	char *message;
