@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
+  . Fixed bug #70430 (Stack buffer overflow in zend_language_parser()). (Nikita)
 
 - SOAP:
   . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)

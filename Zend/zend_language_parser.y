@@ -1278,20 +1278,30 @@ isset_variable:
    would have been.  */
 static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 {
-	if (!yyres) {
-		return yystrlen(yystr);
+	/* CG(parse_error) states:
+	 * 0 => yyres = NULL, yystr is the unexpected token
+	 * 1 => yyres = NULL, yystr is one of the expected tokens
+	 * 2 => yyres != NULL, yystr is the unexpected token
+	 * 3 => yyres != NULL, yystr is one of the expected tokens
+	 */
+	if (yyres && CG(parse_error) < 2) {
+		CG(parse_error) = 2;
 	}
-	if (CG(parse_error) == 0) {
+
+	if (CG(parse_error) % 2 == 0) {
+		/* The unexpected token */
 		char buffer[120];
 		const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 		unsigned int len = 0, toklen = 0, yystr_len;
 
-		CG(parse_error) = 1;
+		CG(parse_error)++;
 
 		if (LANG_SCNG(yy_text)[0] == 0 &&
 			LANG_SCNG(yy_leng) == 1 &&
 			memcmp(yystr, "\"end of file\"", sizeof("\"end of file\"") - 1) == 0) {
-			yystpcpy(yyres, "end of file");
+			if (yyres) {
+				yystpcpy(yyres, "end of file");
+			}
 			return sizeof("end of file")-1;
 		}
 
@@ -1312,14 +1322,22 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		} else {
 			len = (end - str) > 30 ? 30 : (end - str);
 		}
-		if (toklen) {
-			snprintf(buffer, sizeof(buffer), "'%.*s' %.*s", len, str, toklen, tok1);
-		} else {
-			snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
+		if (yyres) {
+			if (toklen) {
+				snprintf(buffer, sizeof(buffer), "'%.*s' %.*s", len, str, toklen, tok1);
+			} else {
+				snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
+			}
+			yystpcpy(yyres, buffer);
 		}
-		yystpcpy(yyres, buffer);
 		return len + (toklen ? toklen + 1 : 0) + 2;
 	}
+
+	/* One of the expected tokens */
+	if (!yyres) {
+		return yystrlen(yystr) - (*yystr == '"' ? 2 : 0);
+	}
+
 	if (*yystr == '"') {
 		YYSIZE_T yyn = 0;
 		const char *yyp = yystr;
