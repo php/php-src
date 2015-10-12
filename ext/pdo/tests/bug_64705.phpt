@@ -39,6 +39,6 @@ array(3) {
   [2]=>
   string(%d) "SQLSTATE[%s]%A"
 }
-string(5) "%s"
+int(%d)
 string(%d) "SQLSTATE[%s]%A"
 ===DONE===
