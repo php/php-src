@@ -2974,7 +2974,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, size_t
 /* }}} */
 
 
-MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND_CONN_DATA * const conn);
+/* {{{ _mysqlnd_stmt_init */
+MYSQLND_STMT *
+MYSQLND_METHOD(mysqlnd_conn_data, stmt_init)(MYSQLND_CONN_DATA * const conn)
+{
+	MYSQLND_STMT * ret;
+	DBG_ENTER("_mysqlnd_stmt_init");
+	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_prepared_statement(conn, conn->persistent);
+	DBG_RETURN(ret);
+}
+/* }}} */
 
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
@@ -2990,7 +2999,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, next_result),
 	MYSQLND_METHOD(mysqlnd_conn_data, more_results),
 
-	_mysqlnd_stmt_init,
+	MYSQLND_METHOD(mysqlnd_conn_data, stmt_init),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, shutdown),
 	MYSQLND_METHOD(mysqlnd_conn_data, refresh),

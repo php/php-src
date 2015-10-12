@@ -2370,18 +2370,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ _mysqlnd_stmt_init */
-MYSQLND_STMT *
-_mysqlnd_stmt_init(MYSQLND_CONN_DATA * const conn)
-{
-	MYSQLND_STMT * ret;
-	DBG_ENTER("_mysqlnd_stmt_init");
-	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_prepared_statement(conn);
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ _mysqlnd_init_ps_subsystem */
 void _mysqlnd_init_ps_subsystem()
 {

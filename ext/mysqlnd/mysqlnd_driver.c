@@ -196,7 +196,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn, zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
@@ -210,12 +210,12 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		ret->m = mysqlnd_stmt_get_methods();
 		ret->persistent = conn->persistent;
 
-		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
+		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), persistent);
 		DBG_INF_FMT("stmt=%p", stmt);
 		if (!stmt) {
 			break;
 		}
-		stmt->persistent = conn->persistent;
+		stmt->persistent = persistent;
 		stmt->error_info = &(stmt->error_info_impl);
 		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
@@ -226,18 +226,19 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		}
 
 		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
+		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
+		if (!stmt->error_info->error_list) {
+			break;
+		}
+
+		zend_llist_init(stmt->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
+
 		/*
 		  Mark that we reference the connection, thus it won't be
 		  be destructed till there is open statements. The last statement
 		  or normal query result will close it then.
 		*/
 		stmt->conn = conn->m->get_reference(conn);
-		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
-		if (!stmt->error_info->error_list) {
-			break;
-		}
-
-		zend_llist_init(stmt->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, conn->persistent);
 
 		DBG_RETURN(ret);
 	} while (0);
