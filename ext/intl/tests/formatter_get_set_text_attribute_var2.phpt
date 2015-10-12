@@ -1,8 +1,8 @@
 --TEST--
-numfmt_get/set_text_attribute() ICU < 56.1
+numfmt_get/set_text_attribute() ICU >= 56.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) die('skip for ICU >= 56.1'); ?>
 --FILE--
 <?php
 
@@ -106,8 +106,8 @@ New value: [_-_]
 Formatting number with new value: -12,345.123_-_
 
 Attribute PADDING_CHARACTER
-Default value: [*]
-Formatting number with default value: ***********12,345.123
+Default value: [ ]
+Formatting number with default value:            12,345.123
 New value: [^]
 Formatting number with new value: ^^^^^^^^^^^12,345.123
 
