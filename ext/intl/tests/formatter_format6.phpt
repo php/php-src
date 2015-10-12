@@ -1,9 +1,8 @@
 --TEST--
-numfmt_format() icu >= 54.1 && icu < 56.1
+numfmt_format() icu >= 56.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') >=  0) die('skip for ICU < 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) die('skip for ICU >= 56.1'); ?>
 --FILE--
 <?php
 
@@ -88,7 +87,7 @@ Locale is: ru_UA
 '1 234 567,89 ?(грн\.|₴)'
 '123 456 789 ?%'
 '1,23456789123457E6'
-'один миллион двести тридцать четыре тысячи пятьсот шестьдесят семь запятая восемь девять один два три четыре пять семь'
+'один миллион двести тридцать четыре тысячи пятьсот шестьдесят семь целых восемьдесят девять миллионов сто двадцать три тысячи четыреста пятьдесят семь стомиллионных'
 '1 234 567.?'
 '1 234 567'
 '#####.###'
