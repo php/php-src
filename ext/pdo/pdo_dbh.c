@@ -40,46 +40,46 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 
 PDO_API zval *pdo_throw_exception_ex(zend_class_entry *exception_ce, pdo_error_type *pdo_err TSRMLS_DC, long code TSRMLS_DC, const char *format, ...) /* {{{ */
 {
-    va_list arg;
-    char *message;
-    zval *zexception, *info;
-    zend_class_entry *default_exception_ce;
+	va_list arg;
+	char *message;
+	zval *zexception, *info;
+	zend_class_entry *default_exception_ce;
 
-    va_start(arg, format);
-    zend_vspprintf(&message, 0, format, arg);
-    va_end(arg);
+	va_start(arg, format);
+	zend_vspprintf(&message, 0, format, arg);
+	va_end(arg);
 
-    default_exception_ce = zend_exception_get_default(TSRMLS_C);
+	default_exception_ce = zend_exception_get_default(TSRMLS_C);
 
-    MAKE_STD_ZVAL(zexception);
-    if (exception_ce) {
-        if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-            zend_error(E_NOTICE, "Exceptions must be derived from the Exception base class");
-            exception_ce = default_exception_ce;
-        }
-    } else {
-        exception_ce = default_exception_ce;
-    }
-    object_init_ex(zexception, exception_ce);
+	MAKE_STD_ZVAL(zexception);
+	if (exception_ce) {
+		if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
+			zend_error(E_NOTICE, "Exceptions must be derived from the Exception base class");
+			exception_ce = default_exception_ce;
+		}
+	} else {
+		exception_ce = default_exception_ce;
+	}
+	object_init_ex(zexception, exception_ce);
 
-    zend_update_property_string(exception_ce, zexception, "message", sizeof("message")-1, message TSRMLS_CC);
-    zend_update_property_string(exception_ce, zexception, "code", sizeof("code")-1, *pdo_err TSRMLS_CC);
+	zend_update_property_string(exception_ce, zexception, "message", sizeof("message")-1, message TSRMLS_CC);
+	zend_update_property_long(default_exception_ce, zexception, "code", sizeof("code")-1, code TSRMLS_CC);
 
-    MAKE_STD_ZVAL(info);
-    array_init(info);
+	MAKE_STD_ZVAL(info);
+	array_init(info);
 
-    add_next_index_string(info, *pdo_err TSRMLS_CC, 1);
-    add_next_index_long(info, code TSRMLS_CC);
-    add_next_index_string(info, message TSRMLS_CC, 1);
+	add_next_index_string(info, *pdo_err TSRMLS_CC, 1);
+	add_next_index_long(info, code TSRMLS_CC);
+	add_next_index_string(info, message TSRMLS_CC, 1);
 
-    efree(message);
+	efree(message);
 
-    zend_update_property(exception_ce, zexception, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
-    zval_ptr_dtor(&info);
+	zend_update_property(exception_ce, zexception, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
+	zval_ptr_dtor(&info);
 
-    zend_throw_exception_internal(zexception TSRMLS_CC);
+	zend_throw_exception_internal(zexception TSRMLS_CC);
 
-    return zexception;
+	return zexception;
 }
 /* }}} */
 
