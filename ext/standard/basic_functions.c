@@ -4014,7 +4014,7 @@ PHP_FUNCTION(long2ip)
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
-	char *ptr, *str;
+	char *ptr, *str = NULL;
 	size_t str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &str, &str_len) == FAILURE) {
