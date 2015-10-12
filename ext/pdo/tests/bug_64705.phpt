@@ -13,13 +13,16 @@ PDOTest::skip();
 if(getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-if(substr(getenv('PDOTEST_DSN'), 0, strlen('sqlite')) === 'sqlite') putenv('PDOTEST_DSN=sqlite:.');
-if(substr(getenv('PDOTEST_DSN'), 0, strlen('odbc')) === 'odbc') {
+if(substr(getenv('PDOTEST_DSN'), 0, strlen('sqlite')) === 'sqlite') {
+  putenv('PDOTEST_DSN=sqlite:.');
+} else if(substr(getenv('PDOTEST_DSN'), 0, strlen('odbc')) === 'odbc') {
   putenv('PDOTEST_DSN=odbc:DRIVER=ibm-db2;HOSTNAME=localhost;PORT=50000;DATABASE=bad_database;PROTOCOL=TCPIP;UID=bad_user;PWD=bad_password;');
+} else if(substr(getenv('PDOTEST_DSN'), 0, strlen('pgsql')) === 'pgsql') {
+  putenv('PDOTEST_DSN=pgsql:host=localhost;port=54321;dbname=bad_database_gDm9VNHRkIxQ');
 }
 
-putenv('PDOTEST_USER=bad_username');
-putenv('PDOTEST_PASS=bad_password');
+putenv('PDOTEST_USER=bad_username_gDm9VNHRkIxQ');
+putenv('PDOTEST_PASS=bad_password_gDm9VNHRkIxQ');
 
 try {
     $db = PDOTest::factory();
