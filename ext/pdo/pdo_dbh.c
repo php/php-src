@@ -68,9 +68,9 @@ PDO_API zval *pdo_throw_exception_ex(zend_class_entry *exception_ce, pdo_error_t
 	MAKE_STD_ZVAL(info);
 	array_init(info);
 
-	add_next_index_string(info, *pdo_err TSRMLS_CC, 1);
-	add_next_index_long(info, code TSRMLS_CC);
-	add_next_index_string(info, message TSRMLS_CC, 1);
+	add_next_index_string(info, *pdo_err, 1);
+	add_next_index_long(info, code);
+	add_next_index_string(info, message, 1);
 
 	efree(message);
 
