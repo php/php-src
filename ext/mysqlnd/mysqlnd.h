@@ -83,11 +83,11 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-#define mysqlnd_init(flags, persistent)		mysqlnd_connection_init((flags), (persistent))
+#define mysqlnd_init(flags, persistent)		mysqlnd_connection_init((flags), (persistent), NULL /*use default factory*/)
 #define mysqlnd_connect(conn, host, user, pass, pass_len, db, db_len, port, socket, mysql_flags, client_api_flags) \
 			mysqlnd_connection_connect((conn), (host), (user), (pass), (pass_len), (db), (db_len), (port), (socket), (mysql_flags), (client_api_flags))
 
-PHPAPI MYSQLND * mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent);
+PHPAPI MYSQLND * mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory);
 PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 											const char * host, const char * user,
 											const char * passwd, unsigned int passwd_len,

@@ -1166,7 +1166,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
 
 	if (!conn_handle) {
 		self_alloced = TRUE;
-		if (!(conn_handle = mysqlnd_connection_init(client_api_flags, FALSE))) {
+		if (!(conn_handle = mysqlnd_connection_init(client_api_flags, FALSE, NULL))) {
 			/* OOM */
 			DBG_RETURN(NULL);
 		}
@@ -2979,8 +2979,8 @@ MYSQLND_STMT *
 MYSQLND_METHOD(mysqlnd_conn_data, stmt_init)(MYSQLND_CONN_DATA * const conn)
 {
 	MYSQLND_STMT * ret;
-	DBG_ENTER("_mysqlnd_stmt_init");
-	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_prepared_statement(conn, conn->persistent);
+	DBG_ENTER("mysqlnd_conn_data::stmt_init");
+	ret = conn->object_factory.get_prepared_statement(conn, conn->persistent);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -3086,7 +3086,7 @@ MYSQLND_METHOD(mysqlnd_conn, clone_object)(MYSQLND * const conn)
 {
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_conn::get_reference");
-	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).clone_connection_object(conn);
+	ret = conn->data->object_factory.clone_connection_object(conn);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -3155,11 +3155,12 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_connection_init */
 PHPAPI MYSQLND *
-mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent)
+mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory)
 {
+	struct st_mysqlnd_object_factory_methods * factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_connection_init");
-	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_connection(persistent);
+	ret = factory->get_connection(factory, persistent);
 	if (ret && ret->data) {
 		ret->data->m->negotiate_client_api_capabilities(ret->data, client_flags);
 	}

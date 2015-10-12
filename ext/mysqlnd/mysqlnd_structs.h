@@ -399,7 +399,9 @@ struct st_mysqlnd_protocol_payload_decoder_factory_methods
 };
 
 
-typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(zend_bool persistent);
+struct st_mysqlnd_object_factory_methods;
+
+typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 typedef MYSQLND_NET * (*func_mysqlnd_object_factory__get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
@@ -977,6 +979,8 @@ struct st_mysqlnd_connection_data
 	zval			async_err_cb;
 	zend_bool		in_async_read_cb;
 	zend_bool		in_async_err_cb;
+
+	struct st_mysqlnd_object_factory_methods object_factory;
 
 	struct st_mysqlnd_conn_data_methods * m;
 

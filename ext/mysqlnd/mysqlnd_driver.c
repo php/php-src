@@ -111,7 +111,7 @@ mysqlnd_error_list_pdtor(void * pDest)
 
 /* {{{ mysqlnd_object_factory::get_connection */
 static MYSQLND *
-MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent)
 {
 	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -139,6 +139,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
 
 	data->persistent = persistent;
 	data->m = mysqlnd_conn_data_get_methods();
+	data->object_factory = *factory;
 	CONN_SET_STATE(data, CONN_ALLOCED);
 	data->m->get_reference(data);
 
