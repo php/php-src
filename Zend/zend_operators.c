@@ -492,7 +492,6 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-	double dval;
 	if (Z_TYPE_P(op) == IS_DOUBLE) {
 		zend_string *str;
 		double dval = Z_DVAL_P(op);
