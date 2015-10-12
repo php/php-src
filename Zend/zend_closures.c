@@ -34,6 +34,9 @@
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
 	zend_throw_error(NULL, "Closure object cannot have properties")
 
+/* reuse bit to mark "fake" closures (it wasn't used for functions before) */
+#define ZEND_ACC_FAKE_CLOSURE ZEND_ACC_INTERFACE
+
 typedef struct _zend_closure {
 	zend_object       std;
 	zend_function     func;
@@ -102,11 +105,8 @@ static zend_bool zend_valid_closure_binding(
 		return 0;
 	}
 
-	if (func->type == ZEND_INTERNAL_FUNCTION && scope && func->common.scope &&
-			!instanceof_function(scope, func->common.scope)) {
-		zend_error(E_WARNING, "Cannot bind function %s::%s to scope class %s",
-				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name),
-				ZSTR_VAL(scope->name));
+	if ((func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && scope != func->common.scope) {
+		zend_error(E_WARNING, "Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()");
 		return 0;
 	}
 
@@ -614,6 +614,17 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			ZVAL_COPY(&closure->this_ptr, this_ptr);
 		}
 	}
+}
+/* }}} */
+
+ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */
+{
+	zend_closure *closure;
+
+	zend_create_closure(res, func, scope, called_scope, this_ptr);
+
+	closure = (zend_closure *)Z_OBJ_P(res);
+	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
 }
 /* }}} */
 

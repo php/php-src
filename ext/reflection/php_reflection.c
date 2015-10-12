@@ -1762,7 +1762,7 @@ ZEND_METHOD(reflection_function, getClosure)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	zend_create_closure(return_value, fptr, NULL, NULL, NULL);
+	zend_create_fake_closure(return_value, fptr, NULL, NULL, NULL);
 }
 /* }}} */
 
@@ -3144,7 +3144,7 @@ ZEND_METHOD(reflection_method, getClosure)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
-		zend_create_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
+		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 			return;
@@ -3161,7 +3161,7 @@ ZEND_METHOD(reflection_method, getClosure)
 		{
 			ZVAL_COPY(return_value, obj);
 		} else {
-			zend_create_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
+			zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
 		}
 	}
 }
