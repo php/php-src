@@ -1,5 +1,38 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+15 Oct 2015, PHP 7.0.0 RC 5
+
+- Core:
+  . Fixed bug #70630 (Closure::call/bind() crash with ReflectionFunction->
+    getClosure()). (Dmitry, Bob)
+  . Fixed bug #70662 (Duplicate array key via undefined index error handler).
+    (Nikita)
+  . Fixed bug #70681 (Segfault when binding $this of internal instance method
+    to null). (Nikita)
+  . Fixed bug #70685 (Segfault for getClosure() internal method rebind with
+    invalid $this). (Nikita)
+
+- Mcrypt:
+  . Fixed bug #70625 (mcrypt_encrypt() won't return data when no IV was
+    specified under RC4). (Nikita)
+
+- Opcache:
+  . Fixed compatibility with Windows 10 (see also bug #70652). (Anatol)
+
+- Phpdbg:
+  . Fixed bug #70614 (incorrect exit code in -rr mode with Exceptions). (Bob)
+
+- Reflection:
+  . Fixed bug #70650 (Wrong docblock assignment). (Marcio)
+  . Fixed bug #70674 (ReflectionFunction::getClosure() leaks memory when used
+    for internal functions). (Dmitry, Bob)
+
+- Standard:
+  . Fixed bug #70667 (strtr() causes invalid writes and a crashes). (Dmitry)
+  . Fixed bug #70668 (array_keys() doesn't respect references when $strict is
+    true). (Bob, Dmitry)
+
+
 01 Oct 2015, PHP 7.0.0 RC 4
 
 - Core:
@@ -31,6 +64,11 @@ PHP                                                                        NEWS
 - OpenSSL
   . Require at least OpenSSL version 0.9.8. (Jakub Zelenka)
   . Fixed bug #68312 (Lookup for openssl.cnf causes a message box). (Anatol)
+
+- Phar:
+  . Fixed bug #69720 (Null pointer dereference in phar_get_fp_offset()). (Stas)
+  . FIxed bug #70433 (Uninitialized pointer in phar_make_dirstream when zip
+    entry filename is "/"). (Stas)
 
 - Phpdbg:
   . Fixed bug #70532 (phpdbg must respect set_exception_handler). (Bob)
