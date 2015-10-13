@@ -127,13 +127,13 @@ INPUT       ([^\n\000#"']|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|
 	return T_PROTO;
 }
 
-<NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
+<NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE})/[ \r\t\n\000] {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 1;
 	return T_TRUTHY;
 }
 
-<NORMAL>({T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE}){WS} {
+<NORMAL>({T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE})/[ \r\t\n\000] {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
 	yylval->num = 0;
 	return T_FALSY;
