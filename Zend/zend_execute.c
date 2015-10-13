@@ -893,7 +893,7 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 	return 1;
 }
 
-static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+static ZEND_COLD void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
 	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
 	    UNEXPECTED(zend_verify_missing_arg_type(EX(func), arg_num, cache_slot))) {
@@ -907,9 +907,7 @@ static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, ui
 		} else {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);
 		}
-		return 1;
 	}
-	return 0;
 }
 
 static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
@@ -2736,9 +2734,9 @@ ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_n
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
 
-ZEND_API int ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
-	return zend_verify_missing_arg(execute_data, arg_num, cache_slot);
+	zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
 /*
