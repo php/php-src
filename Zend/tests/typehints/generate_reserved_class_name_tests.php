@@ -45,7 +45,11 @@ const RESERVED_NAMES = [
     'self',
     'static',
     'string',
-    'true'
+    'true',
+    'integer',
+    'long',
+    'double',
+    'boolean'
 ];
 
 const CLASS_KINDS = [
