@@ -1507,7 +1507,9 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 					heap->real_size += new_size - old_size;
 #endif
 #if ZEND_MM_STAT
+					heap->real_peak = MAX(heap->real_peak, heap->real_size);
 					heap->size += new_size - old_size;
+					heap->peak = MAX(heap->peak, heap->size);
 #endif
 #if ZEND_DEBUG
 					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1618,9 +1620,19 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 	}
 
 	/* Naive reallocation */
+#if ZEND_MM_STAT
+	do {
+		size_t orig_peak = heap->peak;
+		size_t orig_real_peak = heap->real_peak;
+#endif
 	ret = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	memcpy(ret, ptr, MIN(old_size, copy_size));
 	zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+#if ZEND_MM_STAT
+		heap->peak = MAX(orig_peak, heap->size);
+		heap->real_peak = MAX(orig_real_peak, heap->real_size);
+	} while (0);
+#endif
 	return ret;
 }
 
