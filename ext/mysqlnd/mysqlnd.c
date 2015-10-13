@@ -844,7 +844,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		goto err;
 	}
 
-	conn->client_flag			= mysql_flags;
 	conn->server_capabilities 	= greet_packet->server_capabilities;
 
 	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
@@ -860,7 +859,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(PASS);
 err:
-	conn->client_flag = 0;
 	conn->server_capabilities = 0;
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(FAIL);

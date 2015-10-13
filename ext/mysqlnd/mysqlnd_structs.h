@@ -930,10 +930,9 @@ struct st_mysqlnd_connection_data
 	unsigned int	connect_or_select_db_len;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
-	zend_ulong	max_packet_size;
+	zend_ulong		max_packet_size;
 	unsigned int	port;
-	zend_ulong	client_flag;
-	zend_ulong	server_capabilities;
+	zend_ulong		server_capabilities;
 
 	/* For UPSERT queries */
 	MYSQLND_UPSERT_STATUS * upsert_status;
