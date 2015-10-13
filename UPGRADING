@@ -556,6 +556,10 @@ Other
   . Added ability to move PHP code pages (PHP TEXT segment) into HUGE pages.
     It's possible to enable/disable this feature in php.ini through
     opcache.huge_code_pages=0/1. OS should be configured to provide huge pages.
+  . Added Windows only opcache.file_cache_fallback=1 ini option, which implies
+    the implemented fallback mechanism. When OPcache was not able to reattach
+    the shared memory segment to the desired address and opcache.file_cache
+    is on, opcache.file_cache_only=1 will be automatically enforced.
 
 - OpenSSL
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
