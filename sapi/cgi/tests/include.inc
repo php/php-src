@@ -21,18 +21,27 @@ function get_cgi_path() /* {{{ */
 	if ($cli) {
 		/* trying to guess ... */
 		$php_path = $php;
-		for ($i = 0; $i < 2; $i++) {
-			$slash_pos = strrpos($php_path, "/");
-			if ($slash_pos) {
-				$php_path = substr($php_path, 0, $slash_pos);
-			} else {
-				return FALSE;
-			}
-		}
+		if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
+			/* On Windows it should be in the same dir as php.exe in most of the cases. */
+			$php_path = dirname($php);
 
-		if ($php_path && is_dir($php_path) && file_exists($php_path."/cgi/php-cgi") && is_executable($php_path."/cgi/php-cgi")) { 
-			/* gotcha */
-			return $php_path."/cgi/php-cgi";
+			if (is_dir($php_path) && file_exists("$php_path/php-cgi.exe") && is_executable("$php_path/php-cgi.exe")) {
+				return "$php_path/php-cgi.exe";
+			}
+		} else {
+			for ($i = 0; $i < 2; $i++) {
+				$slash_pos = strrpos($php_path, "/");
+				if ($slash_pos) {
+					$php_path = substr($php_path, 0, $slash_pos);
+				} else {
+					return FALSE;
+				}
+			}
+
+			if ($php_path && is_dir($php_path) && file_exists($php_path."/cgi/php-cgi") && is_executable($php_path."/cgi/php-cgi")) { 
+				/* gotcha */
+				return $php_path."/cgi/php-cgi";
+			}
 		}
 		return false;
 	}

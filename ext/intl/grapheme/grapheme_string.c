@@ -383,9 +383,9 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
-	int no_length = 1;
+	zend_bool no_length = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", (char **)&str, &str_len, &lstart, &length, &no_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_substr: unable to parse input param", 0 );
 		RETURN_FALSE;

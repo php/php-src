@@ -431,17 +431,17 @@ struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
-	zend_function       *func;             /* executed op_array              */
-	zval                 This;
-#if ZEND_EX_USE_RUN_TIME_CACHE
-	void               **run_time_cache;
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;
-#endif
+	zend_function       *func;             /* executed funcrion              */
+	zval                 This;             /* this + call_info + num_args    */
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
@@ -698,7 +698,6 @@ void zend_emit_final_return(zval *zv);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
@@ -954,9 +953,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO 253
-#define ZEND_BRK  254
-#define ZEND_CONT 255
+#define ZEND_GOTO  253
+#define ZEND_BRK   254
+#define ZEND_CONT  255
 
 
 END_EXTERN_C()

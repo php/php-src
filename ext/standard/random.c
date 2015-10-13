@@ -31,7 +31,7 @@
 # include "win32/winutil.h"
 #endif
 #ifdef __linux__
-# include <linux/random.h>
+# include <sys/syscall.h>
 #endif
 
 #ifdef ZTS
@@ -107,7 +107,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		              amount_to_read
 
 		*/
-		n = getrandom(bytes + read_bytes, amount_to_read, 0);
+		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 
 		if (n == -1) {
 			if (errno == EINTR || errno == EAGAIN) {
@@ -140,7 +140,13 @@ static int php_random_bytes(void *bytes, size_t size)
 			return FAILURE;
 		}
 		/* Does the file exist and is it a character device? */
-		if (fstat(fd, &st) != 0 || !S_ISCHR(st.st_mode)) {
+		if (fstat(fd, &st) != 0 || 
+# ifdef S_IFNAM
+                !(S_IFNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# else
+                !S_ISCHR(st.st_mode)
+# endif
+		) {
 			close(fd);
 			zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
 			return FAILURE;

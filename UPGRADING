@@ -643,6 +643,7 @@ Other
 ========================================
 6. New Functions
 ========================================
+
 - GMP
   . Added gmp_random_seed().
 
@@ -666,6 +667,8 @@ Other
 7. New Classes and Interfaces
 ========================================
 
+- ReflectionGenerator
+- ReflectionType
 
 ========================================
 8. Removed Extensions and SAPIs
