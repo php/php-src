@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 29 Oct 2015, PHP 7.0.0 RC 6
 
-
+- Core:
+  . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
 
 15 Oct 2015, PHP 7.0.0 RC 5
 
