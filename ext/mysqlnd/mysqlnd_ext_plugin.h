@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 /* $Id: mysqlnd.h 318221 2011-10-19 15:04:12Z andrey $ */
@@ -134,36 +133,6 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 
 #define mysqlnd_net_get_methods()		mysqlnd_plugin_methods_xetters.io.get()
 #define mysqlnd_net_set_methods(m)		mysqlnd_plugin_methods_xetters.io.set((m))
-
-
-/*
-PHPAPI struct st_mysqlnd_object_factory_methods * mysqlnd_object_factory_get_methods();
-PHPAPI void mysqlnd_object_factory_set_methods(struct st_mysqlnd_object_factory_methods * methods);
-
-PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
-PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods * methods);
-
-PHPAPI struct st_mysqlnd_conn_data_methods * mysqlnd_conn_data_get_methods();
-PHPAPI void mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods);
-
-PHPAPI struct st_mysqlnd_res_methods * mysqlnd_result_get_methods();
-PHPAPI void mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods);
-
-PHPAPI struct st_mysqlnd_result_unbuffered_methods * mysqlnd_result_unbuffered_get_methods();
-PHPAPI void mysqlnd_result_unbuffered_set_methods(struct st_mysqlnd_result_unbuffered_methods * methods);
-
-PHPAPI struct st_mysqlnd_result_buffered_methods * mysqlnd_result_buffered_get_methods();
-PHPAPI void mysqlnd_result_buffered_set_methods(struct st_mysqlnd_result_buffered_methods * methods);
-
-PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods();
-PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods * methods);
-
-PHPAPI struct st_mysqlnd_protocol_payload_decoder_factory_methods * mysqlnd_protocol_get_methods();
-PHPAPI void mysqlnd_protocol_set_methods(struct st_mysqlnd_protocol_payload_decoder_factory_methods * methods);
-
-PHPAPI struct st_mysqlnd_net_methods * mysqlnd_net_get_methods();
-PHPAPI void mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods);
-*/
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
 
