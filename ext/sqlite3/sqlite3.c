@@ -871,6 +871,8 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 		if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
 		}
+	} else {
+		ZVAL_UNDEF(&retval);
 	}
 
 	zval_ptr_dtor(&zargs[0]);
