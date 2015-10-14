@@ -3097,14 +3097,15 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
    SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-  char *buf, *location, *action;
-  size_t   buf_size, location_size, action_size;
-  zend_long  version;
-  zend_long  one_way = 0;
-  zval *this_ptr = getThis();
+	zend_string *buf;
+	char      *location, *action;
+	size_t     location_size, action_size;
+	zend_long  version;
+	zend_long  one_way = 0;
+	zval      *this_ptr = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl|l",
-	    &buf, &buf_size,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|l",
+	    &buf,
 	    &location, &location_size,
 	    &action, &action_size,
 	    &version, &one_way) == FAILURE) {
@@ -3114,10 +3115,10 @@ PHP_METHOD(SoapClient, __doRequest)
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
 	    return_value)) {
 		return;
 	}

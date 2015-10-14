@@ -320,7 +320,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	nohost:
 
 	if ((p = memchr(s, '?', (ue - s)))) {
-		pp = strchr(s, '#');
+		pp = memchr(s, '#', (ue - s));
 
 		if (pp && pp < p) {
 			if (pp - s) {
@@ -708,22 +708,24 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format])
+/* {{{ proto array get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	size_t url_len;
-	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
 	zend_long format = 0;
+	zval *zcontext = NULL;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
@@ -767,7 +769,7 @@ no_name_header:
 					s++;
 				}
 
-				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
+				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);

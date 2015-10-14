@@ -649,7 +649,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 				zend_hash_index_update(dest, num_key, src_entry);
 			}
 		} else {
-			SEPARATE_ZVAL(dest_entry);
+			SEPARATE_ARRAY(dest_entry);
 			php_autoglobal_merge(Z_ARRVAL_P(dest_entry), Z_ARRVAL_P(src_entry));
 		}
 	} ZEND_HASH_FOREACH_END();

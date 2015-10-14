@@ -337,8 +337,12 @@ register const zend_op* volatile opline __asm__(ZEND_VM_IP_GLOBAL_REG);
 #if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)
 # define ZEND_OPCODE_HANDLER_RET void
 # define ZEND_VM_TAIL_CALL(call) call; return
-# define ZEND_VM_CONTINUE()      return
-# define ZEND_VM_RETURN()        opline = NULL; ZEND_VM_CONTINUE()
+# ifdef ZEND_VM_TAIL_CALL_DISPATCH
+#  define ZEND_VM_CONTINUE()     ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return
+# else
+#  define ZEND_VM_CONTINUE()     return
+# endif
+# define ZEND_VM_RETURN()        opline = NULL; return
 #else
 # define ZEND_OPCODE_HANDLER_RET int
 # define ZEND_VM_TAIL_CALL(call) return call
@@ -460,7 +464,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 	zend_execute_data *old_execute_data;
 	uint32_t call_info = EX_CALL_INFO();
 
-	if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_FUNCTION) {
+	if (EXPECTED(ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_FUNCTION)) {
 		zend_object *object;
 
 		i_free_compiled_variables(execute_data);
@@ -505,7 +509,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 
 		LOAD_NEXT_OPLINE();
 		ZEND_VM_LEAVE();
-	} else if (ZEND_CALL_KIND_EX(call_info) == ZEND_CALL_NESTED_CODE) {
+	}
+	if (EXPECTED((ZEND_CALL_KIND_EX(call_info) & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
@@ -859,32 +864,28 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPC
 			goto fcall_end;
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
-		EG(scope) = fbc->common.scope;
-
-		ZVAL_NULL(EX_VAR(opline->result.var));
-
 		/* Not sure what should be done here if it's a static method */
 		object = Z_OBJ(call->This);
-		if (EXPECTED(object != NULL)) {
-			call->prev_execute_data = execute_data;
-			EG(current_execute_data) = call;
-			object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
-			EG(current_execute_data) = call->prev_execute_data;
-		} else {
-			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
-#if 0
-			//TODO: implement clean exit ???
+		if (UNEXPECTED(object == NULL)) {
 			zend_vm_stack_free_args(call);
-
-			zend_vm_stack_free_call_frame(call);
-
 			if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
 				zend_string_release(fbc->common.function_name);
 			}
 			efree(fbc);
-#endif
+			zend_vm_stack_free_call_frame(call);
+
+			zend_throw_error(NULL, "Cannot call overloaded function for non-object");
 			HANDLE_EXCEPTION();
 		}
+
+		EG(scope) = fbc->common.scope;
+
+		ZVAL_NULL(EX_VAR(opline->result.var));
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+		object->handlers->call_method(fbc->common.function_name, object, call, EX_VAR(opline->result.var));
+		EG(current_execute_data) = call->prev_execute_data;
 
 		zend_vm_stack_free_args(call);
 
@@ -1203,9 +1204,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_missing_arg(execute_data, arg_num, CACHE_ADDR(opline->op2.num)))) {
-			HANDLE_EXCEPTION();
-		}
+		zend_verify_missing_arg(execute_data, arg_num, CACHE_ADDR(opline->op2.num));
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
@@ -1566,10 +1566,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 
 	SAVE_OPLINE();
 	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
-	LOAD_OPLINE();
+
+	if (EG(exception)) {
+		HANDLE_EXCEPTION();
+	}
 
 	switch (ret) {
 		case ZEND_USER_OPCODE_CONTINUE:
+			LOAD_OPLINE();
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
@@ -1582,10 +1586,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 		case ZEND_USER_OPCODE_ENTER:
 			ZEND_VM_ENTER();
 		case ZEND_USER_OPCODE_LEAVE:
+			LOAD_OPLINE();
 			ZEND_VM_LEAVE();
 		case ZEND_USER_OPCODE_DISPATCH:
+			ZEND_ASSERT(EX(opline) == opline);
 			ZEND_VM_DISPATCH(opline->opcode, opline);
 		default:
+			ZEND_ASSERT(EX(opline) == opline);
 			ZEND_VM_DISPATCH((zend_uchar)(ret & 0xff), opline);
 	}
 }
@@ -5016,7 +5023,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -6937,7 +6945,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -7433,7 +7442,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -7748,7 +7758,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (IS_CONST == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
 
+			}
 		}
 #endif
 	}
@@ -13554,7 +13568,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(free_op1);
+			if (IS_TMP_VAR == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
+				zval_ptr_dtor_nogc(free_op1);
+			}
 		}
 #endif
 	}
@@ -19290,7 +19308,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(free_op1);
+			if (IS_VAR == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
+				zval_ptr_dtor_nogc(free_op1);
+			}
 		}
 #endif
 	}
@@ -25052,7 +25074,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (IS_UNUSED == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
 
+			}
 		}
 #endif
 	}
@@ -31068,7 +31094,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -33281,7 +33308,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -34218,7 +34246,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -34549,7 +34578,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		zend_verify_return_type(EX(func), retval_ptr, CACHE_ADDR(opline->op2.num));
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (IS_CV == IS_CONST) {
+				zval_ptr_dtor_nogc(retval_ptr);
+			} else {
 
+			}
 		}
 #endif
 	}
@@ -41406,7 +41439,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -42387,7 +42421,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;
@@ -42788,7 +42823,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(name));
-					/* break missing intentionally */
+					retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
 					break;

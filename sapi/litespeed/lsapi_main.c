@@ -173,6 +173,7 @@ static int sapi_lsapi_deactivate(void)
     if ( SG(request_info).path_translated )
     {
         efree( SG(request_info).path_translated );
+        SG(request_info).path_translated = NULL;
     }
 
     return SUCCESS;

@@ -396,6 +396,7 @@ typedef struct _zend_internal_function {
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	struct _zend_module_entry *module;
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
@@ -430,17 +431,17 @@ struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
-	zend_function       *func;             /* executed op_array              */
-	zval                 This;
-#if ZEND_EX_USE_RUN_TIME_CACHE
-	void               **run_time_cache;
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;
-#endif
+	zend_function       *func;             /* executed funcrion              */
+	zval                 This;             /* this + call_info + num_args    */
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
@@ -697,7 +698,6 @@ void zend_emit_final_return(zval *zv);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
@@ -725,6 +725,7 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
+ZEND_API void zend_try_exception_handler();
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
@@ -952,9 +953,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO 253
-#define ZEND_BRK  254
-#define ZEND_CONT 255
+#define ZEND_GOTO  253
+#define ZEND_BRK   254
+#define ZEND_CONT  255
 
 
 END_EXTERN_C()
@@ -1004,6 +1005,9 @@ END_EXTERN_C()
 
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
+
+/* force IS_OBJ_USE_GUARDS for all classes */
+#define ZEND_COMPILE_GUARDS						(1<<9)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

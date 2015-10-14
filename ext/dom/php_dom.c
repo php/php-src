@@ -507,7 +507,6 @@ static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 	dom_object *clone = dom_objects_set_class(intern->std.ce, 0);
 
 	clone->std.handlers = dom_get_obj_handlers();
-	zend_objects_clone_members(&clone->std, &intern->std);
 
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
@@ -527,6 +526,8 @@ static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 
 		}
 	}
+
+	zend_objects_clone_members(&clone->std, &intern->std);
 
 	return &clone->std;
 }
@@ -1056,7 +1057,8 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
-	//??? if (basenode)
+	ZEND_ASSERT(basenode != NULL);
+
 	ZVAL_OBJ(&mapptr->baseobj_zv, &basenode->std);
 	Z_ADDREF(mapptr->baseobj_zv);
 
