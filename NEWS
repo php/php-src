@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 Core:
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Added void return type. (Andrea)
 
 Standard
   . Implemented FR #55716 (Add an option to pass a custom stream context to

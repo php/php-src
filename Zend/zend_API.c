@@ -183,6 +183,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "callable";
 		case IS_ARRAY:
 			return "array";
+		case IS_VOID:
+			return "void";
 		default:
 			return "unknown";
 	}
