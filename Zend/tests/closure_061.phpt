@@ -64,6 +64,15 @@ $tests = [
         [new DLL, null],
         [new DLL, ClsUnrelated::class],
     ]],
+
+    [function() {}, [
+        [null,         null],
+        [new Cls,      null],
+        [new Cls,      'Cls'],
+        [null,         'Cls'],
+        [null,         'stdClass'],
+        [new stdClass, null],
+    ]],
 ];
 
 set_error_handler(function($errno, $errstr) {
@@ -78,6 +87,9 @@ foreach ($tests as list($fn, $bindings)) {
     } else {
         $c = (new ReflectionFunction($fn))->getClosure();
         $fnStr = $fn;
+    }
+    if ($fn instanceof Closure) {
+        $fnStr = "(function() {})";
     }
 
     echo "$fnStr()\n" . str_repeat('-', strlen($fnStr) + 2), "\n\n";
@@ -206,3 +218,24 @@ Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure
 
 bindTo(new SplDoublyLinkedList, ClsUnrelated::class):
 Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
+
+(function() {})()
+-----------------
+
+bindTo(null, null):
+Success!
+
+bindTo(new Cls, null):
+Success!
+
+bindTo(new Cls, Cls::class):
+Success!
+
+bindTo(null, Cls::class):
+Success!
+
+bindTo(null, stdClass::class):
+Cannot bind closure to scope of internal class stdClass
+
+bindTo(new stdClass, null):
+Success!

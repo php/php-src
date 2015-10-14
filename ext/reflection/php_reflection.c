@@ -1762,7 +1762,12 @@ ZEND_METHOD(reflection_function, getClosure)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	zend_create_fake_closure(return_value, fptr, NULL, NULL, NULL);
+	if (!Z_ISUNDEF(intern->obj)) {
+		/* Closures are immutable objects */
+		ZVAL_COPY(return_value, &intern->obj);
+	} else {
+		zend_create_fake_closure(return_value, fptr, NULL, NULL, NULL);
+	}
 }
 /* }}} */
 
