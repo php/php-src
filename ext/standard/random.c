@@ -141,8 +141,8 @@ static int php_random_bytes(void *bytes, size_t size)
 		}
 		/* Does the file exist and is it a character device? */
 		if (fstat(fd, &st) != 0 || 
-# ifdef S_IFNAM
-                !(S_IFNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# ifdef S_ISNAM
+                !(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
 # else
                 !S_ISCHR(st.st_mode)
 # endif
