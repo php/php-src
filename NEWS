@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
 
 - SOAP:
+  . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)
   . Fixed bug #70709 (SOAP Client generates Segfault). (Laruence)
 
 15 Oct 2015, PHP 7.0.0 RC 5
