@@ -1494,7 +1494,11 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 	} else if (header_close) {
 		do {
 			int len_read;
-			http_buf = zend_string_realloc(http_buf, http_buf_size + 4096 + 1, 0);
+			if (http_buf) {
+				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, 0);
+			} else {
+				http_buf = zend_string_alloc(4096, 0);
+			}
 			len_read = php_stream_read(stream, http_buf->val + http_buf_size, 4096);
 			if (len_read > 0) {
 				http_buf_size += len_read;
