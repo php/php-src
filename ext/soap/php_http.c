@@ -1419,7 +1419,12 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						}
 						return NULL;
 					}
-					http_buf = zend_string_realloc(http_buf, http_buf_size + buf_size, 0);
+
+					if (http_buf) {
+						http_buf = zend_string_realloc(http_buf, http_buf_size + buf_size, 0);
+					} else {
+						http_buf = zend_string_alloc(buf_size, 0);
+					}
 
 					while (len_size < buf_size) {
 						int len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
