@@ -15,11 +15,9 @@ $values = Array(
 '"verî.(),:;<>[]\".VERÎ.\"verî@\ \"verî\".unüsual"@strange.example.com',
 'tést@example.com',
 'tést.child@example.com',
-'tést@exämple.com',
-'tést@ä-.xe',
+'tést@xn--exmple-cua.com',
+'tést@xn----zfa.xe',
 'tést@subexample.wizard',
-'tést@wähwähwäh.ümläüts.de',
-'"tés@t"@wähwähwäh.ümläüts.de',
 'tést@[255.255.255.255]',
 'tést@[IPv6:2001:0db8:85a3:08d3:1319:8a2e:0370:7344]',
 'tést@[IPv6:2001::7344]',
@@ -45,11 +43,9 @@ string(43) ""verî.uñusual.@.uñusual.com"@example.com"
 string(74) ""verî.(),:;<>[]\".VERÎ.\"verî@\ \"verî\".unüsual"@strange.example.com"
 string(17) "tést@example.com"
 string(23) "tést.child@example.com"
-string(18) "tést@exämple.com"
-string(12) "tést@ä-.xe"
+string(24) "tést@xn--exmple-cua.com"
+string(18) "tést@xn----zfa.xe"
 string(23) "tést@subexample.wizard"
-string(32) "tést@wähwähwäh.ümläüts.de"
-string(35) ""tés@t"@wähwähwäh.ümläüts.de"
 string(23) "tést@[255.255.255.255]"
 string(52) "tést@[IPv6:2001:0db8:85a3:08d3:1319:8a2e:0370:7344]"
 string(23) "tést@[IPv6:2001::7344]"
