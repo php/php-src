@@ -49,3 +49,11 @@ PHP_HASH_API void PHP_SHA3512Update(PHP_SHA3_512_CTX*, const unsigned char*, uns
 PHP_HASH_API void PHP_SAH3512Final(unsigned char[32], PHP_SHA3_512_CTX*);
 
 #endif
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -6,4 +6,7 @@ Standard
   . Implemented FR #55716 (Add an option to pass a custom stream context to
     get_headers()). (Ferenc)
 
+Hash
+  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
