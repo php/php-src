@@ -1,6 +1,7 @@
 --TEST--
 Bug #42767 (highlight_string() truncates trailing comments)
 --INI--
+highlight.use_css = no
 highlight.string  = #DD0000
 highlight.comment = #FF8000
 highlight.keyword = #007700

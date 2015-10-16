@@ -1,5 +1,7 @@
 --TEST--
 Bug #36513 (comment will be outputed in last line)
+--INI--
+highlight.use_css = no
 --FILE--
 <?php 
 function test($s) {

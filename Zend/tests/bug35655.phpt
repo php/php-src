@@ -1,6 +1,7 @@
 --TEST--
 Bug #35655 (whitespace following end of heredoc is lost)
 --INI--
+highlight.use_css = no
 highlight.string  = #DD0000
 highlight.comment = #FF8000
 highlight.keyword = #007700
