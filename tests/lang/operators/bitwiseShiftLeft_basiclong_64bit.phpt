@@ -3,6 +3,7 @@ Test << operator : 64bit long tests
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (strtolower(php_uname('m')) != 'x86_64') die("skip this test is for x86_64 platforms only");
 ?>
 --FILE--
 <?php
