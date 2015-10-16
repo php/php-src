@@ -1183,6 +1183,12 @@ typedef struct st_mysqlnd_string
 	size_t	l;
 } MYSQLND_STRING;
 
+typedef struct st_mysqlnd_const_string
+{
+	const char *s;
+	size_t	l;
+} MYSQLND_CSTRING;
+
 
 struct st_mysqlnd_plugin_header
 {
@@ -1236,5 +1242,11 @@ struct st_mysqlnd_authentication_plugin
 	} methods;
 };
 
+
+struct st_mysqlnd_protocol_command
+{
+	enum_func_status (*run)(void *cmd);
+	void (*free_command)(void * cmd);
+};
 
 #endif /* MYSQLND_STRUCTS_H */

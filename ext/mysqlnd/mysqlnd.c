@@ -29,29 +29,12 @@
 #include "mysqlnd_debug.h"
 #include "zend_smart_str.h"
 
-/*
-  TODO :
-  - Don't bind so tightly the metadata with the result set. This means
-	that the metadata reading should not expect a MYSQLND_RES pointer, it
-	does not need it, but return a pointer to the metadata (MYSQLND_FIELD *).
-	For normal statements we will then just assign it to a member of
-	MYSQLND_RES. For PS statements, it will stay as part of the statement
-	(MYSQLND_STMT) between prepare and execute. At execute the new metadata
-	will be sent by the server, so we will discard the old one and then
-	finally attach it to the result set. This will make the code more clean,
-	as a prepared statement won't have anymore stmt->result != NULL, as it
-	is now, just to have where to store the metadata.
-
-  - Change mysqlnd_simple_command to accept a heap dynamic array of MYSQLND_STRING
-	terminated by a string with ptr being NULL. Thus, multi-part messages can be
-	sent to the network like writev() and this can save at least for
-	mysqlnd_stmt_send_long_data() new malloc. This change will probably make the
-	code in few other places cleaner.
-*/
 
 extern MYSQLND_CHARSET *mysqlnd_charsets;
 
 
+struct st_mysqlnd_protocol_command *
+mysqlnd_get_command(enum php_mysqlnd_server_command command, ...);
 
 PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
 "Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
@@ -393,13 +376,14 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const conn, enum_mysqlnd_server_option option)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_server_option);
-	zend_uchar buffer[2];
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::set_server_option");
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-
-		int2store(buffer, (unsigned int) option);
-		ret = conn->m->send_command(conn, COM_SET_OPTION, buffer, sizeof(buffer), PROT_EOF_PACKET, FALSE, TRUE);
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_SET_OPTION, conn, option);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1227,14 +1211,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 
-	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->send_command(conn, COM_QUERY, (zend_uchar *) query, query_len,
-									  PROT_LAST /* we will handle the OK packet*/,
-									  FALSE, FALSE);
-		if (PASS == ret) {
-			CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	if (type == MYSQLND_SEND_QUERY_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
+	{
+		const MYSQLND_CSTRING query_string = {query, query_len};
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_QUERY, conn, query_string);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
 		}
-		conn->m->local_tx_end(conn, this_func, ret);
+
+		if (type == MYSQLND_SEND_QUERY_EXPLICIT) {
+			conn->m->local_tx_end(conn, this_func, ret);
+		}
 	}
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 	DBG_RETURN(ret);
@@ -1253,15 +1241,17 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
-	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		if (state <= CONN_READY || state == CONN_QUIT_SENT) {
-			php_error_docref(NULL, E_WARNING, "Connection not opened, clear or has been closed");
-			DBG_ERR_FMT("Connection not opened, clear or has been closed. State=%u", state);
-			DBG_RETURN(ret);
+	if (type == MYSQLND_REAP_RESULT_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
+	{
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_REAP_RESULT, conn);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
 		}
-		ret = conn->m->query_read_result_set_header(conn, NULL);
 
-		conn->m->local_tx_end(conn, this_func, ret);
+		if (type == MYSQLND_REAP_RESULT_EXPLICIT) {
+			conn->m->local_tx_end(conn, this_func, ret);
+		}
 	}
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 	DBG_RETURN(ret);
@@ -1471,34 +1461,22 @@ MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const char *table, const char *achtung_wild)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, list_fields);
-	/* db + \0 + wild + \0 (for wild) */
-	zend_uchar buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p;
-	size_t table_len, wild_len;
 	MYSQLND_RES * result = NULL;
 	DBG_ENTER("mysqlnd_conn_data::list_fields");
 	DBG_INF_FMT("conn=%llu table=%s wild=%s", conn->thread_id, table? table:"",achtung_wild? achtung_wild:"");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
-			p = buff;
-			if (table && (table_len = strlen(table))) {
-				size_t to_copy = MIN(table_len, MYSQLND_MAX_ALLOWED_DB_LEN);
-				memcpy(p, table, to_copy);
-				p += to_copy;
-				*p++ = '\0';
-			}
+			enum_func_status ret = FAIL;
+			const MYSQLND_CSTRING tbl = {table, strlen(table)};
+			const MYSQLND_CSTRING wildcard = {achtung_wild, strlen(achtung_wild)};
 
-			if (achtung_wild && (wild_len = strlen(achtung_wild))) {
-				size_t to_copy = MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN);
-				memcpy(p, achtung_wild, to_copy);
-				p += to_copy;
-				*p++ = '\0';
+			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_FIELD_LIST, conn, tbl, wildcard);
+			if (command) {
+				ret = command->run(command);
+				command->free_command(command);
 			}
-
-			if (PASS != conn->m->send_command(conn, COM_FIELD_LIST, buff, p - buff,
-											   PROT_LAST /* we will handle the OK packet*/,
-											   FALSE, TRUE)) {
-				conn->m->local_tx_end(conn, 0, FAIL);
+			if (ret == FAIL) {
 				break;
 			}
 
@@ -1670,7 +1648,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	DBG_ENTER("mysqlnd_conn_data::dump_debug_info");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->send_command(conn, COM_DEBUG, NULL, 0, PROT_EOF_PACKET, FALSE, TRUE);
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_DEBUG, conn);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1691,7 +1673,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 	DBG_INF_FMT("conn=%llu db=%s", conn->thread_id, db);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->send_command(conn, COM_INIT_DB, (zend_uchar*) db, db_len, PROT_OK_PACKET, FALSE, TRUE);
+		const MYSQLND_CSTRING database = {db, db_len};
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_INIT_DB, conn, database);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
+
 		/*
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
@@ -1727,7 +1715,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = conn->m->send_command(conn, COM_PING, NULL, 0, PROT_OK_PACKET, TRUE, TRUE);
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_PING, conn);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 		/*
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
@@ -1755,7 +1747,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
-			ret = conn->m->send_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE);
+			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STATISTICS, conn);
+			if (command) {
+				ret = command->run(command);
+				command->free_command(command);
+			}
+
 			if (FAIL == ret) {
 				break;
 			}
@@ -1792,21 +1789,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 	DBG_INF_FMT("conn=%llu pid=%u", conn->thread_id, pid);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		int4store(buff, pid);
-
-		/* If we kill ourselves don't expect OK packet, PROT_LAST will skip it */
-		if (pid != conn->thread_id) {
-			ret = conn->m->send_command(conn, COM_PROCESS_KILL, buff, 4, PROT_OK_PACKET, FALSE, TRUE);
-			/*
-			  The server sends 0 but libmysql doesn't read it and has established
-			  a protocol of giving back -1. Thus we have to follow it :(
-			*/
-			SET_ERROR_AFF_ROWS(conn);
-		} else if (PASS == (ret = conn->m->send_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE))) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			conn->m->send_close(conn);
+		unsigned int process_id = pid;
+		/* 'unsigned char' is promoted to 'int' when passed through '...' */
+		unsigned int read_response = (pid != conn->thread_id);
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_PROCESS_KILL, conn, process_id, read_response);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+			if (read_response) {
+				/*
+				  The server sends 0 but libmysql doesn't read it and has established
+				  a protocol of giving back -1. Thus we have to follow it :(
+				*/
+				SET_ERROR_AFF_ROWS(conn);
+			} else if (PASS == ret) {
+				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				conn->m->send_close(conn);
+			}
 		}
-
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1864,11 +1864,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	DBG_INF_FMT("conn=%llu options=%lu", conn->thread_id, options);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		int1store(bits, options);
-
-		ret = conn->m->send_command(conn, COM_REFRESH, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
-
-		conn->m->local_tx_end(conn, this_func, ret);
+		unsigned int options_param = (unsigned int) options;
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_REFRESH, conn, options_param);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 	}
 	DBG_RETURN(ret);
 }
@@ -1886,10 +1887,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 	DBG_INF_FMT("conn=%llu level=%lu", conn->thread_id, level);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		int1store(bits, level);
-
-		ret = conn->m->send_command(conn, COM_SHUTDOWN, bits, 1, PROT_OK_PACKET, FALSE, TRUE);
-
+		unsigned int level_param = (unsigned int) level;
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_SHUTDOWN, conn, level_param);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1921,7 +1924,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
-				ret = conn->m->send_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE);
+				struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_QUIT, conn);
+				if (command) {
+					ret = command->run(command);
+					command->free_command(command);
+				}
 				net->data->m.close_stream(net, conn->stats, conn->error_info);
 			}
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
@@ -3165,6 +3172,689 @@ mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct 
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+
+struct st_mysqlnd_protocol_no_params_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_protocol_no_params_command_context
+	{
+		MYSQLND_CONN_DATA * conn;
+	} context;
+};
+
+/* {{{ mysqlnd_com_no_params_free_command */
+static void
+mysqlnd_com_no_params_free_command(void * command)
+{
+	DBG_ENTER("mysqlnd_com_no_params_free_command");
+	mnd_efree(command);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/************************** COM_SET_OPTION ******************************************/
+struct st_mysqlnd_protocol_com_set_option_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_set_option_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		enum_mysqlnd_server_option option;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_set_option_run */
+enum_func_status
+mysqlnd_com_set_option_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_set_option_command * command = (struct st_mysqlnd_protocol_com_set_option_command *) cmd;
+	zend_uchar buffer[2];
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+	enum_mysqlnd_server_option option = command->context.option;
+
+	DBG_ENTER("mysqlnd_com_set_option_run");
+	int2store(buffer, (unsigned int) option);
+
+	ret = conn->m->send_command_do_request(conn, COM_SET_OPTION, buffer, sizeof(buffer), FALSE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_EOF_PACKET, FALSE, COM_SET_OPTION, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_set_option_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_set_option_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_set_option_command * command;
+	DBG_ENTER("mysqlnd_com_set_option_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_set_option_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.option = va_arg(args, enum_mysqlnd_server_option);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_set_option_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_DEBUG ******************************************/
+/* {{{ mysqlnd_com_debug_run */
+static enum_func_status
+mysqlnd_com_debug_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_debug_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_DEBUG, NULL, 0, FALSE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_EOF_PACKET, COM_DEBUG, COM_DEBUG, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_debug_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_debug_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_no_params_command * command;
+	DBG_ENTER("mysqlnd_com_debug_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_no_params_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+
+		command->parent.run = mysqlnd_com_debug_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_INIT_DB ******************************************/
+struct st_mysqlnd_protocol_com_init_db_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_init_db_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		MYSQLND_CSTRING db;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_init_db_run */
+static enum_func_status
+mysqlnd_com_init_db_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_init_db_command * command = (struct st_mysqlnd_protocol_com_init_db_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_init_db_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_INIT_DB, (zend_uchar*) command->context.db.s, command->context.db.l, FALSE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_INIT_DB, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_init_db_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_init_db_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_init_db_command * command;
+	DBG_ENTER("mysqlnd_com_init_db_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_init_db_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.db = va_arg(args, MYSQLND_CSTRING);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_init_db_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_PING ******************************************/
+/* {{{ mysqlnd_com_ping_run */
+static enum_func_status
+mysqlnd_com_ping_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_ping_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_PING, NULL, 0, TRUE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, TRUE, COM_PING, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_ping_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_ping_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_no_params_command * command;
+	DBG_ENTER("mysqlnd_com_ping_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_no_params_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+
+		command->parent.run = mysqlnd_com_ping_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+/************************** COM_FIELD_LIST ******************************************/
+struct st_mysqlnd_protocol_com_field_list_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_field_list_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		MYSQLND_CSTRING table;
+		MYSQLND_CSTRING achtung_wild;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_field_list_run */
+static enum_func_status
+mysqlnd_com_field_list_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_field_list_command * command = (struct st_mysqlnd_protocol_com_field_list_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+	/* db + \0 + wild + \0 (for wild) */
+	zend_uchar buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p;
+	size_t table_len, wild_len;
+
+	DBG_ENTER("mysqlnd_com_field_list_run");
+
+	if (command->context.table.s && command->context.table.l) {
+		size_t to_copy = MIN(command->context.table.l, MYSQLND_MAX_ALLOWED_DB_LEN);
+		memcpy(p, command->context.table.s, to_copy);
+		p += to_copy;
+		*p++ = '\0';
+	}
+
+	if (command->context.achtung_wild.s && command->context.achtung_wild.l) {
+		size_t to_copy = MIN(command->context.achtung_wild.l, MYSQLND_MAX_ALLOWED_DB_LEN);
+		memcpy(p, command->context.achtung_wild.s, to_copy);
+		p += to_copy;
+		*p++ = '\0';
+	}
+
+	ret = conn->m->send_command_do_request(conn, COM_FIELD_LIST, buff, p - buff, FALSE, TRUE);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_field_list_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_field_list_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_field_list_command * command;
+	DBG_ENTER("mysqlnd_com_field_list_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_field_list_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.table = va_arg(args, MYSQLND_CSTRING);
+		command->context.achtung_wild = va_arg(args, MYSQLND_CSTRING);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_field_list_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_STATISTICS ******************************************/
+/* {{{ mysqlnd_com_statistics_run */
+static enum_func_status
+mysqlnd_com_statistics_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_statistics_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_STATISTICS, NULL, 0, FALSE, TRUE);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_statistics_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_statistics_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_no_params_command * command;
+	DBG_ENTER("mysqlnd_com_statistics_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_no_params_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+
+		command->parent.run = mysqlnd_com_statistics_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+/************************** COM_PROCESS_KILL ******************************************/
+struct st_mysqlnd_protocol_com_process_kill_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_process_kill_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		unsigned int process_id;
+		zend_bool read_response;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_process_kill_run */
+enum_func_status
+mysqlnd_com_process_kill_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_process_kill_command * command = (struct st_mysqlnd_protocol_com_process_kill_command *) cmd;
+	zend_uchar buff[4];
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_process_kill_run");
+	int4store(buff, command->context.process_id);
+
+	ret = conn->m->send_command_do_request(conn, COM_PROCESS_KILL, buff, 4, FALSE, TRUE);
+	if (PASS == ret && command->context.read_response) {
+		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_PROCESS_KILL, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_process_kill_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_process_kill_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_process_kill_command * command;
+	DBG_ENTER("mysqlnd_com_process_kill_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_process_kill_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.process_id = va_arg(args, unsigned int);
+		command->context.read_response = va_arg(args, unsigned int)? TRUE:FALSE;
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_process_kill_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+/************************** COM_REFRESH ******************************************/
+struct st_mysqlnd_protocol_com_refresh_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_refresh_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		uint8_t options;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_refresh_run */
+enum_func_status
+mysqlnd_com_refresh_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_refresh_command * command = (struct st_mysqlnd_protocol_com_refresh_command *) cmd;
+	zend_uchar bits[1];
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_refresh_run");
+	int1store(bits, command->context.options);
+
+	ret = conn->m->send_command_do_request(conn, COM_REFRESH, bits, 1, FALSE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_REFRESH, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_refresh_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_refresh_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_refresh_command * command;
+	DBG_ENTER("mysqlnd_com_refresh_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_refresh_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.options = va_arg(args, unsigned int);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_refresh_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_SHUTDOWN ******************************************/
+struct st_mysqlnd_protocol_com_shutdown_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_shutdown_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		uint8_t level;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_shutdown_run */
+enum_func_status
+mysqlnd_com_shutdown_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_shutdown_command * command = (struct st_mysqlnd_protocol_com_shutdown_command *) cmd;
+	zend_uchar bits[1];
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_shutdown_run");
+	int1store(bits, command->context.level);
+
+	ret = conn->m->send_command_do_request(conn, COM_SHUTDOWN, bits, 1, FALSE, TRUE);
+	if (PASS == ret) {
+		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_SHUTDOWN, TRUE);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_shutdown_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_shutdown_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_shutdown_command * command;
+	DBG_ENTER("mysqlnd_com_shutdown_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_shutdown_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.level = va_arg(args, unsigned int);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_shutdown_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_QUIT ******************************************/
+struct st_mysqlnd_protocol_com_quit_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_quit_context
+	{
+		MYSQLND_CONN_DATA * conn;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_quit_run */
+enum_func_status
+mysqlnd_com_quit_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_quit_command * command = (struct st_mysqlnd_protocol_com_quit_command *) cmd;
+	zend_uchar bits[1];
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_quit_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_QUIT, NULL, 0, TRUE, TRUE);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_quit_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_quit_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_quit_command * command;
+	DBG_ENTER("mysqlnd_com_quit_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_quit_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_quit_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+/************************** COM_QUERY ******************************************/
+struct st_mysqlnd_protocol_com_query_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_query_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		MYSQLND_CSTRING query;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_query_run */
+static enum_func_status
+mysqlnd_com_query_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_query_command * command = (struct st_mysqlnd_protocol_com_query_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+
+	DBG_ENTER("mysqlnd_com_query_run");
+
+	ret = conn->m->send_command_do_request(conn, COM_QUERY, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE, FALSE);
+
+	if (PASS == ret) {
+		CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_query_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_query_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_query_command * command;
+	DBG_ENTER("mysqlnd_com_query_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_query_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.query = va_arg(args, MYSQLND_CSTRING);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_query_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+/************************** COM_REAP_RESULT ******************************************/
+struct st_mysqlnd_protocol_com_reap_result_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_reap_result_context
+	{
+		MYSQLND_CONN_DATA * conn;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_reap_result_run */
+static enum_func_status
+mysqlnd_com_reap_result_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_reap_result_command * command = (struct st_mysqlnd_protocol_com_reap_result_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
+
+	DBG_ENTER("mysqlnd_com_reap_result_run");
+	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
+		php_error_docref(NULL, E_WARNING, "Connection not opened, clear or has been closed");
+		DBG_ERR_FMT("Connection not opened, clear or has been closed. State=%u", state);
+		DBG_RETURN(ret);
+	}
+	ret = conn->m->query_read_result_set_header(conn, NULL);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_reap_result_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_reap_result_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_reap_result_command * command;
+	DBG_ENTER("mysqlnd_com_reap_result_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_reap_result_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_reap_result_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
+
+
+/* {{{ mysqlnd_get_command */
+struct st_mysqlnd_protocol_command *
+mysqlnd_get_command(enum php_mysqlnd_server_command command, ...)
+{
+	struct st_mysqlnd_protocol_command * ret;
+	va_list args;
+	DBG_ENTER("mysqlnd_get_command");
+
+	va_start(args, command);
+	switch (command) {
+		case COM_SET_OPTION:
+			ret = mysqlnd_com_set_option_create_command(args);
+			break;
+		case COM_DEBUG:
+			ret = mysqlnd_com_debug_create_command(args);
+			break;
+		case COM_INIT_DB:
+			ret = mysqlnd_com_init_db_create_command(args);
+			break;
+		case COM_PING:
+			ret = mysqlnd_com_ping_create_command(args);
+			break;
+		case COM_FIELD_LIST:
+			ret = mysqlnd_com_field_list_create_command(args);
+			break;
+		case COM_STATISTICS:
+			ret = mysqlnd_com_statistics_create_command(args);
+			break;
+		case COM_PROCESS_KILL:
+			ret = mysqlnd_com_process_kill_create_command(args);
+			break;
+		case COM_REFRESH:
+			ret = mysqlnd_com_refresh_create_command(args);
+			break;
+		case COM_SHUTDOWN:
+			ret = mysqlnd_com_shutdown_create_command(args);
+			break;
+		case COM_QUIT:
+			ret = mysqlnd_com_quit_create_command(args);
+			break;
+		case COM_QUERY:
+			ret = mysqlnd_com_query_create_command(args);
+			break;
+		case COM_REAP_RESULT:
+			ret = mysqlnd_com_reap_result_create_command(args);
+			break;
+		default:
+			break;
+	}
+	va_end(args);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
 
 /*
  * Local variables:
