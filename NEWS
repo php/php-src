@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2
 
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
-
 - Core:
   . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
   . Removed the sql.safe_mode directive. (Kalle)
@@ -25,6 +22,12 @@ PHP                                                                        NEWS
     bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
   . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
     (Anatol)
+
+- BCMath:
+  . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
+
+- Calendar:
+  . Fix integer overflows (Joshua Rogers)
 
 - Date:
   . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
