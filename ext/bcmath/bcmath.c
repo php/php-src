@@ -376,8 +376,8 @@ PHP_FUNCTION(bcmod)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	bc_str2num(&first, left, 0);
-	bc_str2num(&second, right, 0);
+	php_str2num(&first, left);
+	php_str2num(&second, right);
 
 	switch (bc_modulo(first, second, &result, 0)) {
 		case 0:
