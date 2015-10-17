@@ -2517,13 +2517,13 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 	}
 	memcpy(mem, start, size);
 
-#ifdef MAP_HUGETLB
+#  ifdef MAP_HUGETLB
 	ret = mmap(start, size,
 		PROT_READ | PROT_WRITE | PROT_EXEC,
 		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
 		-1, 0);
-#endif
-#ifdef MADV_HUGEPAGE
+#  endif
+#  ifdef MADV_HUGEPAGE
 	if (ret == MAP_FAILED) {
 		ret = mmap(start, size,
 			PROT_READ | PROT_WRITE | PROT_EXEC,
@@ -2531,7 +2531,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			-1, 0);
 		madvise(start, size, MADV_HUGEPAGE);
 	}
-#endif
+#  endif
 	if (ret == start) {
 	    memcpy(start, mem, size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
@@ -2565,7 +2565,13 @@ static void accel_move_code_to_huge_pages(void)
 		fclose(f);
 	}
 }
-# endif
+# else
+static void accel_move_code_to_huge_pages(void)
+{
+	zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages has no affect as huge page is not supported");
+	return;
+}
+# endif /* defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE) */
 #endif /* HAVE_HUGE_CODE_PAGES */
 
 static int accel_startup(zend_extension *extension)
