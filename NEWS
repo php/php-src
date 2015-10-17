@@ -6,13 +6,17 @@ PHP                                                                        NEWS
   . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
   . Fixed bug #70430 (Stack buffer overflow in zend_language_parser()). (Nikita)
 
-- SOAP:
-  . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)
-  . Fixed bug #70709 (SOAP Client generates Segfault). (Laruence)
-
 - Opcache:
   . Fixed bug #70724 (Undefined Symbols from opcache.so on Mac OS X 10.10).
     (Laruence)
+
+- SPL:
+  . Fixed bug #70730 (Incorrect ArrayObject serialization if unset is called
+    in serialize()). (Laruence)
+
+- SOAP:
+  . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)
+  . Fixed bug #70709 (SOAP Client generates Segfault). (Laruence)
 
 - XSL:
   . Fixed bug #70678 (PHP7 returns true when false is expected). (Felipe) 
