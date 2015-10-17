@@ -29,15 +29,15 @@
 # endif
 #endif
 
-inline php_hash_uint64 rol64(php_hash_uint64 v, unsigned char b) {
+static inline php_hash_uint64 rol64(php_hash_uint64 v, unsigned char b) {
 	return (v << b) | (v >> (64 - b));
 }
-inline unsigned char idx(unsigned char x, unsigned char y) {
+static inline unsigned char idx(unsigned char x, unsigned char y) {
 	return x + (5 * y);
 }
 
 #ifdef WORDS_BIGENDIAN
-inline php_hash_uint64 load64(const unsigned char* x) {
+static inline php_hash_uint64 load64(const unsigned char* x) {
 	php_hash_uint64 ret = 0;
 	for (unsigned char i = 7; i >= 0; --i) {
 		ret <<= 8;
@@ -45,13 +45,13 @@ inline php_hash_uint64 load64(const unsigned char* x) {
 	}
 	return ret;
 }
-inline void store64(const unsigned char* x, php_hash_uint64 val) {
+static inline void store64(const unsigned char* x, php_hash_uint64 val) {
 	for (unsigned char i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
-inline void xor64(const unsigned char* x, php_hash_uint64 val) {
+static inline void xor64(const unsigned char* x, php_hash_uint64 val) {
 	for (unsigned char i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
@@ -66,7 +66,7 @@ inline void xor64(const unsigned char* x, php_hash_uint64 val) {
 # define XORLane(x, y, v)   (((php_hash_uint64*)ctx->state)[idx(x,y)] ^= v)
 #endif
 
-inline char LFSR86540(unsigned char* pLFSR)
+static inline char LFSR86540(unsigned char* pLFSR)
 {
 	unsigned char LFSR = *pLFSR;
 	char result = LFSR & 0x01;
