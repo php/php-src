@@ -242,7 +242,6 @@ static ZEND_INI_MH(OnEnable)
 }
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
-
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
