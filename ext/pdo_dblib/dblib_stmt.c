@@ -197,14 +197,15 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
+	struct pdo_column_data *col;
+	char *fname;
 	
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
 	
-	struct pdo_column_data *col = &stmt->columns[colno];
-
-	char *fname = (char*)dbcolname(H->link, colno+1);
+	col = &stmt->columns[colno];
+	fname = (char*)dbcolname(H->link, colno+1);
 
 	if (fname && *fname) {
 		col->name = estrdup(fname);
