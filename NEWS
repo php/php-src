@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #70724 (Undefined Symbols from opcache.so on Mac OS X 10.10).
     (Laruence)
 
+- PDO_DBlib:
+  . Fixed bug #69757 (Segmentation fault on nextRowset).
+    (miracle at rpz dot name)
+
 - SPL:
   . Fixed bug #70730 (Incorrect ArrayObject serialization if unset is called
     in serialize()). (Laruence)
