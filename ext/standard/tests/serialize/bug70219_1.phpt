@@ -1,5 +1,7 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
+--SKIPIF--
+<?php include __DIR__ . '/../../../session/tests/skipif.inc'; ?>
 --FILE--
 <?php
 ini_set('session.serialize_handler', 'php_serialize');
