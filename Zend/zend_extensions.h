@@ -37,13 +37,11 @@ You can use the following macro to check the extension API version for compatibi
 #define ZEND_EXTENSION_API_NO_5_4_X 220100525
 #define ZEND_EXTENSION_API_NO_5_5_X 220121212
 #define ZEND_EXTENSION_API_NO_5_6_X 220131226
-#define ZEND_EXTENSION_API_NO_7_1_X 320140815
+#define ZEND_EXTENSION_API_NO_7_0_X 320151012
 
 #if ZEND_EXTENSION_API_NO < ZEND_EXTENSION_API_NO_5_5_X
    // do something for php versions lower than 5.5.x
 #endif
-
-@see https://github.com/php/php-src/pull/1523
 */
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
