@@ -81,6 +81,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->colors[1] = NULL;
 	pg->colors[2] = NULL;
 
+	pg->lines = phpdbg_get_terminal_height();
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->buffer = NULL;
