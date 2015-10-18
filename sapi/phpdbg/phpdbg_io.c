@@ -190,15 +190,49 @@ PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
 	return ret;
 }
 
+static int phpdbg_output_pager(int sock, const char *ptr, int len) {
+	int count = 0, bytes = 0;
+	const char *p = ptr, *endp = ptr + len;
+	
+	while ((p = memchr(p, '\n', endp - p))) {
+		count++;
+		p++;
+		
+		if (count % PHPDBG_G(lines) == 0) {
+			bytes += write(sock, ptr + bytes, (p - ptr) - bytes);
+			
+			if (memchr(p, '\n', endp - p)) {
+				int chr;
+				printf("\r---Type <return> to continue or q <return> to quit---");
+				chr = getchar();
+				if (chr == 'q') {
+					break;
+				}
+				printf("\r");
+			} else break;
+		}
+	}
+	if (bytes && count % PHPDBG_G(lines) != 0) {
+		bytes += write(sock, ptr + bytes, len - bytes);
+	} else if (!bytes) {
+		bytes += write(sock, ptr, len);
+	}
+	return bytes;
+}
 
 PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
+	
+	if (PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION
+		&& PHPDBG_G(io)[PHPDBG_STDOUT].fd == sock
+		&& PHPDBG_G(lines) > 0) {
+		return phpdbg_output_pager(sock, ptr, len);
+	}
 
 	return write(sock, ptr, len);
 }
-
 
 PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port) {
 	struct addrinfo res;
