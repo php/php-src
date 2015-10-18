@@ -25,6 +25,27 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
+/*
+The constants below are derived from ext/opcache/ZendAccelerator.h
+
+You can use the following macro to check the extension API version for compatibilities:
+
+#define ZEND_EXTENSION_API_NO_5_0_X 220040412
+#define ZEND_EXTENSION_API_NO_5_1_X 220051025
+#define ZEND_EXTENSION_API_NO_5_2_X 220060519
+#define ZEND_EXTENSION_API_NO_5_3_X 220090626
+#define ZEND_EXTENSION_API_NO_5_4_X 220100525
+#define ZEND_EXTENSION_API_NO_5_5_X 220121212
+#define ZEND_EXTENSION_API_NO_5_6_X 220131226
+#define ZEND_EXTENSION_API_NO_7_1_X 320140815
+
+#if ZEND_EXTENSION_API_NO < ZEND_EXTENSION_API_NO_5_5_X
+   // do something for php versions lower than 5.5.x
+#endif
+
+@see https://github.com/php/php-src/pull/1523
+*/
+
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..
  */
