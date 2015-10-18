@@ -305,7 +305,7 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_erase_empty_line;
 			if (value) {
 				convert_to_long_ex(value);
-				rl_erase_empty_line = Z_LVAL_PP(value);
+				rl_erase_empty_line = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
 #endif
