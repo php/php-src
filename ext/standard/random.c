@@ -79,7 +79,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 
 /* {{{ */
 
-static int php_random_bytes(void *bytes, size_t size)
+PHPAPI int php_random_bytes(void *bytes, size_t size)
 {
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
