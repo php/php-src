@@ -2241,19 +2241,13 @@ static void dbstmt_prop_delete(zval *object, zval *member, const zend_literal *k
 }
 
 static union _zend_function *dbstmt_method_get(
-#if PHP_API_VERSION >= 20041225
 	zval **object_pp,
-#else
-	zval *object,
-#endif
    	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
-#if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
 	zend_function *fbc_fallback = NULL;
-#endif
 
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
@@ -2261,20 +2255,14 @@ static union _zend_function *dbstmt_method_get(
 	if (zend_hash_find(&Z_OBJCE_P(object)->function_table, lc_method_name,
 			method_len+1, (void**)&fbc) == FAILURE) {
 
-#if PHP_API_VERSION >= 20041225
 		/* Prepare fallback by running standard method for functions.
 		 * If the function does not find a method to instanciate it will return this fallback method. */
 		fbc_fallback = std_object_handlers.get_method(object_pp, method_name, method_len, key TSRMLS_CC);
-#endif
 
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 		/* instance not created by PDO object */
 		if (!stmt->dbh) {
-
-#if PHP_API_VERSION >= 20041225
 			fbc = fbc_fallback;
-#endif
-
 			goto out;
 		}
 		/* not a pre-defined method, nor a user-defined method; check
@@ -2284,19 +2272,15 @@ static union _zend_function *dbstmt_method_get(
 				PDO_DBH_DRIVER_METHOD_KIND_STMT TSRMLS_CC)
 				|| !stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
 
-#if PHP_API_VERSION >= 20041225
 				fbc = fbc_fallback;
-#endif
-
 				goto out;
 			}
 		}
 
 		if (zend_hash_find(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT],
 				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-			#if PHP_API_VERSION >= 20041225
+
 			fbc = fbc_fallback;
-			#endif
 			goto out;
 		}
 		/* got it */
@@ -2696,11 +2680,7 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 }
 
 static union _zend_function *row_method_get(
-#if PHP_API_VERSION >= 20041225
 	zval **object_pp,
-#else
-	zval *object,
-#endif
 	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc;

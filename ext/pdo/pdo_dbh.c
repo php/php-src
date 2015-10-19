@@ -1348,18 +1348,12 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 }
 
 static union _zend_function *dbh_method_get(
-#if PHP_API_VERSION >= 20041225
 	zval **object_pp,
-#else
-	zval *object,
-#endif
 	char *method_name, int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
-#if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
-#endif
 	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
 
 	lc_method_name = emalloc(method_len + 1);
