@@ -17,7 +17,6 @@ addons:
       - libsasl2-dev
       - libxpm-dev
       - libt1-dev
-      - libc-client2007e-dev
 
 notifications:
     email: 

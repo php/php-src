@@ -56,8 +56,6 @@ $TS \
 --with-pspell=/usr \
 --with-enchant=/usr \
 --enable-wddx \
---with-imap \
---with-imap-ssl \
 --with-freetype-dir=/usr \
 --with-xpm-dir=/usr \
 --with-kerberos \
