@@ -476,7 +476,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_
 typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(const MYSQLND_CONN_DATA * const conn);
 typedef void				(*func_mysqlnd_conn_data__set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * conn, enum mysqlnd_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
@@ -501,7 +501,6 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DA
 typedef enum_func_status	(*func_mysqlnd_conn_data__execute_init_commands)(MYSQLND_CONN_DATA * conn);
 typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags);
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const char * const host, const char * const user, const char * const passwd, const unsigned int passwd_len, const char * const db, const unsigned int db_len, const unsigned int mysql_flags);
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status);
 typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, enum_mysqlnd_client_option option, const char * const key, const char * const value);
@@ -572,7 +571,7 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__get_state get_state;
 	func_mysqlnd_conn_data__set_state set_state;
 
-	func_mysqlnd_conn_data__send_command send_command;
+	func_mysqlnd_conn_data__send_command_do_request send_command_do_request;
 	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
 
 	func_mysqlnd_conn_data__restart_psession restart_psession;
@@ -597,7 +596,6 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__execute_init_commands execute_init_commands;
 	func_mysqlnd_conn_data__get_updated_connect_flags get_updated_connect_flags;
 	func_mysqlnd_conn_data__connect_handshake connect_handshake;
-	func_mysqlnd_conn_data__send_command_do_request send_command_do_request;
 	func_mysqlnd_conn_data__fetch_auth_plugin_by_name fetch_auth_plugin_by_name;
 
 	func_mysqlnd_conn_data__set_client_option_2d set_client_option_2d;

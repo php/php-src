@@ -240,6 +240,11 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								size_t * switch_to_auth_protocol_data_len
 								);
 
+/* {{{ mysqlnd_get_command */
+struct st_mysqlnd_protocol_command *
+mysqlnd_get_command(enum php_mysqlnd_server_command command, ...);
+
+
 #endif	/* MYSQLND_PRIV_H */
 
 

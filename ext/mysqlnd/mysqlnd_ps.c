@@ -417,7 +417,23 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		stmt_to_prepare = s_to_prepare->data;
 	}
 
-	if (FAIL == stmt_to_prepare->conn->m->send_command(stmt_to_prepare->conn, COM_STMT_PREPARE, (const zend_uchar *) query, query_len, PROT_LAST, FALSE, TRUE) ||
+	{
+		enum_func_status ret = FAIL;
+		const MYSQLND_CSTRING query_string = {query, query_len};
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_PREPARE, stmt_to_prepare->conn, query_string);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
+		if (FAIL == ret) {
+			goto fail;
+		}
+	}
+
+	if (
+#if A0
+		FAIL == stmt_to_prepare->conn->m->send_command(stmt_to_prepare->conn, COM_STMT_PREPARE, (const zend_uchar *) query, query_len, PROT_LAST, FALSE, TRUE) ||
+#endif
 		FAIL == mysqlnd_stmt_read_prepare_response(s_to_prepare))
 	{
 		goto fail;
@@ -722,10 +738,19 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	}
 	ret = s->m->generate_execute_request(s, &request, &request_len, &free_request);
 	if (ret == PASS) {
+		const MYSQLND_CSTRING payload = {request, request_len};
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_EXECUTE, stmt->conn, payload);
+		ret = FAIL;
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}	
+#if A0
 		/* support for buffer types should be added here ! */
 		ret = stmt->conn->m->send_command(stmt->conn, COM_STMT_EXECUTE, request, request_len,
 										  PROT_LAST /* we will handle the response packet*/,
 										  FALSE, FALSE);
+#endif
 	} else {
 		SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -1057,12 +1082,30 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 	int4store(buf, stmt->stmt_id);
 	int4store(buf + STMT_ID_LENGTH, 1); /* for now fetch only one row */
 
+	{
+		const MYSQLND_CSTRING payload = {buf, sizeof(buf)};
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_FETCH, stmt->conn, payload);
+		ret = FAIL;
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+			if (ret == FAIL) {
+				COPY_CLIENT_ERROR(*stmt->error_info, *stmt->conn->error_info);	
+			}
+		}
+		if (FAIL == ret) {
+			DBG_RETURN(FAIL);
+		}
+
+	}
+#if A9
 	if (FAIL == stmt->conn->m->send_command(stmt->conn, COM_STMT_FETCH, buf, sizeof(buf),
 											PROT_LAST /* we will handle the response packet*/,
 											FALSE, TRUE)) {
 		COPY_CLIENT_ERROR(*stmt->error_info, *stmt->conn->error_info);
 		DBG_RETURN(FAIL);
 	}
+#endif
 
 	row_packet->skip_extraction = stmt->result_bind? FALSE:TRUE;
 
@@ -1263,12 +1306,30 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 		*/
 
 		int4store(cmd_buf, stmt->stmt_id);
+
+		if (CONN_GET_STATE(conn) == CONN_READY) {
+			const MYSQLND_CSTRING payload = {cmd_buf, sizeof(cmd_buf)};
+			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_RESET, stmt->conn, payload);
+			ret = FAIL;
+			if (command) {
+				ret = command->run(command);
+				command->free_command(command);
+
+				if (ret == PASS) {
+					ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_STMT_RESET, TRUE);
+				} else {
+					COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
+				}
+			}
+		}
+#if A0
 		if (CONN_GET_STATE(conn) == CONN_READY &&
 			FAIL == (ret = conn->m->send_command(conn, COM_STMT_RESET, cmd_buf,
 											  	 sizeof(cmd_buf), PROT_OK_PACKET,
 												 FALSE, TRUE))) {
 			COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
 		}
+#endif
 		*stmt->upsert_status = *conn->upsert_status;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
@@ -1324,7 +1385,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn;
 	zend_uchar * cmd_buf;
-	enum php_mysqlnd_server_command cmd = COM_STMT_SEND_LONG_DATA;
 
 	DBG_ENTER("mysqlnd_stmt::send_long_data");
 	if (!stmt || !stmt->conn) {
@@ -1379,11 +1439,26 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
 
 			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
-			ret = conn->m->send_command(conn, cmd, cmd_buf, packet_len, PROT_LAST , FALSE, TRUE);
-			mnd_efree(cmd_buf);
+			{
+				const MYSQLND_CSTRING payload = {cmd_buf, packet_len};
+				struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_SEND_LONG_DATA, stmt->conn, payload);
+				ret = FAIL;
+				if (command) {
+					ret = command->run(command);
+					command->free_command(command);
+					if (ret == FAIL) {
+						COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
+					}
+				}
+			}
+
+#if A0
+			ret = conn->m->send_command(conn, COM_STMT_SEND_LONG_DATA, cmd_buf, packet_len, PROT_LAST , FALSE, TRUE);
 			if (FAIL == ret) {
 				COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
 			}
+#endif
+			mnd_efree(cmd_buf);
 		} else {
 			ret = FAIL;
 			SET_OOM_ERROR(*stmt->error_info);
@@ -1409,7 +1484,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
-		if ((packet_len = conn->net->m.consume_uneaten_data(conn->net, cmd))) {
+		if ((packet_len = conn->net->m.consume_uneaten_data(conn->net, COM_STMT_SEND_LONG_DATA))) {
 			php_error_docref(NULL, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
@@ -2198,12 +2273,29 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 														STAT_FREE_RESULT_EXPLICIT);
 
 		int4store(cmd_buf, stmt->stmt_id);
-		if (CONN_GET_STATE(conn) == CONN_READY &&
+		if (CONN_GET_STATE(conn) == CONN_READY) {
+			enum_func_status ret = FAIL;
+			const MYSQLND_CSTRING payload = {cmd_buf, sizeof(cmd_buf)};
+			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_CLOSE, conn, payload);
+			if (command) {
+				ret = command->run(command);
+				command->free_command(command);
+
+				if (ret == FAIL) {
+					COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
+				}
+			}
+			if (ret == FAIL) {
+				DBG_RETURN(FAIL);
+			}
+
+#if A0		
 			FAIL == conn->m->send_command(conn, COM_STMT_CLOSE, cmd_buf, sizeof(cmd_buf),
 										  PROT_LAST /* COM_STMT_CLOSE doesn't send an OK packet*/,
 										  FALSE, TRUE)) {
 			COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
 			DBG_RETURN(FAIL);
+#endif
 		}
 	}
 	switch (stmt->execute_count) {

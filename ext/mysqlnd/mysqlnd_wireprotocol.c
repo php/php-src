@@ -655,12 +655,16 @@ size_t php_mysqlnd_auth_write(void * _packet)
 		}
 	}
 	if (packet->is_change_user_packet) {
-		if (PASS != conn->m->send_command(conn, COM_CHANGE_USER, buffer + MYSQLND_HEADER_SIZE, p - buffer - MYSQLND_HEADER_SIZE,
-									      PROT_LAST /* the caller will handle the OK packet */,
-										  packet->silent, TRUE)) {
-			DBG_RETURN(0);
+		enum_func_status ret = FAIL;
+		const MYSQLND_CSTRING payload = {buffer + MYSQLND_HEADER_SIZE, p - (buffer + MYSQLND_HEADER_SIZE)};
+		const unsigned int silent = packet->silent;
+		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_CHANGE_USER, conn, payload, silent);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
 		}
-		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);
+
+		DBG_RETURN(ret == PASS? (p - buffer - MYSQLND_HEADER_SIZE) : 0);
 	} else {
 		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
 		if (!sent) {
