@@ -1,5 +1,15 @@
 language: c
-
+sudo: false
+addons:
+  apt:
+    packages:
+      - locales
+      - language-pack-de
+      - re2c
+      - libgmp-dev
+      - libicu-dev
+      - libmcrypt-dev
+      - libtidy-dev
 notifications:
     email: 
        on_failure: change
@@ -26,11 +36,6 @@ env:
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
-
-before_install:
-    - sudo cp ./travis/de /var/lib/locales/supported.d/de
-    - sudo dpkg-reconfigure locales
-    - ./travis/install.sh
 
 before_script:
     # Compile PHP
