@@ -1,4 +1,19 @@
 language: c
+sudo: false
+addons:
+  apt:
+    packages:
+      - locales
+      - language-pack-de
+      - re2c
+      - libgmp-dev
+      - libicu-dev
+      - libmcrypt-dev
+      - libtidy-dev
+      - libenchant-dev
+      - libaspell-dev
+      - libpspell-dev
+      - librecode-dev
 
 notifications:
     email: 
@@ -26,13 +41,6 @@ env:
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
-
-before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev
-    - sudo cp ./travis/de /var/lib/locales/supported.d/de
-    - sudo dpkg-reconfigure locales
-    - ./travis/install.sh
 
 before_script:
     # Compile PHP

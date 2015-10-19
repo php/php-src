@@ -10,7 +10,9 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix=$HOME"/php-install" \
+--quiet \
 $DEBUG \
 $TS \
 --enable-fpm \
@@ -58,4 +60,4 @@ $TS \
 --enable-wddx \
 --enable-sysvmsg 
 make -j2 --quiet
-sudo make install
+make install
