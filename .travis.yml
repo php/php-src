@@ -54,7 +54,6 @@ before_script:
     - . ./travis/ext/pdo_mysql/setup.sh
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
-    - . ./travis/ext/imap/setup.sh
 
 # Run PHPs run-tests.php 
 script:
