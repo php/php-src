@@ -10,7 +10,9 @@ else
 	DEBUG="";
 fi
 ./buildconf --force
-./configure --quiet \
+./configure \
+--prefix=$HOME"/php-install" \
+--quiet \
 $DEBUG \
 $TS \
 --enable-phpdbg \
@@ -61,4 +63,4 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg 
 make -j2 --quiet
-sudo make install
+make install
