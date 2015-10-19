@@ -327,6 +327,25 @@ _mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods)
 /* }}} */
 
 
+/* {{{ mysqlnd_command_factory_get */
+static func_mysqlnd__command_factory
+_mysqlnd_command_factory_get()
+{
+	return mysqlnd_command_factory;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_command_factory_set */
+static void
+_mysqlnd_command_factory_set(func_mysqlnd__command_factory factory)
+{
+	mysqlnd_command_factory = factory;
+}
+/* }}} */
+
+
+
 struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 {
 	{
@@ -363,7 +382,11 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 	},
 	{
 		_mysqlnd_net_get_methods,
-		_mysqlnd_net_set_methods
+		_mysqlnd_net_set_methods,
+	},
+	{
+		_mysqlnd_command_factory_get,
+		_mysqlnd_command_factory_set,
 	},
 };
 

@@ -900,6 +900,15 @@ struct st_mysqlnd_protocol_payload_decoder_factory
 };
 
 
+struct st_mysqlnd_protocol_command
+{
+	enum_func_status (*run)(void *cmd);
+	void (*free_command)(void * cmd);
+};
+
+typedef struct st_mysqlnd_protocol_command * (*func_mysqlnd__command_factory)(enum php_mysqlnd_server_command command, ...);
+
+
 struct st_mysqlnd_connection_data
 {
 /* Operation related */
@@ -978,6 +987,7 @@ struct st_mysqlnd_connection_data
 	zend_bool		in_async_err_cb;
 
 	struct st_mysqlnd_object_factory_methods object_factory;
+	func_mysqlnd__command_factory command_factory;
 
 	struct st_mysqlnd_conn_data_methods * m;
 
@@ -1238,13 +1248,6 @@ struct st_mysqlnd_authentication_plugin
 	struct {
 		func_auth_plugin__get_auth_data get_auth_data;
 	} methods;
-};
-
-
-struct st_mysqlnd_protocol_command
-{
-	enum_func_status (*run)(void *cmd);
-	void (*free_command)(void * cmd);
 };
 
 #endif /* MYSQLND_STRUCTS_H */

@@ -155,6 +155,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 
 	data->net = mysqlnd_net_init(persistent, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
+	data->command_factory = mysqlnd_command_factory_get();
 
 	if (!data->net || !data->payload_decoder_factory) {
 		new_object->m->dtor(new_object);

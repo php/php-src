@@ -420,7 +420,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	{
 		enum_func_status ret = FAIL;
 		const MYSQLND_CSTRING query_string = {query, query_len};
-		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_PREPARE, stmt_to_prepare->conn, query_string);
+		struct st_mysqlnd_protocol_command * command = stmt_to_prepare->conn->command_factory(COM_STMT_PREPARE, stmt_to_prepare->conn, query_string);
 		if (command) {
 			ret = command->run(command);
 			command->free_command(command);
@@ -734,7 +734,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	ret = s->m->generate_execute_request(s, &request, &request_len, &free_request);
 	if (ret == PASS) {
 		const MYSQLND_CSTRING payload = {request, request_len};
-		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_EXECUTE, stmt->conn, payload);
+		struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_EXECUTE, stmt->conn, payload);
 		ret = FAIL;
 		if (command) {
 			ret = command->run(command);
@@ -1033,8 +1033,6 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 /* }}} */
 
 
-#define STMT_ID_LENGTH 4
-
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
 mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything)
@@ -1042,7 +1040,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	zend_uchar buf[STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
+	zend_uchar buf[MYSQLND_STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
 	MYSQLND_PACKET_ROW * row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
@@ -1069,11 +1067,11 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 	SET_EMPTY_ERROR(*stmt->conn->error_info);
 
 	int4store(buf, stmt->stmt_id);
-	int4store(buf + STMT_ID_LENGTH, 1); /* for now fetch only one row */
+	int4store(buf + MYSQLND_STMT_ID_LENGTH, 1); /* for now fetch only one row */
 
 	{
 		const MYSQLND_CSTRING payload = {buf, sizeof(buf)};
-		struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_FETCH, stmt->conn, payload);
+		struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_FETCH, stmt->conn, payload);
 		ret = FAIL;
 		if (command) {
 			ret = command->run(command);
@@ -1262,7 +1260,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret = PASS;
-	zend_uchar cmd_buf[STMT_ID_LENGTH /* statement id */];
 
 	DBG_ENTER("mysqlnd_stmt::reset");
 	if (!stmt || !stmt->conn) {
@@ -1294,11 +1291,9 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 		  be separated before that.
 		*/
 
-		int4store(cmd_buf, stmt->stmt_id);
-
 		if (CONN_GET_STATE(conn) == CONN_READY) {
-			const MYSQLND_CSTRING payload = {cmd_buf, sizeof(cmd_buf)};
-			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_RESET, stmt->conn, payload);
+			size_t stmt_id = stmt->stmt_id;
+			struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_RESET, stmt->conn, stmt_id);
 			ret = FAIL;
 			if (command) {
 				ret = command->run(command);
@@ -1411,18 +1406,18 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 
 	if (CONN_GET_STATE(conn) == CONN_READY) {
 		size_t packet_len;
-		cmd_buf = mnd_emalloc(packet_len = STMT_ID_LENGTH + 2 + length);
+		cmd_buf = mnd_emalloc(packet_len = MYSQLND_STMT_ID_LENGTH + 2 + length);
 		if (cmd_buf) {
 			stmt->param_bind[param_no].flags |= MYSQLND_PARAM_BIND_BLOB_USED;
 
 			int4store(cmd_buf, stmt->stmt_id);
-			int2store(cmd_buf + STMT_ID_LENGTH, param_no);
-			memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
+			int2store(cmd_buf + MYSQLND_STMT_ID_LENGTH, param_no);
+			memcpy(cmd_buf + MYSQLND_STMT_ID_LENGTH + 2, data, length);
 
 			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
 			{
 				const MYSQLND_CSTRING payload = {cmd_buf, packet_len};
-				struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_SEND_LONG_DATA, stmt->conn, payload);
+				struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_SEND_LONG_DATA, stmt->conn, payload);
 				ret = FAIL;
 				if (command) {
 					ret = command->run(command);
@@ -2207,7 +2202,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_CONN_DATA * conn;
-	zend_uchar cmd_buf[STMT_ID_LENGTH /* statement id */];
 	enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 	DBG_ENTER("mysqlnd_stmt::net_close");
@@ -2247,11 +2241,10 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 		MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_FREE_RESULT_IMPLICIT:
 														STAT_FREE_RESULT_EXPLICIT);
 
-		int4store(cmd_buf, stmt->stmt_id);
 		if (CONN_GET_STATE(conn) == CONN_READY) {
 			enum_func_status ret = FAIL;
-			const MYSQLND_CSTRING payload = {cmd_buf, sizeof(cmd_buf)};
-			struct st_mysqlnd_protocol_command * command = mysqlnd_get_command(COM_STMT_CLOSE, conn, payload);
+			size_t stmt_id = stmt->stmt_id;
+			struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_CLOSE, conn, stmt_id);
 			if (command) {
 				ret = command->run(command);
 				command->free_command(command);

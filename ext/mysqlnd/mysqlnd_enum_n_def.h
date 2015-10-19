@@ -49,6 +49,9 @@
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE			4096
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE_STR		"4096"
 
+#define MYSQLND_STMT_ID_LENGTH 4
+
+
 #define SERVER_STATUS_IN_TRANS					1	/* Transaction has started */
 #define SERVER_STATUS_AUTOCOMMIT				2	/* Server in auto_commit mode */
 #define SERVER_MORE_RESULTS_EXISTS				8	/* Multi query - next query exists */

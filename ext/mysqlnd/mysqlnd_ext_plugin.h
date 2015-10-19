@@ -67,7 +67,7 @@ struct st_mysqlnd_plugin_methods_xetters
 		void (*set)(struct st_mysqlnd_conn_data_methods * methods);
 	} connection_data;
 
-	struct st_mnd_result_etters
+	struct st_mnd_result_xetters
 	{
 		struct st_mysqlnd_res_methods * (*get)();
 		void (*set)(struct st_mysqlnd_res_methods * methods);
@@ -102,6 +102,12 @@ struct st_mysqlnd_plugin_methods_xetters
 		struct st_mysqlnd_net_methods * (*get)();
 		void (*set)(struct st_mysqlnd_net_methods * methods);
 	} io;
+
+	struct st_mnd_command_factory_xetters
+	{
+		func_mysqlnd__command_factory (*get)();
+		void (*set)(func_mysqlnd__command_factory factory);
+	} command_factory;
 };
 
 extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
@@ -133,6 +139,10 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 
 #define mysqlnd_net_get_methods()		mysqlnd_plugin_methods_xetters.io.get()
 #define mysqlnd_net_set_methods(m)		mysqlnd_plugin_methods_xetters.io.set((m))
+
+
+#define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
+#define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
 
