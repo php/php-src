@@ -188,7 +188,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 
 	/* little mini hack so that we can use this code from the dbh ctor */
 	if (!dbh->methods) {
-		pdo_throw_exception_ex(php_pdo_get_exception(), *pdo_err, einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s", *pdo_err, einfo->errcode, einfo->errmsg);
+		pdo_throw_exception_ex(*pdo_err, einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s", *pdo_err, einfo->errcode, einfo->errmsg);
 	}
 
 	return einfo->errcode;

@@ -105,7 +105,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 
 	if (!dbh->methods) {
 		PDO_DBG_INF("Throwing exception");
-		pdo_throw_exception_ex(php_pdo_get_exception(), *pdo_err, einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s", *pdo_err, einfo->errcode, einfo->errmsg);
+		pdo_throw_exception_ex(*pdo_err, einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s", *pdo_err, einfo->errcode, einfo->errmsg);
 	}
 
 	PDO_DBG_RETURN(einfo->errcode);

@@ -399,7 +399,7 @@ cleanup:
 	dbh->driver_data = H;
 
 	if (!ret) {
-		pdo_throw_exception_ex(php_pdo_get_exception(), DBLIB_G(err).sqlstate, DBLIB_G(err).dberr TSRMLS_CC,
+		pdo_throw_exception_ex(DBLIB_G(err).sqlstate, DBLIB_G(err).dberr TSRMLS_CC,
 			"SQLSTATE[%s] %s (severity %d)",
 			DBLIB_G(err).sqlstate,
 			DBLIB_G(err).dberrstr,
