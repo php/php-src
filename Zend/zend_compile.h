@@ -714,7 +714,7 @@ void zend_do_extended_fcall_end(void);
 
 void zend_verify_namespace(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
+void zend_resolve_goto_label(zend_op_array *op_array, znode *label_node, zend_op *pass2_opline);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -876,9 +876,7 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define ZEND_FREE_ON_RETURN     (1<<0)
-
-#define ZEND_MEMBER_FUNC_CALL   (1<<0)
+#define ZEND_MEMBER_FUNC_CALL	1<<0
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
@@ -953,9 +951,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO  253
-#define ZEND_BRK   254
-#define ZEND_CONT  255
+#define ZEND_BRK 254
+#define ZEND_CONT 255
 
 
 END_EXTERN_C()

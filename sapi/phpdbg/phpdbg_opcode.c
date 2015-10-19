@@ -150,9 +150,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 		break;
 	}
 
-	spprintf(&result, 0,
-		"%-23s %-20s %-20s %-20s",
-		decode[0] ? decode[0] : opcode_name,
+	asprintf(&decode[0],
+		"%-20s %-20s %-20s",
 		decode[1] ? decode[1] : "",
 		decode[2] ? decode[2] : "",
 		decode[3] ? decode[3] : "");
