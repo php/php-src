@@ -430,12 +430,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		}
 	}
 
-	if (
-#if A0
-		FAIL == stmt_to_prepare->conn->m->send_command(stmt_to_prepare->conn, COM_STMT_PREPARE, (const zend_uchar *) query, query_len, PROT_LAST, FALSE, TRUE) ||
-#endif
-		FAIL == mysqlnd_stmt_read_prepare_response(s_to_prepare))
-	{
+	if (FAIL == mysqlnd_stmt_read_prepare_response(s_to_prepare)) {
 		goto fail;
 	}
 
@@ -745,12 +740,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 			ret = command->run(command);
 			command->free_command(command);
 		}	
-#if A0
-		/* support for buffer types should be added here ! */
-		ret = stmt->conn->m->send_command(stmt->conn, COM_STMT_EXECUTE, request, request_len,
-										  PROT_LAST /* we will handle the response packet*/,
-										  FALSE, FALSE);
-#endif
 	} else {
 		SET_STMT_ERROR(stmt, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -1322,14 +1311,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 				}
 			}
 		}
-#if A0
-		if (CONN_GET_STATE(conn) == CONN_READY &&
-			FAIL == (ret = conn->m->send_command(conn, COM_STMT_RESET, cmd_buf,
-											  	 sizeof(cmd_buf), PROT_OK_PACKET,
-												 FALSE, TRUE))) {
-			COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
-		}
-#endif
 		*stmt->upsert_status = *conn->upsert_status;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
@@ -1452,12 +1433,6 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 				}
 			}
 
-#if A0
-			ret = conn->m->send_command(conn, COM_STMT_SEND_LONG_DATA, cmd_buf, packet_len, PROT_LAST , FALSE, TRUE);
-			if (FAIL == ret) {
-				COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
-			}
-#endif
 			mnd_efree(cmd_buf);
 		} else {
 			ret = FAIL;
@@ -2288,14 +2263,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 			if (ret == FAIL) {
 				DBG_RETURN(FAIL);
 			}
-
-#if A0		
-			FAIL == conn->m->send_command(conn, COM_STMT_CLOSE, cmd_buf, sizeof(cmd_buf),
-										  PROT_LAST /* COM_STMT_CLOSE doesn't send an OK packet*/,
-										  FALSE, TRUE)) {
-			COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
-			DBG_RETURN(FAIL);
-#endif
 		}
 	}
 	switch (stmt->execute_count) {
