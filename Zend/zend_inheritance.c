@@ -170,7 +170,7 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
-		/* Only one has a type hint and the other one doesn't */
+		/* Only one has a type declaration and the other one doesn't */
 		return 0;
 	}
 
@@ -239,7 +239,7 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 	}
 
 	if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
-		/* Incompatible type hint */
+		/* Incompatible type */
 		return 0;
 	}
 
