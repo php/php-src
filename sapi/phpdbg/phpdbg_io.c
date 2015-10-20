@@ -202,13 +202,13 @@ static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 			bytes += write(sock, ptr + bytes, (p - ptr) - bytes);
 			
 			if (memchr(p, '\n', endp - p)) {
-				int chr;
-				printf("\r---Type <return> to continue or q <return> to quit---");
-				chr = getchar();
-				if (chr == 'q') {
+				char buf[PHPDBG_MAX_CMD];
+				write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
+				phpdbg_consume_stdin_line(buf);
+				if (*buf == 'q') {
 					break;
 				}
-				printf("\r");
+				write(sock, "\r", 1);
 			} else break;
 		}
 	}
@@ -225,9 +225,10 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
 	
-	if (PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION
-		&& PHPDBG_G(io)[PHPDBG_STDOUT].fd == sock
-		&& PHPDBG_G(lines) > 0) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION)
+	 && !(PHPDBG_G(flags) & PHPDBG_WRITE_XML)
+	 && PHPDBG_G(io)[PHPDBG_STDOUT].fd == sock
+	 && PHPDBG_G(lines) > 0) {
 		return phpdbg_output_pager(sock, ptr, len);
 	}
 
