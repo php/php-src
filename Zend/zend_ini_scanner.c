@@ -472,10 +472,6 @@ yyc_INITIAL:
 		case '|':
 		case '}':
 		case '~':	goto yy10;
-<<<<<<< HEAD
-=======
-		case '#':	goto yy12;
->>>>>>> PHP-5.6
 		case '%':
 		case '\'':
 		case '*':
@@ -489,7 +485,6 @@ yyc_INITIAL:
 		case '>':
 		case '?':
 		case '@':
-<<<<<<< HEAD
 		case ']':	goto yy12;
 		case ';':	goto yy13;
 		case '=':	goto yy15;
@@ -504,33 +499,13 @@ yyc_INITIAL:
 		case 'Y':
 		case 'y':	goto yy21;
 		case '[':	goto yy22;
-=======
-		case ']':	goto yy13;
-		case ';':	goto yy14;
-		case '=':	goto yy16;
-		case 'F':
-		case 'f':	goto yy18;
-		case 'N':
-		case 'n':	goto yy19;
-		case 'O':
-		case 'o':	goto yy20;
-		case 'T':
-		case 't':	goto yy21;
-		case 'Y':
-		case 'y':	goto yy22;
-		case '[':	goto yy23;
->>>>>>> PHP-5.6
 		default:	goto yy2;
 		}
 yy2:
 		YYDEBUG(2, *YYCURSOR);
 		++YYCURSOR;
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		goto yy25;
-=======
-		goto yy26;
->>>>>>> PHP-5.6
 yy3:
 		YYDEBUG(3, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
@@ -549,11 +524,7 @@ yy4:
 		YYDEBUG(4, *YYCURSOR);
 		yyaccept = 0;
 		yych = *(YYMARKER = ++YYCURSOR);
-<<<<<<< HEAD
 		goto yy63;
-=======
-		goto yy73;
->>>>>>> PHP-5.6
 yy5:
 		YYDEBUG(5, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
@@ -578,11 +549,7 @@ yy7:
 yy8:
 		YYDEBUG(8, *YYCURSOR);
 		yych = *++YYCURSOR;
-<<<<<<< HEAD
 		if (yych == '\n') goto yy66;
-=======
-		if (yych == '\n') goto yy76;
->>>>>>> PHP-5.6
 		goto yy7;
 yy9:
 		YYDEBUG(9, *YYCURSOR);
@@ -590,7 +557,6 @@ yy9:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= 0x1F) {
 			if (yych <= '\n') {
-<<<<<<< HEAD
 				if (yych <= 0x08) goto yy25;
 				if (yych <= '\t') goto yy62;
 				goto yy66;
@@ -606,24 +572,6 @@ yy9:
 			} else {
 				if (yych == '=') goto yy55;
 				goto yy25;
-=======
-				if (yych <= 0x08) goto yy26;
-				if (yych <= '\t') goto yy72;
-				goto yy76;
-			} else {
-				if (yych == '\r') goto yy77;
-				if (yych <= 0x1F) goto yy26;
-				goto yy74;
-			}
-		} else {
-			if (yych <= ':') {
-				if (yych == '#') goto yy63;
-				goto yy26;
-			} else {
-				if (yych <= ';') goto yy58;
-				if (yych == '=') goto yy56;
-				goto yy26;
->>>>>>> PHP-5.6
 			}
 		}
 yy10:
@@ -635,7 +583,6 @@ yy10:
 		{ /* Disallow these chars outside option values */
 	return yytext[0];
 }
-<<<<<<< HEAD
 #line 587 "Zend/zend_ini_scanner.c"
 yy12:
 		YYDEBUG(12, *YYCURSOR);
@@ -647,30 +594,11 @@ yy13:
 		yych = *(YYMARKER = ++YYCURSOR);
 		goto yy58;
 		YYDEBUG(14, *YYCURSOR);
-=======
-#line 588 "Zend/zend_ini_scanner.c"
-yy12:
-		YYDEBUG(12, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy64;
-yy13:
-		YYDEBUG(13, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy26;
-yy14:
-		YYDEBUG(14, *YYCURSOR);
-		yyaccept = 2;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy59;
-		YYDEBUG(15, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 648 "Zend/zend_ini_scanner.l"
 		{
 	return 0;
 }
-<<<<<<< HEAD
 #line 603 "Zend/zend_ini_scanner.c"
 yy15:
 		YYDEBUG(15, *YYCURSOR);
@@ -679,16 +607,6 @@ yy15:
 		goto yy56;
 yy16:
 		YYDEBUG(16, *YYCURSOR);
-=======
-#line 609 "Zend/zend_ini_scanner.c"
-yy16:
-		YYDEBUG(16, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy57;
-yy17:
-		YYDEBUG(17, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 491 "Zend/zend_ini_scanner.l"
 		{ /* Start option value */
@@ -699,7 +617,6 @@ yy17:
 	}
 	return '=';
 }
-<<<<<<< HEAD
 #line 621 "Zend/zend_ini_scanner.c"
 yy17:
 		YYDEBUG(17, *YYCURSOR);
@@ -755,63 +672,6 @@ yy22:
 		YYDEBUG(22, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(23, *YYCURSOR);
-=======
-#line 627 "Zend/zend_ini_scanner.c"
-yy18:
-		YYDEBUG(18, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'A') goto yy53;
-		if (yych == 'a') goto yy53;
-		goto yy26;
-yy19:
-		YYDEBUG(19, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych <= 'U') {
-			if (yych == 'O') goto yy44;
-			if (yych <= 'T') goto yy26;
-			goto yy45;
-		} else {
-			if (yych <= 'o') {
-				if (yych <= 'n') goto yy26;
-				goto yy44;
-			} else {
-				if (yych == 'u') goto yy45;
-				goto yy26;
-			}
-		}
-yy20:
-		YYDEBUG(20, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych <= 'N') {
-			if (yych == 'F') goto yy38;
-			if (yych <= 'M') goto yy26;
-			goto yy31;
-		} else {
-			if (yych <= 'f') {
-				if (yych <= 'e') goto yy26;
-				goto yy38;
-			} else {
-				if (yych == 'n') goto yy31;
-				goto yy26;
-			}
-		}
-yy21:
-		YYDEBUG(21, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'R') goto yy36;
-		if (yych == 'r') goto yy36;
-		goto yy26;
-yy22:
-		YYDEBUG(22, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'E') goto yy27;
-		if (yych == 'e') goto yy27;
-		goto yy26;
-yy23:
-		YYDEBUG(23, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(24, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 406 "Zend/zend_ini_scanner.l"
 		{ /* Section start */
@@ -823,7 +683,6 @@ yy23:
 	}
 	return TC_SECTION;
 }
-<<<<<<< HEAD
 #line 687 "Zend/zend_ini_scanner.c"
 yy24:
 		YYDEBUG(24, *YYCURSOR);
@@ -853,37 +712,6 @@ yy27:
 			goto yy27;
 		}
 		YYDEBUG(29, *YYCURSOR);
-=======
-#line 693 "Zend/zend_ini_scanner.c"
-yy25:
-		YYDEBUG(25, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-yy26:
-		YYDEBUG(26, *YYCURSOR);
-		if (yybm[0+yych] & 16) {
-			goto yy25;
-		}
-		if (yych == '[') goto yy28;
-		goto yy3;
-yy27:
-		YYDEBUG(27, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'S') goto yy31;
-		if (yych == 's') goto yy31;
-		goto yy26;
-yy28:
-		YYDEBUG(28, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(29, *YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy28;
-		}
-		YYDEBUG(30, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 431 "Zend/zend_ini_scanner.l"
 		{ /* Start of option with offset */
@@ -898,7 +726,6 @@ yy28:
 
 	RETURN_TOKEN(TC_OFFSET, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 730 "Zend/zend_ini_scanner.c"
 yy30:
 		YYDEBUG(30, *YYCURSOR);
@@ -908,22 +735,10 @@ yy30:
 		YYDEBUG(31, *YYCURSOR);
 		if (yybm[0+yych] & 64) {
 			goto yy30;
-=======
-#line 736 "Zend/zend_ini_scanner.c"
-yy31:
-		YYDEBUG(31, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(32, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy31;
->>>>>>> PHP-5.6
 		}
 		if (yych <= '\'') {
 			if (yych <= ' ') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x08) goto yy24;
 					if (yych <= '\t') goto yy33;
 				} else {
@@ -934,24 +749,11 @@ yy31:
 					if (yych == '#') goto yy24;
 				} else {
 					if (yych != '&') goto yy24;
-=======
-					if (yych <= 0x08) goto yy25;
-					if (yych <= '\t') goto yy34;
-				} else {
-					if (yych != '\r') goto yy25;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych == '#') goto yy25;
-				} else {
-					if (yych != '&') goto yy25;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= 'Z') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ')') goto yy32;
 					if (yych <= ':') goto yy24;
 				} else {
@@ -969,31 +771,11 @@ yy31:
 		}
 yy32:
 		YYDEBUG(32, *YYCURSOR);
-=======
-					if (yych <= ')') goto yy33;
-					if (yych <= ':') goto yy25;
-				} else {
-					if (yych != '=') goto yy25;
-				}
-			} else {
-				if (yych <= '^') {
-					if (yych <= '[') goto yy28;
-					if (yych <= ']') goto yy25;
-				} else {
-					if (yych <= 'z') goto yy25;
-					if (yych >= 0x7F) goto yy25;
-				}
-			}
-		}
-yy33:
-		YYDEBUG(33, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 469 "Zend/zend_ini_scanner.l"
 		{ /* TRUE value (when used outside option value/offset this causes parse error!) */
 	RETURN_TOKEN(BOOL_TRUE, "1", 1);
 }
-<<<<<<< HEAD
 #line 780 "Zend/zend_ini_scanner.c"
 yy33:
 		YYDEBUG(33, *YYCURSOR);
@@ -1040,60 +822,11 @@ yy38:
 					if (yych >= '#') goto yy24;
 				} else {
 					if (yych == '%') goto yy24;
-=======
-#line 786 "Zend/zend_ini_scanner.c"
-yy34:
-		YYDEBUG(34, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(35, *YYCURSOR);
-		if (yych == '\t') goto yy34;
-		if (yych == ' ') goto yy34;
-		goto yy33;
-yy36:
-		YYDEBUG(36, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'U') goto yy37;
-		if (yych != 'u') goto yy26;
-yy37:
-		YYDEBUG(37, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'E') goto yy31;
-		if (yych == 'e') goto yy31;
-		goto yy26;
-yy38:
-		YYDEBUG(38, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'F') goto yy39;
-		if (yych != 'f') goto yy26;
-yy39:
-		YYDEBUG(39, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(40, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x08) goto yy25;
-					if (yych <= '\t') goto yy42;
-				} else {
-					if (yych != '\r') goto yy25;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= ' ') goto yy39;
-					if (yych >= '#') goto yy25;
-				} else {
-					if (yych == '%') goto yy25;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '=') {
 				if (yych <= ':') {
-<<<<<<< HEAD
 					if (yych <= '\'') goto yy24;
 					if (yych >= '*') goto yy24;
 				} else {
@@ -1112,32 +845,11 @@ yy39:
 		}
 yy40:
 		YYDEBUG(40, *YYCURSOR);
-=======
-					if (yych <= '\'') goto yy25;
-					if (yych >= '*') goto yy25;
-				} else {
-					if (yych == '<') goto yy25;
-				}
-			} else {
-				if (yych <= ']') {
-					if (yych == '[') goto yy28;
-					goto yy25;
-				} else {
-					if (yych <= '^') goto yy41;
-					if (yych <= 'z') goto yy25;
-					if (yych >= 0x7F) goto yy25;
-				}
-			}
-		}
-yy41:
-		YYDEBUG(41, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 473 "Zend/zend_ini_scanner.l"
 		{ /* FALSE value (when used outside option value/offset this causes parse error!)*/
 	RETURN_TOKEN(BOOL_FALSE, "", 0);
 }
-<<<<<<< HEAD
 #line 854 "Zend/zend_ini_scanner.c"
 yy41:
 		YYDEBUG(41, *YYCURSOR);
@@ -1150,25 +862,10 @@ yy41:
 		goto yy40;
 yy43:
 		YYDEBUG(43, *YYCURSOR);
-=======
-#line 860 "Zend/zend_ini_scanner.c"
-yy42:
-		YYDEBUG(42, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(43, *YYCURSOR);
-		if (yych == '\t') goto yy42;
-		if (yych == ' ') goto yy42;
-		goto yy41;
-yy44:
-		YYDEBUG(44, *YYCURSOR);
->>>>>>> PHP-5.6
 		yych = *++YYCURSOR;
 		if (yych <= '\'') {
 			if (yych <= 0x1F) {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x08) goto yy25;
 					if (yych <= '\t') goto yy41;
 					goto yy40;
@@ -1185,30 +882,11 @@ yy44:
 					if (yych == '%') goto yy25;
 					if (yych <= '&') goto yy40;
 					goto yy25;
-=======
-					if (yych <= 0x08) goto yy26;
-					if (yych <= '\t') goto yy42;
-					goto yy41;
-				} else {
-					if (yych == '\r') goto yy41;
-					goto yy26;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= ' ') goto yy39;
-					if (yych <= '"') goto yy41;
-					goto yy26;
-				} else {
-					if (yych == '%') goto yy26;
-					if (yych <= '&') goto yy41;
-					goto yy26;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= 'N') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ')') goto yy40;
 					if (yych <= ':') goto yy25;
 					goto yy40;
@@ -1259,64 +937,11 @@ yy46:
 					if (yych >= '#') goto yy24;
 				} else {
 					if (yych == '%') goto yy24;
-=======
-					if (yych <= ')') goto yy41;
-					if (yych <= ':') goto yy26;
-					goto yy41;
-				} else {
-					if (yych == '=') goto yy41;
-					if (yych <= 'M') goto yy26;
-					goto yy52;
-				}
-			} else {
-				if (yych <= 'm') {
-					if (yych == '^') goto yy41;
-					goto yy26;
-				} else {
-					if (yych <= 'n') goto yy52;
-					if (yych <= 'z') goto yy26;
-					if (yych <= '~') goto yy41;
-					goto yy26;
-				}
-			}
-		}
-yy45:
-		YYDEBUG(45, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'L') goto yy46;
-		if (yych != 'l') goto yy26;
-yy46:
-		YYDEBUG(46, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'L') goto yy47;
-		if (yych != 'l') goto yy26;
-yy47:
-		YYDEBUG(47, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(48, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x08) goto yy25;
-					if (yych <= '\t') goto yy50;
-				} else {
-					if (yych != '\r') goto yy25;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= ' ') goto yy47;
-					if (yych >= '#') goto yy25;
-				} else {
-					if (yych == '%') goto yy25;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '=') {
 				if (yych <= ':') {
-<<<<<<< HEAD
 					if (yych <= '\'') goto yy24;
 					if (yych >= '*') goto yy24;
 				} else {
@@ -1335,32 +960,11 @@ yy47:
 		}
 yy48:
 		YYDEBUG(48, *YYCURSOR);
-=======
-					if (yych <= '\'') goto yy25;
-					if (yych >= '*') goto yy25;
-				} else {
-					if (yych == '<') goto yy25;
-				}
-			} else {
-				if (yych <= ']') {
-					if (yych == '[') goto yy28;
-					goto yy25;
-				} else {
-					if (yych <= '^') goto yy49;
-					if (yych <= 'z') goto yy25;
-					if (yych >= 0x7F) goto yy25;
-				}
-			}
-		}
-yy49:
-		YYDEBUG(49, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 477 "Zend/zend_ini_scanner.l"
 		{
 	RETURN_TOKEN(NULL_NULL, "", 0);
 }
-<<<<<<< HEAD
 #line 969 "Zend/zend_ini_scanner.c"
 yy49:
 		YYDEBUG(49, *YYCURSOR);
@@ -1405,53 +1009,11 @@ yy56:
 		goto yy16;
 yy57:
 		YYDEBUG(57, *YYCURSOR);
-=======
-#line 975 "Zend/zend_ini_scanner.c"
-yy50:
-		YYDEBUG(50, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(51, *YYCURSOR);
-		if (yych == '\t') goto yy50;
-		if (yych == ' ') goto yy50;
-		goto yy49;
-yy52:
-		YYDEBUG(52, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'E') goto yy39;
-		if (yych == 'e') goto yy39;
-		goto yy26;
-yy53:
-		YYDEBUG(53, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'L') goto yy54;
-		if (yych != 'l') goto yy26;
-yy54:
-		YYDEBUG(54, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'S') goto yy55;
-		if (yych != 's') goto yy26;
-yy55:
-		YYDEBUG(55, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == 'E') goto yy39;
-		if (yych == 'e') goto yy39;
-		goto yy26;
-yy56:
-		YYDEBUG(56, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-yy57:
-		YYDEBUG(57, *YYCURSOR);
-		if (yych == '\t') goto yy56;
-		if (yych == ' ') goto yy56;
-		goto yy17;
 yy58:
 		YYDEBUG(58, *YYCURSOR);
-<<<<<<< HEAD
 		if (yybm[0+yych] & 128) {
 			goto yy57;
 		}
@@ -1461,22 +1023,6 @@ yy59:
 		++YYCURSOR;
 yy60:
 		YYDEBUG(60, *YYCURSOR);
-=======
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy59:
-		YYDEBUG(59, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy58;
-		}
-		if (yych >= '\r') goto yy62;
-yy60:
-		YYDEBUG(60, *YYCURSOR);
-		++YYCURSOR;
-yy61:
-		YYDEBUG(61, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 637 "Zend/zend_ini_scanner.l"
 		{ /* Comment */
@@ -1484,7 +1030,6 @@ yy61:
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 1034 "Zend/zend_ini_scanner.c"
 yy61:
 		YYDEBUG(61, *YYCURSOR);
@@ -1493,107 +1038,10 @@ yy61:
 		goto yy60;
 yy62:
 		YYDEBUG(62, *YYCURSOR);
-=======
-#line 1040 "Zend/zend_ini_scanner.c"
-yy62:
-		YYDEBUG(62, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy60;
-		goto yy61;
-yy63:
-		YYDEBUG(63, *YYCURSOR);
-		yyaccept = 1;
-		YYMARKER = ++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy64:
-		YYDEBUG(64, *YYCURSOR);
-		if (yych <= '\'') {
-			if (yych <= ' ') {
-				if (yych <= '\n') {
-					if (yych <= 0x08) goto yy63;
-					if (yych >= '\n') goto yy69;
-				} else {
-					if (yych == '\r') goto yy71;
-					goto yy63;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych == '#') goto yy63;
-				} else {
-					if (yych != '&') goto yy63;
-				}
-			}
-		} else {
-			if (yych <= 'Z') {
-				if (yych <= ';') {
-					if (yych <= ')') goto yy65;
-					if (yych <= ':') goto yy63;
-				} else {
-					if (yych != '=') goto yy63;
-				}
-			} else {
-				if (yych <= '^') {
-					if (yych <= '[') goto yy67;
-					if (yych <= ']') goto yy63;
-				} else {
-					if (yych <= 'z') goto yy63;
-					if (yych >= 0x7F) goto yy63;
-				}
-			}
-		}
-yy65:
-		YYDEBUG(65, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-		YYDEBUG(66, *YYCURSOR);
-		if (yych == '\n') goto yy69;
-		if (yych == '\r') goto yy71;
-		goto yy65;
-yy67:
-		YYDEBUG(67, *YYCURSOR);
-		yyaccept = 3;
-		YYMARKER = ++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-		YYDEBUG(68, *YYCURSOR);
-		if (yych <= '\f') {
-			if (yych <= 0x08) goto yy65;
-			if (yych <= '\t') goto yy67;
-			if (yych >= '\v') goto yy65;
-		} else {
-			if (yych <= '\r') goto yy71;
-			if (yych == ' ') goto yy67;
-			goto yy65;
-		}
-yy69:
-		YYDEBUG(69, *YYCURSOR);
-		++YYCURSOR;
-yy70:
-		YYDEBUG(70, *YYCURSOR);
-		yyleng = YYCURSOR - SCNG(yy_text);
-#line 642 "Zend/zend_ini_scanner.l"
-		{ /* #Comment */
-	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(TSRMLS_C), SCNG(lineno));
-	BEGIN(INITIAL);
-	SCNG(lineno)++;
-	return END_OF_LINE;
-}
-#line 1126 "Zend/zend_ini_scanner.c"
-yy71:
-		YYDEBUG(71, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy69;
-		goto yy70;
-yy72:
-		YYDEBUG(72, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy63:
 		YYDEBUG(63, *YYCURSOR);
 		if (yych <= 0x1F) {
@@ -1617,37 +1065,10 @@ yy63:
 		}
 yy64:
 		YYDEBUG(64, *YYCURSOR);
-=======
-yy73:
-		YYDEBUG(73, *YYCURSOR);
-		if (yych <= ' ') {
-			if (yych <= '\n') {
-				if (yych <= 0x08) goto yy5;
-				if (yych <= '\t') goto yy72;
-				goto yy76;
-			} else {
-				if (yych == '\r') goto yy77;
-				if (yych <= 0x1F) goto yy5;
-				goto yy72;
-			}
-		} else {
-			if (yych <= ':') {
-				if (yych == '#') goto yy65;
-				goto yy5;
-			} else {
-				if (yych <= ';') goto yy58;
-				if (yych == '=') goto yy56;
-				goto yy5;
-			}
-		}
-yy74:
-		YYDEBUG(74, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 1;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(65, *YYCURSOR);
 		if (yych <= '&') {
 			if (yych <= 0x1F) {
@@ -1665,32 +1086,12 @@ yy74:
 					goto yy24;
 				} else {
 					if (yych == '%') goto yy24;
-=======
-		YYDEBUG(75, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x08) goto yy25;
-					if (yych <= '\t') goto yy72;
-				} else {
-					if (yych == '\r') goto yy77;
-					goto yy25;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= ' ') goto yy74;
-					if (yych <= '"') goto yy3;
-					goto yy63;
-				} else {
-					if (yych == '%') goto yy25;
->>>>>>> PHP-5.6
 					goto yy3;
 				}
 			}
 		} else {
 			if (yych <= '=') {
 				if (yych <= ':') {
-<<<<<<< HEAD
 					if (yych <= '\'') goto yy24;
 					if (yych <= ')') goto yy3;
 					goto yy24;
@@ -1719,36 +1120,6 @@ yy67:
 		YYDEBUG(67, *YYCURSOR);
 		++YYCURSOR;
 		if ((yych = *YYCURSOR) == '\n') goto yy66;
-=======
-					if (yych <= '\'') goto yy25;
-					if (yych <= ')') goto yy3;
-					goto yy25;
-				} else {
-					if (yych <= ';') goto yy58;
-					if (yych <= '<') goto yy25;
-					goto yy56;
-				}
-			} else {
-				if (yych <= ']') {
-					if (yych == '[') goto yy28;
-					goto yy25;
-				} else {
-					if (yych <= '^') goto yy3;
-					if (yych <= 'z') goto yy25;
-					if (yych <= '~') goto yy3;
-					goto yy25;
-				}
-			}
-		}
-yy76:
-		YYDEBUG(76, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy7;
-yy77:
-		YYDEBUG(77, *YYCURSOR);
-		++YYCURSOR;
-		if ((yych = *YYCURSOR) == '\n') goto yy76;
->>>>>>> PHP-5.6
 		goto yy7;
 	}
 /* *********************************** */
@@ -1788,7 +1159,6 @@ yyc_ST_DOUBLE_QUOTES:
 			  0,   0,   0,   0,   0,   0,   0,   0, 
 			  0,   0,   0,   0,   0,   0,   0,   0, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(68, *YYCURSOR);
 		YYFILL(2);
 		yych = *YYCURSOR;
@@ -1798,17 +1168,6 @@ yyc_ST_DOUBLE_QUOTES:
 		++YYCURSOR;
 yy71:
 		YYDEBUG(71, *YYCURSOR);
-=======
-		YYDEBUG(78, *YYCURSOR);
-		YYFILL(2);
-		yych = *YYCURSOR;
-		if (yych == '"') goto yy82;
-		if (yych == '$') goto yy84;
-		YYDEBUG(80, *YYCURSOR);
-		++YYCURSOR;
-yy81:
-		YYDEBUG(81, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 587 "Zend/zend_ini_scanner.l"
 		{ /* Escape double quoted string contents */
@@ -1846,7 +1205,6 @@ yy81:
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"');
 	return TC_QUOTED_STRING;
 }
-<<<<<<< HEAD
 #line 1209 "Zend/zend_ini_scanner.c"
 yy72:
 		YYDEBUG(72, *YYCURSOR);
@@ -1855,23 +1213,12 @@ yy72:
 		goto yy78;
 yy73:
 		YYDEBUG(73, *YYCURSOR);
-=======
-#line 1302 "Zend/zend_ini_scanner.c"
-yy82:
-		YYDEBUG(82, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy88;
-yy83:
-		YYDEBUG(83, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 582 "Zend/zend_ini_scanner.l"
 		{ /* Double quoted '"' string ends */
 	yy_pop_state();
 	return '"';
 }
-<<<<<<< HEAD
 #line 1223 "Zend/zend_ini_scanner.c"
 yy74:
 		YYDEBUG(74, *YYCURSOR);
@@ -1880,23 +1227,12 @@ yy74:
 		YYDEBUG(75, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(76, *YYCURSOR);
-=======
-#line 1316 "Zend/zend_ini_scanner.c"
-yy84:
-		YYDEBUG(84, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych != '{') goto yy81;
-		YYDEBUG(85, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(86, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 449 "Zend/zend_ini_scanner.l"
 		{ /* Variable start */
 	yy_push_state(ST_VARNAME);
 	return TC_DOLLAR_CURLY;
 }
-<<<<<<< HEAD
 #line 1237 "Zend/zend_ini_scanner.c"
 yy77:
 		YYDEBUG(77, *YYCURSOR);
@@ -1909,20 +1245,6 @@ yy78:
 			goto yy77;
 		}
 		goto yy73;
-=======
-#line 1330 "Zend/zend_ini_scanner.c"
-yy87:
-		YYDEBUG(87, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-yy88:
-		YYDEBUG(88, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy87;
-		}
-		goto yy83;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_OFFSET:
@@ -1961,17 +1283,12 @@ yyc_ST_OFFSET:
 			 66,  66,  66,  66,  66,  66,  66,  66, 
 			 66,  66,  66,  66,  66,  66,  66,  66, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(79, *YYCURSOR);
-=======
-		YYDEBUG(89, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYFILL(2);
 		yych = *YYCURSOR;
 		if (yych <= '-') {
 			if (yych <= ' ') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x08) goto yy81;
 					if (yych <= '\t') goto yy83;
 					goto yy84;
@@ -1986,28 +1303,11 @@ yyc_ST_OFFSET:
 				} else {
 					if (yych == '\'') goto yy89;
 					if (yych >= '-') goto yy90;
-=======
-					if (yych <= 0x08) goto yy91;
-					if (yych <= '\t') goto yy93;
-					goto yy94;
-				} else {
-					if (yych == '\r') goto yy94;
-					if (yych >= ' ') goto yy93;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych == '"') goto yy96;
-					if (yych >= '$') goto yy98;
-				} else {
-					if (yych == '\'') goto yy99;
-					if (yych >= '-') goto yy100;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= 'Z') {
 				if (yych <= '9') {
-<<<<<<< HEAD
 					if (yych <= '.') goto yy91;
 					if (yych >= '0') goto yy92;
 				} else {
@@ -2032,38 +1332,11 @@ yy81:
 		goto yy100;
 yy82:
 		YYDEBUG(82, *YYCURSOR);
-=======
-					if (yych <= '.') goto yy101;
-					if (yych >= '0') goto yy102;
-				} else {
-					if (yych == ';') goto yy94;
-					if (yych >= 'A') goto yy104;
-				}
-			} else {
-				if (yych <= '^') {
-					if (yych <= '[') goto yy91;
-					if (yych <= '\\') goto yy106;
-					if (yych <= ']') goto yy107;
-				} else {
-					if (yych == '`') goto yy91;
-					if (yych <= 'z') goto yy104;
-				}
-			}
-		}
-yy91:
-		YYDEBUG(91, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy110;
-yy92:
-		YYDEBUG(92, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 573 "Zend/zend_ini_scanner.l"
 		{ /* Get rest as section/offset value */
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 1341 "Zend/zend_ini_scanner.c"
 yy83:
 		YYDEBUG(83, *YYCURSOR);
@@ -2080,51 +1353,23 @@ yy84:
 		++YYCURSOR;
 yy85:
 		YYDEBUG(85, *YYCURSOR);
-=======
-#line 1434 "Zend/zend_ini_scanner.c"
-yy93:
-		YYDEBUG(93, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy136;
-		}
-		if (yych == '"') goto yy138;
-		if (yych == ']') goto yy139;
-		goto yy110;
-yy94:
-		YYDEBUG(94, *YYCURSOR);
-		++YYCURSOR;
-yy95:
-		YYDEBUG(95, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 648 "Zend/zend_ini_scanner.l"
 		{
 	return 0;
 }
-<<<<<<< HEAD
 #line 1362 "Zend/zend_ini_scanner.c"
 yy86:
 		YYDEBUG(86, *YYCURSOR);
 		++YYCURSOR;
 yy87:
 		YYDEBUG(87, *YYCURSOR);
-=======
-#line 1455 "Zend/zend_ini_scanner.c"
-yy96:
-		YYDEBUG(96, *YYCURSOR);
-		++YYCURSOR;
-yy97:
-		YYDEBUG(97, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 577 "Zend/zend_ini_scanner.l"
 		{ /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES);
 	return '"';
 }
-<<<<<<< HEAD
 #line 1374 "Zend/zend_ini_scanner.c"
 yy88:
 		YYDEBUG(88, *YYCURSOR);
@@ -2161,49 +1406,10 @@ yy91:
 		goto yy100;
 yy92:
 		YYDEBUG(92, *YYCURSOR);
-=======
-#line 1467 "Zend/zend_ini_scanner.c"
-yy98:
-		YYDEBUG(98, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych <= '\\') {
-			if (yych <= 0x00) goto yy95;
-			if (yych <= '[') goto yy109;
-			goto yy114;
-		} else {
-			if (yych == '{') goto yy134;
-			goto yy109;
-		}
-yy99:
-		YYDEBUG(99, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy130;
-		}
-		goto yy95;
-yy100:
-		YYDEBUG(100, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy110;
-		if (yych <= '9') goto yy128;
-		goto yy110;
-yy101:
-		YYDEBUG(101, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy110;
-		if (yych <= '9') goto yy126;
-		goto yy110;
-yy102:
-		YYDEBUG(102, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '\'') {
 			if (yych <= '\r') {
-<<<<<<< HEAD
 				if (yych == '\n') goto yy93;
 				if (yych <= '\f') goto yy100;
 			} else {
@@ -2225,35 +1431,11 @@ yy102:
 		}
 yy93:
 		YYDEBUG(93, *YYCURSOR);
-=======
-				if (yych == '\n') goto yy103;
-				if (yych <= '\f') goto yy110;
-			} else {
-				if (yych == '"') goto yy103;
-				if (yych <= '&') goto yy110;
-			}
-		} else {
-			if (yych <= '9') {
-				if (yych == '.') goto yy122;
-				if (yych <= '/') goto yy110;
-				goto yy124;
-			} else {
-				if (yych <= ';') {
-					if (yych <= ':') goto yy110;
-				} else {
-					if (yych != ']') goto yy110;
-				}
-			}
-		}
-yy103:
-		YYDEBUG(103, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 551 "Zend/zend_ini_scanner.l"
 		{ /* Get number option value as string */
 	RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 1440 "Zend/zend_ini_scanner.c"
 yy94:
 		YYDEBUG(94, *YYCURSOR);
@@ -2279,39 +1461,11 @@ yy94:
 		}
 yy95:
 		YYDEBUG(95, *YYCURSOR);
-=======
-#line 1533 "Zend/zend_ini_scanner.c"
-yy104:
-		YYDEBUG(104, *YYCURSOR);
-		yyaccept = 3;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 16) {
-			goto yy120;
-		}
-		if (yych <= '"') {
-			if (yych <= '\f') {
-				if (yych != '\n') goto yy110;
-			} else {
-				if (yych <= '\r') goto yy105;
-				if (yych <= '!') goto yy110;
-			}
-		} else {
-			if (yych <= ':') {
-				if (yych != '\'') goto yy110;
-			} else {
-				if (yych <= ';') goto yy105;
-				if (yych != ']') goto yy110;
-			}
-		}
-yy105:
-		YYDEBUG(105, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 547 "Zend/zend_ini_scanner.l"
 		{ /* Get constant option value */
 	RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 1470 "Zend/zend_ini_scanner.c"
 yy96:
 		YYDEBUG(96, *YYCURSOR);
@@ -2322,38 +1476,19 @@ yy97:
 		++YYCURSOR;
 yy98:
 		YYDEBUG(98, *YYCURSOR);
-=======
-#line 1563 "Zend/zend_ini_scanner.c"
-yy106:
-		YYDEBUG(106, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy109;
-yy107:
-		YYDEBUG(107, *YYCURSOR);
-		++YYCURSOR;
-yy108:
-		YYDEBUG(108, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 444 "Zend/zend_ini_scanner.l"
 		{ /* End of section or an option offset */
 	BEGIN(INITIAL);
 	return ']';
 }
-<<<<<<< HEAD
 #line 1486 "Zend/zend_ini_scanner.c"
 yy99:
 		YYDEBUG(99, *YYCURSOR);
-=======
-#line 1579 "Zend/zend_ini_scanner.c"
-yy109:
-		YYDEBUG(109, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy100:
 		YYDEBUG(100, *YYCURSOR);
 		if (yybm[0+yych] & 2) {
@@ -2369,28 +1504,10 @@ yy101:
 		goto yy99;
 yy102:
 		YYDEBUG(102, *YYCURSOR);
-=======
-yy110:
-		YYDEBUG(110, *YYCURSOR);
-		if (yybm[0+yych] & 2) {
-			goto yy109;
-		}
-		if (yych == '$') goto yy112;
-		if (yych != '\\') goto yy92;
-yy111:
-		YYDEBUG(111, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		goto yy109;
-yy112:
-		YYDEBUG(112, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yych <= '\\') {
-<<<<<<< HEAD
 			if (yych <= 0x00) goto yy103;
 			if (yych <= '[') goto yy99;
 			goto yy104;
@@ -2415,37 +1532,10 @@ yy103:
 		}
 yy104:
 		YYDEBUG(104, *YYCURSOR);
-=======
-			if (yych <= 0x00) goto yy113;
-			if (yych <= '[') goto yy109;
-			goto yy114;
-		} else {
-			if (yych != '{') goto yy109;
-		}
-yy113:
-		YYDEBUG(113, *YYCURSOR);
-		YYCURSOR = YYMARKER;
-		if (yyaccept <= 1) {
-			if (yyaccept <= 0) {
-				goto yy92;
-			} else {
-				goto yy95;
-			}
-		} else {
-			if (yyaccept <= 2) {
-				goto yy103;
-			} else {
-				goto yy105;
-			}
-		}
-yy114:
-		YYDEBUG(114, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yybm[0+yych] & 4) {
-<<<<<<< HEAD
 			goto yy105;
 		}
 		if (yych == '\\') goto yy107;
@@ -2474,60 +1564,20 @@ yy107:
 		goto yy99;
 yy109:
 		YYDEBUG(109, *YYCURSOR);
-=======
-			goto yy115;
-		}
-		if (yych == '\\') goto yy117;
-		goto yy109;
-yy115:
-		YYDEBUG(115, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(116, *YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy115;
-		}
-		if (yych == '\\') goto yy119;
-		goto yy109;
-yy117:
-		YYDEBUG(117, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(118, *YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy115;
-		}
-		if (yych == '\\') goto yy117;
-		goto yy109;
-yy119:
-		YYDEBUG(119, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yybm[0+yych] & 4) {
-<<<<<<< HEAD
 			goto yy105;
 		}
 		if (yych == '\\') goto yy107;
 		goto yy99;
 yy110:
 		YYDEBUG(110, *YYCURSOR);
-=======
-			goto yy115;
-		}
-		if (yych == '\\') goto yy117;
-		goto yy109;
-yy120:
-		YYDEBUG(120, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(111, *YYCURSOR);
 		if (yybm[0+yych] & 16) {
 			goto yy110;
@@ -2556,41 +1606,10 @@ yy120:
 		}
 yy112:
 		YYDEBUG(112, *YYCURSOR);
-=======
-		YYDEBUG(121, *YYCURSOR);
-		if (yybm[0+yych] & 16) {
-			goto yy120;
-		}
-		if (yych <= '$') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy105;
-				if (yych <= '\f') goto yy109;
-				goto yy105;
-			} else {
-				if (yych == '"') goto yy105;
-				if (yych <= '#') goto yy109;
-				goto yy112;
-			}
-		} else {
-			if (yych <= ';') {
-				if (yych == '\'') goto yy105;
-				if (yych <= ':') goto yy109;
-				goto yy105;
-			} else {
-				if (yych <= '[') goto yy109;
-				if (yych <= '\\') goto yy111;
-				if (yych <= ']') goto yy105;
-				goto yy109;
-			}
-		}
-yy122:
-		YYDEBUG(122, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(113, *YYCURSOR);
 		if (yybm[0+yych] & 32) {
 			goto yy112;
@@ -2619,41 +1638,10 @@ yy122:
 		}
 yy114:
 		YYDEBUG(114, *YYCURSOR);
-=======
-		YYDEBUG(123, *YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy122;
-		}
-		if (yych <= '$') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy103;
-				if (yych <= '\f') goto yy109;
-				goto yy103;
-			} else {
-				if (yych == '"') goto yy103;
-				if (yych <= '#') goto yy109;
-				goto yy112;
-			}
-		} else {
-			if (yych <= ';') {
-				if (yych == '\'') goto yy103;
-				if (yych <= ':') goto yy109;
-				goto yy103;
-			} else {
-				if (yych <= '[') goto yy109;
-				if (yych <= '\\') goto yy111;
-				if (yych <= ']') goto yy103;
-				goto yy109;
-			}
-		}
-yy124:
-		YYDEBUG(124, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(115, *YYCURSOR);
 		if (yych <= '\'') {
 			if (yych <= '!') {
@@ -2672,32 +1660,11 @@ yy124:
 					if (yych <= '$') goto yy102;
 					if (yych <= '&') goto yy99;
 					goto yy93;
-=======
-		YYDEBUG(125, *YYCURSOR);
-		if (yych <= '\'') {
-			if (yych <= '!') {
-				if (yych <= '\n') {
-					if (yych <= '\t') goto yy109;
-					goto yy103;
-				} else {
-					if (yych == '\r') goto yy103;
-					goto yy109;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= '"') goto yy103;
-					goto yy109;
-				} else {
-					if (yych <= '$') goto yy112;
-					if (yych <= '&') goto yy109;
-					goto yy103;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
 				if (yych <= '.') {
-<<<<<<< HEAD
 					if (yych <= '-') goto yy99;
 					goto yy112;
 				} else {
@@ -2718,33 +1685,10 @@ yy124:
 		}
 yy116:
 		YYDEBUG(116, *YYCURSOR);
-=======
-					if (yych <= '-') goto yy109;
-					goto yy122;
-				} else {
-					if (yych <= '/') goto yy109;
-					if (yych <= '9') goto yy124;
-					goto yy109;
-				}
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy103;
-					goto yy109;
-				} else {
-					if (yych <= '\\') goto yy111;
-					if (yych <= ']') goto yy103;
-					goto yy109;
-				}
-			}
-		}
-yy126:
-		YYDEBUG(126, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(117, *YYCURSOR);
 		if (yych <= '&') {
 			if (yych <= '\r') {
@@ -2758,26 +1702,10 @@ yy126:
 				} else {
 					if (yych == '$') goto yy102;
 					goto yy99;
-=======
-		YYDEBUG(127, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy103;
-				if (yych <= '\f') goto yy109;
-				goto yy103;
-			} else {
-				if (yych <= '"') {
-					if (yych <= '!') goto yy109;
-					goto yy103;
-				} else {
-					if (yych == '$') goto yy112;
-					goto yy109;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
-<<<<<<< HEAD
 				if (yych <= '\'') goto yy93;
 				if (yych <= '/') goto yy99;
 				if (yych <= '9') goto yy116;
@@ -2795,30 +1723,10 @@ yy126:
 		}
 yy118:
 		YYDEBUG(118, *YYCURSOR);
-=======
-				if (yych <= '\'') goto yy103;
-				if (yych <= '/') goto yy109;
-				if (yych <= '9') goto yy126;
-				goto yy109;
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy103;
-					goto yy109;
-				} else {
-					if (yych <= '\\') goto yy111;
-					if (yych <= ']') goto yy103;
-					goto yy109;
-				}
-			}
-		}
-yy128:
-		YYDEBUG(128, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(119, *YYCURSOR);
 		if (yych <= '&') {
 			if (yych <= '\r') {
@@ -2832,26 +1740,10 @@ yy128:
 				} else {
 					if (yych == '$') goto yy102;
 					goto yy99;
-=======
-		YYDEBUG(129, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy103;
-				if (yych <= '\f') goto yy109;
-				goto yy103;
-			} else {
-				if (yych <= '"') {
-					if (yych <= '!') goto yy109;
-					goto yy103;
-				} else {
-					if (yych == '$') goto yy112;
-					goto yy109;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
-<<<<<<< HEAD
 				if (yych <= '\'') goto yy93;
 				if (yych <= '/') goto yy99;
 				if (yych <= '9') goto yy118;
@@ -2879,35 +1771,6 @@ yy120:
 		YYDEBUG(122, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(123, *YYCURSOR);
-=======
-				if (yych <= '\'') goto yy103;
-				if (yych <= '/') goto yy109;
-				if (yych <= '9') goto yy128;
-				goto yy109;
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy103;
-					goto yy109;
-				} else {
-					if (yych <= '\\') goto yy111;
-					if (yych <= ']') goto yy103;
-					goto yy109;
-				}
-			}
-		}
-yy130:
-		YYDEBUG(130, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(131, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy130;
-		}
-		YYDEBUG(132, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(133, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 416 "Zend/zend_ini_scanner.l"
 		{ /* Raw string */
@@ -2918,39 +1781,24 @@ yy130:
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 1785 "Zend/zend_ini_scanner.c"
 yy124:
 		YYDEBUG(124, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(125, *YYCURSOR);
-=======
-#line 1878 "Zend/zend_ini_scanner.c"
-yy134:
-		YYDEBUG(134, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(135, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 449 "Zend/zend_ini_scanner.l"
 		{ /* Variable start */
 	yy_push_state(ST_VARNAME);
 	return TC_DOLLAR_CURLY;
 }
-<<<<<<< HEAD
 #line 1796 "Zend/zend_ini_scanner.c"
 yy126:
 		YYDEBUG(126, *YYCURSOR);
-=======
-#line 1889 "Zend/zend_ini_scanner.c"
-yy136:
-		YYDEBUG(136, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(127, *YYCURSOR);
 		if (yybm[0+yych] & 128) {
 			goto yy126;
@@ -2986,43 +1834,6 @@ yy129:
 		++YYCURSOR;
 		yych = *YYCURSOR;
 		goto yy98;
-=======
-		YYDEBUG(137, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy136;
-		}
-		if (yych <= '$') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy92;
-				if (yych <= '\f') goto yy109;
-				goto yy92;
-			} else {
-				if (yych == '"') goto yy138;
-				if (yych <= '#') goto yy109;
-				goto yy112;
-			}
-		} else {
-			if (yych <= ';') {
-				if (yych == '\'') goto yy92;
-				if (yych <= ':') goto yy109;
-				goto yy92;
-			} else {
-				if (yych <= '[') goto yy109;
-				if (yych <= '\\') goto yy111;
-				if (yych <= ']') goto yy139;
-				goto yy109;
-			}
-		}
-yy138:
-		YYDEBUG(138, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy97;
-yy139:
-		YYDEBUG(139, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy108;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_RAW:
@@ -3061,16 +1872,11 @@ yyc_ST_RAW:
 			 64,  64,  64,  64,  64,  64,  64,  64, 
 			 64,  64,  64,  64,  64,  64,  64,  64, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(130, *YYCURSOR);
-=======
-		YYDEBUG(140, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYFILL(3);
 		yych = *YYCURSOR;
 		if (yych <= '\f') {
 			if (yych <= 0x08) {
-<<<<<<< HEAD
 				if (yych >= 0x01) goto yy134;
 			} else {
 				if (yych <= '\t') goto yy136;
@@ -3090,48 +1896,18 @@ yyc_ST_RAW:
 		YYDEBUG(132, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(133, *YYCURSOR);
-=======
-				if (yych >= 0x01) goto yy144;
-			} else {
-				if (yych <= '\t') goto yy146;
-				if (yych <= '\n') goto yy147;
-				goto yy144;
-			}
-		} else {
-			if (yych <= ' ') {
-				if (yych <= '\r') goto yy149;
-				if (yych <= 0x1F) goto yy144;
-				goto yy146;
-			} else {
-				if (yych == ';') goto yy150;
-				goto yy144;
-			}
-		}
-		YYDEBUG(142, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(143, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 643 "Zend/zend_ini_scanner.l"
 		{ /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 1906 "Zend/zend_ini_scanner.c"
 yy134:
 		YYDEBUG(134, *YYCURSOR);
 		++YYCURSOR;
 yy135:
 		YYDEBUG(135, *YYCURSOR);
-=======
-#line 1999 "Zend/zend_ini_scanner.c"
-yy144:
-		YYDEBUG(144, *YYCURSOR);
-		++YYCURSOR;
-yy145:
-		YYDEBUG(145, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 500 "Zend/zend_ini_scanner.l"
 		{ /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
@@ -3170,7 +1946,6 @@ end_raw_value_chars:
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 1950 "Zend/zend_ini_scanner.c"
 yy136:
 		YYDEBUG(136, *YYCURSOR);
@@ -3195,32 +1970,6 @@ yy137:
 		++YYCURSOR;
 yy138:
 		YYDEBUG(138, *YYCURSOR);
-=======
-#line 2043 "Zend/zend_ini_scanner.c"
-yy146:
-		YYDEBUG(146, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '\r') {
-			if (yych <= 0x08) goto yy145;
-			if (yych <= '\n') goto yy158;
-			if (yych <= '\f') goto yy145;
-			goto yy158;
-		} else {
-			if (yych <= ' ') {
-				if (yych <= 0x1F) goto yy145;
-				goto yy158;
-			} else {
-				if (yych == ';') goto yy158;
-				goto yy145;
-			}
-		}
-yy147:
-		YYDEBUG(147, *YYCURSOR);
-		++YYCURSOR;
-yy148:
-		YYDEBUG(148, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 541 "Zend/zend_ini_scanner.l"
 		{ /* End of option value */
@@ -3228,7 +1977,6 @@ yy148:
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 1981 "Zend/zend_ini_scanner.c"
 yy139:
 		YYDEBUG(139, *YYCURSOR);
@@ -3256,35 +2004,6 @@ yy143:
 		++YYCURSOR;
 yy144:
 		YYDEBUG(144, *YYCURSOR);
-=======
-#line 2074 "Zend/zend_ini_scanner.c"
-yy149:
-		YYDEBUG(149, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy156;
-		goto yy148;
-yy150:
-		YYDEBUG(150, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy152;
-yy151:
-		YYDEBUG(151, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy152:
-		YYDEBUG(152, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy151;
-		}
-		if (yych >= '\r') goto yy155;
-yy153:
-		YYDEBUG(153, *YYCURSOR);
-		++YYCURSOR;
-yy154:
-		YYDEBUG(154, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 637 "Zend/zend_ini_scanner.l"
 		{ /* Comment */
@@ -3292,7 +2011,6 @@ yy154:
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 2015 "Zend/zend_ini_scanner.c"
 yy145:
 		YYDEBUG(145, *YYCURSOR);
@@ -3305,25 +2023,10 @@ yy146:
 		goto yy138;
 yy147:
 		YYDEBUG(147, *YYCURSOR);
-=======
-#line 2108 "Zend/zend_ini_scanner.c"
-yy155:
-		YYDEBUG(155, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy153;
-		goto yy154;
-yy156:
-		YYDEBUG(156, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy148;
-yy157:
-		YYDEBUG(157, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy148:
 		YYDEBUG(148, *YYCURSOR);
 		if (yybm[0+yych] & 128) {
@@ -3336,41 +2039,18 @@ yy148:
 			if (yych == ';') goto yy141;
 		}
 		YYDEBUG(149, *YYCURSOR);
-=======
-yy158:
-		YYDEBUG(158, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy157;
-		}
-		if (yych <= '\f') {
-			if (yych == '\n') goto yy156;
-		} else {
-			if (yych <= '\r') goto yy160;
-			if (yych == ';') goto yy151;
-		}
-		YYDEBUG(159, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 627 "Zend/zend_ini_scanner.l"
 		{
 	/* eat whitespace */
 	goto restart;
 }
-<<<<<<< HEAD
 #line 2049 "Zend/zend_ini_scanner.c"
 yy150:
 		YYDEBUG(150, *YYCURSOR);
 		++YYCURSOR;
 		if ((yych = *YYCURSOR) == '\n') goto yy146;
 		goto yy138;
-=======
-#line 2142 "Zend/zend_ini_scanner.c"
-yy160:
-		YYDEBUG(160, *YYCURSOR);
-		++YYCURSOR;
-		if ((yych = *YYCURSOR) == '\n') goto yy156;
-		goto yy148;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_SECTION_RAW:
@@ -3409,7 +2089,6 @@ yyc_ST_SECTION_RAW:
 			128, 128, 128, 128, 128, 128, 128, 128, 
 			128, 128, 128, 128, 128, 128, 128, 128, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(151, *YYCURSOR);
 		YYFILL(3);
 		yych = *YYCURSOR;
@@ -3425,47 +2104,21 @@ yyc_ST_SECTION_RAW:
 		goto yy164;
 yy154:
 		YYDEBUG(154, *YYCURSOR);
-=======
-		YYDEBUG(161, *YYCURSOR);
-		YYFILL(3);
-		yych = *YYCURSOR;
-		if (yych <= '\f') {
-			if (yych == '\n') goto yy165;
-		} else {
-			if (yych <= '\r') goto yy165;
-			if (yych == ']') goto yy167;
-		}
-		YYDEBUG(163, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy174;
-yy164:
-		YYDEBUG(164, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 537 "Zend/zend_ini_scanner.l"
 		{ /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2113 "Zend/zend_ini_scanner.c"
 yy155:
 		YYDEBUG(155, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(156, *YYCURSOR);
-=======
-#line 2206 "Zend/zend_ini_scanner.c"
-yy165:
-		YYDEBUG(165, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(166, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 648 "Zend/zend_ini_scanner.l"
 		{
 	return 0;
 }
-<<<<<<< HEAD
 #line 2123 "Zend/zend_ini_scanner.c"
 yy157:
 		YYDEBUG(157, *YYCURSOR);
@@ -3474,16 +2127,6 @@ yy157:
 		goto yy160;
 yy158:
 		YYDEBUG(158, *YYCURSOR);
-=======
-#line 2216 "Zend/zend_ini_scanner.c"
-yy167:
-		YYDEBUG(167, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy170;
-yy168:
-		YYDEBUG(168, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 425 "Zend/zend_ini_scanner.l"
 		{ /* End of section */
@@ -3491,7 +2134,6 @@ yy168:
 	SCNG(lineno)++;
 	return ']';
 }
-<<<<<<< HEAD
 #line 2138 "Zend/zend_ini_scanner.c"
 yy159:
 		YYDEBUG(159, *YYCURSOR);
@@ -3526,42 +2168,6 @@ yy164:
 			goto yy163;
 		}
 		goto yy154;
-=======
-#line 2231 "Zend/zend_ini_scanner.c"
-yy169:
-		YYDEBUG(169, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy170:
-		YYDEBUG(170, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy169;
-		}
-		if (yych == '\n') goto yy171;
-		if (yych == '\r') goto yy172;
-		goto yy168;
-yy171:
-		YYDEBUG(171, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy168;
-yy172:
-		YYDEBUG(172, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy171;
-		goto yy168;
-yy173:
-		YYDEBUG(173, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-yy174:
-		YYDEBUG(174, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy173;
-		}
-		goto yy164;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_SECTION_VALUE:
@@ -3600,17 +2206,12 @@ yyc_ST_SECTION_VALUE:
 			132, 132, 132, 132, 132, 132, 132, 132, 
 			132, 132, 132, 132, 132, 132, 132, 132, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(165, *YYCURSOR);
-=======
-		YYDEBUG(175, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYFILL(3);
 		yych = *YYCURSOR;
 		if (yych <= '-') {
 			if (yych <= ' ') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x08) goto yy167;
 					if (yych <= '\t') goto yy169;
 					goto yy170;
@@ -3625,28 +2226,11 @@ yyc_ST_SECTION_VALUE:
 				} else {
 					if (yych == '\'') goto yy175;
 					if (yych >= '-') goto yy176;
-=======
-					if (yych <= 0x08) goto yy177;
-					if (yych <= '\t') goto yy179;
-					goto yy180;
-				} else {
-					if (yych == '\r') goto yy180;
-					if (yych >= ' ') goto yy179;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych == '"') goto yy182;
-					if (yych >= '$') goto yy184;
-				} else {
-					if (yych == '\'') goto yy185;
-					if (yych >= '-') goto yy186;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= 'Z') {
 				if (yych <= '9') {
-<<<<<<< HEAD
 					if (yych <= '.') goto yy177;
 					if (yych >= '0') goto yy178;
 				} else {
@@ -3671,38 +2255,11 @@ yy167:
 		goto yy190;
 yy168:
 		YYDEBUG(168, *YYCURSOR);
-=======
-					if (yych <= '.') goto yy187;
-					if (yych >= '0') goto yy188;
-				} else {
-					if (yych == ';') goto yy180;
-					if (yych >= 'A') goto yy190;
-				}
-			} else {
-				if (yych <= '^') {
-					if (yych <= '[') goto yy177;
-					if (yych <= '\\') goto yy192;
-					if (yych <= ']') goto yy193;
-				} else {
-					if (yych == '`') goto yy177;
-					if (yych <= 'z') goto yy190;
-				}
-			}
-		}
-yy177:
-		YYDEBUG(177, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy200;
-yy178:
-		YYDEBUG(178, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 573 "Zend/zend_ini_scanner.l"
 		{ /* Get rest as section/offset value */
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2264 "Zend/zend_ini_scanner.c"
 yy169:
 		YYDEBUG(169, *YYCURSOR);
@@ -3721,53 +2278,23 @@ yy170:
 		++YYCURSOR;
 yy171:
 		YYDEBUG(171, *YYCURSOR);
-=======
-#line 2357 "Zend/zend_ini_scanner.c"
-yy179:
-		YYDEBUG(179, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= 0x1F) {
-			if (yych == '\t') goto yy226;
-			goto yy200;
-		} else {
-			if (yych <= ' ') goto yy226;
-			if (yych == '"') goto yy228;
-			goto yy200;
-		}
-yy180:
-		YYDEBUG(180, *YYCURSOR);
-		++YYCURSOR;
-yy181:
-		YYDEBUG(181, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 648 "Zend/zend_ini_scanner.l"
 		{
 	return 0;
 }
-<<<<<<< HEAD
 #line 2287 "Zend/zend_ini_scanner.c"
 yy172:
 		YYDEBUG(172, *YYCURSOR);
 		++YYCURSOR;
 yy173:
 		YYDEBUG(173, *YYCURSOR);
-=======
-#line 2380 "Zend/zend_ini_scanner.c"
-yy182:
-		YYDEBUG(182, *YYCURSOR);
-		++YYCURSOR;
-yy183:
-		YYDEBUG(183, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 577 "Zend/zend_ini_scanner.l"
 		{ /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES);
 	return '"';
 }
-<<<<<<< HEAD
 #line 2299 "Zend/zend_ini_scanner.c"
 yy174:
 		YYDEBUG(174, *YYCURSOR);
@@ -3804,49 +2331,10 @@ yy177:
 		goto yy190;
 yy178:
 		YYDEBUG(178, *YYCURSOR);
-=======
-#line 2392 "Zend/zend_ini_scanner.c"
-yy184:
-		YYDEBUG(184, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych <= '\\') {
-			if (yych <= 0x00) goto yy181;
-			if (yych <= '[') goto yy199;
-			goto yy204;
-		} else {
-			if (yych == '{') goto yy224;
-			goto yy199;
-		}
-yy185:
-		YYDEBUG(185, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy220;
-		}
-		goto yy181;
-yy186:
-		YYDEBUG(186, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy200;
-		if (yych <= '9') goto yy218;
-		goto yy200;
-yy187:
-		YYDEBUG(187, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy200;
-		if (yych <= '9') goto yy216;
-		goto yy200;
-yy188:
-		YYDEBUG(188, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '\'') {
 			if (yych <= '\r') {
-<<<<<<< HEAD
 				if (yych == '\n') goto yy179;
 				if (yych <= '\f') goto yy190;
 			} else {
@@ -3868,35 +2356,11 @@ yy188:
 		}
 yy179:
 		YYDEBUG(179, *YYCURSOR);
-=======
-				if (yych == '\n') goto yy189;
-				if (yych <= '\f') goto yy200;
-			} else {
-				if (yych == '"') goto yy189;
-				if (yych <= '&') goto yy200;
-			}
-		} else {
-			if (yych <= '9') {
-				if (yych == '.') goto yy212;
-				if (yych <= '/') goto yy200;
-				goto yy214;
-			} else {
-				if (yych <= ';') {
-					if (yych <= ':') goto yy200;
-				} else {
-					if (yych != ']') goto yy200;
-				}
-			}
-		}
-yy189:
-		YYDEBUG(189, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 551 "Zend/zend_ini_scanner.l"
 		{ /* Get number option value as string */
 	RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2365 "Zend/zend_ini_scanner.c"
 yy180:
 		YYDEBUG(180, *YYCURSOR);
@@ -3922,39 +2386,11 @@ yy180:
 		}
 yy181:
 		YYDEBUG(181, *YYCURSOR);
-=======
-#line 2458 "Zend/zend_ini_scanner.c"
-yy190:
-		YYDEBUG(190, *YYCURSOR);
-		yyaccept = 3;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy210;
-		}
-		if (yych <= '"') {
-			if (yych <= '\f') {
-				if (yych != '\n') goto yy200;
-			} else {
-				if (yych <= '\r') goto yy191;
-				if (yych <= '!') goto yy200;
-			}
-		} else {
-			if (yych <= ':') {
-				if (yych != '\'') goto yy200;
-			} else {
-				if (yych <= ';') goto yy191;
-				if (yych != ']') goto yy200;
-			}
-		}
-yy191:
-		YYDEBUG(191, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 547 "Zend/zend_ini_scanner.l"
 		{ /* Get constant option value */
 	RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2395 "Zend/zend_ini_scanner.c"
 yy182:
 		YYDEBUG(182, *YYCURSOR);
@@ -3967,20 +2403,6 @@ yy183:
 		goto yy186;
 yy184:
 		YYDEBUG(184, *YYCURSOR);
-=======
-#line 2488 "Zend/zend_ini_scanner.c"
-yy192:
-		YYDEBUG(192, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy199;
-yy193:
-		YYDEBUG(193, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy196;
-yy194:
-		YYDEBUG(194, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 425 "Zend/zend_ini_scanner.l"
 		{ /* End of section */
@@ -3988,7 +2410,6 @@ yy194:
 	SCNG(lineno)++;
 	return ']';
 }
-<<<<<<< HEAD
 #line 2414 "Zend/zend_ini_scanner.c"
 yy185:
 		YYDEBUG(185, *YYCURSOR);
@@ -4014,38 +2435,10 @@ yy188:
 		goto yy184;
 yy189:
 		YYDEBUG(189, *YYCURSOR);
-=======
-#line 2507 "Zend/zend_ini_scanner.c"
-yy195:
-		YYDEBUG(195, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy196:
-		YYDEBUG(196, *YYCURSOR);
-		if (yybm[0+yych] & 2) {
-			goto yy195;
-		}
-		if (yych == '\n') goto yy197;
-		if (yych == '\r') goto yy198;
-		goto yy194;
-yy197:
-		YYDEBUG(197, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy194;
-yy198:
-		YYDEBUG(198, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy197;
-		goto yy194;
-yy199:
-		YYDEBUG(199, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy190:
 		YYDEBUG(190, *YYCURSOR);
 		if (yybm[0+yych] & 4) {
@@ -4061,28 +2454,10 @@ yy191:
 		goto yy189;
 yy192:
 		YYDEBUG(192, *YYCURSOR);
-=======
-yy200:
-		YYDEBUG(200, *YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy199;
-		}
-		if (yych == '$') goto yy202;
-		if (yych != '\\') goto yy178;
-yy201:
-		YYDEBUG(201, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		goto yy199;
-yy202:
-		YYDEBUG(202, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yych <= '\\') {
-<<<<<<< HEAD
 			if (yych <= 0x00) goto yy193;
 			if (yych <= '[') goto yy189;
 			goto yy194;
@@ -4107,37 +2482,10 @@ yy193:
 		}
 yy194:
 		YYDEBUG(194, *YYCURSOR);
-=======
-			if (yych <= 0x00) goto yy203;
-			if (yych <= '[') goto yy199;
-			goto yy204;
-		} else {
-			if (yych != '{') goto yy199;
-		}
-yy203:
-		YYDEBUG(203, *YYCURSOR);
-		YYCURSOR = YYMARKER;
-		if (yyaccept <= 1) {
-			if (yyaccept <= 0) {
-				goto yy178;
-			} else {
-				goto yy181;
-			}
-		} else {
-			if (yyaccept <= 2) {
-				goto yy189;
-			} else {
-				goto yy191;
-			}
-		}
-yy204:
-		YYDEBUG(204, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yybm[0+yych] & 8) {
-<<<<<<< HEAD
 			goto yy195;
 		}
 		if (yych == '\\') goto yy197;
@@ -4166,60 +2514,20 @@ yy197:
 		goto yy189;
 yy199:
 		YYDEBUG(199, *YYCURSOR);
-=======
-			goto yy205;
-		}
-		if (yych == '\\') goto yy207;
-		goto yy199;
-yy205:
-		YYDEBUG(205, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(206, *YYCURSOR);
-		if (yybm[0+yych] & 8) {
-			goto yy205;
-		}
-		if (yych == '\\') goto yy209;
-		goto yy199;
-yy207:
-		YYDEBUG(207, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(208, *YYCURSOR);
-		if (yybm[0+yych] & 8) {
-			goto yy205;
-		}
-		if (yych == '\\') goto yy207;
-		goto yy199;
-yy209:
-		YYDEBUG(209, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yybm[0+yych] & 8) {
-<<<<<<< HEAD
 			goto yy195;
 		}
 		if (yych == '\\') goto yy197;
 		goto yy189;
 yy200:
 		YYDEBUG(200, *YYCURSOR);
-=======
-			goto yy205;
-		}
-		if (yych == '\\') goto yy207;
-		goto yy199;
-yy210:
-		YYDEBUG(210, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(201, *YYCURSOR);
 		if (yybm[0+yych] & 32) {
 			goto yy200;
@@ -4248,41 +2556,10 @@ yy210:
 		}
 yy202:
 		YYDEBUG(202, *YYCURSOR);
-=======
-		YYDEBUG(211, *YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy210;
-		}
-		if (yych <= '$') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy191;
-				if (yych <= '\f') goto yy199;
-				goto yy191;
-			} else {
-				if (yych == '"') goto yy191;
-				if (yych <= '#') goto yy199;
-				goto yy202;
-			}
-		} else {
-			if (yych <= ';') {
-				if (yych == '\'') goto yy191;
-				if (yych <= ':') goto yy199;
-				goto yy191;
-			} else {
-				if (yych <= '[') goto yy199;
-				if (yych <= '\\') goto yy201;
-				if (yych <= ']') goto yy191;
-				goto yy199;
-			}
-		}
-yy212:
-		YYDEBUG(212, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(203, *YYCURSOR);
 		if (yybm[0+yych] & 64) {
 			goto yy202;
@@ -4311,41 +2588,10 @@ yy212:
 		}
 yy204:
 		YYDEBUG(204, *YYCURSOR);
-=======
-		YYDEBUG(213, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy212;
-		}
-		if (yych <= '$') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy189;
-				if (yych <= '\f') goto yy199;
-				goto yy189;
-			} else {
-				if (yych == '"') goto yy189;
-				if (yych <= '#') goto yy199;
-				goto yy202;
-			}
-		} else {
-			if (yych <= ';') {
-				if (yych == '\'') goto yy189;
-				if (yych <= ':') goto yy199;
-				goto yy189;
-			} else {
-				if (yych <= '[') goto yy199;
-				if (yych <= '\\') goto yy201;
-				if (yych <= ']') goto yy189;
-				goto yy199;
-			}
-		}
-yy214:
-		YYDEBUG(214, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(205, *YYCURSOR);
 		if (yych <= '\'') {
 			if (yych <= '!') {
@@ -4364,32 +2610,11 @@ yy214:
 					if (yych <= '$') goto yy192;
 					if (yych <= '&') goto yy189;
 					goto yy179;
-=======
-		YYDEBUG(215, *YYCURSOR);
-		if (yych <= '\'') {
-			if (yych <= '!') {
-				if (yych <= '\n') {
-					if (yych <= '\t') goto yy199;
-					goto yy189;
-				} else {
-					if (yych == '\r') goto yy189;
-					goto yy199;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= '"') goto yy189;
-					goto yy199;
-				} else {
-					if (yych <= '$') goto yy202;
-					if (yych <= '&') goto yy199;
-					goto yy189;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
 				if (yych <= '.') {
-<<<<<<< HEAD
 					if (yych <= '-') goto yy189;
 					goto yy202;
 				} else {
@@ -4410,33 +2635,10 @@ yy214:
 		}
 yy206:
 		YYDEBUG(206, *YYCURSOR);
-=======
-					if (yych <= '-') goto yy199;
-					goto yy212;
-				} else {
-					if (yych <= '/') goto yy199;
-					if (yych <= '9') goto yy214;
-					goto yy199;
-				}
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy189;
-					goto yy199;
-				} else {
-					if (yych <= '\\') goto yy201;
-					if (yych <= ']') goto yy189;
-					goto yy199;
-				}
-			}
-		}
-yy216:
-		YYDEBUG(216, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(207, *YYCURSOR);
 		if (yych <= '&') {
 			if (yych <= '\r') {
@@ -4450,26 +2652,10 @@ yy216:
 				} else {
 					if (yych == '$') goto yy192;
 					goto yy189;
-=======
-		YYDEBUG(217, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy189;
-				if (yych <= '\f') goto yy199;
-				goto yy189;
-			} else {
-				if (yych <= '"') {
-					if (yych <= '!') goto yy199;
-					goto yy189;
-				} else {
-					if (yych == '$') goto yy202;
-					goto yy199;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
-<<<<<<< HEAD
 				if (yych <= '\'') goto yy179;
 				if (yych <= '/') goto yy189;
 				if (yych <= '9') goto yy206;
@@ -4487,30 +2673,10 @@ yy216:
 		}
 yy208:
 		YYDEBUG(208, *YYCURSOR);
-=======
-				if (yych <= '\'') goto yy189;
-				if (yych <= '/') goto yy199;
-				if (yych <= '9') goto yy216;
-				goto yy199;
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy189;
-					goto yy199;
-				} else {
-					if (yych <= '\\') goto yy201;
-					if (yych <= ']') goto yy189;
-					goto yy199;
-				}
-			}
-		}
-yy218:
-		YYDEBUG(218, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 2;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(209, *YYCURSOR);
 		if (yych <= '&') {
 			if (yych <= '\r') {
@@ -4524,26 +2690,10 @@ yy218:
 				} else {
 					if (yych == '$') goto yy192;
 					goto yy189;
-=======
-		YYDEBUG(219, *YYCURSOR);
-		if (yych <= '&') {
-			if (yych <= '\r') {
-				if (yych == '\n') goto yy189;
-				if (yych <= '\f') goto yy199;
-				goto yy189;
-			} else {
-				if (yych <= '"') {
-					if (yych <= '!') goto yy199;
-					goto yy189;
-				} else {
-					if (yych == '$') goto yy202;
-					goto yy199;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
-<<<<<<< HEAD
 				if (yych <= '\'') goto yy179;
 				if (yych <= '/') goto yy189;
 				if (yych <= '9') goto yy208;
@@ -4571,35 +2721,6 @@ yy210:
 		YYDEBUG(212, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(213, *YYCURSOR);
-=======
-				if (yych <= '\'') goto yy189;
-				if (yych <= '/') goto yy199;
-				if (yych <= '9') goto yy218;
-				goto yy199;
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy189;
-					goto yy199;
-				} else {
-					if (yych <= '\\') goto yy201;
-					if (yych <= ']') goto yy189;
-					goto yy199;
-				}
-			}
-		}
-yy220:
-		YYDEBUG(220, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(221, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy220;
-		}
-		YYDEBUG(222, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(223, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 416 "Zend/zend_ini_scanner.l"
 		{ /* Raw string */
@@ -4610,39 +2731,24 @@ yy220:
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2735 "Zend/zend_ini_scanner.c"
 yy214:
 		YYDEBUG(214, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(215, *YYCURSOR);
-=======
-#line 2828 "Zend/zend_ini_scanner.c"
-yy224:
-		YYDEBUG(224, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(225, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 449 "Zend/zend_ini_scanner.l"
 		{ /* Variable start */
 	yy_push_state(ST_VARNAME);
 	return TC_DOLLAR_CURLY;
 }
-<<<<<<< HEAD
 #line 2746 "Zend/zend_ini_scanner.c"
 yy216:
 		YYDEBUG(216, *YYCURSOR);
-=======
-#line 2839 "Zend/zend_ini_scanner.c"
-yy226:
-		YYDEBUG(226, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(217, *YYCURSOR);
 		if (yych <= '"') {
 			if (yych <= '\f') {
@@ -4657,28 +2763,11 @@ yy226:
 				} else {
 					if (yych <= ' ') goto yy216;
 					if (yych <= '!') goto yy189;
-=======
-		YYDEBUG(227, *YYCURSOR);
-		if (yych <= '"') {
-			if (yych <= '\f') {
-				if (yych <= 0x08) goto yy199;
-				if (yych <= '\t') goto yy226;
-				if (yych <= '\n') goto yy178;
-				goto yy199;
-			} else {
-				if (yych <= 0x1F) {
-					if (yych <= '\r') goto yy178;
-					goto yy199;
-				} else {
-					if (yych <= ' ') goto yy226;
-					if (yych <= '!') goto yy199;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ':') {
 				if (yych <= '$') {
-<<<<<<< HEAD
 					if (yych <= '#') goto yy189;
 					goto yy192;
 				} else {
@@ -4701,30 +2790,6 @@ yy218:
 		++YYCURSOR;
 		yych = *YYCURSOR;
 		goto yy173;
-=======
-					if (yych <= '#') goto yy199;
-					goto yy202;
-				} else {
-					if (yych == '\'') goto yy178;
-					goto yy199;
-				}
-			} else {
-				if (yych <= '[') {
-					if (yych <= ';') goto yy178;
-					goto yy199;
-				} else {
-					if (yych <= '\\') goto yy201;
-					if (yych <= ']') goto yy178;
-					goto yy199;
-				}
-			}
-		}
-yy228:
-		YYDEBUG(228, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy183;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_VALUE:
@@ -4763,49 +2828,28 @@ yyc_ST_VALUE:
 			162, 162, 162, 162, 162, 162, 162, 162, 
 			162, 162, 162, 162, 162, 162, 162, 162, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(219, *YYCURSOR);
-=======
-		YYDEBUG(229, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYFILL(6);
 		yych = *YYCURSOR;
 		YYDEBUG(-1, yych);
 		switch (yych) {
-<<<<<<< HEAD
 		case 0x00:	goto yy221;
 		case '\t':
 		case ' ':	goto yy225;
 		case '\n':	goto yy227;
 		case '\r':	goto yy229;
-=======
-		case 0x00:	goto yy231;
-		case '\t':
-		case ' ':	goto yy235;
-		case '\n':	goto yy237;
-		case '\r':	goto yy239;
->>>>>>> PHP-5.6
 		case '!':
 		case '&':
 		case '(':
 		case ')':
 		case '^':
 		case '|':
-<<<<<<< HEAD
 		case '~':	goto yy230;
 		case '"':	goto yy232;
 		case '$':	goto yy234;
 		case '\'':	goto yy235;
 		case '-':	goto yy236;
 		case '.':	goto yy237;
-=======
-		case '~':	goto yy240;
-		case '"':	goto yy242;
-		case '$':	goto yy244;
-		case '\'':	goto yy245;
-		case '-':	goto yy246;
-		case '.':	goto yy247;
->>>>>>> PHP-5.6
 		case '0':
 		case '1':
 		case '2':
@@ -4815,15 +2859,9 @@ yyc_ST_VALUE:
 		case '6':
 		case '7':
 		case '8':
-<<<<<<< HEAD
 		case '9':	goto yy238;
 		case ';':	goto yy240;
 		case '=':	goto yy241;
-=======
-		case '9':	goto yy248;
-		case ';':	goto yy250;
-		case '=':	goto yy251;
->>>>>>> PHP-5.6
 		case 'A':
 		case 'B':
 		case 'C':
@@ -4866,7 +2904,6 @@ yyc_ST_VALUE:
 		case 'v':
 		case 'w':
 		case 'x':
-<<<<<<< HEAD
 		case 'z':	goto yy243;
 		case 'F':
 		case 'f':	goto yy245;
@@ -4885,33 +2922,12 @@ yy221:
 		++YYCURSOR;
 yy222:
 		YYDEBUG(222, *YYCURSOR);
-=======
-		case 'z':	goto yy253;
-		case 'F':
-		case 'f':	goto yy255;
-		case 'N':
-		case 'n':	goto yy256;
-		case 'O':
-		case 'o':	goto yy257;
-		case 'T':
-		case 't':	goto yy258;
-		case 'Y':
-		case 'y':	goto yy259;
-		default:	goto yy233;
-		}
-yy231:
-		YYDEBUG(231, *YYCURSOR);
-		++YYCURSOR;
-yy232:
-		YYDEBUG(232, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 643 "Zend/zend_ini_scanner.l"
 		{ /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 2932 "Zend/zend_ini_scanner.c"
 yy223:
 		YYDEBUG(223, *YYCURSOR);
@@ -4920,22 +2936,11 @@ yy223:
 		goto yy251;
 yy224:
 		YYDEBUG(224, *YYCURSOR);
-=======
-#line 3025 "Zend/zend_ini_scanner.c"
-yy233:
-		YYDEBUG(233, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy261;
-yy234:
-		YYDEBUG(234, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 569 "Zend/zend_ini_scanner.l"
 		{ /* Get everything else as option/offset value */
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2945 "Zend/zend_ini_scanner.c"
 yy225:
 		YYDEBUG(225, *YYCURSOR);
@@ -4944,36 +2949,17 @@ yy225:
 		goto yy305;
 yy226:
 		YYDEBUG(226, *YYCURSOR);
-=======
-#line 3038 "Zend/zend_ini_scanner.c"
-yy235:
-		YYDEBUG(235, *YYCURSOR);
-		yyaccept = 1;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy315;
-yy236:
-		YYDEBUG(236, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 623 "Zend/zend_ini_scanner.l"
 		{
 	RETURN_TOKEN(TC_WHITESPACE, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 2958 "Zend/zend_ini_scanner.c"
 yy227:
 		YYDEBUG(227, *YYCURSOR);
 		++YYCURSOR;
 yy228:
 		YYDEBUG(228, *YYCURSOR);
-=======
-#line 3051 "Zend/zend_ini_scanner.c"
-yy237:
-		YYDEBUG(237, *YYCURSOR);
-		++YYCURSOR;
-yy238:
-		YYDEBUG(238, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 541 "Zend/zend_ini_scanner.l"
 		{ /* End of option value */
@@ -4981,7 +2967,6 @@ yy238:
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 2971 "Zend/zend_ini_scanner.c"
 yy229:
 		YYDEBUG(229, *YYCURSOR);
@@ -4995,48 +2980,23 @@ yy230:
 		goto yy302;
 yy231:
 		YYDEBUG(231, *YYCURSOR);
-=======
-#line 3064 "Zend/zend_ini_scanner.c"
-yy239:
-		YYDEBUG(239, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy313;
-		goto yy238;
-yy240:
-		YYDEBUG(240, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy312;
-yy241:
-		YYDEBUG(241, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 559 "Zend/zend_ini_scanner.l"
 		{ /* Boolean operators */
 	return yytext[0];
 }
-<<<<<<< HEAD
 #line 2989 "Zend/zend_ini_scanner.c"
 yy232:
 		YYDEBUG(232, *YYCURSOR);
 		++YYCURSOR;
 yy233:
 		YYDEBUG(233, *YYCURSOR);
-=======
-#line 3082 "Zend/zend_ini_scanner.c"
-yy242:
-		YYDEBUG(242, *YYCURSOR);
-		++YYCURSOR;
-yy243:
-		YYDEBUG(243, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 577 "Zend/zend_ini_scanner.l"
 		{ /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES);
 	return '"';
 }
-<<<<<<< HEAD
 #line 3001 "Zend/zend_ini_scanner.c"
 yy234:
 		YYDEBUG(234, *YYCURSOR);
@@ -5073,50 +3033,11 @@ yy237:
 		goto yy251;
 yy238:
 		YYDEBUG(238, *YYCURSOR);
-=======
-#line 3094 "Zend/zend_ini_scanner.c"
-yy244:
-		YYDEBUG(244, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych <= '\\') {
-			if (yych <= 0x00) goto yy232;
-			if (yych <= '[') goto yy260;
-			goto yy267;
-		} else {
-			if (yych == '{') goto yy309;
-			goto yy260;
-		}
-yy245:
-		YYDEBUG(245, *YYCURSOR);
-		yyaccept = 2;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy305;
-		}
-		goto yy232;
-yy246:
-		YYDEBUG(246, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy261;
-		if (yych <= '9') goto yy303;
-		goto yy261;
-yy247:
-		YYDEBUG(247, *YYCURSOR);
-		yyaccept = 0;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yych <= '/') goto yy261;
-		if (yych <= '9') goto yy301;
-		goto yy261;
-yy248:
-		YYDEBUG(248, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '/') {
 			if (yych <= 0x1F) {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy239;
 					if (yych <= 0x08) goto yy251;
 				} else {
@@ -5129,26 +3050,11 @@ yy248:
 				} else {
 					if (yych == '.') goto yy287;
 					goto yy251;
-=======
-					if (yych <= 0x00) goto yy249;
-					if (yych <= 0x08) goto yy261;
-				} else {
-					if (yych != '\r') goto yy261;
-				}
-			} else {
-				if (yych <= ')') {
-					if (yych <= '"') goto yy249;
-					if (yych <= '%') goto yy261;
-				} else {
-					if (yych == '.') goto yy297;
-					goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= '9') goto yy289;
 					if (yych <= ':') goto yy251;
 				} else {
@@ -5165,30 +3071,11 @@ yy248:
 		}
 yy239:
 		YYDEBUG(239, *YYCURSOR);
-=======
-					if (yych <= '9') goto yy299;
-					if (yych <= ':') goto yy261;
-				} else {
-					if (yych != '=') goto yy261;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy249;
-					if (yych <= '{') goto yy261;
-				} else {
-					if (yych != '~') goto yy261;
-				}
-			}
-		}
-yy249:
-		YYDEBUG(249, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 551 "Zend/zend_ini_scanner.l"
 		{ /* Get number option value as string */
 	RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 3080 "Zend/zend_ini_scanner.c"
 yy240:
 		YYDEBUG(240, *YYCURSOR);
@@ -5199,18 +3086,6 @@ yy241:
 		YYDEBUG(241, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(242, *YYCURSOR);
-=======
-#line 3173 "Zend/zend_ini_scanner.c"
-yy250:
-		YYDEBUG(250, *YYCURSOR);
-		yyaccept = 2;
-		yych = *(YYMARKER = ++YYCURSOR);
-		goto yy293;
-yy251:
-		YYDEBUG(251, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(252, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 563 "Zend/zend_ini_scanner.l"
 		{ /* Make = used in option value to trigger error */
@@ -5218,7 +3093,6 @@ yy251:
 	BEGIN(INITIAL);
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 3097 "Zend/zend_ini_scanner.c"
 yy243:
 		YYDEBUG(243, *YYCURSOR);
@@ -5226,20 +3100,10 @@ yy243:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yybm[0+yych] & 4) {
 			goto yy252;
-=======
-#line 3190 "Zend/zend_ini_scanner.c"
-yy253:
-		YYDEBUG(253, *YYCURSOR);
-		yyaccept = 4;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy262;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ':') {
 			if (yych <= '\r') {
 				if (yych <= 0x08) {
-<<<<<<< HEAD
 					if (yych >= 0x01) goto yy251;
 				} else {
 					if (yych <= '\n') goto yy244;
@@ -5251,25 +3115,11 @@ yy253:
 				} else {
 					if (yych <= '%') goto yy251;
 					if (yych >= '*') goto yy251;
-=======
-					if (yych >= 0x01) goto yy261;
-				} else {
-					if (yych <= '\n') goto yy254;
-					if (yych <= '\f') goto yy261;
-				}
-			} else {
-				if (yych <= '"') {
-					if (yych <= 0x1F) goto yy261;
-				} else {
-					if (yych <= '%') goto yy261;
-					if (yych >= '*') goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '^') {
 				if (yych <= '<') {
-<<<<<<< HEAD
 					if (yych >= '<') goto yy251;
 				} else {
 					if (yych <= '=') goto yy244;
@@ -5285,43 +3135,19 @@ yy253:
 		}
 yy244:
 		YYDEBUG(244, *YYCURSOR);
-=======
-					if (yych >= '<') goto yy261;
-				} else {
-					if (yych <= '=') goto yy254;
-					if (yych <= ']') goto yy261;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '{') goto yy261;
-				} else {
-					if (yych != '~') goto yy261;
-				}
-			}
-		}
-yy254:
-		YYDEBUG(254, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 547 "Zend/zend_ini_scanner.l"
 		{ /* Get constant option value */
 	RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 3144 "Zend/zend_ini_scanner.c"
 yy245:
 		YYDEBUG(245, *YYCURSOR);
-=======
-#line 3237 "Zend/zend_ini_scanner.c"
-yy255:
-		YYDEBUG(255, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '<') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -5339,31 +3165,11 @@ yy255:
 					if (yych <= '9') goto yy252;
 					if (yych == ';') goto yy244;
 					goto yy251;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '/') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					goto yy261;
-				} else {
-					if (yych <= '9') goto yy262;
-					if (yych == ';') goto yy254;
-					goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '_') {
 				if (yych <= 'A') {
-<<<<<<< HEAD
 					if (yych <= '=') goto yy244;
 					if (yych <= '@') goto yy251;
 					goto yy279;
@@ -5388,38 +3194,11 @@ yy255:
 		}
 yy246:
 		YYDEBUG(246, *YYCURSOR);
-=======
-					if (yych <= '=') goto yy254;
-					if (yych <= '@') goto yy261;
-					goto yy289;
-				} else {
-					if (yych <= 'Z') goto yy262;
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					goto yy262;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych <= '`') goto yy261;
-					if (yych <= 'a') goto yy289;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy256:
-		YYDEBUG(256, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= 'N') {
 			if (yych <= '%') {
 				if (yych <= '\f') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					if (yych <= '\n') goto yy244;
@@ -5444,39 +3223,12 @@ yy256:
 						if (yych <= '=') goto yy244;
 						if (yych <= '@') goto yy251;
 						goto yy252;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					if (yych <= '\n') goto yy254;
-					goto yy261;
-				} else {
-					if (yych <= '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					if (yych <= '"') goto yy254;
-					goto yy261;
-				}
-			} else {
-				if (yych <= ':') {
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					if (yych <= '9') goto yy262;
-					goto yy261;
-				} else {
-					if (yych <= '<') {
-						if (yych <= ';') goto yy254;
-						goto yy261;
-					} else {
-						if (yych <= '=') goto yy254;
-						if (yych <= '@') goto yy261;
-						goto yy262;
->>>>>>> PHP-5.6
 					}
 				}
 			}
 		} else {
 			if (yych <= 'n') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= 'O') goto yy271;
 					if (yych == 'U') goto yy272;
 					goto yy252;
@@ -5487,23 +3239,10 @@ yy256:
 					} else {
 						if (yych == '`') goto yy251;
 						goto yy252;
-=======
-					if (yych <= 'O') goto yy281;
-					if (yych == 'U') goto yy282;
-					goto yy262;
-				} else {
-					if (yych <= '^') {
-						if (yych <= ']') goto yy261;
-						goto yy254;
-					} else {
-						if (yych == '`') goto yy261;
-						goto yy262;
->>>>>>> PHP-5.6
 					}
 				}
 			} else {
 				if (yych <= 'z') {
-<<<<<<< HEAD
 					if (yych <= 'o') goto yy271;
 					if (yych == 'u') goto yy272;
 					goto yy252;
@@ -5514,35 +3253,17 @@ yy256:
 					} else {
 						if (yych == '~') goto yy244;
 						goto yy251;
-=======
-					if (yych <= 'o') goto yy281;
-					if (yych == 'u') goto yy282;
-					goto yy262;
-				} else {
-					if (yych <= '|') {
-						if (yych <= '{') goto yy261;
-						goto yy254;
-					} else {
-						if (yych == '~') goto yy254;
-						goto yy261;
->>>>>>> PHP-5.6
 					}
 				}
 			}
 		}
-<<<<<<< HEAD
 yy247:
 		YYDEBUG(247, *YYCURSOR);
-=======
-yy257:
-		YYDEBUG(257, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= 'E') {
 			if (yych <= '%') {
 				if (yych <= '\f') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					if (yych <= '\n') goto yy244;
@@ -5567,39 +3288,12 @@ yy257:
 						if (yych <= '=') goto yy244;
 						if (yych <= '@') goto yy251;
 						goto yy252;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					if (yych <= '\n') goto yy254;
-					goto yy261;
-				} else {
-					if (yych <= '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					if (yych <= '"') goto yy254;
-					goto yy261;
-				}
-			} else {
-				if (yych <= ':') {
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					if (yych <= '9') goto yy262;
-					goto yy261;
-				} else {
-					if (yych <= '<') {
-						if (yych <= ';') goto yy254;
-						goto yy261;
-					} else {
-						if (yych <= '=') goto yy254;
-						if (yych <= '@') goto yy261;
-						goto yy262;
->>>>>>> PHP-5.6
 					}
 				}
 			}
 		} else {
 			if (yych <= 'e') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= 'F') goto yy266;
 					if (yych == 'N') goto yy260;
 					goto yy252;
@@ -5610,23 +3304,10 @@ yy257:
 					} else {
 						if (yych == '`') goto yy251;
 						goto yy252;
-=======
-					if (yych <= 'F') goto yy276;
-					if (yych == 'N') goto yy270;
-					goto yy262;
-				} else {
-					if (yych <= '^') {
-						if (yych <= ']') goto yy261;
-						goto yy254;
-					} else {
-						if (yych == '`') goto yy261;
-						goto yy262;
->>>>>>> PHP-5.6
 					}
 				}
 			} else {
 				if (yych <= 'z') {
-<<<<<<< HEAD
 					if (yych <= 'f') goto yy266;
 					if (yych == 'n') goto yy260;
 					goto yy252;
@@ -5637,35 +3318,17 @@ yy257:
 					} else {
 						if (yych == '~') goto yy244;
 						goto yy251;
-=======
-					if (yych <= 'f') goto yy276;
-					if (yych == 'n') goto yy270;
-					goto yy262;
-				} else {
-					if (yych <= '|') {
-						if (yych <= '{') goto yy261;
-						goto yy254;
-					} else {
-						if (yych == '~') goto yy254;
-						goto yy261;
->>>>>>> PHP-5.6
 					}
 				}
 			}
 		}
-<<<<<<< HEAD
 yy248:
 		YYDEBUG(248, *YYCURSOR);
-=======
-yy258:
-		YYDEBUG(258, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -5684,32 +3347,11 @@ yy258:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'R') goto yy264;
 					goto yy252;
@@ -5733,37 +3375,11 @@ yy258:
 		}
 yy249:
 		YYDEBUG(249, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'R') goto yy274;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'r') goto yy274;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy259:
-		YYDEBUG(259, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -5782,32 +3398,11 @@ yy259:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'E') goto yy254;
 					goto yy252;
@@ -5831,36 +3426,10 @@ yy259:
 		}
 yy250:
 		YYDEBUG(250, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'E') goto yy264;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'e') goto yy264;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy260:
-		YYDEBUG(260, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 0;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy251:
 		YYDEBUG(251, *YYCURSOR);
 		if (yybm[0+yych] & 2) {
@@ -5870,35 +3439,17 @@ yy251:
 		goto yy224;
 yy252:
 		YYDEBUG(252, *YYCURSOR);
-=======
-yy261:
-		YYDEBUG(261, *YYCURSOR);
-		if (yybm[0+yych] & 2) {
-			goto yy260;
-		}
-		if (yych == '$') goto yy265;
-		goto yy234;
-yy262:
-		YYDEBUG(262, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(253, *YYCURSOR);
 		if (yybm[0+yych] & 4) {
 			goto yy252;
-=======
-		YYDEBUG(263, *YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy262;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ')') {
 			if (yych <= '\r') {
 				if (yych <= 0x08) {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					goto yy250;
 				} else {
@@ -5915,30 +3466,11 @@ yy262:
 					if (yych <= '$') goto yy255;
 					if (yych <= '%') goto yy250;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					goto yy260;
-				} else {
-					if (yych <= '\n') goto yy254;
-					if (yych <= '\f') goto yy260;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= 0x1F) goto yy260;
-					if (yych <= '"') goto yy254;
-					goto yy260;
-				} else {
-					if (yych <= '$') goto yy265;
-					if (yych <= '%') goto yy260;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ':') goto yy250;
 					goto yy244;
 				} else {
@@ -5958,33 +3490,11 @@ yy262:
 		}
 yy254:
 		YYDEBUG(254, *YYCURSOR);
-=======
-					if (yych <= ':') goto yy260;
-					goto yy254;
-				} else {
-					if (yych == '=') goto yy254;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy254;
-					if (yych <= '{') goto yy260;
-					goto yy254;
-				} else {
-					if (yych == '~') goto yy254;
-					goto yy260;
-				}
-			}
-		}
-yy264:
-		YYDEBUG(264, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6003,32 +3513,11 @@ yy264:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'S') goto yy260;
 					goto yy252;
@@ -6052,36 +3541,10 @@ yy264:
 		}
 yy255:
 		YYDEBUG(255, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'S') goto yy270;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 's') goto yy270;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy265:
-		YYDEBUG(265, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yych <= '\\') {
-<<<<<<< HEAD
 			if (yych <= 0x00) goto yy256;
 			if (yych <= '[') goto yy250;
 			goto yy257;
@@ -6090,21 +3553,10 @@ yy265:
 		}
 yy256:
 		YYDEBUG(256, *YYCURSOR);
-=======
-			if (yych <= 0x00) goto yy266;
-			if (yych <= '[') goto yy260;
-			goto yy267;
-		} else {
-			if (yych != '{') goto yy260;
-		}
-yy266:
-		YYDEBUG(266, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYCURSOR = YYMARKER;
 		if (yyaccept <= 3) {
 			if (yyaccept <= 1) {
 				if (yyaccept <= 0) {
-<<<<<<< HEAD
 					goto yy224;
 				} else {
 					goto yy226;
@@ -6114,23 +3566,11 @@ yy266:
 					goto yy222;
 				} else {
 					goto yy239;
-=======
-					goto yy234;
-				} else {
-					goto yy236;
-				}
-			} else {
-				if (yyaccept <= 2) {
-					goto yy232;
-				} else {
-					goto yy249;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yyaccept <= 5) {
 				if (yyaccept <= 4) {
-<<<<<<< HEAD
 					goto yy244;
 				} else {
 					goto yy261;
@@ -6145,27 +3585,10 @@ yy266:
 		}
 yy257:
 		YYDEBUG(257, *YYCURSOR);
-=======
-					goto yy254;
-				} else {
-					goto yy271;
-				}
-			} else {
-				if (yyaccept <= 6) {
-					goto yy278;
-				} else {
-					goto yy285;
-				}
-			}
-		}
-yy267:
-		YYDEBUG(267, *YYCURSOR);
->>>>>>> PHP-5.6
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
 		if (yybm[0+yych] & 8) {
-<<<<<<< HEAD
 			goto yy258;
 		}
 		goto yy250;
@@ -6187,34 +3610,10 @@ yy260:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yybm[0+yych] & 16) {
 			goto yy262;
-=======
-			goto yy268;
-		}
-		goto yy260;
-yy268:
-		YYDEBUG(268, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(269, *YYCURSOR);
-		if (yybm[0+yych] & 8) {
-			goto yy268;
-		}
-		if (yych <= 0x00) goto yy234;
-		if (yych == '\\') goto yy267;
-		goto yy260;
-yy270:
-		YYDEBUG(270, *YYCURSOR);
-		yyaccept = 5;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 16) {
-			goto yy272;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ';') {
 			if (yych <= ' ') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy261;
 					if (yych <= '\t') goto yy251;
 				} else {
@@ -6228,27 +3627,11 @@ yy270:
 					if (yych <= '/') goto yy251;
 					if (yych <= '9') goto yy252;
 					if (yych <= ':') goto yy251;
-=======
-					if (yych <= 0x00) goto yy271;
-					if (yych <= '\t') goto yy261;
-				} else {
-					if (yych != '\r') goto yy261;
-				}
-			} else {
-				if (yych <= ')') {
-					if (yych <= '"') goto yy271;
-					if (yych <= '%') goto yy261;
-				} else {
-					if (yych <= '/') goto yy261;
-					if (yych <= '9') goto yy262;
-					if (yych <= ':') goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '_') {
 				if (yych <= '@') {
-<<<<<<< HEAD
 					if (yych != '=') goto yy251;
 				} else {
 					if (yych <= 'Z') goto yy252;
@@ -6268,33 +3651,11 @@ yy270:
 		}
 yy261:
 		YYDEBUG(261, *YYCURSOR);
-=======
-					if (yych != '=') goto yy261;
-				} else {
-					if (yych <= 'Z') goto yy262;
-					if (yych <= ']') goto yy261;
-					if (yych >= '_') goto yy262;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych <= '`') goto yy261;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych >= 0x7F) goto yy261;
-				}
-			}
-		}
-yy271:
-		YYDEBUG(271, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 469 "Zend/zend_ini_scanner.l"
 		{ /* TRUE value (when used outside option value/offset this causes parse error!) */
 	RETURN_TOKEN(BOOL_TRUE, "1", 1);
 }
-<<<<<<< HEAD
 #line 3660 "Zend/zend_ini_scanner.c"
 yy262:
 		YYDEBUG(262, *YYCURSOR);
@@ -6308,27 +3669,11 @@ yy262:
 		goto yy261;
 yy264:
 		YYDEBUG(264, *YYCURSOR);
-=======
-#line 3753 "Zend/zend_ini_scanner.c"
-yy272:
-		YYDEBUG(272, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(273, *YYCURSOR);
-		if (yybm[0+yych] & 16) {
-			goto yy272;
-		}
-		goto yy271;
-yy274:
-		YYDEBUG(274, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6347,32 +3692,11 @@ yy274:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'U') goto yy252;
 				} else {
@@ -6395,36 +3719,11 @@ yy274:
 		}
 yy265:
 		YYDEBUG(265, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'U') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'u') goto yy275;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy275:
-		YYDEBUG(275, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6443,32 +3742,11 @@ yy275:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'E') goto yy260;
 					goto yy252;
@@ -6492,37 +3770,11 @@ yy275:
 		}
 yy266:
 		YYDEBUG(266, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'E') goto yy270;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'e') goto yy270;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy276:
-		YYDEBUG(276, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6541,32 +3793,11 @@ yy276:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'F') goto yy252;
 				} else {
@@ -6593,39 +3824,10 @@ yy267:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yybm[0+yych] & 4) {
 			goto yy252;
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'F') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'f') goto yy277;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy277:
-		YYDEBUG(277, *YYCURSOR);
-		yyaccept = 6;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy262;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ')') {
 			if (yych <= '\f') {
 				if (yych <= 0x08) {
-<<<<<<< HEAD
 					if (yych >= 0x01) goto yy251;
 				} else {
 					if (yych <= '\t') goto yy269;
@@ -6639,27 +3841,11 @@ yy277:
 				} else {
 					if (yych <= '"') goto yy268;
 					if (yych <= '%') goto yy251;
-=======
-					if (yych >= 0x01) goto yy261;
-				} else {
-					if (yych <= '\t') goto yy279;
-					if (yych >= '\v') goto yy261;
-				}
-			} else {
-				if (yych <= ' ') {
-					if (yych <= '\r') goto yy278;
-					if (yych <= 0x1F) goto yy261;
-					goto yy279;
-				} else {
-					if (yych <= '"') goto yy278;
-					if (yych <= '%') goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ':') goto yy251;
 				} else {
 					if (yych != '=') goto yy251;
@@ -6675,29 +3861,11 @@ yy277:
 		}
 yy268:
 		YYDEBUG(268, *YYCURSOR);
-=======
-					if (yych <= ':') goto yy261;
-				} else {
-					if (yych != '=') goto yy261;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy278;
-					if (yych <= '{') goto yy261;
-				} else {
-					if (yych != '~') goto yy261;
-				}
-			}
-		}
-yy278:
-		YYDEBUG(278, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 473 "Zend/zend_ini_scanner.l"
 		{ /* FALSE value (when used outside option value/offset this causes parse error!)*/
 	RETURN_TOKEN(BOOL_FALSE, "", 0);
 }
-<<<<<<< HEAD
 #line 3870 "Zend/zend_ini_scanner.c"
 yy269:
 		YYDEBUG(269, *YYCURSOR);
@@ -6710,26 +3878,11 @@ yy269:
 		goto yy268;
 yy271:
 		YYDEBUG(271, *YYCURSOR);
-=======
-#line 3963 "Zend/zend_ini_scanner.c"
-yy279:
-		YYDEBUG(279, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(280, *YYCURSOR);
-		if (yych == '\t') goto yy279;
-		if (yych == ' ') goto yy279;
-		goto yy278;
-yy281:
-		YYDEBUG(281, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 6;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '<') {
 			if (yych <= ' ') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy268;
 					if (yych <= 0x08) goto yy251;
 					if (yych <= '\t') goto yy269;
@@ -6749,33 +3902,11 @@ yy281:
 					if (yych <= '9') goto yy252;
 					if (yych == ';') goto yy268;
 					goto yy251;
-=======
-					if (yych <= 0x00) goto yy278;
-					if (yych <= 0x08) goto yy261;
-					if (yych <= '\t') goto yy279;
-					goto yy278;
-				} else {
-					if (yych == '\r') goto yy278;
-					if (yych <= 0x1F) goto yy261;
-					goto yy279;
-				}
-			} else {
-				if (yych <= '/') {
-					if (yych <= '"') goto yy278;
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy278;
-					goto yy261;
-				} else {
-					if (yych <= '9') goto yy262;
-					if (yych == ';') goto yy278;
-					goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '_') {
 				if (yych <= 'N') {
-<<<<<<< HEAD
 					if (yych <= '=') goto yy268;
 					if (yych <= '@') goto yy251;
 					if (yych <= 'M') goto yy252;
@@ -6798,47 +3929,17 @@ yy281:
 					} else {
 						if (yych == '~') goto yy268;
 						goto yy251;
-=======
-					if (yych <= '=') goto yy278;
-					if (yych <= '@') goto yy261;
-					if (yych <= 'M') goto yy262;
-					goto yy288;
-				} else {
-					if (yych <= 'Z') goto yy262;
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy278;
-					goto yy262;
-				}
-			} else {
-				if (yych <= 'z') {
-					if (yych <= '`') goto yy261;
-					if (yych == 'n') goto yy288;
-					goto yy262;
-				} else {
-					if (yych <= '|') {
-						if (yych <= '{') goto yy261;
-						goto yy278;
-					} else {
-						if (yych == '~') goto yy278;
-						goto yy261;
->>>>>>> PHP-5.6
 					}
 				}
 			}
 		}
-<<<<<<< HEAD
 yy272:
 		YYDEBUG(272, *YYCURSOR);
-=======
-yy282:
-		YYDEBUG(282, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6857,32 +3958,11 @@ yy282:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'L') goto yy252;
 				} else {
@@ -6905,36 +3985,11 @@ yy282:
 		}
 yy273:
 		YYDEBUG(273, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'L') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'l') goto yy283;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy283:
-		YYDEBUG(283, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -6953,32 +4008,11 @@ yy283:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'L') goto yy252;
 				} else {
@@ -7005,39 +4039,10 @@ yy274:
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yybm[0+yych] & 4) {
 			goto yy252;
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'L') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'l') goto yy284;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy284:
-		YYDEBUG(284, *YYCURSOR);
-		yyaccept = 7;
-		yych = *(YYMARKER = ++YYCURSOR);
-		if (yybm[0+yych] & 4) {
-			goto yy262;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ')') {
 			if (yych <= '\f') {
 				if (yych <= 0x08) {
-<<<<<<< HEAD
 					if (yych >= 0x01) goto yy251;
 				} else {
 					if (yych <= '\t') goto yy276;
@@ -7051,27 +4056,11 @@ yy284:
 				} else {
 					if (yych <= '"') goto yy275;
 					if (yych <= '%') goto yy251;
-=======
-					if (yych >= 0x01) goto yy261;
-				} else {
-					if (yych <= '\t') goto yy286;
-					if (yych >= '\v') goto yy261;
-				}
-			} else {
-				if (yych <= ' ') {
-					if (yych <= '\r') goto yy285;
-					if (yych <= 0x1F) goto yy261;
-					goto yy286;
-				} else {
-					if (yych <= '"') goto yy285;
-					if (yych <= '%') goto yy261;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ':') goto yy251;
 				} else {
 					if (yych != '=') goto yy251;
@@ -7087,29 +4076,11 @@ yy284:
 		}
 yy275:
 		YYDEBUG(275, *YYCURSOR);
-=======
-					if (yych <= ':') goto yy261;
-				} else {
-					if (yych != '=') goto yy261;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy285;
-					if (yych <= '{') goto yy261;
-				} else {
-					if (yych != '~') goto yy261;
-				}
-			}
-		}
-yy285:
-		YYDEBUG(285, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 477 "Zend/zend_ini_scanner.l"
 		{
 	RETURN_TOKEN(NULL_NULL, "", 0);
 }
-<<<<<<< HEAD
 #line 4085 "Zend/zend_ini_scanner.c"
 yy276:
 		YYDEBUG(276, *YYCURSOR);
@@ -7122,26 +4093,11 @@ yy276:
 		goto yy275;
 yy278:
 		YYDEBUG(278, *YYCURSOR);
-=======
-#line 4178 "Zend/zend_ini_scanner.c"
-yy286:
-		YYDEBUG(286, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(287, *YYCURSOR);
-		if (yych == '\t') goto yy286;
-		if (yych == ' ') goto yy286;
-		goto yy285;
-yy288:
-		YYDEBUG(288, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -7160,32 +4116,11 @@ yy288:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'E') goto yy267;
 					goto yy252;
@@ -7209,37 +4144,11 @@ yy288:
 		}
 yy279:
 		YYDEBUG(279, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'E') goto yy277;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'e') goto yy277;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy289:
-		YYDEBUG(289, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -7258,32 +4167,11 @@ yy289:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'L') goto yy252;
 				} else {
@@ -7306,36 +4194,11 @@ yy289:
 		}
 yy280:
 		YYDEBUG(280, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'L') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'l') goto yy290;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy290:
-		YYDEBUG(290, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -7354,32 +4217,11 @@ yy290:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych != 'S') goto yy252;
 				} else {
@@ -7402,36 +4244,11 @@ yy290:
 		}
 yy281:
 		YYDEBUG(281, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych != 'S') goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 's') goto yy291;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy291:
-		YYDEBUG(291, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 4;
 		yych = *(YYMARKER = ++YYCURSOR);
 		if (yych <= '=') {
 			if (yych <= '"') {
 				if (yych <= '\n') {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy244;
 					if (yych <= 0x08) goto yy251;
 					goto yy244;
@@ -7450,32 +4267,11 @@ yy291:
 					if (yych == ';') goto yy244;
 					if (yych <= '<') goto yy251;
 					goto yy244;
-=======
-					if (yych <= 0x00) goto yy254;
-					if (yych <= 0x08) goto yy261;
-					goto yy254;
-				} else {
-					if (yych == '\r') goto yy254;
-					if (yych <= 0x1F) goto yy261;
-					goto yy254;
-				}
-			} else {
-				if (yych <= '9') {
-					if (yych <= '%') goto yy261;
-					if (yych <= ')') goto yy254;
-					if (yych <= '/') goto yy261;
-					goto yy262;
-				} else {
-					if (yych == ';') goto yy254;
-					if (yych <= '<') goto yy261;
-					goto yy254;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '`') {
 				if (yych <= 'Z') {
-<<<<<<< HEAD
 					if (yych <= '@') goto yy251;
 					if (yych == 'E') goto yy267;
 					goto yy252;
@@ -7513,45 +4309,6 @@ yy284:
 		++YYCURSOR;
 yy285:
 		YYDEBUG(285, *YYCURSOR);
-=======
-					if (yych <= '@') goto yy261;
-					if (yych == 'E') goto yy277;
-					goto yy262;
-				} else {
-					if (yych <= ']') goto yy261;
-					if (yych <= '^') goto yy254;
-					if (yych <= '_') goto yy262;
-					goto yy261;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == 'e') goto yy277;
-					if (yych <= 'z') goto yy262;
-					goto yy261;
-				} else {
-					if (yych == '}') goto yy261;
-					if (yych <= '~') goto yy254;
-					goto yy261;
-				}
-			}
-		}
-yy292:
-		YYDEBUG(292, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(2);
-		yych = *YYCURSOR;
-yy293:
-		YYDEBUG(293, *YYCURSOR);
-		if (yybm[0+yych] & 32) {
-			goto yy292;
-		}
-		if (yych >= '\r') goto yy296;
-yy294:
-		YYDEBUG(294, *YYCURSOR);
-		++YYCURSOR;
-yy295:
-		YYDEBUG(295, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 637 "Zend/zend_ini_scanner.l"
 		{ /* Comment */
@@ -7559,7 +4316,6 @@ yy295:
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
-<<<<<<< HEAD
 #line 4320 "Zend/zend_ini_scanner.c"
 yy286:
 		YYDEBUG(286, *YYCURSOR);
@@ -7568,34 +4324,17 @@ yy286:
 		goto yy285;
 yy287:
 		YYDEBUG(287, *YYCURSOR);
-=======
-#line 4413 "Zend/zend_ini_scanner.c"
-yy296:
-		YYDEBUG(296, *YYCURSOR);
-		yych = *++YYCURSOR;
-		if (yych == '\n') goto yy294;
-		goto yy295;
-yy297:
-		YYDEBUG(297, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(288, *YYCURSOR);
 		if (yybm[0+yych] & 64) {
 			goto yy287;
-=======
-		YYDEBUG(298, *YYCURSOR);
-		if (yybm[0+yych] & 64) {
-			goto yy297;
->>>>>>> PHP-5.6
 		}
 		if (yych <= ')') {
 			if (yych <= '\r') {
 				if (yych <= 0x08) {
-<<<<<<< HEAD
 					if (yych <= 0x00) goto yy239;
 					goto yy250;
 				} else {
@@ -7612,30 +4351,11 @@ yy297:
 					if (yych <= '$') goto yy255;
 					if (yych <= '%') goto yy250;
 					goto yy239;
-=======
-					if (yych <= 0x00) goto yy249;
-					goto yy260;
-				} else {
-					if (yych <= '\n') goto yy249;
-					if (yych <= '\f') goto yy260;
-					goto yy249;
-				}
-			} else {
-				if (yych <= '#') {
-					if (yych <= 0x1F) goto yy260;
-					if (yych <= '"') goto yy249;
-					goto yy260;
-				} else {
-					if (yych <= '$') goto yy265;
-					if (yych <= '%') goto yy260;
-					goto yy249;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= ':') goto yy250;
 					goto yy239;
 				} else {
@@ -7655,32 +4375,10 @@ yy297:
 		}
 yy289:
 		YYDEBUG(289, *YYCURSOR);
-=======
-					if (yych <= ':') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '=') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy249;
-					if (yych <= '{') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '~') goto yy249;
-					goto yy260;
-				}
-			}
-		}
-yy299:
-		YYDEBUG(299, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(290, *YYCURSOR);
 		if (yych <= '.') {
 			if (yych <= 0x1F) {
@@ -7702,35 +4400,11 @@ yy299:
 					if (yych <= ')') goto yy239;
 					if (yych <= '-') goto yy250;
 					goto yy287;
-=======
-		YYDEBUG(300, *YYCURSOR);
-		if (yych <= '.') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x00) goto yy249;
-					if (yych <= 0x08) goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '\r') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych <= '"') goto yy249;
-					if (yych <= '#') goto yy260;
-					goto yy265;
-				} else {
-					if (yych <= '%') goto yy260;
-					if (yych <= ')') goto yy249;
-					if (yych <= '-') goto yy260;
-					goto yy297;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '=') {
 				if (yych <= ':') {
-<<<<<<< HEAD
 					if (yych <= '/') goto yy250;
 					if (yych <= '9') goto yy289;
 					goto yy250;
@@ -7751,33 +4425,10 @@ yy299:
 		}
 yy291:
 		YYDEBUG(291, *YYCURSOR);
-=======
-					if (yych <= '/') goto yy260;
-					if (yych <= '9') goto yy299;
-					goto yy260;
-				} else {
-					if (yych == '<') goto yy260;
-					goto yy249;
-				}
-			} else {
-				if (yych <= '{') {
-					if (yych == '^') goto yy249;
-					goto yy260;
-				} else {
-					if (yych == '}') goto yy260;
-					if (yych <= '~') goto yy249;
-					goto yy260;
-				}
-			}
-		}
-yy301:
-		YYDEBUG(301, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(292, *YYCURSOR);
 		if (yych <= '/') {
 			if (yych <= 0x1F) {
@@ -7798,34 +4449,11 @@ yy301:
 					if (yych <= '%') goto yy250;
 					if (yych <= ')') goto yy239;
 					goto yy250;
-=======
-		YYDEBUG(302, *YYCURSOR);
-		if (yych <= '/') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x00) goto yy249;
-					if (yych <= 0x08) goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '\r') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych <= '"') goto yy249;
-					if (yych <= '#') goto yy260;
-					goto yy265;
-				} else {
-					if (yych <= '%') goto yy260;
-					if (yych <= ')') goto yy249;
-					goto yy260;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= '9') goto yy291;
 					if (yych <= ':') goto yy250;
 					goto yy239;
@@ -7846,33 +4474,10 @@ yy301:
 		}
 yy293:
 		YYDEBUG(293, *YYCURSOR);
-=======
-					if (yych <= '9') goto yy301;
-					if (yych <= ':') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '=') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy249;
-					if (yych <= '{') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '~') goto yy249;
-					goto yy260;
-				}
-			}
-		}
-yy303:
-		YYDEBUG(303, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 3;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 		YYDEBUG(294, *YYCURSOR);
 		if (yych <= '/') {
 			if (yych <= 0x1F) {
@@ -7893,34 +4498,11 @@ yy303:
 					if (yych <= '%') goto yy250;
 					if (yych <= ')') goto yy239;
 					goto yy250;
-=======
-		YYDEBUG(304, *YYCURSOR);
-		if (yych <= '/') {
-			if (yych <= 0x1F) {
-				if (yych <= '\n') {
-					if (yych <= 0x00) goto yy249;
-					if (yych <= 0x08) goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '\r') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '$') {
-					if (yych <= '"') goto yy249;
-					if (yych <= '#') goto yy260;
-					goto yy265;
-				} else {
-					if (yych <= '%') goto yy260;
-					if (yych <= ')') goto yy249;
-					goto yy260;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= ']') {
 				if (yych <= ';') {
-<<<<<<< HEAD
 					if (yych <= '9') goto yy293;
 					if (yych <= ':') goto yy250;
 					goto yy239;
@@ -7951,38 +4533,6 @@ yy295:
 		YYDEBUG(297, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(298, *YYCURSOR);
-=======
-					if (yych <= '9') goto yy303;
-					if (yych <= ':') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '=') goto yy249;
-					goto yy260;
-				}
-			} else {
-				if (yych <= '|') {
-					if (yych <= '^') goto yy249;
-					if (yych <= '{') goto yy260;
-					goto yy249;
-				} else {
-					if (yych == '~') goto yy249;
-					goto yy260;
-				}
-			}
-		}
-yy305:
-		YYDEBUG(305, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-		YYDEBUG(306, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy305;
-		}
-		YYDEBUG(307, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(308, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 416 "Zend/zend_ini_scanner.l"
 		{ /* Raw string */
@@ -7993,26 +4543,17 @@ yy305:
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 4547 "Zend/zend_ini_scanner.c"
 yy299:
 		YYDEBUG(299, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(300, *YYCURSOR);
-=======
-#line 4640 "Zend/zend_ini_scanner.c"
-yy309:
-		YYDEBUG(309, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(310, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 449 "Zend/zend_ini_scanner.l"
 		{ /* Variable start */
 	yy_push_state(ST_VARNAME);
 	return TC_DOLLAR_CURLY;
 }
-<<<<<<< HEAD
 #line 4558 "Zend/zend_ini_scanner.c"
 yy301:
 		YYDEBUG(301, *YYCURSOR);
@@ -8030,30 +4571,10 @@ yy303:
 		goto yy228;
 yy304:
 		YYDEBUG(304, *YYCURSOR);
-=======
-#line 4651 "Zend/zend_ini_scanner.c"
-yy311:
-		YYDEBUG(311, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-yy312:
-		YYDEBUG(312, *YYCURSOR);
-		if (yych == '\t') goto yy311;
-		if (yych == ' ') goto yy311;
-		goto yy241;
-yy313:
-		YYDEBUG(313, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy238;
-yy314:
-		YYDEBUG(314, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyaccept = 1;
 		YYMARKER = ++YYCURSOR;
 		YYFILL(2);
 		yych = *YYCURSOR;
-<<<<<<< HEAD
 yy305:
 		YYDEBUG(305, *YYCURSOR);
 		if (yych <= 0x1F) {
@@ -8082,36 +4603,6 @@ yy307:
 		++YYCURSOR;
 		if ((yych = *YYCURSOR) == '\n') goto yy303;
 		goto yy228;
-=======
-yy315:
-		YYDEBUG(315, *YYCURSOR);
-		if (yych <= 0x1F) {
-			if (yych <= '\n') {
-				if (yych <= 0x08) goto yy236;
-				if (yych <= '\t') goto yy314;
-				goto yy313;
-			} else {
-				if (yych == '\r') goto yy317;
-				goto yy236;
-			}
-		} else {
-			if (yych <= '"') {
-				if (yych <= ' ') goto yy314;
-				if (yych <= '!') goto yy236;
-			} else {
-				if (yych == ';') goto yy292;
-				goto yy236;
-			}
-		}
-		YYDEBUG(316, *YYCURSOR);
-		yych = *++YYCURSOR;
-		goto yy243;
-yy317:
-		YYDEBUG(317, *YYCURSOR);
-		++YYCURSOR;
-		if ((yych = *YYCURSOR) == '\n') goto yy313;
-		goto yy238;
->>>>>>> PHP-5.6
 	}
 /* *********************************** */
 yyc_ST_VARNAME:
@@ -8150,17 +4641,12 @@ yyc_ST_VARNAME:
 			128, 128, 128, 128, 128, 128, 128, 128, 
 			128, 128, 128, 128, 128, 128, 128, 128, 
 		};
-<<<<<<< HEAD
 		YYDEBUG(308, *YYCURSOR);
-=======
-		YYDEBUG(318, *YYCURSOR);
->>>>>>> PHP-5.6
 		YYFILL(2);
 		yych = *YYCURSOR;
 		if (yych <= ')') {
 			if (yych <= '"') {
 				if (yych <= '\f') {
-<<<<<<< HEAD
 					if (yych <= 0x08) goto yy310;
 					if (yych <= '\n') goto yy312;
 				} else {
@@ -8172,25 +4658,11 @@ yyc_ST_VARNAME:
 					if (yych == '$') goto yy312;
 				} else {
 					if (yych != '\'') goto yy312;
-=======
-					if (yych <= 0x08) goto yy320;
-					if (yych <= '\n') goto yy322;
-				} else {
-					if (yych <= '\r') goto yy322;
-					if (yych >= '!') goto yy322;
-				}
-			} else {
-				if (yych <= '%') {
-					if (yych == '$') goto yy322;
-				} else {
-					if (yych != '\'') goto yy322;
->>>>>>> PHP-5.6
 				}
 			}
 		} else {
 			if (yych <= '[') {
 				if (yych <= '<') {
-<<<<<<< HEAD
 					if (yych == ';') goto yy312;
 				} else {
 					if (yych <= '=') goto yy312;
@@ -8212,29 +4684,6 @@ yy310:
 		goto yy317;
 yy311:
 		YYDEBUG(311, *YYCURSOR);
-=======
-					if (yych == ';') goto yy322;
-				} else {
-					if (yych <= '=') goto yy322;
-					if (yych >= '[') goto yy322;
-				}
-			} else {
-				if (yych <= 'z') {
-					if (yych == '^') goto yy322;
-				} else {
-					if (yych == '}') goto yy324;
-					if (yych <= '~') goto yy322;
-				}
-			}
-		}
-yy320:
-		YYDEBUG(320, *YYCURSOR);
-		++YYCURSOR;
-		yych = *YYCURSOR;
-		goto yy327;
-yy321:
-		YYDEBUG(321, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 454 "Zend/zend_ini_scanner.l"
 		{ /* Variable name */
@@ -8246,44 +4695,27 @@ yy321:
 
 	RETURN_TOKEN(TC_VARNAME, yytext, yyleng);
 }
-<<<<<<< HEAD
 #line 4699 "Zend/zend_ini_scanner.c"
 yy312:
 		YYDEBUG(312, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(313, *YYCURSOR);
-=======
-#line 4792 "Zend/zend_ini_scanner.c"
-yy322:
-		YYDEBUG(322, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(323, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 648 "Zend/zend_ini_scanner.l"
 		{
 	return 0;
 }
-<<<<<<< HEAD
 #line 4709 "Zend/zend_ini_scanner.c"
 yy314:
 		YYDEBUG(314, *YYCURSOR);
 		++YYCURSOR;
 		YYDEBUG(315, *YYCURSOR);
-=======
-#line 4802 "Zend/zend_ini_scanner.c"
-yy324:
-		YYDEBUG(324, *YYCURSOR);
-		++YYCURSOR;
-		YYDEBUG(325, *YYCURSOR);
->>>>>>> PHP-5.6
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 464 "Zend/zend_ini_scanner.l"
 		{ /* Variable end */
 	yy_pop_state();
 	return '}';
 }
-<<<<<<< HEAD
 #line 4720 "Zend/zend_ini_scanner.c"
 yy316:
 		YYDEBUG(316, *YYCURSOR);
@@ -8296,20 +4728,6 @@ yy317:
 			goto yy316;
 		}
 		goto yy311;
-=======
-#line 4813 "Zend/zend_ini_scanner.c"
-yy326:
-		YYDEBUG(326, *YYCURSOR);
-		++YYCURSOR;
-		YYFILL(1);
-		yych = *YYCURSOR;
-yy327:
-		YYDEBUG(327, *YYCURSOR);
-		if (yybm[0+yych] & 128) {
-			goto yy326;
-		}
-		goto yy321;
->>>>>>> PHP-5.6
 	}
 }
 #line 652 "Zend/zend_ini_scanner.l"
