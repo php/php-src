@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 29 Oct 2015, PHP 7.0.0 RC 6
 
 - Core:
+  . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
+    (Laruence)
   . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
   . Fixed bug #70430 (Stack buffer overflow in zend_language_parser()). (Nikita)
 
