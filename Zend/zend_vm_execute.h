@@ -1566,14 +1566,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 
 	SAVE_OPLINE();
 	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
-
-	if (EG(exception)) {
-		HANDLE_EXCEPTION();
-	}
+	LOAD_OPLINE();
 
 	switch (ret) {
 		case ZEND_USER_OPCODE_CONTINUE:
-			LOAD_OPLINE();
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
@@ -1589,10 +1585,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 			LOAD_OPLINE();
 			ZEND_VM_LEAVE();
 		case ZEND_USER_OPCODE_DISPATCH:
-			ZEND_ASSERT(EX(opline) == opline);
 			ZEND_VM_DISPATCH(opline->opcode, opline);
 		default:
-			ZEND_ASSERT(EX(opline) == opline);
 			ZEND_VM_DISPATCH((zend_uchar)(ret & 0xff), opline);
 	}
 }
