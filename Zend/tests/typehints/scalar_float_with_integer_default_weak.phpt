@@ -1,5 +1,5 @@
 --TEST--
-Float type hint should allow an integer as default
+Float type should allow an integer as default
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Closure with variadic type hint
+Closure with variadic type declaration
 --FILE--
 <?php
 $f = function (stdClass ...$a) {

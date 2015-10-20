@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint - internal function strict mode
+Scalar type - internal function strict mode
 --FILE--
 <?php
 declare(strict_types=1);

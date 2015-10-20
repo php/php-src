@@ -1,5 +1,5 @@
 --TEST--
-Return scalar type hint basics
+Return scalar type basics
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
@@ -48,7 +48,7 @@ $values = [
 ];
 
 foreach ($functions as $type => $function) {
-    echo PHP_EOL, "Testing '$type' typehint:", PHP_EOL;
+    echo PHP_EOL, "Testing '$type' type:", PHP_EOL;
     foreach ($values as $value) {
         echo "*** Trying ";
         var_dump($value);
@@ -63,7 +63,7 @@ foreach ($functions as $type => $function) {
 echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
-Testing 'int' typehint:
+Testing 'int' type:
 *** Trying int(1)
 int(1)
 *** Trying string(1) "1"
@@ -101,7 +101,7 @@ int(0)
 *** Trying resource(5) of type (stream)
 *** Caught Return value of {closure}() must be of the type integer, resource returned in %s on line %d
 
-Testing 'float' typehint:
+Testing 'float' type:
 *** Trying int(1)
 float(1)
 *** Trying string(1) "1"
@@ -139,7 +139,7 @@ float(0)
 *** Trying resource(5) of type (stream)
 *** Caught Return value of {closure}() must be of the type float, resource returned in %s on line %d
 
-Testing 'string' typehint:
+Testing 'string' type:
 *** Trying int(1)
 string(1) "1"
 *** Trying string(1) "1"
@@ -176,7 +176,7 @@ string(6) "foobar"
 *** Trying resource(5) of type (stream)
 *** Caught Return value of {closure}() must be of the type string, resource returned in %s on line %d
 
-Testing 'bool' typehint:
+Testing 'bool' type:
 *** Trying int(1)
 bool(true)
 *** Trying string(1) "1"

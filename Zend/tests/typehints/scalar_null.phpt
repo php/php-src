@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint nullability
+Scalar type nullability
 --FILE--
 <?php
 

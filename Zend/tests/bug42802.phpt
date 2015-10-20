@@ -1,5 +1,5 @@
 --TEST--
-Bug #42802 (Namespace not supported in typehints)
+Bug #42802 (Namespace not supported in types)
 --FILE--
 <?php
 namespace foo;

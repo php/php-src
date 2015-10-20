@@ -1,5 +1,5 @@
 --TEST--
-Strict scalar type hint basics
+Strict scalar type basics
 --FILE--
 <?php
 
@@ -48,7 +48,7 @@ function type($value) {
 }
 
 foreach ($functions as $type => $function) {
-    echo PHP_EOL, "Testing '$type' typehint:", PHP_EOL;
+    echo PHP_EOL, "Testing '$type' type:", PHP_EOL;
     foreach ($values as $value) {
         $errored = false;
         echo PHP_EOL . "*** Trying ", type($value), " value", PHP_EOL;
@@ -62,7 +62,7 @@ foreach ($functions as $type => $function) {
 echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
-Testing 'int' typehint:
+Testing 'int' type:
 
 *** Trying integer value
 int(1)
@@ -91,7 +91,7 @@ int(1)
 *** Trying resource value
 *** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d
 
-Testing 'float' typehint:
+Testing 'float' type:
 
 *** Trying integer value
 float(1)
@@ -120,7 +120,7 @@ float(1)
 *** Trying resource value
 *** Caught Argument 1 passed to {closure}() must be of the type float, resource given, called in %s on line %d
 
-Testing 'string' typehint:
+Testing 'string' type:
 
 *** Trying integer value
 *** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
@@ -149,7 +149,7 @@ string(1) "1"
 *** Trying resource value
 *** Caught Argument 1 passed to {closure}() must be of the type string, resource given, called in %s on line %d
 
-Testing 'bool' typehint:
+Testing 'bool' type:
 
 *** Trying integer value
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d

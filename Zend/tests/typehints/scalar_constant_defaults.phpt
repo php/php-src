@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint - default via constants
+Scalar type - default via constants
 --FILE--
 <?php
 

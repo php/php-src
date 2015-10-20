@@ -1,5 +1,5 @@
 --TEST--
-callable type hint#002 - Reflection
+callable type#002 - Reflection
 --FILE--
 <?php
 

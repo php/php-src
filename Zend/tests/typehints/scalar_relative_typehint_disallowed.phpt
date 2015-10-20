@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint - disallow relative typehints
+Scalar type - disallow relative types
 --FILE--
 <?php
 

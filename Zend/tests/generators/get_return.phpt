@@ -58,7 +58,7 @@ $gen->next();
 var_dump($gen->getReturn());
 
 // Explicit value-less return also results in a NULL generator
-// return value and there is no interference with type hints
+// return value and there is no interference with type declarations
 function gen6() : Generator {
     return;
     yield 24;

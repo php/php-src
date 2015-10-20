@@ -1,5 +1,5 @@
 --TEST--
-Array type hint
+Array type declaration
 --FILE--
 <?php
 function foo(array $a) {

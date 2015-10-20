@@ -1,5 +1,5 @@
 --TEST--
-Float type hint should allow an integer as default even with strict types
+Float type should allow an integer as default even with strict types
 --FILE--
 <?php
 

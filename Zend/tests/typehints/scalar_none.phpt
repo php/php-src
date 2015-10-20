@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint missing parameters
+Scalar type missing parameters
 --FILE--
 <?php
 

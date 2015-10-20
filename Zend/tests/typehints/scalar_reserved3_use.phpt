@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint names cannot be used as class, trait or interface names (3) - use
+Scalar type names cannot be used as class, trait or interface names (3) - use
 --FILE--
 <?php
 

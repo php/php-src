@@ -1,5 +1,5 @@
 --TEST--
-Scalar type hint - default via constants - error condition
+Scalar type - default via constants - error condition
 --FILE--
 <?php
 

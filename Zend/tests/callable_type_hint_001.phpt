@@ -1,5 +1,5 @@
 --TEST--
-callable type hint#001
+callable type#001
 --FILE--
 <?php
 

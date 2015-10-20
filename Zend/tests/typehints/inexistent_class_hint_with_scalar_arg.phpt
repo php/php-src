@@ -1,5 +1,5 @@
 --TEST--
-Inexistent class as typehint receiving scalar argument
+Inexistent class as type receiving scalar argument
 --FILE--
 <?php
 

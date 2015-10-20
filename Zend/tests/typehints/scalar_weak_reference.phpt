@@ -1,5 +1,5 @@
 --TEST--
-Weak scalar type hints, with references
+Weak scalar types, with references
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ function to_bool(bool &$x) {}
 
 $x = 1.0;
 var_dump($x);
-to_int($x); // because $x is by-reference, the weak type hint converts it
+to_int($x); // because $x is by-reference, the weak type converts it
 var_dump($x);
 to_float($x);
 var_dump($x);
