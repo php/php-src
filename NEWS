@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.16
 
+- Core:
+  . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
+    (Laruence)
+
 - PDO_DBlib:
   . Fixed bug #69757 (Segmentation fault on nextRowset).
     (miracle at rpz dot name)
