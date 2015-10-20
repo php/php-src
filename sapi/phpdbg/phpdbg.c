@@ -1845,7 +1845,7 @@ phpdbg_interact:
 					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
 					if (quit_immediately) {
-						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+						PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
 					} else {
 						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 					}
