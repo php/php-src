@@ -97,7 +97,6 @@ static int php_random_bytes(void *bytes, size_t size)
 
 	/* Keep reading until we get enough entropy */
 	do {
-		amount_to_read = size - read_bytes;
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -107,6 +106,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		              amount_to_read
 
 		*/
+		amount_to_read = size - read_bytes;
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 
 		if (n == -1) {
