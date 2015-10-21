@@ -21,7 +21,7 @@ foo($closure);
 string(6) "strpos"
 string(3) "foo"
 
-Deprecated: Non-static method bar::baz() should not be called statically in %scallable_type_hint_001.php on line %d
+Deprecated: Non-static method bar::baz() should not be called statically in %s on line %d
 array(2) {
   [0]=>
   string(3) "bar"
