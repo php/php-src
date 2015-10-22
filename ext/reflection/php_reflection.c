@@ -445,7 +445,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 
 	/* Constants */
-	if (&ce->constants_table) {
 		string_printf(str, "\n");
 		count = zend_hash_num_elements(&ce->constants_table);
 		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
@@ -459,10 +458,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
-	}
 
 	/* Static properties */
-	if (&ce->properties_info) {
 		/* counting static properties */
 		count = zend_hash_num_elements(&ce->properties_info);
 		if (count > 0) {
@@ -489,10 +486,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
-	}
 
 	/* Static methods */
-	if (&ce->function_table) {
 		/* counting static methods */
 		count = zend_hash_num_elements(&ce->function_table);
 		if (count > 0) {
@@ -524,10 +519,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			string_printf(str, "\n");
 		}
 		string_printf(str, "%s  }\n", indent);
-	}
 
 	/* Default/Implicit properties */
-	if (&ce->properties_info) {
 		count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
 		string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
 		if (count > 0) {
@@ -540,7 +533,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
-	}
 
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_properties) {
 		string       dyn;
@@ -568,7 +560,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 
 	/* Non static methods */
-	if (&ce->function_table) {
 		count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
 		if (count > 0) {
 			zend_function *mptr;
@@ -617,7 +608,6 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			string_printf(str, "\n%s  - Methods [0] {\n", indent);
 		}
 		string_printf(str, "%s  }\n", indent);
-	}
 
 	string_printf(str, "%s}\n", indent);
 	string_free(&sub_indent);
