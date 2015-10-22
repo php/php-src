@@ -897,14 +897,9 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		ZVAL_STRING(&key_zval, net->data->options.ssl_key, 0);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
-	if (net->data->options.ssl_verify_peer) {
+	{
 		zval verify_peer_zval;
-		ZVAL_TRUE(&verify_peer_zval);
-		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
-		php_stream_context_set_option(context, "ssl", "verify_peer_name", &verify_peer_zval);
-	} else {
-		zval verify_peer_zval;
-		ZVAL_FALSE(&verify_peer_zval);
+		ZVAL_BOOL(&verify_peer_zval, net->data->options.ssl_verify_peer);
 		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
 		php_stream_context_set_option(context, "ssl", "verify_peer_name", &verify_peer_zval);
 	}
