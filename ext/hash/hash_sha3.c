@@ -106,8 +106,10 @@ static void permute(PHP_SHA3_CTX* ctx) {
 			for (t = 0; t < 24; ++t) {
 				unsigned char r = ((t + 1) * (t + 2) / 2) % 64;
 				unsigned char Y = (2*x + 3*y) % 5;
-				x = y; y = Y;
-				php_hash_uint64 temp = readLane(x, y);
+				php_hash_uint64 temp;
+				x = y;
+				y = Y;
+				temp = readLane(x, y);
 				writeLane(x, y, rol64(current, r));
 				current = temp;
 			}
