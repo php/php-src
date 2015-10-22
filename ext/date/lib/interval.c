@@ -70,7 +70,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		rt->i += dst_m_corr;
 	}
 
-	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
+	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
