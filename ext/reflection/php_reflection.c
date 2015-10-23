@@ -445,94 +445,94 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 
 	/* Constants */
-		string_printf(str, "\n");
-		count = zend_hash_num_elements(&ce->constants_table);
-		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
-		if (count > 0) {
-			zend_string *key;
-			zval *value;
+	string_printf(str, "\n");
+	count = zend_hash_num_elements(&ce->constants_table);
+	string_printf(str, "%s  - Constants [%d] {\n", indent, count);
+	if (count > 0) {
+		zend_string *key;
+		zval *value;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, value) {
-				zval_update_constant_ex(value, 1, NULL);
-				_const_string(str, ZSTR_VAL(key), value, indent);
-			} ZEND_HASH_FOREACH_END();
-		}
-		string_printf(str, "%s  }\n", indent);
+		ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, value) {
+			zval_update_constant_ex(value, 1, NULL);
+			_const_string(str, ZSTR_VAL(key), value, indent);
+		} ZEND_HASH_FOREACH_END();
+	}
+	string_printf(str, "%s  }\n", indent);
 
 	/* Static properties */
-		/* counting static properties */
-		count = zend_hash_num_elements(&ce->properties_info);
-		if (count > 0) {
-			zend_property_info *prop;
+	/* counting static properties */
+	count = zend_hash_num_elements(&ce->properties_info);
+	if (count > 0) {
+		zend_property_info *prop;
 
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-				if(prop->flags & ZEND_ACC_SHADOW) {
-					count_shadow_props++;
-				} else if (prop->flags & ZEND_ACC_STATIC) {
-					count_static_props++;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+			if(prop->flags & ZEND_ACC_SHADOW) {
+				count_shadow_props++;
+			} else if (prop->flags & ZEND_ACC_STATIC) {
+				count_static_props++;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
-		/* static properties */
-		string_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
-		if (count_static_props > 0) {
-			zend_property_info *prop;
+	/* static properties */
+	string_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
+	if (count_static_props > 0) {
+		zend_property_info *prop;
 
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-				if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
-					_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.buf));
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-		string_printf(str, "%s  }\n", indent);
+		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+			if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
+				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.buf));
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	string_printf(str, "%s  }\n", indent);
 
 	/* Static methods */
-		/* counting static methods */
-		count = zend_hash_num_elements(&ce->function_table);
-		if (count > 0) {
-			zend_function *mptr;
+	/* counting static methods */
+	count = zend_hash_num_elements(&ce->function_table);
+	if (count > 0) {
+		zend_function *mptr;
 
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-				if (mptr->common.fn_flags & ZEND_ACC_STATIC
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
-				{
-					count_static_funcs++;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
+			if (mptr->common.fn_flags & ZEND_ACC_STATIC
+				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+			{
+				count_static_funcs++;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
-		/* static methods */
-		string_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
-		if (count_static_funcs > 0) {
-			zend_function *mptr;
+	/* static methods */
+	string_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
+	if (count_static_funcs > 0) {
+		zend_function *mptr;
 
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-				if (mptr->common.fn_flags & ZEND_ACC_STATIC
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
-				{
-					string_printf(str, "\n");
-					_function_string(str, mptr, ce, ZSTR_VAL(sub_indent.buf));
-				}
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			string_printf(str, "\n");
-		}
-		string_printf(str, "%s  }\n", indent);
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
+			if (mptr->common.fn_flags & ZEND_ACC_STATIC
+				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+			{
+				string_printf(str, "\n");
+				_function_string(str, mptr, ce, ZSTR_VAL(sub_indent.buf));
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		string_printf(str, "\n");
+	}
+	string_printf(str, "%s  }\n", indent);
 
 	/* Default/Implicit properties */
-		count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
-		string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
-		if (count > 0) {
-			zend_property_info *prop;
+	count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
+	string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
+	if (count > 0) {
+		zend_property_info *prop;
 
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-				if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
-					_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.buf));
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-		string_printf(str, "%s  }\n", indent);
+		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+			if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
+				_property_string(str, prop, NULL, ZSTR_VAL(sub_indent.buf));
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	string_printf(str, "%s  }\n", indent);
 
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_properties) {
 		string       dyn;
@@ -560,54 +560,54 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	}
 
 	/* Non static methods */
-		count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
-		if (count > 0) {
-			zend_function *mptr;
-			zend_string *key;
-			string dyn;
+	count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
+	if (count > 0) {
+		zend_function *mptr;
+		zend_string *key;
+		string dyn;
 
-			count = 0;
-			string_init(&dyn);
+		count = 0;
+		string_init(&dyn);
 
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
-				if ((mptr->common.fn_flags & ZEND_ACC_STATIC) == 0
-					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
+			if ((mptr->common.fn_flags & ZEND_ACC_STATIC) == 0
+				&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
+			{
+				size_t len = ZSTR_LEN(mptr->common.function_name);
+
+				/* Do not display old-style inherited constructors */
+				if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
+					|| mptr->common.scope == ce
+					|| !key
+					|| zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0)
 				{
-					size_t len = ZSTR_LEN(mptr->common.function_name);
-
-					/* Do not display old-style inherited constructors */
-					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
-						|| mptr->common.scope == ce
-						|| !key
-						|| zend_binary_strcasecmp(ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(mptr->common.function_name), len) == 0)
+					zend_function *closure;
+					/* see if this is a closure */
+					if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+						&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+						&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 					{
-						zend_function *closure;
-						/* see if this is a closure */
-						if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-							&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-							&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
-						{
-							mptr = closure;
-						} else {
-							closure = NULL;
-						}
-						string_printf(&dyn, "\n");
-						_function_string(&dyn, mptr, ce, ZSTR_VAL(sub_indent.buf));
-						count++;
-						_free_function(closure);
+						mptr = closure;
+					} else {
+						closure = NULL;
 					}
+					string_printf(&dyn, "\n");
+					_function_string(&dyn, mptr, ce, ZSTR_VAL(sub_indent.buf));
+					count++;
+					_free_function(closure);
 				}
-			} ZEND_HASH_FOREACH_END();
-			string_printf(str, "\n%s  - Methods [%d] {", indent, count);
-			if (!count) {
-				string_printf(str, "\n");
 			}
-			string_append(str, &dyn);
-			string_free(&dyn);
-		} else {
-			string_printf(str, "\n%s  - Methods [0] {\n", indent);
+		} ZEND_HASH_FOREACH_END();
+		string_printf(str, "\n%s  - Methods [%d] {", indent, count);
+		if (!count) {
+			string_printf(str, "\n");
 		}
-		string_printf(str, "%s  }\n", indent);
+		string_append(str, &dyn);
+		string_free(&dyn);
+	} else {
+		string_printf(str, "\n%s  - Methods [0] {\n", indent);
+	}
+	string_printf(str, "%s  }\n", indent);
 
 	string_printf(str, "%s}\n", indent);
 	string_free(&sub_indent);
