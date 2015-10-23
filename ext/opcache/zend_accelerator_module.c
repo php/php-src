@@ -802,7 +802,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 	} zend_end_try();
 
 	if(op_array != NULL) {
-		destroy_op_array(op_array);
+		op_array_destroy(op_array);
 		efree(op_array);
 		RETVAL_TRUE;
 	} else {

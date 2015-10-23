@@ -284,7 +284,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 
 					PHAR_G(cwd_init) = 0;
 					efree(name);
-					destroy_op_array(new_op_array);
+					op_array_destroy(new_op_array);
 					efree(new_op_array);
 					zval_ptr_dtor(&result);
 				} zend_catch {

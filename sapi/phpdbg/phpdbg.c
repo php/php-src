@@ -172,7 +172,7 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 	phpdbg_breakcond_t *brake = (phpdbg_breakcond_t *) Z_PTR_P(data);
 
 	if (brake->ops) {
-		destroy_op_array(brake->ops);
+		op_array_destroy(brake->ops);
 		efree(brake->ops);
 	}
 	efree((char*) brake->code);
@@ -241,7 +241,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	}
 
 	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
+		op_array_destroy(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
 	}

@@ -1431,7 +1431,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 			if (EG(exception)) {
 				zend_exception_error(EG(exception), E_ERROR);
 			}
-			destroy_op_array(op_array);
+			op_array_destroy(op_array);
 			efree_size(op_array, sizeof(zend_op_array));
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);

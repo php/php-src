@@ -512,7 +512,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 	}
 	if (EXPECTED((ZEND_CALL_KIND_EX(call_info) & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
-		destroy_op_array(&EX(func)->op_array);
+		op_array_destroy(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
@@ -3682,7 +3682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
+		op_array_destroy(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
@@ -29206,7 +29206,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
+		op_array_destroy(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
@@ -40657,7 +40657,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
+		op_array_destroy(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);

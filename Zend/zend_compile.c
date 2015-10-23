@@ -4832,7 +4832,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	zend_oparray_context orig_oparray_context;
 
-	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+	op_array_init(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;

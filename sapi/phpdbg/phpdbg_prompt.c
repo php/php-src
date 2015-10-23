@@ -388,7 +388,7 @@ void phpdbg_clean(zend_bool full) /* {{{ */
 {
 	/* this is implicitly required */
 	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
+		op_array_destroy(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
 	}

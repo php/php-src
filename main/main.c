@@ -2598,7 +2598,7 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 		zend_destroy_file_handle(file);
 
 		if (op_array) {
-			destroy_op_array(op_array);
+			op_array_destroy(op_array);
 			efree(op_array);
 			retval = SUCCESS;
 		}
