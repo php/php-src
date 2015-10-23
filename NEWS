@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)
   . Fixed bug #70709 (SOAP Client generates Segfault). (Laruence)
 
+- SPL:
+  . Fixed bug #70730 (Incorrect ArrayObject serialization if unset is called
+    in serialize()). (Laruence)
+
 
 15 Oct 2015, PHP 7.0.0 RC 5
 
