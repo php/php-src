@@ -32,7 +32,7 @@ try{
                     print("okey");
                     
                 } else {
-                    print("okey");
+                    print("openssl has failure to return pkcs12");
                 }        
                 
             } else {
