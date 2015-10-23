@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     (miracle at rpz dot name)
 
 - SOAP:
+  . Fixed bug #70715 (Segmentation fault inside soap client). (Laruence)
   . Fixed bug #70709 (SOAP Client generates Segfault). (Laruence)
 
 
