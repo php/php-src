@@ -1,5 +1,5 @@
 --TEST--
-bool openssl_pkcs12_export ( mixed $x509 , string &$out , mixed $priv_key , string $pass [, array $args ] );
+bool openssl_pkcs12_export(mixed $x509 , string &$out , mixed $priv_key , string $pass [, array $args ]);
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
