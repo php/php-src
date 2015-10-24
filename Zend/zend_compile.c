@@ -2126,8 +2126,15 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast, int th
 	zend_compile_expr(&name_node, name_ast);
 
 	if (name_node.op_type == IS_CONST) {
-		zend_string *name = Z_STR(name_node.u.constant);
-		uint32_t fetch_type = zend_get_class_fetch_type(name);
+		zend_string *name;
+		uint32_t fetch_type;
+
+		if (Z_TYPE(name_node.u.constant) != IS_STRING) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
+		}
+
+		name = Z_STR(name_node.u.constant);
+		fetch_type = zend_get_class_fetch_type(name);
 
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, NULL);
 		opline->extended_value = fetch_type | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
