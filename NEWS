@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #70689 (Exception handler does not work as expected). (Laruence)
   . Fixed bug #70430 (Stack buffer overflow in zend_language_parser()). (Nikita)
+  . Fixed bug #70782 (null ptr deref and segfault (zend_get_class_fetch_type)).
+    (Nikita)
 
 - Opcache:
   . Fixed bug #70724 (Undefined Symbols from opcache.so on Mac OS X 10.10).
