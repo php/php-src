@@ -84,7 +84,7 @@ static void zend_resource_dtor(zend_resource *res)
 ZEND_API int zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
-		return zend_list_delete(res);
+		return zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
