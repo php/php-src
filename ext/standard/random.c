@@ -87,8 +87,6 @@ static int php_random_bytes(void *bytes, size_t size)
 		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF
-	arc4random_buf(bytes, size);
 #elif HAVE_DECL_GETRANDOM
 	/* Linux getrandom(2) syscall */
 	size_t read_bytes = 0;
