@@ -21,7 +21,7 @@ if ((is_array($getMdMethodsTrue)) && (!is_null($getMdMethodsTrue))) {
 if ((is_array($getMdMethodsFalse)) && (!is_null($getMdMethodsFalse))) {
  print("okey");
 } else {
- print("openssl has failure to get md method with true argument");
+ print("openssl has failure to get md method with false argument");
 }
 ?>
 --EXPECT--
