@@ -25,6 +25,8 @@ if ((is_array($getCipherFalse)) && (!is_null($getCipherFalse))) {
 }    
 ?>
 --EXPECT--
+okey
+okey
 array(203) {
   [0]=>
   string(11) "AES-128-CBC"
