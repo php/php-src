@@ -12,7 +12,7 @@ if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0")
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $config_arg = array('config' => $config);
 $crs_exported_file_notext_true = __DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-true.crs";
-$crsExportedFileNoTextFalse = __DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-false.crs";
+$crs_exported_file_notext_false = __DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-false.crs";
 
 $dn = array(
     "countryName" => "BR",
@@ -35,9 +35,9 @@ $csr = openssl_csr_new($dn, $privkey, $args);
 
 if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true)){
 
-    if (openssl_csr_export_to_file($csr, $crsExportedFileNoTextFalse, false)){
+    if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_false, false)){
     
-        if ((file_exists($crs_exported_file_notext_true)) && (file_exists($crsExportedFileNoTextFalse))) {
+        if ((file_exists($crs_exported_file_notext_true)) && (file_exists($crs_exported_file_notext_false))) {
             print("okey");
             
         } else {
