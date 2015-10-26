@@ -15,7 +15,7 @@ $getMdMethodsFalse = openssl_get_md_methods(false);
 if ((is_array($getMdMethodsTrue)) && (!is_null($getMdMethodsTrue))) {
  print("okey");
 } else {
- print("openssl has failure to get md method with true argument");
+ print("OpenSSL has failed to get md methods with the aliases argument set to true");
 }
 
 if ((is_array($getMdMethodsFalse)) && (!is_null($getMdMethodsFalse))) {
