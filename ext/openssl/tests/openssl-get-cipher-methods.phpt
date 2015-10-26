@@ -12,17 +12,17 @@ if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0")
 $getCipherTrue = openssl_get_cipher_methods(true);
 $getCipherFalse = openssl_get_cipher_methods(false);
 
-    if ((is_array($getCipherTrue)) && (!is_null($getCipherTrue))) {
-        print("okey");
-    } else {
-        print("openssl has failure to get cipher method with true argument");
-    }
+if ((is_array($getCipherTrue)) && (!is_null($getCipherTrue))) {
+    print("okey");
+} else {
+    print("openssl has failure to get cipher method with true argument");
+}
     
-    if ((is_array($getCipherFalse)) && (!is_null($getCipherFalse))) {
-        print("okey");
-    } else {
-        print("openssl has failure to get cipher method with true argument");
-    }    
+if ((is_array($getCipherFalse)) && (!is_null($getCipherFalse))) {
+    print("okey");
+} else {
+    print("openssl has failure to get cipher method with true argument");
+}    
 ?>
 --EXPECT--
 array(203) {
