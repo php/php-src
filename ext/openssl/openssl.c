@@ -5265,6 +5265,26 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 }
 /* }}} */
 
+static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type, EVP_CIPHER_CTX *cipher_ctx,
+		size_t password_len, size_t keylen, unsigned char *key, char *iv, zend_long options, int enc)  /* {{{ */
+{
+	if (!EVP_CipherInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL, enc)) {
+		return FAILURE;
+	}
+	if (password_len > keylen) {
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
+	}
+	if (!EVP_CipherInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv, enc)) {
+		return FAILURE;
+	}
+	if (options & OPENSSL_ZERO_PADDING) {
+		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, long $tag_length = 16]]]]])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
