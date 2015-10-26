@@ -8,27 +8,27 @@ if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0")
 ?>
 --FILE--
 <?php
-$pemFile = "bug37820cert.pem";
-$keyFile = "bug37820key.pem";
-$privkeyFilePem = "file://" . dirname(__FILE__) . "/{$keyFile}";
-$privkeyDirPem = __DIR__ . "/{$pemFile}";
-$passPhrase = "JavaIsBetterThanPython:-)";
+$pem_file = "bug37820cert.pem";
+$key_file = "bug37820key.pem";
+$priv_key_file_pem = "file://" . dirname(__FILE__) . "/{$key_file}";
+$priv_key_dir_pem = __DIR__ . "/{$pem_file}";
+$pass_phrase = "JavaIsBetterThanPython:-)";
 $args = array(
-    'extracerts' => $privkeyFilePem,
+    'extracerts' => $priv_key_file_pem,
     'friendly_name' => 'My signed cert by CA certificate'
 );
 
 try{
-    $cert = openssl_x509_read(file_get_contents($privkeyDirPem));
+    $cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
     
     if ( false !== $cert ){
-        $privkey = openssl_pkey_get_private($privkeyFilePem);
+        $priv_key = openssl_pkey_get_private($priv_key_file_pem);
         
-        if( false !== $privkey ){
+        if( false !== $priv_key ){
         
-            if (openssl_pkcs12_export($cert, $pkcs12Out, $privkey, $passPhrase, $args)) {
+            if (openssl_pkcs12_export($cert, $pkcs12_out, $priv_key, $pass_phrase, $args)) {
                 
-                if (null !== $pkcs12Out) {
+                if (null !== $pkcs12_out) {
                     print("okey");
                     
                 } else {
