@@ -12,7 +12,7 @@ $get_cipher_true = openssl_get_cipher_methods(true);
 $get_cipher_false = openssl_get_cipher_methods(false);
 
 if (is_array($get_cipher_true)) {
-    print("okey");
+    print("okey\n");
 } else {
     print("OpenSSL has failed to get cipher methods with the aliases argument set to true");
 }
