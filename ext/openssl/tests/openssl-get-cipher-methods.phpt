@@ -17,7 +17,7 @@ if (is_array($get_cipher_true)) {
     print("OpenSSL has failed to get cipher methods with the aliases argument set to true");
 }
 
-if ((is_array($get_cipher_false)) && (!is_null($get_cipher_false))) {
+if (is_array($get_cipher_false) {
     print("okey");
 } else {
     print("OpenSSL has failed to get cipher methods with the aliases argument set to false");
