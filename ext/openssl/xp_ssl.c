@@ -2298,7 +2298,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 							: stream->chunk_size);
 				}
 
-				*(int *)ret = sslsock->s.socket;
+				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;
 
