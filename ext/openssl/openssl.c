@@ -710,7 +710,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		}
 	}
 	if (key != NULL) {
-		zend_hash_str_update(HASH_OF(val), key, strlen(key), &subitem);
+		zend_hash_str_update(Z_ARRVAL_P(val), key, strlen(key), &subitem);
 	}
 }
 /* }}} */
@@ -1310,6 +1310,7 @@ PHP_MINFO_FUNCTION(openssl)
 	php_info_print_table_row(2, "OpenSSL support", "enabled");
 	php_info_print_table_row(2, "OpenSSL Library Version", SSLeay_version(SSLEAY_VERSION));
 	php_info_print_table_row(2, "OpenSSL Header Version", OPENSSL_VERSION_TEXT);
+	php_info_print_table_row(2, "Openssl default config", default_ssl_conf_filename);
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -2252,7 +2253,7 @@ static X509_STORE * setup_verify(zval * calist)
 	}
 
 	if (calist && (Z_TYPE_P(calist) == IS_ARRAY)) {
-		ZEND_HASH_FOREACH_VAL(HASH_OF(calist), item) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(calist), item) {
 			convert_to_string_ex(item);
 
 			if (VCWD_STAT(Z_STRVAL_P(item), &sb) == -1) {
@@ -2358,7 +2359,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval * zcerts) /* {{{ */
 
 	/* get certs */
 	if (Z_TYPE_P(zcerts) == IS_ARRAY) {
-		ZEND_HASH_FOREACH_VAL(HASH_OF(zcerts), zcertval) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zcerts), zcertval) {
 			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
 			if (cert == NULL) {
 				goto clean_exit;
@@ -2691,7 +2692,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 		subj = X509_REQ_get_subject_name(csr);
 		/* apply values from the dn hash */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(dn), strindex, item) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
 			if (strindex) {
 				int nid;
 
@@ -2764,7 +2765,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			}
 		}
 		if (attribs) {
-			ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(attribs), strindex, item) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
 
 				convert_to_string_ex(item);
@@ -3251,7 +3252,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 
 		/* get passphrase */
 
-		if ((zphrase = zend_hash_index_find(HASH_OF(val), 1)) == NULL) {
+		if ((zphrase = zend_hash_index_find(Z_ARRVAL_P(val), 1)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
 			return NULL;
 		}
@@ -3265,7 +3266,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 		}
 
 		/* now set val to be the key param and continue */
-		if ((val = zend_hash_index_find(HASH_OF(val), 0)) == NULL) {
+		if ((val = zend_hash_index_find(Z_ARRVAL_P(val), 0)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
 			TMP_CLEAN;
 		}
@@ -4231,7 +4232,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
-		ZEND_HASH_FOREACH_VAL(HASH_OF(zrecipcerts), zcertval) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
 			zend_resource *certresource;
 
 			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
@@ -4285,7 +4286,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 	/* tack on extra headers */
 	if (zheaders) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(zheaders), strindex, zcertval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
 			convert_to_string_ex(zcertval);
 
 			if (strindex) {
@@ -4389,7 +4390,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 	/* tack on extra headers */
 	if (zheaders) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(zheaders), strindex, hval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
 			convert_to_string_ex(hval);
 
 			if (strindex) {
@@ -4910,7 +4911,7 @@ PHP_FUNCTION(openssl_seal)
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}
-	pubkeysht = HASH_OF(pubkeys);
+	pubkeysht = Z_ARRVAL_P(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
 		php_error_docref(NULL, E_WARNING, "Fourth argument to openssl_seal() must be a non-empty array");
@@ -4967,14 +4968,13 @@ PHP_FUNCTION(openssl_seal)
 	EVP_CIPHER_CTX_cleanup(&ctx);
 
 	if (!EVP_SealInit(&ctx, cipher, eks, eksl, &iv_buf[0], pkeys, nkeys) ||
-			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
+			!EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len) ||
+			!EVP_SealFinal(&ctx, buf + len1, &len2)) {
 		RETVAL_FALSE;
 		efree(buf);
 		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
-
-	EVP_SealFinal(&ctx, buf + len1, &len2);
 
 	if (len1 + len2 > 0) {
 		zval_dtor(sealdata);

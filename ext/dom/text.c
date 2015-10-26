@@ -164,13 +164,13 @@ PHP_FUNCTION(dom_text_split_text)
 	}
 	length = xmlUTF8Strlen(cur);
 
-	if (offset > length || offset < 0) {
+	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length || offset < 0) {
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
-	first = xmlUTF8Strndup(cur, offset);
-	second = xmlUTF8Strsub(cur, offset, length - offset);
+	first = xmlUTF8Strndup(cur, (int)offset);
+	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
 
 	xmlFree(cur);
 

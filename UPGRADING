@@ -34,6 +34,11 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+- get_headers() has an extra parameter which allows passing a custom stream
+  context.
+- The first $varname argument for getenv() is no longer mandatory, the
+  current environment variables will be returned as an associative array
+  when omitted.
 
 ========================================
 6. New Functions
@@ -62,6 +67,9 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Core:
+  . Support for ftok()
 
 ========================================
 13. Other Changes

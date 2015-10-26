@@ -893,7 +893,7 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 	return 1;
 }
 
-static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+static ZEND_COLD void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
 	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
 	    UNEXPECTED(zend_verify_missing_arg_type(EX(func), arg_num, cache_slot))) {
@@ -907,9 +907,7 @@ static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, ui
 		} else {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);
 		}
-		return 1;
 	}
-	return 0;
 }
 
 static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
@@ -926,14 +924,8 @@ static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const ch
 		fclass = "";
 	}
 
-	if (zf->common.type == ZEND_USER_FUNCTION) {
-		zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned in %s on line %d",
-			fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind,
-			ZSTR_VAL(zf->op_array.filename), EG(current_execute_data)->opline->lineno);
-	} else {
-		zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
-			fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
-	}
+	zend_type_error("Return value of %s%s%s() must %s%s, %s%s returned",
+		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
 static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
@@ -1457,8 +1449,8 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 
 	ZVAL_OBJ(&obj, Z_OBJ_P(object));
 	Z_ADDREF(obj);
-	if (Z_OBJ_HT(obj)->read_property &&
-		(z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv)) != NULL) {
+	if (EXPECTED(Z_OBJ_HT(obj)->read_property)) {
+		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
 			return;
@@ -1563,7 +1555,8 @@ num_index:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
-					/* break missing intentionally */
+					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 					break;
@@ -1611,7 +1604,8 @@ str_index:
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
-					/* break missing intentionally */
+					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+					break;
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;
@@ -1970,8 +1964,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	if (EXPECTED(Z_OBJ_HT_P(container)->get_property_ptr_ptr)) {
 		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, cache_slot);
 		if (NULL == ptr) {
-			if (Z_OBJ_HT_P(container)->read_property &&
-				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result)) != NULL) {
+			if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
+				ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result);
 				if (ptr != result) {
 					ZVAL_INDIRECT(result, ptr);
 				} else if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {
@@ -2186,12 +2180,14 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
-	zend_attach_symbol_table(execute_data);
-
-	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+	if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+			GC_REFCOUNT(Z_OBJ(EX(This)))--;
+		}
 	}
+
+	zend_attach_symbol_table(execute_data);
 
 	if (!op_array->run_time_cache) {
 		op_array->run_time_cache = emalloc(op_array->cache_size);
@@ -2214,6 +2210,13 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(return_value) = return_value;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
+		if (UNEXPECTED(op_array->this_var != (uint32_t)-1) && EXPECTED(Z_OBJ(EX(This)))) {
+			GC_REFCOUNT(Z_OBJ(EX(This)))++;
+			if (!zend_hash_str_add(EX(symbol_table), "this", sizeof("this")-1, &EX(This))) {
+				GC_REFCOUNT(Z_OBJ(EX(This)))--;
+			}
+		}
+
 		zend_attach_symbol_table(execute_data);
 	} else {
 		uint32_t first_extra_arg, num_args;
@@ -2264,11 +2267,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 				var++;
 			} while (var != end);
 		}
-	}
 
-	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
-		GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+			GC_REFCOUNT(Z_OBJ(EX(This)))++;
+		}
 	}
 
 	if (!op_array->run_time_cache) {
@@ -2731,9 +2734,9 @@ ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_n
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
 
-ZEND_API int ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
-	return zend_verify_missing_arg(execute_data, arg_num, cache_slot);
+	zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
 /*

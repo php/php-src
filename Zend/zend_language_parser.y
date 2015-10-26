@@ -700,7 +700,7 @@ class_statement_list:
 
 class_statement:
 		variable_modifiers property_list ';'
-			{ $$ = zend_ast_append_doc_comment($2); $$->attr = $1; }
+			{ $$ = $2; $$->attr = $1; }
 	|	T_CONST class_const_list ';'
 			{ $$ = $2; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations
@@ -798,9 +798,10 @@ property_list:
 ;
 
 property:
-		T_VARIABLE { $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL); }
-	|	T_VARIABLE '=' expr
-			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3); }
+		T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL)); }
+	|	T_VARIABLE '=' expr backup_doc_comment
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 class_const_list:
@@ -1277,50 +1278,66 @@ isset_variable:
    would have been.  */
 static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 {
-	if (!yyres) {
-		return yystrlen(yystr);
+	/* CG(parse_error) states:
+	 * 0 => yyres = NULL, yystr is the unexpected token
+	 * 1 => yyres = NULL, yystr is one of the expected tokens
+	 * 2 => yyres != NULL, yystr is the unexpected token
+	 * 3 => yyres != NULL, yystr is one of the expected tokens
+	 */
+	if (yyres && CG(parse_error) < 2) {
+		CG(parse_error) = 2;
 	}
-	{
-		if (CG(parse_error) == 0) {
-			char buffer[120];
-			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
-			unsigned int len = 0, toklen = 0, yystr_len;
 
-			CG(parse_error) = 1;
+	if (CG(parse_error) % 2 == 0) {
+		/* The unexpected token */
+		char buffer[120];
+		const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
+		unsigned int len = 0, toklen = 0, yystr_len;
 
-			if (LANG_SCNG(yy_text)[0] == 0 &&
-				LANG_SCNG(yy_leng) == 1 &&
-				memcmp(yystr, "\"end of file\"", sizeof("\"end of file\"") - 1) == 0) {
+		CG(parse_error)++;
+
+		if (LANG_SCNG(yy_text)[0] == 0 &&
+			LANG_SCNG(yy_leng) == 1 &&
+			memcmp(yystr, "\"end of file\"", sizeof("\"end of file\"") - 1) == 0) {
+			if (yyres) {
 				yystpcpy(yyres, "end of file");
-				return sizeof("end of file")-1;
 			}
+			return sizeof("end of file")-1;
+		}
 
-			str = LANG_SCNG(yy_text);
-			end = memchr(str, '\n', LANG_SCNG(yy_leng));
-			yystr_len = (unsigned int)yystrlen(yystr);
+		str = LANG_SCNG(yy_text);
+		end = memchr(str, '\n', LANG_SCNG(yy_leng));
+		yystr_len = (unsigned int)yystrlen(yystr);
 
-			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
-				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
-				toklen = (tok2 - tok1) + 1;
-			} else {
-				tok1 = tok2 = NULL;
-				toklen = 0;
-			}
+		if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
+			&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
+			toklen = (tok2 - tok1) + 1;
+		} else {
+			tok1 = tok2 = NULL;
+			toklen = 0;
+		}
 
-			if (end == NULL) {
-				len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
-			} else {
-				len = (end - str) > 30 ? 30 : (end - str);
-			}
+		if (end == NULL) {
+			len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
+		} else {
+			len = (end - str) > 30 ? 30 : (end - str);
+		}
+		if (yyres) {
 			if (toklen) {
 				snprintf(buffer, sizeof(buffer), "'%.*s' %.*s", len, str, toklen, tok1);
 			} else {
 				snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
 			}
 			yystpcpy(yyres, buffer);
-			return len + (toklen ? toklen + 1 : 0) + 2;
 		}
+		return len + (toklen ? toklen + 1 : 0) + 2;
 	}
+
+	/* One of the expected tokens */
+	if (!yyres) {
+		return yystrlen(yystr) - (*yystr == '"' ? 2 : 0);
+	}
+
 	if (*yystr == '"') {
 		YYSIZE_T yyn = 0;
 		const char *yyp = yystr;

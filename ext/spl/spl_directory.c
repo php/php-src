@@ -122,10 +122,6 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		spl_filesystem_file_free_line(intern);
 		break;
 	}
-
-	if (intern->it) {
-		//????zend_iterator_dtor(&intern->it->intern);
-	}
 } /* }}} */
 
 /* {{{ spl_ce_dir_object_new */
@@ -838,7 +834,8 @@ SPL_METHOD(DirectoryIterator, seek)
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
-			break;
+			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", pos);
+			return;
 		}
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_next, "next", NULL);
 	}
@@ -1646,8 +1643,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(object);
 	}
 	/* Otherwise we were called from the owning object free storage handler as
-	 * it sets
-	 * iterator->intern.data to NULL.
+	 * it sets iterator->intern.data to IS_UNDEF.
 	 * We don't even need to destroy iterator->current as we didn't add a
 	 * reference to it in move_forward or get_iterator */
 }

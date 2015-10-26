@@ -23,6 +23,7 @@
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
+#include "php_variables.h"
 #include "php_ini.h"
 #include "php_standard.h"
 #include "php_math.h"
@@ -631,7 +632,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_getenv, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
 	ZEND_ARG_INFO(0, varname)
 ZEND_END_ARG_INFO()
 
@@ -1763,7 +1764,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_fmod, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
-	ZEND_ARG_INFO(0, numerator)
+	ZEND_ARG_INFO(0, dividend)
 	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -2597,6 +2598,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, url)
 	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ user_filters.c */
@@ -4007,15 +4009,22 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname)
-   Get the value of an environment variable */
+/* {{{ proto string getenv([string varname])
+   Get the value of an environment variable or every available environment variable 
+   if no varname is present  */
 PHP_FUNCTION(getenv)
 {
-	char *ptr, *str;
+	char *ptr, *str = NULL;
 	size_t str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (!str) {
+		array_init(return_value);
+		php_import_environment_variables(return_value);
+		return;
 	}
 
 	/* SAPI method returns an emalloc()'d string */
@@ -4265,7 +4274,7 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
 	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
-		((args = zend_hash_str_find_ind(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
+		((args = zend_hash_str_find_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
 		(args = zend_hash_str_find_ind(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL)
 	) {
 		int pos = 0;
@@ -4379,23 +4388,23 @@ PHP_FUNCTION(getopt)
 		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_LONG) {
 			/* numeric string */
 			int optname_int = atoi(optname);
-			if ((args = zend_hash_index_find(HASH_OF(return_value), optname_int)) != NULL) {
+			if ((args = zend_hash_index_find(Z_ARRVAL_P(return_value), optname_int)) != NULL) {
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
-				zend_hash_next_index_insert(HASH_OF(args), &val);
+				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_index_update(HASH_OF(return_value), optname_int, &val);
+				zend_hash_index_update(Z_ARRVAL_P(return_value), optname_int, &val);
 			}
 		} else {
 			/* other strings */
-			if ((args = zend_hash_str_find(HASH_OF(return_value), optname, strlen(optname))) != NULL) {
+			if ((args = zend_hash_str_find(Z_ARRVAL_P(return_value), optname, strlen(optname))) != NULL) {
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array_ex(args);
 				}
-				zend_hash_next_index_insert(HASH_OF(args), &val);
+				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_str_add(HASH_OF(return_value), optname, strlen(optname), &val);
+				zend_hash_str_add(Z_ARRVAL_P(return_value), optname, strlen(optname), &val);
 			}
 		}
 
@@ -4968,9 +4977,8 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 }
 /* }}} */
 
-static void run_user_tick_functions(int tick_count) /* {{{ */
+static void run_user_tick_functions(int tick_count, void *arg) /* {{{ */
 {
-
 	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t) user_tick_function_call);
 }
 /* }}} */
@@ -5680,7 +5688,7 @@ PHP_FUNCTION(register_tick_function)
 		zend_llist_init(BG(user_tick_functions),
 						sizeof(user_tick_function_entry),
 						(llist_dtor_func_t) user_tick_function_dtor, 0);
-		php_add_tick_function(run_user_tick_functions);
+		php_add_tick_function(run_user_tick_functions, NULL);
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {

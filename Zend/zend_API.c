@@ -506,7 +506,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	ZVAL_DEREF(arg);
 	while (1) {
 		if (*spec_walk == '/') {
-			SEPARATE_ZVAL(arg);
+			SEPARATE_ZVAL_NOREF(arg);
 			real_arg = arg;
 		} else if (*spec_walk == '!') {
 			check_null = 1;
@@ -2123,6 +2123,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	internal_function->module = EG(current_module);
+	memset(internal_function->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	if (scope) {
 		class_name_len = ZSTR_LEN(scope->name);

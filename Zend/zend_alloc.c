@@ -1507,7 +1507,9 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 					heap->real_size += new_size - old_size;
 #endif
 #if ZEND_MM_STAT
+					heap->real_peak = MAX(heap->real_peak, heap->real_size);
 					heap->size += new_size - old_size;
+					heap->peak = MAX(heap->peak, heap->size);
 #endif
 #if ZEND_DEBUG
 					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1618,9 +1620,19 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 	}
 
 	/* Naive reallocation */
+#if ZEND_MM_STAT
+	do {
+		size_t orig_peak = heap->peak;
+		size_t orig_real_peak = heap->real_peak;
+#endif
 	ret = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	memcpy(ret, ptr, MIN(old_size, copy_size));
 	zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+#if ZEND_MM_STAT
+		heap->peak = MAX(orig_peak, heap->size);
+		heap->real_peak = MAX(orig_real_peak, heap->real_size);
+	} while (0);
+#endif
 	return ret;
 }
 
@@ -2014,6 +2026,27 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, int i,
 	return count;
 }
 
+static zend_long zend_mm_find_leaks_huge(zend_mm_heap *heap, zend_mm_huge_list *list)
+{
+	zend_long count = 0;
+	zend_mm_huge_list *prev = list;
+	zend_mm_huge_list *p = list->next;
+
+	while (p) {
+		if (p->dbg.filename == list->dbg.filename && p->dbg.lineno == list->dbg.lineno) {
+			prev->next = p->next;
+			zend_mm_chunk_free(heap, p->ptr, p->size);
+			zend_mm_free_heap(heap, p, NULL, 0, NULL, 0);
+			count++;
+		} else {
+			prev = p;
+		}
+		p = prev->next;
+	}
+
+	return count;
+}
+
 static void zend_mm_check_leaks(zend_mm_heap *heap)
 {
 	zend_mm_huge_list *list;
@@ -2028,8 +2061,6 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 	while (list) {
 		zend_mm_huge_list *q = list;
 
-		heap->huge_list = list->next;
-
 		leak.addr = list->ptr;
 		leak.size = list->dbg.size;
 		leak.filename = list->dbg.filename;
@@ -2039,13 +2070,13 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 		zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
-//???		repeated = zend_mm_find_leaks_huge(segment, p);
+		repeated = zend_mm_find_leaks_huge(heap, list);
 		total += 1 + repeated;
 		if (repeated) {
 			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 		}
 
-		list = list->next;
+		heap->huge_list = list = list->next;
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 		zend_mm_free_heap(heap, q, NULL, 0, NULL, 0);
 	}
@@ -2376,7 +2407,6 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 {
 
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
-	// TODO: use size???
 	zend_mm_free_huge(AG(mm_heap), ptr);
 }
 #endif

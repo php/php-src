@@ -242,7 +242,6 @@ static ZEND_INI_MH(OnEnable)
 }
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
-
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
@@ -308,6 +307,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
+#endif
+#if ENABLE_FILE_CACHE_FALLBACK
+	STD_PHP_INI_ENTRY("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_HUGE_CODE_PAGES
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
@@ -733,7 +735,11 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if ((!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled))
+#if ENABLE_FILE_CACHE_FALLBACK
+	&& !fallback_process
+#endif
+	) {
 		RETURN_FALSE;
 	}
 
