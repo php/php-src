@@ -17,7 +17,7 @@ if ((is_array($getCipherTrue)) && (!is_null($getCipherTrue))) {
 } else {
     print("openssl has failure to get cipher method with true argument");
 }
-    
+
 if ((is_array($getCipherFalse)) && (!is_null($getCipherFalse))) {
     print("okey");
 } else {
