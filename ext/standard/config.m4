@@ -593,11 +593,6 @@ dnl
 AC_CHECK_HEADERS([atomic.h])
 
 dnl
-dnl Check for arc4random on BSD systems
-dnl
-AC_CHECK_DECLS([arc4random_buf])
-
-dnl
 dnl Check for getrandom on newer Linux kernels
 dnl
 AC_CHECK_DECLS([getrandom])
