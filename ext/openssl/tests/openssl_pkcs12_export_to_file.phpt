@@ -8,27 +8,27 @@ if (!extension_loaded("openssl")) print "skip";
 ?>
 --FILE--
 <?php
-$pemFile = "bug37820cert.pem";
-$keyFile = "bug37820key.pem";
-$pkcs12Export = "openssl_pkcs12_export_to_file.pem";
-$privkeyFilePem = "file://" . dirname(__FILE__) . "/{$keyFile}";
-$privkeyDirPem = __DIR__ . "/{$pemFile}";
-$exportFile = __DIR__ . "/{$pkcs12Export}";
-$passPhrase = "JavaIsBetterThanPython:-)";
+$pem_file = "bug37820cert.pem";
+$key_file = "bug37820key.pem";
+$pkcs12_export = "openssl_pkcs12_export_to_file.pem";
+$priv_key_file_pem = "file://" . dirname(__FILE__) . "/{$key_file}";
+$priv_key_dir_pem = __DIR__ . "/{$pem_file}";
+$export_file = __DIR__ . "/{$pkcs12_export}";
+$pass_phrase = "JavaIsBetterThanPython:-)";
 $args = array(
-    'extracerts' => $privkeyFilePem,
+    'extracerts' => $priv_key_file_pem,
     'friendly_name' => 'My signed cert by CA certificate'
 );
 
 try{
-    $cert = openssl_x509_read(file_get_contents($privkeyDirPem));
+    $cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
     
     if ( false !== $cert ){
-        $privkey = openssl_pkey_get_private($privkeyFilePem);
+        $privkey = openssl_pkey_get_private($priv_key_file_pem);
         
         if( false !== $privkey ){
         
-            if (openssl_pkcs12_export_to_file($cert, $exportFile, $privkey, $passPhrase, $args)) {
+            if (openssl_pkcs12_export_to_file($cert, $export_file, $privkey, $pass_phrase, $args)) {
                 print("okey");
                 
             } else {
