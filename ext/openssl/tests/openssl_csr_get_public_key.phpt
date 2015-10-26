@@ -10,7 +10,6 @@ if (!extension_loaded("openssl")) print "skip";
 <?php
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $config_arg = array('config' => $config);
-$crsExportedFileNoTextFalse = __DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-false.crs";
 
 $dn = array(
     "countryName" => "BR",
