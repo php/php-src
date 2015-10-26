@@ -7170,7 +7170,7 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 
 	SAVE_OPLINE();
 	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
-	LOAD_OPLINE();
+	opline = EX(opline);
 
 	switch (ret) {
 		case ZEND_USER_OPCODE_CONTINUE:
@@ -7186,7 +7186,6 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		case ZEND_USER_OPCODE_ENTER:
 			ZEND_VM_ENTER();
 		case ZEND_USER_OPCODE_LEAVE:
-			LOAD_OPLINE();
 			ZEND_VM_LEAVE();
 		case ZEND_USER_OPCODE_DISPATCH:
 			ZEND_VM_DISPATCH(opline->opcode, opline);
