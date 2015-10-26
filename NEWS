@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
     (Laruence)
 
+- OpenSSL:
+  . Fixed bug #70718 (stream_select() when OpenSSL extension is loaded on
+    PHP Win64). (Anatol)
+
 - PDO_DBlib:
   . Fixed bug #69757 (Segmentation fault on nextRowset).
     (miracle at rpz dot name)
