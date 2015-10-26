@@ -15,13 +15,13 @@ $getCipherFalse = openssl_get_cipher_methods(false);
 if ((is_array($getCipherTrue)) && (!is_null($getCipherTrue))) {
     print("okey");
 } else {
-    print("openssl has failure to get cipher method with true argument");
+    print("OpenSSL has failed to get cipher methods with the aliases argument set to true");
 }
 
 if ((is_array($getCipherFalse)) && (!is_null($getCipherFalse))) {
     print("okey");
 } else {
-    print("openssl has failure to get cipher method with true argument");
+    print("OpenSSL has failed to get cipher methods with the aliases argument set to false");
 }
 ?>
 --EXPECT--
