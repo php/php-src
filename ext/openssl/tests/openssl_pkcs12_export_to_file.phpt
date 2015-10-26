@@ -3,8 +3,8 @@ bool openssl_pkcs12_export_to_file ( mixed $x509 , string $filename , mixed $pri
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip";
-if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
+<?php
+if (!extension_loaded("openssl")) print "skip";
 ?>
 --FILE--
 <?php
