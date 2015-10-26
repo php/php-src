@@ -9,10 +9,24 @@ if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0")
 ?>
 --FILE--
 <?php
-var_dump(openssl_get_md_methods(true));
-var_dump(openssl_get_md_methods(false));
+$getMdMethodsTrue = openssl_get_md_methods(true);
+$getMdMethodsFalse = openssl_get_md_methods(false);
+
+if ((is_array($getMdMethodsTrue)) && (!is_null($getMdMethodsTrue))) {
+ print("okey");
+} else {
+ print("openssl has failure to get cipher method with true argument");
+}
+
+if ((is_array($getMdMethodsFalse)) && (!is_null($getMdMethodsFalse))) {
+ print("okey");
+} else {
+ print("openssl has failure to get cipher method with true argument");
+}
 ?>
 --EXPECT--
+okey
+okey
 array(53) {
   [0]=>
   string(3) "DSA"
