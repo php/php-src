@@ -15,13 +15,13 @@ $getMdMethodsFalse = openssl_get_md_methods(false);
 if ((is_array($getMdMethodsTrue)) && (!is_null($getMdMethodsTrue))) {
  print("okey");
 } else {
- print("openssl has failure to get cipher method with true argument");
+ print("openssl has failure to get md method with true argument");
 }
 
 if ((is_array($getMdMethodsFalse)) && (!is_null($getMdMethodsFalse))) {
  print("okey");
 } else {
- print("openssl has failure to get cipher method with true argument");
+ print("openssl has failure to get md method with true argument");
 }
 ?>
 --EXPECT--
