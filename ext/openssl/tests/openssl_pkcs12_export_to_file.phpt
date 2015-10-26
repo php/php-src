@@ -28,7 +28,7 @@ try{
         
         if( false !== $privkey ){
         
-            if (openssl_pkcs12_export_to_file($cert, $export_file, $privkey, $pass_phrase, $args)) {
+            if (openssl_pkcs12_export_to_file($cert, $export_file, $priv_key, $pass_phrase, $args)) {
                 print("okey");
                 
             } else {
