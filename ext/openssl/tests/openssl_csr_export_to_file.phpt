@@ -33,11 +33,11 @@ $args = array(
 $privkey = openssl_pkey_new($config_arg);
 $csr = openssl_csr_new($dn, $privkey, $args);
 
-if (openssl_csr_export_to_file($csr, $crsExportedFileNoTextTrue, true)){
+if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true)){
 
     if (openssl_csr_export_to_file($csr, $crsExportedFileNoTextFalse, false)){
     
-        if ((file_exists($crsExportedFileNoTextTrue)) && (file_exists($crsExportedFileNoTextFalse))) {
+        if ((file_exists($crs_exported_file_notext_true)) && (file_exists($crsExportedFileNoTextFalse))) {
             print("okey");
             
         } else {
