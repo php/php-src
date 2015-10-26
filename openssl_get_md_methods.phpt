@@ -5,7 +5,6 @@ marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) print "skip";
-if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
 ?>
 --FILE--
 <?php
