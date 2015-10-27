@@ -1733,7 +1733,7 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #ifdef ZEND_WIN32
 	/* On Windows we don't have ability to extend huge block in-place.
 	 * We allocate them with 2MB size granularuty, to avoid many 
-	 * reallocatioons whenthey when they are extended by small peaces
+	 * reallocatioons when they are extended by small peaces
 	 */
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
 #else
