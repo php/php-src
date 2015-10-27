@@ -249,28 +249,26 @@ static void accel_interned_strings_restore_state(void)
     uint nIndex;
     Bucket *p;
 
-	if (EXPECTED(ZCSG(interned_strings_top) > ZCSG(interned_strings_saved_top))) {
-		memset(ZCSG(interned_strings_saved_top),
-				0, ZCSG(interned_strings_top) - ZCSG(interned_strings_saved_top));
-		ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_top);
-		while (idx > 0) {
-			idx--;
-			p = ZCSG(interned_strings).arData + idx;
-			if ((char*)p->key < ZCSG(interned_strings_top)) break;
-			ZCSG(interned_strings).nNumUsed--;
-			ZCSG(interned_strings).nNumOfElements--;
+	memset(ZCSG(interned_strings_saved_top),
+			0, ZCSG(interned_strings_top) - ZCSG(interned_strings_saved_top));
+	ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_top);
+    while (idx > 0) {
+    	idx--;
+		p = ZCSG(interned_strings).arData + idx;
+		if ((char*)p->key < ZCSG(interned_strings_top)) break;
+		ZCSG(interned_strings).nNumUsed--;
+		ZCSG(interned_strings).nNumOfElements--;
 
-			nIndex = p->h | ZCSG(interned_strings).nTableMask;
-			if (HT_HASH(&ZCSG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {
-				HT_HASH(&ZCSG(interned_strings), nIndex) = Z_NEXT(p->val);
-			} else {
-				uint32_t prev = HT_HASH(&ZCSG(interned_strings), nIndex);
-				while (Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) != idx) {
-					prev = Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val);
-				}
-				Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) = Z_NEXT(p->val);
-			}
-		}
+		nIndex = p->h | ZCSG(interned_strings).nTableMask;
+		if (HT_HASH(&ZCSG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {
+			HT_HASH(&ZCSG(interned_strings), nIndex) = Z_NEXT(p->val);
+		} else {
+			uint32_t prev = HT_HASH(&ZCSG(interned_strings), nIndex);
+			while (Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) != idx) {
+				prev = Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val);
+ 			}
+			Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) = Z_NEXT(p->val);
+ 		}
 	}
 }
 
