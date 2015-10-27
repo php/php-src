@@ -44,7 +44,7 @@ if ( false !== $cert ){
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__."/{$export_file}");
+unlink(__DIR__."/openssl_pkcs12_export_to_file.pem");
 ?>
 --EXPECT--
 okey
