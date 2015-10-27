@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #70430 (Stack buffer overflow in zend_language_parser()). (Nikita)
   . Fixed bug #70782 (null ptr deref and segfault (zend_get_class_fetch_type)).
     (Nikita)
+  . Fixed bug #70785 (Infinite loop due to exception during identical
+    comparison). (Laruence)
 
 - Opcache:
   . Fixed bug #70724 (Undefined Symbols from opcache.so on Mac OS X 10.10).
