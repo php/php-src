@@ -249,6 +249,8 @@ static void accel_interned_strings_restore_state(void)
     uint nIndex;
     Bucket *p;
 
+	memset(ZCSG(interned_strings_saved_top),
+			0, ZCSG(interned_strings_top) - ZCSG(interned_strings_saved_top));
 	ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_top);
     while (idx > 0) {
     	idx--;
