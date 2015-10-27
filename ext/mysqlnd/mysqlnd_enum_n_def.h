@@ -101,6 +101,10 @@
 #define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
 #define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SESSION_TRACK					(1UL << 23) /* Extended OK */
+/*
+  This is a mysqlnd extension. CLIENT_ODBC is not used anyway. We will reuse it for our case and translate it to not using SSL peer verification
+*/
+#define CLIENT_SSL_DONT_VERIFY_SERVER_CERT	CLIENT_ODBC
 #define CLIENT_SSL_VERIFY_SERVER_CERT	(1UL << 30)
 #define CLIENT_REMEMBER_OPTIONS			(1UL << 31)
 

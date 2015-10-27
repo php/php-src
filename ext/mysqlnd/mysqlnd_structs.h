@@ -207,7 +207,13 @@ typedef struct st_mysqlnd_net_options
 	char		*ssl_capath;
 	char		*ssl_cipher;
 	char		*ssl_passphrase;
-	zend_bool	ssl_verify_peer;
+	enum mysqlnd_ssl_peer {
+		MYSQLND_SSL_PEER_DEFAULT = 0,
+		MYSQLND_SSL_PEER_VERIFY = 1,
+		MYSQLND_SSL_PEER_DONT_VERIFY = 2,
+
+#define MYSQLND_SSL_PEER_DEFAULT_ACTION  MYSQLND_SSL_PEER_VERIFY
+	} ssl_verify_peer;
 	uint64_t	flags;
 
 	char *		sha256_server_public_key;
@@ -217,6 +223,7 @@ typedef struct st_mysqlnd_net_options
 	char *		unused3;
 	char *		unused4;
 } MYSQLND_NET_OPTIONS;
+
 
 
 typedef struct st_mysqlnd_connection MYSQLND;
