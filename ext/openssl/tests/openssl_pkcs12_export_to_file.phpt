@@ -20,7 +20,6 @@ $args = array(
     'friendly_name' => 'My signed cert by CA certificate'
 );
 
-
 $cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
 
 if ( false !== $cert ){
