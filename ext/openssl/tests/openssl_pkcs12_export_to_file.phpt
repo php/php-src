@@ -24,9 +24,9 @@ try{
     $cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
     
     if ( false !== $cert ){
-        $privkey = openssl_pkey_get_private($priv_key_file_pem);
+        $priv_key = openssl_pkey_get_private($priv_key_file_pem);
         
-        if( false !== $privkey ){
+        if( false !== $priv_key ){
         
             if (openssl_pkcs12_export_to_file($cert, $export_file, $priv_key, $pass_phrase, $args)) {
                 print("okey");
