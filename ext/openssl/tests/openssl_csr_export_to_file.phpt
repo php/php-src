@@ -32,27 +32,10 @@ $args = array(
 $privkey = openssl_pkey_new($config_arg);
 $csr = openssl_csr_new($dn, $privkey, $args);
 
-if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true)){
-
-    if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_false, false)){
-    
-        if ((file_exists($crs_exported_file_notext_true)) && (file_exists($crs_exported_file_notext_false))) {
-            print("okey");
-            
-        } else {
-            print("export to csr file has failed on create file");    
-            
-        }
-        
-    } else {
-        print("export to csr with human readable file has failed");    
-        
-    }
-
-}else{
-    print("export to csr file has failed");    
-
-}
+var_dump(openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true));
+var_dump(openssl_csr_export_to_file($csr, $crs_exported_file_notext_false, false));
+var_dump(file_exists($crs_exported_file_notext_true))
+var_dump(file_exists($crs_exported_file_notext_false));
 ?>
 --CLEAN--
 <?php 
@@ -60,4 +43,7 @@ unlink(__DIR__."/{$crs_exported_file_notext_true}");
 unlink(__DIR__."/{$crs_exported_file_notext_false}"); 
 ?>
 --EXPECT--
-okey
+bool(true)
+bool(true)
+bool(true)
+bool(true)
