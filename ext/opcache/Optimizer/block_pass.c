@@ -1091,13 +1091,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			             VAR_SOURCE(opline->op1) &&
 			             (VAR_SOURCE(opline->op1)->opcode == ZEND_FAST_CONCAT ||
 			              VAR_SOURCE(opline->op1)->opcode == ZEND_ROPE_END ||
-			              VAR_SOURCE(opline->op1)->opcode == ZEND_FETCH_CONSTANT))) &&
+			              VAR_SOURCE(opline->op1)->opcode == ZEND_FETCH_CONSTANT ||
+			              VAR_SOURCE(opline->op1)->opcode == ZEND_FETCH_CLASS_CONSTANT))) &&
 			           (opline->op2_type == IS_CONST ||
 			            (opline->op2_type == IS_TMP_VAR &&
 			             VAR_SOURCE(opline->op2) &&
 			             (VAR_SOURCE(opline->op2)->opcode == ZEND_FAST_CONCAT ||
 			              VAR_SOURCE(opline->op2)->opcode == ZEND_ROPE_END ||
-			              VAR_SOURCE(opline->op2)->opcode == ZEND_FETCH_CONSTANT)))) {
+			              VAR_SOURCE(opline->op2)->opcode == ZEND_FETCH_CONSTANT ||
+			              VAR_SOURCE(opline->op2)->opcode == ZEND_FETCH_CLASS_CONSTANT)))) {
 				opline->opcode = ZEND_FAST_CONCAT;
 			}
 		} else if (opline->opcode == ZEND_QM_ASSIGN &&
@@ -1116,6 +1118,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					VAR_SOURCE(opline->op1)->opcode == ZEND_IS_IDENTICAL ||
 					VAR_SOURCE(opline->op1)->opcode == ZEND_IS_NOT_IDENTICAL ||
 					VAR_SOURCE(opline->op1)->opcode == ZEND_ISSET_ISEMPTY_VAR ||
+					VAR_SOURCE(opline->op1)->opcode == ZEND_ISSET_ISEMPTY_STATIC_PROP ||
 					VAR_SOURCE(opline->op1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ) &&
 					!zend_bitset_in(used_ext, VAR_NUM(ZEND_OP1(opline).var))) {
 			/* T = IS_SMALLER(X, Y), T1 = BOOL(T) => T = IS_SMALLER(X, Y), T1 = QM_ASSIGN(T) */
@@ -1414,6 +1417,7 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 
 					if (src &&
 					    src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R) {
 						ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
