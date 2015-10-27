@@ -10,8 +10,8 @@ if (!extension_loaded("openssl")) print "skip";
 <?php
 $pem_file = "bug37820cert.pem";
 $key_file = "bug37820key.pem";
-$priv_key_file_pem = "file://" . dirname(__FILE__) . "/{$key_file}";
-$priv_key_dir_pem = __DIR__ . "/{$pem_file}";
+$priv_key_file_pem = 'file://' . __DIR__ . DIRECTORY_SEPARATOR . $key_file;
+$priv_key_dir_pem = __DIR__ . DIRECTORY_SEPARATOR . $pem_file;
 $pass_phrase = "JavaIsBetterThanPython:-)";
 $args = array(
     'extracerts' => $priv_key_file_pem,
