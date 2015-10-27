@@ -54,5 +54,10 @@ if (openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true)){
 
 }
 ?>
+--CLEAN--
+<?php 
+unlink(__DIR__."/{$crs_exported_file_notext_true}");
+unlink(__DIR__."/{$crs_exported_file_notext_false}"); 
+?>
 --EXPECT--
 okey
