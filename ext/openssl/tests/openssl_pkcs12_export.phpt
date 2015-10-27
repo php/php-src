@@ -18,37 +18,32 @@ $args = array(
     'friendly_name' => 'My signed cert by CA certificate'
 );
 
-try{
-    $cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
+$cert = openssl_x509_read(file_get_contents($priv_key_dir_pem));
+
+if ( false !== $cert ){
+    $priv_key = openssl_pkey_get_private($priv_key_file_pem);
     
-    if ( false !== $cert ){
-        $priv_key = openssl_pkey_get_private($priv_key_file_pem);
-        
-        if( false !== $priv_key ){
-        
-            if (openssl_pkcs12_export($cert, $pkcs12_out, $priv_key, $pass_phrase, $args)) {
-                
-                if (null !== $pkcs12_out) {
-                    print("okey");
-                    
-                } else {
-                    print("openssl has failure to return pkcs12");
-                }        
+    if( false !== $priv_key ){
+    
+        if (openssl_pkcs12_export($cert, $pkcs12_out, $priv_key, $pass_phrase, $args)) {
+            
+            if (null !== $pkcs12_out) {
+                print("okey");
                 
             } else {
-                print("openssl has failure to export pkcs12");
-            }
+                print("openssl has failure to return pkcs12");
+            }        
             
         } else {
-            print("openssl could not read key file");
+            print("openssl has failure to export pkcs12");
         }
         
     } else {
-        print("openssl x509 could not read pem file");
+        print("openssl could not read key file");
     }
     
-} catch(Exception $ex){
-    print($ex->getMessage());
+} else {
+    print("openssl x509 could not read pem file");
 }
 ?>
 --EXPECT--
