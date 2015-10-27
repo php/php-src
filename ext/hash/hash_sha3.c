@@ -38,21 +38,24 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline php_hash_uint64 load64(const unsigned char* x) {
+	unsigned char i;
 	php_hash_uint64 ret = 0;
-	for (unsigned char i = 7; i >= 0; --i) {
+	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
 		ret |= x[i];
 	}
 	return ret;
 }
 static inline void store64(const unsigned char* x, php_hash_uint64 val) {
-	for (unsigned char i = 0; i < 8; ++i) {
+	unsigned char i;
+	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
 static inline void xor64(const unsigned char* x, php_hash_uint64 val) {
-	for (unsigned char i = 0; i < 8; ++i) {
+	unsigned char i;
+	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
 	}
