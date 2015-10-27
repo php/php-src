@@ -242,6 +242,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
+		/* check for invalid chars inside login/pass */
+		pp = s;
+		while (pp < p) {
+			if (!isalnum(*pp) && *pp != ':' && *pp != ';' && *pp != '=' && !(*pp >= '!' && *pp <= ',')) {
+				if (ret->scheme) {
+					efree(ret->scheme);
+				}
+				efree(ret);
+				return NULL;
+			}
+			pp++;
+		}
+
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = estrndup(s, (pp-s));
 			php_replace_controlchars_ex(ret->user, (pp - s));
