@@ -42,5 +42,9 @@ if ( false !== $cert ){
     print("openssl x509 could not read pem file");
 }
 ?>
+--CLEAN--
+<?php
+unlink(__DIR__."/{$export_file}");
+?>
 --EXPECT--
 okey
