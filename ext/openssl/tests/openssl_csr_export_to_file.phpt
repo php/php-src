@@ -34,13 +34,13 @@ $csr = openssl_csr_new($dn, $privkey, $args);
 
 var_dump(openssl_csr_export_to_file($csr, $crs_exported_file_notext_true, true));
 var_dump(openssl_csr_export_to_file($csr, $crs_exported_file_notext_false, false));
-var_dump(file_exists($crs_exported_file_notext_true))
+var_dump(file_exists($crs_exported_file_notext_true));
 var_dump(file_exists($crs_exported_file_notext_false));
 ?>
 --CLEAN--
 <?php 
-unlink(__DIR__."/{$crs_exported_file_notext_true}");
-unlink(__DIR__."/{$crs_exported_file_notext_false}"); 
+unlink(__DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-true.crs");
+unlink(__DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-false.crs"); 
 ?>
 --EXPECT--
 bool(true)
