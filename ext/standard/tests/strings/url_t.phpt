@@ -575,22 +575,7 @@ $sample_urls = array (
   string(16) "some_page_ref123"
 }
 
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(7) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(11) "www.php.net"
-  ["port"]=>
-  int(80)
-  ["user"]=>
-  string(14) "secret@hideout"
-  ["path"]=>
-  string(10) "/index.php"
-  ["query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
-  ["fragment"]=>
-  string(16) "some_page_ref123"
-}
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: bool(false)
 
 --> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123: array(8) {
   ["scheme"]=>
@@ -759,22 +744,7 @@ $sample_urls = array (
   string(7) "9130731"
 }
 
---> http://user:@pass@host/path?argument?value#etc: array(7) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(4) "host"
-  ["user"]=>
-  string(4) "user"
-  ["pass"]=>
-  string(5) "@pass"
-  ["path"]=>
-  string(5) "/path"
-  ["query"]=>
-  string(14) "argument?value"
-  ["fragment"]=>
-  string(3) "etc"
-}
+--> http://user:@pass@host/path?argument?value#etc: bool(false)
 string(4) "http"
 string(11) "www.php.net"
 int(80)
