@@ -1464,7 +1464,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #endif
 #ifdef ZEND_WIN32
 			/* On Windows we don't have ability to extend huge blocks in-place.
-			 * We allocate them with 2MB size granularuty, to avoid many 
+			 * We allocate them with 2MB size granularity, to avoid many 
 			 * reallocations when they are extended by small pieces
 			 */
 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
@@ -1732,7 +1732,7 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 {
 #ifdef ZEND_WIN32
 	/* On Windows we don't have ability to extend huge blocks in-place.
-	 * We allocate them with 2MB size granularuty, to avoid many 
+	 * We allocate them with 2MB size granularity, to avoid many 
 	 * reallocations when they are extended by small pieces
 	 */
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
