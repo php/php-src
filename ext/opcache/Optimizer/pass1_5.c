@@ -308,14 +308,14 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				} else if (op_array->scope &&
 					ZEND_OP1_TYPE(opline) == IS_UNUSED &&
-					(opline->op1.num & ~ZEND_FETCH_CLASS_NO_AUTOLOAD) == ZEND_FETCH_CLASS_SELF) {
+					(opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
 					/* for self::B */
 					ce = op_array->scope;
 				} else if (op_array->scope &&
 					ZEND_OP1_TYPE(opline) == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
 					(ZEND_OP1_TYPE(opline - 1) == IS_UNUSED &&
-					((opline - 1)->extended_value & ~ZEND_FETCH_CLASS_NO_AUTOLOAD) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					ZEND_RESULT((opline - 1)).var == ZEND_OP1(opline).var) {
 					/* for self::B */
 					ce = op_array->scope;
