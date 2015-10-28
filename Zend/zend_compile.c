@@ -2212,7 +2212,6 @@ static void zend_compile_class_ref_ex(znode *result, zend_ast *name_ast, uint32_
 		zend_ensure_valid_class_fetch_type(fetch_type);
 		result->op_type = IS_UNUSED;
 		result->u.op.num = fetch_type | fetch_flags;
-		return 0;
 	}
 }
 /* }}} */
