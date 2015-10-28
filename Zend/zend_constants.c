@@ -294,7 +294,7 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, zend_ulong flags)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
 {
 	zend_constant *c;
 	const char *colon;
@@ -427,7 +427,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags)
+zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags)
 {
 	zend_constant *c;
 
