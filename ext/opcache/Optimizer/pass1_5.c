@@ -341,12 +341,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zval_copy_ctor(&t);
 						}
 
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						} else {
-							MAKE_NOP((opline - 1));
-						}
 						if (zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &t)) {
+							if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+								literal_dtor(&ZEND_OP1_LITERAL(opline));
+							} else if (ZEND_OP1_TYPE(opline) == IS_VAR) {
+								MAKE_NOP((opline - 1));
+							}
 							literal_dtor(&ZEND_OP2_LITERAL(opline));
 							MAKE_NOP(opline);
 						}
