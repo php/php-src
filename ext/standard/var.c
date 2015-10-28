@@ -341,7 +341,7 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
-static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key, zend_bool pretty_output) /* {{{ */
 {
 	int level;
 	smart_str *buf;
@@ -369,7 +369,7 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 		efree(key);
 		efree(tmp_str);
 	}
-	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
+	php_var_export_ex(zv, level + 2, buf TSRMLS_CC, pretty_output);
 
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
@@ -378,7 +378,7 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 }
 /* }}} */
 
-static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key, zend_bool pretty_output) /* {{{ */
 {
 	int level;
 	smart_str *buf;
@@ -406,14 +406,14 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 		smart_str_append_long(buf, (long) hash_key->h);
 	}
 	smart_str_appendl(buf, " => ", 4);
-	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
+	php_var_export_ex(zv, level + 2, buf TSRMLS_CC, pretty_output);
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
 	return 0;
 }
 /* }}} */
 
-PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC, zend_bool pretty_output) /* {{{ */
 {
 	HashTable *myht;
 	char *tmp_str, *tmp_str2;
@@ -462,13 +462,24 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
 		}
-		smart_str_appendl(buf, "array (\n", 8);
-		zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 2, level, buf);
+
+		if (pretty_output == true) {
+			smart_str_appendl(buf, "[\n", 2);
+        } else {
+			smart_str_appendl(buf, "array (\n", 8);
+		}
+
+		zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 2, level, buf, pretty_output);
 
 		if (level > 1) {
 			buffer_append_spaces(buf, level - 1);
 		}
-		smart_str_appendc(buf, ')');
+
+		if (pretty_output == true) {
+			smart_str_appendc(buf, ']');
+		} else {
+			smart_str_appendc(buf, ')');
+		}
 
 		break;
 
@@ -486,16 +497,25 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 
 		smart_str_appendl(buf, class_name, class_name_len);
-		smart_str_appendl(buf, "::__set_state(array(\n", 21);
+		if (pretty_output == true) {
+			smart_str_appendl(buf, "::__set_state([\n", 16);
+		} else {
+			smart_str_appendl(buf, "::__set_state(array (\n", 22);
+		}
 
 		efree((char*)class_name);
 		if (myht) {
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf, pretty_output);
 		}
 		if (level > 1) {
 			buffer_append_spaces(buf, level - 1);
 		}
-		smart_str_appendl(buf, "))", 2);
+
+		if (pretty_output == true) {
+			smart_str_appendl(buf, ")]", 2);
+		} else {
+			smart_str_appendl(buf, "))", 2);
+		}
 
 		break;
 	default:
@@ -506,10 +526,10 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 /* }}} */
 
 /* FOR BC reasons, this will always perform and then print */
-PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC, zend_bool pretty_output) /* {{{ */
 {
 	smart_str buf = {0};
-	php_var_export_ex(struc, level, &buf TSRMLS_CC);
+	php_var_export_ex(struc, level, &buf TSRMLS_CC, pretty_output);
 	smart_str_0 (&buf);
 	PHPWRITE(buf.c, buf.len);
 	smart_str_free(&buf);
@@ -523,13 +543,14 @@ PHP_FUNCTION(var_export)
 {
 	zval *var;
 	zend_bool return_output = 0;
+	zend_bool pretty_ouput = 0;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &return_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &return_output, &pretty_output) == FAILURE) {
 		return;
 	}
 
-	php_var_export_ex(&var, 1, &buf TSRMLS_CC);
+	php_var_export_ex(&var, 1, &buf TSRMLS_CC, pretty_output);
 	smart_str_0 (&buf);
 
 	if (return_output) {
