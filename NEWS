@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 7.0.1
 
+- Standard:
+  . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
+    (laruence)
+
 - XSL:
   . Fixed bug #70678 (PHP7 returns true when false is expected). (Felipe)
 
