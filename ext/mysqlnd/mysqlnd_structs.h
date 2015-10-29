@@ -116,7 +116,7 @@ struct st_mysqlnd_upsert_status
 	uint64_t		affected_rows;
 	uint64_t		last_insert_id;
 
-	struct st_mysqlnd_upsert_status_methods *m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_upsert_status) *m;
 };
 
 
@@ -316,7 +316,7 @@ typedef func_mysqlnd_net__open_stream (*func_mysqlnd_net__get_open_stream)(MYSQL
 typedef void				(*func_mysqlnd_net__post_connect_set_opt)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef enum_func_status	(*func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info);
 
-struct st_mysqlnd_net_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_net)
 {
 	func_mysqlnd_net__init init;
 	func_mysqlnd_net__dtor dtor;
@@ -387,7 +387,7 @@ typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol_payload_d
 typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 
-struct st_mysqlnd_protocol_payload_decoder_factory_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_protocol_payload_decoder_factory)
 {
 	func_mysqlnd_protocol_payload_decoder_factory__get_mysqlnd_conn_data get_mysqlnd_conn_data;
 	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
@@ -412,7 +412,7 @@ struct st_mysqlnd_protocol_payload_decoder_factory_methods
 };
 
 
-struct st_mysqlnd_object_factory_methods;
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_object_factory);
 
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
@@ -421,7 +421,7 @@ typedef MYSQLND_NET * (*func_mysqlnd_object_factory__get_io_channel)(zend_bool p
 typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 
 
-struct st_mysqlnd_object_factory_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_object_factory)
 {
 	func_mysqlnd_object_factory__get_connection get_connection;
 	func_mysqlnd_object_factory__clone_connection_object clone_connection_object;
@@ -523,7 +523,7 @@ typedef unsigned int		(*func_mysqlnd_conn_data__negotiate_client_api_capabilitie
 typedef unsigned int		(*func_mysqlnd_conn_data__get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn);
 
 
-struct st_mysqlnd_conn_data_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_conn_data)
 {
 	func_mysqlnd_conn_data__connect connect;
 	func_mysqlnd_conn_data__escape_string escape_string;
@@ -623,7 +623,7 @@ typedef MYSQLND *			(*func_mysqlnd_conn__clone_object)(MYSQLND * const conn);
 typedef void				(*func_mysqlnd_conn__dtor)(MYSQLND * conn);
 typedef enum_func_status	(*func_mysqlnd_conn__close)(MYSQLND * conn, enum_connection_close_type close_type);
 
-struct st_mysqlnd_conn_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_conn)
 {
 	func_mysqlnd_data__connect connect;
 	func_mysqlnd_conn__clone_object clone_object;
@@ -667,7 +667,7 @@ typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *resu
 
 typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent);
 
-struct st_mysqlnd_res_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_res)
 {
 	mysqlnd_fetch_row_func	fetch_row;
 
@@ -709,7 +709,7 @@ typedef zend_ulong *		(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_R
 typedef void				(*func_mysqlnd_result_unbuffered__free_last_data)(MYSQLND_RES_UNBUFFERED * result, MYSQLND_STATS * const global_stats);
 typedef void				(*func_mysqlnd_result_unbuffered__free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats);
 
-struct st_mysqlnd_result_unbuffered_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_result_unbuffered)
 {
 	mysqlnd_fetch_row_func							fetch_row;
 	func_mysqlnd_res__row_decoder					row_decoder;
@@ -726,7 +726,7 @@ typedef zend_ulong *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES
 typedef enum_func_status	(*func_mysqlnd_result_buffered__data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row);
 typedef void				(*func_mysqlnd_result_buffered__free_result)(MYSQLND_RES_BUFFERED * const result);
 
-struct st_mysqlnd_result_buffered_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_result_buffered)
 {
 	mysqlnd_fetch_row_func						fetch_row;
 	func_mysqlnd_res__row_decoder				row_decoder;
@@ -747,7 +747,7 @@ typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_ME
 typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent);
 typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA * meta);
 
-struct st_mysqlnd_res_meta_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_res_meta)
 {
 	func_mysqlnd_res_meta__fetch_field fetch_field;
 	func_mysqlnd_res_meta__fetch_field_direct fetch_field_direct;
@@ -804,7 +804,7 @@ typedef void 				(*func_mysqlnd_stmt__free_stmt_content)(MYSQLND_STMT * const s)
 typedef enum_func_status	(*func_mysqlnd_stmt__flush)(MYSQLND_STMT * const stmt);
 typedef void 				(*func_mysqlnd_stmt__free_stmt_result)(MYSQLND_STMT * const s);
 
-struct st_mysqlnd_stmt_methods
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_stmt)
 {
 	func_mysqlnd_stmt__prepare prepare;
 	func_mysqlnd_stmt__send_execute send_execute;
@@ -880,7 +880,7 @@ struct st_mysqlnd_net_data
 
 	zend_bool			persistent;
 
-	struct st_mysqlnd_net_methods m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_net) m;
 };
 
 
@@ -909,7 +909,7 @@ struct st_mysqlnd_protocol_payload_decoder_factory
 {
 	MYSQLND_CONN_DATA * conn;
 	zend_bool persistent;
-	struct st_mysqlnd_protocol_payload_decoder_factory_methods m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_protocol_payload_decoder_factory) m;
 };
 
 
@@ -999,10 +999,10 @@ struct st_mysqlnd_connection_data
 	zend_bool		in_async_read_cb;
 	zend_bool		in_async_err_cb;
 
-	struct st_mysqlnd_object_factory_methods object_factory;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_object_factory) object_factory;
 	func_mysqlnd__command_factory command_factory;
 
-	struct st_mysqlnd_conn_data_methods * m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_conn_data) * m;
 
 	/* persistent connection */
 	zend_bool		persistent;
@@ -1013,7 +1013,7 @@ struct st_mysqlnd_connection
 {
 	MYSQLND_CONN_DATA * data;
 	zend_bool persistent;
-	struct st_mysqlnd_conn_methods * m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_conn) * m;
 };
 
 
@@ -1029,7 +1029,7 @@ struct st_mysqlnd_result_metadata
 	MYSQLND_FIELD					*fields;
 	struct mysqlnd_field_hash_key	*zend_hash_keys;
 
-	struct st_mysqlnd_res_meta_methods * m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_res_meta) * m;
 
 	size_t							bit_fields_total_len; /* trailing \0 not counted */
 	/* We need this to make fast allocs in rowp_read */
@@ -1059,7 +1059,7 @@ struct st_mysqlnd_result_metadata
 	unsigned int		field_count;				\
 	zend_bool			ps;							\
 	zend_bool			persistent;					\
-	struct st_mysqlnd_result_buffered_methods m;	\
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_result_buffered) m;	\
 	enum mysqlnd_buffered_type type;				\
 	void				* unused1;					\
 	void				* unused2;					\
@@ -1092,7 +1092,7 @@ struct st_mysqlnd_buffered_result_c
 
 struct st_mysqlnd_unbuffered_result
 {
-	struct st_mysqlnd_result_unbuffered_methods m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_result_unbuffered) m;
 	uint64_t			row_count;
 
 	/* For unbuffered (both normal and PS) */
@@ -1133,8 +1133,7 @@ struct st_mysqlnd_res
 	MYSQLND_RES_UNBUFFERED	*unbuf;
 
 	zend_bool				persistent;
-
-	struct st_mysqlnd_res_methods m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_res) m;
 };
 
 
@@ -1193,7 +1192,7 @@ struct st_mysqlnd_stmt_data
 struct st_mysqlnd_stmt
 {
 	MYSQLND_STMT_DATA * data;
-	struct st_mysqlnd_stmt_methods	*m;
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_stmt) * m;
 	zend_bool persistent;
 };
 
