@@ -1,5 +1,5 @@
 --TEST--
-array openssl_get_cipher_methods ([ bool $aliases = false ] );
+openssl_get_cipher_methods basic test
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
