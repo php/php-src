@@ -640,7 +640,8 @@ enum php_mysqlnd_server_command
 	COM_STMT_EXECUTE_BATCH = 32,
 	COM_END,
 	/* Here follow own, non-protocol, commands */
-	COM_REAP_RESULT=250, /* own command */
+	COM_REAP_RESULT=240, /* own command */
+	COM_ENABLE_SSL,
 };
 
 

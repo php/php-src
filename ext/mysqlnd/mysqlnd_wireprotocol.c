@@ -656,7 +656,7 @@ size_t php_mysqlnd_auth_write(void * _packet)
 	}
 	if (packet->is_change_user_packet) {
 		enum_func_status ret = FAIL;
-		const MYSQLND_CSTRING payload = {buffer + MYSQLND_HEADER_SIZE, p - (buffer + MYSQLND_HEADER_SIZE)};
+		const MYSQLND_CSTRING payload = {(char*) buffer + MYSQLND_HEADER_SIZE, p - (buffer + MYSQLND_HEADER_SIZE)};
 		const unsigned int silent = packet->silent;
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_CHANGE_USER, conn, payload, silent);
 		if (command) {
@@ -2888,8 +2888,7 @@ mysqlnd_com_field_list_run(void *cmd)
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
 	/* db + \0 + wild + \0 (for wild) */
-	zend_uchar buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p;
-	size_t table_len, wild_len;
+	zend_uchar buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p = buff;
 
 	DBG_ENTER("mysqlnd_com_field_list_run");
 
@@ -3150,7 +3149,6 @@ enum_func_status
 mysqlnd_com_quit_run(void *cmd)
 {
 	struct st_mysqlnd_protocol_com_quit_command * command = (struct st_mysqlnd_protocol_com_quit_command *) cmd;
-	zend_uchar bits[1];
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
 
@@ -3302,7 +3300,7 @@ mysqlnd_com_reap_result_run(void *cmd)
 	struct st_mysqlnd_protocol_com_reap_result_command * command = (struct st_mysqlnd_protocol_com_reap_result_command *) cmd;
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
-	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
+	const enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
 
 	DBG_ENTER("mysqlnd_com_reap_result_run");
 	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
@@ -3634,6 +3632,135 @@ mysqlnd_com_stmt_close_create_command(va_list args)
 /* }}} */
 
 
+
+/************************** COM_ENABLE_SSL ******************************************/
+struct st_mysqlnd_protocol_com_enable_ssl_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_enable_ssl_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		size_t client_capabilities;
+		size_t server_capabilities;
+		unsigned int charset_no;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_enable_ssl_run */
+static enum_func_status
+mysqlnd_com_enable_ssl_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_enable_ssl_command * command = (struct st_mysqlnd_protocol_com_enable_ssl_command *) cmd;
+	enum_func_status ret = FAIL;
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_PACKET_AUTH * auth_packet;
+	size_t client_capabilities = command->context.client_capabilities;
+	size_t server_capabilities = command->context.server_capabilities;
+
+	DBG_ENTER("mysqlnd_com_enable_ssl_run");
+	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
+	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", client_capabilities & CLIENT_LONG_PASSWORD? 1:0);
+	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", client_capabilities & CLIENT_FOUND_ROWS? 1:0);
+	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", client_capabilities & CLIENT_LONG_FLAG? 1:0);
+	DBG_INF_FMT("CLIENT_NO_SCHEMA=		%d", client_capabilities & CLIENT_NO_SCHEMA? 1:0);
+	DBG_INF_FMT("CLIENT_COMPRESS=		%d", client_capabilities & CLIENT_COMPRESS? 1:0);
+	DBG_INF_FMT("CLIENT_ODBC=			%d", client_capabilities & CLIENT_ODBC? 1:0);
+	DBG_INF_FMT("CLIENT_LOCAL_FILES=	%d", client_capabilities & CLIENT_LOCAL_FILES? 1:0);
+	DBG_INF_FMT("CLIENT_IGNORE_SPACE=	%d", client_capabilities & CLIENT_IGNORE_SPACE? 1:0);
+	DBG_INF_FMT("CLIENT_PROTOCOL_41=	%d", client_capabilities & CLIENT_PROTOCOL_41? 1:0);
+	DBG_INF_FMT("CLIENT_INTERACTIVE=	%d", client_capabilities & CLIENT_INTERACTIVE? 1:0);
+	DBG_INF_FMT("CLIENT_SSL=			%d", client_capabilities & CLIENT_SSL? 1:0);
+	DBG_INF_FMT("CLIENT_IGNORE_SIGPIPE=	%d", client_capabilities & CLIENT_IGNORE_SIGPIPE? 1:0);
+	DBG_INF_FMT("CLIENT_TRANSACTIONS=	%d", client_capabilities & CLIENT_TRANSACTIONS? 1:0);
+	DBG_INF_FMT("CLIENT_RESERVED=		%d", client_capabilities & CLIENT_RESERVED? 1:0);
+	DBG_INF_FMT("CLIENT_SECURE_CONNECTION=%d", client_capabilities & CLIENT_SECURE_CONNECTION? 1:0);
+	DBG_INF_FMT("CLIENT_MULTI_STATEMENTS=%d", client_capabilities & CLIENT_MULTI_STATEMENTS? 1:0);
+	DBG_INF_FMT("CLIENT_MULTI_RESULTS=	%d", client_capabilities & CLIENT_MULTI_RESULTS? 1:0);
+	DBG_INF_FMT("CLIENT_PS_MULTI_RESULTS=%d", client_capabilities & CLIENT_PS_MULTI_RESULTS? 1:0);
+	DBG_INF_FMT("CLIENT_CONNECT_ATTRS=	%d", client_capabilities & CLIENT_PLUGIN_AUTH? 1:0);
+	DBG_INF_FMT("CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA=	%d", client_capabilities & CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA? 1:0);
+	DBG_INF_FMT("CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS=	%d", client_capabilities & CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS? 1:0);
+	DBG_INF_FMT("CLIENT_SESSION_TRACK=		%d", client_capabilities & CLIENT_SESSION_TRACK? 1:0);
+	DBG_INF_FMT("CLIENT_SSL_VERIFY_SERVER_CERT=	%d", client_capabilities & CLIENT_SSL_VERIFY_SERVER_CERT? 1:0);
+	DBG_INF_FMT("CLIENT_REMEMBER_OPTIONS=		%d", client_capabilities & CLIENT_REMEMBER_OPTIONS? 1:0);
+
+	auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
+	if (!auth_packet) {
+		SET_OOM_ERROR(*conn->error_info);
+		goto end;
+	}
+	auth_packet->client_flags = client_capabilities;
+	auth_packet->max_packet_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
+
+	auth_packet->charset_no	= command->context.charset_no;
+
+#ifdef MYSQLND_SSL_SUPPORTED
+	if (client_capabilities & CLIENT_SSL) {
+		const zend_bool server_has_ssl = (server_capabilities & CLIENT_SSL)? TRUE:FALSE;
+		if (server_has_ssl == FALSE) {
+			goto close_conn;
+		} else {
+			enum mysqlnd_ssl_peer verify = client_capabilities & CLIENT_SSL_VERIFY_SERVER_CERT?
+												MYSQLND_SSL_PEER_VERIFY:
+												(client_capabilities & CLIENT_SSL_DONT_VERIFY_SERVER_CERT?
+													MYSQLND_SSL_PEER_DONT_VERIFY:
+													MYSQLND_SSL_PEER_DEFAULT);
+			DBG_INF("Switching to SSL");
+			if (!PACKET_WRITE(auth_packet, conn)) {
+				goto close_conn;
+			}
+
+			conn->net->data->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
+
+			if (FAIL == conn->net->data->m.enable_ssl(conn->net)) {
+				goto end;
+			}
+		}
+	}
+#else
+	auth_packet->client_flags &= ~CLIENT_SSL;
+	if (!PACKET_WRITE(auth_packet, conn)) {
+		goto close_conn;
+	}
+#endif
+	ret = PASS;
+end:
+	PACKET_FREE(auth_packet);
+	DBG_RETURN(ret);
+
+close_conn:
+	CONN_SET_STATE(conn, CONN_QUIT_SENT);
+	conn->m->send_close(conn);
+	SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+	PACKET_FREE(auth_packet);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_enable_ssl_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_enable_ssl_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_enable_ssl_command * command;
+	DBG_ENTER("mysqlnd_com_enable_ssl_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_enable_ssl_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.client_capabilities = va_arg(args, size_t);
+		command->context.server_capabilities = va_arg(args, size_t);
+		command->context.charset_no = va_arg(args, unsigned int);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_enable_ssl_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_get_command */
 static struct st_mysqlnd_protocol_command *
 mysqlnd_get_command(enum php_mysqlnd_server_command command, ...)
@@ -3700,6 +3827,9 @@ mysqlnd_get_command(enum php_mysqlnd_server_command command, ...)
 			break;
 		case COM_STMT_CLOSE:
 			ret = mysqlnd_com_stmt_close_create_command(args);
+			break;
+		case COM_ENABLE_SSL:
+			ret = mysqlnd_com_enable_ssl_create_command(args);
 			break;
 		default:
 			break;
