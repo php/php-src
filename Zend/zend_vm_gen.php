@@ -60,19 +60,19 @@ $vm_op_flags = array(
 	"ZEND_VM_OP1_TMPVAR"      => 1<<2,
 	"ZEND_VM_OP1_NUM"         => 1<<3,
 	"ZEND_VM_OP1_ADDR"        => 1<<4,
-	"ZEND_VM_OP1_LINE"        => 1<<5,
+	"ZEND_VM_OP1_OPLINE"      => 1<<5,
 
 	"ZEND_VM_OP2_SPEC"        => 1<<8,
 	"ZEND_VM_OP2_CONST"       => 1<<9,
 	"ZEND_VM_OP2_TMPVAR"      => 1<<10,
 	"ZEND_VM_OP2_NUM"         => 1<<11,
 	"ZEND_VM_OP2_ADDR"        => 1<<12,
-	"ZEND_VM_OP2_LINE"        => 1<<13,
+	"ZEND_VM_OP2_OPLINE"      => 1<<13,
 
 	"ZEND_VM_EXT_NUM"         => 1<<16,
 	"ZEND_VM_EXT_VAR"         => 1<<17,
-	"ZEND_VM_EXT_LINE"        => 1<<18,
-	"ZEND_VM_EXT_REL_LINE"    => 1<<19,
+	"ZEND_VM_EXT_OPLINE"      => 1<<18,
+	"ZEND_VM_EXT_REL_OPLINE"  => 1<<19,
 	"ZEND_VM_EXT_DIM_OBJ"     => 1<<20,
 	"ZEND_VM_EXT_CLASS_FETCH" => 1<<21,
 	"ZEND_VM_EXT_CONST_FETCH" => 1<<22,
@@ -80,8 +80,8 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<24,
 	"ZEND_VM_EXT_TYPE"        => 1<<25,
 	"ZEND_VM_EXT_EVAL"        => 1<<26,
-	"ZEND_VM_EXT_FCALL"       => 1<<27,
-	"ZEND_VM_EXT_FRET"        => 1<<28,
+	"ZEND_VM_EXT_FAST_CALL"   => 1<<27,
+	"ZEND_VM_EXT_FAST_RET"    => 1<<28,
 	"ZEND_VM_EXT_ISSET"       => 1<<29,
 );
 
@@ -99,14 +99,14 @@ $vm_op_decode = array(
 	"TMPVAR"               => ZEND_VM_OP1_SPEC | ZEND_VM_OP1_TMPVAR,
 	"NUM"                  => ZEND_VM_OP1_NUM,
 	"ADDR"                 => ZEND_VM_OP1_ADDR,
-	"LINE"                 => ZEND_VM_OP1_LINE,
+	"OPLINE"               => ZEND_VM_OP1_OPLINE,
 );
 
 $vm_ext_decode = array(
 	"NUM"                  => ZEND_VM_EXT_NUM,
 	"VAR"                  => ZEND_VM_EXT_VAR,
-	"LINE"                 => ZEND_VM_EXT_LINE,
-	"REL_LINE"             => ZEND_VM_EXT_REL_LINE,
+	"OPLINE"               => ZEND_VM_EXT_OPLINE,
+	"REL_OPLINE"           => ZEND_VM_EXT_REL_OPLINE,
 	"DIM_OBJ"              => ZEND_VM_EXT_DIM_OBJ,
 	"CLASS_FETCH"          => ZEND_VM_EXT_CLASS_FETCH,
 	"CONST_FETCH"          => ZEND_VM_EXT_CONST_FETCH,
@@ -114,8 +114,8 @@ $vm_ext_decode = array(
 	"ARRAY_INIT"           => ZEND_VM_EXT_ARRAY_INIT,
 	"TYPE"                 => ZEND_VM_EXT_TYPE,
 	"EVAL"                 => ZEND_VM_EXT_EVAL,
-	"FCALL"                => ZEND_VM_EXT_FCALL,
-	"FRET"                 => ZEND_VM_EXT_FRET,
+	"FAST_CALL"            => ZEND_VM_EXT_FAST_CALL,
+	"FAST_RET"             => ZEND_VM_EXT_FAST_RET,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
 );
 
@@ -1399,11 +1399,16 @@ function parse_operand_spec($def, $lineno, $str, &$flags) {
 function parse_ext_spec($def, $lineno, $str) {
 	global $vm_ext_decode;
 
-	if (isset($vm_ext_decode[$str])) {
-		return $vm_ext_decode[$str];
-	} else {
-		die("ERROR ($def:$lineno): Wrong extended_value type '$str'\n");
+	$flags = 0;
+	$a = explode("|",$str);
+	foreach($a as $val) {
+		if (isset($vm_ext_decode[$val])) {
+			$flags |= $vm_ext_decode[$val];
+		} else {
+			die("ERROR ($def:$lineno): Wrong extended_value type '$str'\n");
+		}
 	}
+	return $flags;
 }
 
 function gen_vm($def, $skel) {
@@ -1608,6 +1613,10 @@ function gen_vm($def, $skel) {
 		$op = str_pad($dsc["op"],$max_opcode_len);
 		fputs($f,"#define $op $code\n");
 	}
+
+	$code = str_pad((string)$max_opcode,$code_len," ",STR_PAD_LEFT);
+	$op = str_pad("ZEND_VM_LAST_OPCODE",$max_opcode_len);
+	fputs($f,"\n#define $op $code\n");
 
 	fputs($f, "\n#endif\n");
 	fclose($f);
