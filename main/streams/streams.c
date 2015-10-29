@@ -2233,19 +2233,20 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue)
 {
 	zval *wrapperhash;
-	zval category, copied_val;
+	zval category;
 
-	ZVAL_DUP(&copied_val, optionvalue);
-
-	if (NULL == (wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername)))) {
+	wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername));
+	if (NULL == wrapperhash) {
 		array_init(&category);
-		if (NULL == zend_hash_str_update(Z_ARRVAL(context->options), (char*)wrappername, strlen(wrappername), &category)) {
+		wrapperhash = zend_hash_str_update(Z_ARRVAL(context->options), (char*)wrappername, strlen(wrappername), &category);
+		if (NULL == wrapperhash) {
 			return FAILURE;
 		}
-
-		wrapperhash = &category;
 	}
-	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), &copied_val) ? SUCCESS : FAILURE;
+	if (Z_REFCOUNTED_P(optionvalue)) {
+		Z_ADDREF_P(optionvalue);
+	}
+	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
 }
 /* }}} */
 

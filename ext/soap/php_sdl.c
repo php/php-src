@@ -296,7 +296,7 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
 						ZVAL_COPY(&ctx->old_header, header);
 						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
-						zval_dtor(&new_header);
+						zval_ptr_dtor(&new_header);
 					}
 				}
 			}

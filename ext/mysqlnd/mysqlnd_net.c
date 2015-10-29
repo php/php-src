@@ -924,6 +924,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		zval key_zval;
 		ZVAL_STRING(&key_zval, net->data->options.ssl_key);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
+		zval_ptr_dtor(&key_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_cert) {
@@ -933,6 +934,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		if (!net->data->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
 		}
+		zval_ptr_dtor(&cert_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_ca) {
@@ -945,18 +947,21 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		zval capath_zval;
 		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath);
 		php_stream_context_set_option(context, "ssl", "capath", &capath_zval);
+		zval_ptr_dtor(&capath_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
 		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase);
 		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
+		zval_ptr_dtor(&passphrase_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_cipher) {
 		zval cipher_zval;
 		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
+		zval_ptr_dtor(&cipher_zval);
 		any_flag = TRUE;
 	}
 	{
