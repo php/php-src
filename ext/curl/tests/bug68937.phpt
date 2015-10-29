@@ -17,7 +17,9 @@ curl_setopt_array($ch, array(
 	CURLOPT_HTTPHEADER => array(
 		'Content-Length: 1',
 	),
-	CURLOPT_READFUNCTION => 'curl_read'
+	CURLOPT_READFUNCTION => 'curl_read',
+	CURLOPT_CONNECTTIMEOUT=> 1,
+	CURLOPT_TIMEOUT=>1
 ));
 
 function curl_read($ch, $fp, $len) {
