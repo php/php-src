@@ -2529,7 +2529,10 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			PROT_READ | PROT_WRITE | PROT_EXEC,
 			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
 			-1, 0);
-		madvise(start, size, MADV_HUGEPAGE);
+		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
+			munmap(mem, size);
+			return -1;
+		}
 	}
 #  endif
 	if (ret == start) {
