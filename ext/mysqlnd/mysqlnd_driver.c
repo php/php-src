@@ -135,7 +135,10 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 
 	data->error_info = &(data->error_info_impl);
 	data->options = &(data->options_impl);
+
+	mysqlnd_upsert_status_init(&data->upsert_status_impl);
 	data->upsert_status = &(data->upsert_status_impl);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(data->upsert_status);
 
 	data->persistent = persistent;
 	data->m = mysqlnd_conn_data_get_methods();
@@ -151,7 +154,6 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 	zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
-	SET_ERROR_AFF_ROWS(data);
 
 	data->net = mysqlnd_net_init(persistent, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
@@ -219,6 +221,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		}
 		stmt->persistent = persistent;
 		stmt->error_info = &(stmt->error_info_impl);
+		mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
 		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
 		stmt->execute_cmd_buffer.length = 4096;

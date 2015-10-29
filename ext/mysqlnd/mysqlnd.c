@@ -44,6 +44,42 @@ PHPAPI const char * const mysqlnd_out_of_memory = "Out of memory";
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 
 
+/* {{{ mysqlnd_upsert_status::reset */
+void
+MYSQLND_METHOD(mysqlnd_upsert_status, reset)(MYSQLND_UPSERT_STATUS * const upsert_status)
+{
+	upsert_status->warning_count = 0;
+	upsert_status->server_status = 0;
+	upsert_status->affected_rows = 0;
+	upsert_status->last_insert_id = 0;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_upsert_status::set_affected_rows_to_error */
+void
+MYSQLND_METHOD(mysqlnd_upsert_status, set_affected_rows_to_error)(MYSQLND_UPSERT_STATUS * upsert_status)
+{
+	upsert_status->affected_rows = (uint64_t) ~0;
+}
+/* }}} */
+
+
+MYSQLND_CLASS_METHODS_START(mysqlnd_upsert_status)
+	MYSQLND_METHOD(mysqlnd_upsert_status, reset),
+	MYSQLND_METHOD(mysqlnd_upsert_status, set_affected_rows_to_error),
+MYSQLND_CLASS_METHODS_END;
+
+
+/* {{{ mysqlnd_upsert_status_init */
+void
+mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status)
+{
+	upsert_status->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_upsert_status);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_conn_data::free_options */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn)
@@ -190,9 +226,12 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 
 /* {{{ mysqlnd_conn_data::send_command_handle_response */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DATA * conn, enum mysqlnd_packet_type ok_packet,
-															 zend_bool silent, enum php_mysqlnd_server_command command,
-															 zend_bool ignore_upsert_status)
+MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(
+		MYSQLND_CONN_DATA * const conn,
+		const enum mysqlnd_packet_type ok_packet,
+		const zend_bool silent,
+		const enum php_mysqlnd_server_command command,
+		const zend_bool ignore_upsert_status)
 {
 	enum_func_status ret = FAIL;
 
@@ -228,14 +267,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DAT
 					  safe to unconditionally turn off the flag here.
 					*/
 					conn->upsert_status->server_status &= ~SERVER_MORE_RESULTS_EXISTS;
-					SET_ERROR_AFF_ROWS(conn);
+					UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 				} else {
 					SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
 									ok_response->message, ok_response->message_len,
 									conn->persistent);
 
 					if (!ignore_upsert_status) {
-						memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+						UPSERT_STATUS_RESET(conn->upsert_status);
 						conn->upsert_status->warning_count = ok_response->warning_count;
 						conn->upsert_status->server_status = ok_response->server_status;
 						conn->upsert_status->affected_rows = ok_response->affected_rows;
@@ -263,7 +302,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DAT
 			} else if (0xFF == ok_response->field_count) {
 				/* The server signalled error. Set the error */
 				SET_CLIENT_ERROR(*conn->error_info, ok_response->error_no, ok_response->sqlstate, ok_response->error);
-				SET_ERROR_AFF_ROWS(conn);
+				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 			} else if (0xFE != ok_response->field_count) {
 				SET_CLIENT_ERROR(*conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
 				if (!silent) {
@@ -288,10 +327,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(MYSQLND_CONN_DAT
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::simple_command_send_request */
+/* {{{ mysqlnd_conn_data::send_command_do_request */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
-			   const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status)
+MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request)(
+		MYSQLND_CONN_DATA * const conn,
+		const enum php_mysqlnd_server_command command,
+		const zend_uchar * const arg, const size_t arg_len,
+		const zend_bool silent,
+		const zend_bool ignore_upsert_status)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet;
@@ -314,7 +357,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request)(MYSQLND_CONN_DATA * c
 			DBG_RETURN(FAIL);
 	}
 
-	SET_ERROR_AFF_ROWS(conn);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 	SET_EMPTY_ERROR(*conn->error_info);
 
 	cmd_packet = conn->payload_decoder_factory->m.get_command_packet(conn->payload_decoder_factory, FALSE);
@@ -747,7 +790,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	{
 		goto err;
 	}
-	memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+
+	UPSERT_STATUS_RESET(conn->upsert_status);
 	conn->upsert_status->warning_count = 0;
 	conn->upsert_status->server_status = greet_packet->server_status;
 	conn->upsert_status->affected_rows = 0;
@@ -791,7 +835,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	local_tx_started = TRUE;
 
 	SET_EMPTY_ERROR(*conn->error_info);
-	SET_ERROR_AFF_ROWS(conn);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
@@ -1595,7 +1639,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
 		*/
-		SET_ERROR_AFF_ROWS(conn);
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 		if (ret == PASS) {
 			if (conn->connect_or_select_db) {
 				mnd_pefree(conn->connect_or_select_db, conn->persistent);
@@ -1635,7 +1679,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
 		*/
-		SET_ERROR_AFF_ROWS(conn);
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1711,7 +1755,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 				  The server sends 0 but libmysql doesn't read it and has established
 				  a protocol of giving back -1. Thus we have to follow it :(
 				*/
-				SET_ERROR_AFF_ROWS(conn);
+				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 			} else if (PASS == ret) {
 				CONN_SET_STATE(conn, CONN_QUIT_SENT);
 				conn->m->send_close(conn);
@@ -2095,7 +2139,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 			}
 
 			SET_EMPTY_ERROR(*conn->error_info);
-			SET_ERROR_AFF_ROWS(conn);
+			UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 			/*
 			  We are sure that there is a result set, since conn->state is set accordingly
 			  in mysqlnd_store_result() or mysqlnd_fetch_row_unbuffered()
@@ -2202,7 +2246,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 
 	SET_EMPTY_ERROR(*conn->error_info);
-	SET_ERROR_AFF_ROWS(conn);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	if (!user) {
 		user = "";
@@ -2961,7 +3005,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request),
+//	MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request),
 	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn_data, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, end_psession),

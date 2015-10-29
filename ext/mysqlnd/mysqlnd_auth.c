@@ -289,7 +289,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			mnd_pefree(conn->last_message, conn->persistent);
 			conn->last_message = NULL;
 		}
-		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */
 		if (conn->m->get_server_version(conn) < 50123) {
 			ret = conn->m->set_charset(conn, old_cs->name);

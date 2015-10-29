@@ -418,7 +418,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 			break;
 		}
 
-		SET_ERROR_AFF_ROWS(conn);
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(rset_header, conn))) {
 			php_error_docref(NULL, E_WARNING, "Error reading result set's header");
@@ -465,7 +465,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				DBG_INF("UPSERT");
 				conn->last_query_type = QUERY_UPSERT;
 				conn->field_count = rset_header->field_count;
-				memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+				UPSERT_STATUS_RESET(conn->upsert_status);
 				conn->upsert_status->warning_count = rset_header->warning_count;
 				conn->upsert_status->server_status = rset_header->server_status;
 				conn->upsert_status->affected_rows = rset_header->affected_rows;
@@ -490,9 +490,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len, conn->persistent);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
-				memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+				UPSERT_STATUS_RESET(conn->upsert_status);
 				/* restore after zeroing */
-				SET_ERROR_AFF_ROWS(conn);
+				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 				conn->last_query_type = QUERY_SELECT;
 				CONN_SET_STATE(conn, CONN_FETCHING_DATA);
@@ -556,6 +556,11 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 						conn->current_result = NULL;
 					} else {
 						stmt->result = NULL;
+						/* XXX: This will crash, because we will null also the methods.
+							But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
+							(from mysqlnd_driver.c?) to do the reset.
+							This is done also in mysqlnd_ps.c
+						*/
 						memset(stmt, 0, sizeof(*stmt));
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
@@ -772,7 +777,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
-		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
+
+		UPSERT_STATUS_RESET(result->conn->upsert_status);
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -898,7 +904,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
-		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
+
+		UPSERT_STATUS_RESET(result->conn->upsert_status);
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1354,7 +1361,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	/* Finally clean */
 	if (row_packet->eof) {
-		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
+		UPSERT_STATUS_RESET(conn->upsert_status);
 		conn->upsert_status->warning_count = row_packet->warning_count;
 		conn->upsert_status->server_status = row_packet->server_status;
 	}

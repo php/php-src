@@ -76,8 +76,10 @@
 
 #define MAX_CHARSET_LEN			32
 
+void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 
-#define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status->affected_rows = (uint64_t) ~0
+#define UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(status) (status)->m->set_affected_rows_to_error((status))
+#define UPSERT_STATUS_RESET(status) (status)->m->reset((status))
 
 /* Error handling */
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
@@ -181,6 +183,7 @@ PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_result_unbuffered)
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_result_buffered);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol_payload_decoder_factory);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_upsert_status);
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning);
 

@@ -28,7 +28,8 @@
 #define MYSQLND_TYPEDEFED_METHODS
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
-#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class)
+#define MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(class) struct st_##class##_methods
+#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(class) MYSQLND_CLASS_METHOD_TABLE_NAME(class)
 
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
@@ -98,13 +99,25 @@ typedef struct st_mysqlnd_field
 } MYSQLND_FIELD;
 
 
-typedef struct st_mysqlnd_upsert_result
+typedef struct st_mysqlnd_upsert_status MYSQLND_UPSERT_STATUS;
+typedef void (*func_mysqlnd_upsert_status__reset)(MYSQLND_UPSERT_STATUS * const upsert_status);
+typedef void (*func_mysqlnd_upsert_status__set_affected_rows_to_error)(MYSQLND_UPSERT_STATUS * const upsert_status);
+
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_upsert_status)
+{
+	func_mysqlnd_upsert_status__reset reset;
+	func_mysqlnd_upsert_status__set_affected_rows_to_error set_affected_rows_to_error;
+};
+
+struct st_mysqlnd_upsert_status
 {
 	unsigned int	warning_count;
 	unsigned int	server_status;
 	uint64_t		affected_rows;
 	uint64_t		last_insert_id;
-} MYSQLND_UPSERT_STATUS;
+
+	struct st_mysqlnd_upsert_status_methods *m;
+};
 
 
 typedef struct st_mysqlnd_error_info
@@ -476,8 +489,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_
 typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(const MYSQLND_CONN_DATA * const conn);
 typedef void				(*func_mysqlnd_conn_data__set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status);
-typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * conn, enum mysqlnd_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const zend_bool silent, const zend_bool ignore_upsert_status);
+typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const zend_bool silent, const enum php_mysqlnd_server_command command, const zend_bool ignore_upsert_status);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__end_psession)(MYSQLND_CONN_DATA * conn);
@@ -571,7 +584,7 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__get_state get_state;
 	func_mysqlnd_conn_data__set_state set_state;
 
-	func_mysqlnd_conn_data__send_command_do_request send_command_do_request;
+//	func_mysqlnd_conn_data__send_command_do_request send_command_do_request;
 	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
 
 	func_mysqlnd_conn_data__restart_psession restart_psession;

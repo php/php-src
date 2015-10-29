@@ -358,6 +358,11 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 			if (stmt->result) {
 				stmt->result->m.free_result_contents(stmt->result);
 				mnd_efree(stmt->result);
+				/* XXX: This will crash, because we will null also the methods.
+					But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
+					(from mysqlnd_driver.c?) to do the reset.
+					This is done also in mysqlnd_result.c
+				*/
 				memset(stmt, 0, sizeof(MYSQLND_STMT_DATA));
 				stmt->state = MYSQLND_STMT_INITTED;
 			}
@@ -389,8 +394,8 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 	DBG_INF_FMT("query=%s", query);
 
-	SET_ERROR_AFF_ROWS(stmt);
-	SET_ERROR_AFF_ROWS(stmt->conn);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->upsert_status);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->conn->upsert_status);
 
 	SET_EMPTY_ERROR(*stmt->error_info);
 	SET_EMPTY_ERROR(*stmt->conn->error_info);
@@ -516,7 +521,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 	ret = stmt->conn->m->query_read_result_set_header(stmt->conn, s);
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
-		memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
+		UPSERT_STATUS_RESET(stmt->upsert_status);
 		stmt->upsert_status->affected_rows = conn->upsert_status->affected_rows;
 		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
@@ -650,8 +655,8 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	conn = stmt->conn;
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	SET_ERROR_AFF_ROWS(stmt);
-	SET_ERROR_AFF_ROWS(stmt->conn);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->upsert_status);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(stmt->conn->upsert_status);
 
 	if (stmt->result && stmt->state >= MYSQLND_STMT_PREPARED && stmt->field_count) {
 		/*
@@ -733,7 +738,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, enum_mysqlnd_
 	}
 	ret = s->m->generate_execute_request(s, &request, &request_len, &free_request);
 	if (ret == PASS) {
-		const MYSQLND_CSTRING payload = {request, request_len};
+		const MYSQLND_CSTRING payload = {(const char*) request, request_len};
 		struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_EXECUTE, stmt->conn, payload);
 		ret = FAIL;
 		if (command) {
@@ -970,7 +975,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
-		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
+		UPSERT_STATUS_RESET(result->conn->upsert_status);
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1070,7 +1075,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 	int4store(buf + MYSQLND_STMT_ID_LENGTH, 1); /* for now fetch only one row */
 
 	{
-		const MYSQLND_CSTRING payload = {buf, sizeof(buf)};
+		const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
 		struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_FETCH, stmt->conn, payload);
 		ret = FAIL;
 		if (command) {
@@ -1096,7 +1101,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 
 	row_packet->skip_extraction = stmt->result_bind? FALSE:TRUE;
 
-	memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
+	UPSERT_STATUS_RESET(stmt->upsert_status);
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		const MYSQLND_RES_METADATA * const meta = result->meta;
 		unsigned int i, field_count = result->field_count;
@@ -1416,7 +1421,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 
 			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
 			{
-				const MYSQLND_CSTRING payload = {cmd_buf, packet_len};
+				const MYSQLND_CSTRING payload = {(const char *) cmd_buf, packet_len};
 				struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_SEND_LONG_DATA, stmt->conn, payload);
 				ret = FAIL;
 				if (command) {

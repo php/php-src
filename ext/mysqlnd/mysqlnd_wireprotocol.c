@@ -2660,6 +2660,72 @@ mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_F
 
 
 
+/* {{{ mysqlnd_conn_data::send_command_do_request */
+static enum_func_status
+send_command_do_request(
+		MYSQLND_CONN_DATA * const conn,
+		const enum php_mysqlnd_server_command command,
+		const zend_uchar * const arg, const size_t arg_len,
+		const zend_bool silent,
+		const zend_bool ignore_upsert_status)
+{
+	enum_func_status ret = PASS;
+	MYSQLND_PACKET_COMMAND * cmd_packet = NULL;
+	enum mysqlnd_connection_state conn_state = CONN_GET_STATE(conn);
+	MYSQLND_ERROR_INFO	* error_info = conn->error_info;
+	DBG_ENTER("mysqlnd_conn_data::send_command_do_request");
+	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
+	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
+
+	switch (conn_state) {
+		case CONN_READY:
+			break;
+		case CONN_QUIT_SENT:
+			SET_CLIENT_ERROR(*error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			DBG_ERR("Server is gone");
+			DBG_RETURN(FAIL);
+		default:
+			SET_CLIENT_ERROR(*error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
+			DBG_ERR_FMT("Command out of sync. State=%u", conn_state);
+			DBG_RETURN(FAIL);
+	}
+
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
+	SET_EMPTY_ERROR(*conn->error_info);
+
+	cmd_packet = conn->payload_decoder_factory->m.get_command_packet(conn->payload_decoder_factory, FALSE);
+	if (!cmd_packet) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(FAIL);
+	}
+
+	cmd_packet->command = command;
+	if (arg && arg_len) {
+		cmd_packet->argument = arg;
+		cmd_packet->arg_len  = arg_len;
+	}
+
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_COM_QUIT + command - 1 /* because of COM_SLEEP */ );
+
+	if (! PACKET_WRITE(cmd_packet, conn)) {
+		if (!silent) {
+			DBG_ERR_FMT("Error while sending %s packet", mysqlnd_command_to_text[command]);
+			php_error(E_WARNING, "Error while sending %s packet. PID=%d", mysqlnd_command_to_text[command], getpid());
+		}
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		conn->m->send_close(conn);
+		DBG_ERR("Server is gone");
+		ret = FAIL;
+	}
+	PACKET_FREE(cmd_packet);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+
+
 
 struct st_mysqlnd_protocol_no_params_command
 {
@@ -2706,7 +2772,7 @@ mysqlnd_com_set_option_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_set_option_run");
 	int2store(buffer, (unsigned int) option);
 
-	ret = conn->m->send_command_do_request(conn, COM_SET_OPTION, buffer, sizeof(buffer), FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_SET_OPTION, buffer, sizeof(buffer), FALSE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_EOF_PACKET, FALSE, COM_SET_OPTION, TRUE);
 	}
@@ -2747,7 +2813,7 @@ mysqlnd_com_debug_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_debug_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_DEBUG, NULL, 0, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_DEBUG, NULL, 0, FALSE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_EOF_PACKET, COM_DEBUG, COM_DEBUG, TRUE);
 	}
@@ -2798,7 +2864,7 @@ mysqlnd_com_init_db_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_init_db_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_INIT_DB, (zend_uchar*) command->context.db.s, command->context.db.l, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_INIT_DB, (zend_uchar*) command->context.db.s, command->context.db.l, FALSE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_INIT_DB, TRUE);
 	}
@@ -2839,7 +2905,7 @@ mysqlnd_com_ping_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_ping_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_PING, NULL, 0, TRUE, TRUE);
+	ret = send_command_do_request(conn, COM_PING, NULL, 0, TRUE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, TRUE, COM_PING, TRUE);
 	}
@@ -2906,7 +2972,7 @@ mysqlnd_com_field_list_run(void *cmd)
 		*p++ = '\0';
 	}
 
-	ret = conn->m->send_command_do_request(conn, COM_FIELD_LIST, buff, p - buff, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_FIELD_LIST, buff, p - buff, FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -2945,7 +3011,7 @@ mysqlnd_com_statistics_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_statistics_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_STATISTICS, NULL, 0, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STATISTICS, NULL, 0, FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -2995,7 +3061,7 @@ mysqlnd_com_process_kill_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_process_kill_run");
 	int4store(buff, command->context.process_id);
 
-	ret = conn->m->send_command_do_request(conn, COM_PROCESS_KILL, buff, 4, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_PROCESS_KILL, buff, 4, FALSE, TRUE);
 	if (PASS == ret && command->context.read_response) {
 		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_PROCESS_KILL, TRUE);
 	}
@@ -3049,7 +3115,7 @@ mysqlnd_com_refresh_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_refresh_run");
 	int1store(bits, command->context.options);
 
-	ret = conn->m->send_command_do_request(conn, COM_REFRESH, bits, 1, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_REFRESH, bits, 1, FALSE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_REFRESH, TRUE);
 	}
@@ -3103,7 +3169,7 @@ mysqlnd_com_shutdown_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_shutdown_run");
 	int1store(bits, command->context.level);
 
-	ret = conn->m->send_command_do_request(conn, COM_SHUTDOWN, bits, 1, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_SHUTDOWN, bits, 1, FALSE, TRUE);
 	if (PASS == ret) {
 		ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_SHUTDOWN, TRUE);
 	}
@@ -3154,7 +3220,7 @@ mysqlnd_com_quit_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_quit_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_QUIT, NULL, 0, TRUE, TRUE);
+	ret = send_command_do_request(conn, COM_QUIT, NULL, 0, TRUE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3201,7 +3267,7 @@ mysqlnd_com_query_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_query_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_QUERY, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE, FALSE);
+	ret = send_command_do_request(conn, COM_QUERY, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE, FALSE);
 
 	if (PASS == ret) {
 		CONN_SET_STATE(conn, CONN_QUERY_SENT);
@@ -3254,7 +3320,7 @@ mysqlnd_com_change_user_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_change_user_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_CHANGE_USER, (zend_uchar*) command->context.payload.s, command->context.payload.l, command->context.silent, TRUE);
+	ret = send_command_do_request(conn, COM_CHANGE_USER, (zend_uchar*) command->context.payload.s, command->context.payload.l, command->context.silent, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3356,7 +3422,7 @@ mysqlnd_com_stmt_prepare_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_stmt_prepare_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_STMT_PREPARE, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STMT_PREPARE, (zend_uchar*) command->context.query.s, command->context.query.l, FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3405,7 +3471,7 @@ mysqlnd_com_stmt_execute_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_stmt_execute_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_STMT_EXECUTE, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, FALSE);
+	ret = send_command_do_request(conn, COM_STMT_EXECUTE, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, FALSE);
 
 	DBG_RETURN(ret);
 }
@@ -3454,7 +3520,7 @@ mysqlnd_com_stmt_fetch_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_stmt_fetch_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_STMT_FETCH, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STMT_FETCH, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3505,7 +3571,7 @@ mysqlnd_com_stmt_reset_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_stmt_reset_run");
 
 	int4store(cmd_buf, command->context.stmt_id);
-	ret = conn->m->send_command_do_request(conn, COM_STMT_RESET, cmd_buf, sizeof(cmd_buf), FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STMT_RESET, cmd_buf, sizeof(cmd_buf), FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3554,7 +3620,7 @@ mysqlnd_com_stmt_send_long_data_run(void *cmd)
 
 	DBG_ENTER("mysqlnd_com_stmt_send_long_data_run");
 
-	ret = conn->m->send_command_do_request(conn, COM_STMT_SEND_LONG_DATA, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STMT_SEND_LONG_DATA, (zend_uchar*) command->context.payload.s, command->context.payload.l, FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
@@ -3605,7 +3671,7 @@ mysqlnd_com_stmt_close_run(void *cmd)
 	DBG_ENTER("mysqlnd_com_stmt_close_run");
 
 	int4store(cmd_buf, command->context.stmt_id);
-	ret = conn->m->send_command_do_request(conn, COM_STMT_CLOSE, cmd_buf, sizeof(cmd_buf), FALSE, TRUE);
+	ret = send_command_do_request(conn, COM_STMT_CLOSE, cmd_buf, sizeof(cmd_buf), FALSE, TRUE);
 
 	DBG_RETURN(ret);
 }
