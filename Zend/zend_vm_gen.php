@@ -59,20 +59,20 @@ $vm_op_flags = array(
 	"ZEND_VM_OP1_CONST"       => 1<<1,
 	"ZEND_VM_OP1_TMPVAR"      => 1<<2,
 	"ZEND_VM_OP1_NUM"         => 1<<3,
-	"ZEND_VM_OP1_ADDR"        => 1<<4,
-	"ZEND_VM_OP1_OPLINE"      => 1<<5,
+	"ZEND_VM_OP1_JMP_ADDR"    => 1<<4,
+	"ZEND_VM_OP1_JMP_ABS"     => 1<<5,
 
 	"ZEND_VM_OP2_SPEC"        => 1<<8,
 	"ZEND_VM_OP2_CONST"       => 1<<9,
 	"ZEND_VM_OP2_TMPVAR"      => 1<<10,
 	"ZEND_VM_OP2_NUM"         => 1<<11,
-	"ZEND_VM_OP2_ADDR"        => 1<<12,
-	"ZEND_VM_OP2_OPLINE"      => 1<<13,
+	"ZEND_VM_OP2_JMP_ADDR"    => 1<<12,
+	"ZEND_VM_OP2_JMP_ABS"     => 1<<13,
 
 	"ZEND_VM_EXT_NUM"         => 1<<16,
 	"ZEND_VM_EXT_VAR"         => 1<<17,
-	"ZEND_VM_EXT_OPLINE"      => 1<<18,
-	"ZEND_VM_EXT_REL_OPLINE"  => 1<<19,
+	"ZEND_VM_EXT_JMP_ABS"     => 1<<18,
+	"ZEND_VM_EXT_JMP_REL"     => 1<<19,
 	"ZEND_VM_EXT_DIM_OBJ"     => 1<<20,
 	"ZEND_VM_EXT_CLASS_FETCH" => 1<<21,
 	"ZEND_VM_EXT_CONST_FETCH" => 1<<22,
@@ -98,15 +98,15 @@ $vm_op_decode = array(
 	"CV"                   => ZEND_VM_OP1_SPEC,
 	"TMPVAR"               => ZEND_VM_OP1_SPEC | ZEND_VM_OP1_TMPVAR,
 	"NUM"                  => ZEND_VM_OP1_NUM,
-	"ADDR"                 => ZEND_VM_OP1_ADDR,
-	"OPLINE"               => ZEND_VM_OP1_OPLINE,
+	"JMP_ADDR"             => ZEND_VM_OP1_JMP_ADDR,
+	"JMP_ABS"              => ZEND_VM_OP1_JMP_ABS,
 );
 
 $vm_ext_decode = array(
 	"NUM"                  => ZEND_VM_EXT_NUM,
 	"VAR"                  => ZEND_VM_EXT_VAR,
-	"OPLINE"               => ZEND_VM_EXT_OPLINE,
-	"REL_OPLINE"           => ZEND_VM_EXT_REL_OPLINE,
+	"JMP_ABS"              => ZEND_VM_EXT_JMP_ABS,
+	"JMP_REL"              => ZEND_VM_EXT_JMP_REL,
 	"DIM_OBJ"              => ZEND_VM_EXT_DIM_OBJ,
 	"CLASS_FETCH"          => ZEND_VM_EXT_CLASS_FETCH,
 	"CONST_FETCH"          => ZEND_VM_EXT_CONST_FETCH,
@@ -1444,7 +1444,7 @@ function gen_vm($def, $skel) {
 		if (strpos($line,"ZEND_VM_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z|]+)\s*,\s*([A-Z|]+)\s*(,\s*([A-Z_|]+)\s*)?\)/",
+					"/^ZEND_VM_HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
@@ -1479,7 +1479,7 @@ function gen_vm($def, $skel) {
 		} else if (strpos($line,"ZEND_VM_HELPER(") === 0) {
 		  // Parsing helper's definition
 			if (preg_match(
-					"/^ZEND_VM_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z|]+)\s*,\s*([A-Z|]+)\s*\)/",
+					"/^ZEND_VM_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HELPER definition.\n");
@@ -1496,7 +1496,7 @@ function gen_vm($def, $skel) {
 		} else if (strpos($line,"ZEND_VM_HELPER_EX(") === 0) {
 		  // Parsing helper with parameter definition
 			if (preg_match(
-					"/^ZEND_VM_HELPER_EX\(\s*([A-Za-z_]+)\s*,\s*([A-Z|]+)\s*,\s*([A-Z|]+)\s*,\s*(.*)\s*\)/",
+					"/^ZEND_VM_HELPER_EX\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*,\s*(.*)\s*\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HELPER definition.\n");
