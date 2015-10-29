@@ -202,5 +202,14 @@ END_EXTERN_C()
 #define ZEND_SPACESHIP                       170
 #define ZEND_DECLARE_ANON_CLASS              171
 #define ZEND_DECLARE_ANON_INHERITED_CLASS    172
+#define ZEND_FETCH_STATIC_PROP_R             173
+#define ZEND_FETCH_STATIC_PROP_W             174
+#define ZEND_FETCH_STATIC_PROP_RW            175
+#define ZEND_FETCH_STATIC_PROP_IS            176
+#define ZEND_FETCH_STATIC_PROP_FUNC_ARG      177
+#define ZEND_FETCH_STATIC_PROP_UNSET         178
+#define ZEND_UNSET_STATIC_PROP               179
+#define ZEND_ISSET_ISEMPTY_STATIC_PROP       180
+#define ZEND_FETCH_CLASS_CONSTANT            181
 
 #endif

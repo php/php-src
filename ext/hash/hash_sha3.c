@@ -38,21 +38,24 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline php_hash_uint64 load64(const unsigned char* x) {
+	unsigned char i;
 	php_hash_uint64 ret = 0;
-	for (unsigned char i = 7; i >= 0; --i) {
+	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
 		ret |= x[i];
 	}
 	return ret;
 }
-static inline void store64(const unsigned char* x, php_hash_uint64 val) {
-	for (unsigned char i = 0; i < 8; ++i) {
+static inline void store64(unsigned char* x, php_hash_uint64 val) {
+	unsigned char i;
+	for (i = 0; i < 8; ++i) {
 		x[i] = val & 0xFF;
 		val >>= 8;
 	}
 }
-static inline void xor64(const unsigned char* x, php_hash_uint64 val) {
-	for (unsigned char i = 0; i < 8; ++i) {
+static inline void xor64(unsigned char* x, php_hash_uint64 val) {
+	unsigned char i;
+	for (i = 0; i < 8; ++i) {
 		x[i] ^= val & 0xFF;
 		val >>= 8;
 	}
@@ -129,7 +132,7 @@ static void permute(PHP_SHA3_CTX* ctx) {
 		}
 
 		{ // i step (see [Keccak Reference, Section 2.3.5])
-		unsigned char j;
+			unsigned char j;
 			for (j = 0; j < 7; ++j) {
 				if (LFSR86540(&LFSRstate)) {
 					php_hash_uint64 bitPos = (1<<j) - 1;

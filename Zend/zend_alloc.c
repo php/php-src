@@ -1462,7 +1462,15 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #if ZEND_DEBUG
 			size = real_size;
 #endif
+#ifdef ZEND_WIN32
+			/* On Windows we don't have ability to extend huge block in-place.
+			 * We allocate them with 2MB size granularuty, to avoid many 
+			 * reallocatioons whenthey when they are extended by small peaces
+			 */
+			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 			if (new_size == old_size) {
 #if ZEND_DEBUG
 				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1722,7 +1730,15 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 
 static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef ZEND_WIN32
+	/* On Windows we don't have ability to extend huge block in-place.
+	 * We allocate them with 2MB size granularuty, to avoid many 
+	 * reallocatioons whenthey when they are extended by small peaces
+	 */
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 	void *ptr;
 
 #if ZEND_MM_LIMIT

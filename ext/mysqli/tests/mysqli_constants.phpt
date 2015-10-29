@@ -139,6 +139,9 @@ require_once('skipifconnectfailure.inc');
 	if ($version >= 50033 || $IS_MYSQLND) {
 		$expected_constants['MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT'] = true;
 	}
+	if ($IS_MYSQLND) {
+		$expected_constants['MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'] = true;
+	}
 
 	/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
 	if ($version >= 50606 || $IS_MYSQLND) {

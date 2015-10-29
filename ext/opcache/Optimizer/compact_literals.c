@@ -177,24 +177,23 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					LITERAL_INFO(opline->op1.constant, LITERAL_CONST, 1, 1, 2);
 					break;
 				case ZEND_FETCH_CONSTANT:
-					if (ZEND_OP1_TYPE(opline) == IS_UNUSED) {
-						if ((opline->extended_value & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
-							LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 5);
-						} else {
-							LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 3);
-						}
+					if ((opline->extended_value & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
+						LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 5);
 					} else {
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							LITERAL_INFO(opline->op1.constant, LITERAL_CLASS, 1, 1, 2);
-						}
-						optimizer_literal_class_info(
-							info,
-							opline->op1_type,
-							opline->op1,
-							opline->op2.constant,
-							LITERAL_CLASS_CONST, (ZEND_OP1_TYPE(opline) == IS_CONST) ? 1 : 2, 1,
-							op_array);
+						LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 3);
 					}
+					break;
+				case ZEND_FETCH_CLASS_CONSTANT:
+					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_CLASS, 1, 1, 2);
+					}
+					optimizer_literal_class_info(
+						info,
+						opline->op1_type,
+						opline->op1,
+						opline->op2.constant,
+						LITERAL_CLASS_CONST, (ZEND_OP1_TYPE(opline) == IS_CONST) ? 1 : 2, 1,
+						op_array);
 					break;
 				case ZEND_FETCH_R:
 				case ZEND_FETCH_W:
@@ -204,23 +203,29 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_FETCH_FUNC_ARG:
 				case ZEND_UNSET_VAR:
 				case ZEND_ISSET_ISEMPTY_VAR:
-					if (ZEND_OP2_TYPE(opline) == IS_UNUSED) {
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
-						}
-					} else {
-						if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-							LITERAL_INFO(opline->op2.constant, LITERAL_CLASS, 1, 1, 2);
-						}
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							optimizer_literal_class_info(
-								info,
-								opline->op2_type,
-								opline->op2,
-								opline->op1.constant,
-								LITERAL_STATIC_PROPERTY, 2, 1,
-								op_array);
-						}
+					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
+					}
+					break;
+				case ZEND_FETCH_STATIC_PROP_R:
+				case ZEND_FETCH_STATIC_PROP_W:
+				case ZEND_FETCH_STATIC_PROP_RW:
+				case ZEND_FETCH_STATIC_PROP_IS:
+				case ZEND_FETCH_STATIC_PROP_UNSET:
+				case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+				case ZEND_UNSET_STATIC_PROP:
+				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, LITERAL_CLASS, 1, 1, 2);
+					}
+					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+						optimizer_literal_class_info(
+							info,
+							opline->op2_type,
+							opline->op2,
+							opline->op1.constant,
+							LITERAL_STATIC_PROPERTY, 2, 1,
+							op_array);
 					}
 					break;
 				case ZEND_FETCH_CLASS:

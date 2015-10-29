@@ -131,6 +131,7 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 				case ZEND_INIT_STATIC_METHOD_CALL:
 				case ZEND_CATCH:
 				case ZEND_FETCH_CONSTANT:
+				case ZEND_FETCH_CLASS_CONSTANT:
 				case ZEND_DEFINED:
 				case ZEND_NEW:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val);
@@ -179,20 +180,20 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 	if (Z_TYPE_P(val) == IS_STRING) {
 		zend_string_hash_val(Z_STR(ZEND_OP2_LITERAL(opline)));
 		switch (opline->opcode) {
-			case ZEND_FETCH_R:
-			case ZEND_FETCH_W:
-			case ZEND_FETCH_RW:
-			case ZEND_FETCH_IS:
-			case ZEND_FETCH_UNSET:
-			case ZEND_FETCH_FUNC_ARG:
 			case ZEND_FETCH_CLASS:
 			case ZEND_INIT_FCALL_BY_NAME:
 			/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
-			case ZEND_UNSET_VAR:
-			case ZEND_ISSET_ISEMPTY_VAR:
 			case ZEND_ADD_INTERFACE:
 			case ZEND_ADD_TRAIT:
 			case ZEND_INSTANCEOF:
+			case ZEND_FETCH_STATIC_PROP_R:
+			case ZEND_FETCH_STATIC_PROP_W:
+			case ZEND_FETCH_STATIC_PROP_RW:
+			case ZEND_FETCH_STATIC_PROP_IS:
+			case ZEND_FETCH_STATIC_PROP_UNSET:
+			case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+			case ZEND_UNSET_STATIC_PROP:
+			case ZEND_ISSET_ISEMPTY_STATIC_PROP:
 				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 				op_array->cache_size += sizeof(void*);
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
@@ -213,7 +214,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
 				/* break missing intentionally */
-			/*case ZEND_FETCH_CONSTANT:*/
+			/*case ZEND_FETCH_CLASS_CONSTANT:*/
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_FETCH_OBJ_R:
 			case ZEND_FETCH_OBJ_W:

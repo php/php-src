@@ -67,7 +67,7 @@ void zend_register_standard_constants(void);
 void clean_non_persistent_constants(void);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
-ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, zend_ulong flags);
+ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
 ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zend_bool bval, int flags, int module_number);
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number);
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number);
@@ -76,7 +76,7 @@ ZEND_API void zend_register_string_constant(const char *name, size_t name_len, c
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number);
 ZEND_API int zend_register_constant(zend_constant *c);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
-zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags);
+zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant
