@@ -2967,6 +2967,10 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				if (Z_TYPE_P(dest_zval) == IS_NULL) {
 					convert_to_array_ex(dest_zval);
 					add_next_index_null(dest_zval);
+				} else if (Z_TYPE_P(dest_zval) == IS_ARRAY) {
+					if (UNEXPECTED(Z_ARRVAL_P(dest_zval)->nNextFreeElement > Z_ARRVAL_P(dest_zval)->nNumUsed)) {
+						Z_ARRVAL_P(dest_zval)->nNextFreeElement = Z_ARRVAL_P(dest_zval)->nNumUsed;
+					}
 				} else {
 					convert_to_array_ex(dest_zval);
 				}
