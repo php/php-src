@@ -163,7 +163,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 				l2 = 0;
 			}
 		}
-	} else if (f->key) {
+	} else {
 		if (s->key) {
 			return zendi_smart_strcmp(f->key, s->key);
 		} else {
