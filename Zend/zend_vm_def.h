@@ -2591,7 +2591,7 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 	ZEND_VM_JMP(opline);
 }
 
-ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_REL)
+ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_ADDR)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -4205,7 +4205,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ABS)
+ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
@@ -4215,8 +4215,8 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ABS)
 	/* Check whether an exception has been thrown, if not, jump over code */
 	zend_exception_restore();
 	if (EG(exception) == NULL) {
-		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->extended_value]);
-		ZEND_VM_CONTINUE(); /* CHECK_ME */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
 	}
 	catch_ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 	if (UNEXPECTED(catch_ce == NULL)) {
@@ -4238,8 +4238,8 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ABS)
 				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
 			}
-			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->extended_value]);
-			ZEND_VM_CONTINUE(); /* CHECK_ME */
+			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+			ZEND_VM_CONTINUE();
 		}
 	}
 
@@ -6097,7 +6097,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 	}
 }
 
-ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_REL)
+ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *array;
@@ -6274,7 +6274,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_REL)
+ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *array;
