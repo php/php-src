@@ -29,8 +29,7 @@
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
 #define MYSQLND_CLASS_METHODS_TYPE(class) struct st_##class##_methods
-#define MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(class) struct st_##class##_methods
-#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(class) MYSQLND_CLASS_METHOD_TABLE_NAME(class)
+#define MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) MYSQLND_CLASS_METHODS_TYPE(class) MYSQLND_CLASS_METHOD_TABLE_NAME(class)
 
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
@@ -117,7 +116,7 @@ struct st_mysqlnd_upsert_status
 	uint64_t		affected_rows;
 	uint64_t		last_insert_id;
 
-	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_upsert_status) *m;
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_upsert_status) *m;
 };
 
 
