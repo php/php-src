@@ -31,6 +31,11 @@ typedef struct {
 	int fd;
 } php_random_globals;
 
+#define php_random_bytes_throw(b, s) php_random_bytes((b), (s), 1)
+#define php_random_bytes_silent(b, s) php_random_bytes((b), (s), 0)
+
+PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw);
+
 #ifdef ZTS
 # define RANDOM_G(v) ZEND_TSRMG(random_globals_id, php_random_globals *, v)
 extern PHPAPI int random_globals_id;
