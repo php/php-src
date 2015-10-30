@@ -104,54 +104,12 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 		(buf_len) = 0; \
 	}
 
+
 enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent);
-
-
-#define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 #define SET_EMPTY_ERROR(info)							(info)->m->reset((info))
-#define SET_CLIENT_ERROR(info, err_no, sqlstate, error)	(info)->m->set_client_error((info), (err_no), (sqlstate), (error))
-#define COPY_CLIENT_ERROR(error_info_to, error_info_from) \
-	{ \
-		SET_CLIENT_ERROR((error_info_to), (error_info_from).error_no, (error_info_from).sqlstate, (error_info_from).error); \
-	}
-
-
-#if 0
-#define SET_EMPTY_ERROR(error_info) \
-	{ \
-		(error_info).error_no = 0; \
-		(error_info).error[0] = '\0'; \
-		strlcpy((error_info).sqlstate, "00000", sizeof((error_info).sqlstate)); \
-		if ((error_info).error_list) { \
-			zend_llist_clean((error_info).error_list); \
-		} \
-	}
-
-#define SET_CLIENT_ERROR(error_info, a, b, c) \
-{ \
-	if (0 == (a)) { \
-		SET_EMPTY_ERROR((error_info)); \
-	} else { \
-		(error_info).error_no = (a); \
-		strlcpy((error_info).sqlstate, (b), sizeof((error_info).sqlstate)); \
-		strlcpy((error_info).error, (c), sizeof((error_info).error)); \
-		if ((error_info).error_list) {\
-			MYSQLND_ERROR_LIST_ELEMENT error_for_the_list = {0}; \
-																	\
-			error_for_the_list.error_no = (a); \
-			strlcpy(error_for_the_list.sqlstate, (b), sizeof(error_for_the_list.sqlstate)); \
-			error_for_the_list.error = mnd_pestrdup((c), TRUE); \
-			if (error_for_the_list.error) { \
-				DBG_INF_FMT("adding error [%s] to the list", error_for_the_list.error); \
-				zend_llist_add_element((error_info).error_list, &error_for_the_list); \
-			} \
-		} \
-	} \
-}
-#endif
-
-
-#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR((stmt)->error_info, a, b, c)
+#define SET_CLIENT_ERROR(info, err_no, sqlstate, error)	(err_no)? (info)->m->set_client_error((info), (err_no), (sqlstate), (error)) : (info)->m->reset((info))
+#define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
+#define COPY_CLIENT_ERROR(dest, source)					SET_CLIENT_ERROR((dest), (source).error_no, (source).sqlstate, (source).error)
 
 #define CONN_GET_STATE(c)		(c)->m->get_state((c))
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s))
