@@ -148,7 +148,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	streams_options |= IGNORE_URL;
 	net_stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	if (!net_stream) {
-		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
+		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
 		DBG_RETURN(NULL);
 	}
 	/*
@@ -211,7 +211,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			mnd_sprintf_free(hashed_details);
 		}
 		errcode = CR_CONNECTION_ERROR;
-		SET_CLIENT_ERROR(*error_info,
+		SET_CLIENT_ERROR(error_info,
 						 CR_CONNECTION_ERROR,
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
@@ -310,7 +310,7 @@ MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char
 	}
 
 	if (!ret) {
-		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "No handler for this scheme");
+		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "No handler for this scheme");
 	}
 
 	DBG_RETURN(ret);
@@ -484,7 +484,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 	/* Even for zero size payload we have to send a packet */
 	if (!bytes_sent) {
 		DBG_ERR_FMT("Can't %u send bytes", count);
-		SET_CLIENT_ERROR(*error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
 	DBG_RETURN(bytes_sent);
 }

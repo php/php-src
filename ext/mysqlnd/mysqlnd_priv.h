@@ -104,7 +104,19 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 		(buf_len) = 0; \
 	}
 
+enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent);
 
+
+#define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
+#define SET_EMPTY_ERROR(info)							(info)->m->reset((info))
+#define SET_CLIENT_ERROR(info, err_no, sqlstate, error)	(info)->m->set_client_error((info), (err_no), (sqlstate), (error))
+#define COPY_CLIENT_ERROR(error_info_to, error_info_from) \
+	{ \
+		SET_CLIENT_ERROR((error_info_to), (error_info_from).error_no, (error_info_from).sqlstate, (error_info_from).error); \
+	}
+
+
+#if 0
 #define SET_EMPTY_ERROR(error_info) \
 	{ \
 		(error_info).error_no = 0; \
@@ -114,7 +126,6 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 			zend_llist_clean((error_info).error_list); \
 		} \
 	}
-
 
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
 { \
@@ -137,18 +148,10 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 		} \
 	} \
 }
+#endif
 
 
-#define COPY_CLIENT_ERROR(error_info_to, error_info_from) \
-	{ \
-		SET_CLIENT_ERROR((error_info_to), (error_info_from).error_no, (error_info_from).sqlstate, (error_info_from).error); \
-	}
-
-
-#define SET_OOM_ERROR(error_info) SET_CLIENT_ERROR((error_info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
-
-
-#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(*(stmt)->error_info, a, b, c)
+#define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR((stmt)->error_info, a, b, c)
 
 #define CONN_GET_STATE(c)		(c)->m->get_state((c))
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s))

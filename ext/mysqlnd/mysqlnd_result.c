@@ -371,7 +371,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 
 	result->meta = result->m.result_meta_init(result->field_count, result->persistent);
 	if (!result->meta) {
-		SET_OOM_ERROR(*conn->error_info);
+		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
 	}
 
@@ -413,14 +413,14 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 	do {
 		rset_header = conn->payload_decoder_factory->m.get_rset_header_packet(conn->payload_decoder_factory, FALSE);
 		if (!rset_header) {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
 			break;
 		}
 
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
-		if (FAIL == (ret = PACKET_READ(rset_header, conn))) {
+		if (FAIL == (ret = PACKET_READ(rset_header))) {
 			php_error_docref(NULL, E_WARNING, "Error reading result set's header");
 			break;
 		}
@@ -440,7 +440,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 			  This will copy the error code and the messages, as they
 			  are buffers in the struct
 			*/
-			COPY_CLIENT_ERROR(*conn->error_info, rset_header->error_info);
+			COPY_CLIENT_ERROR(conn->error_info, rset_header->error_info);
 			ret = FAIL;
 			DBG_ERR_FMT("error=%s", rset_header->error_info.error);
 			/* Return back from CONN_QUERY_SENT */
@@ -526,7 +526,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					result = stmt->result;
 				}
 				if (!result) {
-					SET_OOM_ERROR(*conn->error_info);
+					SET_OOM_ERROR(conn->error_info);
 					ret = FAIL;
 					break;
 				}
@@ -544,11 +544,11 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				/* Check for SERVER_STATUS_MORE_RESULTS if needed */
 				fields_eof = conn->payload_decoder_factory->m.get_eof_packet(conn->payload_decoder_factory, FALSE);
 				if (!fields_eof) {
-					SET_OOM_ERROR(*conn->error_info);
+					SET_OOM_ERROR(conn->error_info);
 					ret = FAIL;
 					break;
 				}
-				if (FAIL == (ret = PACKET_READ(fields_eof, conn))) {
+				if (FAIL == (ret = PACKET_READ(fields_eof))) {
 					DBG_ERR("Error occurred while reading the EOF packet");
 					result->m.free_result_contents(result);
 					mnd_efree(result);
@@ -696,7 +696,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		DBG_RETURN(PASS);
 	}
 	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(*result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(FAIL);
 	}
 	if (!row_packet) {
@@ -710,7 +710,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 	  If we skip rows (row == NULL) we have to
 	  result->m.unbuffered_free_last_data() before it. The function returns always true.
 	*/
-	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
+	if (PASS == (ret = PACKET_READ(row_packet)) && !row_packet->eof) {
 		result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL);
 
 		result->unbuf->last_row_data = row_packet->fields;
@@ -760,7 +760,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 						}
 					}
 				} else {
-					SET_OOM_ERROR(*result->conn->error_info);
+					SET_OOM_ERROR(result->conn->error_info);
 				}
 			}
 		}
@@ -768,7 +768,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		*fetched_anything = TRUE;
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(*result->conn->error_info, row_packet->error_info);
+			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
@@ -816,7 +816,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		DBG_RETURN(PASS);
 	}
 	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(*result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(FAIL);
 	}
 	if (!row_packet) {
@@ -830,7 +830,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	  If we skip rows (row == NULL) we have to
 	  result->m.unbuffered_free_last_data() before it. The function returns always true.
 	*/
-	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
+	if (PASS == (ret = PACKET_READ(row_packet)) && !row_packet->eof) {
 		result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL);
 
 		result->unbuf->last_row_data = row_packet->fields;
@@ -895,7 +895,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		*fetched_anything = TRUE;
 	} else if (ret == FAIL) {
 		if (row_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(*result->conn->error_info, row_packet->error_info);
+			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
 		CONN_SET_STATE(result->conn, CONN_READY);
@@ -932,7 +932,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 {
 	DBG_ENTER("mysqlnd_res::use_result");
 
-	SET_EMPTY_ERROR(*result->conn->error_info);
+	SET_EMPTY_ERROR(result->conn->error_info);
 
 	if (ps == FALSE) {
 		result->type			= MYSQLND_RES_NORMAL;
@@ -964,7 +964,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 
 	DBG_RETURN(result);
 oom:
-	SET_OOM_ERROR(*result->conn->error_info);
+	SET_OOM_ERROR(result->conn->error_info);
 	DBG_RETURN(NULL);
 }
 /* }}} */
@@ -1036,7 +1036,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 				set->data_cursor += field_count;
 				MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
 			} else {
-				SET_OOM_ERROR(*result->conn->error_info);
+				SET_OOM_ERROR(result->conn->error_info);
 			}
 /* END difference between normal normal fetch and _c */
 
@@ -1170,7 +1170,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 
 		current_row = mnd_emalloc(field_count * sizeof(zval));
 		if (!current_row) {
-			SET_OOM_ERROR(*result->conn->error_info);
+			SET_OOM_ERROR(result->conn->error_info);
 			DBG_RETURN(FAIL);
 		}
 
@@ -1294,7 +1294,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	if (free_rows) {
 		*row_buffers = mnd_pemalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), 0);
 		if (!*row_buffers) {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
 			goto end;
 		}
@@ -1304,7 +1304,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	/* non-persistent */
 	row_packet = conn->payload_decoder_factory->m.get_row_packet(conn->payload_decoder_factory, FALSE);
 	if (!row_packet) {
-		SET_OOM_ERROR(*conn->error_info);
+		SET_OOM_ERROR(conn->error_info);
 		ret = FAIL;
 		goto end;
 	}
@@ -1317,7 +1317,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
 
-	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
+	while (FAIL != (ret = PACKET_READ(row_packet)) && !row_packet->eof) {
 		if (!free_rows) {
 			uint64_t total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
 			MYSQLND_MEMORY_POOL_CHUNK ** new_row_buffers;
@@ -1325,13 +1325,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
 			if (total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
-				SET_OOM_ERROR(*conn->error_info);
+				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
 				goto end;
 			}
 			new_row_buffers = mnd_perealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), 0);
 			if (!new_row_buffers) {
-				SET_OOM_ERROR(*conn->error_info);
+				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
 				goto end;
 			}
@@ -1369,7 +1369,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	if (free_rows) {
 		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
 		if (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
 			goto end;
 		}
@@ -1383,7 +1383,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 
 	if (ret == FAIL) {
-		COPY_CLIENT_ERROR(set->error_info, row_packet->error_info);
+		COPY_CLIENT_ERROR(&set->error_info, row_packet->error_info);
 	} else {
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status->affected_rows = set->row_count;
@@ -1419,14 +1419,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	if (flags & MYSQLND_STORE_NO_COPY) {
 		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent);
 		if (!result->stored_data) {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
 		}
 		row_buffers = &result->stored_data->row_buffers;
 	} else if (flags & MYSQLND_STORE_COPY) {
 		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent);
 		if (!result->stored_data) {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
 		}
 		row_buffers = &result->stored_data->row_buffers;
@@ -1435,9 +1435,9 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	if (FAIL == ret) {
 		if (result->stored_data) {
-			COPY_CLIENT_ERROR(*conn->error_info, result->stored_data->error_info);
+			COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		} else {
-			SET_OOM_ERROR(*conn->error_info);
+			SET_OOM_ERROR(conn->error_info);
 		}
 		DBG_RETURN(NULL);
 	} else {
@@ -1448,13 +1448,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 			if (set->row_count) {
 				/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
 				if (set->row_count * meta->field_count * sizeof(zval *) > SIZE_MAX) {
-					SET_OOM_ERROR(*conn->error_info);
+					SET_OOM_ERROR(conn->error_info);
 					DBG_RETURN(NULL);
 				}
 				/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
 				set->data = mnd_emalloc((size_t)(set->row_count * meta->field_count * sizeof(zval)));
 				if (!set->data) {
-					SET_OOM_ERROR(*conn->error_info);
+					SET_OOM_ERROR(conn->error_info);
 					DBG_RETURN(NULL);
 				}
 				memset(set->data, 0, (size_t)(set->row_count * meta->field_count * sizeof(zval)));
@@ -1791,7 +1791,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 	if ((!result->unbuf && !set)) {
 		php_error_docref(NULL, E_WARNING, "fetch_all can be used only with buffered sets");
 		if (result->conn) {
-			SET_CLIENT_ERROR(*result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
+			SET_CLIENT_ERROR(result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
 		}
 		RETVAL_NULL();
 		DBG_VOID_RETURN;

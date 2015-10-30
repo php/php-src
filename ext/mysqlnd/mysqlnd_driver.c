@@ -93,22 +93,6 @@ PHPAPI void mysqlnd_library_init(void)
 /* }}} */
 
 
-
-/* {{{ mysqlnd_error_list_pdtor */
-static void
-mysqlnd_error_list_pdtor(void * pDest)
-{
-	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-
-	DBG_ENTER("mysqlnd_error_list_pdtor");
-	if (element->error) {
-		mnd_pefree(element->error, TRUE);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_object_factory::get_connection */
 static MYSQLND *
 MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent)
@@ -133,7 +117,12 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 	new_object->m = mysqlnd_conn_get_methods();
 	data = new_object->data;
 
-	data->error_info = &(data->error_info_impl);
+	if (FAIL == mysqlnd_error_info_init(&data->error_info_impl, persistent)) {
+		new_object->m->dtor(new_object);
+		DBG_RETURN(NULL);
+	}
+	data->error_info = &data->error_info_impl;
+
 	data->options = &(data->options_impl);
 
 	mysqlnd_upsert_status_init(&data->upsert_status_impl);
@@ -145,13 +134,6 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 	data->object_factory = *factory;
 	CONN_SET_STATE(data, CONN_ALLOCED);
 	data->m->get_reference(data);
-
-	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (!data->error_info->error_list) {
-		new_object->m->dtor(new_object);
-		DBG_RETURN(NULL);
-	}
-	zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
 
@@ -220,7 +202,12 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 			break;
 		}
 		stmt->persistent = persistent;
-		stmt->error_info = &(stmt->error_info_impl);
+
+		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, persistent)) {
+			break;		
+		}
+		stmt->error_info = &stmt->error_info_impl;
+
 		mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
 		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
@@ -231,12 +218,6 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		}
 
 		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
-		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
-		if (!stmt->error_info->error_list) {
-			break;
-		}
-
-		zend_llist_init(stmt->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
 
 		/*
 		  Mark that we reference the connection, thus it won't be
@@ -248,7 +229,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		DBG_RETURN(ret);
 	} while (0);
 
-	SET_OOM_ERROR(*conn->error_info);
+	SET_OOM_ERROR(conn->error_info);
 	if (ret) {
 		ret->m->dtor(ret, TRUE);
 		ret = NULL;

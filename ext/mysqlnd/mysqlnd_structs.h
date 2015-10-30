@@ -120,13 +120,27 @@ struct st_mysqlnd_upsert_status
 };
 
 
-typedef struct st_mysqlnd_error_info
+
+typedef struct st_mysqlnd_error_info MYSQLND_ERROR_INFO;
+typedef void (*func_mysqlnd_error_info__reset)(MYSQLND_ERROR_INFO * const info);
+typedef void (*func_mysqlnd_error_info__set_client_error)(MYSQLND_ERROR_INFO * const info, const unsigned int err_no, const char * const sqlstate, const char * const error);
+
+
+MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_error_info)
+{
+	func_mysqlnd_error_info__reset reset;
+	func_mysqlnd_error_info__set_client_error set_client_error;
+};
+
+struct st_mysqlnd_error_info
 {
 	char error[MYSQLND_ERRMSG_SIZE+1];
 	char sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int error_no;
 	zend_llist * error_list;
-} MYSQLND_ERROR_INFO;
+
+	MYSQLND_CLASS_METHOD_TABLE_NAME_DECL(mysqlnd_error_info) *m;
+};
 
 
 typedef struct st_mysqlnd_error_list_element

@@ -59,7 +59,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	field_packet = conn->payload_decoder_factory->m.get_result_field_packet(conn->payload_decoder_factory, FALSE);
 	if (!field_packet) {
-		SET_OOM_ERROR(*conn->error_info);
+		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
 	}
 	field_packet->persistent_alloc = meta->persistent;
@@ -73,12 +73,12 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 		field_packet->metadata = &(meta->fields[i]);
-		if (FAIL == PACKET_READ(field_packet, conn)) {
+		if (FAIL == PACKET_READ(field_packet)) {
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
 		if (field_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(*conn->error_info, field_packet->error_info);
+			COPY_CLIENT_ERROR(conn->error_info, field_packet->error_info);
 			/* Return back from CONN_QUERY_SENT */
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);

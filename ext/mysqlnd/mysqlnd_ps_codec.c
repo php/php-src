@@ -587,7 +587,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 			if (Z_TYPE_P(parameter) != IS_LONG &&
 				PASS != mysqlnd_stmt_copy_it(copies_param, parameter, stmt->param_count, i))
 			{
-				SET_OOM_ERROR(*stmt->error_info);
+				SET_OOM_ERROR(stmt->error_info);
 				goto end;
 			}
 			/*
@@ -695,7 +695,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 					/* Double binding of the same zval, make a copy */
 					if (!*copies_param || Z_ISUNDEF((*copies_param)[i])) {
 						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i)) {
-							SET_OOM_ERROR(*stmt->error_info);
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -710,7 +710,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
 					if (!*copies_param || Z_ISUNDEF((*copies_param)[i])) {
 						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i)) {
-							SET_OOM_ERROR(*stmt->error_info);
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -745,7 +745,7 @@ use_string:
 				if (Z_TYPE_P(the_var) != IS_STRING) {
 					if (!*copies_param || Z_ISUNDEF((*copies_param)[i])) {
 						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i)) {
-							SET_OOM_ERROR(*stmt->error_info);
+							SET_OOM_ERROR(stmt->error_info);
 							goto end;
 						}
 					}
@@ -845,7 +845,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	{
 		unsigned int null_count = (stmt->param_count + 7) / 8;
 		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, null_count)) {
-			SET_OOM_ERROR(*stmt->error_info);
+			SET_OOM_ERROR(stmt->error_info);
 			goto end;
 		}
 		/* put `null` bytes */
@@ -871,7 +871,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 
 	if (stmt->send_types_to_server) {
 		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, stmt->param_count * 2)) {
-			SET_OOM_ERROR(*stmt->error_info);
+			SET_OOM_ERROR(stmt->error_info);
 			goto end;
 		}
 		mysqlnd_stmt_execute_store_types(stmt, copies, p);
@@ -887,7 +887,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 
 	/* 2.2 Enlarge the buffer, if needed */
 	if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, data_size)) {
-		SET_OOM_ERROR(*stmt->error_info);
+		SET_OOM_ERROR(stmt->error_info);
 		goto end;
 	}
 

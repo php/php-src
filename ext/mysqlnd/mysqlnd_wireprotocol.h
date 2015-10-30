@@ -36,8 +36,8 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
-#define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet)))
-#define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet)))
+#define PACKET_WRITE(packet)	((packet)->header.m->write_to_net((packet)))
+#define PACKET_READ(packet)		((packet)->header.m->read_from_net((packet)))
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
