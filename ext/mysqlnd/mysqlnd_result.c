@@ -456,7 +456,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				conn->last_query_type = QUERY_LOAD_LOCAL;
 				conn->field_count = 0; /* overwrite previous value, or the last value could be used and lead to bug#53503 */
 				SET_CONNECTION_STATE(&conn->state, CONN_SENDING_LOAD_DATA);
-				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file, &is_warning);
+				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file.s, &is_warning);
 				SET_CONNECTION_STATE(&conn->state,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
@@ -470,8 +470,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				conn->upsert_status->server_status = rset_header->server_status;
 				conn->upsert_status->affected_rows = rset_header->affected_rows;
 				conn->upsert_status->last_insert_id = rset_header->last_insert_id;
-				SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-								rset_header->info_or_local_file, rset_header->info_or_local_file_len,
+				SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l,
+								rset_header->info_or_local_file.s, rset_header->info_or_local_file.l,
 								conn->persistent);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
@@ -487,7 +487,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 				DBG_INF("Result set pending");
-				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len, conn->persistent);
+				SET_EMPTY_MESSAGE(conn->last_message.s, conn->last_message.l, conn->persistent);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
 				UPSERT_STATUS_RESET(conn->upsert_status);

@@ -158,8 +158,7 @@ typedef struct st_mysqlnd_packet_ok {
 typedef struct st_mysqlnd_packet_command {
 	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
-	const zend_uchar				*argument;
-	size_t							arg_len;
+	MYSQLND_CSTRING	argument;
 } MYSQLND_PACKET_COMMAND;
 
 
@@ -179,7 +178,7 @@ typedef struct st_mysqlnd_packet_eof {
 
 /* Result Set header*/
 typedef struct st_mysqlnd_packet_rset_header {
-	MYSQLND_PACKET_HEADER		header;
+	MYSQLND_PACKET_HEADER header;
 	/*
 	  0x00 => ok
 	  ~0   => LOAD DATA LOCAL
@@ -196,8 +195,7 @@ typedef struct st_mysqlnd_packet_rset_header {
 	uint64_t	affected_rows;
 	uint64_t	last_insert_id;
 	/* This is for both LOAD DATA or info, when no result set */
-	char		*info_or_local_file;
-	size_t		info_or_local_file_len;
+	MYSQLND_STRING info_or_local_file;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
 } MYSQLND_PACKET_RSET_HEADER;
@@ -248,9 +246,7 @@ typedef struct st_mysqlnd_packet_row {
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_stats {
 	MYSQLND_PACKET_HEADER	header;
-	char *message;
-	/* message_len is not part of the packet*/
-	size_t message_len;
+	MYSQLND_STRING message;
 } MYSQLND_PACKET_STATS;
 
 

@@ -309,9 +309,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->auth_plugin_data, pers);
 		conn->auth_plugin_data = NULL;
 	}
-	if (conn->last_message) {
-		mnd_pefree(conn->last_message, pers);
-		conn->last_message = NULL;
+	if (conn->last_message.s) {
+		mnd_pefree(conn->last_message.s, pers);
+		conn->last_message.s = NULL;
 	}
 	if (conn->error_info->error_list) {
 		zend_llist_clean(conn->error_info->error_list);
@@ -356,7 +356,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 }
 /* }}} */
 
-
+#if 0
 /* {{{ mysqlnd_conn_data::send_command_handle_response */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(
@@ -458,7 +458,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response)(
 	DBG_RETURN(ret);
 }
 /* }}} */
-
+#endif
 
 /* {{{ mysqlnd_conn_data::set_server_option */
 static enum_func_status
@@ -488,9 +488,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 	DBG_ENTER("mysqlnd_conn_data::restart_psession");
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
 	/* Free here what should not be seen by the next script */
-	if (conn->last_message) {
-		mnd_pefree(conn->last_message, conn->persistent);
-		conn->last_message = NULL;
+	if (conn->last_message.s) {
+		mnd_pefree(conn->last_message.s, conn->persistent);
+		conn->last_message.s = NULL;
 	}
 	DBG_RETURN(PASS);
 }
@@ -1791,7 +1791,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 			if (PASS == (ret = PACKET_READ(stats_header))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = zend_string_init(stats_header->message, stats_header->message_len, 0);
+				*message = zend_string_init(stats_header->message.s, stats_header->message.l, 0);
 				DBG_INF(ZSTR_VAL(*message));
 			}
 			PACKET_FREE(stats_header);
@@ -2075,7 +2075,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, warning_count)(const MYSQLND_CONN_DATA * const
 static const char *
 MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 {
-	return conn->last_message;
+	return conn->last_message.s;
 }
 /* }}} */
 
@@ -3054,7 +3054,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
+//	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn_data, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, end_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, send_close),

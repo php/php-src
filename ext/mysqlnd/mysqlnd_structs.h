@@ -35,6 +35,19 @@
 #define MYSQLND_CLASS_METHODS_END			}
 
 
+typedef struct st_mysqlnd_string
+{
+	char	*s;
+	size_t	l;
+} MYSQLND_STRING;
+
+typedef struct st_mysqlnd_const_string
+{
+	const char *s;
+	size_t	l;
+} MYSQLND_CSTRING;
+
+
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
 typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIST;
@@ -594,7 +607,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 	func_mysqlnd_conn_data__get_reference get_reference;
 	func_mysqlnd_conn_data__free_reference free_reference;
 
-	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
+//	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
 
 	func_mysqlnd_conn_data__restart_psession restart_psession;
 	func_mysqlnd_conn_data__end_psession end_psession;
@@ -985,8 +998,7 @@ struct st_mysqlnd_connection_data
 	/* For UPSERT queries */
 	MYSQLND_UPSERT_STATUS * upsert_status;
 	MYSQLND_UPSERT_STATUS upsert_status_impl;
-	char			*last_message;
-	unsigned int	last_message_len;
+	MYSQLND_STRING last_message;
 
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	* error_info;
@@ -1219,19 +1231,6 @@ struct st_mysqlnd_stmt
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * m;
 	zend_bool persistent;
 };
-
-
-typedef struct st_mysqlnd_string
-{
-	char	*s;
-	size_t	l;
-} MYSQLND_STRING;
-
-typedef struct st_mysqlnd_const_string
-{
-	const char *s;
-	size_t	l;
-} MYSQLND_CSTRING;
 
 
 struct st_mysqlnd_plugin_header

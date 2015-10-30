@@ -139,7 +139,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		goto end;
 	}
 
-	SET_NEW_MESSAGE(conn->last_message, conn->last_message_len, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
+	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
 	ret = PASS;
 end:
 	PACKET_FREE(change_auth_resp_packet);
@@ -285,9 +285,9 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 		conn->passwd = tmp;
 
-		if (conn->last_message) {
-			mnd_pefree(conn->last_message, conn->persistent);
-			conn->last_message = NULL;
+		if (conn->last_message.s) {
+			mnd_pefree(conn->last_message.s, conn->persistent);
+			conn->last_message.s = NULL;
 		}
 		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */

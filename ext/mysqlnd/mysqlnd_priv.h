@@ -149,7 +149,7 @@ PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_upsert_status);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_error_info);
 
-enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning);
+enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning);
 
 
 
@@ -209,6 +209,20 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 
 extern func_mysqlnd__command_factory mysqlnd_command_factory;
 
+
+enum_func_status
+send_command_handle_response(
+		const enum mysqlnd_packet_type ok_packet,
+		const zend_bool silent,
+		const enum php_mysqlnd_server_command command,
+		const zend_bool ignore_upsert_status,
+
+		MYSQLND_ERROR_INFO	* error_info,
+		MYSQLND_UPSERT_STATUS * upsert_status,
+		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
+		MYSQLND_STRING * last_message,
+		zend_bool last_message_persistent
+	);
 #endif	/* MYSQLND_PRIV_H */
 
 

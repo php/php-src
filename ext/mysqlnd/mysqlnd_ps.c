@@ -1302,9 +1302,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 				ret = command->run(command);
 				command->free_command(command);
 
-				if (ret == PASS) {
-					ret = conn->m->send_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_STMT_RESET, TRUE);
-				} else {
+				if (ret == FAIL) {
 					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				}
 			}
