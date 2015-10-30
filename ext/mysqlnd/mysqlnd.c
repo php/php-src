@@ -1936,14 +1936,15 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 	DBG_ENTER("mysqlnd_send_close");
 	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 
-	if (GET_CONNECTION_STATE(&conn->state) >= CONN_READY) {
+	state = GET_CONNECTION_STATE(&conn->state);
+	DBG_INF_FMT("state=%u", state);
+
+	if (state >= CONN_READY) {
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 	}
-	state = GET_CONNECTION_STATE(&conn->state);
-	DBG_INF_FMT("state=%u", state);
 	switch (state) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
