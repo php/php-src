@@ -33,6 +33,9 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
+#if defined(__OpenBSD__) || defined(__NetBSD__)
+# include <sys/param.h>
+#endif
 
 #ifdef ZTS
 int random_globals_id;
@@ -87,6 +90,8 @@ static int php_random_bytes(void *bytes, size_t size)
 		zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
 		return FAILURE;
 	}
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
+	arc4random_buf(bytes, size);
 #elif HAVE_DECL_GETRANDOM
 	/* Linux getrandom(2) syscall */
 	size_t read_bytes = 0;
