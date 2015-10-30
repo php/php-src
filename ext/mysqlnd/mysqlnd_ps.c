@@ -71,7 +71,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (CONN_GET_STATE(conn) != CONN_FETCHING_DATA ||
+	if (GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA ||
 		stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE)
 	{
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
@@ -167,7 +167,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (CONN_GET_STATE(conn) != CONN_FETCHING_DATA || stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
+	if (GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA || stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
 						 UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(NULL);
@@ -238,7 +238,7 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s)
 	conn = stmt->conn;
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	if (CONN_GET_STATE(conn) != CONN_NEXT_RESULT_PENDING || !(conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS)) {
+	if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING || !(conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -516,14 +516,14 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 		DBG_RETURN(FAIL);
 	}
 	conn = stmt->conn;
-	CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	SET_CONNECTION_STATE(&conn->state, CONN_QUERY_SENT);
 
 	ret = stmt->conn->m->query_read_result_set_header(stmt->conn, s);
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 		UPSERT_STATUS_RESET(stmt->upsert_status);
 		stmt->upsert_status->affected_rows = conn->upsert_status->affected_rows;
-		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
+		if (GET_CONNECTION_STATE(&conn->state) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
 		}
 		stmt->state = MYSQLND_STMT_PREPARED;
@@ -574,7 +574,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 			if (stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS) {
 				DBG_INF("cursor exists");
 				stmt->cursor_exists = TRUE;
-				CONN_SET_STATE(conn, CONN_READY);
+				SET_CONNECTION_STATE(&conn->state, CONN_READY);
 				/* Only cursor read */
 				stmt->default_rset_handler = s->m->use_result;
 				DBG_INF("use_result");
@@ -885,7 +885,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 		DBG_INF("EOF already reached");
 		DBG_RETURN(PASS);
 	}
-	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
+	if (GET_CONNECTION_STATE(&result->conn->state) != CONN_FETCHING_DATA) {
 		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
 						 UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("command out of sync");
@@ -969,7 +969,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 			COPY_CLIENT_ERROR(stmt->conn->error_info, row_packet->error_info);
 			COPY_CLIENT_ERROR(stmt->error_info, row_packet->error_info);
 		}
-		CONN_SET_STATE(result->conn, CONN_READY);
+		SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		DBG_INF("EOF");
@@ -983,9 +983,9 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 		  destroying the result object
 		*/
 		if (result->conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
-			CONN_SET_STATE(result->conn, CONN_NEXT_RESULT_PENDING);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_NEXT_RESULT_PENDING);
 		} else {
-			CONN_SET_STATE(result->conn, CONN_READY);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		}
 	}
 
@@ -1012,8 +1012,8 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s)
 	conn = stmt->conn;
 
 	if (!stmt->field_count ||
-		(!stmt->cursor_exists && CONN_GET_STATE(conn) != CONN_FETCHING_DATA) ||
-		(stmt->cursor_exists && CONN_GET_STATE(conn) != CONN_READY) ||
+		(!stmt->cursor_exists && GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA) ||
+		(stmt->cursor_exists && GET_CONNECTION_STATE(&conn->state) != CONN_READY) ||
 		(stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE))
 	{
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
@@ -1296,7 +1296,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 		  be separated before that.
 		*/
 
-		if (CONN_GET_STATE(conn) == CONN_READY) {
+		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			size_t stmt_id = stmt->stmt_id;
 			struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_RESET, stmt->conn, stmt_id);
 			ret = FAIL;
@@ -1409,7 +1409,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			one by one to the wire.
 	*/
 
-	if (CONN_GET_STATE(conn) == CONN_READY) {
+	if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 		size_t packet_len;
 		cmd_buf = mnd_emalloc(packet_len = MYSQLND_STMT_ID_LENGTH + 2 + length);
 		if (cmd_buf) {
@@ -2055,7 +2055,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result)(MYSQLND_STMT * const s)
 	}
 
 	/* Line is free! */
-	CONN_SET_STATE(stmt->conn, CONN_READY);
+	SET_CONNECTION_STATE(&stmt->conn->state, CONN_READY);
 
 	DBG_RETURN(PASS);
 }
@@ -2246,7 +2246,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_boo
 		MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_FREE_RESULT_IMPLICIT:
 														STAT_FREE_RESULT_EXPLICIT);
 
-		if (CONN_GET_STATE(conn) == CONN_READY) {
+		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			enum_func_status ret = FAIL;
 			size_t stmt_id = stmt->stmt_id;
 			struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_CLOSE, conn, stmt_id);

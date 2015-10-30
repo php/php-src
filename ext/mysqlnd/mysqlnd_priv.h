@@ -111,8 +111,8 @@ enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_b
 #define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 #define COPY_CLIENT_ERROR(dest, source)					SET_CLIENT_ERROR((dest), (source).error_no, (source).sqlstate, (source).error)
 
-#define CONN_GET_STATE(c)		(c)->state.m->get(&(c)->state)
-#define CONN_SET_STATE(c, s)	(c)->state.m->set(&(c)->state, (s))
+#define GET_CONNECTION_STATE(state_struct)		(state_struct)->m->get((state_struct))
+#define SET_CONNECTION_STATE(state_struct, s)	(state_struct)->m->set((state_struct), (s))
 
 void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
 

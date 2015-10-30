@@ -75,7 +75,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		change_auth_resp_packet->auth_data_len = auth_plugin_data_len;
 
 		if (!PACKET_WRITE(change_auth_resp_packet)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
@@ -196,7 +196,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		change_auth_resp_packet->auth_data_len = auth_plugin_data_len;
 
 		if (!PACKET_WRITE(change_auth_resp_packet)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
@@ -224,7 +224,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 
 		if (!PACKET_WRITE(auth_packet)) {
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
@@ -514,13 +514,13 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 			if (! PACKET_WRITE(pk_req_packet)) {
 				DBG_ERR_FMT("Error while sending public key request packet");
 				php_error(E_WARNING, "Error while sending public key request packet. PID=%d", getpid());
-				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
 			if (FAIL == PACKET_READ(pk_resp_packet) || NULL == pk_resp_packet->public_key) {
 				DBG_ERR_FMT("Error while receiving public key");
 				php_error(E_WARNING, "Error while receiving public key. PID=%d", getpid());
-				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
 			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet->public_key_len, pk_resp_packet->public_key);

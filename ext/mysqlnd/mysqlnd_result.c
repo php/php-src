@@ -444,7 +444,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 			ret = FAIL;
 			DBG_ERR_FMT("error=%s", rset_header->error_info.error);
 			/* Return back from CONN_QUERY_SENT */
-			CONN_SET_STATE(conn, CONN_READY);
+			SET_CONNECTION_STATE(&conn->state, CONN_READY);
 			break;
 		}
 		conn->error_info->error_no = 0;
@@ -455,9 +455,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				DBG_INF("LOAD DATA");
 				conn->last_query_type = QUERY_LOAD_LOCAL;
 				conn->field_count = 0; /* overwrite previous value, or the last value could be used and lead to bug#53503 */
-				CONN_SET_STATE(conn, CONN_SENDING_LOAD_DATA);
+				SET_CONNECTION_STATE(&conn->state, CONN_SENDING_LOAD_DATA);
 				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file, &is_warning);
-				CONN_SET_STATE(conn,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
+				SET_CONNECTION_STATE(&conn->state,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
 			}
@@ -475,9 +475,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 								conn->persistent);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
-					CONN_SET_STATE(conn, CONN_NEXT_RESULT_PENDING);
+					SET_CONNECTION_STATE(&conn->state, CONN_NEXT_RESULT_PENDING);
 				} else {
-					CONN_SET_STATE(conn, CONN_READY);
+					SET_CONNECTION_STATE(&conn->state, CONN_READY);
 				}
 				ret = PASS;
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
@@ -495,7 +495,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 				conn->last_query_type = QUERY_SELECT;
-				CONN_SET_STATE(conn, CONN_FETCHING_DATA);
+				SET_CONNECTION_STATE(&conn->state, CONN_FETCHING_DATA);
 				/* PS has already allocated it */
 				conn->field_count = rset_header->field_count;
 				if (!stmt) {
@@ -695,7 +695,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		/* No more rows obviously */
 		DBG_RETURN(PASS);
 	}
-	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
+	if (GET_CONNECTION_STATE(&result->conn->state) != CONN_FETCHING_DATA) {
 		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(FAIL);
 	}
@@ -771,7 +771,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
-		CONN_SET_STATE(result->conn, CONN_READY);
+		SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
@@ -786,9 +786,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		  destroying the result object
 		*/
 		if (result->conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
-			CONN_SET_STATE(result->conn, CONN_NEXT_RESULT_PENDING);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_NEXT_RESULT_PENDING);
 		} else {
-			CONN_SET_STATE(result->conn, CONN_READY);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		}
 		result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL);
 	}
@@ -815,7 +815,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		/* No more rows obviously */
 		DBG_RETURN(PASS);
 	}
-	if (CONN_GET_STATE(result->conn) != CONN_FETCHING_DATA) {
+	if (GET_CONNECTION_STATE(&result->conn->state) != CONN_FETCHING_DATA) {
 		SET_CLIENT_ERROR(result->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_RETURN(FAIL);
 	}
@@ -898,7 +898,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 			COPY_CLIENT_ERROR(result->conn->error_info, row_packet->error_info);
 			DBG_ERR_FMT("errorno=%u error=%s", row_packet->error_info.error_no, row_packet->error_info.error);
 		}
-		CONN_SET_STATE(result->conn, CONN_READY);
+		SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
@@ -913,9 +913,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		  destroying the result object
 		*/
 		if (result->conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
-			CONN_SET_STATE(result->conn, CONN_NEXT_RESULT_PENDING);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_NEXT_RESULT_PENDING);
 		} else {
-			CONN_SET_STATE(result->conn, CONN_READY);
+			SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
 		}
 		result->unbuf->m.free_last_data(result->unbuf, result->conn? result->conn->stats : NULL);
 	}
@@ -1377,9 +1377,9 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	}
 
 	if (conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
-		CONN_SET_STATE(conn, CONN_NEXT_RESULT_PENDING);
+		SET_CONNECTION_STATE(&conn->state, CONN_NEXT_RESULT_PENDING);
 	} else {
-		CONN_SET_STATE(conn, CONN_READY);
+		SET_CONNECTION_STATE(&conn->state, CONN_READY);
 	}
 
 	if (ret == FAIL) {
@@ -1414,7 +1414,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	result->conn = conn->m->get_reference(conn);
 	result->type = MYSQLND_RES_NORMAL;
 
-	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
+	SET_CONNECTION_STATE(&conn->state, CONN_FETCHING_DATA);
 
 	if (flags & MYSQLND_STORE_NO_COPY) {
 		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent);

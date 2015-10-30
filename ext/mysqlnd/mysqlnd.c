@@ -909,12 +909,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
-				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
+				conn? conn->persistent:0, conn? GET_CONNECTION_STATE(&conn->state):-1);
 
-	if (CONN_GET_STATE(conn) > CONN_ALLOCED && CONN_GET_STATE(conn) ) {
+	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED && GET_CONNECTION_STATE(&conn->state) ) {
 		DBG_INF("Connecting on a connected handle.");
 
-		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
+		if (GET_CONNECTION_STATE(&conn->state) < CONN_QUIT_SENT) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CLOSE_IMPLICIT);
 			reconnect = TRUE;
 			conn->m->send_close(conn);
@@ -1011,7 +1011,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	}
 
 	{
-		CONN_SET_STATE(conn, CONN_READY);
+		SET_CONNECTION_STATE(&conn->state, CONN_READY);
 
 		if (saved_compression) {
 			net->data->compressed = TRUE;
@@ -1294,7 +1294,8 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 	MYSQLND **ret = NULL;
 
 	while (*p) {
-		if (CONN_GET_STATE((*p)->data) <= CONN_READY || CONN_GET_STATE((*p)->data) == CONN_QUIT_SENT) {
+		const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
+		if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
 			cnt++;
 		}
 		p++;
@@ -1303,7 +1304,8 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 		MYSQLND **ret_p = ret = ecalloc(cnt + 1, sizeof(MYSQLND *));
 		p_p = p = conn_array;
 		while (*p) {
-			if (CONN_GET_STATE((*p)->data) <= CONN_READY || CONN_GET_STATE((*p)->data) == CONN_QUIT_SENT) {
+			const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
+			if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
 				*ret_p = *p;
 				*p = NULL;
 				ret_p++;
@@ -1827,7 +1829,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 				*/
 				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 			} else if (PASS == ret) {
-				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				conn->m->send_close(conn);
 			}
 		}
@@ -1934,13 +1936,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 	DBG_ENTER("mysqlnd_send_close");
 	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 
-	if (CONN_GET_STATE(conn) >= CONN_READY) {
+	if (GET_CONNECTION_STATE(&conn->state) >= CONN_READY) {
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 	}
-	state = CONN_GET_STATE(conn);
+	state = GET_CONNECTION_STATE(&conn->state);
 	DBG_INF_FMT("state=%u", state);
 	switch (state) {
 		case CONN_READY:
@@ -1953,7 +1955,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 				}
 				net->data->m.close_stream(net, conn->stats, conn->error_info);
 			}
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			break;
 		case CONN_SENDING_LOAD_DATA:
 			/*
@@ -1977,7 +1979,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 
 			  Fall-through
 			*/
-			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
@@ -2182,7 +2184,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		do {
-			if (CONN_GET_STATE(conn) != CONN_NEXT_RESULT_PENDING) {
+			if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING) {
 				break;
 			}
 
@@ -2200,7 +2202,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 				if (!conn->error_info->error_no) {
 					DBG_ERR_FMT("Serious error. %s::%u", __FILE__, __LINE__);
 					php_error_docref(NULL, E_WARNING, "Serious error. PID=%d", getpid());
-					CONN_SET_STATE(conn, CONN_QUIT_SENT);
+					SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 					conn->m->send_close(conn);
 				} else {
 					DBG_INF_FMT("Error from the server : (%u) %s", conn->error_info->error_no, conn->error_info->error);
@@ -2557,7 +2559,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, co
 			}
 
 			/* Nothing to store for UPSERT/LOAD DATA */
-			if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
+			if (conn->last_query_type != QUERY_SELECT || GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA) {
 				SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 				DBG_ERR("Command out of sync");
 				break;
@@ -2600,7 +2602,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 			}
 
 			/* Nothing to store for UPSERT/LOAD DATA*/
-			if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
+			if (conn->last_query_type != QUERY_SELECT || GET_CONNECTION_STATE(&conn->state) != CONN_FETCHING_DATA) {
 				SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 				DBG_ERR("Command out of sync");
 				break;
@@ -3121,7 +3123,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		if (CONN_GET_STATE(conn) >= CONN_READY) {
+		if (GET_CONNECTION_STATE(&conn->state) >= CONN_READY) {
 			static enum_mysqlnd_collected_stats close_type_to_stat_map[MYSQLND_CLOSE_LAST] = {
 				STAT_CLOSE_EXPLICIT,
 				STAT_CLOSE_IMPLICIT,
