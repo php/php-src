@@ -500,8 +500,6 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__query_read_result_set_header)
 
 typedef MYSQLND_CONN_DATA *	(*func_mysqlnd_conn_data__get_reference)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_DATA * const conn);
-typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(const MYSQLND_CONN_DATA * const conn);
-typedef void				(*func_mysqlnd_conn_data__set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const zend_bool silent, const zend_bool ignore_upsert_status);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const zend_bool silent, const enum php_mysqlnd_server_command command, const zend_bool ignore_upsert_status);
@@ -595,10 +593,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 
 	func_mysqlnd_conn_data__get_reference get_reference;
 	func_mysqlnd_conn_data__free_reference free_reference;
-	func_mysqlnd_conn_data__get_state get_state;
-	func_mysqlnd_conn_data__set_state set_state;
 
-//	func_mysqlnd_conn_data__send_command_do_request send_command_do_request;
 	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
 
 	func_mysqlnd_conn_data__restart_psession restart_psession;
@@ -936,6 +931,25 @@ struct st_mysqlnd_protocol_command
 typedef struct st_mysqlnd_protocol_command * (*func_mysqlnd__command_factory)(enum php_mysqlnd_server_command command, ...);
 
 
+
+struct st_mysqlnd_connection_state;
+typedef enum mysqlnd_connection_state (*func_mysqlnd_connection_state__get)(const struct st_mysqlnd_connection_state * const state_struct);
+typedef void (*func_mysqlnd_connection_state__set)(struct st_mysqlnd_connection_state * const state_struct, enum mysqlnd_connection_state state);
+
+
+MYSQLND_CLASS_METHODS_TYPE(mysqlnd_connection_state)
+{
+	func_mysqlnd_connection_state__get get;
+	func_mysqlnd_connection_state__set set;
+};
+
+struct st_mysqlnd_connection_state
+{
+	enum mysqlnd_connection_state state;
+
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_connection_state) *m;
+};
+
 struct st_mysqlnd_connection_data
 {
 /* Operation related */
@@ -978,11 +992,7 @@ struct st_mysqlnd_connection_data
 	MYSQLND_ERROR_INFO	* error_info;
 	MYSQLND_ERROR_INFO	error_info_impl;
 
-	/*
-	  To prevent queries during unbuffered fetches. Also to
-	  mark the connection as destroyed for garbage collection.
-	*/
-	enum mysqlnd_connection_state	state;
+	struct st_mysqlnd_connection_state state;
 	enum_mysqlnd_query_type			last_query_type;
 	/* Temporary storage between query and (use|store)_result() call */
 	MYSQLND_RES						*current_result;

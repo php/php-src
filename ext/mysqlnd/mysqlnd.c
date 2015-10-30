@@ -152,7 +152,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_error_info)
 MYSQLND_CLASS_METHODS_END;
 
 
-/* {{{ mysqlnd_upsert_status_init */
+
+/* {{{ mysqlnd_error_info_init */
 enum_func_status
 mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 {
@@ -166,6 +167,48 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 	}
 
 	DBG_RETURN(info->error_list? PASS:FAIL);
+}
+/* }}} */
+
+
+
+
+/* {{{ mysqlnd_connection_state::get */
+static enum mysqlnd_connection_state
+MYSQLND_METHOD(mysqlnd_connection_state, get)(const struct st_mysqlnd_connection_state * const state_struct)
+{
+	DBG_ENTER("mysqlnd_connection_state::get")
+	DBG_RETURN(state_struct->state);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_connection_state::set */
+static void
+MYSQLND_METHOD(mysqlnd_connection_state, set)(struct st_mysqlnd_connection_state * const state_struct, enum mysqlnd_connection_state state)
+{
+	DBG_ENTER("mysqlnd_connection_state::set")
+	DBG_INF_FMT("New state=%u", state);
+	state_struct->state = state;
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
+	MYSQLND_METHOD(mysqlnd_connection_state, get),
+	MYSQLND_METHOD(mysqlnd_connection_state, set),
+MYSQLND_CLASS_METHODS_END;
+
+
+/* {{{ mysqlnd_upsert_status_init */
+void
+mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
+{
+	DBG_ENTER("mysqlnd_error_info_init")
+	state->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_connection_state);
+	state->state = CONN_ALLOCED;
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -1980,28 +2023,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference)(MYSQLND_CONN_DATA * co
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::get_state */
-static enum mysqlnd_connection_state
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(const MYSQLND_CONN_DATA * const conn)
-{
-	DBG_ENTER("mysqlnd_conn_data::get_state");
-	DBG_RETURN(conn->state);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_data::set_state */
-static void
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state)
-{
-	DBG_ENTER("mysqlnd_conn_data::set_state");
-	DBG_INF_FMT("New state=%u", new_state);
-	conn->state = new_state;
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::field_count */
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const conn)
@@ -3029,10 +3050,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference),
-	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state),
-	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state),
 
-//	MYSQLND_METHOD(mysqlnd_conn_data, send_command_do_request),
 	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn_data, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, end_psession),

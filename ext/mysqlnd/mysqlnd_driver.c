@@ -132,7 +132,9 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 	data->persistent = persistent;
 	data->m = mysqlnd_conn_data_get_methods();
 	data->object_factory = *factory;
-	CONN_SET_STATE(data, CONN_ALLOCED);
+
+	mysqlnd_connection_state_init(&data->state);
+
 	data->m->get_reference(data);
 
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);

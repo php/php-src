@@ -111,8 +111,10 @@ enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_b
 #define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
 #define COPY_CLIENT_ERROR(dest, source)					SET_CLIENT_ERROR((dest), (source).error_no, (source).sqlstate, (source).error)
 
-#define CONN_GET_STATE(c)		(c)->m->get_state((c))
-#define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s))
+#define CONN_GET_STATE(c)		(c)->state.m->get(&(c)->state)
+#define CONN_SET_STATE(c, s)	(c)->state.m->set(&(c)->state, (s))
+
+void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
 
 /* PS stuff */
 typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row);
