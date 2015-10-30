@@ -169,7 +169,7 @@ struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters =
 
 
 /* {{{ _mysqlnd_object_factory_get_methods */
-static struct st_mysqlnd_object_factory_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *
 _mysqlnd_object_factory_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
@@ -178,7 +178,7 @@ _mysqlnd_object_factory_get_methods()
 
 /* {{{ mysqlnd_conn_set_methods */
 static void
-_mysqlnd_object_factory_set_methods(struct st_mysqlnd_object_factory_methods *methods)
+_mysqlnd_object_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory) = *methods;
 }
@@ -186,7 +186,7 @@ _mysqlnd_object_factory_set_methods(struct st_mysqlnd_object_factory_methods *me
 
 
 /* {{{ _mysqlnd_conn_get_methods */
-static struct st_mysqlnd_conn_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *
 _mysqlnd_conn_get_methods()
 {
 	return mysqlnd_conn_methods;
@@ -195,7 +195,7 @@ _mysqlnd_conn_get_methods()
 
 /* {{{ _mysqlnd_conn_set_methods */
 static void
-_mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
+_mysqlnd_conn_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *methods)
 {
 	mysqlnd_conn_methods = methods;
 }
@@ -203,7 +203,7 @@ _mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
 
 
 /* {{{ _mysqlnd_conn_data_get_methods */
-static struct st_mysqlnd_conn_data_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) *
 _mysqlnd_conn_data_get_methods()
 {
 	return mysqlnd_conn_data_methods;
@@ -212,7 +212,7 @@ _mysqlnd_conn_data_get_methods()
 
 /* {{{ _mysqlnd_conn_data_set_methods */
 static void
-_mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods)
+_mysqlnd_conn_data_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * methods)
 {
 	mysqlnd_conn_data_methods = methods;
 }
@@ -220,7 +220,7 @@ _mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods)
 
 
 /* {{{ _mysqlnd_result_get_methods */
-static struct st_mysqlnd_res_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) *
 _mysqlnd_result_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_res);
@@ -230,7 +230,7 @@ _mysqlnd_result_get_methods()
 
 /* {{{ _mysqlnd_result_set_methods */
 static void
-_mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods)
+_mysqlnd_result_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_res) = *methods;
 }
@@ -238,7 +238,7 @@ _mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods)
 
 
 /* {{{ _mysqlnd_result_unbuffered_get_methods */
-static struct st_mysqlnd_result_unbuffered_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) *
 _mysqlnd_result_unbuffered_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_unbuffered);
@@ -248,7 +248,7 @@ _mysqlnd_result_unbuffered_get_methods()
 
 /* {{{ _mysqlnd_result_unbuffered_set_methods */
 static void
-_mysqlnd_result_unbuffered_set_methods(struct st_mysqlnd_result_unbuffered_methods * methods)
+_mysqlnd_result_unbuffered_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_unbuffered) = *methods;
 }
@@ -256,7 +256,7 @@ _mysqlnd_result_unbuffered_set_methods(struct st_mysqlnd_result_unbuffered_metho
 
 
 /* {{{ _mysqlnd_result_buffered_get_methods */
-static struct st_mysqlnd_result_buffered_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) *
 _mysqlnd_result_buffered_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_buffered);
@@ -266,7 +266,7 @@ _mysqlnd_result_buffered_get_methods()
 
 /* {{{ _mysqlnd_result_buffered_set_methods */
 static void
-_mysqlnd_result_buffered_set_methods(struct st_mysqlnd_result_buffered_methods * methods)
+_mysqlnd_result_buffered_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_buffered) = *methods;
 }
@@ -274,7 +274,7 @@ _mysqlnd_result_buffered_set_methods(struct st_mysqlnd_result_buffered_methods *
 
 
 /* {{{ _mysqlnd_stmt_get_methods */
-static struct st_mysqlnd_stmt_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) *
 _mysqlnd_stmt_get_methods()
 {
 	return mysqlnd_stmt_methods;
@@ -284,7 +284,7 @@ _mysqlnd_stmt_get_methods()
 
 /* {{{ _mysqlnd_stmt_set_methods */
 static void
-_mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)
+_mysqlnd_stmt_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) *methods)
 {
 	mysqlnd_stmt_methods = methods;
 }
@@ -292,7 +292,7 @@ _mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)
 
 
 /* {{{ _mysqlnd_protocol_payload_decoder_factory_get_methods */
-static struct st_mysqlnd_protocol_payload_decoder_factory_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *
 _mysqlnd_protocol_payload_decoder_factory_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
@@ -302,7 +302,7 @@ _mysqlnd_protocol_payload_decoder_factory_get_methods()
 
 /* {{{ _mysqlnd_protocol_payload_decoder_factory_set_methods */
 static void
-_mysqlnd_protocol_payload_decoder_factory_set_methods(struct st_mysqlnd_protocol_payload_decoder_factory_methods * methods)
+_mysqlnd_protocol_payload_decoder_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory) = *methods;
 }
@@ -310,7 +310,7 @@ _mysqlnd_protocol_payload_decoder_factory_set_methods(struct st_mysqlnd_protocol
 
 
 /* {{{ _mysqlnd_net_get_methods */
-static struct st_mysqlnd_net_methods *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) *
 _mysqlnd_net_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_net);
@@ -320,7 +320,7 @@ _mysqlnd_net_get_methods()
 
 /* {{{ _mysqlnd_net_set_methods */
 static void
-_mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods)
+_mysqlnd_net_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_net) = *methods;
 }
@@ -344,6 +344,23 @@ _mysqlnd_command_factory_set(func_mysqlnd__command_factory factory)
 }
 /* }}} */
 
+
+/* {{{ _mysqlnd_error_info_get_methods */
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *
+_mysqlnd_error_info_get_methods()
+{
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_error_info);
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_error_info_set_methods */
+static void
+_mysqlnd_error_info_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *methods)
+{
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_error_info) = *methods;
+}
+/* }}} */
 
 
 struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
@@ -383,6 +400,10 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 	{
 		_mysqlnd_net_get_methods,
 		_mysqlnd_net_set_methods,
+	},
+	{
+		_mysqlnd_error_info_get_methods,
+		_mysqlnd_error_info_set_methods,
 	},
 	{
 		_mysqlnd_command_factory_get,

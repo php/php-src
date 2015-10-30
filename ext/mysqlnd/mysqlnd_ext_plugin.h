@@ -51,57 +51,63 @@ struct st_mysqlnd_plugin_methods_xetters
 {
 	struct st_mnd_object_factory_xetters
 	{
-		struct st_mysqlnd_object_factory_methods * (*get)();
-		void (*set)(struct st_mysqlnd_object_factory_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *methods);
 	} object_factory;
 
 	struct st_mnd_connection_xetters
 	{
-		struct st_mysqlnd_conn_methods * (*get)();
-		void (*set)(struct st_mysqlnd_conn_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *methods);
 	} connection;
 
 	struct st_mnd_connection_data_xetters
 	{
-		struct st_mysqlnd_conn_data_methods * (*get)();
-		void (*set)(struct st_mysqlnd_conn_data_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) *methods);
 	} connection_data;
 
 	struct st_mnd_result_xetters
 	{
-		struct st_mysqlnd_res_methods * (*get)();
-		void (*set)(struct st_mysqlnd_res_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) *methods);
 	} result;
 
 	struct st_mnd_unbuffered_result_xetters
 	{
-		struct st_mysqlnd_result_unbuffered_methods * (*get)();
-		void (*set)(struct st_mysqlnd_result_unbuffered_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) *methods);
 	} unbuffered_result;
 
 	struct st_mnd_buffered_result_xetters
 	{
-		struct st_mysqlnd_result_buffered_methods * (*get)();
-		void (*set)(struct st_mysqlnd_result_buffered_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered)* (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) *methods);
 	} buffered_result;
 
 	struct st_mnd_stmt_xetters
 	{
-		struct st_mysqlnd_stmt_methods * (*get)();
-		void (*set)(struct st_mysqlnd_stmt_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * methods);
 	} statement;
 
 	struct st_mnd_protocol_xetters
 	{
-		struct st_mysqlnd_protocol_payload_decoder_factory_methods * (*get)();
-		void (*set)(struct st_mysqlnd_protocol_payload_decoder_factory_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)* (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *methods);
 	} protocol;
 
 	struct st_mnd_io_xetters
 	{
-		struct st_mysqlnd_net_methods * (*get)();
-		void (*set)(struct st_mysqlnd_net_methods * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * methods);
 	} io;
+
+	struct st_mnd_error_info_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * methods);
+	} error_info;
 
 	struct st_mnd_command_factory_xetters
 	{
@@ -143,6 +149,9 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 
 #define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
 #define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))
+
+#define mysqlnd_error_info_get_methods()	mysqlnd_plugin_methods_xetters.error_info.get()
+#define mysqlnd_error_info_set_methods(m)	mysqlnd_plugin_methods_xetters.error_info.set((m))
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
 
