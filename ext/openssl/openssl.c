@@ -5340,17 +5340,14 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len);
 
+	if (php_openssl_cipher_init(cipher_type, cipher_ctx, password_len, keylen, key, iv, options, 1) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Failed to initialize cipher encryption");
+		RETVAL_FALSE;
+		goto openssl_encrypt_clean;
+	}
+
 	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
-
-	EVP_EncryptInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL);
-	if (password_len > keylen) {
-		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
-	}
-	EVP_EncryptInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
-	if (options & OPENSSL_ZERO_PADDING) {
-		EVP_CIPHER_CTX_set_padding(cipher_ctx, 0);
-	}
 	if (data_len > 0) {
 		EVP_EncryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
 	}
@@ -5372,6 +5369,8 @@ PHP_FUNCTION(openssl_encrypt)
 		zend_string_release(outbuf);
 		RETVAL_FALSE;
 	}
+
+openssl_encrypt_clean:
 	if (key != (unsigned char*)password) {
 		efree(key);
 	}
