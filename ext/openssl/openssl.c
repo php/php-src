@@ -5289,9 +5289,9 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type, EVP_CIPHER_CTX
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
 {
-	zend_long options = 0;
+	zend_long options = 0, tag_len = 16;
 	char *data, *method, *password, *iv = "", *aad = "";
-	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len, aad_len = 0, tag_len = 16;
+	size_t data_len, method_len, password_len, iv_len = 0, max_iv_len, aad_len = 0;
 	zval *tag;
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
