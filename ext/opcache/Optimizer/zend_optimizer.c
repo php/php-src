@@ -516,6 +516,10 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
 				break;
+			case ZEND_CATCH:
+				/* relative offset into absolute index */
+				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
+				break;
 			case ZEND_JMPZNZ:
 				/* relative offset into absolute index */
 				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
@@ -559,6 +563,10 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
+				break;
+			case ZEND_CATCH:
+				/* absolute index to relative offset */
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */

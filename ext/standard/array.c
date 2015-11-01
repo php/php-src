@@ -163,7 +163,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 				l2 = 0;
 			}
 		}
-	} else if (f->key) {
+	} else {
 		if (s->key) {
 			return zendi_smart_strcmp(f->key, s->key);
 		} else {
@@ -5474,17 +5474,17 @@ PHP_FUNCTION(array_chunk)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
-	zval *values, *keys;
+	HashTable *values, *keys;
 	uint32_t pos_values = 0;
 	zval *entry_keys, *entry_values;
 	int num_keys, num_values;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa", &keys, &values) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hh", &keys, &values) == FAILURE) {
 		return;
 	}
 
-	num_keys = zend_hash_num_elements(Z_ARRVAL_P(keys));
-	num_values = zend_hash_num_elements(Z_ARRVAL_P(values));
+	num_keys = zend_hash_num_elements(keys);
+	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
 		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
@@ -5497,12 +5497,12 @@ PHP_FUNCTION(array_combine)
 		return;
 	}
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry_keys) {
+	ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
 		while (1) {
-			if (pos_values >= Z_ARRVAL_P(values)->nNumUsed) {
+			if (pos_values >= values->nNumUsed) {
 				break;
-			} else if (Z_TYPE(Z_ARRVAL_P(values)->arData[pos_values].val) != IS_UNDEF) {
-				entry_values = &Z_ARRVAL_P(values)->arData[pos_values].val;
+			} else if (Z_TYPE(values->arData[pos_values].val) != IS_UNDEF) {
+				entry_values = &values->arData[pos_values].val;
 				if (Z_TYPE_P(entry_keys) == IS_LONG) {
 					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
 						Z_LVAL_P(entry_keys), entry_values);
