@@ -1659,7 +1659,7 @@ ZEND_VM_HELPER_EX(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 		}
 		if (OP1_TYPE == IS_CONST &&
 		    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
-				
+
 			/* check if static properties were destoyed */
 			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
@@ -2533,7 +2533,7 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 	zval *val;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-	
+
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
 		ZEND_VM_SET_NEXT_OPCODE(opline + 1);
 		ZEND_VM_CONTINUE();
@@ -3214,7 +3214,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CONST|VAR, CONST|TMPVA
 
 	if (OP1_TYPE == IS_UNUSED) {
 		/* previous opcode is ZEND_FETCH_CLASS */
-		if ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT || 
+		if ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
 		    (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
 			ce = EX(called_scope);
 		}
@@ -3273,7 +3273,7 @@ ZEND_VM_HANDLER(128, ZEND_INIT_DYNAMIC_CALL, ANY, CONST|TMPVAR|CV, NUM)
 ZEND_VM_C_LABEL(try_function_name):
 	if (OP2_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		const char *colon;
-		
+
 		if ((colon = zend_memrchr(Z_STRVAL_P(function_name), ':', Z_STRLEN_P(function_name))) != NULL &&
 			colon > Z_STRVAL_P(function_name) &&
 			*(colon-1) == ':'
@@ -3281,18 +3281,18 @@ ZEND_VM_C_LABEL(try_function_name):
 			zend_string *mname;
 			size_t cname_length = colon - Z_STRVAL_P(function_name) - 1;
 			size_t mname_length = Z_STRLEN_P(function_name) - cname_length - (sizeof("::") - 1);
-			
+
 			lcname = zend_string_init(Z_STRVAL_P(function_name), cname_length, 0);
-			
+
 			object = NULL;
 			called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(called_scope == NULL)) {
 				zend_string_release(lcname);
 				ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 			}
-			
+
 			mname = zend_string_init(Z_STRVAL_P(function_name) + (cname_length + sizeof("::") - 1), mname_length, 0);
-			
+
 			if (called_scope->get_static_method) {
 				fbc = called_scope->get_static_method(called_scope, mname);
 			} else {
@@ -3307,10 +3307,10 @@ ZEND_VM_C_LABEL(try_function_name):
 				FREE_OP2();
 				HANDLE_EXCEPTION();
 			}
-			
+
 			zend_string_release(lcname);
 			zend_string_release(mname);
-			
+
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 					zend_error(E_DEPRECATED,
@@ -3867,7 +3867,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		} else {
 			zend_execute_internal(call, ret);
 		}
-		
+
 #if ZEND_DEBUG
 		ZEND_ASSERT(
 			!call->func ||
@@ -5164,6 +5164,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED, CONST)
 {
 	zend_class_entry *ce;
 	zval *value;
+	zend_class_constant_info *const_info;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -5205,8 +5206,14 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED, CONST)
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+		if (EXPECTED((const_info = zend_hash_find_ptr(&ce->constants_info, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(const_info, EG(scope))) {
+				zend_error(E_ERROR, "Cannot access %s const %s::%s", zend_visibility_string(const_info->flags), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = OBJ_CONST_NUM(const_info->ce, const_info->offset);
 			ZVAL_DEREF(value);
+
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -6609,7 +6616,7 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CON
 
 	if (OP1_TYPE == IS_CONST && value) {
 		CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
-	}		
+	}
 
 	if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
 		zend_string_release(Z_STR(tmp));
@@ -7824,7 +7831,7 @@ ZEND_VM_C_LABEL(check_indirect):
 		}
 
 		variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-		
+
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			uint32_t refcnt = Z_DELREF_P(variable_ptr);
 

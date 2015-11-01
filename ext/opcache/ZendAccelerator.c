@@ -456,11 +456,20 @@ static void accel_use_shm_interned_strings(void)
 			}
 		}
 
-		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
-			q = ce->constants_table.arData + j;
-			if (!Z_TYPE(q->val) == IS_UNDEF) continue;
+		for (j = 0; j < ce->constants_info.nNumUsed; j++) {
+			zend_class_constant_info *info;
+
+			q = ce->properties_info.arData + j;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
+
+			info = (zend_class_constant_info*)Z_PTR(q->val);
+
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key);
+			}
+
+			if (info->name) {
+				info->name = accel_new_interned_string(info->name);
 			}
 		}
 	}
@@ -1902,7 +1911,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 			zend_string *resolved_path;
 			int key_length;
 			char *key = NULL;
-			
+
 			if (!ZCG(accel_directives).revalidate_path) {
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename, filename_len, &key_length);

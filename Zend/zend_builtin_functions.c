@@ -916,7 +916,7 @@ ZEND_FUNCTION(defined)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (zend_get_constant_ex(name, NULL, ZEND_FETCH_CLASS_SILENT)) {
+	if (zend_get_constant_ex(name, NULL, NULL, ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

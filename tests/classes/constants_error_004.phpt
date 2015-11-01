@@ -6,8 +6,8 @@ Class constant whose initial value references a non-existent class
   {
       const c1 = D::hello;
   }
-  
-  $a = new C();
+
+  var_dump(C::c1);
 ?>
 --EXPECTF--
 Fatal error: Class 'D' not found in %s on line %d

@@ -249,6 +249,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
+	zend_class_constant_info *const_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (--ce->refcount > 0) {
@@ -276,6 +277,16 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
+			if (ce->constants_table) {
+				zval *p = ce->constants_table;
+				zval *end = p + ce->constants_count;
+
+				while (p != end) {
+					i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+					p++;
+				}
+				efree(ce->constants_table);
+			}
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
 					zend_string_release(prop_info->name);
@@ -284,10 +295,18 @@ ZEND_API void destroy_zend_class(zval *zv)
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_FOREACH_PTR(&ce->constants_info, const_info) {
+				if (const_info->ce == ce || (const_info->flags & ZEND_ACC_SHADOW)) {
+					zend_string_release(const_info->name);
+					if (const_info->doc_comment) {
+						zend_string_release(const_info->doc_comment);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
+			zend_hash_destroy(&ce->constants_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
@@ -319,10 +338,20 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				free(ce->default_static_members_table);
 			}
+			if (ce->constants_table) {
+				zval *p = ce->constants_table;
+				zval *end = p + ce->constants_count;
+
+				while (p != end) {
+					zval_internal_ptr_dtor(p);
+					p++;
+				}
+				free(ce->constants_table);
+			}
 			zend_hash_destroy(&ce->properties_info);
+			zend_hash_destroy(&ce->constants_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}

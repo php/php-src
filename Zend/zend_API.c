@@ -1133,15 +1133,6 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			zend_property_info *prop_info;
 
 			*scope = class_type;
-			ZEND_HASH_FOREACH_VAL(&class_type->constants_table, val) {
-				ZVAL_DEREF(val);
-				if (Z_CONSTANT_P(val)) {
-					if (UNEXPECTED(zval_update_constant_ex(val, 1, class_type) != SUCCESS)) {
-						return FAILURE;
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
-
 			ce = class_type;
 			while (ce) {
 				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
@@ -3737,58 +3728,155 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
 {
+	zend_class_constant_info *const_info;
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (access_type != ZEND_ACC_PUBLIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	}
+
+	if (zend_string_equals_literal_ci(name, "class")) {
+		zend_error((ce->type == ZEND_INTERNAL_CLASS) ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"A class constant must not be called 'class'; it is reserved for class name fetching");
+	}
+
+	const_info = zend_hash_find_ptr(&ce->constants_info, name);
+	if (const_info == NULL) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			const_info = pemalloc(sizeof(zend_class_constant_info), 1);
+		} else {
+			const_info = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant_info));
+		}
+
+		const_info->offset = ce->constants_count++;
+		const_info->name = zend_string_copy(name);
+		const_info->name = zend_new_interned_string(const_info->name);
+		const_info->flags = access_type;
+		const_info->doc_comment = doc_comment;
+		const_info->ce = ce;
+
+		ce->constants_table = perealloc(ce->constants_table, sizeof(zval) * ce->constants_count, ce->type == ZEND_INTERNAL_CLASS);
+		zend_hash_add_ptr(&ce->constants_info, name, const_info);
+	}
+
+	ZVAL_COPY_VALUE(&ce->constants_table[const_info->offset], value);
+
 	if (Z_CONSTANT_P(value)) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
-	return zend_hash_str_update(&ce->constants_table, name, name_length, value) ?
-		SUCCESS : FAILURE;
+	return 1;
+}
+/* }}} */
+
+
+ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+{
+	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(key);
+	return ret;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_null_ex(zend_class_entry *ce, zend_string *name, int access_type, zend_string *doc_comment) /* {{{ */
+{
+	zval constant;
+
+	ZVAL_NULL(&constant);
+	return zend_declare_class_constant_ex(ce, name, &constant, access_type, doc_comment);
 }
 /* }}} */
 
 ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length) /* {{{ */
 {
+	zend_string *propname = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int retval = zend_declare_class_constant_null_ex(ce, propname, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(propname);
+	return retval;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_long_ex(zend_class_entry *ce, zend_string *name, zend_long value, int access_type, zend_string *doc_comment) /* {{{ */
+{
 	zval constant;
 
-	ZVAL_NULL(&constant);
-	return zend_declare_class_constant(ce, name, name_length, &constant);
+	ZVAL_LONG(&constant, value);
+	return zend_declare_class_constant_ex(ce, name, &constant, access_type, doc_comment);
 }
 /* }}} */
 
 ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value) /* {{{ */
 {
+
+	zend_string *propname = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int retval = zend_declare_class_constant_long_ex(ce, propname, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(propname);
+	return retval;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_bool_ex(zend_class_entry *ce, zend_string *name, zend_bool value, int access_type, zend_string *doc_comment) /* {{{ */
+{
 	zval constant;
 
-	ZVAL_LONG(&constant, value);
-	return zend_declare_class_constant(ce, name, name_length, &constant);
+	ZVAL_BOOL(&constant, value);
+	return zend_declare_class_constant_ex(ce, name, &constant, access_type, doc_comment);
 }
 /* }}} */
 
 ZEND_API int zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_bool value) /* {{{ */
 {
+	zend_string *propname = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int retval = zend_declare_class_constant_bool_ex(ce, propname, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(propname);
+	return retval;
+}
+/* }}} */
+
+
+ZEND_API int zend_declare_class_constant_double_ex(zend_class_entry *ce, zend_string *name, double value, int access_type, zend_string *doc_comment) /* {{{ */
+{
 	zval constant;
 
-	ZVAL_BOOL(&constant, value);
-	return zend_declare_class_constant(ce, name, name_length, &constant);
+	ZVAL_DOUBLE(&constant, value);
+	return zend_declare_class_constant_ex(ce, name, &constant, access_type, doc_comment);
 }
 /* }}} */
 
 ZEND_API int zend_declare_class_constant_double(zend_class_entry *ce, const char *name, size_t name_length, double value) /* {{{ */
 {
-	zval constant;
-
-	ZVAL_DOUBLE(&constant, value);
-	return zend_declare_class_constant(ce, name, name_length, &constant);
+	zend_string *propname = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int retval = zend_declare_class_constant_double_ex(ce, propname, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(propname);
+	return retval;
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_length) /* {{{ */
+ZEND_API int zend_declare_class_constant_stringl_ex(zend_class_entry *ce, zend_string *name, const char *value, size_t value_length, int access_type, zend_string *doc_comment) /* {{{ */
 {
 	zval constant;
 
 	ZVAL_NEW_STR(&constant, zend_string_init(value, value_length, ce->type & ZEND_INTERNAL_CLASS));
-	return zend_declare_class_constant(ce, name, name_length, &constant);
+	return zend_declare_class_constant_ex(ce, name, &constant, access_type, doc_comment);
+}
+/* }}} */
+
+
+ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_length) /* {{{ */
+{
+	zend_string *propname = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	int retval = zend_declare_class_constant_stringl_ex(ce, propname, value, value_length, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(propname);
+	return retval;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_string_ex(zend_class_entry *ce, zend_string *name, const char *value, int access_type, zend_string *doc_comment) /* {{{ */
+{
+	return zend_declare_class_constant_stringl_ex(ce, name, value, strlen(value), access_type, doc_comment);
 }
 /* }}} */
 

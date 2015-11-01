@@ -566,7 +566,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			} else {
 				ZVAL_EMPTY_STRING(p);
 			}
-		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
+		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, scope, Z_CONST_FLAGS_P(p))) == NULL)) {
 			char *actual = Z_STRVAL_P(p);
 
 			if (UNEXPECTED(EG(exception))) {

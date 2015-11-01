@@ -292,6 +292,21 @@ static void zend_persist_property_info_calc(zval *zv)
 	}
 }
 
+static void zend_persist_constant_info_calc(zval *zv)
+{
+	zend_class_constant_info *const_info = Z_PTR_P(zv);
+
+	if (!zend_shared_alloc_get_xlat_entry(const_info)) {
+		zend_shared_alloc_register_xlat_entry(const_info, const_info);
+		ADD_ARENA_SIZE(sizeof(zend_class_constant_info));
+		ADD_INTERNED_STRING(const_info->name, 0);
+		if (ZCG(accel_directives).save_comments && const_info->doc_comment) {
+			ADD_STRING(const_info->doc_comment);
+		}
+	}
+}
+
+
 static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -316,7 +331,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 				zend_persist_zval_calc(&ce->default_static_members_table[i]);
 			}
 		}
-		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc);
+		zend_hash_persist_calc(&ce->constants_info, zend_persist_constant_info_calc);
 
 		if (ce->info.user.filename) {
 			ADD_STRING(ce->info.user.filename);

@@ -137,12 +137,14 @@ struct _zend_class_entry {
 
 	int default_properties_count;
 	int default_static_members_count;
+	int constants_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	zval *static_members_table;
+	zval *constants_table;
 	HashTable function_table;
 	HashTable properties_info;
-	HashTable constants_table;
+	HashTable constants_info;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
