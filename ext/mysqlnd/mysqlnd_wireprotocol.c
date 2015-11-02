@@ -1292,9 +1292,8 @@ php_mysqlnd_rset_field_read(void * _packet)
 		DBG_ERR_FMT("Server error : (%u) %s", packet->error_info.error_no, packet->error_info.error);
 		DBG_RETURN(PASS);
 	} else if (EODATA_MARKER == *p && packet->header.size < 8) {
-		/* Premature EOF. That should be COM_FIELD_LIST */
+		/* Premature EOF. That should be COM_FIELD_LIST. But we don't support COM_FIELD_LIST anymore, thus this should not happen */
 		DBG_INF("Premature EOF. That should be COM_FIELD_LIST");
-		packet->stupid_list_fields_eof = TRUE;
 		DBG_RETURN(PASS);
 	}
 
@@ -3114,79 +3113,6 @@ mysqlnd_com_ping_create_command(va_list args)
 }
 /* }}} */
 
-/************************** COM_FIELD_LIST ******************************************/
-struct st_mysqlnd_protocol_com_field_list_command
-{
-	struct st_mysqlnd_protocol_command parent;
-	struct st_mysqlnd_com_field_list_context
-	{
-		MYSQLND_CONN_DATA * conn;
-		MYSQLND_CSTRING table;
-		MYSQLND_CSTRING achtung_wild;
-	} context;
-};
-
-
-/* {{{ mysqlnd_com_field_list_run */
-static enum_func_status
-mysqlnd_com_field_list_run(void *cmd)
-{
-	struct st_mysqlnd_protocol_com_field_list_command * command = (struct st_mysqlnd_protocol_com_field_list_command *) cmd;
-	enum_func_status ret = FAIL;
-	MYSQLND_CONN_DATA * conn = command->context.conn;
-	/* db + \0 + wild + \0 (for wild) */
-	zend_uchar buff[MYSQLND_MAX_ALLOWED_DB_LEN * 2 + 1 + 1], *p = buff;
-
-	DBG_ENTER("mysqlnd_com_field_list_run");
-
-	if (command->context.table.s && command->context.table.l) {
-		size_t to_copy = MIN(command->context.table.l, MYSQLND_MAX_ALLOWED_DB_LEN);
-		memcpy(p, command->context.table.s, to_copy);
-		p += to_copy;
-		*p++ = '\0';
-	}
-
-	if (command->context.achtung_wild.s && command->context.achtung_wild.l) {
-		size_t to_copy = MIN(command->context.achtung_wild.l, MYSQLND_MAX_ALLOWED_DB_LEN);
-		memcpy(p, command->context.achtung_wild.s, to_copy);
-		p += to_copy;
-		*p++ = '\0';
-	}
-
-	ret = send_command(COM_FIELD_LIST, buff, p - buff, FALSE,
-					   &conn->state,
-					   conn->error_info,
-					   conn->upsert_status,
-					   conn->stats,
-					   conn->payload_decoder_factory,
-					   conn->m->send_close,
-					   conn);
-
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_com_field_list_create_command */
-static struct st_mysqlnd_protocol_command *
-mysqlnd_com_field_list_create_command(va_list args)
-{
-	struct st_mysqlnd_protocol_com_field_list_command * command;
-	DBG_ENTER("mysqlnd_com_field_list_create_command");
-	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_field_list_command));
-	if (command) {
-		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
-		command->context.table = va_arg(args, MYSQLND_CSTRING);
-		command->context.achtung_wild = va_arg(args, MYSQLND_CSTRING);
-
-		command->parent.free_command = mysqlnd_com_no_params_free_command;
-		command->parent.run = mysqlnd_com_field_list_run;
-	}
-
-	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
-}
-/* }}} */
-
 
 /************************** COM_STATISTICS ******************************************/
 struct st_mysqlnd_protocol_com_statistics_command
@@ -4173,9 +4099,6 @@ mysqlnd_get_command(enum php_mysqlnd_server_command command, ...)
 			break;
 		case COM_PING:
 			ret = mysqlnd_com_ping_create_command(args);
-			break;
-		case COM_FIELD_LIST:
-			ret = mysqlnd_com_field_list_create_command(args);
 			break;
 		case COM_STATISTICS:
 			ret = mysqlnd_com_statistics_create_command(args);

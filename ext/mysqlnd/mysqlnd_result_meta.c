@@ -84,18 +84,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			DBG_RETURN(FAIL);
 		}
 
-		if (field_packet->stupid_list_fields_eof == TRUE) {
-			meta->field_count = i;
-			break;
-		}
-
 		if (mysqlnd_ps_fetch_functions[meta->fields[i].type].func == NULL) {
-			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers",
-						meta->fields[i].type);
-			php_error_docref(NULL, E_WARNING,
-							 "Unknown type %u sent by the server. "
-							 "Please send a report to the developers",
-							 meta->fields[i].type);
+			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers", meta->fields[i].type);
+			php_error_docref(NULL, E_WARNING, "Unknown type %u sent by the server. Please send a report to the developers", meta->fields[i].type);
 			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}

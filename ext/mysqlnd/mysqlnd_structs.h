@@ -493,7 +493,6 @@ typedef const char *		(*func_mysqlnd_conn_data__get_host_information)(const MYSQ
 typedef unsigned int		(*func_mysqlnd_conn_data__get_protocol_information)(const MYSQLND_CONN_DATA * const conn);
 typedef const char *		(*func_mysqlnd_conn_data__get_last_message)(const MYSQLND_CONN_DATA * const conn);
 typedef const char *		(*func_mysqlnd_conn_data__charset_name)(const MYSQLND_CONN_DATA * const conn);
-typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__list_fields)(MYSQLND_CONN_DATA * conn, const char * table, const char * achtung_wild);
 typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__list_method)(MYSQLND_CONN_DATA * conn, const char * query, const char * achtung_wild, char *par1);
 
 typedef uint64_t			(*func_mysqlnd_conn_data__get_last_insert_id)(const MYSQLND_CONN_DATA * const conn);
@@ -585,7 +584,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 	func_mysqlnd_conn_data__get_protocol_information get_protocol_information;
 	func_mysqlnd_conn_data__get_last_message get_last_message;
 	func_mysqlnd_conn_data__charset_name charset_name;
-	func_mysqlnd_conn_data__list_fields list_fields;
 	func_mysqlnd_conn_data__list_method list_method;
 
 	func_mysqlnd_conn_data__get_last_insert_id get_last_insert_id;

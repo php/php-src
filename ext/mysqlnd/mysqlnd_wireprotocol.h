@@ -207,7 +207,6 @@ typedef struct st_mysqlnd_packet_res_field {
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
-	zend_bool				stupid_list_fields_eof;
 	zend_bool				persistent_alloc;
 
 	MYSQLND_ERROR_INFO		error_info;

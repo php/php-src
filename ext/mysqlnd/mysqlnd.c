@@ -1373,72 +1373,6 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 /* }}} */
 
 
-/*
-  COM_FIELD_LIST is special, different from a SHOW FIELDS FROM :
-  - There is no result set header - status from the command, which
-    impacts us to allocate big chunk of memory for reading the metadata.
-  - The EOF packet is consumed by the metadata packet reader.
-*/
-
-/* {{{ mysqlnd_conn_data::list_fields */
-MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const char *table, const char *achtung_wild)
-{
-	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), list_fields);
-	MYSQLND_RES * result = NULL;
-	DBG_ENTER("mysqlnd_conn_data::list_fields");
-	DBG_INF_FMT("conn=%llu table=%s wild=%s", conn->thread_id, table? table:"",achtung_wild? achtung_wild:"");
-
-	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		do {
-			enum_func_status ret = FAIL;
-			const MYSQLND_CSTRING tbl = {table, strlen(table)};
-			const MYSQLND_CSTRING wildcard = {achtung_wild, strlen(achtung_wild)};
-
-			struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_FIELD_LIST, conn, tbl, wildcard);
-			if (command) {
-				ret = command->run(command);
-				command->free_command(command);
-			}
-			if (ret == FAIL) {
-				break;
-			}
-
-			/*
-			   Prepare for the worst case.
-			   MyISAM goes to 2500 BIT columns, double it for safety.
-			*/
-			result = conn->m->result_init(5000, conn->persistent);
-			if (!result) {
-				break;
-			}
-
-			if (FAIL == result->m.read_result_metadata(result, conn)) {
-				DBG_ERR("Error occurred while reading metadata");
-				result->m.free_result(result, TRUE);
-				result = NULL;
-				break;
-			}
-
-			result->type = MYSQLND_RES_NORMAL;
-			result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, FALSE, result->persistent);
-			if (!result->unbuf) {
-				/* OOM */
-				SET_OOM_ERROR(conn->error_info);
-				result->m.free_result(result, TRUE);
-				result = NULL;
-				break;
-			}
-			result->unbuf->eof_reached = TRUE;
-		} while (0);
-		conn->m->local_tx_end(conn, this_func, result == NULL? FAIL:PASS);
-	}
-
-	DBG_RETURN(result);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::list_method */
 MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const char * query, const char *achtung_wild, char *par1)
@@ -2894,7 +2828,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, get_proto_info),
 	MYSQLND_METHOD(mysqlnd_conn_data, info),
 	MYSQLND_METHOD(mysqlnd_conn_data, charset_name),
-	MYSQLND_METHOD(mysqlnd_conn_data, list_fields),
 	MYSQLND_METHOD(mysqlnd_conn_data, list_method),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, insert_id),
@@ -2916,7 +2849,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference),
 
-//	MYSQLND_METHOD(mysqlnd_conn_data, send_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn_data, restart_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, end_psession),
 	MYSQLND_METHOD(mysqlnd_conn_data, send_close),
