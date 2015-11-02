@@ -284,9 +284,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->passwd, pers);
 		conn->passwd = NULL;
 	}
-	if (conn->connect_or_select_db) {
-		mnd_pefree(conn->connect_or_select_db, pers);
-		conn->connect_or_select_db = NULL;
+	if (conn->connect_or_select_db.s) {
+		mnd_pefree(conn->connect_or_select_db.s, pers);
+		conn->connect_or_select_db.s = NULL;
 	}
 	if (conn->unix_socket) {
 		mnd_pefree(conn->unix_socket, pers);
@@ -925,10 +925,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		conn->passwd			= mnd_pestrndup(passwd, passwd_len, conn->persistent);
 		conn->passwd_len		= passwd_len;
 		conn->port				= port;
-		conn->connect_or_select_db = mnd_pestrndup(db, db_len, conn->persistent);
-		conn->connect_or_select_db_len = db_len;
+		conn->connect_or_select_db.s = mnd_pestrndup(db, db_len, conn->persistent);
+		conn->connect_or_select_db.l = db_len;
 
-		if (!conn->user || !conn->passwd || !conn->connect_or_select_db) {
+		if (!conn->user || !conn->passwd || !conn->connect_or_select_db.s) {
 			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
@@ -1538,23 +1538,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 			command->free_command(command);
 		}
 
-		/*
-		  The server sends 0 but libmysql doesn't read it and has established
-		  a protocol of giving back -1. Thus we have to follow it :(
-		*/
-		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
-		if (ret == PASS) {
-			if (conn->connect_or_select_db) {
-				mnd_pefree(conn->connect_or_select_db, conn->persistent);
-			}
-			conn->connect_or_select_db = mnd_pestrndup(db, db_len, conn->persistent);
-			conn->connect_or_select_db_len = db_len;
-			if (!conn->connect_or_select_db) {
-				/* OOM */
-				SET_OOM_ERROR(conn->error_info);
-				ret = FAIL;
-			}
-		}
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);

@@ -985,8 +985,7 @@ struct st_mysqlnd_connection_data
 	size_t			auth_plugin_data_len;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
-	char			*connect_or_select_db;
-	unsigned int	connect_or_select_db_len;
+	MYSQLND_STRING	connect_or_select_db;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
 	zend_ulong		max_packet_size;

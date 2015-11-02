@@ -3020,6 +3020,7 @@ mysqlnd_com_init_db_run(void *cmd)
 	struct st_mysqlnd_protocol_com_init_db_command * command = (struct st_mysqlnd_protocol_com_init_db_command *) cmd;
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
+	const MYSQLND_CSTRING db = command->context.db;
 
 	DBG_ENTER("mysqlnd_com_init_db_run");
 
@@ -3034,6 +3035,24 @@ mysqlnd_com_init_db_run(void *cmd)
 	if (PASS == ret) {
 		ret = send_command_handle_response(PROT_OK_PACKET, FALSE, COM_INIT_DB, TRUE,
 										   conn->error_info, conn->upsert_status, conn->payload_decoder_factory, &conn->last_message, conn->persistent);
+	}
+
+	/*
+	  The server sends 0 but libmysql doesn't read it and has established
+	  a protocol of giving back -1. Thus we have to follow it :(
+	*/
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
+	if (ret == PASS) {
+		if (conn->connect_or_select_db.s) {
+			mnd_pefree(conn->connect_or_select_db.s, conn->persistent);
+		}
+		conn->connect_or_select_db.s = mnd_pestrndup(db.s, db.l, conn->persistent);
+		conn->connect_or_select_db.l = db.l;
+		if (!conn->connect_or_select_db.s) {
+			/* OOM */
+			SET_OOM_ERROR(conn->error_info);
+			ret = FAIL;
+		}
 	}
 
 	DBG_RETURN(ret);
