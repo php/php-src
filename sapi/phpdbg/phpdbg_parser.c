@@ -70,7 +70,7 @@
 
 /* Copy the first part of user declarations.  */
 /* Line 371 of yacc.c  */
-#line 1 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 1 "sapi/phpdbg/phpdbg_parser.y"
 
  
 /*
@@ -129,7 +129,7 @@ extern int phpdbg_debug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 387 of yacc.c  */
-#line 31 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 31 "sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -1453,25 +1453,25 @@ yyreduce:
     {
         case 3:
 /* Line 1802 of yacc.c  */
-#line 67 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 67 "sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 5:
 /* Line 1802 of yacc.c  */
-#line 72 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 72 "sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 6:
 /* Line 1802 of yacc.c  */
-#line 73 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 73 "sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(2) - (2)])); }
     break;
 
   case 7:
 /* Line 1802 of yacc.c  */
-#line 77 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 77 "sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = (yyvsp[(2) - (3)]).str;
@@ -1481,7 +1481,7 @@ yyreduce:
 
   case 8:
 /* Line 1802 of yacc.c  */
-#line 82 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 82 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = (yyvsp[(1) - (4)]).str;
@@ -1491,7 +1491,7 @@ yyreduce:
 
   case 9:
 /* Line 1802 of yacc.c  */
-#line 87 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 87 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (4)]).len + (yyvsp[(2) - (4)]).len + 1);
@@ -1506,7 +1506,7 @@ yyreduce:
 
   case 10:
 /* Line 1802 of yacc.c  */
-#line 97 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 97 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (5)]).len + (yyvsp[(2) - (5)]).len + 1);
@@ -1521,7 +1521,7 @@ yyreduce:
 
   case 11:
 /* Line 1802 of yacc.c  */
-#line 107 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 107 "sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (3)]).str;
@@ -1531,7 +1531,7 @@ yyreduce:
 
   case 12:
 /* Line 1802 of yacc.c  */
-#line 112 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 112 "sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = NUMERIC_METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (5)]).str;
@@ -1542,7 +1542,7 @@ yyreduce:
 
   case 13:
 /* Line 1802 of yacc.c  */
-#line 118 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 118 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FUNCTION_PARAM;
 		(yyval).str = (yyvsp[(1) - (3)]).str;
@@ -1553,7 +1553,7 @@ yyreduce:
 
   case 14:
 /* Line 1802 of yacc.c  */
-#line 124 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 124 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = COND_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1563,49 +1563,49 @@ yyreduce:
 
   case 15:
 /* Line 1802 of yacc.c  */
-#line 129 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 129 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 16:
 /* Line 1802 of yacc.c  */
-#line 130 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 130 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 17:
 /* Line 1802 of yacc.c  */
-#line 131 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 131 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 18:
 /* Line 1802 of yacc.c  */
-#line 132 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 132 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 19:
 /* Line 1802 of yacc.c  */
-#line 133 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 133 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 20:
 /* Line 1802 of yacc.c  */
-#line 134 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 134 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 21:
 /* Line 1802 of yacc.c  */
-#line 135 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 135 "sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 22:
 /* Line 1802 of yacc.c  */
-#line 139 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 139 "sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = EVAL_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1615,7 +1615,7 @@ yyreduce:
 
   case 23:
 /* Line 1802 of yacc.c  */
-#line 144 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 144 "sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = SHELL_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1625,7 +1625,7 @@ yyreduce:
 
   case 24:
 /* Line 1802 of yacc.c  */
-#line 149 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 149 "sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = RUN_PARAM;
 		(yyval).len = 0;
@@ -1634,7 +1634,7 @@ yyreduce:
 
   case 25:
 /* Line 1802 of yacc.c  */
-#line 153 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 153 "sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = RUN_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1876,7 +1876,7 @@ yyreturn:
 
 
 /* Line 2050 of yacc.c  */
-#line 160 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+#line 160 "sapi/phpdbg/phpdbg_parser.y"
 
 
 static int yyerror(void ***tsrm_ls, const char *msg) {
