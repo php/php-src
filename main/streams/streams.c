@@ -84,6 +84,7 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 
 	if (stream->ctx) {
 		zend_list_delete(stream->ctx);
+		stream->ctx = NULL;
 	}
 
 	return 0;
