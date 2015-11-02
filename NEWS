@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.6.16
 
 - Core:
+  . Fixed bug #70828 (php-fpm 5.6 with opcache crashes when referencing a
+    non-existent constant). (Laruence)
   . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
     (Laruence)
 

@@ -5804,7 +5804,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				opline->op2.constant = zend_add_const_name_literal(CG(active_op_array), &constant_name->u.constant, 0 TSRMLS_CC);
 			} else {
 				opline->extended_value = IS_CONSTANT_UNQUALIFIED;
-				if (CG(current_namespace)) {
+				if (check_namespace && CG(current_namespace)) {
 					opline->extended_value |= IS_CONSTANT_IN_NAMESPACE;
 					opline->op2.constant = zend_add_const_name_literal(CG(active_op_array), &constant_name->u.constant, 1 TSRMLS_CC);
 				} else {
