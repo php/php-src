@@ -572,25 +572,6 @@ size_t php_mysqlnd_auth_write(void * _packet)
 
 		if (packet->connect_attr && zend_hash_num_elements(packet->connect_attr)) {
 			size_t ca_payload_len = 0;
-#ifdef OLD_CODE
-			HashPosition pos_value;
-			const char ** entry_value;
-			zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
-			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
-				char *s_key;
-				unsigned int s_len;
-				zend_ulong num_key;
-				size_t value_len = strlen(*entry_value);
-
-				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, &pos_value)) {
-					ca_payload_len += php_mysqlnd_net_store_length_size(s_len);
-					ca_payload_len += s_len;
-					ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
-					ca_payload_len += value_len;
-				}
-				zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
-			}
-#else
 
 			{
 				zend_string * key;
@@ -606,30 +587,10 @@ size_t php_mysqlnd_auth_write(void * _packet)
 					}
 				} ZEND_HASH_FOREACH_END();
 			}
-#endif
+
 			if (sizeof(buffer) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len) + (p - buffer))) {
 				p = php_mysqlnd_net_store_length(p, ca_payload_len);
 
-#ifdef OLD_CODE
-				zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
-				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
-					char *s_key;
-					unsigned int s_len;
-					zend_ulong num_key;
-					size_t value_len = strlen(*entry_value);
-					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, &pos_value)) {
-						/* copy key */
-						p = php_mysqlnd_net_store_length(p, s_len);
-						memcpy(p, s_key, s_len);
-						p+= s_len;
-						/* copy value */
-						p = php_mysqlnd_net_store_length(p, value_len);
-						memcpy(p, *entry_value, value_len);
-						p+= value_len;
-					}
-					zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
-				}
-#else
 				{
 					zend_string * key;
 					zval * entry_value;
@@ -648,7 +609,6 @@ size_t php_mysqlnd_auth_write(void * _packet)
 						}
 					} ZEND_HASH_FOREACH_END();
 				}
-#endif
 			} else {
 				/* cannot put the data - skip */
 			}
