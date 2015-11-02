@@ -78,8 +78,8 @@
 
 void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 
-#define UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(status) (status)->m->set_affected_rows_to_error((status))
-#define UPSERT_STATUS_RESET(status) (status)->m->reset((status))
+#define UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(status)	(status)->m->set_affected_rows_to_error((status))
+#define UPSERT_STATUS_RESET(status)							(status)->m->reset((status))
 
 /* Error handling */
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \

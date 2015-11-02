@@ -136,7 +136,7 @@ mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 /* }}} */
 
 
-static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA of local file";
+static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA of a local file";
 
 
 /* {{{ mysqlnd_handle_local_infile */
@@ -213,7 +213,11 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 infile_error:
 	/* get response from server and update upsert values */
 	if (FAIL == send_command_handle_response(PROT_OK_PACKET, FALSE, COM_QUERY, FALSE,
-	                                         conn->error_info, conn->upsert_status, conn->payload_decoder_factory, &conn->last_message, conn->persistent)) {
+	                                         conn->error_info,
+											 conn->upsert_status,
+											 conn->payload_decoder_factory,
+											 &conn->last_message,
+											 conn->persistent)) {
 		result = FAIL;
 	}
 

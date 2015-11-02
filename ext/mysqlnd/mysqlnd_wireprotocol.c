@@ -2730,13 +2730,113 @@ send_command(
 /* }}} */
 
 
+/* {{{ send_command_handle_OK */
+static enum_func_status
+send_command_handle_OK(MYSQLND_ERROR_INFO * const error_info,
+					   MYSQLND_UPSERT_STATUS * const upsert_status,
+					   MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
+					   const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+					   MYSQLND_STRING * const last_message,
+					   const zend_bool last_message_persistent)
+{
+	enum_func_status ret = FAIL;
+	MYSQLND_PACKET_OK * ok_response = payload_decoder_factory->m.get_ok_packet(payload_decoder_factory, FALSE);
+
+	DBG_ENTER("send_command_handle_OK");
+	if (!ok_response) {
+		SET_OOM_ERROR(error_info);
+		DBG_RETURN(FAIL);
+	}
+	if (FAIL == (ret = PACKET_READ(ok_response))) {
+		DBG_INF("Error while reading OK packet");
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		goto end;
+	}
+	DBG_INF_FMT("OK from server");
+	if (0xFF == ok_response->field_count) {
+		/* The server signalled error. Set the error */
+		SET_CLIENT_ERROR(error_info, ok_response->error_no, ok_response->sqlstate, ok_response->error);
+		ret = FAIL;
+		/*
+		  Cover a protocol design error: error packet does not
+		  contain the server status. Therefore, the client has no way
+		  to find out whether there are more result sets of
+		  a multiple-result-set statement pending. Luckily, in 5.0 an
+		  error always aborts execution of a statement, wherever it is
+		  a multi-statement or a stored procedure, so it should be
+		  safe to unconditionally turn off the flag here.
+		*/
+		upsert_status->server_status &= ~SERVER_MORE_RESULTS_EXISTS;
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(upsert_status);
+	} else {
+		SET_NEW_MESSAGE(last_message->s, last_message->l,
+						ok_response->message, ok_response->message_len,
+						last_message_persistent);
+		if (!ignore_upsert_status) {
+			UPSERT_STATUS_RESET(upsert_status);
+			upsert_status->warning_count = ok_response->warning_count;
+			upsert_status->server_status = ok_response->server_status;
+			upsert_status->affected_rows = ok_response->affected_rows;
+			upsert_status->last_insert_id = ok_response->last_insert_id;
+		} else {
+			/* LOAD DATA */
+		}
+	}
+end:
+	PACKET_FREE(ok_response);
+	DBG_INF(ret == PASS ? "PASS":"FAIL");
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ send_command_handle_EOF */
+enum_func_status
+send_command_handle_EOF(MYSQLND_ERROR_INFO * const error_info,
+						MYSQLND_UPSERT_STATUS * const upsert_status,
+						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory)
+{
+	enum_func_status ret = FAIL;
+	MYSQLND_PACKET_EOF * response = payload_decoder_factory->m.get_eof_packet(payload_decoder_factory, FALSE);
+
+	DBG_ENTER("send_command_handle_EOF");
+
+	if (!response) {
+		SET_OOM_ERROR(error_info);
+		DBG_RETURN(FAIL);
+	}
+	if (FAIL == (ret = PACKET_READ(response))) {
+		DBG_INF("Error while reading EOF packet");
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+	} else if (0xFF == response->field_count) {
+		/* The server signalled error. Set the error */
+		DBG_INF_FMT("Error_no=%d SQLstate=%s Error=%s", response->error_no, response->sqlstate, response->error);
+
+		SET_CLIENT_ERROR(error_info, response->error_no, response->sqlstate, response->error);
+
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(upsert_status);
+	} else if (0xFE != response->field_count) {
+		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		DBG_ERR_FMT("EOF packet expected, field count wasn't 0xFE but 0x%2X", response->field_count);
+		php_error_docref(NULL, E_WARNING, "EOF packet expected, field count wasn't 0xFE but 0x%2X", response->field_count);
+	} else {
+		DBG_INF_FMT("EOF from server");
+	}
+	PACKET_FREE(response);
+
+	DBG_INF(ret == PASS ? "PASS":"FAIL");
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ send_command_handle_response */
 enum_func_status
 send_command_handle_response(
 		const enum mysqlnd_packet_type ok_packet,
 		const zend_bool silent,
 		const enum php_mysqlnd_server_command command,
-		const zend_bool ignore_upsert_status,
+		const zend_bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
 
 		MYSQLND_ERROR_INFO	* error_info,
 		MYSQLND_UPSERT_STATUS * upsert_status,
@@ -2751,87 +2851,19 @@ send_command_handle_response(
 	DBG_INF_FMT("silent=%u packet=%u command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
 
 	switch (ok_packet) {
-		case PROT_OK_PACKET:{
-			MYSQLND_PACKET_OK * ok_response = payload_decoder_factory->m.get_ok_packet(payload_decoder_factory, FALSE);
-			if (!ok_response) {
-				SET_OOM_ERROR(error_info);
-				break;
-			}
-			if (FAIL == (ret = PACKET_READ(ok_response))) {
-				if (!silent) {
-					DBG_ERR_FMT("Error while reading %s's OK packet", mysqlnd_command_to_text[command]);
-					php_error_docref(NULL, E_WARNING, "Error while reading %s's OK packet. PID=%u",
-									 mysqlnd_command_to_text[command], getpid());
-				}
-			} else {
-				DBG_INF_FMT("OK from server");
-				if (0xFF == ok_response->field_count) {
-					/* The server signalled error. Set the error */
-					SET_CLIENT_ERROR(error_info, ok_response->error_no, ok_response->sqlstate, ok_response->error);
-					ret = FAIL;
-					/*
-					  Cover a protocol design error: error packet does not
-					  contain the server status. Therefore, the client has no way
-					  to find out whether there are more result sets of
-					  a multiple-result-set statement pending. Luckily, in 5.0 an
-					  error always aborts execution of a statement, wherever it is
-					  a multi-statement or a stored procedure, so it should be
-					  safe to unconditionally turn off the flag here.
-					*/
-					upsert_status->server_status &= ~SERVER_MORE_RESULTS_EXISTS;
-					UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(upsert_status);
-				} else {
-					SET_NEW_MESSAGE(last_message->s, last_message->l,
-									ok_response->message, ok_response->message_len,
-									last_message_persistent);
-
-					if (!ignore_upsert_status) {
-						UPSERT_STATUS_RESET(upsert_status);
-						upsert_status->warning_count = ok_response->warning_count;
-						upsert_status->server_status = ok_response->server_status;
-						upsert_status->affected_rows = ok_response->affected_rows;
-						upsert_status->last_insert_id = ok_response->last_insert_id;
-					}
-				}
-			}
-			PACKET_FREE(ok_response);
+		case PROT_OK_PACKET:
+			ret = send_command_handle_OK(error_info, upsert_status, payload_decoder_factory, ignore_upsert_status, last_message, last_message_persistent);
 			break;
-		}
-		case PROT_EOF_PACKET:{
-			MYSQLND_PACKET_EOF * ok_response = payload_decoder_factory->m.get_eof_packet(payload_decoder_factory, FALSE);
-			if (!ok_response) {
-				SET_OOM_ERROR(error_info);
-				break;
-			}
-			if (FAIL == (ret = PACKET_READ(ok_response))) {
-				SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
-								 "Malformed packet");
-				if (!silent) {
-					DBG_ERR_FMT("Error while reading %s's EOF packet", mysqlnd_command_to_text[command]);
-					php_error_docref(NULL, E_WARNING, "Error while reading %s's EOF packet. PID=%d",
-									 mysqlnd_command_to_text[command], getpid());
-				}
-			} else if (0xFF == ok_response->field_count) {
-				/* The server signalled error. Set the error */
-				SET_CLIENT_ERROR(error_info, ok_response->error_no, ok_response->sqlstate, ok_response->error);
-				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(upsert_status);
-			} else if (0xFE != ok_response->field_count) {
-				SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
-				if (!silent) {
-					DBG_ERR_FMT("EOF packet expected, field count wasn't 0xFE but 0x%2X", ok_response->field_count);
-					php_error_docref(NULL, E_WARNING, "EOF packet expected, field count wasn't 0xFE but 0x%2X",
-									ok_response->field_count);
-				}
-			} else {
-				DBG_INF_FMT("OK from server");
-			}
-			PACKET_FREE(ok_response);
+		case PROT_EOF_PACKET:
+			ret = send_command_handle_EOF(error_info, upsert_status, payload_decoder_factory);
 			break;
-		}
 		default:
 			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
 			php_error_docref(NULL, E_ERROR, "Wrong response packet %u passed to the function", ok_packet);
 			break;
+	}
+	if (!silent && error_info->error_no == CR_MALFORMED_PACKET) {
+		php_error_docref(NULL, E_WARNING, "Error while reading %s's response packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 	}
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -2942,7 +2974,7 @@ mysqlnd_com_debug_run(void *cmd)
 					   conn->m->send_close,
 					   conn);
 	if (PASS == ret) {
-		ret = send_command_handle_response(PROT_EOF_PACKET, COM_DEBUG, COM_DEBUG, TRUE,
+		ret = send_command_handle_response(PROT_EOF_PACKET, FALSE, COM_DEBUG, TRUE,
 										   conn->error_info, conn->upsert_status, conn->payload_decoder_factory, &conn->last_message, conn->persistent);
 	}
 
