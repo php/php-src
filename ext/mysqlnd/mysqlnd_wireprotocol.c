@@ -3085,6 +3085,11 @@ mysqlnd_com_ping_run(void *cmd)
 		ret = send_command_handle_response(PROT_OK_PACKET, TRUE, COM_PING, TRUE,
 										   conn->error_info, conn->upsert_status, conn->payload_decoder_factory, &conn->last_message, conn->persistent);
 	}
+	/*
+	  The server sends 0 but libmysql doesn't read it and has established
+	  a protocol of giving back -1. Thus we have to follow it :(
+	*/
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	DBG_RETURN(ret);
 }
@@ -3184,13 +3189,25 @@ mysqlnd_com_field_list_create_command(va_list args)
 
 
 /************************** COM_STATISTICS ******************************************/
+struct st_mysqlnd_protocol_com_statistics_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_statistics_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		zend_string ** message;
+	} context;
+};
+
+
 /* {{{ mysqlnd_com_statistics_run */
 static enum_func_status
 mysqlnd_com_statistics_run(void *cmd)
 {
-	struct st_mysqlnd_protocol_no_params_command * command = (struct st_mysqlnd_protocol_no_params_command *) cmd;
+	struct st_mysqlnd_protocol_com_statistics_command * command = (struct st_mysqlnd_protocol_com_statistics_command *) cmd;
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
+	zend_string **message = command->context.message;
 
 	DBG_ENTER("mysqlnd_com_statistics_run");
 
@@ -3203,6 +3220,20 @@ mysqlnd_com_statistics_run(void *cmd)
 					   conn->m->send_close,
 					   conn);
 
+	if (PASS == ret) {
+		MYSQLND_PACKET_STATS * stats_header = conn->payload_decoder_factory->m.get_stats_packet(conn->payload_decoder_factory, FALSE);
+		if (!stats_header) {
+			SET_OOM_ERROR(conn->error_info);
+		} else {
+			if (PASS == (ret = PACKET_READ(stats_header))) {
+				/* will be freed by Zend, thus don't use the mnd_ allocator */
+				*message = zend_string_init(stats_header->message.s, stats_header->message.l, 0);
+				DBG_INF(ZSTR_VAL(*message));
+			}
+			PACKET_FREE(stats_header);
+		}
+	}
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -3212,13 +3243,14 @@ mysqlnd_com_statistics_run(void *cmd)
 static struct st_mysqlnd_protocol_command *
 mysqlnd_com_statistics_create_command(va_list args)
 {
-	struct st_mysqlnd_protocol_no_params_command * command;
+	struct st_mysqlnd_protocol_com_statistics_command * command;
 	DBG_ENTER("mysqlnd_com_statistics_create_command");
-	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_no_params_command));
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_statistics_command));
 	if (command) {
 		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
-		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->context.message = va_arg(args, zend_string **);
 
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
 		command->parent.run = mysqlnd_com_statistics_run;
 	}
 
@@ -3247,6 +3279,7 @@ mysqlnd_com_process_kill_run(void *cmd)
 	zend_uchar buff[4];
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
+	zend_bool read_response = command->context.read_response;
 
 	DBG_ENTER("mysqlnd_com_process_kill_run");
 	int4store(buff, command->context.process_id);
@@ -3259,9 +3292,20 @@ mysqlnd_com_process_kill_run(void *cmd)
 					   conn->payload_decoder_factory,
 					   conn->m->send_close,
 					   conn);
-	if (PASS == ret && command->context.read_response) {
+	if (PASS == ret && read_response) {
 		ret = send_command_handle_response(PROT_OK_PACKET, FALSE, COM_PROCESS_KILL, TRUE,
 										   conn->error_info, conn->upsert_status, conn->payload_decoder_factory, &conn->last_message, conn->persistent);
+	}
+
+	if (read_response) {
+		/*
+		  The server sends 0 but libmysql doesn't read it and has established
+		  a protocol of giving back -1. Thus we have to follow it :(
+		*/
+		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
+	} else if (PASS == ret) {
+		SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+		conn->m->send_close(conn);
 	}
 
 	DBG_RETURN(ret);

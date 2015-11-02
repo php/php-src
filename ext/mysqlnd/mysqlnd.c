@@ -1644,12 +1644,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 			ret = command->run(command);
 			command->free_command(command);
 		}
-		/*
-		  The server sends 0 but libmysql doesn't read it and has established
-		  a protocol of giving back -1. Thus we have to follow it :(
-		*/
-		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
-
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_INF_FMT("ret=%u", ret);
@@ -1664,36 +1658,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), get_server_statistics);
 	enum_func_status ret = FAIL;
-	MYSQLND_PACKET_STATS * stats_header;
 
 	DBG_ENTER("mysqlnd_conn_data::statistic");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		do {
-			struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STATISTICS, conn);
-			if (command) {
-				ret = command->run(command);
-				command->free_command(command);
-			}
-
-			if (FAIL == ret) {
-				break;
-			}
-			stats_header = conn->payload_decoder_factory->m.get_stats_packet(conn->payload_decoder_factory, FALSE);
-			if (!stats_header) {
-				SET_OOM_ERROR(conn->error_info);
-				break;
-			}
-
-			if (PASS == (ret = PACKET_READ(stats_header))) {
-				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = zend_string_init(stats_header->message.s, stats_header->message.l, 0);
-				DBG_INF(ZSTR_VAL(*message));
-			}
-			PACKET_FREE(stats_header);
-		} while (0);
-
+		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STATISTICS, conn, message);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1719,16 +1693,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 		if (command) {
 			ret = command->run(command);
 			command->free_command(command);
-			if (read_response) {
-				/*
-				  The server sends 0 but libmysql doesn't read it and has established
-				  a protocol of giving back -1. Thus we have to follow it :(
-				*/
-				UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
-			} else if (PASS == ret) {
-				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-				conn->m->send_close(conn);
-			}
 		}
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1792,6 +1756,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 			ret = command->run(command);
 			command->free_command(command);
 		}
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
 }
