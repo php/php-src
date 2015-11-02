@@ -78,8 +78,21 @@
 
 void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 
-#define UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(status)	(status)->m->set_affected_rows_to_error((status))
 #define UPSERT_STATUS_RESET(status)							(status)->m->reset((status))
+
+#define UPSERT_STATUS_GET_SERVER_STATUS(status)				(status)->server_status
+#define UPSERT_STATUS_SET_SERVER_STATUS(status, server_st)	(status)->server_status = (server_st)
+
+#define UPSERT_STATUS_GET_WARNINGS(status)					(status)->warning_count
+#define UPSERT_STATUS_SET_WARNINGS(status, warnings)		(status)->warning_count = (warnings)
+
+#define UPSERT_STATUS_GET_AFFECTED_ROWS(status)				(status)->affected_rows
+#define UPSERT_STATUS_SET_AFFECTED_ROWS(status, rows)		(status)->affected_rows = (rows)
+#define UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(status)	(status)->m->set_affected_rows_to_error((status))
+
+#define UPSERT_STATUS_GET_LAST_INSERT_ID(status)			(status)->last_insert_id
+#define UPSERT_STATUS_SET_LAST_INSERT_ID(status, id)		(status)->last_insert_id = (id)
+
 
 /* Error handling */
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
@@ -106,10 +119,6 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 
 
 enum_func_status mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent);
-#define SET_EMPTY_ERROR(info)							(info)->m->reset((info))
-#define SET_CLIENT_ERROR(info, err_no, sqlstate, error)	(err_no)? (info)->m->set_client_error((info), (err_no), (sqlstate), (error)) : (info)->m->reset((info))
-#define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
-#define COPY_CLIENT_ERROR(dest, source)					SET_CLIENT_ERROR((dest), (source).error_no, (source).sqlstate, (source).error)
 
 #define GET_CONNECTION_STATE(state_struct)		(state_struct)->m->get((state_struct))
 #define SET_CONNECTION_STATE(state_struct, s)	(state_struct)->m->set((state_struct), (s))

@@ -100,7 +100,6 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	result->stored_data->m.fetch_row = mysqlnd_stmt_fetch_row_buffered;
 
 	if (PASS == ret) {
-		/* Overflow ? */
 		if (result->stored_data->type == MYSQLND_BUFFERED_TYPE_ZVAL) {
 			MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result->stored_data;
 			if (result->stored_data->row_count) {
@@ -124,7 +123,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 		}
 
 		/* libmysql API docs say it should be so for SELECT statements */
-		stmt->upsert_status->affected_rows = stmt->result->stored_data->row_count;
+		UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, stmt->result->stored_data->row_count);
 
 		stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
 	} else {
@@ -190,7 +189,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 		}
 
 		if ((result = result->m.store_result(result, conn, MYSQLND_STORE_PS | MYSQLND_STORE_NO_COPY))) {
-			stmt->upsert_status->affected_rows = result->stored_data->row_count;
+			UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, result->stored_data->row_count);
 			stmt->state = MYSQLND_STMT_PREPARED;
 			result->type = MYSQLND_RES_PS_BUF;
 		} else {
@@ -237,11 +236,11 @@ MYSQLND_METHOD(mysqlnd_stmt, next_result)(MYSQLND_STMT * s)
 	conn = stmt->conn;
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING || !(conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS)) {
+	if (GET_CONNECTION_STATE(&conn->state) != CONN_NEXT_RESULT_PENDING || !(UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS)) {
 		DBG_RETURN(FAIL);
 	}
 
-	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
+	DBG_INF_FMT("server_status=%u cursor=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status), UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_STATUS_CURSOR_EXISTS);
 
 	/* Free space for next result */
 	s->m->free_stmt_result(s);
@@ -264,7 +263,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s)
 	MYSQLND_PACKET_RES_FIELD * field_packet;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
-	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
+	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -299,7 +298,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_read_prepare_response");
-	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
+	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -322,10 +321,10 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s)
 	}
 	ret = PASS;
 	stmt->stmt_id = prepare_resp->stmt_id;
-	stmt->warning_count = stmt->conn->upsert_status->warning_count = prepare_resp->warning_count;
+	UPSERT_STATUS_SET_WARNINGS(stmt->conn->upsert_status, prepare_resp->warning_count);
+	UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, 0);  /* be like libmysql */
 	stmt->field_count = stmt->conn->field_count = prepare_resp->field_count;
 	stmt->param_count = prepare_resp->param_count;
-	stmt->upsert_status->affected_rows = 0; /* be like libmysql */
 done:
 	PACKET_FREE(prepare_resp);
 
@@ -343,7 +342,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	enum_func_status ret = FAIL;
 
 	DBG_ENTER("mysqlnd_stmt_prepare_read_eof");
-	if (!stmt || !stmt->conn || !stmt->conn->payload_decoder_factory) {
+	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -360,14 +359,14 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 				/* XXX: This will crash, because we will null also the methods.
 					But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 					(from mysqlnd_driver.c?) to do the reset.
-					This is done also in mysqlnd_result.c
+					This bad handling is also in mysqlnd_result.c
 				*/
 				memset(stmt, 0, sizeof(MYSQLND_STMT_DATA));
 				stmt->state = MYSQLND_STMT_INITTED;
 			}
 		} else {
-			stmt->upsert_status->server_status = fields_eof->server_status;
-			stmt->upsert_status->warning_count = fields_eof->warning_count;
+			UPSERT_STATUS_SET_SERVER_STATUS(stmt->upsert_status, fields_eof->server_status);
+			UPSERT_STATUS_SET_WARNINGS(stmt->upsert_status, fields_eof->warning_count);
 			stmt->state = MYSQLND_STMT_PREPARED;
 		}
 		PACKET_FREE(fields_eof);
@@ -521,7 +520,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 		UPSERT_STATUS_RESET(stmt->upsert_status);
-		stmt->upsert_status->affected_rows = conn->upsert_status->affected_rows;
+		UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status));
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
 		}
@@ -537,7 +536,11 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 		*/
 		SET_EMPTY_ERROR(stmt->error_info);
 		SET_EMPTY_ERROR(stmt->conn->error_info);
-		*stmt->upsert_status = *conn->upsert_status; /* copy status */
+		UPSERT_STATUS_SET_WARNINGS(stmt->upsert_status, UPSERT_STATUS_GET_WARNINGS(conn->upsert_status));
+		UPSERT_STATUS_SET_AFFECTED_ROWS(stmt->upsert_status, UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status));
+		UPSERT_STATUS_SET_SERVER_STATUS(stmt->upsert_status, UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
+		UPSERT_STATUS_SET_LAST_INSERT_ID(stmt->upsert_status, UPSERT_STATUS_GET_LAST_INSERT_ID(conn->upsert_status));
+
 		stmt->state = MYSQLND_STMT_EXECUTED;
 		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {
 			DBG_INF("PASS");
@@ -567,10 +570,10 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 			  use_result() or store_result() and we should be able to scrap the
 			  data on the line, if he just decides to close the statement.
 			*/
-			DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status,
-						stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
+			DBG_INF_FMT("server_status=%u cursor=%u", UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status),
+						UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS);
 
-			if (stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS) {
+			if (UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS) {
 				DBG_INF("cursor exists");
 				stmt->cursor_exists = TRUE;
 				SET_CONNECTION_STATE(&conn->state, CONN_READY);
@@ -601,7 +604,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 		}
 	}
 #ifndef MYSQLND_DONT_SKIP_OUT_PARAMS_RESULTSET
-	if (stmt->upsert_status->server_status & SERVER_PS_OUT_PARAMS) {
+	if (UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_PS_OUT_PARAMS) {
 		s->m->free_stmt_content(s);
 		DBG_INF("PS OUT Variable RSet, skipping");
 		/* OUT params result set. Skip for now to retain compatibility */
@@ -609,10 +612,10 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 	}
 #endif
 
-	DBG_INF_FMT("server_status=%u cursor=%u", stmt->upsert_status->server_status, stmt->upsert_status->server_status & SERVER_STATUS_CURSOR_EXISTS);
+	DBG_INF_FMT("server_status=%u cursor=%u", UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status), UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) & SERVER_STATUS_CURSOR_EXISTS);
 
-	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status->affected_rows) {
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status->affected_rows);
+	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && UPSERT_STATUS_GET_AFFECTED_ROWS(stmt->upsert_status)) {
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, UPSERT_STATUS_GET_AFFECTED_ROWS(stmt->upsert_status));
 	}
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
@@ -975,13 +978,14 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, unsigned i
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
 		UPSERT_STATUS_RESET(result->conn->upsert_status);
-		result->conn->upsert_status->warning_count = row_packet->warning_count;
-		result->conn->upsert_status->server_status = row_packet->server_status;
+		UPSERT_STATUS_SET_WARNINGS(result->conn->upsert_status, row_packet->warning_count);
+		UPSERT_STATUS_SET_SERVER_STATUS(result->conn->upsert_status, row_packet->server_status);
+
 		/*
 		  result->row_packet will be cleaned when
 		  destroying the result object
 		*/
-		if (result->conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
+		if (UPSERT_STATUS_GET_SERVER_STATUS(result->conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS) {
 			SET_CONNECTION_STATE(&result->conn->state, CONN_NEXT_RESULT_PENDING);
 		} else {
 			SET_CONNECTION_STATE(&result->conn->state, CONN_READY);
@@ -1058,8 +1062,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 
 	if (stmt->state < MYSQLND_STMT_USER_FETCHING) {
 		/* Only initted - error */
-		SET_CLIENT_ERROR(stmt->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-						mysqlnd_out_of_sync);
+		SET_CLIENT_ERROR(stmt->conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
 		DBG_ERR("command out of sync");
 		DBG_RETURN(FAIL);
 	}
@@ -1175,23 +1178,19 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 		*fetched_anything = TRUE;
 	} else {
 		*fetched_anything = FALSE;
+		UPSERT_STATUS_SET_WARNINGS(stmt->upsert_status, row_packet->warning_count);
+		UPSERT_STATUS_SET_WARNINGS(stmt->conn->upsert_status, row_packet->warning_count);
 
-		stmt->upsert_status->warning_count =
-			stmt->conn->upsert_status->warning_count =
-				row_packet->warning_count;
-
-		stmt->upsert_status->server_status =
-			stmt->conn->upsert_status->server_status =
-				row_packet->server_status;
+		UPSERT_STATUS_SET_SERVER_STATUS(stmt->upsert_status, row_packet->server_status);
+		UPSERT_STATUS_SET_SERVER_STATUS(stmt->conn->upsert_status, row_packet->server_status);
 
 		result->unbuf->eof_reached = row_packet->eof;
 	}
-	stmt->upsert_status->warning_count =
-		stmt->conn->upsert_status->warning_count =
-			row_packet->warning_count;
-	stmt->upsert_status->server_status =
-		stmt->conn->upsert_status->server_status =
-			row_packet->server_status;
+	UPSERT_STATUS_SET_WARNINGS(stmt->upsert_status, row_packet->warning_count);
+	UPSERT_STATUS_SET_WARNINGS(stmt->conn->upsert_status, row_packet->warning_count);
+
+	UPSERT_STATUS_SET_SERVER_STATUS(stmt->upsert_status, row_packet->server_status);
+	UPSERT_STATUS_SET_SERVER_STATUS(stmt->conn->upsert_status, row_packet->server_status);
 
 	DBG_INF_FMT("ret=%s fetched=%u server_status=%u warnings=%u eof=%u",
 				ret == PASS? "PASS":"FAIL", *fetched_anything,
@@ -1356,7 +1355,7 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s)
 /* {{{ mysqlnd_stmt::send_long_data */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned int param_no,
-							 				 const char * const data, zend_ulong length)
+							 				 const char * const data, zend_ulong data_length)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret = FAIL;
@@ -1367,7 +1366,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
 	}
-	DBG_INF_FMT("stmt=%lu param_no=%u data_len=%lu", stmt->stmt_id, param_no, length);
+	DBG_INF_FMT("stmt=%lu param_no=%u data_len=%lu", stmt->stmt_id, param_no, data_length);
 
 	conn = stmt->conn;
 
@@ -1395,27 +1394,17 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 		DBG_RETURN(FAIL);
 	}
 
-	/*
-	  XXX:	Unfortunately we have to allocate additional buffer to be able the
-			additional data, which is like a header inside the payload.
-			This should be optimised, but it will be a pervasive change, so
-			conn->m->send_command() will accept not a buffer, but actually MYSQLND_STRING*
-			terminated by NULL, to send. If the strings are not big, we can collapse them
-			on the buffer every connection has, but otherwise we will just send them
-			one by one to the wire.
-	*/
-
 	if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
-		size_t packet_len;
-		cmd_buf = mnd_emalloc(packet_len = MYSQLND_STMT_ID_LENGTH + 2 + length);
+		const size_t packet_len = MYSQLND_STMT_ID_LENGTH + 2 + data_length;
+		cmd_buf = mnd_emalloc(packet_len);
 		if (cmd_buf) {
 			stmt->param_bind[param_no].flags |= MYSQLND_PARAM_BIND_BLOB_USED;
 
 			int4store(cmd_buf, stmt->stmt_id);
 			int2store(cmd_buf + MYSQLND_STMT_ID_LENGTH, param_no);
-			memcpy(cmd_buf + MYSQLND_STMT_ID_LENGTH + 2, data, length);
+			memcpy(cmd_buf + MYSQLND_STMT_ID_LENGTH + 2, data, data_length);
 
-			/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
+			/* COM_STMT_SEND_LONG_DATA doesn't acknowledge with an OK packet */
 			{
 				const MYSQLND_CSTRING payload = {(const char *) cmd_buf, packet_len};
 				struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_SEND_LONG_DATA, stmt->conn, payload);
@@ -1737,7 +1726,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt? stmt->upsert_status->last_insert_id : 0;
+	return stmt? UPSERT_STATUS_GET_LAST_INSERT_ID(stmt->upsert_status) : 0;
 }
 /* }}} */
 
@@ -1747,7 +1736,7 @@ static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt? stmt->upsert_status->affected_rows : 0;
+	return stmt? UPSERT_STATUS_GET_AFFECTED_ROWS(stmt->upsert_status) : 0;
 }
 /* }}} */
 
@@ -1767,7 +1756,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt? stmt->upsert_status->warning_count : 0;
+	return stmt? UPSERT_STATUS_GET_WARNINGS(stmt->upsert_status) : 0;
 }
 /* }}} */
 
@@ -1777,7 +1766,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_stmt, server_status)(const MYSQLND_STMT * const s)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	return stmt? stmt->upsert_status->server_status : 0;
+	return stmt? UPSERT_STATUS_GET_SERVER_STATUS(stmt->upsert_status) : 0;
 }
 /* }}} */
 
@@ -1875,7 +1864,9 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 
 	if (stmt->update_max_length && stmt->result->stored_data) {
 		/* stored result, we have to update the max_length before we clone the meta data :( */
-		stmt->result->stored_data->m.initialize_result_set_rest(stmt->result->stored_data, stmt->result->meta, stmt->conn->stats,
+		stmt->result->stored_data->m.initialize_result_set_rest(stmt->result->stored_data,
+																stmt->result->meta,
+																stmt->conn->stats,
 																stmt->conn->options->int_and_float_native);
 	}
 	/*
@@ -1883,9 +1874,6 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 			find a better way to do it. In different functions I have put
 			fuses to check for result->m.fetch_row() being NULL. This should
 			be handled in a better way.
-
-	  In the meantime we don't need a zval cache reference for this fake
-	  result set, so we don't get one.
 	*/
 	do {
 		result = stmt->conn->m->result_init(stmt->field_count, stmt->persistent);

@@ -890,7 +890,7 @@ php_mysqlnd_ok_read(void * _packet)
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
 										);
-		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+		DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 		DBG_RETURN(PASS);
 	}
 	/* Everything was fine! */
@@ -1143,7 +1143,7 @@ php_mysqlnd_rset_header_read(void * _packet)
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
 										);
-		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+		DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 		DBG_RETURN(PASS);
 	}
 
@@ -2679,7 +2679,7 @@ send_command(
 	MYSQLND_PACKET_COMMAND * cmd_packet = NULL;
 	DBG_ENTER("send_command");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
-	DBG_INF_FMT("server_status=%u", upsert_status->server_status);
+	DBG_INF_FMT("server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(upsert_status));
 	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
 	enum mysqlnd_connection_state state = connection_state->m->get(connection_state);
 
@@ -2773,10 +2773,10 @@ send_command_handle_OK(MYSQLND_ERROR_INFO * const error_info,
 						last_message_persistent);
 		if (!ignore_upsert_status) {
 			UPSERT_STATUS_RESET(upsert_status);
-			upsert_status->warning_count = ok_response->warning_count;
-			upsert_status->server_status = ok_response->server_status;
-			upsert_status->affected_rows = ok_response->affected_rows;
-			upsert_status->last_insert_id = ok_response->last_insert_id;
+			UPSERT_STATUS_SET_WARNINGS(upsert_status, ok_response->warning_count);
+			UPSERT_STATUS_SET_SERVER_STATUS(upsert_status, ok_response->server_status);
+			UPSERT_STATUS_SET_AFFECTED_ROWS(upsert_status, ok_response->affected_rows);
+			UPSERT_STATUS_SET_LAST_INSERT_ID(upsert_status, ok_response->last_insert_id);
 		} else {
 			/* LOAD DATA */
 		}

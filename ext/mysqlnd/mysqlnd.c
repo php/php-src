@@ -759,9 +759,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	}
 
 	UPSERT_STATUS_RESET(conn->upsert_status);
-	conn->upsert_status->warning_count = 0;
-	conn->upsert_status->server_status = greet_packet->server_status;
-	conn->upsert_status->affected_rows = 0;
+	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, greet_packet->server_status);
 
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(PASS);
@@ -1112,8 +1110,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 			PASS == conn->m->reap_query(conn, MYSQLND_REAP_RESULT_IMPLICIT))
 		{
 			ret = PASS;
-			if (conn->last_query_type == QUERY_UPSERT && conn->upsert_status->affected_rows) {
-				MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status->affected_rows);
+			if (conn->last_query_type == QUERY_UPSERT && UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status)) {
+				MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status));
 			}
 		}
 		conn->m->local_tx_end(conn, this_func, ret);
@@ -1132,7 +1130,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::send_query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
-	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 
 	if (type == MYSQLND_SEND_QUERY_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
 	{
@@ -1147,7 +1145,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 			conn->m->local_tx_end(conn, this_func, ret);
 		}
 	}
-	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1162,7 +1160,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	DBG_ENTER("mysqlnd_conn_data::reap_query");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
-	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	if (type == MYSQLND_REAP_RESULT_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
 	{
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_REAP_RESULT, conn);
@@ -1175,7 +1173,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 			conn->m->local_tx_end(conn, this_func, ret);
 		}
 	}
-	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
+	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1484,8 +1482,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn,
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		DBG_INF_FMT("server_status=%u", conn->upsert_status->server_status);
-		if (conn->upsert_status->server_status & SERVER_STATUS_NO_BACKSLASH_ESCAPES) {
+		DBG_INF_FMT("server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
+		if (UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_STATUS_NO_BACKSLASH_ESCAPES) {
 			ret = mysqlnd_cset_escape_quotes(conn->charset, newstr, escapestr, escapestr_len);
 		} else {
 			ret = mysqlnd_cset_escape_slashes(conn->charset, newstr, escapestr, escapestr_len);
@@ -1818,7 +1816,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const c
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, server_status)(const MYSQLND_CONN_DATA * const conn)
 {
-	return conn->upsert_status->server_status;
+	return UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status);
 }
 /* }}} */
 
@@ -1827,7 +1825,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, server_status)(const MYSQLND_CONN_DATA * const
 static uint64_t
 MYSQLND_METHOD(mysqlnd_conn_data, insert_id)(const MYSQLND_CONN_DATA * const conn)
 {
-	return conn->upsert_status->last_insert_id;
+	return UPSERT_STATUS_GET_LAST_INSERT_ID(conn->upsert_status);
 }
 /* }}} */
 
@@ -1836,7 +1834,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, insert_id)(const MYSQLND_CONN_DATA * const con
 static uint64_t
 MYSQLND_METHOD(mysqlnd_conn_data, affected_rows)(const MYSQLND_CONN_DATA * const conn)
 {
-	return conn->upsert_status->affected_rows;
+	return UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status);
 }
 /* }}} */
 
@@ -1845,7 +1843,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, affected_rows)(const MYSQLND_CONN_DATA * const
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, warning_count)(const MYSQLND_CONN_DATA * const conn)
 {
-	return conn->upsert_status->warning_count;
+	return UPSERT_STATUS_GET_WARNINGS(conn->upsert_status);
 }
 /* }}} */
 
@@ -1947,7 +1945,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, more_results)(const MYSQLND_CONN_DATA * const 
 {
 	DBG_ENTER("mysqlnd_conn_data::more_results");
 	/* (conn->state == CONN_NEXT_RESULT_PENDING) too */
-	DBG_RETURN(conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS? TRUE:FALSE);
+	DBG_RETURN(UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS? TRUE:FALSE);
 }
 /* }}} */
 
@@ -1989,8 +1987,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 				}
 				break;
 			}
-			if (conn->last_query_type == QUERY_UPSERT && conn->upsert_status->affected_rows) {
-				MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status->affected_rows);
+			if (conn->last_query_type == QUERY_UPSERT && UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status)) {
+				MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, UPSERT_STATUS_GET_AFFECTED_ROWS(conn->upsert_status));
 			}
 		} while (0);
 		conn->m->local_tx_end(conn, this_func, ret);

@@ -132,6 +132,10 @@ struct st_mysqlnd_upsert_status
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_upsert_status) *m;
 };
 
+#define SET_EMPTY_ERROR(info)							(info)->m->reset((info))
+#define SET_CLIENT_ERROR(info, err_no, sqlstate, error)	(err_no)? (info)->m->set_client_error((info), (err_no), (sqlstate), (error)) : (info)->m->reset((info))
+#define SET_OOM_ERROR(info) 							SET_CLIENT_ERROR((info), CR_OUT_OF_MEMORY, UNKNOWN_SQLSTATE, mysqlnd_out_of_memory)
+#define COPY_CLIENT_ERROR(dest, source)					SET_CLIENT_ERROR((dest), (source).error_no, (source).sqlstate, (source).error)
 
 
 typedef struct st_mysqlnd_error_info MYSQLND_ERROR_INFO;
@@ -1190,7 +1194,6 @@ struct st_mysqlnd_stmt_data
 	zend_ulong					stmt_id;
 	zend_ulong					flags;/* cursor is set here */
 	enum_mysqlnd_stmt_state		state;
-	unsigned int				warning_count;
 	MYSQLND_RES					*result;
 	unsigned int				field_count;
 	unsigned int				param_count;
