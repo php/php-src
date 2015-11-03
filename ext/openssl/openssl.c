@@ -5230,7 +5230,7 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 }
 /* }}} */
 
-static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len) /* {{{ */
+static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len, zend_bool *free_iv) /* {{{ */
 {
 	char *iv_new;
 
@@ -5245,7 +5245,8 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 		/* BC behavior */
 		*piv_len = iv_required_len;
 		*piv     = iv_new;
-		return 1;
+		*free_iv = 1;
+		return SUCCESS;
 	}
 
 	if (*piv_len < iv_required_len) {
@@ -5253,14 +5254,16 @@ static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_
 		memcpy(iv_new, *piv, *piv_len);
 		*piv_len = iv_required_len;
 		*piv     = iv_new;
-		return 1;
+		*free_iv = 1;
+		return SUCCESS;
 	}
 
 	php_error_docref(NULL, E_WARNING, "IV passed is %d bytes long which is longer than the %d expected by selected cipher, truncating", *piv_len, iv_required_len);
 	memcpy(iv_new, *piv, iv_required_len);
 	*piv_len = iv_required_len;
 	*piv     = iv_new;
-	return 1;
+	*free_iv = 1;
+	return SUCCESS;
 
 }
 /* }}} */
@@ -5338,7 +5341,10 @@ PHP_FUNCTION(openssl_encrypt)
 	if (iv_len == 0 && max_iv_len > 0) {
 		php_error_docref(NULL, E_WARNING, "Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
-	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len);
+	if (php_openssl_validate_iv(&iv, &iv_len, max_iv_len, &free_iv) == FAILURE) {
+		RETVAL_FALSE;
+		goto openssl_encrypt_clean;
+	}
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, password_len, keylen, key, iv, options, 1) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Failed to initialize cipher encryption");
@@ -5447,7 +5453,10 @@ PHP_FUNCTION(openssl_decrypt)
 		key = (unsigned char*)password;
 	}
 
-	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type));
+	if (php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type), &free_iv) == FAILURE) {
+		RETVAL_FALSE;
+		goto openssl_decrypt_clean;
+	}
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, password_len, keylen, key, iv, options, 0) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Failed to initialize cipher decryption");
