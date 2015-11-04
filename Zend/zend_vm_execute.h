@@ -7737,8 +7737,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 				ZVAL_UNDEF(var);
 				zval_dtor_func_for_ptr(garbage);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(var);
-				ZVAL_UNDEF(var);
+				zval *z = var;
+				ZVAL_DEREF(z);
+				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
+					ZVAL_UNDEF(var);
+					gc_possible_root(Z_COUNTED_P(z));
+				} else {
+					ZVAL_UNDEF(var);
+				}
 			}
 		} else {
 			ZVAL_UNDEF(var);
@@ -35008,8 +35014,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 				ZVAL_UNDEF(var);
 				zval_dtor_func_for_ptr(garbage);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(var);
-				ZVAL_UNDEF(var);
+				zval *z = var;
+				ZVAL_DEREF(z);
+				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
+					ZVAL_UNDEF(var);
+					gc_possible_root(Z_COUNTED_P(z));
+				} else {
+					ZVAL_UNDEF(var);
+				}
 			}
 		} else {
 			ZVAL_UNDEF(var);
@@ -43180,8 +43192,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 				ZVAL_UNDEF(var);
 				zval_dtor_func_for_ptr(garbage);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(var);
-				ZVAL_UNDEF(var);
+				zval *z = var;
+				ZVAL_DEREF(z);
+				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
+					ZVAL_UNDEF(var);
+					gc_possible_root(Z_COUNTED_P(z));
+				} else {
+					ZVAL_UNDEF(var);
+				}
 			}
 		} else {
 			ZVAL_UNDEF(var);

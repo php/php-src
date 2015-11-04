@@ -5605,8 +5605,14 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH)
 				ZVAL_UNDEF(var);
 				zval_dtor_func_for_ptr(garbage);
 			} else {
-				GC_ZVAL_CHECK_POSSIBLE_ROOT(var);
-				ZVAL_UNDEF(var);
+				zval *z = var;
+				ZVAL_DEREF(z);
+				if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
+					ZVAL_UNDEF(var);
+					gc_possible_root(Z_COUNTED_P(z));
+				} else {
+					ZVAL_UNDEF(var);
+				}
 			}
 		} else {
 			ZVAL_UNDEF(var);
