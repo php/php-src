@@ -459,6 +459,9 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 		}
 	}
 #else
+#ifdef ZEND_WIN32
+	ZeroMemory(&cwd, sizeof(cwd));
+#endif
 	result = getcwd(cwd, sizeof(cwd));
 #endif
 	if (!result) {
