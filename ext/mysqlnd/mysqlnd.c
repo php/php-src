@@ -292,10 +292,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->unix_socket, pers);
 		conn->unix_socket = NULL;
 	}
-	DBG_INF_FMT("scheme=%s", conn->scheme);
-	if (conn->scheme) {
-		mnd_pefree(conn->scheme, pers);
-		conn->scheme = NULL;
+	DBG_INF_FMT("scheme=%s", conn->scheme.s);
+	if (conn->scheme.s) {
+		mnd_pefree(conn->scheme.s, pers);
+		conn->scheme.s = NULL;
 	}
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
@@ -712,7 +712,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		DBG_RETURN(FAIL); /* OOM */
 	}
 
-	if (FAIL == net->data->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
+	if (FAIL == net->data->m.connect_ex(conn->net, conn->scheme, conn->persistent,
 										conn->stats, conn->error_info))
 	{
 		goto err;
@@ -889,12 +889,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
-		DBG_INF_FMT("transport=%s conn->scheme=%s", transport, conn->scheme);
-		conn->scheme = mnd_pestrndup(transport, transport_len, conn->persistent);
-		conn->scheme_len = transport_len;
+		DBG_INF_FMT("transport=%s conn->scheme=%s", transport, conn->scheme.s);
+		conn->scheme.s = mnd_pestrndup(transport, transport_len, conn->persistent);
+		conn->scheme.l = transport_len;
 		mnd_sprintf_free(transport);
 		transport = NULL;
-		if (!conn->scheme) {
+		if (!conn->scheme.s) {
 			goto err; /* OOM */
 		}
 	}
@@ -1004,11 +1004,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	}
 err:
 
-	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme);
+	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
 	if (!conn->error_info->error_no) {
 		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, conn->error_info->error? conn->error_info->error:"Unknown error");
-		php_error_docref(NULL, E_WARNING, "[%u] %.128s (trying to connect via %s)",
-						 conn->error_info->error_no, conn->error_info->error, conn->scheme);
+		php_error_docref(NULL, E_WARNING, "[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
 	}
 
 	conn->m->free_contents(conn);
@@ -1744,7 +1743,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 		case CONN_QUERY_SENT:
 		case CONN_FETCHING_DATA:
 			MYSQLND_INC_GLOBAL_STATISTIC(STAT_CLOSE_IN_MIDDLE);
-			DBG_ERR_FMT("Brutally closing connection [%p][%s]", conn, conn->scheme);
+			DBG_ERR_FMT("Brutally closing connection [%p][%s]", conn, conn->scheme.s);
 			/*
 			  Do nothing, the connection will be brutally closed
 			  and the server will catch it and free close from its side.

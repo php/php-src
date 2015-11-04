@@ -129,8 +129,7 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 
 /* {{{ mysqlnd_net::open_pipe */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
-									   const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 #if PHP_API_VERSION < 20100412
@@ -146,7 +145,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 		streams_options |= STREAM_OPEN_PERSISTENT;
 	}
 	streams_options |= IGNORE_URL;
-	net_stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
+	net_stream = php_stream_open_wrapper(scheme.s + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	if (!net_stream) {
 		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
 		DBG_RETURN(NULL);
@@ -169,8 +168,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 
 /* {{{ mysqlnd_net::open_tcp_or_unix */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
-											  const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 #if PHP_API_VERSION < 20100412
@@ -202,7 +200,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	}
 
 	DBG_INF_FMT("calling php_stream_xport_create");
-	net_stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
+	net_stream = php_stream_xport_create(scheme.s, scheme.l, streams_options, streams_flags,
 										  hashed_details, (net->data->options.timeout_connect) ? &tv : NULL,
 										  NULL /*ctx*/, &errstr, &errcode);
 	if (errstr || !net_stream) {
@@ -265,8 +263,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 
 /* {{{ mysqlnd_net::post_connect_set_opt */
 static void
-MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
-												  const char * const scheme, const size_t scheme_len,
+MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net, const MYSQLND_STRING scheme,
 												  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	php_stream * net_stream = net->data->m.get_stream(net);
@@ -280,7 +277,7 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 		}
 
-		if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
+		if (!memcmp(scheme.s, "tcp://", sizeof("tcp://") - 1)) {
 			/* TCP -> Set TCP_NODELAY */
 			mysqlnd_set_sock_no_delay(net_stream);
 			/* TCP -> Set SO_KEEPALIVE */
@@ -295,16 +292,16 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 
 /* {{{ mysqlnd_net::get_open_stream */
 static func_mysqlnd_net__open_stream
-MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
+MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const MYSQLND_STRING scheme,
 											 MYSQLND_ERROR_INFO * const error_info)
 {
 	func_mysqlnd_net__open_stream ret = NULL;
 	DBG_ENTER("mysqlnd_net::get_open_stream");
-	if (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1)) {
+	if (scheme.l > (sizeof("pipe://") - 1) && !memcmp(scheme.s, "pipe://", sizeof("pipe://") - 1)) {
 		ret = net->data->m.open_pipe;
-	} else if ((scheme_len > (sizeof("tcp://") - 1) && !memcmp(scheme, "tcp://", sizeof("tcp://") - 1))
+	} else if ((scheme.l > (sizeof("tcp://") - 1) && !memcmp(scheme.s, "tcp://", sizeof("tcp://") - 1))
 				||
-				(scheme_len > (sizeof("unix://") - 1) && !memcmp(scheme, "unix://", sizeof("unix://") - 1)))
+				(scheme.l > (sizeof("unix://") - 1) && !memcmp(scheme.s, "unix://", sizeof("unix://") - 1)))
 	{
 		ret = net->data->m.open_tcp_or_unix;
 	}
@@ -320,8 +317,7 @@ MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char
 
 /* {{{ mysqlnd_net::connect_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
-										const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
 										MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status ret = FAIL;
@@ -332,12 +328,12 @@ MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const char * co
 
 	net->data->m.close_stream(net, conn_stats, error_info);
 
-	open_stream = net->data->m.get_open_stream(net, scheme, scheme_len, error_info);
+	open_stream = net->data->m.get_open_stream(net, scheme, error_info);
 	if (open_stream) {
-		php_stream * net_stream = open_stream(net, scheme, scheme_len, persistent, conn_stats, error_info);
+		php_stream * net_stream = open_stream(net, scheme, persistent, conn_stats, error_info);
 		if (net_stream) {
 			(void) net->data->m.set_stream(net, net_stream);
-			net->data->m.post_connect_set_opt(net, scheme, scheme_len, conn_stats, error_info);
+			net->data->m.post_connect_set_opt(net, scheme, conn_stats, error_info);
 			ret = PASS;
 		}
 	}
