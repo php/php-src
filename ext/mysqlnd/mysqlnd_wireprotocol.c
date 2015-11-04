@@ -288,15 +288,19 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 
 /* {{{ mysqlnd_read_packet_header_and_body */
 static enum_func_status
-mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header, MYSQLND_CONN_DATA * conn,
+mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
+									MYSQLND_NET * net,
+									MYSQLND_STATS * stats,
+									MYSQLND_ERROR_INFO * error_info,
+									MYSQLND_CONNECTION_STATE * connection_state,
 									zend_uchar * buf, size_t buf_size, const char * const packet_type_as_text,
 									enum mysqlnd_packet_type packet_type)
 {
 	DBG_ENTER("mysqlnd_read_packet_header_and_body");
 	DBG_INF_FMT("buf=%p size=%u", buf, buf_size);
-	if (FAIL == mysqlnd_read_header(conn->net, packet_header, conn->stats, conn->error_info)) {
-		SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+	if (FAIL == mysqlnd_read_header(net, packet_header, stats, error_info)) {
+		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
+		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone);
 		DBG_ERR_FMT("Can't read %s's header", packet_type_as_text);
 		DBG_RETURN(FAIL);
@@ -306,14 +310,14 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header, MYSQL
 					buf_size, packet_header->size, packet_header->size - buf_size);
 		DBG_RETURN(FAIL);
 	}
-	if (FAIL == conn->net->data->m.receive_ex(conn->net, buf, packet_header->size, conn->stats, conn->error_info)) {
-		SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+	if (FAIL == net->data->m.receive_ex(net, buf, packet_header->size, stats, error_info)) {
+		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
+		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone);
 		DBG_ERR_FMT("Empty '%s' packet body", packet_type_as_text);
 		DBG_RETURN(FAIL);
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, packet_type_to_statistic_byte_count[packet_type],
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, packet_type_to_statistic_byte_count[packet_type],
 										MYSQLND_HEADER_SIZE + packet_header->size,
 										packet_type_to_statistic_packet_count[packet_type],
 										1);
@@ -331,12 +335,14 @@ php_mysqlnd_greet_read(void * _packet)
 	zend_uchar *begin = buf;
 	zend_uchar *pad_start = NULL;
 	MYSQLND_PACKET_GREET *packet= (MYSQLND_PACKET_GREET *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 
 	DBG_ENTER("php_mysqlnd_greet_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, sizeof(buf), "greeting", PROT_GREET_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, sizeof(buf), "greeting", PROT_GREET_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -496,8 +502,11 @@ size_t php_mysqlnd_auth_write(void * _packet)
 	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 	int len;
 	MYSQLND_PACKET_AUTH * packet= (MYSQLND_PACKET_AUTH *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_CONN_DATA * conn = packet->header.conn;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 
 	DBG_ENTER("php_mysqlnd_auth_write");
 
@@ -528,7 +537,7 @@ size_t php_mysqlnd_auth_write(void * _packet)
 		if (packet->auth_data_len > 0xFF) {
 			const char * const msg = "Authentication data too long. "
 				"Won't fit into the buffer and will be truncated. Authentication will thus fail";
-			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
+			SET_CLIENT_ERROR(error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
 			php_error_docref(NULL, E_WARNING, "%s", msg);
 			DBG_RETURN(0);
 		}
@@ -626,9 +635,9 @@ size_t php_mysqlnd_auth_write(void * _packet)
 
 		DBG_RETURN(ret == PASS? (p - buffer - MYSQLND_HEADER_SIZE) : 0);
 	} else {
-		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
+		size_t sent = net->data->m.send_ex(net, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
 		if (!sent) {
-			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		}
 		DBG_RETURN(sent);
 	}
@@ -655,11 +664,13 @@ static enum_func_status
 php_mysqlnd_auth_response_read(void * _packet)
 {
 	register MYSQLND_PACKET_AUTH_RESPONSE * packet= (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
-	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
-	zend_uchar *buf = conn->net->cmd_buffer.buffer? (zend_uchar *) conn->net->cmd_buffer.buffer : local_buf;
+	size_t buf_len = net->cmd_buffer.buffer? net->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
+	zend_uchar *buf = net->cmd_buffer.buffer? (zend_uchar *) net->cmd_buffer.buffer : local_buf;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	zend_ulong i;
@@ -668,7 +679,7 @@ php_mysqlnd_auth_response_read(void * _packet)
 
 	/* leave space for terminating safety \0 */
 	buf_len--;
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "OK", PROT_OK_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "OK", PROT_OK_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -779,9 +790,11 @@ static size_t
 php_mysqlnd_change_auth_response_write(void * _packet)
 {
 	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *packet= (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
-	zend_uchar * buffer = conn->net->cmd_buffer.length >= packet->auth_data_len? conn->net->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
+	zend_uchar * buffer = net->cmd_buffer.length >= packet->auth_data_len? net->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
 	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 
 	DBG_ENTER("php_mysqlnd_change_auth_response_write");
@@ -792,12 +805,12 @@ php_mysqlnd_change_auth_response_write(void * _packet)
 	}
 
 	{
-		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
-		if (buffer != conn->net->cmd_buffer.buffer) {
+		size_t sent = net->data->m.send_ex(net, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
+		if (buffer != net->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
 		if (!sent) {
-			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+			SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		}
 		DBG_RETURN(sent);
 	}
@@ -824,18 +837,20 @@ static enum_func_status
 php_mysqlnd_ok_read(void * _packet)
 {
 	register MYSQLND_PACKET_OK *packet= (MYSQLND_PACKET_OK *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	zend_uchar local_buf[OK_BUFFER_SIZE];
-	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length : OK_BUFFER_SIZE;
-	zend_uchar *buf = conn->net->cmd_buffer.buffer? (zend_uchar *) conn->net->cmd_buffer.buffer : local_buf;
+	size_t buf_len = net->cmd_buffer.buffer? net->cmd_buffer.length : OK_BUFFER_SIZE;
+	zend_uchar *buf = net->cmd_buffer.buffer? (zend_uchar *) net->cmd_buffer.buffer : local_buf;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	zend_ulong i;
 
 	DBG_ENTER("php_mysqlnd_ok_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "OK", PROT_OK_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "OK", PROT_OK_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -850,7 +865,6 @@ php_mysqlnd_ok_read(void * _packet)
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
 										);
-		DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 		DBG_RETURN(PASS);
 	}
 	/* Everything was fine! */
@@ -920,16 +934,18 @@ php_mysqlnd_eof_read(void * _packet)
 	  Error : error_code + '#' + sqlstate + MYSQLND_ERRMSG_SIZE
 	*/
 	MYSQLND_PACKET_EOF *packet= (MYSQLND_PACKET_EOF *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
-	size_t buf_len = conn->net->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
+	size_t buf_len = net->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 
 	DBG_ENTER("php_mysqlnd_eof_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "EOF", PROT_EOF_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "EOF", PROT_EOF_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -996,9 +1012,10 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 {
 	/* Let's have some space, which we can use, if not enough, we will allocate new buffer */
 	MYSQLND_PACKET_COMMAND * packet= (MYSQLND_PACKET_COMMAND *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
-	MYSQLND_NET * net = conn->net;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	unsigned int error_reporting = EG(error_reporting);
 	size_t sent = 0;
 
@@ -1014,7 +1031,7 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 		EG(error_reporting) = 0;
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PACKETS_SENT_CMD);
+	MYSQLND_INC_CONN_STATISTIC(stats, STAT_PACKETS_SENT_CMD);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	net->data->m.consume_uneaten_data(net, packet->command);
@@ -1024,7 +1041,7 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 		zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 
 		int1store(buffer + MYSQLND_HEADER_SIZE, packet->command);
-		sent = net->data->m.send_ex(net, buffer, 1, conn->stats, conn->error_info);
+		sent = net->data->m.send_ex(net, buffer, 1, stats, error_info);
 	} else {
 		size_t tmp_len = packet->argument.l + 1 + MYSQLND_HEADER_SIZE;
 		zend_uchar *tmp, *p;
@@ -1039,9 +1056,9 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 
 		memcpy(p, packet->argument.s, packet->argument.l);
 
-		sent = net->data->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
+		sent = net->data->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, stats, error_info);
 		if (tmp != net->cmd_buffer.buffer) {
-			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
+			MYSQLND_INC_CONN_STATISTIC(stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
 		}
 	}
@@ -1051,7 +1068,7 @@ end:
 		EG(error_reporting) = error_reporting;
 	}
 	if (!sent) {
-		SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 	}
 	DBG_RETURN(sent);
 }
@@ -1075,18 +1092,20 @@ static enum_func_status
 php_mysqlnd_rset_header_read(void * _packet)
 {
 	MYSQLND_PACKET_RSET_HEADER * packet= (MYSQLND_PACKET_RSET_HEADER *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	enum_func_status ret = PASS;
-	size_t buf_len = conn->net->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	size_t buf_len = net->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	size_t len;
 
 	DBG_ENTER("php_mysqlnd_rset_header_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "resultset header", PROT_RSET_HEADER_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "resultset header", PROT_RSET_HEADER_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -1103,7 +1122,6 @@ php_mysqlnd_rset_header_read(void * _packet)
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
 										);
-		DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 		DBG_RETURN(PASS);
 	}
 
@@ -1127,7 +1145,7 @@ php_mysqlnd_rset_header_read(void * _packet)
 				packet->info_or_local_file.s[len] = '\0';
 				packet->info_or_local_file.l = len;
 			} else {
-				SET_OOM_ERROR(conn->error_info);
+				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 			}
 			break;
@@ -1154,7 +1172,7 @@ php_mysqlnd_rset_header_read(void * _packet)
 					packet->info_or_local_file.s[len] = '\0';
 					packet->info_or_local_file.l = len;
 				} else {
-					SET_OOM_ERROR(conn->error_info);
+					SET_OOM_ERROR(error_info);
 					ret = FAIL;
 				}
 			}
@@ -1219,10 +1237,12 @@ php_mysqlnd_rset_field_read(void * _packet)
 {
 	/* Should be enough for the metadata of a single row */
 	MYSQLND_PACKET_RES_FIELD *packet = (MYSQLND_PACKET_RES_FIELD *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
-	size_t buf_len = conn->net->cmd_buffer.length, total_len = 0;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
+	size_t buf_len = net->cmd_buffer.length, total_len = 0;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	char *root_ptr;
@@ -1232,7 +1252,7 @@ php_mysqlnd_rset_field_read(void * _packet)
 
 	DBG_ENTER("php_mysqlnd_rset_field_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "field", PROT_RSET_FLD_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "field", PROT_RSET_FLD_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -1335,7 +1355,7 @@ php_mysqlnd_rset_field_read(void * _packet)
 		DBG_INF_FMT("Def found, length %lu, persistent=%u", len, packet->persistent_alloc);
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		if (!meta->def) {
-			SET_OOM_ERROR(conn->error_info);
+			SET_OOM_ERROR(error_info);
 			DBG_RETURN(FAIL);
 		}
 		memcpy(meta->def, p, len);
@@ -1346,7 +1366,7 @@ php_mysqlnd_rset_field_read(void * _packet)
 
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	if (!root_ptr) {
-		SET_OOM_ERROR(conn->error_info);
+		SET_OOM_ERROR(error_info);
 		DBG_RETURN(FAIL);
 	}
 
@@ -1432,7 +1452,10 @@ void php_mysqlnd_rset_field_free_mem(void * _packet, zend_bool stack_allocation)
 
 /* {{{ php_mysqlnd_read_row_ex */
 static enum_func_status
-php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
+php_mysqlnd_read_row_ex(MYSQLND_NET * net,
+						MYSQLND_STATS * stats,
+						MYSQLND_ERROR_INFO * error_info,
+						MYSQLND_MEMORY_POOL * result_set_memory_pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
 						size_t * data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes)
@@ -1454,7 +1477,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 	*data_size = prealloc_more_bytes;
 	while (1) {
-		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info)) {
+		if (FAIL == mysqlnd_read_header(net, &header, stats, error_info)) {
 			ret = FAIL;
 			break;
 		}
@@ -1479,7 +1502,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			  We have to realloc the buffer.
 			*/
 			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size)) {
-				SET_OOM_ERROR(conn->error_info);
+				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
 			}
@@ -1487,7 +1510,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
-		if (PASS != (ret = conn->net->data->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info))) {
+		if (PASS != (ret = net->data->m.receive_ex(net, p, header.size, stats, error_info))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
 			break;
@@ -1787,8 +1810,9 @@ static enum_func_status
 php_mysqlnd_rowp_read(void * _packet)
 {
 	MYSQLND_PACKET_ROW *packet= (MYSQLND_PACKET_ROW *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
 	zend_uchar *p;
 	enum_func_status ret = PASS;
 	size_t post_alloc_for_bit_fields = 0;
@@ -1801,13 +1825,14 @@ php_mysqlnd_rowp_read(void * _packet)
 		post_alloc_for_bit_fields = packet->bit_fields_total_len + packet->bit_fields_count;
 	}
 
-	ret = php_mysqlnd_read_row_ex(conn, packet->result_set_memory_pool, &packet->row_buffer, &data_size,
+	ret = php_mysqlnd_read_row_ex(net, stats, error_info,
+								  packet->result_set_memory_pool, &packet->row_buffer, &data_size,
 								  packet->persistent_alloc, post_alloc_for_bit_fields
 								 );
 	if (FAIL == ret) {
 		goto end;
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, packet_type_to_statistic_byte_count[PROT_ROW_PACKET],
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, packet_type_to_statistic_byte_count[PROT_ROW_PACKET],
 										MYSQLND_HEADER_SIZE + packet->header.size,
 										packet_type_to_statistic_packet_count[PROT_ROW_PACKET],
 										1);
@@ -1840,7 +1865,7 @@ php_mysqlnd_rowp_read(void * _packet)
 			DBG_INF_FMT("server_status=%u warning_count=%u", packet->server_status, packet->warning_count);
 		}
 	} else {
-		MYSQLND_INC_CONN_STATISTIC(conn->stats,
+		MYSQLND_INC_CONN_STATISTIC(stats,
 									packet->binary_protocol? STAT_ROWS_FETCHED_FROM_SERVER_PS:
 															 STAT_ROWS_FETCHED_FROM_SERVER_NORMAL);
 
@@ -1864,7 +1889,7 @@ php_mysqlnd_rowp_read(void * _packet)
 														packet->persistent_alloc);
 			}
 		} else {
-			MYSQLND_INC_CONN_STATISTIC(conn->stats,
+			MYSQLND_INC_CONN_STATISTIC(stats,
 										packet->binary_protocol? STAT_ROWS_SKIPPED_PS:
 																 STAT_ROWS_SKIPPED_NORMAL);
 		}
@@ -1909,14 +1934,16 @@ static enum_func_status
 php_mysqlnd_stats_read(void * _packet)
 {
 	MYSQLND_PACKET_STATS *packet= (MYSQLND_PACKET_STATS *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
-	size_t buf_len = conn->net->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
+	size_t buf_len = net->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 
 	DBG_ENTER("php_mysqlnd_stats_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "statistics", PROT_STATS_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "statistics", PROT_STATS_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -1955,18 +1982,20 @@ static enum_func_status
 php_mysqlnd_prepare_read(void * _packet)
 {
 	MYSQLND_PACKET_PREPARE_RESPONSE *packet= (MYSQLND_PACKET_PREPARE_RESPONSE *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	/* In case of an error, we should have place to put it */
-	size_t buf_len = conn->net->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	size_t buf_len = net->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	unsigned int data_size;
 
 	DBG_ENTER("php_mysqlnd_prepare_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "prepare", PROT_PREPARE_RESP_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "prepare", PROT_PREPARE_RESP_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -2047,17 +2076,19 @@ static enum_func_status
 php_mysqlnd_chg_user_read(void * _packet)
 {
 	MYSQLND_PACKET_CHG_USER_RESPONSE *packet= (MYSQLND_PACKET_CHG_USER_RESPONSE *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	/* There could be an error message */
-	size_t buf_len = conn->net->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
+	size_t buf_len = net->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 
 	DBG_ENTER("php_mysqlnd_chg_user_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, buf_len, "change user response", PROT_CHG_USER_RESP_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, buf_len, "change user response", PROT_CHG_USER_RESP_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -2138,16 +2169,17 @@ php_mysqlnd_chg_user_free_mem(void * _packet, zend_bool stack_allocation)
 static
 size_t php_mysqlnd_sha256_pk_request_write(void * _packet)
 {
-	MYSQLND_PACKET_HEADER *packet_header= (MYSQLND_PACKET_HEADER *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet_header->factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_PACKET_SHA256_PK_REQUEST * packet = (MYSQLND_PACKET_SHA256_PK_REQUEST *) _packet;
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
 	zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 	size_t sent;
 
 	DBG_ENTER("php_mysqlnd_sha256_pk_request_write");
 
 	int1store(buffer + MYSQLND_HEADER_SIZE, '\1');
-	sent = conn->net->data->m.send_ex(conn->net, buffer, 1, conn->stats, conn->error_info);
+	sent = net->data->m.send_ex(net, buffer, 1, stats, error_info);
 
 	DBG_RETURN(sent);
 }
@@ -2173,8 +2205,10 @@ static enum_func_status
 php_mysqlnd_sha256_pk_request_response_read(void * _packet)
 {
 	MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * packet= (MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE *) _packet;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory = packet->header.factory;
-	MYSQLND_CONN_DATA * conn = factory->m.get_mysqlnd_conn_data(factory);
+	MYSQLND_ERROR_INFO * error_info = packet->header.error_info;
+	MYSQLND_NET * net = packet->header.net;
+	MYSQLND_STATS * stats = packet->header.stats;
+	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
@@ -2182,7 +2216,7 @@ php_mysqlnd_sha256_pk_request_response_read(void * _packet)
 	DBG_ENTER("php_mysqlnd_sha256_pk_request_response_read");
 
 	/* leave space for terminating safety \0 */
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), conn, buf, sizeof(buf), "SHA256_PK_REQUEST_RESPONSE", PROT_SHA256_PK_REQUEST_RESPONSE_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), net, stats, error_info, connection_state, buf, sizeof(buf), "SHA256_PK_REQUEST_RESPONSE", PROT_SHA256_PK_REQUEST_RESPONSE_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -2322,16 +2356,6 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 /* }}} */
 
 
-/* {{{ mysqlnd_protocol::get_mysqlnd_conn_data */
-MYSQLND_CONN_DATA *
-MYSQLND_METHOD(mysqlnd_protocol, get_mysqlnd_conn_data)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory)
-{
-	DBG_ENTER("mysqlnd_protocol::get_mysqlnd_conn_data");
-	DBG_RETURN(factory->conn);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_protocol::get_greet_packet */
 static struct st_mysqlnd_packet_greet *
 MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
@@ -2341,6 +2365,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECO
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_GREET_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2357,6 +2387,13 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECOD
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_AUTH_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.conn = factory->conn;
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2373,6 +2410,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL_PAYL
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_AUTH_RESP_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2389,6 +2432,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOC
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_CHANGE_AUTH_RESP_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2405,6 +2454,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_OK_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2421,6 +2476,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODE
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_EOF_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2437,6 +2498,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DE
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_CMD_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2453,6 +2520,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOA
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_RSET_HEADER_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2469,6 +2542,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL_PAYLO
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_RSET_FLD_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2485,6 +2564,13 @@ MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODE
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_ROW_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.conn = factory->conn;
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2501,6 +2587,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECO
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_STATS_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2517,6 +2609,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL_P
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_PREPARE_RESP_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2533,6 +2631,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_CHG_USER_RESP_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2549,6 +2653,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2565,6 +2675,12 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_
 	if (packet) {
 		packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET];
 		packet->header.factory = factory;
+
+		packet->header.net = factory->conn->net;
+		packet->header.stats = factory->conn->stats;
+		packet->header.error_info = factory->conn->error_info;
+		packet->header.connection_state = &factory->conn->state;
+
 		packet->header.persistent = persistent;
 	}
 	DBG_RETURN(packet);
@@ -2572,7 +2688,6 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_
 /* }}} */
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
-	MYSQLND_METHOD(mysqlnd_protocol, get_mysqlnd_conn_data),
 	MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet),

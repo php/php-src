@@ -401,7 +401,6 @@ struct st_mysqlnd_packet_auth_pam;
 struct st_mysqlnd_packet_sha256_pk_request;
 struct st_mysqlnd_packet_sha256_pk_request_response;
 
-typedef MYSQLND_CONN_DATA *						(*func_mysqlnd_protocol_payload_decoder_factory__get_mysqlnd_conn_data)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory);
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
 typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
@@ -420,7 +419,6 @@ typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_prot
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
 {
-	func_mysqlnd_protocol_payload_decoder_factory__get_mysqlnd_conn_data get_mysqlnd_conn_data;
 	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet get_auth_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet get_auth_response_packet;
@@ -947,9 +945,9 @@ typedef struct st_mysqlnd_protocol_command * (*func_mysqlnd__command_factory)(en
 
 
 
-struct st_mysqlnd_connection_state;
-typedef enum mysqlnd_connection_state (*func_mysqlnd_connection_state__get)(const struct st_mysqlnd_connection_state * const state_struct);
-typedef void (*func_mysqlnd_connection_state__set)(struct st_mysqlnd_connection_state * const state_struct, enum mysqlnd_connection_state state);
+typedef struct st_mysqlnd_connection_state MYSQLND_CONNECTION_STATE;
+typedef enum mysqlnd_connection_state (*func_mysqlnd_connection_state__get)(const MYSQLND_CONNECTION_STATE * const state_struct);
+typedef void (*func_mysqlnd_connection_state__set)(MYSQLND_CONNECTION_STATE * const state_struct, enum mysqlnd_connection_state state);
 
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_connection_state)
@@ -1005,8 +1003,8 @@ struct st_mysqlnd_connection_data
 	MYSQLND_ERROR_INFO	* error_info;
 	MYSQLND_ERROR_INFO	error_info_impl;
 
-	struct st_mysqlnd_connection_state state;
-	enum_mysqlnd_query_type			last_query_type;
+	MYSQLND_CONNECTION_STATE	state;
+	enum_mysqlnd_query_type		last_query_type;
 	/* Temporary storage between query and (use|store)_result() call */
 	MYSQLND_RES						*current_result;
 

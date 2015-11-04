@@ -59,10 +59,17 @@ typedef struct st_mysqlnd_packet_methods {
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
-	mysqlnd_packet_methods *m;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory;
 	zend_uchar	packet_no;
 	zend_bool	persistent;
+
+	mysqlnd_packet_methods *m;
+
+	MYSQLND_CONN_DATA * conn;
+	MYSQLND_NET * net;
+	MYSQLND_ERROR_INFO * error_info;
+	MYSQLND_STATS * stats;
+	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory;
+	MYSQLND_CONNECTION_STATE * connection_state;
 } MYSQLND_PACKET_HEADER;
 
 /* Server greets the client */
