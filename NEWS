@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
 
 - Opcache:
+  . Fixed bug #70843 (Segmentation fault on MacOSX with
+    opcache.file_cache_only=1). (Laruence)
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
     few hours of use). (Laruence)
 
