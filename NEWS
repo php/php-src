@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 7.0.1
 
+- Core:
+  . Fixed bug #70805 (Segmentation faults whilst running Drupal 8 test suite).
+    (Dmitry, Laruence)
+
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
     few hours of use). (Laruence)

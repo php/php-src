@@ -1049,9 +1049,13 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 					return FAILURE;
 				} else {
 					if (ht->pDestructor) {
-						ht->pDestructor(data);
+						zval tmp;
+						ZVAL_COPY_VALUE(&tmp, data);
+						ZVAL_UNDEF(data);
+						ht->pDestructor(&tmp);
+					} else {
+						ZVAL_UNDEF(data);
 					}
-					ZVAL_UNDEF(data);
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
