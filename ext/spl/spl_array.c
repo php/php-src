@@ -325,13 +325,13 @@ string_offest:
 		if (zend_symtable_find(ht, key, len, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE, "Undefined index: %s", key);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE,"Undefined index: %s", key);
 				case BP_VAR_W: {
 				    zval *value;
 				    ALLOC_INIT_ZVAL(value);
