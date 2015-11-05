@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #70805 (Segmentation faults whilst running Drupal 8 test suite).
     (Dmitry, Laruence)
+  . Fixed bug #70862 (Several functions do not check return code of
+    php_stream_copy_to_mem()). (Anatol)
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
