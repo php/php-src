@@ -1566,6 +1566,20 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 		return -1;
 	}
 
+#ifdef ZEND_WIN32
+	{
+		mode_t _tmp = mode;
+
+		mode = 0;
+
+		if (_tmp & _S_IREAD) {
+			mode |= _S_IREAD;
+		}
+		if (_tmp & _S_IWRITE) {
+			mode |= _S_IWRITE;
+		}
+	}
+#endif
 	ret = chmod(new_state.cwd, mode);
 
 	CWD_STATE_FREE_ERR(&new_state);
