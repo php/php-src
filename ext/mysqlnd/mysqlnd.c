@@ -753,7 +753,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				hostname.s?hostname.s:"", username.s?username.s:"", database.s?database.s:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? GET_CONNECTION_STATE(&conn->state):-1);
 
-	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED && GET_CONNECTION_STATE(&conn->state) ) {
+	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED) {
 		DBG_INF("Connecting on a connected handle.");
 
 		if (GET_CONNECTION_STATE(&conn->state) < CONN_QUIT_SENT) {
@@ -763,10 +763,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 
 		conn->m->free_contents(conn);
-		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
-		if (conn->persistent) {
-			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
-		}
 		/* Now reconnect using the same handle */
 		if (net->data->compressed) {
 			/*
