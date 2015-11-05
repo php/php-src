@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
     few hours of use). (Laruence)
 
+- PDO:
+  . Fix bug #70861 (Segmentation fault in pdo_parse_params() during Drupal 8
+    test suite). (Anatol)
+
 - SPL:
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
     as index). (Laruence)
