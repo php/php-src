@@ -129,7 +129,7 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 
 /* {{{ mysqlnd_net::open_pipe */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 #if PHP_API_VERSION < 20100412
@@ -168,7 +168,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const MYSQLND_ST
 
 /* {{{ mysqlnd_net::open_tcp_or_unix */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 #if PHP_API_VERSION < 20100412
@@ -263,7 +263,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const MYS
 
 /* {{{ mysqlnd_net::post_connect_set_opt */
 static void
-MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net, const MYSQLND_STRING scheme,
+MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net, const MYSQLND_CSTRING scheme,
 												  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	php_stream * net_stream = net->data->m.get_stream(net);
@@ -292,7 +292,7 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net, const
 
 /* {{{ mysqlnd_net::get_open_stream */
 static func_mysqlnd_net__open_stream
-MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const MYSQLND_STRING scheme,
+MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const MYSQLND_CSTRING scheme,
 											 MYSQLND_ERROR_INFO * const error_info)
 {
 	func_mysqlnd_net__open_stream ret = NULL;
@@ -317,7 +317,7 @@ MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const MYSQ
 
 /* {{{ mysqlnd_net::connect_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const MYSQLND_STRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const MYSQLND_CSTRING scheme, const zend_bool persistent,
 										MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status ret = FAIL;

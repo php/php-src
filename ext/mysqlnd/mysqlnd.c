@@ -695,6 +695,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 /* {{{ mysqlnd_conn_data::connect_handshake */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
+						const MYSQLND_CSTRING * const scheme,
 						const MYSQLND_CSTRING * const username,
 						const MYSQLND_CSTRING * const password,
 						const MYSQLND_CSTRING * const database,
@@ -704,7 +705,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	size_t client_flags = mysql_flags;
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	if (FAIL == conn->net->data->m.connect_ex(conn->net, conn->scheme, conn->persistent, conn->stats, conn->error_info)) {
+	if (FAIL == conn->net->data->m.connect_ex(conn->net, *scheme, conn->persistent, conn->stats, conn->error_info)) {
 		DBG_RETURN(FAIL);
 	} else {
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_HANDSHAKE, conn, username, password, database, client_flags);
@@ -714,6 +715,42 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		}
 	}
 	DBG_RETURN(ret);
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_data::connect */
+static MYSQLND_STRING
+MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING socket_or_pipe, unsigned int port, zend_bool * unix_socket, zend_bool * named_pipe)
+{
+	MYSQLND_STRING transport;
+	DBG_ENTER("mysqlnd_conn_data::get_scheme");
+#ifndef PHP_WIN32
+	if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
+		DBG_INF_FMT("socket=%s", socket_or_pipe.s? socket_or_pipe.s:"n/a");
+		if (!socket_or_pipe.s) {
+			socket_or_pipe.s = "/tmp/mysql.sock";
+			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		}
+		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe.s);
+		*unix_socket = TRUE;
+#else
+	if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
+		/* named pipe in socket */
+		if (!socket_or_pipe.s) {
+			socket_or_pipe.s = "\\\\.\\pipe\\MySQL";
+			socket_or_pipe.l = strlen(socket_or_pipe.s);
+		}
+		transport.l = mnd_sprintf(&transport.s, 0, "pipe://%s", socket_or_pipe.s);
+		*named_pipe = TRUE;
+#endif
+	} else {
+		if (!port) {
+			port = 3306;
+		}
+		transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+	}
+	DBG_INF_FMT("transport=%s", transport.s? transport.s:"OOM");
+	DBG_RETURN(transport);
 }
 /* }}} */
 
@@ -737,6 +774,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	zend_bool saved_compression = FALSE;
 	zend_bool local_tx_started = FALSE;
 	MYSQLND_NET * net = conn->net;
+	MYSQLND_STRING transport = { NULL, 0 };
+//	char * transport = NULL;
+//	int transport_len;
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
 	DBG_INF_FMT("conn=%p", conn);
@@ -803,53 +843,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
 
-	{
-		char * transport = NULL;
-		int transport_len;
-#ifndef PHP_WIN32
-		if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
-			DBG_INF_FMT("socket=%s", socket_or_pipe.s? socket_or_pipe.s:"n/a");
-			if (!socket_or_pipe.s) {
-				socket_or_pipe.s = "/tmp/mysql.sock";
-				socket_or_pipe.l = strlen(socket_or_pipe.s);
-			}
-			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe.s);
-			unix_socket = TRUE;
-#else
-		if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
-			/* named pipe in socket */
-			if (!socket_or_pipe.s) {
-				socket_or_pipe.s = "\\\\.\\pipe\\MySQL";
-				socket_or_pipe.l = strlen(socket_or_pipe.s);
-			}
-			transport_len = mnd_sprintf(&transport, 0, "pipe://%s", socket_or_pipe.s);
-			named_pipe = TRUE;
-#endif
-		} else {
-			if (!port) {
-				port = 3306;
-			}
-			transport_len = mnd_sprintf(&transport, 0, "tcp://%s:%u", hostname.s, port);
-		}
-		if (!transport) {
-			SET_OOM_ERROR(conn->error_info);
-			goto err; /* OOM */
-		}
-		DBG_INF_FMT("transport=%s conn->scheme=%s", transport, conn->scheme.s);
-		conn->scheme.s = mnd_pestrndup(transport, transport_len, conn->persistent);
-		conn->scheme.l = transport_len;
-		mnd_sprintf_free(transport);
-		transport = NULL;
-		if (!conn->scheme.s) {
-			goto err; /* OOM */
-		}
-	}
+	transport = conn->m->get_scheme(conn, hostname, socket_or_pipe, port, &unix_socket, &named_pipe);
 
 	mysql_flags = conn->m->get_updated_connect_flags(conn, mysql_flags);
 
 	{
-	
-		if (FAIL == conn->m->connect_handshake(conn, &username, &password, &database, mysql_flags)) {
+		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
+		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
 			goto err;
 		}
 	}
@@ -866,6 +866,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		  which we set based on saved_compression.
 		*/
 		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
+
+
+		conn->scheme.s = mnd_pestrndup(transport.s, transport.l, conn->persistent);
+		conn->scheme.l = transport.l;
+		if (transport.s) {
+			mnd_sprintf_free(transport.s);
+			transport.s = NULL;
+		}
+
+		if (!conn->scheme.s) {
+			goto err; /* OOM */
+		}
 
 		conn->user_len			= username.l;
 		conn->user				= mnd_pestrndup(username.s, conn->user_len, conn->persistent);
@@ -952,6 +964,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		DBG_RETURN(PASS);
 	}
 err:
+	if (transport.s) {
+		mnd_sprintf_free(transport.s);
+		transport.s = NULL;
+	}
 
 	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
 	if (!conn->error_info->error_no) {
@@ -2810,7 +2826,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities),
-	MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)
+	MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities),
+
+	MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)
 MYSQLND_CLASS_METHODS_END;
 
 
