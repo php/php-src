@@ -89,11 +89,12 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 PHPAPI MYSQLND * mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory);
 PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
-											const char * host, const char * user,
-											const char * passwd, unsigned int passwd_len,
-											const char * db, unsigned int db_len,
+											const char * const host,
+											const char * const user,
+											const char * const passwd, unsigned int passwd_len,
+											const char * const db, unsigned int db_len,
 											unsigned int port,
-											const char * socket_or_pipe,
+											const char * const socket_or_pipe,
 											unsigned int mysql_flags,
 											unsigned int client_api_flags
 										);

@@ -347,8 +347,8 @@ php_mysqlnd_greet_read(void * _packet)
 	}
 	BAIL_IF_NO_MORE_DATA;
 
-	packet->auth_plugin_data = packet->intern_auth_plugin_data;
-	packet->auth_plugin_data_len = sizeof(packet->intern_auth_plugin_data);
+	packet->authentication_plugin_data.s = packet->intern_auth_plugin_data;
+	packet->authentication_plugin_data.l = sizeof(packet->intern_auth_plugin_data);
 
 	if (packet->header.size < sizeof(buf)) {
 		/*
@@ -386,7 +386,7 @@ php_mysqlnd_greet_read(void * _packet)
 	p+=4;
 	BAIL_IF_NO_MORE_DATA;
 
-	memcpy(packet->auth_plugin_data, p, SCRAMBLE_LENGTH_323);
+	memcpy(packet->authentication_plugin_data.s, p, SCRAMBLE_LENGTH_323);
 	p+= SCRAMBLE_LENGTH_323;
 	BAIL_IF_NO_MORE_DATA;
 
@@ -413,7 +413,7 @@ php_mysqlnd_greet_read(void * _packet)
 
 	if ((size_t) (p - buf) < packet->header.size) {
 		/* auth_plugin_data is split into two parts */
-		memcpy(packet->auth_plugin_data + SCRAMBLE_LENGTH_323, p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
+		memcpy(packet->authentication_plugin_data.s + SCRAMBLE_LENGTH_323, p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
 		p+= SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323;
 		p++; /* 0x0 at the end of the scramble and thus last byte in the packet in 5.1 and previous */
 	} else {
@@ -428,19 +428,19 @@ php_mysqlnd_greet_read(void * _packet)
     	/* Additional 16 bits for server capabilities */
 		packet->server_capabilities |= uint2korr(pad_start) << 16;
 		/* And a length of the server scramble in one byte */
-		packet->auth_plugin_data_len = uint1korr(pad_start + 2);
-		if (packet->auth_plugin_data_len > SCRAMBLE_LENGTH) {
+		packet->authentication_plugin_data.l = uint1korr(pad_start + 2);
+		if (packet->authentication_plugin_data.l > SCRAMBLE_LENGTH) {
 			/* more data*/
-			zend_uchar * new_auth_plugin_data = emalloc(packet->auth_plugin_data_len);
+			char * new_auth_plugin_data = emalloc(packet->authentication_plugin_data.l);
 			if (!new_auth_plugin_data) {
 				goto premature_end;
 			}
 			/* copy what we already have */
-			memcpy(new_auth_plugin_data, packet->auth_plugin_data, SCRAMBLE_LENGTH);
+			memcpy(new_auth_plugin_data, packet->authentication_plugin_data.s, SCRAMBLE_LENGTH);
 			/* add additional scramble data 5.5+ sent us */
-			memcpy(new_auth_plugin_data + SCRAMBLE_LENGTH, p, packet->auth_plugin_data_len - SCRAMBLE_LENGTH);
-			p+= (packet->auth_plugin_data_len - SCRAMBLE_LENGTH);
-			packet->auth_plugin_data = new_auth_plugin_data;
+			memcpy(new_auth_plugin_data + SCRAMBLE_LENGTH, p, packet->authentication_plugin_data.l - SCRAMBLE_LENGTH);
+			p+= (packet->authentication_plugin_data.l - SCRAMBLE_LENGTH);
+			packet->authentication_plugin_data.s = new_auth_plugin_data;
 		}
 	}
 
@@ -456,7 +456,7 @@ php_mysqlnd_greet_read(void * _packet)
 
 	DBG_INF_FMT("server_capabilities=%u charset_no=%u server_status=%i auth_protocol=%s scramble_length=%u",
 				packet->server_capabilities, packet->charset_no, packet->server_status,
-				packet->auth_protocol? packet->auth_protocol:"n/a", packet->auth_plugin_data_len);
+				packet->auth_protocol? packet->auth_protocol:"n/a", packet->authentication_plugin_data.l);
 
 	DBG_RETURN(PASS);
 premature_end:
@@ -477,9 +477,9 @@ void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation)
 		efree(p->server_version);
 		p->server_version = NULL;
 	}
-	if (p->auth_plugin_data && p->auth_plugin_data != p->intern_auth_plugin_data) {
-		efree(p->auth_plugin_data);
-		p->auth_plugin_data = NULL;
+	if (p->authentication_plugin_data.s && p->authentication_plugin_data.s != p->intern_auth_plugin_data) {
+		efree(p->authentication_plugin_data.s);
+		p->authentication_plugin_data.s = NULL;
 	}
 	if (p->auth_protocol) {
 		efree(p->auth_protocol);
@@ -2782,7 +2782,7 @@ send_command(
 
 	cmd_packet->command = command;
 	if (arg && arg_len) {
-		cmd_packet->argument.s = arg;
+		cmd_packet->argument.s = (char *) arg;
 		cmd_packet->argument.l = arg_len;
 	}
 
@@ -4171,6 +4171,125 @@ mysqlnd_com_enable_ssl_create_command(va_list args)
 }
 /* }}} */
 
+/************************** COM_READ_HANDSHAKE ******************************************/
+struct st_mysqlnd_protocol_com_handshake_command
+{
+	struct st_mysqlnd_protocol_command parent;
+	struct st_mysqlnd_com_handshake_context
+	{
+		MYSQLND_CONN_DATA * conn;
+		MYSQLND_CSTRING user;
+		MYSQLND_CSTRING passwd;
+		MYSQLND_CSTRING database;
+		size_t client_flags;
+	} context;
+};
+
+
+/* {{{ mysqlnd_com_handshake_run */
+static enum_func_status
+mysqlnd_com_handshake_run(void *cmd)
+{
+	struct st_mysqlnd_protocol_com_handshake_command * command = (struct st_mysqlnd_protocol_com_handshake_command *) cmd;
+	const char * user = command->context.user.s;
+
+	const char * passwd = command->context.passwd.s;
+	size_t passwd_len = command->context.passwd.l;
+
+	const char * db = command->context.database.s;
+	size_t db_len = command->context.database.l;
+
+	size_t mysql_flags =  command->context.client_flags;
+
+	MYSQLND_CONN_DATA * conn = command->context.conn;
+	MYSQLND_PACKET_GREET * greet_packet;
+
+	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
+	DBG_INF_FMT("stream=%p", conn->net->data->m.get_stream(conn->net));
+	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
+
+	greet_packet = conn->payload_decoder_factory->m.get_greet_packet(conn->payload_decoder_factory, FALSE);
+	if (!greet_packet) {
+		SET_OOM_ERROR(conn->error_info);
+		DBG_RETURN(FAIL); /* OOM */
+	}
+
+	if (FAIL == PACKET_READ(greet_packet)) {
+		DBG_ERR("Error while reading greeting packet");
+		php_error_docref(NULL, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
+		goto err;
+	} else if (greet_packet->error_no) {
+		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
+		SET_CLIENT_ERROR(conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
+		goto err;
+	} else if (greet_packet->pre41) {
+		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet->server_version);
+		php_error_docref(NULL, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
+						" is not supported. Server is %-.32s", greet_packet->server_version);
+		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
+		goto err;
+	}
+
+	conn->thread_id			= greet_packet->thread_id;
+	conn->protocol_version	= greet_packet->protocol_version;
+	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
+
+	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
+	if (!conn->greet_charset) {
+		php_error_docref(NULL, E_WARNING,
+			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
+		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+			"Server sent charset unknown to the client. Please, report to the developers");
+		goto err;
+	}
+
+	conn->server_capabilities 	= greet_packet->server_capabilities;
+
+	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
+												   greet_packet->authentication_plugin_data, greet_packet->auth_protocol,
+												   greet_packet->charset_no, greet_packet->server_capabilities,
+												   conn->options, mysql_flags))
+	{
+		goto err;
+	}
+
+	UPSERT_STATUS_RESET(conn->upsert_status);
+	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, greet_packet->server_status);
+
+	PACKET_FREE(greet_packet);
+	DBG_RETURN(PASS);
+err:
+	conn->server_capabilities = 0;
+	PACKET_FREE(greet_packet);
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_com_handshake_create_command */
+static struct st_mysqlnd_protocol_command *
+mysqlnd_com_handshake_create_command(va_list args)
+{
+	struct st_mysqlnd_protocol_com_handshake_command * command;
+	DBG_ENTER("mysqlnd_com_handshake_create_command");
+	command = mnd_ecalloc(1, sizeof(struct st_mysqlnd_protocol_com_handshake_command));
+	if (command) {
+		command->context.conn = va_arg(args, MYSQLND_CONN_DATA *);
+		command->context.user = *va_arg(args, const MYSQLND_CSTRING *);
+		command->context.passwd = *va_arg(args, const MYSQLND_CSTRING *);
+		command->context.database = *va_arg(args, const MYSQLND_CSTRING *);
+		command->context.client_flags = va_arg(args, size_t);
+
+		command->parent.free_command = mysqlnd_com_no_params_free_command;
+		command->parent.run = mysqlnd_com_handshake_run;
+	}
+
+	DBG_RETURN((struct st_mysqlnd_protocol_command *) command);
+}
+/* }}} */
+
+
 
 /* {{{ mysqlnd_get_command */
 static struct st_mysqlnd_protocol_command *
@@ -4238,6 +4357,9 @@ mysqlnd_get_command(enum php_mysqlnd_server_command command, ...)
 			break;
 		case COM_ENABLE_SSL:
 			ret = mysqlnd_com_enable_ssl_create_command(args);
+			break;
+		case COM_HANDSHAKE:
+			ret = mysqlnd_com_handshake_create_command(args);
 			break;
 		default:
 			break;

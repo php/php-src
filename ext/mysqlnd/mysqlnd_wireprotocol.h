@@ -78,9 +78,8 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
-	zend_uchar	intern_auth_plugin_data[SCRAMBLE_LENGTH];
-	zend_uchar	* auth_plugin_data;
-	size_t		auth_plugin_data_len;
+	char		intern_auth_plugin_data[SCRAMBLE_LENGTH];
+	MYSQLND_STRING authentication_plugin_data;
 	/* 1 byte pad */
 	uint32_t	server_capabilities;
 	uint8_t		charset_no;

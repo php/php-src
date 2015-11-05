@@ -232,6 +232,23 @@ send_command_handle_response(
 		MYSQLND_STRING * last_message,
 		zend_bool last_message_persistent
 	);
+
+enum_func_status
+mysqlnd_connect_run_authentication(
+			MYSQLND_CONN_DATA * conn,
+			const char * const user,
+			const char * const passwd,
+			const char * const db,
+			size_t db_len,
+			size_t passwd_len,
+			MYSQLND_STRING authentication_plugin_data,
+			const char * const authentication_protocol,
+			const unsigned int charset_no,
+			size_t server_capabilities,
+			const MYSQLND_SESSION_OPTIONS * const session_options,
+			zend_ulong mysql_flags
+			);
+
 #endif	/* MYSQLND_PRIV_H */
 
 

@@ -305,9 +305,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->host_info, pers);
 		conn->host_info = NULL;
 	}
-	if (conn->auth_plugin_data) {
-		mnd_pefree(conn->auth_plugin_data, pers);
-		conn->auth_plugin_data = NULL;
+	if (conn->authentication_plugin_data.s) {
+		mnd_pefree(conn->authentication_plugin_data.s, pers);
+		conn->authentication_plugin_data.s = NULL;
 	}
 	if (conn->last_message.s) {
 		mnd_pefree(conn->last_message.s, pers);
@@ -408,24 +408,21 @@ MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn)
 static enum_func_status
 mysqlnd_switch_to_ssl_if_needed(
 			MYSQLND_CONN_DATA * conn,
-			const MYSQLND_PACKET_GREET * const greet_packet,
+			unsigned int charset_no,
+			size_t server_capabilities,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
 			zend_ulong mysql_flags)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset;
-	unsigned int charset_no;
 	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
 
 	if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
 		charset_no	= charset->nr;
-	} else {
-		charset_no	= greet_packet->charset_no;
 	}
 
 	{
 		size_t client_capabilities = mysql_flags;
-		size_t server_capabilities = greet_packet->server_capabilities;
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
 		if (command) {
 			ret = command->run(command);
@@ -464,8 +461,7 @@ mysqlnd_run_authentication(
 			const size_t passwd_len,
 			const char * const db,
 			const size_t db_len,
-			const zend_uchar * const auth_plugin_data,
-			const size_t auth_plugin_data_len,
+			const MYSQLND_STRING auth_plugin_data,
 			const char * const auth_protocol,
 			unsigned int charset_no,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
@@ -485,12 +481,12 @@ mysqlnd_run_authentication(
 
 	DBG_ENTER("mysqlnd_run_authentication");
 
-	plugin_data_len = auth_plugin_data_len;
+	plugin_data_len = auth_plugin_data.l;
 	plugin_data = mnd_emalloc(plugin_data_len + 1);
 	if (!plugin_data) {
 		goto end;
 	}
-	memcpy(plugin_data, auth_plugin_data, plugin_data_len);
+	memcpy(plugin_data, auth_plugin_data.s, plugin_data_len);
 	plugin_data[plugin_data_len] = '\0';
 
 	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
@@ -517,17 +513,17 @@ mysqlnd_run_authentication(
 			switch_to_auth_protocol = NULL;
 			switch_to_auth_protocol_len = 0;
 
-			if (conn->auth_plugin_data) {
-				mnd_pefree(conn->auth_plugin_data, conn->persistent);
-				conn->auth_plugin_data = NULL;
+			if (conn->authentication_plugin_data.s) {
+				mnd_pefree(conn->authentication_plugin_data.s, conn->persistent);
+				conn->authentication_plugin_data.s = NULL;
 			}
-			conn->auth_plugin_data_len = plugin_data_len;
-			conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
-			if (!conn->auth_plugin_data) {
+			conn->authentication_plugin_data.l = plugin_data_len;
+			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
+			if (!conn->authentication_plugin_data.s) {
 				SET_OOM_ERROR(conn->error_info);
 				goto end;
 			}
-			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
+			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
 
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
@@ -592,7 +588,7 @@ end:
 
 
 /* {{{ mysqlnd_connect_run_authentication */
-static enum_func_status
+enum_func_status
 mysqlnd_connect_run_authentication(
 			MYSQLND_CONN_DATA * conn,
 			const char * const user,
@@ -600,7 +596,10 @@ mysqlnd_connect_run_authentication(
 			const char * const db,
 			size_t db_len,
 			size_t passwd_len,
-			const MYSQLND_PACKET_GREET * const greet_packet,
+			MYSQLND_STRING authentication_plugin_data,
+			const char * const authentication_protocol,
+			const unsigned int charset_no,
+			size_t server_capabilities,
 			const MYSQLND_SESSION_OPTIONS * const session_options,
 			zend_ulong mysql_flags
 			)
@@ -608,11 +607,11 @@ mysqlnd_connect_run_authentication(
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_connect_run_authentication");
 
-	ret = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, session_options, mysql_flags);
+	ret = mysqlnd_switch_to_ssl_if_needed(conn, charset_no, server_capabilities, session_options, mysql_flags);
 	if (PASS == ret) {
 		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
-										 greet_packet->auth_plugin_data, greet_packet->auth_plugin_data_len, greet_packet->auth_protocol,
-										 greet_packet->charset_no, session_options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
+										 authentication_plugin_data, authentication_protocol,
+										 charset_no, session_options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
 	}
 	DBG_RETURN(ret);
 }
@@ -696,77 +695,25 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 /* {{{ mysqlnd_conn_data::connect_handshake */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
-						const char * const host, const char * const user,
-						const char * const passwd, const unsigned int passwd_len,
-						const char * const db, const unsigned int db_len,
+						const MYSQLND_CSTRING * const username,
+						const MYSQLND_CSTRING * const password,
+						const MYSQLND_CSTRING * const database,
 						const unsigned int mysql_flags)
 {
-	MYSQLND_PACKET_GREET * greet_packet;
-	MYSQLND_NET * net = conn->net;
-
+	enum_func_status ret = FAIL;
+	size_t client_flags = mysql_flags;
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	greet_packet = conn->payload_decoder_factory->m.get_greet_packet(conn->payload_decoder_factory, FALSE);
-	if (!greet_packet) {
-		SET_OOM_ERROR(conn->error_info);
-		DBG_RETURN(FAIL); /* OOM */
+	if (FAIL == conn->net->data->m.connect_ex(conn->net, conn->scheme, conn->persistent, conn->stats, conn->error_info)) {
+		DBG_RETURN(FAIL);
+	} else {
+		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_HANDSHAKE, conn, username, password, database, client_flags);
+		if (command) {
+			ret = command->run(command);
+			command->free_command(command);
+		}
 	}
-
-	if (FAIL == net->data->m.connect_ex(conn->net, conn->scheme, conn->persistent,
-										conn->stats, conn->error_info))
-	{
-		goto err;
-	}
-
-	DBG_INF_FMT("stream=%p", net->data->m.get_stream(net));
-
-	if (FAIL == PACKET_READ(greet_packet)) {
-		DBG_ERR("Error while reading greeting packet");
-		php_error_docref(NULL, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
-		goto err;
-	} else if (greet_packet->error_no) {
-		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
-		SET_CLIENT_ERROR(conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
-		goto err;
-	} else if (greet_packet->pre41) {
-		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet->server_version);
-		php_error_docref(NULL, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
-						" is not supported. Server is %-.32s", greet_packet->server_version);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
-		goto err;
-	}
-
-	conn->thread_id			= greet_packet->thread_id;
-	conn->protocol_version	= greet_packet->protocol_version;
-	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
-
-	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
-	if (!conn->greet_charset) {
-		php_error_docref(NULL, E_WARNING,
-			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-			"Server sent charset unknown to the client. Please, report to the developers");
-		goto err;
-	}
-
-	conn->server_capabilities 	= greet_packet->server_capabilities;
-
-	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
-												   greet_packet, conn->options, mysql_flags))
-	{
-		goto err;
-	}
-
-	UPSERT_STATUS_RESET(conn->upsert_status);
-	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, greet_packet->server_status);
-
-	PACKET_FREE(greet_packet);
-	DBG_RETURN(PASS);
-err:
-	conn->server_capabilities = 0;
-	PACKET_FREE(greet_packet);
-	DBG_RETURN(FAIL);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -774,16 +721,16 @@ err:
 /* {{{ mysqlnd_conn_data::connect */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
-						 const char *host, const char *user,
-						 const char *passwd, unsigned int passwd_len,
-						 const char *db, unsigned int db_len,
-						 unsigned int port,
-						 const char *socket_or_pipe,
-						 unsigned int mysql_flags
-						)
+						MYSQLND_CSTRING hostname,
+						MYSQLND_CSTRING username,
+						MYSQLND_CSTRING password,
+						MYSQLND_CSTRING database,
+						unsigned int port,
+						MYSQLND_CSTRING socket_or_pipe,
+						unsigned int mysql_flags
+					)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), connect);
-	size_t host_len;
 	zend_bool unix_socket = FALSE;
 	zend_bool named_pipe = FALSE;
 	zend_bool reconnect = FALSE;
@@ -803,7 +750,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u persistent=%u state=%u",
-				host?host:"", user?user:"", db?db:"", port, mysql_flags,
+				hostname.s?hostname.s:"", username.s?username.s:"", database.s?database.s:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? GET_CONNECTION_STATE(&conn->state):-1);
 
 	if (GET_CONNECTION_STATE(&conn->state) > CONN_ALLOCED && GET_CONNECTION_STATE(&conn->state) ) {
@@ -838,52 +785,55 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		conn->m->set_client_option(conn, MYSQLND_OPT_MAX_ALLOWED_PACKET, (char *)&max_allowed_size);
 	}
 
-	if (!host || !host[0]) {
-		host = "localhost";
+	if (!hostname.s || !hostname.s[0]) {
+		hostname.s = "localhost";
+		hostname.l = strlen(hostname.s);
 	}
-	if (!user) {
+	if (!username.s) {
 		DBG_INF_FMT("no user given, using empty string");
-		user = "";
+		username.s = "";
+		username.l = 0;
 	}
-	if (!passwd) {
+	if (!password.s) {
 		DBG_INF_FMT("no password given, using empty string");
-		passwd = "";
-		passwd_len = 0;
+		password.s = "";
+		password.l = 0;
 	}
-	if (!db) {
+	if (!database.s) {
 		DBG_INF_FMT("no db given, using empty string");
-		db = "";
-		db_len = 0;
+		database.s = "";
+		database.l = 0;
 	} else {
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
 
-	host_len = strlen(host);
 	{
 		char * transport = NULL;
 		int transport_len;
 #ifndef PHP_WIN32
-		if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
-			DBG_INF_FMT("socket=%s", socket_or_pipe? socket_or_pipe:"n/a");
-			if (!socket_or_pipe) {
-				socket_or_pipe = "/tmp/mysql.sock";
+		if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
+			DBG_INF_FMT("socket=%s", socket_or_pipe.s? socket_or_pipe.s:"n/a");
+			if (!socket_or_pipe.s) {
+				socket_or_pipe.s = "/tmp/mysql.sock";
+				socket_or_pipe.l = strlen(socket_or_pipe.s);
 			}
-			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe);
+			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe.s);
 			unix_socket = TRUE;
 #else
-		if (host_len == sizeof(".") - 1 && host[0] == '.') {
+		if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
 			/* named pipe in socket */
-			if (!socket_or_pipe) {
-				socket_or_pipe = "\\\\.\\pipe\\MySQL";
+			if (!socket_or_pipe.s) {
+				socket_or_pipe.s = "\\\\.\\pipe\\MySQL";
+				socket_or_pipe.l = strlen(socket_or_pipe.s);
 			}
-			transport_len = mnd_sprintf(&transport, 0, "pipe://%s", socket_or_pipe);
+			transport_len = mnd_sprintf(&transport, 0, "pipe://%s", socket_or_pipe.s);
 			named_pipe = TRUE;
 #endif
 		} else {
 			if (!port) {
 				port = 3306;
 			}
-			transport_len = mnd_sprintf(&transport, 0, "tcp://%s:%u", host, port);
+			transport_len = mnd_sprintf(&transport, 0, "tcp://%s:%u", hostname.s, port);
 		}
 		if (!transport) {
 			SET_OOM_ERROR(conn->error_info);
@@ -901,8 +851,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	mysql_flags = conn->m->get_updated_connect_flags(conn, mysql_flags);
 
-	if (FAIL == conn->m->connect_handshake(conn, host, user, passwd, passwd_len, db, db_len, mysql_flags)) {
-		goto err;
+	{
+	
+		if (FAIL == conn->m->connect_handshake(conn, &username, &password, &database, mysql_flags)) {
+			goto err;
+		}
 	}
 
 	{
@@ -918,13 +871,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		*/
 		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
-		conn->user_len			= strlen(user);
-		conn->user				= mnd_pestrndup(user, conn->user_len, conn->persistent);
-		conn->passwd			= mnd_pestrndup(passwd, passwd_len, conn->persistent);
-		conn->passwd_len		= passwd_len;
+		conn->user_len			= username.l;
+		conn->user				= mnd_pestrndup(username.s, conn->user_len, conn->persistent);
+		conn->passwd			= mnd_pestrndup(password.s, password.l, conn->persistent);
+		conn->passwd_len		= password.l;
 		conn->port				= port;
-		conn->connect_or_select_db.s = mnd_pestrndup(db, db_len, conn->persistent);
-		conn->connect_or_select_db.l = db_len;
+		conn->connect_or_select_db.s = mnd_pestrndup(database.s, database.l, conn->persistent);
+		conn->connect_or_select_db.l = database.l;
 
 		if (!conn->user || !conn->passwd || !conn->connect_or_select_db.s) {
 			SET_OOM_ERROR(conn->error_info);
@@ -932,12 +885,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 
 		if (!unix_socket && !named_pipe) {
-			conn->host = mnd_pestrndup(host, host_len, conn->persistent);
+			conn->host = mnd_pestrndup(hostname.s, hostname.l, conn->persistent);
 			if (!conn->host) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->host_len = host_len;
+			conn->host_len = hostname.l;
 			{
 				char *p;
 				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->host);
@@ -953,7 +906,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				}
 			}
 		} else {
-			conn->unix_socket = mnd_pestrdup(socket_or_pipe, conn->persistent);
+			conn->unix_socket = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
 			if (unix_socket) {
 				conn->host_info = mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
@@ -1024,12 +977,13 @@ err:
 /* {{{ mysqlnd_conn::connect */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
-						 const char * host, const char * user,
-						 const char * passwd, unsigned int passwd_len,
-						 const char * db, unsigned int db_len,
-						 unsigned int port,
-						 const char * socket_or_pipe,
-						 unsigned int mysql_flags
+						const MYSQLND_CSTRING hostname,
+						const MYSQLND_CSTRING username,
+						const MYSQLND_CSTRING password,
+						const MYSQLND_CSTRING database,
+						unsigned int port,
+						const MYSQLND_CSTRING socket_or_pipe,
+						unsigned int mysql_flags
 						)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), connect);
@@ -1040,7 +994,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_client_name", "mysqlnd");
-		ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags);
+		ret = conn->m->connect(conn, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
 
 		conn->m->local_tx_end(conn, this_func, FAIL);
 	}
@@ -1051,20 +1005,26 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
-											const char * host, const char * user,
-											const char * passwd, unsigned int passwd_len,
-											const char * db, unsigned int db_len,
+											const char * const host,
+											const char * const user,
+											const char * const passwd, unsigned int passwd_len,
+											const char * const db, unsigned int db_len,
 											unsigned int port,
-											const char * socket_or_pipe,
+											const char * const sock_or_pipe,
 											unsigned int mysql_flags,
 											unsigned int client_api_flags
 						)
 {
 	enum_func_status ret = FAIL;
 	zend_bool self_alloced = FALSE;
+	MYSQLND_CSTRING hostname = { host, host? strlen(host) : 0 };
+	MYSQLND_CSTRING username = { user, user? strlen(user) : 0 };
+	MYSQLND_CSTRING password = { passwd, passwd_len };
+	MYSQLND_CSTRING database = { db, db_len };
+	MYSQLND_CSTRING socket_or_pipe = { sock_or_pipe, sock_or_pipe? strlen(sock_or_pipe) : 0 };
 
 	DBG_ENTER("mysqlnd_connect");
-	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host?host:"", user?user:"", db?db:"", port, mysql_flags);
+	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host? host:"", user? user:"", db? db:"", port, mysql_flags);
 
 	if (!conn_handle) {
 		self_alloced = TRUE;
@@ -1074,7 +1034,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
 		}
 	}
 
-	ret = conn_handle->m->connect(conn_handle, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags);
+	ret = conn_handle->m->connect(conn_handle, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
 
 	if (ret == FAIL) {
 		if (self_alloced) {
@@ -2087,7 +2047,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
 	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
-									conn->auth_plugin_data, conn->auth_plugin_data_len, conn->options->auth_protocol,
+									 conn->authentication_plugin_data, conn->options->auth_protocol,
 									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/);
 
 	/*
