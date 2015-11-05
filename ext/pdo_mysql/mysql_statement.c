@@ -527,6 +527,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 							php_stream_from_zval_no_verify(stm, parameter);
 							if (stm) {
 								zend_string *mem = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+								zval_ptr_dtor(parameter);
 								ZVAL_STR(parameter, mem ? mem : STR_EMPTY_ALLOC());
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
