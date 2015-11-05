@@ -218,8 +218,7 @@ safe:
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 						if (!buf) {
-							ret = -1;
-							goto clean_up;
+							buf = ZSTR_EMPTY_ALLOC();
 						}
 						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 								param->param_type)) {
