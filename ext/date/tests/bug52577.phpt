@@ -2,7 +2,7 @@
 Bug #52577 (Incorrect date returning)
 --FILE--
 <?php
-date_default_timezone_set('Europe/Kiev');
+date_default_timezone_set('Europe/Kyiv');
 $date = '7.8.2010';
 echo "String: ".$date."\n";
 $date_format = DATE_RFC2822;
