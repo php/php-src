@@ -1,5 +1,7 @@
 --TEST--
 Bug #52577 (Incorrect date returning)
+--CREDITS--
+marcosptf - <marcosptf@yahoo.com.br>
 --FILE--
 <?php
 date_default_timezone_set('Europe/Kyiv');
