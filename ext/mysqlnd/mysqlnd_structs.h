@@ -385,62 +385,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net)
 };
 
 
-struct st_mysqlnd_packet_greet;
-struct st_mysqlnd_packet_greet;
-struct st_mysqlnd_packet_auth;
-struct st_mysqlnd_packet_ok;
-struct st_mysqlnd_packet_command;
-struct st_mysqlnd_packet_eof;
-struct st_mysqlnd_packet_rset_header;
-struct st_mysqlnd_packet_res_field;
-struct st_mysqlnd_packet_row;
-struct st_mysqlnd_packet_stats;
-struct st_mysqlnd_packet_prepare_response;
-struct st_mysqlnd_packet_chg_user_resp;
-struct st_mysqlnd_packet_auth_pam;
-struct st_mysqlnd_packet_sha256_pk_request;
-struct st_mysqlnd_packet_sha256_pk_request_response;
-
-typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_change_auth_response *	(*func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_ok *			(*func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_command *		(*func_mysqlnd_protocol_payload_decoder_factory__get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_eof *			(*func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_rset_header *	(*func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_res_field *	(*func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_row *			(*func_mysqlnd_protocol_payload_decoder_factory__get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_stats *		(*func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
-
-MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
-{
-	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet get_auth_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet get_auth_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet get_change_auth_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet get_ok_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_command_packet get_command_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet get_eof_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet get_rset_header_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet get_result_field_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_row_packet get_row_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet get_stats_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet get_prepare_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet get_change_user_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet get_sha256_pk_request_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
-
-	void * unused1;
-	void * unused2;
-	void * unused3;
-};
-
-
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent);
@@ -657,6 +601,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn)
 	func_mysqlnd_conn__dtor dtor;
 	func_mysqlnd_conn__close close;
 };
+
 
 	/* for decoding - binary or text protocol */
 typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
@@ -932,14 +877,6 @@ struct st_mysqlnd_net
 };
 
 
-struct st_mysqlnd_protocol_payload_decoder_factory
-{
-	MYSQLND_CONN_DATA * conn;
-	zend_bool persistent;
-	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) m;
-};
-
-
 struct st_mysqlnd_protocol_command
 {
 	enum_func_status (*run)(void *cmd);
@@ -1053,6 +990,111 @@ struct st_mysqlnd_connection
 	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * m;
 };
+
+
+
+struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_packet_auth;
+struct st_mysqlnd_packet_ok;
+struct st_mysqlnd_packet_command;
+struct st_mysqlnd_packet_eof;
+struct st_mysqlnd_packet_rset_header;
+struct st_mysqlnd_packet_res_field;
+struct st_mysqlnd_packet_row;
+struct st_mysqlnd_packet_stats;
+struct st_mysqlnd_packet_prepare_response;
+struct st_mysqlnd_packet_chg_user_resp;
+struct st_mysqlnd_packet_auth_pam;
+struct st_mysqlnd_packet_sha256_pk_request;
+struct st_mysqlnd_packet_sha256_pk_request_response;
+
+typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_change_auth_response *	(*func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_ok *			(*func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_command *		(*func_mysqlnd_protocol_payload_decoder_factory__get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_eof *			(*func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_rset_header *	(*func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_res_field *	(*func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_row *			(*func_mysqlnd_protocol_payload_decoder_factory__get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_stats *		(*func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent);
+
+typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command)(
+			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
+			const enum php_mysqlnd_server_command command,
+			const zend_uchar * const arg, const size_t arg_len,
+			const zend_bool silent,
+
+			MYSQLND_CONNECTION_STATE * connection_state,
+			MYSQLND_ERROR_INFO	* error_info,
+			MYSQLND_UPSERT_STATUS * upsert_status,
+			MYSQLND_STATS * stats,
+			func_mysqlnd_conn_data__send_close send_close,
+			void * send_close_ctx);
+
+typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_OK)(
+			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
+			MYSQLND_ERROR_INFO * const error_info,
+			MYSQLND_UPSERT_STATUS * const upsert_status,
+			const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+			MYSQLND_STRING * const last_message,
+			const zend_bool last_message_persistent);
+
+typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_EOF)(
+			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
+			MYSQLND_ERROR_INFO * const error_info,
+			MYSQLND_UPSERT_STATUS * const upsert_status);
+
+typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response)(
+			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
+			const enum mysqlnd_packet_type ok_packet,
+			const zend_bool silent,
+			const enum php_mysqlnd_server_command command,
+			const zend_bool ignore_upsert_status, /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
+
+			MYSQLND_ERROR_INFO	* error_info,
+			MYSQLND_UPSERT_STATUS * upsert_status,
+			MYSQLND_STRING * last_message,
+			zend_bool last_message_persistent);
+
+
+MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
+{
+	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet get_auth_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet get_auth_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet get_change_auth_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet get_ok_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_command_packet get_command_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet get_eof_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet get_rset_header_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet get_result_field_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_row_packet get_row_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet get_stats_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet get_prepare_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet get_change_user_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet get_sha256_pk_request_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
+
+	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command;
+	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response;
+	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_OK send_command_handle_OK;
+	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_EOF send_command_handle_EOF;
+};
+
+struct st_mysqlnd_protocol_payload_decoder_factory
+{
+	MYSQLND_CONN_DATA * conn;
+	zend_bool persistent;
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) m;
+};
+
 
 
 struct mysqlnd_field_hash_key

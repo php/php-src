@@ -212,12 +212,13 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 
 infile_error:
 	/* get response from server and update upsert values */
-	if (FAIL == send_command_handle_response(PROT_OK_PACKET, FALSE, COM_QUERY, FALSE,
-	                                         conn->error_info,
-											 conn->upsert_status,
-											 conn->payload_decoder_factory,
-											 &conn->last_message,
-											 conn->persistent)) {
+	if (FAIL == conn->payload_decoder_factory->m.send_command_handle_response(
+											conn->payload_decoder_factory,
+											PROT_OK_PACKET, FALSE, COM_QUERY, FALSE,
+											conn->error_info,
+											conn->upsert_status,
+											&conn->last_message,
+											conn->persistent)) {
 		result = FAIL;
 	}
 
