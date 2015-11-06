@@ -373,7 +373,7 @@ PHP_FUNCTION(oci_lob_eof)
 	
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 	
-	if (!php_oci_lob_get_length(descriptor, &lob_length TSRMLS_CC) && lob_length >= 0) {
+	if (!php_oci_lob_get_length(descriptor, &lob_length TSRMLS_CC)) {
 		if (lob_length == descriptor->lob_current_position) {
 			RETURN_TRUE;
 		}

@@ -417,10 +417,6 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 		return 0;
 	}
 	
-	if (offset < 0) {
-		offset = 0;
-	}
-	
 	if (offset > descriptor->lob_current_position) {
 		offset = descriptor->lob_current_position;
 	}
