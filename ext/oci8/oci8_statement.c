@@ -1139,15 +1139,22 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 			
 		case SQLT_INT:
 		case SQLT_NUM:
+		{
 			if (Z_TYPE_P(var) == IS_RESOURCE || Z_TYPE_P(var) == IS_OBJECT) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
 				return 1;
 			}
 			convert_to_long(var);
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION > 10
+			bind_data = (ub8 *)&Z_LVAL_P(var);
+			value_sz = sizeof(ub8);
+#else
 			bind_data = (ub4 *)&Z_LVAL_P(var);
 			value_sz = sizeof(ub4);
+#endif
 			mode = OCI_DEFAULT;
-			break;
+		}
+		break;
 			
 		case SQLT_LBI:
 		case SQLT_BIN:
