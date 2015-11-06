@@ -45,12 +45,12 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2014-03-19</date>
+ <date>2015-11-06</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.9</release>
-   <api>2.0.9</api>
+   <release>2.0.10</release>
+   <api>2.0.10</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,7 +58,7 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Fixed oci_field_* reflection: $field can be a column name or index
+Fixed bug #68298 (OCI int overflow)
   </notes>
  <contents>
   <dir name="/">
@@ -79,36 +79,36 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="array_bind_014.phpt" role="test" />
     <file name="array_bind_bdouble.phpt" role="test" />
     <file name="array_bind_bfloat.phpt" role="test" />
-    <file name="array_bind_date1.phpt" role="test" />
     <file name="array_bind_date.phpt" role="test" />
-    <file name="array_bind_float1.phpt" role="test" />
+    <file name="array_bind_date1.phpt" role="test" />
     <file name="array_bind_float.phpt" role="test" />
-    <file name="array_bind_int1.phpt" role="test" />
+    <file name="array_bind_float1.phpt" role="test" />
     <file name="array_bind_int.phpt" role="test" />
-    <file name="array_bind_str1.phpt" role="test" />
+    <file name="array_bind_int1.phpt" role="test" />
     <file name="array_bind_str.phpt" role="test" />
+    <file name="array_bind_str1.phpt" role="test" />
     <file name="array_bind_uin.phpt" role="test" />
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
     <file name="bind_boolean_1.phpt" role="test" />
-    <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_1.phpt" role="test" />
-    <file name="bind_char_2_11gR1.phpt" role="test" />
+    <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_2.phpt" role="test" />
-    <file name="bind_char_3_11gR1.phpt" role="test" />
+    <file name="bind_char_2_11gR1.phpt" role="test" />
     <file name="bind_char_3.phpt" role="test" />
-    <file name="bind_char_4_11gR1.phpt" role="test" />
+    <file name="bind_char_3_11gR1.phpt" role="test" />
     <file name="bind_char_4.phpt" role="test" />
+    <file name="bind_char_4_11gR1.phpt" role="test" />
     <file name="bind_empty.phpt" role="test" />
     <file name="bind_long.phpt" role="test" />
     <file name="bind_long_raw.phpt" role="test" />
-    <file name="bind_misccoltypes_errs.phpt" role="test" />
     <file name="bind_misccoltypes.phpt" role="test" />
+    <file name="bind_misccoltypes_errs.phpt" role="test" />
     <file name="bind_number.phpt" role="test" />
     <file name="bind_query.phpt" role="test" />
-    <file name="bind_raw_2.phpt" role="test" />
     <file name="bind_raw.phpt" role="test" />
+    <file name="bind_raw_2.phpt" role="test" />
     <file name="bind_rowid.phpt" role="test" />
     <file name="bind_sqltafc.phpt" role="test" />
     <file name="bind_sqltchr_1.phpt" role="test" />
@@ -119,13 +119,13 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="bind_unsupported_2.phpt" role="test" />
     <file name="bind_unsupported_3.phpt" role="test" />
     <file name="bug26133.phpt" role="test" />
-    <file name="bug27303_1_11gR1.phpt" role="test" />
     <file name="bug27303_1.phpt" role="test" />
-    <file name="bug27303_2_11gR1.phpt" role="test" />
+    <file name="bug27303_1_11gR1.phpt" role="test" />
     <file name="bug27303_2.phpt" role="test" />
+    <file name="bug27303_2_11gR1.phpt" role="test" />
     <file name="bug27303_3.phpt" role="test" />
-    <file name="bug27303_4_11gR1.phpt" role="test" />
     <file name="bug27303_4.phpt" role="test" />
+    <file name="bug27303_4_11gR1.phpt" role="test" />
     <file name="bug32325.phpt" role="test" />
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
@@ -143,8 +143,8 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="bug42496_1.phpt" role="test" />
     <file name="bug42496_2.phpt" role="test" />
     <file name="bug42841.phpt" role="test" />
-    <file name="bug43492_2.phpt" role="test" />
     <file name="bug43492.phpt" role="test" />
+    <file name="bug43492_2.phpt" role="test" />
     <file name="bug43497.phpt" role="test" />
     <file name="bug44008.phpt" role="test" />
     <file name="bug44113.phpt" role="test" />
@@ -157,54 +157,55 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="bug51253.phpt" role="test" />
     <file name="bug51291_1.phpt" role="test" />
     <file name="bug51291_2.phpt" role="test" />
+    <file name="bug68298.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
-    <file name="coll_002_func.phpt" role="test" />
     <file name="coll_002.phpt" role="test" />
-    <file name="coll_003_func.phpt" role="test" />
+    <file name="coll_002_func.phpt" role="test" />
     <file name="coll_003.phpt" role="test" />
-    <file name="coll_004_func.phpt" role="test" />
+    <file name="coll_003_func.phpt" role="test" />
     <file name="coll_004.phpt" role="test" />
+    <file name="coll_004_func.phpt" role="test" />
     <file name="coll_005.phpt" role="test" />
-    <file name="coll_006_func.phpt" role="test" />
     <file name="coll_006.phpt" role="test" />
+    <file name="coll_006_func.phpt" role="test" />
     <file name="coll_007.phpt" role="test" />
     <file name="coll_008.phpt" role="test" />
-    <file name="coll_009_func.phpt" role="test" />
     <file name="coll_009.phpt" role="test" />
-    <file name="coll_010_func.phpt" role="test" />
+    <file name="coll_009_func.phpt" role="test" />
     <file name="coll_010.phpt" role="test" />
-    <file name="coll_011_func.phpt" role="test" />
+    <file name="coll_010_func.phpt" role="test" />
     <file name="coll_011.phpt" role="test" />
-    <file name="coll_012_func.phpt" role="test" />
+    <file name="coll_011_func.phpt" role="test" />
     <file name="coll_012.phpt" role="test" />
-    <file name="coll_013_func.phpt" role="test" />
+    <file name="coll_012_func.phpt" role="test" />
     <file name="coll_013.phpt" role="test" />
-    <file name="coll_014_func.phpt" role="test" />
+    <file name="coll_013_func.phpt" role="test" />
     <file name="coll_014.phpt" role="test" />
-    <file name="coll_015_func.phpt" role="test" />
+    <file name="coll_014_func.phpt" role="test" />
     <file name="coll_015.phpt" role="test" />
-    <file name="coll_016_func.phpt" role="test" />
+    <file name="coll_015_func.phpt" role="test" />
     <file name="coll_016.phpt" role="test" />
-    <file name="coll_017_func.phpt" role="test" />
+    <file name="coll_016_func.phpt" role="test" />
     <file name="coll_017.phpt" role="test" />
+    <file name="coll_017_func.phpt" role="test" />
     <file name="coll_018.phpt" role="test" />
     <file name="coll_019.phpt" role="test" />
     <file name="commit_001.phpt" role="test" />
     <file name="commit_002.phpt" role="test" />
     <file name="commit_old.phpt" role="test" />
+    <file name="conn_attr.inc" role="test" />
     <file name="conn_attr_1.phpt" role="test" />
     <file name="conn_attr_2.phpt" role="test" />
     <file name="conn_attr_3.phpt" role="test" />
     <file name="conn_attr_4.phpt" role="test" />
     <file name="conn_attr_5.phpt" role="test" />
-    <file name="conn_attr.inc" role="test" />
-    <file name="connect_1_old.phpt" role="test" />
-    <file name="connect_1.phpt" role="test" />
     <file name="connect.inc" role="test" />
-    <file name="connect_old.phpt" role="test" />
     <file name="connect.phpt" role="test" />
+    <file name="connect_1.phpt" role="test" />
+    <file name="connect_1_old.phpt" role="test" />
+    <file name="connect_old.phpt" role="test" />
     <file name="connect_scope1.phpt" role="test" />
     <file name="connect_scope2.phpt" role="test" />
     <file name="connect_scope_try1.phpt" role="test" />
@@ -214,24 +215,25 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="connect_scope_try5.phpt" role="test" />
     <file name="connect_scope_try6.phpt" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
-    <file name="connect_without_oracle_home_11.phpt" role="test" />
-    <file name="connect_without_oracle_home_old_11.phpt" role="test" />
-    <file name="connect_without_oracle_home_old.phpt" role="test" />
     <file name="connect_without_oracle_home.phpt" role="test" />
+    <file name="connect_without_oracle_home_11.phpt" role="test" />
+    <file name="connect_without_oracle_home_old.phpt" role="test" />
+    <file name="connect_without_oracle_home_old_11.phpt" role="test" />
     <file name="create_table.inc" role="test" />
     <file name="create_type.inc" role="test" />
-    <file name="cursor_bind_err.phpt" role="test" />
     <file name="cursor_bind.phpt" role="test" />
-    <file name="cursors_old.phpt" role="test" />
+    <file name="cursor_bind_err.phpt" role="test" />
     <file name="cursors.phpt" role="test" />
-    <file name="dbmsoutput.phpt" role="test" />
+    <file name="cursors_old.phpt" role="test" />
     <file name="db_op_1.phpt" role="test" />
     <file name="db_op_2.phpt" role="test" />
+    <file name="dbmsoutput.phpt" role="test" />
     <file name="debug.phpt" role="test" />
+    <file name="default_prefetch.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
-    <file name="default_prefetch.phpt" role="test" />
+    <file name="define.phpt" role="test" />
     <file name="define0.phpt" role="test" />
     <file name="define1.phpt" role="test" />
     <file name="define2.phpt" role="test" />
@@ -240,7 +242,6 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="define5.phpt" role="test" />
     <file name="define6.phpt" role="test" />
     <file name="define_old.phpt" role="test" />
-    <file name="define.phpt" role="test" />
     <file name="descriptors.phpt" role="test" />
     <file name="details.inc" role="test" />
     <file name="drcp_cclass1.phpt" role="test" />
@@ -265,6 +266,7 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="dupcolnames.phpt" role="test" />
     <file name="edition_1.phpt" role="test" />
     <file name="edition_2.phpt" role="test" />
+    <file name="error.phpt" role="test" />
     <file name="error1.phpt" role="test" />
     <file name="error2.phpt" role="test" />
     <file name="error3.phpt" role="test" />
@@ -273,7 +275,6 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="error_bind_3.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
-    <file name="error.phpt" role="test" />
     <file name="error_set.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
     <file name="execute_mode.phpt" role="test" />
@@ -281,28 +282,28 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="extauth_02.phpt" role="test" />
     <file name="extauth_03.phpt" role="test" />
     <file name="extauth_04.phpt" role="test" />
+    <file name="fetch.phpt" role="test" />
+    <file name="fetch_all.phpt" role="test" />
     <file name="fetch_all1.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
     <file name="fetch_all4.phpt" role="test" />
     <file name="fetch_all5.phpt" role="test" />
-    <file name="fetch_all.phpt" role="test" />
     <file name="fetch_array.phpt" role="test" />
     <file name="fetch_assoc.phpt" role="test" />
+    <file name="fetch_into.phpt" role="test" />
     <file name="fetch_into1.phpt" role="test" />
     <file name="fetch_into2.phpt" role="test" />
-    <file name="fetch_into.phpt" role="test" />
+    <file name="fetch_object.phpt" role="test" />
     <file name="fetch_object_1.phpt" role="test" />
     <file name="fetch_object_2.phpt" role="test" />
-    <file name="fetch_object.phpt" role="test" />
-    <file name="fetch.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
+    <file name="field_funcs.phpt" role="test" />
     <file name="field_funcs0.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
     <file name="field_funcs2.phpt" role="test" />
     <file name="field_funcs3.phpt" role="test" />
     <file name="field_funcs_old.phpt" role="test" />
-    <file name="field_funcs.phpt" role="test" />
     <file name="function_aliases.phpt" role="test" />
     <file name="imp_res_1.phpt" role="test" />
     <file name="imp_res_2.phpt" role="test" />
@@ -383,33 +384,33 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="lob_044.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
+    <file name="lob_temp.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp2.phpt" role="test" />
-    <file name="lob_temp.phpt" role="test" />
     <file name="minfo.phpt" role="test" />
     <file name="null_byte_1.phpt" role="test" />
     <file name="null_byte_2.phpt" role="test" />
     <file name="null_byte_3.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
-    <file name="old_oci_close1.phpt" role="test" />
     <file name="old_oci_close.phpt" role="test" />
+    <file name="old_oci_close1.phpt" role="test" />
+    <file name="password.phpt" role="test" />
     <file name="password_2.phpt" role="test" />
     <file name="password_new.phpt" role="test" />
     <file name="password_old.phpt" role="test" />
-    <file name="password.phpt" role="test" />
-    <file name="pecl_bug10194_blob_64.phpt" role="test" />
-    <file name="pecl_bug10194_blob.phpt" role="test" />
     <file name="pecl_bug10194.phpt" role="test" />
+    <file name="pecl_bug10194_blob.phpt" role="test" />
+    <file name="pecl_bug10194_blob_64.phpt" role="test" />
     <file name="pecl_bug16035.phpt" role="test" />
     <file name="pecl_bug16842.phpt" role="test" />
     <file name="pecl_bug6109.phpt" role="test" />
     <file name="pecl_bug8816.phpt" role="test" />
     <file name="persistent.phpt" role="test" />
-    <file name="prefetch_old.phpt" role="test" />
     <file name="prefetch.phpt" role="test" />
-    <file name="privileged_connect1.phpt" role="test" />
+    <file name="prefetch_old.phpt" role="test" />
     <file name="privileged_connect.phpt" role="test" />
+    <file name="privileged_connect1.phpt" role="test" />
     <file name="refcur_prefetch_1.phpt" role="test" />
     <file name="refcur_prefetch_2.phpt" role="test" />
     <file name="refcur_prefetch_3.phpt" role="test" />
@@ -420,11 +421,11 @@ Fixed oci_field_* reflection: $field can be a column name or index
     <file name="serverversion.phpt" role="test" />
     <file name="skipif.inc" role="test" />
     <file name="statement_cache.phpt" role="test" />
-    <file name="statement_type_old.phpt" role="test" />
     <file name="statement_type.phpt" role="test" />
+    <file name="statement_type_old.phpt" role="test" />
     <file name="test.gif" role="test" />
-    <file name="testping.phpt" role="test" />
     <file name="test.txt" role="test" />
+    <file name="testping.phpt" role="test" />
     <file name="uncommitted.phpt" role="test" />
     <file name="xmltype_01.phpt" role="test" />
     <file name="xmltype_02.phpt" role="test" />
@@ -460,6 +461,21 @@ Fixed oci_field_* reflection: $field can be a column name or index
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.9</release>
+   <api>2.0.9</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Fixed oci_field_* reflection: $field can be a column name or index
+  </notes>
+</release>
 
 <release>
   <version>
