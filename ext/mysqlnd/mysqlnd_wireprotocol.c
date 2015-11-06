@@ -2688,9 +2688,9 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_
 /* }}} */
 
 
-/* {{{ send_command */
+/* {{{ mysqlnd_protocol::send_command */
 static enum_func_status
-mysqlnd_protocol__send_command(
+MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum php_mysqlnd_server_command command,
 		const zend_uchar * const arg, const size_t arg_len,
@@ -2705,7 +2705,7 @@ mysqlnd_protocol__send_command(
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet = NULL;
-	DBG_ENTER("send_command");
+	DBG_ENTER("mysqlnd_protocol::send_command");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 	DBG_INF_FMT("server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(upsert_status));
 	DBG_INF_FMT("sending %u bytes", arg_len + 1); /* + 1 is for the command */
@@ -2757,9 +2757,9 @@ mysqlnd_protocol__send_command(
 /* }}} */
 
 
-/* {{{ send_command_handle_OK */
+/* {{{ mysqlnd_protocol::send_command_handle_OK */
 static enum_func_status
-mysqlnd_protocol__send_command_handle_OK(
+MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
 						MYSQLND_ERROR_INFO * const error_info,
 						MYSQLND_UPSERT_STATUS * const upsert_status,
@@ -2770,7 +2770,7 @@ mysqlnd_protocol__send_command_handle_OK(
 	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_OK * ok_response = payload_decoder_factory->m.get_ok_packet(payload_decoder_factory, FALSE);
 
-	DBG_ENTER("send_command_handle_OK");
+	DBG_ENTER("mysqlnd_protocol::send_command_handle_OK");
 	if (!ok_response) {
 		SET_OOM_ERROR(error_info);
 		DBG_RETURN(FAIL);
@@ -2818,9 +2818,9 @@ end:
 /* }}} */
 
 
-/* {{{ send_command_handle_EOF */
+/* {{{ mysqlnd_protocol::send_command_handle_EOF */
 static enum_func_status
-mysqlnd_protocol__send_command_handle_EOF(
+MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_EOF)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
 						MYSQLND_ERROR_INFO * const error_info,
 						MYSQLND_UPSERT_STATUS * const upsert_status)
@@ -2828,7 +2828,7 @@ mysqlnd_protocol__send_command_handle_EOF(
 	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_EOF * response = payload_decoder_factory->m.get_eof_packet(payload_decoder_factory, FALSE);
 
-	DBG_ENTER("send_command_handle_EOF");
+	DBG_ENTER("mysqlnd_protocol::send_command_handle_EOF");
 
 	if (!response) {
 		SET_OOM_ERROR(error_info);
@@ -2861,7 +2861,7 @@ mysqlnd_protocol__send_command_handle_EOF(
 
 /* {{{ send_command_handle_response */
 static enum_func_status
-mysqlnd_protocol__send_command_handle_response(
+MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
 		const enum mysqlnd_packet_type ok_packet,
 		const zend_bool silent,
@@ -2876,7 +2876,7 @@ mysqlnd_protocol__send_command_handle_response(
 {
 	enum_func_status ret = FAIL;
 
-	DBG_ENTER("send_command_handle_response");
+	DBG_ENTER("mysqlnd_protocol::send_command_handle_response");
 	DBG_INF_FMT("silent=%u packet=%u command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
 
 	switch (ok_packet) {
@@ -2918,10 +2918,10 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
 	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet),
 
-	mysqlnd_protocol__send_command,
-	mysqlnd_protocol__send_command_handle_response,
-	mysqlnd_protocol__send_command_handle_OK,
-	mysqlnd_protocol__send_command_handle_EOF,
+	MYSQLND_METHOD(mysqlnd_protocol, send_command),
+	MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response),
+	MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK),
+	MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_EOF),
 MYSQLND_CLASS_METHODS_END;
 
 
