@@ -110,6 +110,13 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 	return i;
 }
 
+static inline int zend_optimizer_add_literal_string(zend_op_array *op_array, zend_string *str) {
+	zval zv;
+	ZVAL_STR(&zv, str);
+	zend_string_hash_val(str);
+	return zend_optimizer_add_literal(op_array, &zv);
+}
+
 int zend_optimizer_is_disabled_func(const char *name, size_t len) {
 	zend_function *fbc = (zend_function *)zend_hash_str_find_ptr(EG(function_table), name, len);
 
@@ -137,9 +144,7 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
 					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
 					op_array->cache_size += sizeof(void*);
-					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-					zend_optimizer_add_literal(op_array, val);
-					zend_string_hash_val(Z_STR(op_array->literals[opline->op1.constant+1]));
+					zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 					break;
 				default:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val);
@@ -195,23 +200,17 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_INSTANCEOF:
 				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 				op_array->cache_size += sizeof(void*);
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-				zend_optimizer_add_literal(op_array, val);
-				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 				break;
 			case ZEND_INIT_DYNAMIC_CALL:
 				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 				op_array->cache_size += sizeof(void*);
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-				zend_optimizer_add_literal(op_array, val);
-				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 				break;
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-				zend_optimizer_add_literal(op_array, val);
-				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 				/* break missing intentionally */
 			/*case ZEND_FETCH_CONSTANT:*/
 			case ZEND_ASSIGN_OBJ:
