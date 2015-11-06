@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     test suite). (Anatol)
 
 - SPL:
+  . Fixed bug #70868 (PCRE JIT and pattern reuse segfault). (Laruence)
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
     as index). (Laruence)
 
