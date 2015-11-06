@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
     (Laruence)
 
+- OCI8:
+  . Fixed bug #68298 (OCI int overflow) (Senthil).
+
 - PDO_DBlib:
   . Fixed bug #69757 (Segmentation fault on nextRowset).
     (miracle at rpz dot name)
