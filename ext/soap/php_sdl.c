@@ -111,7 +111,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	int ns_len = strlen(ns);
+	int ns_len = ns ? strlen(ns) : 0;
 	int type_len = strlen(type);
 	int len = ns_len + type_len + 1;
 
