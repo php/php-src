@@ -2077,6 +2077,11 @@ static PHP_FUNCTION(session_regenerate_id)
 		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		RETURN_FALSE;
 	}
+	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
+		PS(session_status) = php_session_none;
+		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		RETURN_FALSE;
+	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
 		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
 		zend_string_release(PS(id));
@@ -2086,11 +2091,6 @@ static PHP_FUNCTION(session_regenerate_id)
 			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			RETURN_FALSE;
 		}
-	}
-	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
-		PS(session_status) = php_session_none;
-		php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		RETURN_FALSE;
 	}
 	/* Read is required to make new session data at this point. */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
