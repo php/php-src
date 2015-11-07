@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fix bug #70861 (Segmentation fault in pdo_parse_params() during Drupal 8
     test suite). (Anatol)
 
+- SOAP:
+  . Fixed bug #70875 (Segmentation fault if wsdl has no targetNamespace
+    attribute). (Matteo)
+
 - SPL:
   . Fixed bug #70868 (PCRE JIT and pattern reuse segfault). (Laruence)
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
