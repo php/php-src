@@ -2461,13 +2461,20 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *var_ast = list->child[i];
-		znode fetch_result, dim_node;
+		zend_ast *list_elm_ast = list->child[i];
+		zend_ast *var_ast, *default_ast;
 
-		if (var_ast == NULL) {
+		znode fetch_result, dim_node, default_node;
+		zend_op *opline;
+
+		if (list_elm_ast  == NULL) {
 			continue;
 		}
+
 		has_elems = 1;
+
+		var_ast = list_elm_ast->child[0];
+		default_ast = list_elm_ast->child[1];
 
 		dim_node.op_type = IS_CONST;
 		ZVAL_LONG(&dim_node.u.constant, i);
@@ -2476,8 +2483,31 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
-		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
-		zend_emit_assign_znode(var_ast, &fetch_result);
+		if (default_ast) {
+			zend_compile_expr(&default_node, default_ast);
+		}
+
+		opline = zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
+
+		if (default_ast) {
+			uint32_t opnum_skip_jmp;
+			zend_op *opline_op_data;
+
+			opline->extended_value = ZEND_LIST_ELEM_HAS_DEFAULT;
+
+			opline_op_data = zend_emit_op_data(NULL);
+
+			zend_emit_assign_znode(var_ast, &fetch_result);
+
+			opnum_skip_jmp = zend_emit_jump(0);
+
+			opline_op_data->op2.opline_num = get_next_op_number(CG(active_op_array));
+			zend_emit_assign_znode(var_ast, &default_node);
+
+			zend_update_jump_target_to_next(opnum_skip_jmp);
+		} else {
+			zend_emit_assign_znode(var_ast, &fetch_result);
+		}
 	}
 
 	if (!has_elems) {
@@ -2531,10 +2561,14 @@ zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ 
 	zend_ast_list *list = zend_ast_get_list(list_ast);
 	uint32_t i;
 	for (i = 0; i < list->children; i++) {
-		zend_ast *var_ast = list->child[i];
-		if (!var_ast) {
+		zend_ast *elm_ast = list->child[i];
+		zend_ast *var_ast;
+
+		if (!elm_ast) {
 			continue;
 		}
+
+		var_ast = elm_ast->child[0];
 
 		/* Recursively check nested list()s */
 		if (var_ast->kind == ZEND_AST_LIST && zend_list_has_assign_to(var_ast, name)) {

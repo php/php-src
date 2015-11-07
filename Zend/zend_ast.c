@@ -1074,6 +1074,14 @@ simple_list:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);
 			smart_str_appendc(str, ')');
 			break;
+		case ZEND_AST_LIST_ELEM:
+			zend_ast_export_ex(str, ast->child[0], priority, indent);
+
+			if (ast->child[1]) {
+				smart_str_appendc(str, '=');
+				zend_ast_export_ex(str, ast->child[1], priority, indent);
+			}
+			break;
 		case ZEND_AST_ARRAY:
 			smart_str_appendc(str, '[');
 			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);

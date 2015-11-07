@@ -946,6 +946,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
 
+#define ZEND_LIST_ELEM_HAS_DEFAULT	1
+
 #define ZEND_FAST_CALL_FROM_FINALLY	1
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
