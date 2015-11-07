@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #70876 (Segmentation fault when regenerating session id with
-    strict mode). (Reeze Xia)
+    strict mode). (Laruence)
 
 - SOAP:
   . Fixed bug #70875 (Segmentation fault if wsdl has no targetNamespace
