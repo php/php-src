@@ -10,9 +10,16 @@ var_dump($a, $b);
 list($a, $b=new stdclass) = [1];
 var_dump($a, $b);
 
+list($a, $b=new stdclass) = [1, 2];
+var_dump($a, $b);
+
 list($a, $b=function () {return true;}) = [1];
 var_dump($a, $b);
 
+list($a, $b=function () {return true;}) = [1, 2];
+var_dump($a, $b);
+
+echo "----------\n";
 
 function test_func($str)
 {
@@ -21,6 +28,9 @@ function test_func($str)
 }
 
 list($a, $b=test_func("call me!")) = [1];
+var_dump($a, $b);
+
+list($a, $b=test_func("call me!")) = [1, 2];
 var_dump($a, $b);
 
 ?>
@@ -33,6 +43,11 @@ object(stdClass)#1 (0) {
 int(1)
 object(Closure)#2 (0) {
 }
+int(1)
+int(2)
+----------
 string(8) "call me!"
 int(1)
 string(8) "Yes Sir!"
+int(1)
+int(2)

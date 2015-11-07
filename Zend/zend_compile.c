@@ -2483,10 +2483,6 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
-		if (default_ast) {
-			zend_compile_expr(&default_node, default_ast);
-		}
-
 		opline = zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 
 		if (default_ast) {
@@ -2502,6 +2498,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 			opnum_skip_jmp = zend_emit_jump(0);
 
 			opline_op_data->op2.opline_num = get_next_op_number(CG(active_op_array));
+			zend_compile_expr(&default_node, default_ast);
 			zend_emit_assign_znode(var_ast, &default_node);
 
 			zend_update_jump_target_to_next(opnum_skip_jmp);
