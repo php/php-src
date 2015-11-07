@@ -41,7 +41,9 @@ int(1)
 object(stdClass)#1 (0) {
 }
 int(1)
-object(Closure)#2 (0) {
+int(2)
+int(1)
+object(Closure)#1 (0) {
 }
 int(1)
 int(2)
