@@ -702,6 +702,10 @@ PS_VALIDATE_SID_FUNC(files)
 {
 	PS_FILES_DATA;
 
+	if (!data) {
+		return FAILURE;
+	}
+
 	return ps_files_key_exists(data, ZSTR_VAL(key));
 }
 
