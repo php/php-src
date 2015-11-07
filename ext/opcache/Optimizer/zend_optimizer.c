@@ -137,6 +137,21 @@ static inline void alloc_cache_slots_op2(zend_op_array *op_array, zend_op *oplin
 	op_array->cache_size += num * sizeof(void *);
 }
 
+#define REQUIRES_STRING(val) do { \
+	if (Z_TYPE_P(val) != IS_STRING) { \
+		zval_dtor(val); \
+		return 0; \
+	} \
+} while (0)
+
+#define TO_STRING_NOWARN(val) do { \
+	if (Z_TYPE_P(val) >= IS_ARRAY) { \
+		zval_dtor(val); \
+		return 0; \
+	} \
+	convert_to_string(val); \
+} while (0)
+
 int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
@@ -151,10 +166,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_CONSTANT:
 		case ZEND_DEFINED:
 		case ZEND_NEW:
-			if (Z_TYPE_P(val) != IS_STRING) {
-				zval_dtor(val);
-				return 0;
-			}
+			REQUIRES_STRING(val);
 			ZEND_OP1_TYPE(opline) = IS_CONST;
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
@@ -165,7 +177,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
-			convert_to_string(val);
+			TO_STRING_NOWARN(val);
 			/* break missing intentionally */
 		default:
 			ZEND_OP1_TYPE(opline) = IS_CONST;
@@ -201,23 +213,25 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_ADD_INTERFACE:
 		case ZEND_ADD_TRAIT:
 		case ZEND_INSTANCEOF:
-			if (Z_TYPE_P(val) != IS_STRING) {
-				zval_dtor(val);
-				return 0;
-			}
-
+			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			alloc_cache_slots_op2(op_array, opline, 1);
 			break;
 		case ZEND_INIT_FCALL:
+			REQUIRES_STRING(val);
 			zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			alloc_cache_slots_op2(op_array, opline, 1);
 			break;
 		case ZEND_INIT_DYNAMIC_CALL:
 			if (Z_TYPE_P(val) == IS_STRING) {
+				if (zend_memrchr(Z_STRVAL_P(val), ':', Z_STRLEN_P(val))) {
+					zval_dtor(val);
+					return 0;
+				}
+
 				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 				drop_leading_backslash(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -229,11 +243,10 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			break;
 		case ZEND_INIT_METHOD_CALL:
 		case ZEND_INIT_STATIC_METHOD_CALL:
+			REQUIRES_STRING(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			if (Z_TYPE_P(val) == IS_STRING) {
-				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-				alloc_cache_slots_op2(op_array, opline, 2);
-			}
+			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
+			alloc_cache_slots_op2(op_array, opline, 2);
 			break;
 		/*case ZEND_FETCH_CONSTANT:*/
 		case ZEND_ASSIGN_OBJ:
@@ -249,10 +262,9 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_POST_INC_OBJ:
 		case ZEND_POST_DEC_OBJ:
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			if (Z_TYPE_P(val) == IS_STRING) {
-				alloc_cache_slots_op2(op_array, opline, 2);
-			}
+			alloc_cache_slots_op2(op_array, opline, 2);
 			break;
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
@@ -266,11 +278,12 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_ASSIGN_BW_OR:
 		case ZEND_ASSIGN_BW_AND:
 		case ZEND_ASSIGN_BW_XOR:
-			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			if (Z_TYPE_P(val) == IS_STRING) {
-				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-					alloc_cache_slots_op2(op_array, opline, 2);
-				}
+			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+				TO_STRING_NOWARN(val);
+				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+				alloc_cache_slots_op2(op_array, opline, 2);
+			} else {
+				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}
 			break;
 		case ZEND_OP_DATA:
@@ -319,7 +332,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_ROPE_END:
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
-			convert_to_string(val);
+			TO_STRING_NOWARN(val);
 			/* break missing intentionally */
 		default:
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -351,6 +364,8 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_FETCH_DIM_UNSET:
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
+				case ZEND_RETURN_BY_REF:
+					zval_dtor(val);
 					return 0;
 				case ZEND_SEND_VAR:
 					opline->extended_value = 0;
@@ -372,6 +387,9 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 						opline->extended_value = 0;
 						opline->opcode = ZEND_SEND_VAL;
 					}
+					break;
+				case ZEND_SEND_USER:
+					opline->opcode = ZEND_SEND_VAL_EX;
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
