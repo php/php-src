@@ -124,6 +124,14 @@ int zend_optimizer_is_disabled_func(const char *name, size_t len) {
 			fbc->internal_function.handler == ZEND_FN(display_disabled_function));
 }
 
+static inline void drop_leading_backslash(zval *val) {
+	if (Z_STRVAL_P(val)[0] == '\\') {
+		zend_string *str = zend_string_init(Z_STRVAL_P(val) + 1, Z_STRLEN_P(val) - 1, 0);
+		zval_dtor(val);
+		ZVAL_STR(val, str);
+	}
+}
+
 void zend_optimizer_update_op1_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zval          *val)
@@ -140,6 +148,7 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 				case ZEND_FETCH_CONSTANT:
 				case ZEND_DEFINED:
 				case ZEND_NEW:
+					drop_leading_backslash(val);
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
 					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
@@ -173,13 +182,35 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 		op_array->cache_size += sizeof(void*);
 		return;
-	} else if (opline->opcode == ZEND_ROPE_INIT ||
-			opline->opcode == ZEND_ROPE_ADD ||
-			opline->opcode == ZEND_ROPE_END ||
-			opline->opcode == ZEND_CONCAT ||
-			opline->opcode == ZEND_FAST_CONCAT) {
-		convert_to_string(val);
 	}
+
+	switch (opline->opcode) {
+		case ZEND_ROPE_INIT:
+		case ZEND_ROPE_ADD:
+		case ZEND_ROPE_END:
+		case ZEND_CONCAT:
+		case ZEND_FAST_CONCAT:
+			convert_to_string(val);
+			break;
+		case ZEND_FETCH_R:
+		case ZEND_FETCH_W:
+		case ZEND_FETCH_RW:
+		case ZEND_FETCH_IS:
+		case ZEND_FETCH_UNSET:
+		case ZEND_FETCH_FUNC_ARG:
+		case ZEND_FETCH_CLASS:
+		case ZEND_INIT_FCALL_BY_NAME:
+		/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
+		case ZEND_UNSET_VAR:
+		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_ADD_INTERFACE:
+		case ZEND_ADD_TRAIT:
+		case ZEND_INSTANCEOF:
+		case ZEND_INIT_DYNAMIC_CALL:
+			drop_leading_backslash(val);
+			break;
+	}
+
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 	if (Z_TYPE_P(val) == IS_STRING) {
 		zend_string_hash_val(Z_STR(ZEND_OP2_LITERAL(opline)));
