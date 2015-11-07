@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70873 (Regression on private static properties access).
+    (Laruence)
   . Fixed bug #70805 (Segmentation faults whilst running Drupal 8 test suite).
     (Dmitry, Laruence)
   . Fixed bug #70862 (Several functions do not check return code of
