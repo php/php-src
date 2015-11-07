@@ -352,7 +352,7 @@ Relevant RFCs:
 Other language changes
 ----------------------
 
-* Removed support for static calls to non-static calls form an incompatible
+* Removed support for static calls to non-static methods from an incompatible
   $this context. In this case $this will not be defined, but the call will be
   allowed with a deprecation notice. An example:
 
