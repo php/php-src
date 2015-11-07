@@ -2193,6 +2193,8 @@ ZEND_VM_C_LABEL(try_fetch_list):
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(container, BP_VAR_R);
 		}
+
+		offset_isset = 0;
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 

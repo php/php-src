@@ -5354,6 +5354,8 @@ try_fetch_list:
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(container, BP_VAR_R);
 		}
+
+		offset_isset = 0;
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
@@ -32026,6 +32028,8 @@ try_fetch_list:
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(container, BP_VAR_R);
 		}
+
+		offset_isset = 0;
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
@@ -42039,6 +42043,8 @@ try_fetch_list:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(container, BP_VAR_R);
 		}
+
+		offset_isset = 0;
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
