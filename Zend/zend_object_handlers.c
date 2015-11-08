@@ -275,10 +275,10 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 		return 1;
 	} else if (property_info->flags & ZEND_ACC_PRIVATE) {
 		return (ce == EG(scope) || property_info->ce == EG(scope));
-	} else {
-		ZEND_ASSERT(property_info->flags & ZEND_ACC_PROTECTED);
+	} else if (property_info->flags & ZEND_ACC_PROTECTED) {
 		return zend_check_protected(property_info->ce, EG(scope));
 	}
+	return 0;
 }
 /* }}} */
 

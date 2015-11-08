@@ -643,13 +643,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			(opline->opcode != ZEND_FE_RESET_R || opline->opcode != ZEND_FE_RESET_RW) &&
 			opline->opcode != ZEND_FREE
 			) {
-			zend_op *src = VAR_SOURCE(opline->op1);
+			znode_op op1 = opline->op1;
+			zend_op *src = VAR_SOURCE(op1);
 			zval c = ZEND_OP1_LITERAL(src);
-			VAR_UNSET(opline->op1);
 			zval_copy_ctor(&c);
-			zend_optimizer_update_op1_const(op_array, opline, &c);
-			literal_dtor(&ZEND_OP1_LITERAL(src));
-			MAKE_NOP(src);
+			if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
+				VAR_SOURCE(op1) = NULL;
+				literal_dtor(&ZEND_OP1_LITERAL(src));
+				MAKE_NOP(src);
+			}
 		}
 
 		/* T = QM_ASSIGN(C), F(T) => NOP, F(C) */
@@ -657,13 +659,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op2) &&
 			VAR_SOURCE(opline->op2)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op2)) == IS_CONST) {
-			zend_op *src = VAR_SOURCE(opline->op2);
+			znode_op op2 = opline->op2;
+			zend_op *src = VAR_SOURCE(op2);
 			zval c = ZEND_OP1_LITERAL(src);
-			VAR_UNSET(opline->op2);
 			zval_copy_ctor(&c);
-			zend_optimizer_update_op2_const(op_array, opline, &c);
-			literal_dtor(&ZEND_OP1_LITERAL(src));
-			MAKE_NOP(src);
+			if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
+				VAR_SOURCE(op2) = NULL;
+				literal_dtor(&ZEND_OP1_LITERAL(src));
+				MAKE_NOP(src);
+			}
 		}
 
 		/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */

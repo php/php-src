@@ -118,12 +118,12 @@ int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
 int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
 int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
-void zend_optimizer_update_op1_const(zend_op_array *op_array,
-                                     zend_op       *opline,
-                                     zval          *val);
-void zend_optimizer_update_op2_const(zend_op_array *op_array,
-                                     zend_op       *opline,
-                                     zval          *val);
+int zend_optimizer_update_op1_const(zend_op_array *op_array,
+                                    zend_op       *opline,
+                                    zval          *val);
+int zend_optimizer_update_op2_const(zend_op_array *op_array,
+                                    zend_op       *opline,
+                                    zval          *val);
 int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      zend_op       *opline,
                                      zend_uchar     type,
