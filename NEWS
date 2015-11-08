@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #70843 (Segmentation fault on MacOSX with
     opcache.file_cache_only=1). (Laruence)
 
+- SPL:
+  . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
+    as index). (Laruence)
+
 - Standard:
   . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
     (Laruence)
