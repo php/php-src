@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 12 Nov 2015, PHP 7.0.0 RC 7
 
 - Core:
+  . Fixed bug #70805 (Segmentation faults whilst running Drupal 8 test suite).
+    (Dmitry, Laruence)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
