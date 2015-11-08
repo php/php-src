@@ -115,7 +115,7 @@ php_apache_sapi_header_content_length(const char *val)
 	if (sizeof(apr_off_t) >= 8) {
 		/* We're going to assume that long long is always 64 bits. If it's
 		 * smaller, we're not doing any worse than we would have before bug
-		 * #XXXXX was fixed anyway, since we'll just truncate to 32 bits. */
+		 * #70879 was fixed anyway, since we'll just truncate to 32 bits. */
 		return (apr_off_t) strtoll(val, (char **) NULL, 10);
 	}
 
