@@ -1,5 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+12 Nov 2015, PHP 7.0.0 RC 7
+
+- Core:
+
+- Standard:
+  . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
+    (Laruence)
+
 29 Oct 2015, PHP 7.0.0 RC 6
 
 - Core:
