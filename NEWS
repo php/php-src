@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     php_stream_copy_to_mem()). (Anatol)
   . Fixed bug #70863 (Incorect logic to increment_function for proxy objects).
     (Anatol)
+  . Fixed bug #70323 (Regression in zend_fetch_debug_backtrace() can cause
+    segfaults). (Aharvey, Laruence)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
