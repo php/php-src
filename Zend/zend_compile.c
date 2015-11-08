@@ -2463,7 +2463,6 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *list_elm_ast = list->child[i];
 		zend_ast *var_ast, *default_ast;
-		uint32_t opnum_fetch;
 
 		znode fetch_result, dim_node, default_node;
 		zend_op *opline;
@@ -2484,7 +2483,6 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
-		opnum_fetch = get_next_op_number(CG(active_op_array));
 		opline = zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 
 		if (default_ast) {
