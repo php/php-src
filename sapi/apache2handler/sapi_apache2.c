@@ -88,6 +88,44 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length; /* we always consume all the data passed to us. */
 }
 
+/* Code shamelessly nicked from timelib. This should probably be in a common
+ * header eventually. */
+#if defined(_MSC_VER)
+# define strtoll(s, f, b) _atoi64(s)
+#elif !defined(HAVE_STRTOLL)
+# if defined(HAVE_ATOLL)
+#  define strtoll(s, f, b) atoll(s)
+# else
+#  define strtoll(s, f, b) strtol(s, f, b)
+# endif
+#endif
+
+static apr_off_t
+php_apache_sapi_header_content_length(const char *val)
+{
+#if defined(PHP_WIN32) && defined(APR_HAS_LARGE_FILES)
+	return (apr_off_t) _strtoui64(val, (char **) NULL, 10);
+#else
+    /* Although apr_off_t started life as a simpler typedef for off_t, APR has
+     * long had the ability to use off64_t on platforms that support it, even
+     * if the platform itself is 32 bit. We need to check for the 64 bit case
+     * to ensure that we don't try to convert to a 32 bit integer
+     * unconditionally and therefore lose the ability to set a content length
+     * over 2G. */
+	if (sizeof(apr_off_t) >= 8) {
+		/* We're going to assume that long long is always 64 bits. If it's
+		 * smaller, we're not doing any worse than we would have before bug
+		 * #XXXXX was fixed anyway, since we'll just truncate to 32 bits. */
+		return (apr_off_t) strtoll(val, (char **) NULL, 10);
+	}
+
+	/* There's no real guarantee that sizeof(off_t) >= sizeof(long) in the
+	 * POSIX standard, but we've done this for years and nobody's complained
+	 * yet, so I think we'll consider this safe. */
+	return (apr_off_t) strtol(val, (char **) NULL, 10);
+#endif
+}
+
 static int
 php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
@@ -126,15 +164,8 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_e
 				}
 				ctx->content_type = estrdup(val);
 			} else if (!strcasecmp(sapi_header->header, "content-length")) {
-#ifdef PHP_WIN32
-# ifdef APR_HAS_LARGE_FILES
-				ap_set_content_length(ctx->r, (apr_off_t) _strtoui64(val, (char **)NULL, 10));
-# else
-				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
-# endif
-#else
-				ap_set_content_length(ctx->r, (apr_off_t) strtol(val, (char **)NULL, 10));
-#endif
+				apr_off_t clen = php_apache_sapi_header_content_length(val);
+				ap_set_content_length(ctx->r, clen);
 			} else if (op == SAPI_HEADER_REPLACE) {
 				apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 			} else {
