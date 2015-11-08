@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 - Core:
 
+- Opcache:
+  . Fixed bug #70656 (require() statement broken after opcache_reset() or a
+    few hours of use). (Laruence)
+
 - Standard:
   . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
     (Laruence)
