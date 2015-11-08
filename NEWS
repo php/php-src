@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
     as index). (Laruence)
+  . Fixed bug #70868 (PCRE JIT and pattern reuse segfault). (Laruence)
 
 - Standard:
   . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
