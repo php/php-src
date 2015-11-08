@@ -1,5 +1,5 @@
 --TEST--
-list() default value: nested list
+Testing list() default value: nested list
 --FILE--
 <?php
 

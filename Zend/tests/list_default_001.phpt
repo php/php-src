@@ -1,5 +1,5 @@
 --TEST--
-list() default value: basic
+Testing list() default value: basic
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-list() default value: non array
+Testing list() default value: non array
 --FILE--
 <?php
 

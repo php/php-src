@@ -1,5 +1,5 @@
 --TEST--
-Testing nested list() with empty array and default value
+Testing list() nested with empty array and default value
 --FILE--
 <?php
 
