@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #70876 (Segmentation fault when regenerating session id with
     strict mode). (Laruence)
 
+- SOAP:
+  . Fixed bug #70875 (Segmentation fault if wsdl has no targetNamespace
+    attribute). (Matteo)
+
 - SPL:
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
     as index). (Laruence)
