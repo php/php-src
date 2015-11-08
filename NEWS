@@ -5,12 +5,18 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #70805 (Segmentation faults whilst running Drupal 8 test suite).
     (Dmitry, Laruence)
+  . Fixed bug #70862 (Several functions do not check return code of
+    php_stream_copy_to_mem()). (Anatol)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
     few hours of use). (Laruence)
   . Fixed bug #70843 (Segmentation fault on MacOSX with
     opcache.file_cache_only=1). (Laruence)
+
+- PDO:
+  . Fix bug #70861 (Segmentation fault in pdo_parse_params() during Drupal 8
+    test suite). (Anatol)
 
 - SPL:
   . Fixed bug #70853 (SplFixedArray throws exception when using ref variable
