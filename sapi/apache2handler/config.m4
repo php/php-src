@@ -129,8 +129,6 @@ if test "$PHP_APXS2" != "no"; then
   fi
   AC_MSG_RESULT(yes)
   PHP_SUBST(APXS)
-
-  AC_CHECK_FUNCS(strtoll)
 else
   AC_MSG_RESULT(no)
 fi
