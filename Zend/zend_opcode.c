@@ -686,9 +686,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				break;
 			case ZEND_FETCH_LIST:
-				/* look ahead for OP_DATA which stores jmp_addr */
-				if ((opline + 1 < end) && (opline+1)->opcode == ZEND_OP_DATA) {
-					ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline+1, (opline+1)->op2);
+				if (opline->extended_value != 0) {
+					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				}
 				break;
 		}

@@ -27,6 +27,15 @@ foreach($arr as $key => list($one=strlen('ONE'))) {
 	echo "$key => $one\n";
 }
 
+function say_sth($str) {
+	echo "Beep\n";
+	return $str;
+}
+
+foreach($arr as $key => list($one=say_sth('ONE'))) {
+	echo "$key => $one\n";
+}
+
 ?>
 --EXPECTF--
 Notice: Undefined offset: %d in %s on line %d
@@ -41,6 +50,11 @@ Notice: Undefined offset: %d in %s on line %d
 3 => 1
 -----------
 0 => 3
+1 => 1
+2 => 1
+3 => 1
+Beep
+0 => ONE
 1 => 1
 2 => 1
 3 => 1

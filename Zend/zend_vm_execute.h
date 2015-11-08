@@ -5324,7 +5324,7 @@ try_fetch_list:
 		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
 
 		if (UNEXPECTED(value == NULL)) {
-			if (EXPECTED(opline->extended_value != ZEND_LIST_ELEM_HAS_DEFAULT)) {
+			if (EXPECTED(opline->extended_value == 0)) {
 				zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
 			}
 
@@ -5359,13 +5359,9 @@ try_fetch_list:
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
-	if (UNEXPECTED(opline->extended_value == ZEND_LIST_ELEM_HAS_DEFAULT)) {
-		if (!offset_isset) {
-			/* goto default value assigment, jmp_addr is stored in next OP_DATA */
-			ZEND_VM_JMP(OP_JMP_ADDR((opline+1), (opline+1)->op2));
-		} else {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
+	if (UNEXPECTED(!offset_isset && opline->extended_value != 0)) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
@@ -31998,7 +31994,7 @@ try_fetch_list:
 		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
 
 		if (UNEXPECTED(value == NULL)) {
-			if (EXPECTED(opline->extended_value != ZEND_LIST_ELEM_HAS_DEFAULT)) {
+			if (EXPECTED(opline->extended_value == 0)) {
 				zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
 			}
 
@@ -32033,13 +32029,9 @@ try_fetch_list:
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
-	if (UNEXPECTED(opline->extended_value == ZEND_LIST_ELEM_HAS_DEFAULT)) {
-		if (!offset_isset) {
-			/* goto default value assigment, jmp_addr is stored in next OP_DATA */
-			ZEND_VM_JMP(OP_JMP_ADDR((opline+1), (opline+1)->op2));
-		} else {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
+	if (UNEXPECTED(!offset_isset && opline->extended_value != 0)) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
@@ -42013,7 +42005,7 @@ try_fetch_list:
 		zval *value = zend_hash_index_find(Z_ARRVAL_P(container), Z_LVAL_P(EX_CONSTANT(opline->op2)));
 
 		if (UNEXPECTED(value == NULL)) {
-			if (EXPECTED(opline->extended_value != ZEND_LIST_ELEM_HAS_DEFAULT)) {
+			if (EXPECTED(opline->extended_value == 0)) {
 				zend_error(E_NOTICE,"Undefined offset: " ZEND_ULONG_FMT, Z_LVAL_P(EX_CONSTANT(opline->op2)));
 			}
 
@@ -42048,13 +42040,9 @@ try_fetch_list:
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
-	if (UNEXPECTED(opline->extended_value == ZEND_LIST_ELEM_HAS_DEFAULT)) {
-		if (!offset_isset) {
-			/* goto default value assigment, jmp_addr is stored in next OP_DATA */
-			ZEND_VM_JMP(OP_JMP_ADDR((opline+1), (opline+1)->op2));
-		} else {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
-		}
+	if (UNEXPECTED(!offset_isset && opline->extended_value != 0)) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
