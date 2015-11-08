@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #70323 (Regression in zend_fetch_debug_backtrace() can cause
     segfaults). (Aharvey, Laruence)
+  . Fixed bug #70873 (Regression on private static properties access).
+    (Laruence)
 
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
