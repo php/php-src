@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #70873 (Regression on private static properties access).
     (Laruence)
 
+- OCI8:
+  . Fixed bug #68298 (OCI int overflow) (Senthil).
+
 - Opcache:
   . Fixed bug #70656 (require() statement broken after opcache_reset() or a
     few hours of use). (Laruence)
