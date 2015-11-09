@@ -71,7 +71,8 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 
 main() {
 #if HAVE_CRYPT
-    exit (strcmp((char *)crypt("rasmuslerdorf","rl"),"rl.3StKT.4T8M"));
+    char* encrypted = crypt("rasmuslerdorf","rl");
+    exit (!encrypted || strcmp(encrypted,"rl.3StKT.4T8M"));
 #else
 	exit(0);
 #endif
@@ -95,7 +96,8 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 
 main() {
 #if HAVE_CRYPT
-  exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
+  char* encrypted = crypt("rasmuslerdorf","_J9..rasm");
+  exit (!encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc"));
 #else
   exit(0);
 #endif
@@ -128,7 +130,8 @@ main() {
     salt[12]='\0';
     strcpy(answer,salt);
     strcat(answer,"rISCgZzpwk3UhDidwXvin0");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+    char* encrypted = crypt("rasmuslerdorf",salt);
+    exit (!encrypted || strcmp(encrypted,answer));
 #else
 	exit(0);
 #endif
@@ -158,7 +161,8 @@ main() {
     strcat(salt,"rasmuslerd............");
     strcpy(answer,salt);
     strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+    char* encrypted = crypt("rasmuslerdorf",salt);
+    exit (!encrypted || strcmp(encrypted,answer));
 #else
 	exit(0);
 #endif
@@ -187,7 +191,8 @@ main() {
     strcpy(salt,"\$6\$rasmuslerdorf\$");
     strcpy(answer, salt);
     strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+    char* encrypted = crypt("rasmuslerdorf",salt);
+    exit (!encrypted || strcmp(encrypted,answer));
 #else
 	exit(0);
 #endif
@@ -216,7 +221,8 @@ main() {
     strcpy(salt,"\$5\$rasmuslerdorf\$");
     strcpy(answer, salt);
     strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
-    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+    char* encrypted = crypt("rasmuslerdorf",salt);
+    exit (!encrypted || strcmp(encrypted,answer));
 
 #else
 	exit(0);
