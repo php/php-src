@@ -21,6 +21,7 @@
 /* $Id: mysqlnd.c 317989 2011-10-10 20:49:28Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_vio.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"

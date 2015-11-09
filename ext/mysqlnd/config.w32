@@ -16,7 +16,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_ext_plugin.c " +
 			"mysqlnd_loaddata.c " +
 			"mysqlnd_reverse_api.c " +
-			"mysqlnd_net.c " +
+			"mysqlnd_vio.c " +
 			"mysqlnd_plugin.c " +
 			"mysqlnd_ps.c " +
 			"mysqlnd_ps_codec.c " +

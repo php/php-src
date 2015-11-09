@@ -23,8 +23,6 @@
 #ifndef MYSQLND_WIREPROTOCOL_H
 #define MYSQLND_WIREPROTOCOL_H
 
-#include "mysqlnd_net.h"
-
 #define MYSQLND_HEADER_SIZE 4
 #define COMPRESSED_HEADER_SIZE 3
 
