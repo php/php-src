@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #70863 (Incorect logic to increment_function for proxy objects).
     (Anatol)
   . Fixed bug #70842 (Persistent Stream Segmentation Fault). (Caleb Champlin)
+  . Fixed bug #70323 (Regression in zend_fetch_debug_backtrace() can cause
+    segfaults). (Aharvey, Laruence)
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
