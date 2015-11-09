@@ -270,6 +270,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		conn->net->data->m.free_contents(conn->net);
 	}
 
+	if (conn->vio) {
+		conn->vio->data->m.free_contents(conn->vio);
+	}
+
 	DBG_INF("Freeing memory of members");
 
 	if (conn->host) {
@@ -339,6 +343,11 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 	if (conn->net) {
 		mysqlnd_net_free(conn->net, conn->stats, conn->error_info);
 		conn->net = NULL;
+	}
+
+	if (conn->vio) {
+		mysqlnd_vio_free(conn->vio, conn->stats, conn->error_info);
+		conn->vio = NULL;
 	}
 
 	if (conn->payload_decoder_factory) {
@@ -655,6 +664,7 @@ static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags)
 {
 	MYSQLND_NET * net = conn->net;
+	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
 	/* we allow load data local infile by default */
@@ -680,8 +690,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 		mysql_flags &= ~CLIENT_SSL;
 	}
 #else
-	if (net && (net->data->options.ssl_key || net->data->options.ssl_cert ||
-		net->data->options.ssl_ca || net->data->options.ssl_capath || net->data->options.ssl_cipher))
+	if (vio && (vio->data->options.ssl_key || vio->data->options.ssl_cert ||
+		vio->data->options.ssl_ca || vio->data->options.ssl_capath || vio->data->options.ssl_cipher))
 	{
 		mysql_flags |= CLIENT_SSL;
 	}
@@ -705,9 +715,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	size_t client_flags = mysql_flags;
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	if (FAIL == conn->net->data->m.connect_ex(conn->net, *scheme, conn->persistent, conn->stats, conn->error_info)) {
+	if (FAIL == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info)) {
 		DBG_RETURN(FAIL);
-	} else {
+	} else if (PASS == conn->net->data->m.connect(conn->net, *scheme, conn->persistent, conn->stats, conn->error_info)) {
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_HANDSHAKE, conn, username, password, database, client_flags);
 		if (command) {
 			ret = command->run(command);
@@ -1203,7 +1213,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		stream = (*p)->data->net->data->m.get_stream((*p)->data->net);
+		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
 		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
 		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
@@ -1233,7 +1243,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
 
 	while (*fwd) {
-		stream = (*fwd)->data->net->data->m.get_stream((*fwd)->data->net);
+		stream = (*fwd)->data->vio->data->m.get_stream((*fwd)->data->vio);
 		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
 		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
@@ -1426,7 +1436,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), ssl_set);
 	enum_func_status ret = FAIL;
-	MYSQLND_NET * net = conn->net;
+	MYSQLND_VIO * net = conn->vio;
 	DBG_ENTER("mysqlnd_conn_data::ssl_set");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
@@ -1677,8 +1687,8 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 {
 	enum_func_status ret = PASS;
-	MYSQLND_NET * net = conn->net;
-	php_stream * net_stream = net->data->m.get_stream(net);
+	MYSQLND_VIO * vio = conn->vio;
+	php_stream * net_stream = vio->data->m.get_stream(vio);
 	enum mysqlnd_connection_state state;
 
 	DBG_ENTER("mysqlnd_send_close");
@@ -1702,7 +1712,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 					ret = command->run(command);
 					command->free_command(command);
 				}
-				net->data->m.close_stream(net, conn->stats, conn->error_info);
+				vio->data->m.close_stream(vio, conn->stats, conn->error_info);
 			}
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			break;
@@ -1732,7 +1742,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
-			net->data->m.close_stream(net, conn->stats, conn->error_info);
+			vio->data->m.close_stream(vio, conn->stats, conn->error_info);
 			break;
 	}
 
@@ -2104,6 +2114,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);
+			break;
 		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->net->data->m.set_client_option(conn->net, option, value);
 			break;

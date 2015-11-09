@@ -152,13 +152,14 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	size_t				ret;
 	MYSQLND_INFILE		infile;
 	MYSQLND_NET			* net = conn->net;
+	MYSQLND_VIO			* vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
 	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
 		php_error_docref(NULL, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		/* write empty packet to server */
-		ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info);
+		ret = net->data->m.send(net, vio, empty_packet, 0, conn->stats, conn->error_info);
 		*is_warning = TRUE;
 		goto infile_error;
 	}
@@ -178,13 +179,13 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf));
 		SET_CLIENT_ERROR(conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		/* write empty packet to server */
-		ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info);
+		ret = net->data->m.send(net, vio, empty_packet, 0, conn->stats, conn->error_info);
 		goto infile_error;
 	}
 
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE, buflen - MYSQLND_HEADER_SIZE)) > 0) {
-		if ((ret = net->data->m.send_ex(net, buf, bufsize, conn->stats, conn->error_info)) == 0) {
+		if ((ret = net->data->m.send(net, vio, buf, bufsize, conn->stats, conn->error_info)) == 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
@@ -192,7 +193,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	}
 
 	/* send empty packet for eof */
-	if ((ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info)) == 0) {
+	if ((ret = net->data->m.send(net, vio, empty_packet, 0, conn->stats, conn->error_info)) == 0) {
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		goto infile_error;
 	}

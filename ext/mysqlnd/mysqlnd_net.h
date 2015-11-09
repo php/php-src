@@ -26,6 +26,9 @@
 PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 
+PHPAPI MYSQLND_VIO * mysqlnd_vio_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+PHPAPI void mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+
 #endif /* MYSQLND_NET_H */
 
 /*

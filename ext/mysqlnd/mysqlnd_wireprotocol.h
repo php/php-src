@@ -66,6 +66,7 @@ typedef struct st_mysqlnd_packet_header {
 
 	MYSQLND_CONN_DATA * conn;
 	MYSQLND_NET * net;
+	MYSQLND_VIO * vio;
 	MYSQLND_ERROR_INFO * error_info;
 	MYSQLND_STATS * stats;
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory;

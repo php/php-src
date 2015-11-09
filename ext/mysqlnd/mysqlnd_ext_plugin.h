@@ -97,11 +97,17 @@ struct st_mysqlnd_plugin_methods_xetters
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *methods);
 	} protocol;
 
-	struct st_mnd_io_xetters
+	struct st_mnd_net_xetters
 	{
 		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * (*get)();
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * methods);
-	} io;
+	} net;
+
+	struct st_mnd_vio_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods);
+	} vio;
 
 	struct st_mnd_error_info_xetters
 	{
@@ -143,9 +149,11 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 #define mysqlnd_protocol_get_methods()	mysqlnd_plugin_methods_xetters.protocol.get()
 #define mysqlnd_protocol_set_methods(m)	mysqlnd_plugin_methods_xetters.protocol.set((m))
 
-#define mysqlnd_net_get_methods()		mysqlnd_plugin_methods_xetters.io.get()
-#define mysqlnd_net_set_methods(m)		mysqlnd_plugin_methods_xetters.io.set((m))
+#define mysqlnd_net_get_methods()		mysqlnd_plugin_methods_xetters.net.get()
+#define mysqlnd_net_set_methods(m)		mysqlnd_plugin_methods_xetters.net.set((m))
 
+#define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
+#define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))
 
 #define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
 #define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))

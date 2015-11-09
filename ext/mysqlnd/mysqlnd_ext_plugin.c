@@ -327,6 +327,24 @@ _mysqlnd_net_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * methods)
 /* }}} */
 
 
+/* {{{ _mysqlnd_vio_get_methods */
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) *
+_mysqlnd_vio_get_methods()
+{
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_vio);
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_vio_set_methods */
+static void
+_mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
+{
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_vio) = *methods;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_command_factory_get */
 static func_mysqlnd__command_factory
 _mysqlnd_command_factory_get()
@@ -400,6 +418,10 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 	{
 		_mysqlnd_net_get_methods,
 		_mysqlnd_net_set_methods,
+	},
+	{
+		_mysqlnd_vio_get_methods,
+		_mysqlnd_vio_set_methods,
 	},
 	{
 		_mysqlnd_error_info_get_methods,

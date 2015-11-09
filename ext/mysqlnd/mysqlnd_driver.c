@@ -140,6 +140,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
 
 	data->net = mysqlnd_net_init(persistent, data->stats, data->error_info);
+	data->vio = mysqlnd_vio_init(persistent, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
 	data->command_factory = mysqlnd_command_factory_get();
 
@@ -241,16 +242,16 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 /* }}} */
 
 
-/* {{{ mysqlnd_object_factory::get_io_channel */
-PHPAPI MYSQLND_NET *
-MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+/* {{{ mysqlnd_object_factory::get_net */
+static MYSQLND_NET *
+MYSQLND_METHOD(mysqlnd_object_factory, get_net)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	size_t net_alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t net_data_alloc_size = sizeof(MYSQLND_NET_DATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_NET * net = mnd_pecalloc(1, net_alloc_size, persistent);
 	MYSQLND_NET_DATA * net_data = mnd_pecalloc(1, net_data_alloc_size, persistent);
 
-	DBG_ENTER("mysqlnd_object_factory::get_io_channel");
+	DBG_ENTER("mysqlnd_object_factory::get_net");
 	DBG_INF_FMT("persistent=%u", persistent);
 	if (net && net_data) {
 		net->data = net_data;
@@ -272,6 +273,41 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 		}
 	}
 	DBG_RETURN(net);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_object_factory::get_vio */
+static MYSQLND_VIO *
+MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+{
+	size_t vio_alloc_size = sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_VIO * vio = mnd_pecalloc(1, vio_alloc_size, persistent);
+	MYSQLND_VIO_DATA * vio_data = mnd_pecalloc(1, vio_data_alloc_size, persistent);
+
+	DBG_ENTER("mysqlnd_object_factory::get_vio");
+	DBG_INF_FMT("persistent=%u", persistent);
+	if (vio && vio_data) {
+		vio->data = vio_data;
+		vio->persistent = vio->data->persistent = persistent;
+		vio->data->m = *mysqlnd_vio_get_methods();
+
+		if (PASS != vio->data->m.init(vio, stats, error_info)) {
+			vio->data->m.dtor(vio, stats, error_info);
+			vio = NULL;
+		}
+	} else {
+		if (vio_data) {
+			mnd_pefree(vio_data, persistent);
+			vio_data = NULL;
+		}
+		if (vio) {
+			mnd_pefree(vio, persistent);
+			vio = NULL;
+		}
+	}
+	DBG_RETURN(vio);
 }
 /* }}} */
 
@@ -300,7 +336,8 @@ PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
-	MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel),
+	MYSQLND_METHOD(mysqlnd_object_factory, get_net),
+	MYSQLND_METHOD(mysqlnd_object_factory, get_vio),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;
 
