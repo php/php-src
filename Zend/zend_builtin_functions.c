@@ -2492,12 +2492,13 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	call = NULL;
 	ptr = EG(current_execute_data);
-	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
-	}
 
 	if (ptr) {
+		if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		}
+
 		if (skip_last) {
 			/* skip debug_backtrace() */
 			call = ptr;
@@ -2509,10 +2510,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				ptr = ptr->prev_execute_data;
 			}
 		}
-	}
-	if (!call) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
+
+		if (!call) {
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		}
 	}
 
 	array_init(return_value);
