@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     php_stream_copy_to_mem()). (Anatol)
   . Fixed bug #70863 (Incorect logic to increment_function for proxy objects).
     (Anatol)
+  . Fixed bug #70842 (Persistent Stream Segmentation Fault). (Caleb Champlin)
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
