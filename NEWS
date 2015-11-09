@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 7.0.1
 
+- Streams/Socket
+  . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
+
+12 Nov 2015, PHP 7.0.0 RC 7
+
 - Core:
   . Fixed bug #70873 (Regression on private static properties access).
     (Laruence)
@@ -14,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #70842 (Persistent Stream Segmentation Fault). (Caleb Champlin)
   . Fixed bug #70323 (Regression in zend_fetch_debug_backtrace() can cause
     segfaults). (Aharvey, Laruence)
+
+- OCI8:
+  . Fixed bug #68298 (OCI int overflow) (Senthil).
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
@@ -42,12 +50,8 @@ PHP                                                                        NEWS
   . Fixed bug #70808 (array_merge_recursive corrupts memory of unset items).
     (Laruence)
 
-- Streams/Socket
-  . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
-
 - XSL:
   . Fixed bug #70678 (PHP7 returns true when false is expected). (Felipe)
-
 
 29 Oct 2015, PHP 7.0.0 RC 6
 
