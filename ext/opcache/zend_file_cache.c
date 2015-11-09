@@ -20,6 +20,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_compile.h"
 #include "zend_vm.h"
+#include "zend_interfaces.h"
 
 #include "php.h"
 
@@ -34,6 +35,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifdef HAVE_SYS_UIO_H
 # include <sys/uio.h>
@@ -801,10 +806,12 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 static void zend_file_cache_unserialize_hash(HashTable               *ht,
                                              zend_persistent_script  *script,
                                              void                    *buf,
-                                             unserialize_callback_t   func)
+                                             unserialize_callback_t   func,
+                                             dtor_func_t              dtor)
 {
 	Bucket *p, *end;
 
+	ht->pDestructor = dtor;
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
@@ -869,7 +876,8 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 
 				UNSERIALIZE_PTR(Z_ARR_P(zv));
 				ht = Z_ARR_P(zv);
-				zend_file_cache_unserialize_hash(ht, script, buf, zend_file_cache_unserialize_zval);
+				zend_file_cache_unserialize_hash(ht,
+						script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 			}
 			break;
 		case IS_REFERENCE:
@@ -904,7 +912,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 
 		UNSERIALIZE_PTR(op_array->static_variables);
 		ht = op_array->static_variables;
-		zend_file_cache_unserialize_hash(ht, script, buf, zend_file_cache_unserialize_zval);
+		zend_file_cache_unserialize_hash(ht,
+				script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
 	if (op_array->literals && !IS_UNSERIALIZED(op_array->literals)) {
@@ -1056,7 +1065,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
-	zend_file_cache_unserialize_hash(&ce->function_table, script, buf, zend_file_cache_unserialize_func);
+	zend_file_cache_unserialize_hash(&ce->function_table,
+			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	if (ce->default_properties_table) {
 		zval *p, *end;
 
@@ -1079,10 +1089,12 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 			p++;
 		}
 	}
-	zend_file_cache_unserialize_hash(&ce->constants_table, script, buf, zend_file_cache_unserialize_zval);
+	zend_file_cache_unserialize_hash(&ce->constants_table,
+			script, buf, zend_file_cache_unserialize_zval, NULL);
 	UNSERIALIZE_STR(ZEND_CE_FILENAME(ce));
 	UNSERIALIZE_STR(ZEND_CE_DOC_COMMENT(ce));
-	zend_file_cache_unserialize_hash(&ce->properties_info, script, buf, zend_file_cache_unserialize_prop_info);
+	zend_file_cache_unserialize_hash(&ce->properties_info,
+			script, buf, zend_file_cache_unserialize_prop_info, ZVAL_PTR_DTOR);
 
 	if (ce->trait_aliases) {
 		zend_trait_alias **p, *q;
@@ -1168,6 +1180,11 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__tostring);
 	UNSERIALIZE_PTR(ce->__callstatic);
 	UNSERIALIZE_PTR(ce->__debugInfo);
+
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_ANON_CLASS))) {
+		ce->serialize = zend_class_serialize_deny;
+		ce->unserialize = zend_class_unserialize_deny;
+	}
 }
 
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
@@ -1177,8 +1194,10 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 
 	UNSERIALIZE_STR(script->full_path);
 
-	zend_file_cache_unserialize_hash(&script->class_table, script, buf, zend_file_cache_unserialize_class);
-	zend_file_cache_unserialize_hash(&script->function_table, script, buf, zend_file_cache_unserialize_func);
+	zend_file_cache_unserialize_hash(&script->class_table,
+			script, buf, zend_file_cache_unserialize_class, ZEND_CLASS_DTOR);
+	zend_file_cache_unserialize_hash(&script->function_table,
+			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->main_op_array, script, buf);
 
 	UNSERIALIZE_PTR(script->arena_mem);

@@ -1527,7 +1527,7 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_BLOB:
 				{
 					php_stream *stream = NULL;
-					zend_string *buffer;
+					zend_string *buffer = NULL;
 					if (Z_TYPE_P(parameter) == IS_RESOURCE) {
 						php_stream_from_zval_no_verify(stream, parameter);
 						if (stream == NULL) {
@@ -1540,10 +1540,11 @@ PHP_METHOD(sqlite3stmt, execute)
 						buffer = Z_STR_P(parameter);
 					}
 
-					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
-
-					if (stream) {
+					if (buffer) {
+						sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
 						zend_string_release(buffer);
+					} else {
+						sqlite3_bind_null(stmt_obj->stmt, param->param_number);
 					}
 					break;
 				}

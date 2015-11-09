@@ -2277,7 +2277,7 @@ try_again:
 				zval *val;
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_ADDREF_P(val);
+				Z_TRY_ADDREF_P(val);
 				increment_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);
@@ -2345,7 +2345,7 @@ try_again:
 				zval *val;
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_ADDREF_P(val);
+				Z_TRY_ADDREF_P(val);
 				decrement_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);
