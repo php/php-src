@@ -21,7 +21,8 @@
 #define MYSQLND_PS_H
 
 /* PS stuff */
-typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row);
+typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row);
+
 struct st_mysqlnd_perm_bind {
 	ps_field_fetch_func func;
 	/* should be signed int */
@@ -33,13 +34,13 @@ struct st_mysqlnd_perm_bind {
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
-enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
-enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
+enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything);
+enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned int flags, zend_bool * fetched_anything);
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
 void _mysqlnd_init_ps_fetch_subsystem();
 
-void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count);
+void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pack_len, const zend_uchar ** row, unsigned int byte_count);
 
 #endif /* MYSQLND_PS_H */
 

@@ -298,7 +298,7 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
-zend_ulong	php_mysqlnd_net_field_length(zend_uchar **packet);
+zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
