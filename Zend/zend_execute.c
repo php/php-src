@@ -2418,7 +2418,7 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 }
 /* }}} */
 
-static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
+static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
 {
 	int i;
 	if (UNEXPECTED(EX(call))) {
@@ -2543,6 +2543,12 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 			call = EX(call);
 		} while (call);
 	}
+}
+/* }}} */
+
+static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
+{
+	int i;
 
 	for (i = 0; i < EX(func)->op_array.last_brk_cont; i++) {
 		const zend_brk_cont_element *brk_cont = &EX(func)->op_array.brk_cont_array[i];
@@ -2592,7 +2598,8 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 /* }}} */
 
 void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
-	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
+	cleanup_unfinished_calls(execute_data, op_num);
+	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
 #ifdef HAVE_GCC_GLOBAL_REGS
