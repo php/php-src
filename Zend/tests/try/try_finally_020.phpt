@@ -1,7 +1,5 @@
 --TEST--
 Combination of foreach, finally and exception (call order)
---XFAIL--
-See Bug #62210 and attempt to fix it in "tmp_liveliness" branch
 --FILE--
 <?php
 class A {
