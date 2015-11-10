@@ -151,7 +151,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	int					bufsize;
 	size_t				ret;
 	MYSQLND_INFILE		infile;
-	MYSQLND_NET			* net = conn->net;
+	MYSQLND_PPEC		* net = conn->net;
 	MYSQLND_VIO			* vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");

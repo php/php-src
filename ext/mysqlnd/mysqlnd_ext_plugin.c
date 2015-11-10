@@ -140,16 +140,30 @@ mysqlnd_plugin__get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plu
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin__get_plugin_net_data */
+/* {{{ mysqlnd_plugin__get_plugin_ppec_data */
 static void **
-mysqlnd_plugin__get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id)
+mysqlnd_plugin__get_plugin_ppec_data(const MYSQLND_PPEC * ppec, unsigned int plugin_id)
 {
-	DBG_ENTER("_mysqlnd_plugin__get_plugin_net_data");
+	DBG_ENTER("mysqlnd_plugin__get_plugin_ppec_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!net || plugin_id >= mysqlnd_plugin_count()) {
+	if (!ppec || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)((char *)net + sizeof(MYSQLND_NET) + plugin_id * sizeof(void *)));
+	DBG_RETURN((void *)((char *)ppec + sizeof(MYSQLND_PPEC) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_plugin__get_plugin_vio_data */
+static void **
+mysqlnd_plugin__get_plugin_vio_data(const MYSQLND_VIO * vio, unsigned int plugin_id)
+{
+	DBG_ENTER("_mysqlnd_plugin__get_plugin_vio_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!vio || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)vio + sizeof(MYSQLND_VIO) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -163,7 +177,8 @@ struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters =
 	mysqlnd_plugin__get_plugin_result_buffered_data_c,
 	mysqlnd_plugin__get_plugin_stmt_data,
 	mysqlnd_plugin__get_plugin_protocol_data,
-	mysqlnd_plugin__get_plugin_net_data,
+	mysqlnd_plugin__get_plugin_ppec_data,
+	mysqlnd_plugin__get_plugin_vio_data,
 };
 
 
@@ -309,20 +324,20 @@ _mysqlnd_protocol_payload_decoder_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE
 /* }}} */
 
 
-/* {{{ _mysqlnd_net_get_methods */
-static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) *
-_mysqlnd_net_get_methods()
+/* {{{ _mysqlnd_ppec_get_methods */
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) *
+_mysqlnd_ppec_get_methods()
 {
-	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_net);
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec);
 }
 /* }}} */
 
 
-/* {{{ _mysqlnd_net_set_methods */
+/* {{{ _mysqlnd_ppec_set_methods */
 static void
-_mysqlnd_net_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_net) * methods)
+_mysqlnd_ppec_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods)
 {
-	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_net) = *methods;
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec) = *methods;
 }
 /* }}} */
 
@@ -416,8 +431,8 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 		_mysqlnd_protocol_payload_decoder_factory_set_methods,
 	},
 	{
-		_mysqlnd_net_get_methods,
-		_mysqlnd_net_set_methods,
+		_mysqlnd_ppec_get_methods,
+		_mysqlnd_ppec_set_methods,
 	},
 	{
 		_mysqlnd_vio_get_methods,

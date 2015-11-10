@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -475,7 +474,7 @@ MYSQLND_METHOD(mysqlnd_vio, consume_uneaten_data)(MYSQLND_VIO * const net, enum 
 	php_stream * net_stream = net->data->get_stream(net);
 	int was_blocked = net_stream->ops->set_option(net_stream, opt, 0, NULL);
 
-	DBG_ENTER("mysqlnd_net::consume_uneaten_data");
+	DBG_ENTER("mysqlnd_vio::consume_uneaten_data");
 
 	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
 		/* Do a read of 1 byte */
@@ -630,7 +629,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_vio, disable_ssl)(MYSQLND_VIO * const vio)
 {
-	DBG_ENTER("mysqlnd_net::disable_ssl");
+	DBG_ENTER("mysqlnd_vio::disable_ssl");
 	DBG_RETURN(PASS);
 }
 /* }}} */

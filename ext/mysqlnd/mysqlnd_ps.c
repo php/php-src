@@ -2185,15 +2185,15 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s)
 /* }}} */
 
 
-/* {{{ mysqlnd_stmt::net_close */
+/* {{{ mysqlnd_stmt::close_on_server */
 static enum_func_status
-MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const s, zend_bool implicit)
+MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, zend_bool implicit)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_CONN_DATA * conn;
 	enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
-	DBG_ENTER("mysqlnd_stmt::net_close");
+	DBG_ENTER("mysqlnd_stmt::close_on_server");
 	if (!stmt || !stmt->conn) {
 		DBG_RETURN(FAIL);
 	}
@@ -2292,7 +2292,7 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit)
 		MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_STMT_CLOSE_IMPLICIT:
 														STAT_STMT_CLOSE_EXPLICIT);
 
-		ret = s->m->net_close(s, implicit);
+		ret = s->m->close_on_server(s, implicit);
 		mnd_pefree(stmt, persistent);
 	}
 	mnd_pefree(s, persistent);
@@ -2368,7 +2368,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, free_result),
 	MYSQLND_METHOD(mysqlnd_stmt, data_seek),
 	MYSQLND_METHOD(mysqlnd_stmt, reset),
-	MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close),
+	MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server),
 	MYSQLND_METHOD(mysqlnd_stmt, dtor),
 
 	MYSQLND_METHOD(mysqlnd_stmt, fetch),

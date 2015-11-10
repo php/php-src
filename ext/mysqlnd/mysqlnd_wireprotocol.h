@@ -63,7 +63,7 @@ typedef struct st_mysqlnd_packet_header {
 	mysqlnd_packet_methods *m;
 
 	MYSQLND_CONN_DATA * conn;
-	MYSQLND_NET * net;
+	MYSQLND_PPEC * net;
 	MYSQLND_VIO * vio;
 	MYSQLND_ERROR_INFO * error_info;
 	MYSQLND_STATS * stats;
@@ -323,6 +323,11 @@ enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK
 
 PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 PHPAPI void mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory);
+
+
+PHPAPI MYSQLND_PPEC * mysqlnd_ppec_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+PHPAPI void mysqlnd_ppec_free(MYSQLND_PPEC * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

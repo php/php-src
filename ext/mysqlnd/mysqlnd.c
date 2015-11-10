@@ -342,7 +342,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 	conn->m->free_options(conn);
 
 	if (conn->net) {
-		mysqlnd_net_free(conn->net, conn->stats, conn->error_info);
+		mysqlnd_ppec_free(conn->net, conn->stats, conn->error_info);
 		conn->net = NULL;
 	}
 
@@ -664,7 +664,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags)
 {
-	MYSQLND_NET * net = conn->net;
+	MYSQLND_PPEC * net = conn->net;
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
@@ -784,10 +784,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 	zend_bool local_tx_started = FALSE;
-	MYSQLND_NET * net = conn->net;
+	MYSQLND_PPEC * net = conn->net;
 	MYSQLND_STRING transport = { NULL, 0 };
-//	char * transport = NULL;
-//	int transport_len;
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
 	DBG_INF_FMT("conn=%p", conn);

@@ -360,7 +360,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_NET_OPTIONS * const io_options,
+								  const MYSQLND_PPEC_OPTIONS * const ppec_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -420,7 +420,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_SESSION_OPTIONS * const session_options,
-							   const MYSQLND_NET_OPTIONS * const io_options,
+							   const MYSQLND_PPEC_OPTIONS * const ppec_options,
 							   zend_ulong mysql_flags
 							  )
 {
@@ -481,7 +481,7 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 static RSA *
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_SESSION_OPTIONS * const session_options,
-						   const MYSQLND_NET_OPTIONS * const io_options
+						   const MYSQLND_PPEC_OPTIONS * const io_options
 						  )
 {
 	RSA * ret = NULL;
@@ -570,7 +570,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_NET_OPTIONS * const io_options,
+								  const MYSQLND_PPEC_OPTIONS * const ppec_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -588,7 +588,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		memcpy(ret, passwd, passwd_len);
 	} else {
 		*auth_data_len = 0;
-		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, io_options);
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, ppec_options);
 
 		if (server_public_key) {
 			int server_public_key_len;
