@@ -61,6 +61,7 @@
 #include "mysqlnd_enum_n_def.h"
 #include "mysqlnd_structs.h"
 
+#define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
 /* Library related */
 PHPAPI void mysqlnd_library_init(void);

@@ -17,10 +17,10 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_connection.h"
+#include "mysqlnd_ps.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
 #include "mysqlnd_wireprotocol.h"

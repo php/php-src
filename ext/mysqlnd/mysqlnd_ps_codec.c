@@ -22,6 +22,8 @@
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
+#include "mysqlnd_connection.h"
+#include "mysqlnd_ps.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 #include "mysql_float_to_double.h"

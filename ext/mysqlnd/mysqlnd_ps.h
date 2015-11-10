@@ -14,33 +14,34 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-#ifndef MYSQLND_CHARSET_H
-#define MYSQLND_CHARSET_H
 
-PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const charset, char *newstr,
-										const char *escapestr, size_t escapestr_len);
+#ifndef MYSQLND_PS_H
+#define MYSQLND_PS_H
 
-PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
-										 const char *escapestr, size_t escapestr_len);
-
-struct st_mysqlnd_plugin_charsets
-{
-	const struct st_mysqlnd_plugin_header plugin_header;
-	struct
-	{
-		const MYSQLND_CHARSET * (*const find_charset_by_nr)(unsigned int charsetnr);
-		const MYSQLND_CHARSET * (*const find_charset_by_name)(const char * const name);
-		zend_ulong 			(*const escape_quotes)(const MYSQLND_CHARSET * const cset, char * newstr, const char * escapestr, size_t escapestr_len);
-		zend_ulong			(*const escape_slashes)(const MYSQLND_CHARSET * const cset, char * newstr, const char * escapestr, size_t escapestr_len);
-	} methods;
+/* PS stuff */
+typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row);
+struct st_mysqlnd_perm_bind {
+	ps_field_fetch_func func;
+	/* should be signed int */
+	int					pack_len;
+	unsigned int		php_type;
+	zend_bool			is_possibly_blob;
+	zend_bool			can_ret_as_str_in_uni;
 };
 
-void mysqlnd_charsets_plugin_register(void);
+extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
-#endif /* MYSQLND_CHARSET_H */
+enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
+enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
+
+void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
+void _mysqlnd_init_ps_fetch_subsystem();
+
+void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count);
+
+#endif /* MYSQLND_PS_H */
 
 /*
  * Local variables:

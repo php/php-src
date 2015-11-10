@@ -18,7 +18,6 @@
   +----------------------------------------------------------------------+
 
 */
-
 #ifndef MYSQLND_LIBMYSQL_COMPAT_H
 #define MYSQLND_LIBMYSQL_COMPAT_H
 

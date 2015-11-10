@@ -17,12 +17,14 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_vio.h"
 #include "mysqlnd_protocol_frame_codec.h"
 #include "mysqlnd_wireprotocol.h"
+#include "mysqlnd_connection.h"
+#include "mysqlnd_ps.h"
+#include "mysqlnd_plugin.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"

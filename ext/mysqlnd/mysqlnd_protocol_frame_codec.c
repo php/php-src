@@ -18,6 +18,7 @@
 */
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_connection.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
@@ -420,17 +421,16 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 	DBG_INF_FMT("option=%u", option);
 	switch (option) {
 		case MYSQL_OPT_COMPRESS:
-			pfc->data->flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
+			pfc->data->flags |= MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION;
 			break;
-		case MYSQL_SERVER_PUBLIC_KEY:
-			{
-				zend_bool pers = pfc->persistent;
-				if (pfc->data->sha256_server_public_key) {
-					mnd_pefree(pfc->data->sha256_server_public_key, pers);
-				}
-				pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
-				break;
+		case MYSQL_SERVER_PUBLIC_KEY: {
+			const zend_bool pers = pfc->persistent;
+			if (pfc->data->sha256_server_public_key) {
+				mnd_pefree(pfc->data->sha256_server_public_key, pers);
 			}
+			pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+			break;
+		}
 		default:
 			DBG_RETURN(FAIL);
 	}

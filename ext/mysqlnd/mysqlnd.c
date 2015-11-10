@@ -20,8 +20,10 @@
 
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_connection.h"
 #include "mysqlnd_vio.h"
 #include "mysqlnd_protocol_frame_codec.h"
+#include "mysqlnd_auth.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
@@ -33,11 +35,6 @@
 
 
 extern MYSQLND_CHARSET *mysqlnd_charsets;
-
-PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
-"Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
-"store a new, and more secure, hash value in mysql.user. If this user is used in other scripts executed by PHP 5.2 or earlier you might need to remove the old-passwords "
-"flag from your my.cnf file";
 
 PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
 PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
@@ -417,36 +414,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn)
 /* }}} */
 
 
-/* {{{ mysqlnd_switch_to_ssl_if_needed */
-static enum_func_status
-mysqlnd_switch_to_ssl_if_needed(
-			MYSQLND_CONN_DATA * conn,
-			unsigned int charset_no,
-			size_t server_capabilities,
-			const MYSQLND_SESSION_OPTIONS * const session_options,
-			zend_ulong mysql_flags)
-{
-	enum_func_status ret = FAIL;
-	const MYSQLND_CHARSET * charset;
-	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
-
-	if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
-		charset_no	= charset->nr;
-	}
-
-	{
-		size_t client_capabilities = mysql_flags;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
-	}
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::fetch_auth_plugin_by_name */
 static struct st_mysqlnd_authentication_plugin *
 MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const requested_protocol)
@@ -461,172 +428,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const 
 	mnd_sprintf_free(plugin_name);
 
 	DBG_RETURN(auth_plugin);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_run_authentication */
-static enum_func_status
-mysqlnd_run_authentication(
-			MYSQLND_CONN_DATA * conn,
-			const char * const user,
-			const char * const passwd,
-			const size_t passwd_len,
-			const char * const db,
-			const size_t db_len,
-			const MYSQLND_STRING auth_plugin_data,
-			const char * const auth_protocol,
-			unsigned int charset_no,
-			const MYSQLND_SESSION_OPTIONS * const session_options,
-			zend_ulong mysql_flags,
-			zend_bool silent,
-			zend_bool is_change_user
-			)
-{
-	enum_func_status ret = FAIL;
-	zend_bool first_call = TRUE;
-
-	char * switch_to_auth_protocol = NULL;
-	size_t switch_to_auth_protocol_len = 0;
-	char * requested_protocol = NULL;
-	zend_uchar * plugin_data;
-	size_t plugin_data_len;
-
-	DBG_ENTER("mysqlnd_run_authentication");
-
-	plugin_data_len = auth_plugin_data.l;
-	plugin_data = mnd_emalloc(plugin_data_len + 1);
-	if (!plugin_data) {
-		goto end;
-	}
-	memcpy(plugin_data, auth_plugin_data.s, plugin_data_len);
-	plugin_data[plugin_data_len] = '\0';
-
-	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
-	if (!requested_protocol) {
-		goto end;
-	}
-
-	do {
-		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
-
-		if (!auth_plugin) {
-			php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
-			goto end;
-		}
-		DBG_INF("plugin found");
-
-		{
-			zend_uchar * switch_to_auth_protocol_data = NULL;
-			size_t switch_to_auth_protocol_data_len = 0;
-			zend_uchar * scrambled_data = NULL;
-			size_t scrambled_data_len = 0;
-
-			switch_to_auth_protocol = NULL;
-			switch_to_auth_protocol_len = 0;
-
-			if (conn->authentication_plugin_data.s) {
-				mnd_pefree(conn->authentication_plugin_data.s, conn->persistent);
-				conn->authentication_plugin_data.s = NULL;
-			}
-			conn->authentication_plugin_data.l = plugin_data_len;
-			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
-			if (!conn->authentication_plugin_data.s) {
-				SET_OOM_ERROR(conn->error_info);
-				goto end;
-			}
-			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
-
-			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
-			/* The data should be allocated with malloc() */
-			scrambled_data =
-				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, session_options,
-												   conn->protocol_frame_codec->data, mysql_flags);
-			if (conn->error_info->error_no) {
-				goto end;
-			}
-			if (FALSE == is_change_user) {
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, session_options, mysql_flags,
-											charset_no,
-											first_call,
-											requested_protocol,
-											scrambled_data, scrambled_data_len,
-											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											);
-			} else {
-				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
-											   first_call,
-											   requested_protocol,
-											   scrambled_data, scrambled_data_len,
-											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											  );
-			}
-			first_call = FALSE;
-			free(scrambled_data);
-
-			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-			if (requested_protocol && switch_to_auth_protocol) {
-				mnd_efree(requested_protocol);
-				requested_protocol = switch_to_auth_protocol;
-			}
-
-			if (plugin_data) {
-				mnd_efree(plugin_data);
-			}
-			plugin_data_len = switch_to_auth_protocol_data_len;
-			plugin_data = switch_to_auth_protocol_data;
-		}
-		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
-	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-
-	if (ret == PASS) {
-		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
-		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol);
-	}
-end:
-	if (plugin_data) {
-		mnd_efree(plugin_data);
-	}
-	if (requested_protocol) {
-		mnd_efree(requested_protocol);
-	}
-
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_connect_run_authentication */
-enum_func_status
-mysqlnd_connect_run_authentication(
-			MYSQLND_CONN_DATA * conn,
-			const char * const user,
-			const char * const passwd,
-			const char * const db,
-			size_t db_len,
-			size_t passwd_len,
-			MYSQLND_STRING authentication_plugin_data,
-			const char * const authentication_protocol,
-			const unsigned int charset_no,
-			size_t server_capabilities,
-			const MYSQLND_SESSION_OPTIONS * const session_options,
-			zend_ulong mysql_flags
-			)
-{
-	enum_func_status ret = FAIL;
-	DBG_ENTER("mysqlnd_connect_run_authentication");
-
-	ret = mysqlnd_switch_to_ssl_if_needed(conn, charset_no, server_capabilities, session_options, mysql_flags);
-	if (PASS == ret) {
-		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
-										 authentication_plugin_data, authentication_protocol,
-										 charset_no, session_options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
-	}
-	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -685,7 +486,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
 #else
-	if (pfc && pfc->data->flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+	if (pfc && pfc->data->flags & MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION) {
 		mysql_flags |= CLIENT_COMPRESS;
 	}
 #endif
