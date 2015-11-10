@@ -18,10 +18,10 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: mysqlnd.c 317989 2011-10-10 20:49:28Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_vio.h"
+#include "mysqlnd_protocol_frame_codec.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
@@ -140,12 +140,12 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_
 
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
 
-	data->net = mysqlnd_ppec_init(persistent, data->stats, data->error_info);
+	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, data->stats, data->error_info);
 	data->vio = mysqlnd_vio_init(persistent, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
 	data->command_factory = mysqlnd_command_factory_get();
 
-	if (!data->net || !data->payload_decoder_factory) {
+	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->command_factory) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	}
@@ -244,20 +244,20 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 
 
 /* {{{ mysqlnd_object_factory::get_ppec */
-static MYSQLND_PPEC *
+static MYSQLND_PFC *
 MYSQLND_METHOD(mysqlnd_object_factory, get_ppec)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t ppec_alloc_size = sizeof(MYSQLND_PPEC) + mysqlnd_plugin_count() * sizeof(void *);
-	size_t ppec_data_alloc_size = sizeof(MYSQLND_PPEC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_PPEC * ppec = mnd_pecalloc(1, ppec_alloc_size, persistent);
-	MYSQLND_PPEC_DATA * ppec_data = mnd_pecalloc(1, ppec_data_alloc_size, persistent);
+	size_t ppec_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t ppec_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PFC * ppec = mnd_pecalloc(1, ppec_alloc_size, persistent);
+	MYSQLND_PFC_DATA * ppec_data = mnd_pecalloc(1, ppec_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_ppec");
 	DBG_INF_FMT("persistent=%u", persistent);
 	if (ppec && ppec_data) {
 		ppec->data = ppec_data;
 		ppec->persistent = ppec->data->persistent = persistent;
-		ppec->data->m = *mysqlnd_ppec_get_methods();
+		ppec->data->m = *mysqlnd_pfc_get_methods();
 
 		if (PASS != ppec->data->m.init(ppec, stats, error_info)) {
 			ppec->data->m.dtor(ppec, stats, error_info);

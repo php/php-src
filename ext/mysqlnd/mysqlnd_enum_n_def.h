@@ -18,7 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifndef MYSQLND_ENUM_N_DEF_H
 #define MYSQLND_ENUM_N_DEF_H
 

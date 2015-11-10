@@ -16,13 +16,14 @@
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-#ifndef MYSQLND_VIO_H
-#define MYSQLND_VIO_H
 
-PHPAPI MYSQLND_VIO * mysqlnd_vio_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
-PHPAPI void mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+#ifndef MYSQLND_PROTOCOL_FRAME_CODEC_H
+#define MYSQLND_PROTOCOL_FRAME_CODEC_H
 
-#endif /* MYSQLND_VIO_H */
+PHPAPI MYSQLND_PFC * mysqlnd_pfc_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+PHPAPI void mysqlnd_pfc_free(MYSQLND_PFC * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+
+#endif /* MYSQLND_PROTOCOL_FRAME_CODEC_H */
 
 /*
  * Local variables:

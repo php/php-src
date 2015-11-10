@@ -18,10 +18,10 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_vio.h"
+#include "mysqlnd_protocol_frame_codec.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
@@ -267,8 +267,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		conn->current_result = NULL;
 	}
 
-	if (conn->net) {
-		conn->net->data->m.free_contents(conn->net);
+	if (conn->protocol_frame_codec) {
+		conn->protocol_frame_codec->data->m.free_contents(conn->protocol_frame_codec);
 	}
 
 	if (conn->vio) {
@@ -341,9 +341,9 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, dtor)(MYSQLND_CONN_DATA * conn)
 	conn->m->free_contents(conn);
 	conn->m->free_options(conn);
 
-	if (conn->net) {
-		mysqlnd_ppec_free(conn->net, conn->stats, conn->error_info);
-		conn->net = NULL;
+	if (conn->protocol_frame_codec) {
+		mysqlnd_pfc_free(conn->protocol_frame_codec, conn->stats, conn->error_info);
+		conn->protocol_frame_codec = NULL;
 	}
 
 	if (conn->vio) {
@@ -540,7 +540,7 @@ mysqlnd_run_authentication(
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
 												   plugin_data, plugin_data_len, session_options,
-												   &conn->net->data->options, mysql_flags);
+												   &conn->protocol_frame_codec->data->options, mysql_flags);
 			if (conn->error_info->error_no) {
 				goto end;
 			}
@@ -664,7 +664,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags)
 {
-	MYSQLND_PPEC * net = conn->net;
+	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
@@ -682,7 +682,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
 #else
-	if (net && net->data->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+	if (pfc && pfc->data->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
 		mysql_flags |= CLIENT_COMPRESS;
 	}
 #endif
@@ -713,12 +713,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 						const unsigned int mysql_flags)
 {
 	enum_func_status ret = FAIL;
-	size_t client_flags = mysql_flags;
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	if (FAIL == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info)) {
-		DBG_RETURN(FAIL);
-	} else if (PASS == conn->net->data->m.connect(conn->net, *scheme, conn->persistent, conn->stats, conn->error_info)) {
+	if (PASS == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info) &&
+		PASS == conn->protocol_frame_codec->data->m.reset(conn->protocol_frame_codec, conn->stats, conn->error_info))
+	{
+		size_t client_flags = mysql_flags;
 		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_HANDSHAKE, conn, username, password, database, client_flags);
 		if (command) {
 			ret = command->run(command);
@@ -784,7 +784,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 	zend_bool local_tx_started = FALSE;
-	MYSQLND_PPEC * net = conn->net;
+	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_STRING transport = { NULL, 0 };
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
@@ -813,17 +813,17 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 		conn->m->free_contents(conn);
 		/* Now reconnect using the same handle */
-		if (net->data->compressed) {
+		if (pfc->data->compressed) {
 			/*
-			  we need to save the state. As we will re-connect, net->compressed should be off, or
+			  we need to save the state. As we will re-connect, pfc->compressed should be off, or
 			  we will look for a compression header as part of the greet message, but there will
 			  be none.
 			*/
 			saved_compression = TRUE;
-			net->data->compressed = FALSE;
+			pfc->data->compressed = FALSE;
 		}
-		if (net->data->ssl) {
-			net->data->ssl = FALSE;
+		if (pfc->data->ssl) {
+			pfc->data->ssl = FALSE;
 		}
 	} else {
 		unsigned int max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
@@ -867,14 +867,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		SET_CONNECTION_STATE(&conn->state, CONN_READY);
 
 		if (saved_compression) {
-			net->data->compressed = TRUE;
+			pfc->data->compressed = TRUE;
 		}
 		/*
 		  If a connect on a existing handle is performed and mysql_flags is
 		  passed which doesn't CLIENT_COMPRESS, then we need to overwrite the value
 		  which we set based on saved_compression.
 		*/
-		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
+		pfc->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 
 		conn->scheme.s = mnd_pestrndup(transport.s, transport.l, conn->persistent);
@@ -1435,15 +1435,15 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), ssl_set);
 	enum_func_status ret = FAIL;
-	MYSQLND_VIO * net = conn->vio;
+	MYSQLND_VIO * vio = conn->vio;
 	DBG_ENTER("mysqlnd_conn_data::ssl_set");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		ret = (PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_KEY, key) &&
-			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CERT, cert) &&
-			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CA, ca) &&
-			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CAPATH, capath) &&
-			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CIPHER, cipher)) ? PASS : FAIL;
+		ret = (PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_KEY, key) &&
+			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CERT, cert) &&
+			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CA, ca) &&
+			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CAPATH, capath) &&
+			PASS == vio->data->m.set_client_option(vio, MYSQLND_OPT_SSL_CIPHER, cipher)) ? PASS : FAIL;
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
@@ -1688,12 +1688,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 	enum_func_status ret = PASS;
 	MYSQLND_VIO * vio = conn->vio;
 	php_stream * net_stream = vio->data->m.get_stream(vio);
-	enum mysqlnd_connection_state state;
+	enum mysqlnd_connection_state state = GET_CONNECTION_STATE(&conn->state);
 
 	DBG_ENTER("mysqlnd_send_close");
-	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
-
-	state = GET_CONNECTION_STATE(&conn->state);
+	DBG_INF_FMT("conn=%llu vio->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 	DBG_INF_FMT("state=%u", state);
 
 	if (state >= CONN_READY) {
@@ -2116,7 +2114,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);
 			break;
 		case MYSQL_SERVER_PUBLIC_KEY:
-			ret = conn->net->data->m.set_client_option(conn->net, option, value);
+			ret = conn->protocol_frame_codec->data->m.set_client_option(conn->protocol_frame_codec, option, value);
 			break;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:

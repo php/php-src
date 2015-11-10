@@ -18,7 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: mysqlnd.c 307377 2011-01-11 13:02:57Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_structs.h"
@@ -360,7 +359,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_PPEC_OPTIONS * const ppec_options,
+								  const MYSQLND_PFC_OPTIONS * const ppec_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -420,7 +419,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_SESSION_OPTIONS * const session_options,
-							   const MYSQLND_PPEC_OPTIONS * const ppec_options,
+							   const MYSQLND_PFC_OPTIONS * const ppec_options,
 							   zend_ulong mysql_flags
 							  )
 {
@@ -481,7 +480,7 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 static RSA *
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_SESSION_OPTIONS * const session_options,
-						   const MYSQLND_PPEC_OPTIONS * const io_options
+						   const MYSQLND_PFC_OPTIONS * const io_options
 						  )
 {
 	RSA * ret = NULL;
@@ -570,7 +569,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_PPEC_OPTIONS * const ppec_options,
+								  const MYSQLND_PFC_OPTIONS * const ppec_options,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -580,7 +579,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 
 
-	if (conn->net->data->ssl) {
+	if (conn->protocol_frame_codec->data->ssl) {
 		DBG_INF("simple clear text under SSL");
 		/* clear text under SSL */
 		*auth_data_len = passwd_len;

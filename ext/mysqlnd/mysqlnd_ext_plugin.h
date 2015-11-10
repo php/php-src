@@ -16,8 +16,6 @@
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-/* $Id: mysqlnd.h 318221 2011-10-19 15:04:12Z andrey $ */
-
 #ifndef MYSQLND_EXT_PLUGIN_H
 #define MYSQLND_EXT_PLUGIN_H
 
@@ -31,7 +29,7 @@ struct st_mysqlnd_plugin__plugin_area_getters
 	void ** (*get_result_buffered_aread_c)(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id);
 	void ** (*get_stmt_area)(const MYSQLND_STMT * stmt, unsigned int plugin_id);
 	void ** (*get_protocol_decoder_area)(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, unsigned int plugin_id);
-	void ** (*get_ppec_area)(const MYSQLND_PPEC * ppec, unsigned int plugin_id);
+	void ** (*get_ppec_area)(const MYSQLND_PFC * ppec, unsigned int plugin_id);
 	void ** (*get_vio_area)(const MYSQLND_VIO * vio, unsigned int plugin_id);
 };
 
@@ -151,8 +149,8 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 #define mysqlnd_protocol_get_methods()	mysqlnd_plugin_methods_xetters.protocol.get()
 #define mysqlnd_protocol_set_methods(m)	mysqlnd_plugin_methods_xetters.protocol.set((m))
 
-#define mysqlnd_ppec_get_methods()		mysqlnd_plugin_methods_xetters.ppec.get()
-#define mysqlnd_ppec_set_methods(m)		mysqlnd_plugin_methods_xetters.ppec.set((m))
+#define mysqlnd_pfc_get_methods()		mysqlnd_plugin_methods_xetters.ppec.get()
+#define mysqlnd_pfc_set_methods(m)		mysqlnd_plugin_methods_xetters.ppec.set((m))
 
 #define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
 #define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))

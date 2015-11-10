@@ -16,8 +16,6 @@
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd.c 318221 2011-10-19 15:04:12Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -142,14 +140,14 @@ mysqlnd_plugin__get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plu
 
 /* {{{ mysqlnd_plugin__get_plugin_ppec_data */
 static void **
-mysqlnd_plugin__get_plugin_ppec_data(const MYSQLND_PPEC * ppec, unsigned int plugin_id)
+mysqlnd_plugin__get_plugin_ppec_data(const MYSQLND_PFC * ppec, unsigned int plugin_id)
 {
 	DBG_ENTER("mysqlnd_plugin__get_plugin_ppec_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
 	if (!ppec || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)((char *)ppec + sizeof(MYSQLND_PPEC) + plugin_id * sizeof(void *)));
+	DBG_RETURN((void *)((char *)ppec + sizeof(MYSQLND_PFC) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -324,18 +322,18 @@ _mysqlnd_protocol_payload_decoder_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE
 /* }}} */
 
 
-/* {{{ _mysqlnd_ppec_get_methods */
+/* {{{ _mysqlnd_pfc_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) *
-_mysqlnd_ppec_get_methods()
+_mysqlnd_pfc_get_methods()
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec);
 }
 /* }}} */
 
 
-/* {{{ _mysqlnd_ppec_set_methods */
+/* {{{ _mysqlnd_pfc_set_methods */
 static void
-_mysqlnd_ppec_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods)
+_mysqlnd_pfc_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods)
 {
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec) = *methods;
 }
@@ -431,8 +429,8 @@ struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters =
 		_mysqlnd_protocol_payload_decoder_factory_set_methods,
 	},
 	{
-		_mysqlnd_ppec_get_methods,
-		_mysqlnd_ppec_set_methods,
+		_mysqlnd_pfc_get_methods,
+		_mysqlnd_pfc_set_methods,
 	},
 	{
 		_mysqlnd_vio_get_methods,

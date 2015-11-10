@@ -17,9 +17,6 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 #ifndef MYSQLND_PRIV_H
 #define MYSQLND_PRIV_H
 

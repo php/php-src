@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
@@ -235,12 +233,12 @@ typedef struct st_mysqlnd_session_options
 } MYSQLND_SESSION_OPTIONS;
 
 
-typedef struct st_mysqlnd_protocol_packet_envelope_codec_options
+typedef struct st_mysqlnd_protocol_frame_codec_options
 {
 	uint64_t	flags;
 
 	char *		sha256_server_public_key;
-} MYSQLND_PPEC_OPTIONS;
+} MYSQLND_PFC_OPTIONS;
 
 
 typedef struct st_mysqlnd_vio_options
@@ -272,8 +270,8 @@ typedef struct st_mysqlnd_vio_options
 
 typedef struct st_mysqlnd_connection MYSQLND;
 typedef struct st_mysqlnd_connection_data MYSQLND_CONN_DATA;
-typedef struct st_mysqlnd_protocol_packet_envelope_codec		MYSQLND_PPEC;
-typedef struct st_mysqlnd_protocol_packet_envelope_codec_data	MYSQLND_PPEC_DATA;
+typedef struct st_mysqlnd_protocol_frame_codec		MYSQLND_PFC;
+typedef struct st_mysqlnd_protocol_frame_codec_data	MYSQLND_PFC_DATA;
 typedef struct st_mysqlnd_vio		MYSQLND_VIO;
 typedef struct st_mysqlnd_vio_data	MYSQLND_VIO_DATA;
 typedef struct st_mysqlnd_protocol_payload_decoder_factory	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY;
@@ -378,7 +376,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
-typedef MYSQLND_PPEC * (*func_mysqlnd_object_factory__get_net)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_net)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 
@@ -886,7 +884,7 @@ struct st_mysqlnd_connection_state
 struct st_mysqlnd_connection_data
 {
 /* Operation related */
-	MYSQLND_PPEC	* net;
+	MYSQLND_PFC		* protocol_frame_codec;
 	MYSQLND_VIO		* vio;
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory;
 
@@ -1088,42 +1086,42 @@ typedef struct st_mysqlnd_read_buffer {
 
 
 
-typedef enum_func_status	(*func_mysqlnd_ppec__init)(MYSQLND_PPEC * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info);
-typedef void				(*func_mysqlnd_ppec__dtor)(MYSQLND_PPEC * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef enum_func_status	(*func_mysqlnd_ppec__connect)(MYSQLND_PPEC * const net, const MYSQLND_CSTRING scheme, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef enum_func_status	(*func_mysqlnd_ppec__set_client_option)(MYSQLND_PPEC * const net, enum_mysqlnd_client_option option, const char * const value);
-typedef enum_func_status	(*func_mysqlnd_ppec__decode)(zend_uchar * uncompressed_data, const size_t uncompressed_data_len, const zend_uchar * const compressed_data, const size_t compressed_data_len);
-typedef enum_func_status	(*func_mysqlnd_ppec__encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len, const zend_uchar * const uncompressed_data, const size_t uncompressed_data_len);
-typedef size_t				(*func_mysqlnd_ppec__send)(MYSQLND_PPEC * const net, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef enum_func_status	(*func_mysqlnd_ppec__receive)(MYSQLND_PPEC * const net, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef enum_func_status	(*func_mysqlnd_ppec__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_PPEC * net, MYSQLND_VIO * const vio, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info);
-typedef void				(*func_mysqlnd_ppec__free_contents)(MYSQLND_PPEC * net);
+typedef enum_func_status	(*func_mysqlnd_pfc__init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info);
+typedef void				(*func_mysqlnd_pfc__dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef enum_func_status	(*func_mysqlnd_pfc__reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef enum_func_status	(*func_mysqlnd_pfc__set_client_option)(MYSQLND_PFC * const pfc, enum_mysqlnd_client_option option, const char * const value);
+typedef enum_func_status	(*func_mysqlnd_pfc__decode)(zend_uchar * uncompressed_data, const size_t uncompressed_data_len, const zend_uchar * const compressed_data, const size_t compressed_data_len);
+typedef enum_func_status	(*func_mysqlnd_pfc__encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len, const zend_uchar * const uncompressed_data, const size_t uncompressed_data_len);
+typedef size_t				(*func_mysqlnd_pfc__send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef enum_func_status	(*func_mysqlnd_pfc__receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef enum_func_status	(*func_mysqlnd_pfc__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_PFC * pfc, MYSQLND_VIO * const vio, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info);
+typedef void				(*func_mysqlnd_pfc__free_contents)(MYSQLND_PFC * pfc);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec)
 {
-	func_mysqlnd_ppec__init init;
-	func_mysqlnd_ppec__dtor dtor;
-	func_mysqlnd_ppec__connect connect;
-	func_mysqlnd_ppec__set_client_option set_client_option;
+	func_mysqlnd_pfc__init init;
+	func_mysqlnd_pfc__dtor dtor;
+	func_mysqlnd_pfc__reset reset;
+	func_mysqlnd_pfc__set_client_option set_client_option;
 
-	func_mysqlnd_ppec__decode decode;
-	func_mysqlnd_ppec__encode encode;
+	func_mysqlnd_pfc__decode decode;
+	func_mysqlnd_pfc__encode encode;
 
-	func_mysqlnd_ppec__send send;
-	func_mysqlnd_ppec__receive receive;
+	func_mysqlnd_pfc__send send;
+	func_mysqlnd_pfc__receive receive;
 
-	func_mysqlnd_ppec__read_compressed_packet_from_stream_and_fill_read_buffer read_compressed_packet_from_stream_and_fill_read_buffer;
+	func_mysqlnd_pfc__read_compressed_packet_from_stream_and_fill_read_buffer read_compressed_packet_from_stream_and_fill_read_buffer;
 
-	func_mysqlnd_ppec__free_contents free_contents;
+	func_mysqlnd_pfc__free_contents free_contents;
 };
 
 
-struct st_mysqlnd_protocol_packet_envelope_codec_data
+struct st_mysqlnd_protocol_frame_codec_data
 {
 	php_stream				*stream;
 	zend_bool				compressed;
 	zend_bool				ssl;
-	MYSQLND_PPEC_OPTIONS	options;
+	MYSQLND_PFC_OPTIONS	options;
 
 	unsigned int		refcount;
 
@@ -1133,9 +1131,9 @@ struct st_mysqlnd_protocol_packet_envelope_codec_data
 };
 
 
-struct st_mysqlnd_protocol_packet_envelope_codec
+struct st_mysqlnd_protocol_frame_codec
 {
-	struct st_mysqlnd_protocol_packet_envelope_codec_data * data;
+	struct st_mysqlnd_protocol_frame_codec_data * data;
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_READ_BUFFER	* uncompressed_data;
@@ -1372,7 +1370,7 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 														const MYSQLND_SESSION_OPTIONS * const session_options,
-														const MYSQLND_PPEC_OPTIONS * const net_options, zend_ulong mysql_flags
+														const MYSQLND_PFC_OPTIONS * const pfc_options, zend_ulong mysql_flags
 														);
 
 struct st_mysqlnd_authentication_plugin

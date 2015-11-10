@@ -16,8 +16,6 @@
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd_ps.c 316906 2011-09-17 10:24:18Z pajoye $ */
 #include "php.h"
 #include "php_globals.h"
 #include "mysqlnd.h"

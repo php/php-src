@@ -17,7 +17,6 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
 #include "php.h"
 #include "php_globals.h"
 #include "mysqlnd.h"
@@ -151,7 +150,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	int					bufsize;
 	size_t				ret;
 	MYSQLND_INFILE		infile;
-	MYSQLND_PPEC		* net = conn->net;
+	MYSQLND_PFC			* net = conn->protocol_frame_codec;
 	MYSQLND_VIO			* vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");

@@ -17,8 +17,6 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -1444,7 +1442,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
-		if ((packet_len = conn->net->m.consume_uneaten_data(conn->net, COM_STMT_SEND_LONG_DATA))) {
+		if ((packet_len = conn->protocol_frame_codec->m.consume_uneaten_data(conn->protocol_frame_codec, COM_STMT_SEND_LONG_DATA))) {
 			php_error_docref(NULL, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
