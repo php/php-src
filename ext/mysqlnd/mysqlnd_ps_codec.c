@@ -24,7 +24,7 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
-#include "ext/mysqlnd/mysql_float_to_double.h"
+#include "mysql_float_to_double.h"
 
 #define MYSQLND_SILENT
 

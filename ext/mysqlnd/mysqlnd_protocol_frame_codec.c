@@ -17,15 +17,11 @@
   +----------------------------------------------------------------------+
 */
 #include "php.h"
-#include "php_globals.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
-#include "mysqlnd_ext_plugin.h"
-#include "php_network.h"
-#include "zend_ini.h"
 #ifdef MYSQLND_COMPRESSION_ENABLED
 #include <zlib.h>
 #endif

@@ -24,9 +24,7 @@
 #include "mysqlnd_protocol_frame_codec.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
-#include "mysqlnd_result.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_reverse_api.h"
 #include "mysqlnd_ext_plugin.h"
@@ -243,37 +241,37 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 /* }}} */
 
 
-/* {{{ mysqlnd_object_factory::get_ppec */
+/* {{{ mysqlnd_object_factory::get_pfc */
 static MYSQLND_PFC *
-MYSQLND_METHOD(mysqlnd_object_factory, get_ppec)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t ppec_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
-	size_t ppec_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_PFC * ppec = mnd_pecalloc(1, ppec_alloc_size, persistent);
-	MYSQLND_PFC_DATA * ppec_data = mnd_pecalloc(1, ppec_data_alloc_size, persistent);
+	size_t pfc_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PFC * pfc = mnd_pecalloc(1, pfc_alloc_size, persistent);
+	MYSQLND_PFC_DATA * pfc_data = mnd_pecalloc(1, pfc_data_alloc_size, persistent);
 
-	DBG_ENTER("mysqlnd_object_factory::get_ppec");
+	DBG_ENTER("mysqlnd_object_factory::get_pfc");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (ppec && ppec_data) {
-		ppec->data = ppec_data;
-		ppec->persistent = ppec->data->persistent = persistent;
-		ppec->data->m = *mysqlnd_pfc_get_methods();
+	if (pfc && pfc_data) {
+		pfc->data = pfc_data;
+		pfc->persistent = pfc->data->persistent = persistent;
+		pfc->data->m = *mysqlnd_pfc_get_methods();
 
-		if (PASS != ppec->data->m.init(ppec, stats, error_info)) {
-			ppec->data->m.dtor(ppec, stats, error_info);
-			ppec = NULL;
+		if (PASS != pfc->data->m.init(pfc, stats, error_info)) {
+			pfc->data->m.dtor(pfc, stats, error_info);
+			pfc = NULL;
 		}
 	} else {
-		if (ppec_data) {
-			mnd_pefree(ppec_data, persistent);
-			ppec_data = NULL;
+		if (pfc_data) {
+			mnd_pefree(pfc_data, persistent);
+			pfc_data = NULL;
 		}
-		if (ppec) {
-			mnd_pefree(ppec, persistent);
-			ppec = NULL;
+		if (pfc) {
+			mnd_pefree(pfc, persistent);
+			pfc = NULL;
 		}
 	}
-	DBG_RETURN(ppec);
+	DBG_RETURN(pfc);
 }
 /* }}} */
 
@@ -337,7 +335,7 @@ PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
-	MYSQLND_METHOD(mysqlnd_object_factory, get_ppec),
+	MYSQLND_METHOD(mysqlnd_object_factory, get_pfc),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_vio),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;

@@ -23,7 +23,6 @@
 #include "mysqlnd_structs.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
-#include "mysqlnd_result.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 

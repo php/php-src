@@ -18,14 +18,11 @@
 */
 
 #include "php.h"
-#include "php_globals.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
-#include "zend_ini.h"
-
 
 
 struct st_mysqlnd_protocol_no_params_command
