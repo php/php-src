@@ -234,8 +234,8 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		}
 	}
 
-	if (op_array->brk_cont_array) {
-		ADD_DUP_SIZE(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
+	if (op_array->live_range) {
+		ADD_DUP_SIZE(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
 	}
 
 	if (ZCG(accel_directives).save_comments && op_array->doc_comment) {

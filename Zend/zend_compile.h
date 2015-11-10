@@ -111,18 +111,6 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
-/* Compilation context that is different for each op array. */
-typedef struct _zend_oparray_context {
-	uint32_t   opcodes_size;
-	int        vars_size;
-	int        literals_size;
-	int        current_brk_cont;
-	int        backpatch_count;
-	int        in_finally;
-	uint32_t   fast_call_var;
-	HashTable *labels;
-} zend_oparray_context;
-
 /* Compilation context that is different for each file, but shared between op arrays. */
 typedef struct _zend_file_context {
 	zend_declarables declarables;
@@ -184,6 +172,25 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_op;
 	uint32_t finally_end;
 } zend_try_catch_element;
+
+typedef struct _zend_live_range {
+	uint32_t start;
+	uint32_t end;
+} zend_live_range;
+
+/* Compilation context that is different for each op array. */
+typedef struct _zend_oparray_context {
+	uint32_t   opcodes_size;
+	int        vars_size;
+	int        literals_size;
+	int        backpatch_count;
+	int        in_finally;
+	uint32_t   fast_call_var;
+	int        current_brk_cont;
+	int        last_brk_cont;
+	zend_brk_cont_element *brk_cont_array;
+	HashTable *labels;
+} zend_oparray_context;
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
@@ -354,9 +361,9 @@ struct _zend_op_array {
 	uint32_t T;
 	zend_string **vars;
 
-	int last_brk_cont;
+	int last_live_range;
 	int last_try_catch;
-	zend_brk_cont_element *brk_cont_array;
+	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
@@ -755,7 +762,7 @@ zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
 int get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
+zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);

@@ -78,9 +78,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->scope = NULL;
 	op_array->prototype = NULL;
 
-	op_array->brk_cont_array = NULL;
+	op_array->live_range = NULL;
 	op_array->try_catch_array = NULL;
-	op_array->last_brk_cont = 0;
+	op_array->last_live_range = 0;
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
@@ -387,8 +387,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->doc_comment) {
 		zend_string_release(op_array->doc_comment);
 	}
-	if (op_array->brk_cont_array) {
-		efree(op_array->brk_cont_array);
+	if (op_array->live_range) {
+		efree(op_array->live_range);
 	}
 	if (op_array->try_catch_array) {
 		efree(op_array->try_catch_array);
@@ -451,11 +451,11 @@ int get_next_op_number(zend_op_array *op_array)
 	return op_array->last;
 }
 
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
+zend_brk_cont_element *get_next_brk_cont_element(void)
 {
-	op_array->last_brk_cont++;
-	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
-	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
+	CG(context).last_brk_cont++;
+	CG(context).brk_cont_array = erealloc(CG(context).brk_cont_array, sizeof(zend_brk_cont_element) * CG(context).last_brk_cont);
+	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
 }
 
 static void zend_update_extended_info(zend_op_array *op_array)
@@ -570,7 +570,7 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	int array_offset = opline->op1.num;
 	zend_brk_cont_element *jmp_to;
 	do {
-		jmp_to = &op_array->brk_cont_array[array_offset];
+		jmp_to = &CG(context).brk_cont_array[array_offset];
 		if (nest_levels > 1) {
 			array_offset = jmp_to->parent;
 		}

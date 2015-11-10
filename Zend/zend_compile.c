@@ -218,16 +218,22 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
-	CG(context).current_brk_cont = -1;
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
 	CG(context).fast_call_var = -1;
+	CG(context).current_brk_cont = -1;
+	CG(context).last_brk_cont = 0;
+	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 }
 /* }}} */
 
 void zend_oparray_context_end(zend_oparray_context *prev_context) /* {{{ */
 {
+	if (CG(context).brk_cont_array) {
+		efree(CG(context).brk_cont_array);
+		CG(context).brk_cont_array = NULL;
+	}
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);
@@ -567,14 +573,28 @@ void zend_stop_lexing(void)
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
 
+static void zend_add_live_range(zend_op_array *op_array, uint32_t start, uint32_t end) /* {{{ */
+{
+	zend_live_range *range;
+
+	if (start != end) {
+		op_array->last_live_range++;
+		op_array->live_range = erealloc(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
+		range = op_array->live_range + op_array->last_live_range - 1;
+		range->start = start;
+		range->end = end;
+	}
+}
+/* }}} */
+
 static inline void zend_begin_loop(zend_uchar free_opcode, const znode *loop_var) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
 	int parent = CG(context).current_brk_cont;
 	zend_loop_var info = {0};
 
-	CG(context).current_brk_cont = CG(active_op_array)->last_brk_cont;
-	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
+	CG(context).current_brk_cont = CG(context).last_brk_cont;
+	brk_cont_element = get_next_brk_cont_element();
 	brk_cont_element->parent = parent;
 
 	if (loop_var && (loop_var->op_type & (IS_VAR|IS_TMP_VAR))) {
@@ -597,7 +617,7 @@ static inline void zend_begin_loop(zend_uchar free_opcode, const znode *loop_var
 static inline void zend_end_loop(int cont_addr) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element
-		= &CG(active_op_array)->brk_cont_array[CG(context).current_brk_cont];
+		= &CG(context).brk_cont_array[CG(context).current_brk_cont];
 	brk_cont_element->cont = cont_addr;
 	brk_cont_element->brk = get_next_op_number(CG(active_op_array));
 	CG(context).current_brk_cont = brk_cont_element->parent;
@@ -3734,14 +3754,14 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 	ZVAL_NULL(label);
 
 	current = opline->extended_value;
-	for (; current != dest->brk_cont; current = op_array->brk_cont_array[current].parent) {
+	for (; current != dest->brk_cont; current = CG(context).brk_cont_array[current].parent) {
 		if (current == -1) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = opline->lineno;
 			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
-		if (op_array->brk_cont_array[current].start >= 0) {
+		if (CG(context).brk_cont_array[current].start >= 0) {
 			remove_oplines--;
 		}
 	}
@@ -3989,7 +4009,9 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_end_loop(opnum_fetch);
 
-	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
+	opline = zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
+	zend_add_live_range(CG(active_op_array),
+		opnum_fetch,  opline - CG(active_op_array)->opcodes);
 }
 /* }}} */
 
@@ -4046,10 +4068,11 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	znode expr_node, case_node;
 	zend_op *opline;
 	uint32_t *jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
-	uint32_t opnum_default_jmp;
+	uint32_t opnum_default_jmp, opnum_start;
 
 	zend_compile_expr(&expr_node, expr_ast);
 
+	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_begin_loop(ZEND_FREE, &expr_node);
 
 	case_node.op_type = IS_TMP_VAR;
@@ -4112,7 +4135,9 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	zend_end_loop(get_next_op_number(CG(active_op_array)));
 
 	if (expr_node.op_type == IS_VAR || expr_node.op_type == IS_TMP_VAR) {
-		zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+		opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
+		zend_add_live_range(CG(active_op_array),
+			opnum_start, opline - CG(active_op_array)->opcodes);
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_dtor(&expr_node.u.constant);
 	}
@@ -6426,8 +6451,8 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
-	uint32_t begin_opline_num, end_opline_num;
-	zend_brk_cont_element *brk_cont_element;
+	uint32_t begin_opline_num;
+	zend_op *opline;
 
 	begin_opline_num = get_next_op_number(CG(active_op_array));
 	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL);
@@ -6440,15 +6465,12 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 		zend_compile_expr(result, expr_ast);
 	}
 
-	end_opline_num = get_next_op_number(CG(active_op_array));
-	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
+	opline = zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL);
 
 	/* Store BEGIN_SILENCE/END_SILENCE pair to restore previous
 	 * EG(error_reporting) value on exception */
-	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
-	brk_cont_element->start = begin_opline_num;
-	brk_cont_element->cont = brk_cont_element->brk = end_opline_num;
-	brk_cont_element->parent = -1;
+	zend_add_live_range(CG(active_op_array),
+		begin_opline_num + 1, opline - CG(active_op_array)->opcodes);
 }
 /* }}} */
 
@@ -6768,10 +6790,6 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		zend_brk_cont_element *info = get_next_brk_cont_element(CG(active_op_array));
-		info->start = rope_init_lineno;
-		info->parent = CG(context).current_brk_cont;
-		info->cont = info->brk = opline - CG(active_op_array)->opcodes;
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;
@@ -6785,6 +6803,10 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			get_temporary_variable(CG(active_op_array));
 			i--;			
 		}
+
+		zend_add_live_range(CG(active_op_array),
+			rope_init_lineno, opline - CG(active_op_array)->opcodes);
+
 		/* Update all the previous opcodes to use the same variable */
 		while (opline != init_opline) {
 			opline--;

@@ -617,8 +617,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->arg_info = arg_info;
 	}
 
-	if (op_array->brk_cont_array) {
-		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
+	if (op_array->live_range) {
+		zend_accel_store(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
 	}
 
 	if (op_array->scope) {

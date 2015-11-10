@@ -76,9 +76,8 @@ typedef struct _zend_cfg {
 	zend_code_block    *blocks;
 	zend_code_block   **try;
 	zend_code_block   **catch;
-	zend_code_block   **loop_start;
-	zend_code_block   **loop_cont;
-	zend_code_block   **loop_brk;
+	zend_code_block   **live_range_start;
+	zend_code_block   **live_range_end;
 	zend_op           **Tsource;
 	char               *same_t;
 } zend_cfg;
@@ -130,6 +129,7 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      uint32_t       var,
                                      zval          *val);
 
+void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var);
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);
