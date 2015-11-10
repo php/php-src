@@ -265,21 +265,21 @@ mysqlnd_read_header(MYSQLND_PFC * pfc, MYSQLND_VIO * vio, MYSQLND_PACKET_HEADER 
 							STAT_PROTOCOL_OVERHEAD_IN, MYSQLND_HEADER_SIZE,
 							STAT_PACKETS_RECEIVED, 1);
 
-	if (pfc->data->compressed || pfc->packet_no == header->packet_no) {
+	if (pfc->data->compressed || pfc->data->packet_no == header->packet_no) {
 		/*
 		  Have to increase the number, so we can send correct number back. It will
 		  round at 255 as this is unsigned char. The server needs this for simple
 		  flow control checking.
 		*/
-		pfc->packet_no++;
+		pfc->data->packet_no++;
 		DBG_RETURN(PASS);
 	}
 
 	DBG_ERR_FMT("Logical link: packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
-				pfc->packet_no, header->packet_no, header->size);
+				pfc->data->packet_no, header->packet_no, header->size);
 
 	php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
-			  pfc->packet_no, header->packet_no, header->size);
+			  pfc->data->packet_no, header->packet_no, header->size);
 	DBG_RETURN(FAIL);
 }
 /* }}} */

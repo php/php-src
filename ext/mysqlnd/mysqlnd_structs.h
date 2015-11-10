@@ -233,14 +233,6 @@ typedef struct st_mysqlnd_session_options
 } MYSQLND_SESSION_OPTIONS;
 
 
-typedef struct st_mysqlnd_protocol_frame_codec_options
-{
-	uint64_t	flags;
-
-	char *		sha256_server_public_key;
-} MYSQLND_PFC_OPTIONS;
-
-
 typedef struct st_mysqlnd_vio_options
 {
 	/* timeouts */
@@ -376,7 +368,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
-typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_net)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent);
 
@@ -386,7 +378,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory)
 	func_mysqlnd_object_factory__get_connection get_connection;
 	func_mysqlnd_object_factory__clone_connection_object clone_connection_object;
 	func_mysqlnd_object_factory__get_prepared_statement get_prepared_statement;
-	func_mysqlnd_object_factory__get_net get_net;
+	func_mysqlnd_object_factory__get_pfc get_protocol_frame_codec;
 	func_mysqlnd_object_factory__get_vio get_vio;
 	func_mysqlnd_object_factory__get_protocol_payload_decoder_factory get_protocol_payload_decoder_factory;
 };
@@ -1114,14 +1106,23 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec)
 
 struct st_mysqlnd_protocol_frame_codec_data
 {
-	php_stream				*stream;
-	zend_bool				compressed;
-	zend_bool				ssl;
-	MYSQLND_PFC_OPTIONS	options;
+	php_stream		*stream;
+	zend_bool		compressed;
+	zend_bool		ssl;
+	uint64_t		flags;
+	char *			sha256_server_public_key;
 
-	unsigned int		refcount;
+#ifdef MYSQLND_COMPRESSION_ENABLED
+	MYSQLND_READ_BUFFER	* uncompressed_data;
+#else
+	void * 				unused_pad1;
+#endif
 
-	zend_bool			persistent;
+	/* sequence for simple checking of correct packets */
+	zend_uchar		packet_no;
+	zend_uchar		compressed_envelope_packet_no;
+
+	zend_bool		persistent;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) m;
 };
@@ -1131,17 +1132,7 @@ struct st_mysqlnd_protocol_frame_codec
 {
 	struct st_mysqlnd_protocol_frame_codec_data * data;
 
-#ifdef MYSQLND_COMPRESSION_ENABLED
-	MYSQLND_READ_BUFFER	* uncompressed_data;
-#else
-	void * 				unused_pad1;
-#endif
-
-	zend_bool persistent;
-
-	/* sequence for simple checking of correct packets */
-	zend_uchar			packet_no;
-	zend_uchar			compressed_envelope_packet_no;
+	zend_bool 		persistent;
 };
 
 
@@ -1366,7 +1357,7 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 														const MYSQLND_SESSION_OPTIONS * const session_options,
-														const MYSQLND_PFC_OPTIONS * const pfc_options, zend_ulong mysql_flags
+														const MYSQLND_PFC_DATA * const pfc_data, zend_ulong mysql_flags
 														);
 
 struct st_mysqlnd_authentication_plugin

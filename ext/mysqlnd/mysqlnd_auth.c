@@ -224,7 +224,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 
 		if (!PACKET_WRITE(auth_packet)) {
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
-				SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
 	}
@@ -359,7 +359,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_PFC_OPTIONS * const ppec_options,
+								  const MYSQLND_PFC_DATA * const pfc_data,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -419,7 +419,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_SESSION_OPTIONS * const session_options,
-							   const MYSQLND_PFC_OPTIONS * const ppec_options,
+							   const MYSQLND_PFC_DATA * const pfc_data,
 							   zend_ulong mysql_flags
 							  )
 {
@@ -480,17 +480,17 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 static RSA *
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_SESSION_OPTIONS * const session_options,
-						   const MYSQLND_PFC_OPTIONS * const io_options
+						   const MYSQLND_PFC_DATA * const pfc_data
 						  )
 {
 	RSA * ret = NULL;
-	const char * fname = (io_options->sha256_server_public_key && io_options->sha256_server_public_key[0] != '\0')?
-								io_options->sha256_server_public_key:
+	const char * fname = (pfc_data->sha256_server_public_key && pfc_data->sha256_server_public_key[0] != '\0')?
+								pfc_data->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
 	php_stream * stream;
 	DBG_ENTER("mysqlnd_sha256_get_rsa_key");
 	DBG_INF_FMT("options_s256_pk=[%s] MYSQLND_G(sha256_server_public_key)=[%s]",
-				 io_options->sha256_server_public_key? io_options->sha256_server_public_key:"n/a",
+				 pfc_data->sha256_server_public_key? pfc_data->sha256_server_public_key:"n/a",
 				 MYSQLND_G(sha256_server_public_key)? MYSQLND_G(sha256_server_public_key):"n/a");
 	if (!fname || fname[0] == '\0') {
 		MYSQLND_PACKET_SHA256_PK_REQUEST * pk_req_packet = NULL;
@@ -569,7 +569,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_SESSION_OPTIONS * const session_options,
-								  const MYSQLND_PFC_OPTIONS * const ppec_options,
+								  const MYSQLND_PFC_DATA * const pfc_data,
 								  zend_ulong mysql_flags
 								 )
 {
@@ -587,7 +587,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		memcpy(ret, passwd, passwd_len);
 	} else {
 		*auth_data_len = 0;
-		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, ppec_options);
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, pfc_data);
 
 		if (server_public_key) {
 			int server_public_key_len;

@@ -36,7 +36,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	DBG_ENTER("mysqlnd_pfc::reset");
-	pfc->packet_no = pfc->compressed_envelope_packet_no = 0;
+	pfc->data->packet_no = pfc->data->compressed_envelope_packet_no = 0;
 	DBG_RETURN(PASS);
 }
 /* }}} */
@@ -88,8 +88,8 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
 		DBG_INF_FMT("to_be_sent=%u", to_be_sent);
 		DBG_INF_FMT("packets_sent=%u", packets_sent);
-		DBG_INF_FMT("compressed_envelope_packet_no=%u", pfc->compressed_envelope_packet_no);
-		DBG_INF_FMT("packet_no=%u", pfc->packet_no);
+		DBG_INF_FMT("compressed_envelope_packet_no=%u", pfc->data->compressed_envelope_packet_no);
+		DBG_INF_FMT("packet_no=%u", pfc->data->packet_no);
 #ifdef MYSQLND_COMPRESSION_ENABLED
 		if (pfc->data->compressed == TRUE) {
 			/* here we need to compress the data and then write it, first comes the compressed header */
@@ -99,7 +99,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 			STORE_HEADER_SIZE(safe_storage, uncompressed_payload);
 			int3store(uncompressed_payload, to_be_sent);
-			int1store(uncompressed_payload + 3, pfc->packet_no);
+			int1store(uncompressed_payload + 3, pfc->data->packet_no);
 			if (PASS == pfc->data->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen,
 									   uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE))
 			{
@@ -113,10 +113,10 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 			RESTORE_HEADER_SIZE(uncompressed_payload, safe_storage);
 
 			int3store(compress_buf, payload_size);
-			int1store(compress_buf + 3, pfc->packet_no);
+			int1store(compress_buf + 3, pfc->data->packet_no);
 			DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
 			bytes_sent = vio->data->m.network_write(vio, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, conn_stats, error_info);
-			pfc->compressed_envelope_packet_no++;
+			pfc->data->compressed_envelope_packet_no++;
   #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
@@ -145,12 +145,12 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 			DBG_INF("no compression");
 			STORE_HEADER_SIZE(safe_storage, p);
 			int3store(p, to_be_sent);
-			int1store(p + 3, pfc->packet_no);
+			int1store(p + 3, pfc->data->packet_no);
 			bytes_sent = vio->data->m.network_write(vio, p, to_be_sent + MYSQLND_HEADER_SIZE, conn_stats, error_info);
 			RESTORE_HEADER_SIZE(p, safe_storage);
-			pfc->compressed_envelope_packet_no++;
+			pfc->data->compressed_envelope_packet_no++;
 		}
-		pfc->packet_no++;
+		pfc->data->packet_no++;
 
 		p += to_be_sent;
 		left -= to_be_sent;
@@ -164,7 +164,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 		*/
 	} while (bytes_sent && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
-	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, pfc->packet_no);
+	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, pfc->data->packet_no);
 
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats,
 			STAT_BYTES_SENT, count + packets_sent * MYSQLND_HEADER_SIZE,
@@ -276,15 +276,15 @@ MYSQLND_METHOD(mysqlnd_pfc, read_compressed_packet_from_stream_and_fill_read_buf
 			retval = FAIL;
 			goto end;
 		}
-		pfc->uncompressed_data = mysqlnd_create_read_buffer(decompressed_size);
-		retval = pfc->data->m.decode(pfc->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size);
+		pfc->data->uncompressed_data = mysqlnd_create_read_buffer(decompressed_size);
+		retval = pfc->data->m.decode(pfc->data->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size);
 		if (FAIL == retval) {
 			goto end;
 		}
 	} else {
 		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %u bytes", net_payload_size);
-		pfc->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size);
-		if (FAIL == vio->data->m.network_read(vio, pfc->uncompressed_data->data, net_payload_size, conn_stats, error_info)) {
+		pfc->data->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size);
+		if (FAIL == vio->data->m.network_read(vio, pfc->data->uncompressed_data->data, net_payload_size, conn_stats, error_info)) {
 			retval = FAIL;
 			goto end;
 		}
@@ -361,18 +361,18 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 	DBG_ENTER("mysqlnd_pfc::receive");
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	if (pfc->data->compressed) {
-		if (pfc->uncompressed_data) {
-			size_t to_read_from_buffer = MIN(pfc->uncompressed_data->bytes_left(pfc->uncompressed_data), to_read);
+		if (pfc->data->uncompressed_data) {
+			size_t to_read_from_buffer = MIN(pfc->data->uncompressed_data->bytes_left(pfc->data->uncompressed_data), to_read);
 			DBG_INF_FMT("reading "MYSQLND_SZ_T_SPEC" from uncompressed_data buffer", to_read_from_buffer);
 			if (to_read_from_buffer) {
-				pfc->uncompressed_data->read(pfc->uncompressed_data, to_read_from_buffer, (zend_uchar *) p);
+				pfc->data->uncompressed_data->read(pfc->data->uncompressed_data, to_read_from_buffer, (zend_uchar *) p);
 				p += to_read_from_buffer;
 				to_read -= to_read_from_buffer;
 			}
 			DBG_INF_FMT("left "MYSQLND_SZ_T_SPEC" to read", to_read);
-			if (TRUE == pfc->uncompressed_data->is_empty(pfc->uncompressed_data)) {
+			if (TRUE == pfc->data->uncompressed_data->is_empty(pfc->data->uncompressed_data)) {
 				/* Everything was consumed. This should never happen here, but for security */
-				pfc->uncompressed_data->free_buffer(&pfc->uncompressed_data);
+				pfc->data->uncompressed_data->free_buffer(&pfc->data->uncompressed_data);
 			}
 		}
 		if (to_read) {
@@ -385,15 +385,15 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 			}
 			net_payload_size = uint3korr(net_header);
 			packet_no = uint1korr(net_header + 3);
-			if (pfc->compressed_envelope_packet_no != packet_no) {
+			if (pfc->data->compressed_envelope_packet_no != packet_no) {
 				DBG_ERR_FMT("Transport level: packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
-							pfc->compressed_envelope_packet_no, packet_no, net_payload_size);
+							pfc->data->compressed_envelope_packet_no, packet_no, net_payload_size);
 
 				php_error(E_WARNING, "Packets out of order. Expected %u received %u. Packet size="MYSQLND_SZ_T_SPEC,
-						  pfc->compressed_envelope_packet_no, packet_no, net_payload_size);
+						  pfc->data->compressed_envelope_packet_no, packet_no, net_payload_size);
 				DBG_RETURN(FAIL);
 			}
-			pfc->compressed_envelope_packet_no++;
+			pfc->data->compressed_envelope_packet_no++;
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
 			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (zend_ulong) net_payload_size);
 #endif
@@ -424,15 +424,15 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 	DBG_INF_FMT("option=%u", option);
 	switch (option) {
 		case MYSQL_OPT_COMPRESS:
-			pfc->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
+			pfc->data->flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
 		case MYSQL_SERVER_PUBLIC_KEY:
 			{
 				zend_bool pers = pfc->persistent;
-				if (pfc->data->options.sha256_server_public_key) {
-					mnd_pefree(pfc->data->options.sha256_server_public_key, pers);
+				if (pfc->data->sha256_server_public_key) {
+					mnd_pefree(pfc->data->sha256_server_public_key, pers);
 				}
-				pfc->data->options.sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+				pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		default:
@@ -450,13 +450,13 @@ MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 	DBG_ENTER("mysqlnd_pfc::free_contents");
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
-	if (pfc->uncompressed_data) {
-		pfc->uncompressed_data->free_buffer(&pfc->uncompressed_data);
+	if (pfc->data->uncompressed_data) {
+		pfc->data->uncompressed_data->free_buffer(&pfc->data->uncompressed_data);
 	}
 #endif
-	if (pfc->data->options.sha256_server_public_key) {
-		mnd_pefree(pfc->data->options.sha256_server_public_key, pfc->persistent);
-		pfc->data->options.sha256_server_public_key = NULL;
+	if (pfc->data->sha256_server_public_key) {
+		mnd_pefree(pfc->data->sha256_server_public_key, pfc->persistent);
+		pfc->data->sha256_server_public_key = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -518,7 +518,7 @@ mysqlnd_pfc_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO
 {
 	MYSQLND_PFC * pfc;
 	DBG_ENTER("mysqlnd_pfc_init");
-	pfc = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_net(persistent, stats, error_info);
+	pfc = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_frame_codec(persistent, stats, error_info);
 	DBG_RETURN(pfc);
 }
 /* }}} */

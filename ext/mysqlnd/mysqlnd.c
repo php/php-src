@@ -543,7 +543,7 @@ mysqlnd_run_authentication(
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
 												   plugin_data, plugin_data_len, session_options,
-												   &conn->protocol_frame_codec->data->options, mysql_flags);
+												   conn->protocol_frame_codec->data, mysql_flags);
 			if (conn->error_info->error_no) {
 				goto end;
 			}
@@ -685,7 +685,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
 #else
-	if (pfc && pfc->data->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+	if (pfc && pfc->data->flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
 		mysql_flags |= CLIENT_COMPRESS;
 	}
 #endif
@@ -694,8 +694,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 		mysql_flags &= ~CLIENT_SSL;
 	}
 #else
-	if (vio && (vio->data->options.ssl_key || vio->data->options.ssl_cert ||
-		vio->data->options.ssl_ca || vio->data->options.ssl_capath || vio->data->options.ssl_cipher))
+	if (vio && (vio->data->options.ssl_key ||
+				vio->data->options.ssl_cert ||
+				vio->data->options.ssl_ca ||
+				vio->data->options.ssl_capath ||
+				vio->data->options.ssl_cipher))
 	{
 		mysql_flags |= CLIENT_SSL;
 	}
