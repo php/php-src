@@ -3952,6 +3952,8 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opnum_reset = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
+	zend_begin_loop(ZEND_FE_FREE, &reset_node);
+
 	opnum_fetch = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
@@ -3974,8 +3976,6 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		zend_make_tmp_result(&key_node, opline);
 		zend_emit_assign_znode(key_ast, &key_node);
 	}
-
-	zend_begin_loop(ZEND_FE_FREE, &reset_node);
 
 	zend_compile_stmt(stmt_ast);
 
