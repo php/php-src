@@ -2104,7 +2104,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		goto end;
 	}
 	switch (option) {
-		case MYSQL_OPT_COMPRESS:
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
@@ -2120,6 +2119,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);
 			break;
+		case MYSQL_OPT_COMPRESS:
 		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->protocol_frame_codec->data->m.set_client_option(conn->protocol_frame_codec, option, value);
 			break;
