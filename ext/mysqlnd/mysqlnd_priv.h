@@ -214,23 +214,6 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								size_t * switch_to_auth_protocol_data_len
 								);
 
-extern func_mysqlnd__command_factory mysqlnd_command_factory;
-
-
-enum_func_status
-send_command_handle_response(
-		const enum mysqlnd_packet_type ok_packet,
-		const zend_bool silent,
-		const enum php_mysqlnd_server_command command,
-		const zend_bool ignore_upsert_status,
-
-		MYSQLND_ERROR_INFO	* error_info,
-		MYSQLND_UPSERT_STATUS * upsert_status,
-		MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
-		MYSQLND_STRING * last_message,
-		zend_bool last_message_persistent
-	);
-
 enum_func_status
 mysqlnd_connect_run_authentication(
 			MYSQLND_CONN_DATA * conn,

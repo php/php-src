@@ -1010,8 +1010,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 						const MYSQLND_CSTRING database,
 						unsigned int port,
 						const MYSQLND_CSTRING socket_or_pipe,
-						unsigned int mysql_flags
-						)
+						unsigned int mysql_flags)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), connect);
 	enum_func_status ret = FAIL;

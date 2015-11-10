@@ -11,6 +11,7 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +
 			"mysqlnd_charset.c " +
+			"mysqlnd_commands.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_driver.c " +
 			"mysqlnd_ext_plugin.c " +

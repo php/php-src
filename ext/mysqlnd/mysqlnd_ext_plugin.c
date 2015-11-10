@@ -21,6 +21,7 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_result.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_commands.h"
 #include "mysqlnd_ext_plugin.h"
 
 static struct st_mysqlnd_conn_methods * mysqlnd_conn_methods;

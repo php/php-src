@@ -21,7 +21,7 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_base_sources="mysqlnd.c mysqlnd_alloc.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
                    mysqlnd_loaddata.c mysqlnd_reverse_api.c mysqlnd_vio.c mysqlnd_protocol_frame_codec.c \
                    mysqlnd_statistics.c mysqlnd_driver.c mysqlnd_ext_plugin.c mysqlnd_auth.c \
-				   mysqlnd_result.c mysqlnd_result_meta.c mysqlnd_debug.c\
+				   mysqlnd_result.c mysqlnd_result_meta.c mysqlnd_debug.c mysqlnd_commands.c \
 				   mysqlnd_block_alloc.c mysqlnd_plugin.c php_mysqlnd.c"
 
 
