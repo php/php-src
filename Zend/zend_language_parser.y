@@ -76,7 +76,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_OBJECT_CAST T_BOOL_CAST '@'
 %right T_POW
 %right '['
 %nonassoc T_NEW T_CLONE
@@ -136,10 +136,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INT_CAST    "(int) (T_INT_CAST)"
 %token T_DOUBLE_CAST "(double) (T_DOUBLE_CAST)"
 %token T_STRING_CAST "(string) (T_STRING_CAST)"
-%token T_ARRAY_CAST  "(array) (T_ARRAY_CAST)"
 %token T_OBJECT_CAST "(object) (T_OBJECT_CAST)"
 %token T_BOOL_CAST   "(bool) (T_BOOL_CAST)"
-%token T_UNSET_CAST  "(unset) (T_UNSET_CAST)"
 %token T_NEW       "new (T_NEW)"
 %token T_CLONE     "clone (T_CLONE)"
 %token T_EXIT      "exit (T_EXIT)"
@@ -946,10 +944,10 @@ expr_without_variable:
 	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
 	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(IS_DOUBLE, $2); }
 	|	T_STRING_CAST expr	{ $$ = zend_ast_create_cast(IS_STRING, $2); }
-	|	T_ARRAY_CAST expr	{ $$ = zend_ast_create_cast(IS_ARRAY, $2); }
 	|	T_OBJECT_CAST expr	{ $$ = zend_ast_create_cast(IS_OBJECT, $2); }
 	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(_IS_BOOL, $2); }
-	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $2); }
+	|	'(' T_ARRAY ')' %prec T_INT_CAST expr	{ $$ = zend_ast_create_cast(IS_ARRAY, $4); }
+	|	'(' T_UNSET ')' %prec T_INT_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $4); }
 	|	T_EXIT exit_expr	{ $$ = zend_ast_create(ZEND_AST_EXIT, $2); }
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
