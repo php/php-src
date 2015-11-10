@@ -2420,7 +2420,6 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 
 static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
 {
-	int i;
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
