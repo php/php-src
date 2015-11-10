@@ -125,18 +125,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
 			case ZEND_FAST_CALL:
-				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
-				if (opline->extended_value) {
-					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				}
-				START_BLOCK_OP(opno + 1);
-				break;
-			case ZEND_FAST_RET:
-				if (opline->extended_value) {
-					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				}
-				START_BLOCK_OP(opno + 1);
-				break;
 			case ZEND_JMP:
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -147,6 +135,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_THROW:
+			case ZEND_FAST_RET:
 				/* start new block from this+1 */
 				START_BLOCK_OP(opno + 1);
 				break;
@@ -272,21 +261,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_GENERATOR_RETURN:
 				case ZEND_EXIT:
 				case ZEND_THROW:
-					break;
-				case ZEND_FAST_CALL:
-					if (opline->extended_value) {
-						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
-					}
-					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
-					break;
 				case ZEND_FAST_RET:
-					if (opline->extended_value) {
-						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
-					}
 					break;
 				case ZEND_JMP:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
 					break;
+				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];

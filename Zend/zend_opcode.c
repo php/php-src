@@ -516,48 +516,52 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
 {
 	int i;
-	uint32_t finally_op_num = 0;
+	uint32_t finally_num = (uint32_t)-1;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_num >= op_array->try_catch_array[i].finally_op
 				&& op_num < op_array->try_catch_array[i].finally_end) {
-			finally_op_num = op_array->try_catch_array[i].finally_op;
+			finally_num = i;
 		}
 	}
 
-	if (finally_op_num) {
+	if (finally_num != (uint32_t)-1) {
 		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[finally_op_num - 2].opcode == ZEND_FAST_CALL);
+		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2;
+		op_array->opcodes[op_num].op2.num = finally_num;
 	}
 }
 
 static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
 {
 	int i;
-	uint32_t catch_op_num = 0, finally_op_num = 0;
+	uint32_t finally_num = (uint32_t)-1;
+	uint32_t catch_num = (uint32_t)-1;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_array->try_catch_array[i].try_op > op_num) {
 			break;
 		}
 		if (op_num < op_array->try_catch_array[i].finally_op) {
-			finally_op_num = op_array->try_catch_array[i].finally_op;
+			finally_num = i;
 		}
 		if (op_num < op_array->try_catch_array[i].catch_op) {
-			catch_op_num = op_array->try_catch_array[i].catch_op;
+			catch_num = i;
 		}
 	}
 
-	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
+	if (finally_num != (uint32_t)-1 &&
+	    (catch_num == (uint32_t)-1 ||
+	     op_array->try_catch_array[catch_num].catch_op >=
+	     op_array->try_catch_array[finally_num].finally_op)) {
 		/* in case of unhandled exception return to upward finally block */
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
-		op_array->opcodes[op_num].op2.opline_num = finally_op_num;
-	} else if (catch_op_num) {
+		op_array->opcodes[op_num].op2.num = finally_num;
+	} else if (catch_num != (uint32_t)-1) {
 		/* in case of unhandled exception return to upward catch block */
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
-		op_array->opcodes[op_num].op2.opline_num = catch_op_num;
+		op_array->opcodes[op_num].op2.num = catch_num;
 	}
 }
 

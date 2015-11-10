@@ -58,10 +58,7 @@ typedef struct _zend_loop_var {
 	zend_uchar opcode;
 	zend_uchar var_type;
 	uint32_t   var_num;
-	union {
-		uint32_t try_catch_offset;
-		uint32_t brk_cont_offset;
-	} u;
+	uint32_t   try_catch_offset;
 } zend_loop_var;
 
 static inline void zend_alloc_cache_slot(uint32_t literal) {
@@ -584,7 +581,7 @@ static inline void zend_begin_loop(zend_uchar free_opcode, const znode *loop_var
 		info.opcode = free_opcode;
 		info.var_type = loop_var->op_type;
 		info.var_num = loop_var->u.op.var;
-		info.u.brk_cont_offset = CG(context).current_brk_cont;
+		info.try_catch_offset = CG(active_op_array)->last_try_catch;
 		brk_cont_element->start = get_next_op_number(CG(active_op_array));
 	} else {
 		info.opcode = ZEND_NOP;
@@ -3574,7 +3571,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			opline->result.var = loop_var->var_num;
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
-			opline->op1.num = loop_var->u.try_catch_offset;
+			opline->op1.num = loop_var->try_catch_offset;
 		} else if (loop_var->opcode == ZEND_RETURN) {
 			/* Stack separator */
 			break;
@@ -3592,7 +3589,7 @@ static int zend_handle_loops_and_finally_ex(zend_long depth) /* {{{ */
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
 			SET_UNUSED(opline->op2);
-			opline->op2.num = loop_var->u.brk_cont_offset;
+			opline->op2.num = loop_var->try_catch_offset;
 			opline->extended_value = ZEND_FREE_ON_RETURN;
 			depth--;
 	    }
@@ -4163,7 +4160,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		fast_call.opcode = ZEND_FAST_CALL;
 		fast_call.var_type = IS_TMP_VAR;
 		fast_call.var_num = CG(context).fast_call_var;
-		fast_call.u.try_catch_offset = try_catch_offset;
+		fast_call.try_catch_offset = try_catch_offset;
 		zend_stack_push(&CG(loop_var_stack), &fast_call);
 	}
 
