@@ -30,9 +30,6 @@
 #include "mysqlnd_block_alloc.h"
 #include "mysqlnd_ext_plugin.h"
 
-#define MYSQLND_SILENT
-
-
 const char * const mysqlnd_not_bound_as_blob = "Can't send long data for non-string/non-binary data types";
 const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 

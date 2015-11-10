@@ -28,8 +28,6 @@
 #include "mysqlnd_debug.h"
 #include "mysql_float_to_double.h"
 
-#define MYSQLND_SILENT
-
 
 enum mysqlnd_timestamp_type
 {

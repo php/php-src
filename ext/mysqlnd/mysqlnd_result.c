@@ -29,8 +29,6 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_ext_plugin.h"
 
-#define MYSQLND_SILENT
-
 /* {{{ mysqlnd_result_buffered_zval::initialize_result_set_rest */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta,
