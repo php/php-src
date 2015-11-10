@@ -1,5 +1,5 @@
 --TEST--
-Implode many small strings should not slowdown allocations
+Concatenating many small strings should not slowdown allocations
 --INI--
 memory_limit=256m
 --FILE--
