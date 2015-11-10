@@ -171,7 +171,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 
 /* {{{ mysqlnd_res::clone_metadata */
 static MYSQLND_RES_METADATA *
-MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, const zend_bool persistent)
 {
 	unsigned int i;
 	/* +1 is to have empty marker at the end */

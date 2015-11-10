@@ -377,7 +377,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 
 /* {{{ mysqlnd_stmt::prepare */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const query, unsigned int query_len)
+MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const query, const size_t query_len)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_STMT * s_to_prepare = s;

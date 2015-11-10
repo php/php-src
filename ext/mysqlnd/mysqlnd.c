@@ -179,6 +179,7 @@ static enum mysqlnd_connection_state
 MYSQLND_METHOD(mysqlnd_connection_state, get)(const struct st_mysqlnd_connection_state * const state_struct)
 {
 	DBG_ENTER("mysqlnd_connection_state::get")
+	DBG_INF_FMT("State=%u", state_struct->state);
 	DBG_RETURN(state_struct->state);
 }
 /* }}} */
@@ -186,7 +187,7 @@ MYSQLND_METHOD(mysqlnd_connection_state, get)(const struct st_mysqlnd_connection
 
 /* {{{ mysqlnd_connection_state::set */
 static void
-MYSQLND_METHOD(mysqlnd_connection_state, set)(struct st_mysqlnd_connection_state * const state_struct, enum mysqlnd_connection_state state)
+MYSQLND_METHOD(mysqlnd_connection_state, set)(struct st_mysqlnd_connection_state * const state_struct, const enum mysqlnd_connection_state state)
 {
 	DBG_ENTER("mysqlnd_connection_state::set")
 	DBG_INF_FMT("New state=%u", state);
@@ -200,6 +201,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_connection_state)
 	MYSQLND_METHOD(mysqlnd_connection_state, get),
 	MYSQLND_METHOD(mysqlnd_connection_state, set),
 MYSQLND_CLASS_METHODS_END;
+
+
 
 
 /* {{{ mysqlnd_upsert_status_init */
@@ -277,25 +280,25 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	if (conn->host) {
-		mnd_pefree(conn->host, pers);
-		conn->host = NULL;
+	if (conn->hostname.s) {
+		mnd_pefree(conn->hostname.s, pers);
+		conn->hostname.s = NULL;
 	}
-	if (conn->user) {
-		mnd_pefree(conn->user, pers);
-		conn->user = NULL;
+	if (conn->username.s) {
+		mnd_pefree(conn->username.s, pers);
+		conn->username.s = NULL;
 	}
-	if (conn->passwd) {
-		mnd_pefree(conn->passwd, pers);
-		conn->passwd = NULL;
+	if (conn->password.s) {
+		mnd_pefree(conn->password.s, pers);
+		conn->password.s = NULL;
 	}
 	if (conn->connect_or_select_db.s) {
 		mnd_pefree(conn->connect_or_select_db.s, pers);
 		conn->connect_or_select_db.s = NULL;
 	}
-	if (conn->unix_socket) {
-		mnd_pefree(conn->unix_socket, pers);
-		conn->unix_socket = NULL;
+	if (conn->unix_socket.s) {
+		mnd_pefree(conn->unix_socket.s, pers);
+		conn->unix_socket.s = NULL;
 	}
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	if (conn->scheme.s) {
@@ -888,29 +891,29 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			goto err; /* OOM */
 		}
 
-		conn->user_len			= username.l;
-		conn->user				= mnd_pestrndup(username.s, conn->user_len, conn->persistent);
-		conn->passwd			= mnd_pestrndup(password.s, password.l, conn->persistent);
-		conn->passwd_len		= password.l;
+		conn->username.l		= username.l;
+		conn->username.s		= mnd_pestrndup(username.s, conn->username.l, conn->persistent);
+		conn->password.l		= password.l;
+		conn->password.s		= mnd_pestrndup(password.s, conn->password.l, conn->persistent);
 		conn->port				= port;
-		conn->connect_or_select_db.s = mnd_pestrndup(database.s, database.l, conn->persistent);
 		conn->connect_or_select_db.l = database.l;
+		conn->connect_or_select_db.s = mnd_pestrndup(database.s, conn->connect_or_select_db.l, conn->persistent);
 
-		if (!conn->user || !conn->passwd || !conn->connect_or_select_db.s) {
+		if (!conn->username.s || !conn->password.s|| !conn->connect_or_select_db.s) {
 			SET_OOM_ERROR(conn->error_info);
 			goto err; /* OOM */
 		}
 
 		if (!unix_socket && !named_pipe) {
-			conn->host = mnd_pestrndup(hostname.s, hostname.l, conn->persistent);
-			if (!conn->host) {
+			conn->hostname.s = mnd_pestrndup(hostname.s, hostname.l, conn->persistent);
+			if (!conn->hostname.s) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->host_len = hostname.l;
+			conn->hostname.l = hostname.l;
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->host);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -923,12 +926,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				}
 			}
 		} else {
-			conn->unix_socket = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
+			conn->unix_socket.s = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
 			if (unix_socket) {
 				conn->host_info = mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
 				char *p;
-				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket);
+				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -942,11 +945,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			} else {
 				php_error_docref(NULL, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
 			}
-			if (!conn->unix_socket || !conn->host_info) {
+			if (!conn->unix_socket.s || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->unix_socket_len = strlen(conn->unix_socket);
+			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
 		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		/* todo: check if charset is available */
@@ -1078,7 +1081,7 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
   Still the result from the query is PASS
 */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len)
+MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * const query, const size_t query_len)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), query);
 	enum_func_status ret = FAIL;
@@ -1103,7 +1106,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 
 /* {{{ mysqlnd_conn_data::send_query */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len,
+MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * const query, const size_t query_len,
 											  enum_mysqlnd_send_query_type type, zval *read_cb, zval *err_cb)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), send_query);
@@ -1353,7 +1356,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 
 /* {{{ mysqlnd_conn_data::list_method */
 MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const char * query, const char *achtung_wild, char *par1)
+MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const char * const query, const char * const achtung_wild, const char * const par1)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), list_method);
 	char * show_query = NULL;
@@ -1500,7 +1503,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 
 /* {{{ mysqlnd_conn_data::select_db */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, const char * const db, unsigned int db_len)
+MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, const char * const db, const size_t db_len)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), select_db);
 	enum_func_status ret = FAIL;
@@ -1978,7 +1981,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn)
 
 
 /* {{{ mysqlnd_field_type_name */
-PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
+PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type)
 {
 	switch(field_type) {
 		case FIELD_TYPE_JSON:
@@ -2033,12 +2036,12 @@ PHPAPI const char *mysqlnd_field_type_name(enum mysqlnd_field_types field_type)
 /* {{{ mysqlnd_conn_data::change_user */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
-										  const char * user,
-										  const char * passwd,
-										  const char * db,
-										  zend_bool silent,
-										  size_t passwd_len
-										 )
+											   const char * user,
+											   const char * passwd,
+											   const char * db,
+											   zend_bool silent,
+											   size_t passwd_len
+			)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data), change_user);
 	enum_func_status ret = FAIL;
@@ -2059,6 +2062,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 	if (!passwd) {
 		passwd = "";
+		passwd_len = 0;
 	}
 	if (!db) {
 		db = "";
@@ -2693,8 +2697,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn
 
 
 /* {{{ mysqlnd_conn_data::negotiate_client_api_capabilities */
-static unsigned int
-MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const unsigned int flags)
+static size_t
+MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags)
 {
 	unsigned int ret = 0;
 	DBG_ENTER("mysqlnd_conn_data::negotiate_client_api_capabilities");
@@ -2709,7 +2713,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CON
 
 
 /* {{{ mysqlnd_conn_data::get_client_api_capabilities */
-static unsigned int
+static size_t
 MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::get_client_api_capabilities");
@@ -2720,18 +2724,17 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)(const MYSQLND_CON
 
 /* {{{ mysqlnd_conn_data::local_tx_start */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func)
+MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, const size_t this_func)
 {
-	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn_data::local_tx_start");
-	DBG_RETURN(ret);
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_conn_data::local_tx_end */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status)
+MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)(MYSQLND_CONN_DATA * conn, const size_t this_func, const enum_func_status status)
 {
 	DBG_ENTER("mysqlnd_conn_data::local_tx_end");
 	DBG_RETURN(status);
@@ -2871,7 +2874,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND * conn)
 
 /* {{{ mysqlnd_conn_data::close */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, enum_connection_close_type close_type)
+MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, const enum_connection_close_type close_type)
 {
 	const size_t this_func = STRUCT_OFFSET(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn), close);
 	MYSQLND_CONN_DATA * conn = conn_handle->data;
@@ -2916,7 +2919,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_connection_init */
 PHPAPI MYSQLND *
-mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory)
+mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory)
 {
 	struct st_mysqlnd_object_factory_methods * factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND * ret;

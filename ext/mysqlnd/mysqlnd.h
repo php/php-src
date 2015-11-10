@@ -87,7 +87,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 #define mysqlnd_connect(conn, host, user, pass, pass_len, db, db_len, port, socket, mysql_flags, client_api_flags) \
 			mysqlnd_connection_connect((conn), (host), (user), (pass), (pass_len), (db), (db_len), (port), (socket), (mysql_flags), (client_api_flags))
 
-PHPAPI MYSQLND * mysqlnd_connection_init(unsigned int client_flags, zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory);
+PHPAPI MYSQLND * mysqlnd_connection_init(const size_t client_flags, const zend_bool persistent, struct st_mysqlnd_object_factory_methods * object_factory);
 PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 											const char * const host,
 											const char * const user,
@@ -185,7 +185,7 @@ PHPAPI void mysqlnd_free_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
 PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
-PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
+PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
 void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);

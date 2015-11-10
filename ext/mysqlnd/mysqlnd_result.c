@@ -928,7 +928,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 
 /* {{{ mysqlnd_res::use_result */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps)
+MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_bool ps)
 {
 	DBG_ENTER("mysqlnd_res::use_result");
 
@@ -1506,7 +1506,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_res::free_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, zend_bool implicit)
+MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool implicit)
 {
 	DBG_ENTER("mysqlnd_res::free_result");
 
