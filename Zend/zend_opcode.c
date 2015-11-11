@@ -707,6 +707,16 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		opline++;
 	}
 
+	if (op_array->live_range) {
+		uint32_t i;
+
+		for (i = 0; i < op_array->last_live_range; i++) {
+			op_array->live_range[i].var =
+				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |
+				(op_array->live_range[i].var & ZEND_LIVE_MASK);
+		}
+	}
+
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 	return 0;
 }
