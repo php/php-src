@@ -103,6 +103,11 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 			auth_packet->connect_attr = conn->options->connect_attr;
 		}
 
+		/* Only send CLIENT_SSL flag if the server supports it. Otherwise, we get bad handshake errors. */
+		if ((auth_packet->client_flags & CLIENT_SSL) && !(conn->server_capabilities & CLIENT_SSL)) {
+			auth_packet->client_flags &= ~CLIENT_SSL;
+		}
+
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			goto end;
 		}

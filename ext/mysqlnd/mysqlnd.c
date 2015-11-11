@@ -828,6 +828,12 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
 						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
 		goto err;
+	} else if ((mysql_flags & CLIENT_SSL) && !(greet_packet->server_capabilities & CLIENT_SSL)) {
+		DBG_ERR("SSL connection requested, but server does not support SSL.");
+		php_error_docref(NULL, E_WARNING, "SSL connection requested, but server does not support SSL.");
+		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+						 "SSL connection requested, but server does not support SSL");
+		goto err;
 	}
 
 	conn->thread_id			= greet_packet->thread_id;
