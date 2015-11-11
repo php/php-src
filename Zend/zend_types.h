@@ -410,6 +410,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_CONSTANT_UNQUALIFIED		0x010
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
+#define IS_LEXICAL_IMPLICIT			0x080
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
 #define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
 
