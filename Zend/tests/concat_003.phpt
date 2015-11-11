@@ -1,5 +1,5 @@
 --TEST--
-Implode many small strings should not slowdown allocations
+Concatenating many small strings should not slowdown allocations
 --INI--
 memory_limit=256m
 --FILE--
@@ -12,7 +12,7 @@ $time = microtime(TRUE);
 
 /* This might vary on Linux/Windows, so the worst case and also count in slow machines. */
 $t0_max = 0.1;
-$t1_max = 0.5;
+$t1_max = 0.4;
 
 $datas = [];
 for ($i = 0; $i < 220000; $i++)
