@@ -173,6 +173,7 @@ tests/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
+ext/*/configure.ac
 ext/*/ltmain.sh
 ext/*/libs.mk
 ext/*/build
@@ -213,6 +214,7 @@ ext/mssql/Makefile.global
 ext/mssql/acinclude.m4
 ext/mssql/config.sub
 ext/mssql/configure.in
+ext/mssql/configure.ac
 ext/mssql/ltmain.sh
 ext/mysql/weztest.sqlite
 ext/oci8/tests/*.tmp
