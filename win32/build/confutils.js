@@ -96,7 +96,7 @@ if (typeof(CWD) == "undefined") {
 	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.GIT-RULES"));
 }
 
-/* defaults; we pick up the precise versions from configure.in */
+/* defaults; we pick up the precise versions from configure.ac */
 var PHP_VERSION = 7;
 var PHP_MINOR_VERSION = 1;
 var PHP_RELEASE_VERSION = 0;
