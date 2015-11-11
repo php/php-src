@@ -39,7 +39,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
-	shiftlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t) * op_array->last);
+	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
 	i = new_count = shift = 0;
 	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
@@ -134,5 +134,5 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 			} while (*opline_num != (uint32_t)-1);
 		}
 	}
-	FREE_ALLOCA(shiftlist);
+	free_alloca(shiftlist, use_heap);
 }

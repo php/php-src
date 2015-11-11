@@ -517,22 +517,22 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		for (; opline < end ; opline++, offset++) {
 # if ZEND_USE_ABS_CONST_ADDR
-			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+			if (opline->op1_type == IS_CONST) {
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
 			}
-			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+			if (opline->op2_type == IS_CONST) {
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
 			}
 # endif
 # if ZEND_USE_ABS_JMP_ADDR
-			if (ZEND_DONE_PASS_TWO(op_array)) {
+			if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
 					case ZEND_JMP:
 					case ZEND_FAST_CALL:
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_DECLARE_ANON_INHERITED_CLASS:
-						ZEND_OP1(opline).jmp_addr = &new_opcodes[ZEND_OP1(opline).jmp_addr - op_array->opcodes];
+						opline->op1.jmp_addr = &new_opcodes[opline->op1.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_JMPZNZ:
 						/* relative extended_value don't have to be changed */
@@ -547,7 +547,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FE_RESET_R:
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSERT_CHECK:
-						ZEND_OP2(opline).jmp_addr = &new_opcodes[ZEND_OP2(opline).jmp_addr - op_array->opcodes];
+						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
@@ -747,19 +747,19 @@ static void zend_persist_class_entry(zval *zv)
 
 		zend_hash_persist(&ce->constants_table, zend_persist_zval);
 
-		if (ZEND_CE_FILENAME(ce)) {
+		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
-			zend_accel_memdup_string(ZEND_CE_FILENAME(ce));
+			zend_accel_memdup_string(ce->info.user.filename);
 		}
-		if (ZEND_CE_DOC_COMMENT(ce)) {
+		if (ce->info.user.doc_comment) {
 			if (ZCG(accel_directives).save_comments) {
-				zend_accel_store_string(ZEND_CE_DOC_COMMENT(ce));
+				zend_accel_store_string(ce->info.user.doc_comment);
 			} else {
-				if (!zend_shared_alloc_get_xlat_entry(ZEND_CE_DOC_COMMENT(ce))) {
-					zend_shared_alloc_register_xlat_entry(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT(ce));
-					zend_string_release(ZEND_CE_DOC_COMMENT(ce));
+				if (!zend_shared_alloc_get_xlat_entry(ce->info.user.doc_comment)) {
+					zend_shared_alloc_register_xlat_entry(ce->info.user.doc_comment, ce->info.user.doc_comment);
+					zend_string_release(ce->info.user.doc_comment);
 				}
-				ZEND_CE_DOC_COMMENT(ce) = NULL;
+				ce->info.user.doc_comment = NULL;
 			}
 		}
 		zend_hash_persist(&ce->properties_info, zend_persist_property_info);
@@ -906,7 +906,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	if (key && *key) {
 		*key = zend_accel_memdup(*key, key_length + 1);
 	}
-	zend_accel_store_string(script->full_path);
+	zend_accel_store_string(script->script.filename);
 
 #ifdef __SSE2__
 	/* Align to 64-byte boundary */
@@ -918,9 +918,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
-	zend_accel_persist_class_table(&script->class_table);
-	zend_hash_persist(&script->function_table, zend_persist_op_array);
-	zend_persist_op_array_ex(&script->main_op_array, script);
+	zend_accel_persist_class_table(&script->script.class_table);
+	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
+	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
 	return script;
 }

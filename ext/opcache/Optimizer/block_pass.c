@@ -39,7 +39,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	ALLOCA_FLAG(use_heap);
 
 	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = DO_ALLOCA(ZSTR_LEN(name) + 1);
+		lookup_name = do_alloca(ZSTR_LEN(name) + 1, use_heap);
 		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
 		zend_str_tolower(lookup_name, ZSTR_LEN(name));
 
@@ -50,7 +50,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 		} else {
 			retval = 0;
 		}
-		FREE_ALLOCA(lookup_name);
+		free_alloca(lookup_name, use_heap);
 	}
 
 	if (retval) {

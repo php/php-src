@@ -318,11 +318,11 @@ static void zend_persist_class_entry_calc(zval *zv)
 		}
 		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc);
 
-		if (ZEND_CE_FILENAME(ce)) {
-			ADD_STRING(ZEND_CE_FILENAME(ce));
+		if (ce->info.user.filename) {
+			ADD_STRING(ce->info.user.filename);
 		}
-		if (ZCG(accel_directives).save_comments && ZEND_CE_DOC_COMMENT(ce)) {
-			ADD_STRING(ZEND_CE_DOC_COMMENT(ce));
+		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
+			ADD_STRING(ce->info.user.doc_comment);
 		}
 
 		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
@@ -391,16 +391,16 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	if (key) {
 		ADD_DUP_SIZE(key, key_length + 1);
 	}
-	ADD_STRING(new_persistent_script->full_path);
+	ADD_STRING(new_persistent_script->script.filename);
 
 #ifdef __SSE2__
 	/* Align size to 64-byte boundary */
 	new_persistent_script->size = (new_persistent_script->size + 63) & ~63;
 #endif
 
-	zend_accel_persist_class_table_calc(&new_persistent_script->class_table);
-	zend_hash_persist_calc(&new_persistent_script->function_table, zend_persist_op_array_calc);
-	zend_persist_op_array_calc_ex(&new_persistent_script->main_op_array);
+	zend_accel_persist_class_table_calc(&new_persistent_script->script.class_table);
+	zend_hash_persist_calc(&new_persistent_script->script.function_table, zend_persist_op_array_calc);
+	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 
 #ifdef __SSE2__
 	/* Align size to 64-byte boundary */
