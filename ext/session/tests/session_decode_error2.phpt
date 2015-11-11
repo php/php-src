@@ -54,7 +54,7 @@ array(0) {
 
 -- Iteration 4 --
 
-Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s/session_decode_error2.php on line %d
+Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%esession_decode_error2.php on line %d
 bool(false)
 array(0) {
 }
@@ -294,6 +294,6 @@ bool(false)
 array(0) {
 }
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s/session_decode_error2.php on line %d
+Warning: session_destroy(): Trying to destroy uninitialized session in %s%esession_decode_error2.php on line %d
 bool(false)
 Done
