@@ -2549,16 +2549,12 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 {
 	int i;
 
-	i = EX(func)->op_array.last_live_range;
-	while (i) {
-		const zend_live_range *range;
-
-		i--;
-		range = &EX(func)->op_array.live_range[i];
-		if (range->end <= op_num) {
+	for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+		const zend_live_range *range = &EX(func)->op_array.live_range[i];
+		if (range->start > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		} else if (op_num >= range->start) {
+		} else if (op_num < range->end) {
 			if (!catch_op_num || catch_op_num >= range->end) {
 				zend_op *opline = &EX(func)->op_array.opcodes[range->end];
 				uint32_t var_num = opline->op1.var;

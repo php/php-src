@@ -2711,7 +2711,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 	ZEND_VM_JMP(opline);
 }
 
-ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, TRY_CATCH)
+ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, LIVE_RANGE)
 {
 	USE_OPLINE
 
@@ -2720,7 +2720,7 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, TRY_CATCH)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, TRY_CATCH)
+ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, LIVE_RANGE)
 {
 	zval *var;
 	USE_OPLINE
@@ -7231,7 +7231,6 @@ ZEND_VM_HANDLER(155, ZEND_BIND_TRAITS, ANY, ANY)
 ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 {
 	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
-	uint32_t last_try_catch = EX(func)->op_array.last_try_catch;
 	int i;
 	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	int in_finally = 0;
@@ -7243,14 +7242,14 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
 			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
 			/* exceptions thrown because of loop var destruction on return/break/...
-			 * are logically thrown at the end of the foreach loop,
-			 * so don't check the inner exception regions
+			 * are logically thrown at the end of the foreach loop, so adjust the
+			 * op_num.
 			 */
-			last_try_catch = exc_opline->op2.num;
+			op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
 		}
 	}
 
-	for (i = 0; i < last_try_catch; i++) {
+	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;

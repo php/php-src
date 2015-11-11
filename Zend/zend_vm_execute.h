@@ -1476,7 +1476,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_TRAITS_SPEC_HANDLER(ZEND_
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
-	uint32_t last_try_catch = EX(func)->op_array.last_try_catch;
 	int i;
 	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	int in_finally = 0;
@@ -1488,14 +1487,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
 			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
 			/* exceptions thrown because of loop var destruction on return/break/...
-			 * are logically thrown at the end of the foreach loop,
-			 * so don't check the inner exception regions
+			 * are logically thrown at the end of the foreach loop, so adjust the
+			 * op_num.
 			 */
-			last_try_catch = exc_opline->op2.num;
+			op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
 		}
 	}
 
-	for (i = 0; i < last_try_catch; i++) {
+	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;
