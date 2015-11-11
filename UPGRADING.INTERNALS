@@ -90,7 +90,7 @@ changes. See: https://wiki.php.net/phpng-upgrading
 
        The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
        they can use the implemenations available on the system, not the PHP one. With snprintf the
-       macros ZEND_INT_FMT and ZEND_UINT_FMT should be used.
+       macros ZEND_LONG_FMT and ZEND_ULONG_FMT should be used.
 
   h. HashTable API
 
