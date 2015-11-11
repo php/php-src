@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 7.0.1
 
-- Standard:
-  . Fixed bug #70249 (Segmentation fault while running PHPUnit tests on
-    phpBB 3.2-dev). (Laruence)
-
 - Streams/Socket
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
 
