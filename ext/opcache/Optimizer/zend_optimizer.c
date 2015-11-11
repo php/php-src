@@ -724,6 +724,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level)
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
 	ctx.constants = NULL;
+	ctx.optimization_level = optimization_level;
 
 	zend_optimize_op_array(&script->main_op_array, &ctx);
 
