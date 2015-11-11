@@ -3,8 +3,9 @@ dnl $Id$
 dnl config.m4 for mysqlnd driver
 
 PHP_ARG_ENABLE(mysqlnd, whether to enable mysqlnd,
-  [  --enable-mysqlnd        Enable mysqlnd explicitly, will be done implicitly
-                          when required by other extensions], no, yes)
+  [  --enable-mysqlnd=FILE Enable mysqlnd explicitly, will be done implicitly
+                           when required by other extensions. FILE is the path
+                           to mysql_config.], no, yes)
 
 PHP_ARG_ENABLE(mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
@@ -17,6 +18,8 @@ fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
+  MYSQL_CONFIG=$PHP_MYSQLND
+
   mysqlnd_ps_sources="mysqlnd_ps.c mysqlnd_ps_codec.c"
   mysqlnd_base_sources="mysqlnd.c mysqlnd_alloc.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
                    mysqlnd_loaddata.c mysqlnd_reverse_api.c mysqlnd_net.c \
@@ -44,6 +47,11 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
   PHP_INSTALL_HEADERS([ext/mysqlnd/])
+
+  if test -x "$MYSQL_CONFIG"; then
+    MYSQLND_SOCKET=`$MYSQL_CONFIG --socket`
+    AC_DEFINE_UNQUOTED(MYSQLND_UNIX_SOCK_ADDR, "$MYSQLND_SOCKET", [ ])
+  fi
 fi
 
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then

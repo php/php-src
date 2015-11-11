@@ -962,7 +962,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
 			DBG_INF_FMT("socket=%s", socket_or_pipe? socket_or_pipe:"n/a");
 			if (!socket_or_pipe) {
+#ifdef MYSQLND_UNIX_SOCK_ADDR
+				socket_or_pipe = MYSQLND_UNIX_SOCK_ADDR;
+#else
 				socket_or_pipe = "/tmp/mysql.sock";
+#endif
 			}
 			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe);
 			unix_socket = TRUE;
