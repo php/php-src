@@ -2426,10 +2426,6 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f > (zend_long)ZSTR_LEN(str)) {
-		RETURN_FALSE;
-	}
-
 	if ((f + l) > (zend_long)ZSTR_LEN(str)) {
 		l = ZSTR_LEN(str) - f;
 	}
