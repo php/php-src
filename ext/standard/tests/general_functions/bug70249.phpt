@@ -13,14 +13,14 @@ class Logger {
             register_shutdown_function([$this, 'flush'], true);
         });
     }
-    
+
     public function flush($final = false) {
         return 1;
     }
 }
 
 for ($i = 0; $i < 200; $i++) {
-    $a = new Logger();   
+    $a = new Logger();
 }
 ?>
 okey

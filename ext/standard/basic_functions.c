@@ -5011,16 +5011,9 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
-			zval *entry;
-			for (zend_hash_internal_pointer_reset(BG(user_shutdown_function_names));
-					zend_hash_has_more_elements(BG(user_shutdown_function_names)) == SUCCESS;
-					zend_hash_move_forward(BG(user_shutdown_function_names))) {
-				if ((entry = zend_hash_get_current_data(BG(user_shutdown_function_names))) == NULL) {
-					continue;
-				}
-				user_shutdown_function_call(entry);
-			}
-		} zend_end_try();
+			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
+		}
+		zend_end_try();
 		php_free_shutdown_functions();
 	}
 }
