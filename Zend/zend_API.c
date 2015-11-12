@@ -243,7 +243,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 	const char *class_name = get_active_class_name(&space);
 
 	size_t error_len = strlen(error), sanitized_error_len = error_len, k = 0, n = 0;
-	char *sanitized_error = emalloc(sizeof(char) * error_len);
+	char *sanitized_error = emalloc(sizeof(char) * error_len + 1);
 
 	while (k < error_len) {
 		sanitized_error[n] = error[k];
@@ -256,7 +256,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 
 		if (n == sanitized_error_len) {
 			sanitized_error_len += error_len - k;
-			sanitized_error = erealloc(sanitized_error, sanitized_error_len);
+			sanitized_error = erealloc(sanitized_error, sanitized_error_len + 1);
 		}
 	}
 	sanitized_error[n] = '\0';
