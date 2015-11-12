@@ -224,14 +224,14 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 
 
 /* PS */
-#define mysqlnd_stmt_init(conn)				((conn)->data)->m->stmt_init(((conn)->data))
-#define mysqlnd_stmt_store_result(stmt)		(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt))? PASS:FAIL))
-#define mysqlnd_stmt_get_result(stmt)		(stmt)->m->get_result((stmt))
-#define mysqlnd_stmt_more_results(stmt)		(stmt)->m->more_results((stmt))
-#define mysqlnd_stmt_next_result(stmt)		(stmt)->m->next_result((stmt))
-#define mysqlnd_stmt_data_seek(stmt, row)	(stmt)->m->seek_data((stmt), (row))
-#define mysqlnd_stmt_prepare(stmt, q, qlen)	(stmt)->m->prepare((stmt), (q), (qlen))
-#define mysqlnd_stmt_execute(stmt) 			(stmt)->m->execute((stmt))
+#define mysqlnd_stmt_init(conn)						((conn)->data)->m->stmt_init(((conn)->data))
+#define mysqlnd_stmt_store_result(stmt)				(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt))? PASS:FAIL))
+#define mysqlnd_stmt_get_result(stmt)				(stmt)->m->get_result((stmt))
+#define mysqlnd_stmt_more_results(stmt)				(stmt)->m->more_results((stmt))
+#define mysqlnd_stmt_next_result(stmt)				(stmt)->m->next_result((stmt))
+#define mysqlnd_stmt_data_seek(stmt, row)			(stmt)->m->seek_data((stmt), (row))
+#define mysqlnd_stmt_prepare(stmt, q, qlen)			(stmt)->m->prepare((stmt), (q), (qlen))
+#define mysqlnd_stmt_execute(stmt) 					(stmt)->m->execute((stmt))
 #define mysqlnd_stmt_send_long_data(stmt,p,d,l) 	(stmt)->m->send_long_data((stmt), (p), (d), (l))
 #define mysqlnd_stmt_alloc_param_bind(stmt)			(stmt)->m->alloc_parameter_bind((stmt))
 #define mysqlnd_stmt_free_param_bind(stmt,bind)		(stmt)->m->free_parameter_bind((stmt), (bind))
@@ -245,10 +245,10 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 #define mysqlnd_stmt_param_metadata(stmt)			(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)			(stmt)->m->get_result_metadata((stmt))
 
-#define	mysqlnd_stmt_free_result(stmt)		(stmt)->m->free_result((stmt))
-#define	mysqlnd_stmt_close(stmt, implicit)	(stmt)->m->dtor((stmt), (implicit))
-#define	mysqlnd_stmt_reset(stmt)			(stmt)->m->reset((stmt))
-#define	mysqlnd_stmt_flush(stmt)			(stmt)->m->flush((stmt))
+#define	mysqlnd_stmt_free_result(stmt)				(stmt)->m->free_result((stmt))
+#define	mysqlnd_stmt_close(stmt, implicit)			(stmt)->m->dtor((stmt), (implicit))
+#define	mysqlnd_stmt_reset(stmt)					(stmt)->m->reset((stmt))
+#define	mysqlnd_stmt_flush(stmt)					(stmt)->m->flush((stmt))
 
 
 #define mysqlnd_stmt_attr_get(stmt, attr, value)	(stmt)->m->get_attribute((stmt), (attr), (value))
@@ -261,8 +261,8 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 PHPAPI void			_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC);
 
 /* double check the class name to avoid naming conflicts when using these: */
-#define MYSQLND_METHOD(class, method) php_##class##_##method##_pub
-#define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
+#define MYSQLND_METHOD(class, method) 			mysqlnd_##class##_##method##_pub
+#define MYSQLND_METHOD_PRIVATE(class, method)	mysqlnd_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	char *			debug;	/* The actual string */

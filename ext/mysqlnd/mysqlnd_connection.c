@@ -830,54 +830,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 /* }}} */
 
 
-/* {{{ mysqlnd_connect */
-PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
-											const char * const host,
-											const char * const user,
-											const char * const passwd, unsigned int passwd_len,
-											const char * const db, unsigned int db_len,
-											unsigned int port,
-											const char * const sock_or_pipe,
-											unsigned int mysql_flags,
-											unsigned int client_api_flags
-						)
-{
-	enum_func_status ret = FAIL;
-	zend_bool self_alloced = FALSE;
-	MYSQLND_CSTRING hostname = { host, host? strlen(host) : 0 };
-	MYSQLND_CSTRING username = { user, user? strlen(user) : 0 };
-	MYSQLND_CSTRING password = { passwd, passwd_len };
-	MYSQLND_CSTRING database = { db, db_len };
-	MYSQLND_CSTRING socket_or_pipe = { sock_or_pipe, sock_or_pipe? strlen(sock_or_pipe) : 0 };
-
-	DBG_ENTER("mysqlnd_connect");
-	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host? host:"", user? user:"", db? db:"", port, mysql_flags);
-
-	if (!conn_handle) {
-		self_alloced = TRUE;
-		if (!(conn_handle = mysqlnd_connection_init(client_api_flags, FALSE, NULL))) {
-			/* OOM */
-			DBG_RETURN(NULL);
-		}
-	}
-
-	ret = conn_handle->m->connect(conn_handle, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
-
-	if (ret == FAIL) {
-		if (self_alloced) {
-			/*
-			  We have alloced, thus there are no references to this
-			  object - we are free to kill it!
-			*/
-			conn_handle->m->dtor(conn_handle);
-		}
-		DBG_RETURN(NULL);
-	}
-	DBG_RETURN(conn_handle);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn_data::query */
 /*
   If conn->error_info->error_no is not zero, then we had an error.
@@ -961,198 +913,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	}
 	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-#include "php_network.h"
-
-/* {{{ mysqlnd_stream_array_to_fd_set */
-MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
-{
-	int cnt = 0;
-	MYSQLND **p = conn_array, **p_p;
-	MYSQLND **ret = NULL;
-
-	while (*p) {
-		const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
-		if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
-			cnt++;
-		}
-		p++;
-	}
-	if (cnt) {
-		MYSQLND **ret_p = ret = ecalloc(cnt + 1, sizeof(MYSQLND *));
-		p_p = p = conn_array;
-		while (*p) {
-			const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
-			if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
-				*ret_p = *p;
-				*p = NULL;
-				ret_p++;
-			} else {
-				*p_p = *p;
-				p_p++;
-			}
-			p++;
-		}
-		*ret_p = NULL;
-	}
-	return ret;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stream_array_to_fd_set */
-static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
-{
-	php_socket_t this_fd;
-	php_stream *stream = NULL;
-	unsigned int cnt = 0;
-	MYSQLND **p = conn_array;
-	DBG_ENTER("mysqlnd_stream_array_to_fd_set");
-
-	while (*p) {
-		/* get the fd.
-		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
-		 * when casting.  It is only used here so that the buffered data warning
-		 * is not displayed.
-		 * */
-		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
-		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
-
-			PHP_SAFE_FD_SET(this_fd, fds);
-
-			if (this_fd > *max_fd) {
-				*max_fd = this_fd;
-			}
-			cnt++;
-		}
-		p++;
-	}
-	DBG_RETURN(cnt ? 1 : 0);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stream_array_from_fd_set */
-static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
-{
-	php_socket_t this_fd;
-	php_stream *stream = NULL;
-	int ret = 0;
-	zend_bool disproportion = FALSE;
-	MYSQLND **fwd = conn_array, **bckwd = conn_array;
-	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
-
-	while (*fwd) {
-		stream = (*fwd)->data->vio->data->m.get_stream((*fwd)->data->vio);
-		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
-			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
-				if (disproportion) {
-					*bckwd = *fwd;
-				}
-				bckwd++;
-				fwd++;
-				ret++;
-				continue;
-			}
-		}
-		disproportion = TRUE;
-		fwd++;
-	}
-	*bckwd = NULL;/* NULL-terminate the list */
-
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-#ifndef PHP_WIN32
-#define php_select(m, r, w, e, t)	select(m, r, w, e, t)
-#else
-#include "win32/select.h"
-#endif
-
-
-/* {{{ mysqlnd_poll */
-PHPAPI enum_func_status
-mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
-{
-	struct timeval	tv;
-	struct timeval *tv_p = NULL;
-	fd_set			rfds, wfds, efds;
-	php_socket_t	max_fd = 0;
-	int				retval, sets = 0;
-	int				set_count, max_set_count = 0;
-
-	DBG_ENTER("_mysqlnd_poll");
-	if (sec < 0 || usec < 0) {
-		php_error_docref(NULL, E_WARNING, "Negative values passed for sec and/or usec");
-		DBG_RETURN(FAIL);
-	}
-
-	FD_ZERO(&rfds);
-	FD_ZERO(&wfds);
-	FD_ZERO(&efds);
-
-	if (r_array != NULL) {
-		*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array);
-		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd);
-		if (set_count > max_set_count) {
-			max_set_count = set_count;
-		}
-		sets += set_count;
-	}
-
-	if (e_array != NULL) {
-		set_count = mysqlnd_stream_array_to_fd_set(e_array, &efds, &max_fd);
-		if (set_count > max_set_count) {
-			max_set_count = set_count;
-		}
-		sets += set_count;
-	}
-
-	if (!sets) {
-		php_error_docref(NULL, E_WARNING, *dont_poll ? "All arrays passed are clear":"No stream arrays were passed");
-		DBG_ERR_FMT(*dont_poll ? "All arrays passed are clear":"No stream arrays were passed");
-		DBG_RETURN(FAIL);
-	}
-
-	PHP_SAFE_MAX_FD(max_fd, max_set_count);
-
-	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
-	if (usec > 999999) {
-		tv.tv_sec = sec + (usec / 1000000);
-		tv.tv_usec = usec % 1000000;
-	} else {
-		tv.tv_sec = sec;
-		tv.tv_usec = usec;
-	}
-
-	tv_p = &tv;
-
-	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
-
-	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
-						errno, strerror(errno), max_fd);
-		DBG_RETURN(FAIL);
-	}
-
-	if (r_array != NULL) {
-		mysqlnd_stream_array_from_fd_set(r_array, &rfds);
-	}
-	if (e_array != NULL) {
-		mysqlnd_stream_array_from_fd_set(e_array, &efds);
-	}
-
-	*desc_num = retval;
-	DBG_RETURN(PASS);
 }
 /* }}} */
 
@@ -2209,7 +1969,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 /* {{{ mysqlnd_conn_data::get_connection_stats */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, get_connection_stats)(const MYSQLND_CONN_DATA * const conn,
-												   zval * return_value ZEND_FILE_LINE_DC)
+														zval * return_value ZEND_FILE_LINE_DC)
 {
 	DBG_ENTER("mysqlnd_conn_data::get_connection_stats");
 	mysqlnd_fill_stats_hash(conn->stats, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
@@ -2702,7 +2462,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn_handle, const enum_connection
 		*/
 		ret = conn->m->send_close(conn);
 
-		/* do it after free_reference/dtor and we might crash */
+		/* If we do it after free_reference/dtor then we might crash */
 		conn->m->local_tx_end(conn, this_func, ret);
 
 		conn_handle->m->dtor(conn_handle);
@@ -2718,6 +2478,246 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor),
 	MYSQLND_METHOD(mysqlnd_conn, close)
 MYSQLND_CLASS_METHODS_END;
+
+
+#include "php_network.h"
+
+/* {{{ mysqlnd_stream_array_to_fd_set */
+MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
+{
+	int cnt = 0;
+	MYSQLND **p = conn_array, **p_p;
+	MYSQLND **ret = NULL;
+
+	while (*p) {
+		const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
+		if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
+			cnt++;
+		}
+		p++;
+	}
+	if (cnt) {
+		MYSQLND **ret_p = ret = ecalloc(cnt + 1, sizeof(MYSQLND *));
+		p_p = p = conn_array;
+		while (*p) {
+			const enum mysqlnd_connection_state conn_state = GET_CONNECTION_STATE(&((*p)->data->state));
+			if (conn_state <= CONN_READY || conn_state == CONN_QUIT_SENT) {
+				*ret_p = *p;
+				*p = NULL;
+				ret_p++;
+			} else {
+				*p_p = *p;
+				p_p++;
+			}
+			p++;
+		}
+		*ret_p = NULL;
+	}
+	return ret;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stream_array_to_fd_set */
+static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
+{
+	php_socket_t this_fd;
+	php_stream *stream = NULL;
+	unsigned int cnt = 0;
+	MYSQLND **p = conn_array;
+	DBG_ENTER("mysqlnd_stream_array_to_fd_set");
+
+	while (*p) {
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 * */
+		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
+		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
+		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
+
+			PHP_SAFE_FD_SET(this_fd, fds);
+
+			if (this_fd > *max_fd) {
+				*max_fd = this_fd;
+			}
+			cnt++;
+		}
+		p++;
+	}
+	DBG_RETURN(cnt ? 1 : 0);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stream_array_from_fd_set */
+static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
+{
+	php_socket_t this_fd;
+	php_stream *stream = NULL;
+	int ret = 0;
+	zend_bool disproportion = FALSE;
+	MYSQLND **fwd = conn_array, **bckwd = conn_array;
+	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
+
+	while (*fwd) {
+		stream = (*fwd)->data->vio->data->m.get_stream((*fwd)->data->vio);
+		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
+		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
+			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
+				if (disproportion) {
+					*bckwd = *fwd;
+				}
+				bckwd++;
+				fwd++;
+				ret++;
+				continue;
+			}
+		}
+		disproportion = TRUE;
+		fwd++;
+	}
+	*bckwd = NULL;/* NULL-terminate the list */
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+#ifndef PHP_WIN32
+#define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+#else
+#include "win32/select.h"
+#endif
+
+
+/* {{{ mysqlnd_poll */
+PHPAPI enum_func_status
+mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num)
+{
+	struct timeval	tv;
+	struct timeval *tv_p = NULL;
+	fd_set			rfds, wfds, efds;
+	php_socket_t	max_fd = 0;
+	int				retval, sets = 0;
+	int				set_count, max_set_count = 0;
+
+	DBG_ENTER("_mysqlnd_poll");
+	if (sec < 0 || usec < 0) {
+		php_error_docref(NULL, E_WARNING, "Negative values passed for sec and/or usec");
+		DBG_RETURN(FAIL);
+	}
+
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+
+	if (r_array != NULL) {
+		*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array);
+		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (e_array != NULL) {
+		set_count = mysqlnd_stream_array_to_fd_set(e_array, &efds, &max_fd);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (!sets) {
+		php_error_docref(NULL, E_WARNING, *dont_poll ? "All arrays passed are clear":"No stream arrays were passed");
+		DBG_ERR_FMT(*dont_poll ? "All arrays passed are clear":"No stream arrays were passed");
+		DBG_RETURN(FAIL);
+	}
+
+	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+
+	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
+	if (usec > 999999) {
+		tv.tv_sec = sec + (usec / 1000000);
+		tv.tv_usec = usec % 1000000;
+	} else {
+		tv.tv_sec = sec;
+		tv.tv_usec = usec;
+	}
+
+	tv_p = &tv;
+
+	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
+
+	if (retval == -1) {
+		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+						errno, strerror(errno), max_fd);
+		DBG_RETURN(FAIL);
+	}
+
+	if (r_array != NULL) {
+		mysqlnd_stream_array_from_fd_set(r_array, &rfds);
+	}
+	if (e_array != NULL) {
+		mysqlnd_stream_array_from_fd_set(e_array, &efds);
+	}
+
+	*desc_num = retval;
+	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_connect */
+PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn_handle,
+											const char * const host,
+											const char * const user,
+											const char * const passwd, unsigned int passwd_len,
+											const char * const db, unsigned int db_len,
+											unsigned int port,
+											const char * const sock_or_pipe,
+											unsigned int mysql_flags,
+											unsigned int client_api_flags
+						)
+{
+	enum_func_status ret = FAIL;
+	zend_bool self_alloced = FALSE;
+	MYSQLND_CSTRING hostname = { host, host? strlen(host) : 0 };
+	MYSQLND_CSTRING username = { user, user? strlen(user) : 0 };
+	MYSQLND_CSTRING password = { passwd, passwd_len };
+	MYSQLND_CSTRING database = { db, db_len };
+	MYSQLND_CSTRING socket_or_pipe = { sock_or_pipe, sock_or_pipe? strlen(sock_or_pipe) : 0 };
+
+	DBG_ENTER("mysqlnd_connect");
+	DBG_INF_FMT("host=%s user=%s db=%s port=%u flags=%u", host? host:"", user? user:"", db? db:"", port, mysql_flags);
+
+	if (!conn_handle) {
+		self_alloced = TRUE;
+		if (!(conn_handle = mysqlnd_connection_init(client_api_flags, FALSE, NULL))) {
+			/* OOM */
+			DBG_RETURN(NULL);
+		}
+	}
+
+	ret = conn_handle->m->connect(conn_handle, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
+
+	if (ret == FAIL) {
+		if (self_alloced) {
+			/*
+			  We have alloced, thus there are no references to this
+			  object - we are free to kill it!
+			*/
+			conn_handle->m->dtor(conn_handle);
+		}
+		DBG_RETURN(NULL);
+	}
+	DBG_RETURN(conn_handle);
+}
+/* }}} */
 
 
 /* {{{ mysqlnd_connection_init */
