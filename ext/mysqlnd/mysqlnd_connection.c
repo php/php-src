@@ -99,7 +99,7 @@ mysqlnd_error_list_pdtor(void * pDest)
 static void
 MYSQLND_METHOD(mysqlnd_error_info, reset)(MYSQLND_ERROR_INFO * const info)
 {
-	DBG_ENTER("mysqlnd_error_info::reset")
+	DBG_ENTER("mysqlnd_error_info::reset");
 
 	info->error_no = 0;
 	info->error[0] = '\0';
@@ -120,7 +120,7 @@ MYSQLND_METHOD(mysqlnd_error_info, set_client_error)(MYSQLND_ERROR_INFO * const 
 													 const char * const sqlstate,
 													 const char * const error)
 {
-	DBG_ENTER("mysqlnd_error_info::set_client_error")
+	DBG_ENTER("mysqlnd_error_info::set_client_error");
 	if (err_no) {
 		info->error_no = err_no;
 		strlcpy(info->sqlstate, sqlstate, sizeof(info->sqlstate));
@@ -155,7 +155,7 @@ MYSQLND_CLASS_METHODS_END;
 enum_func_status
 mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 {
-	DBG_ENTER("mysqlnd_error_info_init")
+	DBG_ENTER("mysqlnd_error_info_init");
 	info->m = mysqlnd_error_info_get_methods();
 	info->m->reset(info);
 
@@ -175,7 +175,7 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, zend_bool persistent)
 static enum mysqlnd_connection_state
 MYSQLND_METHOD(mysqlnd_connection_state, get)(const struct st_mysqlnd_connection_state * const state_struct)
 {
-	DBG_ENTER("mysqlnd_connection_state::get")
+	DBG_ENTER("mysqlnd_connection_state::get");
 	DBG_INF_FMT("State=%u", state_struct->state);
 	DBG_RETURN(state_struct->state);
 }
@@ -186,7 +186,7 @@ MYSQLND_METHOD(mysqlnd_connection_state, get)(const struct st_mysqlnd_connection
 static void
 MYSQLND_METHOD(mysqlnd_connection_state, set)(struct st_mysqlnd_connection_state * const state_struct, const enum mysqlnd_connection_state state)
 {
-	DBG_ENTER("mysqlnd_connection_state::set")
+	DBG_ENTER("mysqlnd_connection_state::set");
 	DBG_INF_FMT("New state=%u", state);
 	state_struct->state = state;
 	DBG_VOID_RETURN;
@@ -206,7 +206,7 @@ MYSQLND_CLASS_METHODS_END;
 void
 mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state)
 {
-	DBG_ENTER("mysqlnd_error_info_init")
+	DBG_ENTER("mysqlnd_error_info_init");
 	state->m = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_connection_state);
 	state->state = CONN_ALLOCED;
 	DBG_VOID_RETURN;
