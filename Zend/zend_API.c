@@ -2989,28 +2989,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	} else {
 		/* We already checked for plain function before. */
 		if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
-			size_t callable_name_len = Z_STRLEN_P(callable), sanitized_callable_name_len = Z_STRLEN_P(callable), k = 0, n = 0;
-			char *callable_name = Z_STRVAL_P(callable), *sanitized_callable_name = emalloc(sizeof(char) * callable_name_len);
-
-			while (k < callable_name_len) {
-				sanitized_callable_name[n] = callable_name[k];
-				if ('%' == callable_name[k]) {
-					n++;
-					sanitized_callable_name[n] = '%';
-				}
-				k++;
-				n++;
-
-				if (n == sanitized_callable_name_len) {
-					sanitized_callable_name_len += callable_name_len - k;
-					sanitized_callable_name = erealloc(sanitized_callable_name, sanitized_callable_name_len);
-				}
-			}
-			sanitized_callable_name[n] = '\0';
-
-			zend_spprintf(error, 0, "function '%s' not found or invalid function name", sanitized_callable_name);
-
-			efree(sanitized_callable_name);
+			zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable));
 		}
 		return 0;
 	}
