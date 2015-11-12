@@ -1976,7 +1976,7 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 		!zend_is_def_range(opline - 1, opline->op2_type, opline->op2.var)) {
 
 		if (opline->opcode == ZEND_OP_DATA) {
-			if (!zend_is_def_range(opline - 2, opline->op1_type, opline->op1.var)) {
+			if (!zend_is_def_range(opline - 2, opline->op2_type, opline->op2.var)) {
 				zend_find_live_range(opline-1, opline->op2_type, opline->op2.var);
 			}
 		} else if (opline->opcode == ZEND_FETCH_STATIC_PROP_R ||
