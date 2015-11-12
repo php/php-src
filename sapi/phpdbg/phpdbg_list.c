@@ -373,7 +373,7 @@ void phpdbg_free_file_source(zval *zv) {
 		efree(data->buf);
 	}
 
-	destroy_op_array(&data->op_array);
+	op_array_destroy(&data->op_array);
 
 	efree(data);
 }

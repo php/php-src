@@ -49,7 +49,7 @@ static void op_array_alloc_ops(zend_op_array *op_array, uint32_t size)
 	op_array->opcodes = erealloc(op_array->opcodes, size * sizeof(zend_op));
 }
 
-void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
+void op_array_init(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -107,7 +107,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 ZEND_API void destroy_zend_function(zend_function *function)
 {
 	if (function->type == ZEND_USER_FUNCTION) {
-		destroy_op_array(&function->op_array);
+		op_array_destroy(&function->op_array);
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
@@ -121,7 +121,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		ZEND_ASSERT(function->common.function_name);
-		destroy_op_array(&function->op_array);
+		op_array_destroy(&function->op_array);
 		/* op_arrays are allocated on arena, so we don't have to free them */
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
@@ -338,7 +338,7 @@ void zend_class_add_ref(zval *zv)
 	ce->refcount++;
 }
 
-ZEND_API void destroy_op_array(zend_op_array *op_array)
+ZEND_API void op_array_destroy(zend_op_array *op_array)
 {
 	zval *literal = op_array->literals;
 	zval *end;

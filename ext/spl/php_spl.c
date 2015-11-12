@@ -289,7 +289,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 			ZVAL_UNDEF(&result);
 			zend_execute(new_op_array, &result);
 
-			destroy_op_array(new_op_array);
+			op_array_destroy(new_op_array);
 			efree(new_op_array);
 			if (!EG(exception)) {
 				zval_ptr_dtor(&result);

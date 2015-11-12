@@ -1124,7 +1124,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 			ZVAL_UNDEF(&local_retval);
 			zend_execute(new_op_array, &local_retval);
 		} zend_catch {
-			destroy_op_array(new_op_array);
+			op_array_destroy(new_op_array);
 			efree_size(new_op_array, sizeof(zend_op_array));
 			zend_bailout();
 		} zend_end_try();
@@ -1142,7 +1142,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 		}
 
 		EG(no_extensions)=0;
-		destroy_op_array(new_op_array);
+		op_array_destroy(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		retval = SUCCESS;
 	} else {

@@ -2468,7 +2468,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	}
 	if (EXPECTED((ZEND_CALL_KIND_EX(call_info) & ZEND_CALL_TOP) == 0)) {
 		zend_detach_symbol_table(execute_data);
-		destroy_op_array(&EX(func)->op_array);
+		op_array_destroy(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
@@ -5572,7 +5572,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 			zend_vm_stack_free_call_frame(call);
 		}
 
-		destroy_op_array(new_op_array);
+		op_array_destroy(new_op_array);
 		efree_size(new_op_array, sizeof(zend_op_array));
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);

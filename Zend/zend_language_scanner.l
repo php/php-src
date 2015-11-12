@@ -594,7 +594,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_oparray_context original_oparray_context;
 			zend_op_array *original_active_op_array = CG(active_op_array);
 			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+			op_array_init(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 			CG(active_op_array) = op_array;
 			ZVAL_LONG(&retval_zv, 1);
 
@@ -760,7 +760,7 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 			zend_oparray_context original_oparray_context;
 			zend_op_array *original_active_op_array = CG(active_op_array);
 			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
+			op_array_init(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
 			CG(active_op_array) = op_array;
 
 			if (zend_ast_process) {

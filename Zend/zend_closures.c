@@ -354,7 +354,7 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 			efree(closure->func.op_array.run_time_cache);
 			closure->func.op_array.run_time_cache = NULL;
 		}
-		destroy_op_array(&closure->func.op_array);
+		op_array_destroy(&closure->func.op_array);
 	}
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
