@@ -1157,7 +1157,9 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 0);
 				}
 
-				zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				if (zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL) != SUCCESS) {
+					zend_hash_next_index_insert(ctx.sdl->bindings, &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				}
 				trav= trav->next;
 			}
 
