@@ -1,5 +1,5 @@
 --TEST--
-Bug #70895 null ptr deref and segfault with crafted calable
+Bug #70895 null ptr deref and segfault with crafted callable
 --FILE--
 <?php
 
