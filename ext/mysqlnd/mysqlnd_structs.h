@@ -606,7 +606,7 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_field_direct)(MYSQLND_RES
 typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * const result);
 
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn);
-typedef zend_ulong *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result);
+typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result);
 typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_MEMORY_POOL_CHUNK *** row_buffers, zend_bool binary_protocol);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
@@ -656,10 +656,10 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 };
 
 
-typedef uint64_t			(*func_mysqlnd_result_unbuffered__num_rows)(const MYSQLND_RES_UNBUFFERED * const result);
-typedef zend_ulong *		(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result);
-typedef void				(*func_mysqlnd_result_unbuffered__free_last_data)(MYSQLND_RES_UNBUFFERED * result, MYSQLND_STATS * const global_stats);
-typedef void				(*func_mysqlnd_result_unbuffered__free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats);
+typedef uint64_t		(*func_mysqlnd_result_unbuffered__num_rows)(const MYSQLND_RES_UNBUFFERED * const result);
+typedef const size_t *	(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result);
+typedef void			(*func_mysqlnd_result_unbuffered__free_last_data)(MYSQLND_RES_UNBUFFERED * result, MYSQLND_STATS * const global_stats);
+typedef void			(*func_mysqlnd_result_unbuffered__free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered)
 {
@@ -674,7 +674,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered)
 typedef uint64_t			(*func_mysqlnd_result_buffered__num_rows)(const MYSQLND_RES_BUFFERED * const result);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta,
 																						MYSQLND_STATS * stats, zend_bool int_and_float_native);
-typedef zend_ulong *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES_BUFFERED * const result);
+typedef const size_t *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES_BUFFERED * const result);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row);
 typedef void				(*func_mysqlnd_result_buffered__free_result)(MYSQLND_RES_BUFFERED * const result);
 
@@ -1168,7 +1168,7 @@ struct st_mysqlnd_result_metadata
 	uint64_t			initialized_rows;			\
 													\
 	/*  Column lengths of current row - both buffered and unbuffered. For buffered results it duplicates the data found in **data */ \
-	zend_ulong		*lengths;					\
+	size_t				*lengths;					\
 													\
 	MYSQLND_MEMORY_POOL	*result_set_memory_pool;	\
 													\
@@ -1223,7 +1223,7 @@ struct st_mysqlnd_unbuffered_result
 	  Column lengths of current row - both buffered and unbuffered.
 	  For buffered results it duplicates the data found in **data
 	*/
-	zend_ulong		*lengths;
+	size_t				*lengths;
 
 	MYSQLND_MEMORY_POOL	*result_set_memory_pool;
 
