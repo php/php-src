@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70895 (null ptr deref and segfault with crafted calable).
-    (Anatol)
+    (Anatol, Laruence)
 
 - Streams/Socket
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)

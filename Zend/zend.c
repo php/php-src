@@ -1346,7 +1346,7 @@ ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, cons
 	if (throw_exception) {
 		zend_throw_exception(zend_ce_type_error, message, 0);
 	} else {
-		zend_error(E_WARNING, message);
+		zend_error(E_WARNING, "%s", message);
 	}
 	efree(message);
 
