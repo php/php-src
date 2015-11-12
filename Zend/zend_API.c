@@ -242,37 +242,17 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
-	size_t error_len = strlen(error), sanitized_error_len = error_len, k = 0, n = 0;
-	char *sanitized_error = emalloc(sizeof(char) * error_len);
-
-	while (k < error_len) {
-		sanitized_error[n] = error[k];
-		if ('%' == error[k]) {
-			n++;
-			sanitized_error[n] = '%';
-		}
-		k++;
-		n++;
-
-		if (n == sanitized_error_len) {
-			sanitized_error_len += error_len - k;
-			sanitized_error = erealloc(sanitized_error, sanitized_error_len);
-		}
-	}
-	sanitized_error[n] = '\0';
-
 	if (severity == E_WARNING) {
 		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, sanitized_error);
+			class_name, space, get_active_function_name(), num, error);
 	} else if (severity == E_ERROR) {
 		zend_throw_error(zend_ce_type_error, "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, sanitized_error);
+			class_name, space, get_active_function_name(), num, error);
 	} else {
 		zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, sanitized_error);
+			class_name, space, get_active_function_name(), num, error);
 	}
 	efree(error);
-	efree(sanitized_error);
 }
 /* }}} */
 
@@ -3009,7 +2989,28 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	} else {
 		/* We already checked for plain function before. */
 		if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
-			zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable));
+			size_t callable_name_len = Z_STRLEN_P(callable), sanitized_callable_name_len = Z_STRLEN_P(callable), k = 0, n = 0;
+			char *callable_name = Z_STRVAL_P(callable), *sanitized_callable_name = emalloc(sizeof(char) * callable_name_len);
+
+			while (k < callable_name_len) {
+				sanitized_callable_name[n] = callable_name[k];
+				if ('%' == callable_name[k]) {
+					n++;
+					sanitized_callable_name[n] = '%';
+				}
+				k++;
+				n++;
+
+				if (n == sanitized_callable_name_len) {
+					sanitized_callable_name_len += callable_name_len - k;
+					sanitized_callable_name = erealloc(sanitized_callable_name, sanitized_callable_name_len);
+				}
+			}
+			sanitized_callable_name[n] = '\0';
+
+			zend_spprintf(error, 0, "function '%s' not found or invalid function name", sanitized_callable_name);
+
+			efree(sanitized_callable_name);
 		}
 		return 0;
 	}
