@@ -2068,7 +2068,7 @@ static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info)
 }
 /* }}} */
 
-void zend_emit_final_return(zval *zv) /* {{{ */
+void zend_emit_final_return(int return_one) /* {{{ */
 {
 	znode zn;
 	zend_op *ret;
@@ -2079,8 +2079,8 @@ void zend_emit_final_return(zval *zv) /* {{{ */
 	}
 
 	zn.op_type = IS_CONST;
-	if (zv) {
-		ZVAL_COPY_VALUE(&zn.u.constant, zv);
+	if (return_one) {
+		ZVAL_LONG(&zn.u.constant, 1);
 	} else {
 		ZVAL_NULL(&zn.u.constant);
 	}
@@ -4971,7 +4971,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	CG(zend_lineno) = decl->end_lineno;
 
 	zend_do_extended_info();
-	zend_emit_final_return(NULL);
+	zend_emit_final_return(0);
 
 	pass_two(CG(active_op_array));
 	zend_oparray_context_end(&orig_oparray_context);
