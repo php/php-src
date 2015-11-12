@@ -242,17 +242,37 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
 
+	size_t error_len = strlen(error), sanitized_error_len = error_len, k = 0, n = 0;
+	char *sanitized_error = emalloc(sizeof(char) * error_len);
+
+	while (k < error_len) {
+		sanitized_error[n] = error[k];
+		if ('%' == error[k]) {
+			n++;
+			sanitized_error[n] = '%';
+		}
+		k++;
+		n++;
+
+		if (n == sanitized_error_len) {
+			sanitized_error_len += error_len - k;
+			sanitized_error = erealloc(sanitized_error, sanitized_error_len);
+		}
+	}
+	sanitized_error[n] = '\0';
+
 	if (severity == E_WARNING) {
 		zend_internal_type_error(ZEND_ARG_USES_STRICT_TYPES(), "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, error);
+			class_name, space, get_active_function_name(), num, sanitized_error);
 	} else if (severity == E_ERROR) {
 		zend_throw_error(zend_ce_type_error, "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, error);
+			class_name, space, get_active_function_name(), num, sanitized_error);
 	} else {
 		zend_error(severity, "%s%s%s() expects parameter %d to be a valid callback, %s",
-			class_name, space, get_active_function_name(), num, error);
+			class_name, space, get_active_function_name(), num, sanitized_error);
 	}
 	efree(error);
+	efree(sanitized_error);
 }
 /* }}} */
 
