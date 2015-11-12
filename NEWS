@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #70898, #70895 (null ptr deref and segfault with crafted callable).
     (Anatol, Laruence)
 
+- SOAP:
+  . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
+
 - Streams/Socket
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
 
