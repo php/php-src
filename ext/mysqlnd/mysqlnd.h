@@ -199,7 +199,6 @@ void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 #define mysqlnd_savepoint(conn, name)		((conn)->data)->m->tx_savepoint((conn)->data, (name))
 #define mysqlnd_release_savepoint(conn, name) ((conn)->data)->m->tx_savepoint_release((conn)->data, (name))
 #define mysqlnd_list_dbs(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW DATABASES LIKE %s":"SHOW DATABASES", (wild), NULL)
-#define mysqlnd_list_fields(conn, tab,wild)	((conn)->data)->m->list_fields((conn)->data, (tab), (wild))
 #define mysqlnd_list_processes(conn)		((conn)->data)->m->list_method((conn)->data, "SHOW PROCESSLIST", NULL, NULL)
 #define mysqlnd_list_tables(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW TABLES LIKE %s":"SHOW TABLES", (wild), NULL)
 #define mysqlnd_dump_debug_info(conn)		((conn)->data)->m->server_dump_debug_information((conn)->data)

@@ -91,7 +91,7 @@ typedef struct st_mysqlnd_field
 	const char  *org_table;		/* Org table name, if table was an alias */
 	const char  *db;			/* Database for table */
 	const char  *catalog;		/* Catalog for table */
-	char  *def;                 /* Default value (set by mysql_list_fields) */
+	char  *def;                 /* Default value */
 	zend_ulong length;		/* Width of column (create length) */
 	zend_ulong max_length;	/* Max width for selected set */
 	unsigned int name_length;
@@ -466,7 +466,7 @@ typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQL
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const MYSQLND_CSTRING * const scheme, const MYSQLND_CSTRING * const username, const MYSQLND_CSTRING * const password, const MYSQLND_CSTRING * const database, const unsigned int mysql_flags);
 typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, enum_mysqlnd_client_option option, const char * const key, const char * const value);
+typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, const enum_mysqlnd_client_option option, const char * const key, const char * const value);
 
 
 typedef size_t				(*func_mysqlnd_conn_data__negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const size_t flags);

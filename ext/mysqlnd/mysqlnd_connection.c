@@ -1398,6 +1398,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, info)(const MYSQLND_CONN_DATA * const conn)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_get_client_info */
 PHPAPI const char * mysqlnd_get_client_info()
 {
@@ -1821,7 +1822,7 @@ end:
 /* {{{ mysqlnd_conn_data::set_client_option_2d */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
-														enum_mysqlnd_client_option option,
+														const enum_mysqlnd_client_option option,
 														const char * const key,
 														const char * const value
 														)
@@ -2481,9 +2482,10 @@ MYSQLND_CLASS_METHODS_END;
 #include "php_network.h"
 
 /* {{{ mysqlnd_stream_array_to_fd_set */
-MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
+MYSQLND **
+mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 {
-	int cnt = 0;
+	unsigned int cnt = 0;
 	MYSQLND **p = conn_array, **p_p;
 	MYSQLND **ret = NULL;
 
@@ -2517,7 +2519,8 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array)
 
 
 /* {{{ mysqlnd_stream_array_to_fd_set */
-static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
+static unsigned int
+mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd)
 {
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
@@ -2533,17 +2536,19 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * */
 		stream = (*p)->data->vio->data->m.get_stream((*p)->data->vio);
 		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
+		if (stream != NULL &&
+			SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) &&
+			ZEND_VALID_SOCKET(this_fd))
+		{
 
 			PHP_SAFE_FD_SET(this_fd, fds);
 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
 			}
-			cnt++;
+			++cnt;
 		}
-		p++;
+		++p;
 	}
 	DBG_RETURN(cnt ? 1 : 0);
 }
@@ -2551,11 +2556,12 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 
 
 /* {{{ mysqlnd_stream_array_from_fd_set */
-static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
+static unsigned int
+mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 {
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
-	int ret = 0;
+	unsigned int ret = 0;
 	zend_bool disproportion = FALSE;
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
@@ -2569,14 +2575,14 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 				if (disproportion) {
 					*bckwd = *fwd;
 				}
-				bckwd++;
-				fwd++;
-				ret++;
+				++bckwd;
+				++fwd;
+				++ret;
 				continue;
 			}
 		}
 		disproportion = TRUE;
-		fwd++;
+		++fwd;
 	}
 	*bckwd = NULL;/* NULL-terminate the list */
 
