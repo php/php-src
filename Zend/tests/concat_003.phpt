@@ -1,5 +1,7 @@
 --TEST--
 Concatenating many small strings should not slowdown allocations
+--SKIPIF--
+<?php if (PHP_DEBUG) { die ("skip debug version is slow"); } ?>
 --INI--
 memory_limit=256m
 --FILE--
