@@ -6,12 +6,12 @@ BEGIN {
 	SUBSEP=":";
 }
 
-function get_deps(module_name, module_dir,       depline, cmd)
+function get_deps(module_name,       depline, cmd)
 {
 	# this could probably be made *much* better
 	RS=orig_rs;
 	FS="[(,) \t]+"
-	cmd = "grep PHP_ADD_EXTENSION_DEP " module_dir "/config*.m4"
+	cmd = "grep PHP_ADD_EXTENSION_DEP ext/" module_name "/config*.m4"
 	while (cmd | getline) {
 #		printf("GOT: %s,%s,%s,%s,%s\n", $1, $2, $3, $4, $5);
 		if (!length($5)) {
@@ -63,16 +63,14 @@ function count(arr,       n, i)
 	return n;
 }
 
-/^[a-zA-Z0-9_;-]+/ {
-	split($1, mod, ";");
-
+/^[a-zA-Z0-9_-]+/ {
 	# mini hack for pedantic awk
-	gsub("[^a-zA-Z0-9_-]", "", mod[1])
+	gsub("[^a-zA-Z0-9_-]", "", $1)
 	# add each item to array
-	mods[mod_count++] = mod[1]
+	mods[mod_count++] = $1
 
 	# see if it has any module deps
-	get_deps(mod[1], mod[2]);
+	get_deps($1);
 }
 END {
 	# order it correctly

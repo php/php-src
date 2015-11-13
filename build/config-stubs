@@ -4,7 +4,5 @@
 
 dir=$1; shift
 for stubfile in $dir/*/config0.m4 $dir/*/config.m4 $dir/*/config9.m4; do
-    echo "config_m4_src=$stubfile
-config_m4_dir=`dirname $stubfile`
-sinclude($stubfile)"
+    echo "sinclude($stubfile)"
 done

@@ -24,8 +24,7 @@ cd $srcdir
 module_ptrs="$extra_module_ptrs`echo $@ | $awk -f ./build/order_by_dep.awk`"
 
 for ext in ${1+"$@"} ; do
-	ext_dir=`echo "$ext" | cut -d ';' -f 2`
-	header_list="$header_list $ext_dir/*.h*"
+	header_list="$header_list ext/$ext/*.h*"
 done
 
 includes=`$awk -f ./build/print_include.awk $header_list`
