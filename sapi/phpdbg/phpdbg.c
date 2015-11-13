@@ -81,6 +81,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->colors[1] = NULL;
 	pg->colors[2] = NULL;
 
+	pg->lines = phpdbg_get_terminal_height();
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->buffer = NULL;
@@ -1844,7 +1845,7 @@ phpdbg_interact:
 					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
 					if (quit_immediately) {
-						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+						PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
 					} else {
 						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 					}

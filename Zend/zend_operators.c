@@ -492,7 +492,6 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-	double dval;
 	if (Z_TYPE_P(op) == IS_DOUBLE) {
 		zend_string *str;
 		double dval = Z_DVAL_P(op);
@@ -2278,7 +2277,7 @@ try_again:
 				zval *val;
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_ADDREF_P(val);
+				Z_TRY_ADDREF_P(val);
 				increment_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);
@@ -2346,7 +2345,7 @@ try_again:
 				zval *val;
 
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_ADDREF_P(val);
+				Z_TRY_ADDREF_P(val);
 				decrement_function(val);
 				Z_OBJ_HANDLER_P(op1, set)(op1, val);
 				zval_ptr_dtor(val);

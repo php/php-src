@@ -7,4 +7,4 @@ $x = (new ReflectionFunction("substr"))->getClosure();
 $x->call(new a);
 ?>
 --EXPECTF--
-Warning: a::substr() expects at least 2 parameters, 0 given in %s on line %d
+Warning: Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure() in %s on line %d

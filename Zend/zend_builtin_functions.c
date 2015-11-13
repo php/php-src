@@ -2481,7 +2481,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *call, *ptr, *skip;
+	zend_execute_data *ptr, *skip, *call = NULL;
 	zend_object *object;
 	int lineno, frameno = 0;
 	zend_function *func;
@@ -2490,8 +2490,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_string *include_filename = NULL;
 	zval stack_frame;
 
-	call = NULL;
-	ptr = EG(current_execute_data);
+	array_init(return_value);
+
+	if (!(ptr = EG(current_execute_data))) {
+		return;
+	}
+
 	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
 		call = ptr;
 		ptr = ptr->prev_execute_data;
@@ -2509,13 +2513,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				ptr = ptr->prev_execute_data;
 			}
 		}
+		if (!call) {
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		}
 	}
-	if (!call) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
-	}
-
-	array_init(return_value);
 
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;

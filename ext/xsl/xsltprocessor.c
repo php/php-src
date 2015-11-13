@@ -351,7 +351,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				nodep = dom_object_get_node(obj);
 				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 			} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
-				valuePush(ctxt, xmlXPathNewBoolean(Z_LVAL(retval)));
+				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
 			} else if (Z_TYPE(retval) == IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
 				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));

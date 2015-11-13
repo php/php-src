@@ -1728,6 +1728,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 	) {
 		ZVAL_RES(&zcert, zend_register_resource(peer_cert, php_openssl_get_x509_list_id()));
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate", &zcert);
+		zval_ptr_dtor(&zcert);
 		cert_captured = 1;
 	}
 
@@ -1755,7 +1756,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 		}
 
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate_chain", &arr);
-		zval_dtor(&arr);
+		zval_ptr_dtor(&arr);
 	}
 
 	return cert_captured;
@@ -1874,7 +1875,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 						zval meta_arr;
 						ZVAL_ARR(&meta_arr, capture_session_meta(sslsock->ssl_handle));
 						php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "session_meta", &meta_arr);
-						zval_dtor(&meta_arr);
+						zval_ptr_dtor(&meta_arr);
 					}
 				}
 			}

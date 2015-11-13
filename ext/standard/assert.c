@@ -245,7 +245,7 @@ PHP_FUNCTION(assert)
 		if (!description) {
 			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_error_ce)) {
+			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
@@ -274,6 +274,8 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
+	
+	RETURN_FALSE;
 }
 /* }}} */
 

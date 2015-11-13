@@ -31,7 +31,6 @@
 #include "SAPI.h"
 
 #include <stdio.h>
-#include "php.h"
 
 #ifdef PHP_WIN32
 # include "win32/time.h"

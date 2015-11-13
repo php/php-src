@@ -112,7 +112,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 /* Eat leading whitespace */
 #define EAT_LEADING_WHITESPACE()                     \
-	while (yytext[0]) {                              \
+	while (yyleng) {                                 \
 		if (yytext[0] == ' ' || yytext[0] == '\t') { \
 			SCNG(yy_text)++;                         \
 			yyleng--;                                \
@@ -123,7 +123,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 /* Eat trailing whitespace + extra char */
 #define EAT_TRAILING_WHITESPACE_EX(ch)              \
-	while (yyleng > 0 && (                          \
+	while (yyleng && (                              \
 		(ch != 'X' && yytext[yyleng - 1] ==  ch) || \
 		yytext[yyleng - 1] == '\n' ||               \
 		yytext[yyleng - 1] == '\r' ||               \

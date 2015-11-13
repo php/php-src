@@ -72,12 +72,12 @@ zend_persistent_script* create_persistent_script(void)
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
 	memset(persistent_script, 0, sizeof(zend_persistent_script));
 
-	zend_hash_init(&persistent_script->function_table, 128, NULL, ZEND_FUNCTION_DTOR, 0);
+	zend_hash_init(&persistent_script->script.function_table, 128, NULL, ZEND_FUNCTION_DTOR, 0);
 	/* class_table is usually destroyed by free_persistent_script() that
 	 * overrides destructor. ZEND_CLASS_DTOR may be used by standard
 	 * PHP compiler
 	 */
-	zend_hash_init(&persistent_script->class_table, 16, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&persistent_script->script.class_table, 16, NULL, ZEND_CLASS_DTOR, 0);
 
 	return persistent_script;
 }
@@ -85,18 +85,18 @@ zend_persistent_script* create_persistent_script(void)
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
 	if (destroy_elements) {
-		persistent_script->function_table.pDestructor = zend_accel_destroy_zend_function;
-		persistent_script->class_table.pDestructor = zend_accel_destroy_zend_class;
+		persistent_script->script.function_table.pDestructor = zend_accel_destroy_zend_function;
+		persistent_script->script.class_table.pDestructor = zend_accel_destroy_zend_class;
 	} else {
-		persistent_script->function_table.pDestructor = NULL;
-		persistent_script->class_table.pDestructor = NULL;
+		persistent_script->script.function_table.pDestructor = NULL;
+		persistent_script->script.class_table.pDestructor = NULL;
 	}
 
-	zend_hash_destroy(&persistent_script->function_table);
-	zend_hash_destroy(&persistent_script->class_table);
+	zend_hash_destroy(&persistent_script->script.function_table);
+	zend_hash_destroy(&persistent_script->script.class_table);
 
-	if (persistent_script->full_path) {
-		zend_string_release(persistent_script->full_path);
+	if (persistent_script->script.filename) {
+		zend_string_release(persistent_script->script.filename);
 	}
 
 	efree(persistent_script);
@@ -679,7 +679,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	zend_op_array *op_array;
 
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
-	*op_array = persistent_script->main_op_array;
+	*op_array = persistent_script->script.main_op_array;
 
 	if (EXPECTED(from_shared_memory)) {
 		zend_hash_init(&ZCG(bind_hash), 10, NULL, NULL, 0);
@@ -699,22 +699,22 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */
-		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
-			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor);
+		if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
+			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor);
 		}
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
-		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->function_table);
+		if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
+			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->script.function_table);
 		}
 
 		/* Register __COMPILER_HALT_OFFSET__ constant */
 		if (persistent_script->compiler_halt_offset != 0 &&
-		    persistent_script->full_path) {
+		    persistent_script->script.filename) {
 			zend_string *name;
 			char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
-			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->full_path), ZSTR_LEN(persistent_script->full_path), 0);
+			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
 				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
 			}
@@ -724,17 +724,17 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		zend_hash_destroy(&ZCG(bind_hash));
 		ZCG(current_persistent_script) = NULL;
 	} else /* if (!from_shared_memory) */ {
-		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table);
+		if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
 		}
-		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
-			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, NULL);
+		if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
+			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table, NULL);
 		}
 	}
 
 	if (op_array->early_binding != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
-		CG(compiled_filename) = persistent_script->full_path;
+		CG(compiled_filename) = persistent_script->script.filename;
 		zend_do_delayed_early_binding(op_array);
 		CG(compiled_filename) = orig_compiled_filename;
 	}

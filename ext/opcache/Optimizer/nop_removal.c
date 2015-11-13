@@ -39,7 +39,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
-	shiftlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t) * op_array->last);
+	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
 	i = new_count = shift = 0;
 	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
@@ -109,10 +109,9 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 		}
 
 		/* update brk/cont array */
-		for (j = 0; j < op_array->last_brk_cont; j++) {
-			op_array->brk_cont_array[j].brk -= shiftlist[op_array->brk_cont_array[j].brk];
-			op_array->brk_cont_array[j].cont -= shiftlist[op_array->brk_cont_array[j].cont];
-			op_array->brk_cont_array[j].start -= shiftlist[op_array->brk_cont_array[j].start];
+		for (j = 0; j < op_array->last_live_range; j++) {
+			op_array->live_range[j].start -= shiftlist[op_array->live_range[j].start];
+			op_array->live_range[j].end   -= shiftlist[op_array->live_range[j].end];
 		}
 
 		/* update try/catch array */
@@ -135,5 +134,5 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 			} while (*opline_num != (uint32_t)-1);
 		}
 	}
-	FREE_ALLOCA(shiftlist);
+	free_alloca(shiftlist, use_heap);
 }

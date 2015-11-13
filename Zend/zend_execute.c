@@ -893,7 +893,7 @@ static zend_always_inline int zend_verify_missing_arg_type(zend_function *zf, ui
 	return 1;
 }
 
-static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+static ZEND_COLD void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
 	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) ||
 	    UNEXPECTED(zend_verify_missing_arg_type(EX(func), arg_num, cache_slot))) {
@@ -907,9 +907,7 @@ static ZEND_COLD int zend_verify_missing_arg(zend_execute_data *execute_data, ui
 		} else {
 			zend_error(E_WARNING, "Missing argument %u for %s%s%s()", arg_num, class_name, space, func_name);
 		}
-		return 1;
 	}
-	return 0;
 }
 
 static ZEND_COLD void zend_verify_return_error(const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
@@ -2420,9 +2418,8 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 }
 /* }}} */
 
-static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
+static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
 {
-	int i;
 	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
@@ -2545,31 +2542,36 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 			call = EX(call);
 		} while (call);
 	}
+}
+/* }}} */
 
-	for (i = 0; i < EX(func)->op_array.last_brk_cont; i++) {
-		const zend_brk_cont_element *brk_cont = &EX(func)->op_array.brk_cont_array[i];
-		if (brk_cont->start < 0) {
-			continue;
-		} else if (brk_cont->start > op_num) {
+static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
+{
+	int i;
+
+	for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+		const zend_live_range *range = &EX(func)->op_array.live_range[i];
+		if (range->start > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		} else if (op_num < brk_cont->brk) {
-			if (!catch_op_num || catch_op_num >= brk_cont->brk) {
-				zend_op *brk_opline = &EX(func)->op_array.opcodes[brk_cont->brk];
+		} else if (op_num < range->end) {
+			if (!catch_op_num || catch_op_num >= range->end) {
+				uint32_t kind = range->var & ZEND_LIVE_MASK;
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+				zval *var = EX_VAR(var_num);
 
-				if (brk_opline->opcode == ZEND_FREE) {
-					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
-				} else if (brk_opline->opcode == ZEND_FE_FREE) {
-					zval *var = EX_VAR(brk_opline->op1.var);
+				if (kind == ZEND_LIVE_TMPVAR) {
+					zval_ptr_dtor_nogc(var);
+				} else if (kind == ZEND_LIVE_LOOP) {
 					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
 					zval_ptr_dtor_nogc(var);
-				} else if (brk_opline->opcode == ZEND_ROPE_END) {
-					zend_string **rope = (zend_string **) EX_VAR(brk_opline->op1.var);
+				} else if (kind == ZEND_LIVE_ROPE) {
+					zend_string **rope = (zend_string **)var;
 					zend_op *last = EX(func)->op_array.opcodes + op_num;
 					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
-							|| last->result.var != brk_opline->op1.var) {
+							|| last->result.var != var_num) {
 						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
 						last--;
 					}
@@ -2581,10 +2583,10 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 							zend_string_release(rope[j]);
 						} while (j--);
 					}
-				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
+				} else if (kind == ZEND_LIVE_SILENCE) {
 					/* restore previous error_reporting value */
-					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
-						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
+					if (!EG(error_reporting) && Z_LVAL_P(var) != 0) {
+						EG(error_reporting) = Z_LVAL_P(var);
 					}
 				}
 			}
@@ -2594,7 +2596,8 @@ static zend_always_inline void i_cleanup_unfinished_execution(zend_execute_data 
 /* }}} */
 
 void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
-	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
+	cleanup_unfinished_calls(execute_data, op_num);
+	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -2736,9 +2739,9 @@ ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_n
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
 
-ZEND_API int ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
+ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot)
 {
-	return zend_verify_missing_arg(execute_data, arg_num, cache_slot);
+	zend_verify_missing_arg(execute_data, arg_num, cache_slot);
 }
 
 /*

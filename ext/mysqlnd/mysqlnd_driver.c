@@ -17,15 +17,16 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd.c 317989 2011-10-10 20:49:28Z andrey $ */
 #include "php.h"
 #include "mysqlnd.h"
+#include "mysqlnd_vio.h"
+#include "mysqlnd_protocol_frame_codec.h"
 #include "mysqlnd_wireprotocol.h"
+#include "mysqlnd_connection.h"
+#include "mysqlnd_ps.h"
+#include "mysqlnd_plugin.h"
 #include "mysqlnd_priv.h"
-#include "mysqlnd_result.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_reverse_api.h"
 #include "mysqlnd_ext_plugin.h"
@@ -93,25 +94,9 @@ PHPAPI void mysqlnd_library_init(void)
 /* }}} */
 
 
-
-/* {{{ mysqlnd_error_list_pdtor */
-static void
-mysqlnd_error_list_pdtor(void * pDest)
-{
-	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-
-	DBG_ENTER("mysqlnd_error_list_pdtor");
-	if (element->error) {
-		mnd_pefree(element->error, TRUE);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_object_factory::get_connection */
 static MYSQLND *
-MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent)
 {
 	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -133,26 +118,36 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
 	new_object->m = mysqlnd_conn_get_methods();
 	data = new_object->data;
 
-	data->error_info = &(data->error_info_impl);
-	data->options = &(data->options_impl);
-	data->upsert_status = &(data->upsert_status_impl);
-
-	data->persistent = persistent;
-	data->m = mysqlnd_conn_data_get_methods();
-	CONN_SET_STATE(data, CONN_ALLOCED);
-	data->m->get_reference(data);
-
-	if (PASS != data->m->init(data)) {
+	if (FAIL == mysqlnd_error_info_init(&data->error_info_impl, persistent)) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	}
+	data->error_info = &data->error_info_impl;
 
-	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (!data->error_info->error_list) {
+	data->options = &(data->options_impl);
+
+	mysqlnd_upsert_status_init(&data->upsert_status_impl);
+	data->upsert_status = &(data->upsert_status_impl);
+	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(data->upsert_status);
+
+	data->persistent = persistent;
+	data->m = mysqlnd_conn_data_get_methods();
+	data->object_factory = *factory;
+
+	mysqlnd_connection_state_init(&data->state);
+
+	data->m->get_reference(data);
+
+	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
+
+	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, data->stats, data->error_info);
+	data->vio = mysqlnd_vio_init(persistent, data->stats, data->error_info);
+	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
+	data->command_factory = mysqlnd_command_factory_get();
+
+	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->command_factory) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
-	} else {
-		zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
 	}
 
 	DBG_RETURN(new_object);
@@ -191,7 +186,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn, zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
@@ -205,13 +200,19 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		ret->m = mysqlnd_stmt_get_methods();
 		ret->persistent = conn->persistent;
 
-		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
+		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), persistent);
 		DBG_INF_FMT("stmt=%p", stmt);
 		if (!stmt) {
 			break;
 		}
-		stmt->persistent = conn->persistent;
-		stmt->error_info = &(stmt->error_info_impl);
+		stmt->persistent = persistent;
+
+		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, persistent)) {
+			break;		
+		}
+		stmt->error_info = &stmt->error_info_impl;
+
+		mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
 		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
 		stmt->execute_cmd_buffer.length = 4096;
@@ -221,23 +222,18 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		}
 
 		stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
+
 		/*
 		  Mark that we reference the connection, thus it won't be
 		  be destructed till there is open statements. The last statement
 		  or normal query result will close it then.
 		*/
 		stmt->conn = conn->m->get_reference(conn);
-		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
-		if (!stmt->error_info->error_list) {
-			break;
-		}
-
-		zend_llist_init(stmt->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, conn->persistent);
 
 		DBG_RETURN(ret);
 	} while (0);
 
-	SET_OOM_ERROR(*conn->error_info);
+	SET_OOM_ERROR(conn->error_info);
 	if (ret) {
 		ret->m->dtor(ret, TRUE);
 		ret = NULL;
@@ -247,53 +243,89 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 /* }}} */
 
 
-/* {{{ mysqlnd_object_factory::get_io_channel */
-PHPAPI MYSQLND_NET *
-MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+/* {{{ mysqlnd_object_factory::get_pfc */
+static MYSQLND_PFC *
+MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t net_alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
-	size_t net_data_alloc_size = sizeof(MYSQLND_NET_DATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_NET * net = mnd_pecalloc(1, net_alloc_size, persistent);
-	MYSQLND_NET_DATA * net_data = mnd_pecalloc(1, net_data_alloc_size, persistent);
+	size_t pfc_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PFC * pfc = mnd_pecalloc(1, pfc_alloc_size, persistent);
+	MYSQLND_PFC_DATA * pfc_data = mnd_pecalloc(1, pfc_data_alloc_size, persistent);
 
-	DBG_ENTER("mysqlnd_object_factory::get_io_channel");
+	DBG_ENTER("mysqlnd_object_factory::get_pfc");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (net && net_data) {
-		net->data = net_data;
-		net->persistent = net->data->persistent = persistent;
-		net->data->m = *mysqlnd_net_get_methods();
+	if (pfc && pfc_data) {
+		pfc->data = pfc_data;
+		pfc->persistent = pfc->data->persistent = persistent;
+		pfc->data->m = *mysqlnd_pfc_get_methods();
 
-		if (PASS != net->data->m.init(net, stats, error_info)) {
-			net->data->m.dtor(net, stats, error_info);
-			net = NULL;
+		if (PASS != pfc->data->m.init(pfc, stats, error_info)) {
+			pfc->data->m.dtor(pfc, stats, error_info);
+			pfc = NULL;
 		}
 	} else {
-		if (net_data) {
-			mnd_pefree(net_data, persistent);
-			net_data = NULL;
+		if (pfc_data) {
+			mnd_pefree(pfc_data, persistent);
+			pfc_data = NULL;
 		}
-		if (net) {
-			mnd_pefree(net, persistent);
-			net = NULL;
+		if (pfc) {
+			mnd_pefree(pfc, persistent);
+			pfc = NULL;
 		}
 	}
-	DBG_RETURN(net);
+	DBG_RETURN(pfc);
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_object_factory::get_protocol_decoder */
-static MYSQLND_PROTOCOL *
-MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent)
+/* {{{ mysqlnd_object_factory::get_vio */
+static MYSQLND_VIO *
+MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_PROTOCOL *ret = mnd_pecalloc(1, alloc_size, persistent);
+	size_t vio_alloc_size = sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_VIO * vio = mnd_pecalloc(1, vio_alloc_size, persistent);
+	MYSQLND_VIO_DATA * vio_data = mnd_pecalloc(1, vio_data_alloc_size, persistent);
 
-	DBG_ENTER("mysqlnd_object_factory::get_protocol_decoder");
+	DBG_ENTER("mysqlnd_object_factory::get_vio");
+	DBG_INF_FMT("persistent=%u", persistent);
+	if (vio && vio_data) {
+		vio->data = vio_data;
+		vio->persistent = vio->data->persistent = persistent;
+		vio->data->m = *mysqlnd_vio_get_methods();
+
+		if (PASS != vio->data->m.init(vio, stats, error_info)) {
+			vio->data->m.dtor(vio, stats, error_info);
+			vio = NULL;
+		}
+	} else {
+		if (vio_data) {
+			mnd_pefree(vio_data, persistent);
+			vio_data = NULL;
+		}
+		if (vio) {
+			mnd_pefree(vio, persistent);
+			vio = NULL;
+		}
+	}
+	DBG_RETURN(vio);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_object_factory::get_protocol_payload_decoder_factory */
+static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
+MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent)
+{
+	size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *ret = mnd_pecalloc(1, alloc_size, persistent);
+
+	DBG_ENTER("mysqlnd_object_factory::get_protocol_payload_decoder_factory");
 	DBG_INF_FMT("persistent=%u", persistent);
 	if (ret) {
 		ret->persistent = persistent;
-		ret->m = mysqlnd_mysqlnd_protocol_methods;
+		ret->conn = conn;
+		ret->m = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
 	}
 
 	DBG_RETURN(ret);
@@ -305,8 +337,9 @@ PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),
-	MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel),
-	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)
+	MYSQLND_METHOD(mysqlnd_object_factory, get_pfc),
+	MYSQLND_METHOD(mysqlnd_object_factory, get_vio),
+	MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)
 MYSQLND_CLASS_METHODS_END;
 
 /*

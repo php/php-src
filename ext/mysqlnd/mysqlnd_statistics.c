@@ -12,13 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -26,9 +23,7 @@
 #include "mysqlnd_debug.h"
 
 
-/* {{{ mysqlnd_stats_values_names
- */
-
+/* {{{ mysqlnd_stats_values_names */
 const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 {
 	{ MYSQLND_STR_W_LEN("bytes_sent") },
