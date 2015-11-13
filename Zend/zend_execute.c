@@ -2556,18 +2556,18 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 			break;
 		} else if (op_num < range->end) {
 			if (!catch_op_num || catch_op_num >= range->end) {
-				zend_op *opline = &EX(func)->op_array.opcodes[range->end];
-				uint32_t var_num = opline->op1.var;
+				uint32_t kind = range->var & ZEND_LIVE_MASK;
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
 				zval *var = EX_VAR(var_num);
 
-				if (opline->opcode == ZEND_FREE) {
+				if (kind == ZEND_LIVE_TMPVAR) {
 					zval_ptr_dtor_nogc(var);
-				} else if (opline->opcode == ZEND_FE_FREE) {
+				} else if (kind == ZEND_LIVE_LOOP) {
 					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
 					zval_ptr_dtor_nogc(var);
-				} else if (opline->opcode == ZEND_ROPE_END) {
+				} else if (kind == ZEND_LIVE_ROPE) {
 					zend_string **rope = (zend_string **)var;
 					zend_op *last = EX(func)->op_array.opcodes + op_num;
 					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
@@ -2583,7 +2583,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 							zend_string_release(rope[j]);
 						} while (j--);
 					}
-				} else if (opline->opcode == ZEND_END_SILENCE) {
+				} else if (kind == ZEND_LIVE_SILENCE) {
 					/* restore previous error_reporting value */
 					if (!EG(error_reporting) && Z_LVAL_P(var) != 0) {
 						EG(error_reporting) = Z_LVAL_P(var);

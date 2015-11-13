@@ -3999,8 +3999,6 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (OP1_TYPE == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-				FREE_OP1();
 			}
 		}
 #endif

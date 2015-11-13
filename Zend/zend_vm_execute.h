@@ -7590,8 +7590,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_CONST == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif
@@ -13443,8 +13441,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_TMP_VAR == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-				zval_ptr_dtor_nogc(free_op1);
 			}
 		}
 #endif
@@ -19125,8 +19121,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_VAR == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-				zval_ptr_dtor_nogc(free_op1);
 			}
 		}
 #endif
@@ -25227,8 +25221,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_UNUSED == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif
@@ -34859,8 +34851,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_CV == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif
