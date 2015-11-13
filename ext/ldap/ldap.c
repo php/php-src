@@ -373,6 +373,8 @@ PHP_FUNCTION(ldap_connect)
 
 			url = emalloc(urllen);
 			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+		} else if (port != LDAP_PORT) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The port parameter is not used when passing an LDAP URI");
 		}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
