@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid
+    array property). (Laruence)
   . Fixed bug #70898, #70895 (null ptr deref and segfault with crafted callable).
     (Anatol, Laruence)
 
