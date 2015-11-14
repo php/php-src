@@ -1895,8 +1895,8 @@ PHP_FUNCTION(extract)
 		}
 
 		if (Z_TYPE(final_name) == IS_STRING && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+			zval *orig_var;
 			if (extract_refs) {
-				zval *orig_var;
 
 				ZVAL_MAKE_REF(entry);
 				Z_ADDREF_P(entry);
@@ -1913,7 +1913,16 @@ PHP_FUNCTION(extract)
 			} else {
 				ZVAL_DEREF(entry);
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-				zend_hash_update_ind(symbol_table, Z_STR(final_name), entry);
+				if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
+					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
+						orig_var = Z_INDIRECT_P(orig_var);
+					}
+					ZVAL_DEREF(orig_var);
+					zval_ptr_dtor(orig_var);
+					ZVAL_COPY_VALUE(orig_var, entry);
+				} else {
+					zend_hash_update(symbol_table, Z_STR(final_name), entry);
+				}
 			}
 			count++;
 		}
