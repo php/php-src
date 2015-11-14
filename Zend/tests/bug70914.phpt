@@ -1,5 +1,5 @@
 --TEST--
-Bug #70895 null ptr deref and segfault with crafted callable
+Bug #70914 zend_throw_or_error() format string vulnerability 
 --SKIPIF--
 <?php
 if (!extension_loaded("pdo_sqlite")) {
