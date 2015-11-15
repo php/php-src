@@ -272,7 +272,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
  */
 void php_info_print_style(void)
 {
-	php_info_printf("<style type=\"text/css\">\n");
+	php_info_printf("<style type=\"text/css\" scoped=\"scoped\">\n");
 	php_info_print_css();
 	php_info_printf("</style>\n");
 }
