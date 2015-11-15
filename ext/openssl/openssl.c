@@ -5268,12 +5268,32 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 }
 /* }}} */
 
-static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type, EVP_CIPHER_CTX *cipher_ctx,
-		struct php_openssl_cipher_mode *mode, size_t password_len, unsigned char *key, size_t key_len,
-		char **piv, size_t *piv_len, zend_bool *free_iv, zend_long options, int enc)  /* {{{ */
+static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
+		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
+		char **ppassword, size_t *ppassword_len, zend_bool *free_password,
+		char **piv, size_t *piv_len, zend_bool *free_iv,
+		zend_long options, int enc)  /* {{{ */
 {
-	size_t max_iv_len = EVP_CIPHER_iv_length(cipher_type);
+	unsigned char *key;
+	int key_len, password_len;
+	size_t max_iv_len;
 
+	/* check and set key */
+	password_len = (int) *ppassword_len;
+	key_len = EVP_CIPHER_key_length(cipher_type);
+	if (key_len > password_len) {
+		key = emalloc(key_len);
+		memset(key, 0, key_len);
+		memcpy(key, *ppassword, password_len);
+		*ppassword = (char *) key;
+		*ppassword_len = key_len;
+		*free_password = 1;
+	} else {
+		key = (unsigned char*)*ppassword;
+		*free_password = 0;
+	}
+
+	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
 	if (enc && *piv_len == 0 && max_iv_len > 0) {
 		php_error_docref(NULL, E_WARNING,
 				"Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
@@ -5286,7 +5306,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type, EVP_CIPHER_CTX
 		return FAILURE;
 	}
 	if (password_len > key_len) {
-		EVP_CIPHER_CTX_set_key_length(cipher_ctx, (int)password_len);
+		EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len);
 	}
 	if (!EVP_CipherInit_ex(cipher_ctx, NULL, NULL, key, (unsigned char *)*piv, enc)) {
 		return FAILURE;
@@ -5310,10 +5330,9 @@ PHP_FUNCTION(openssl_encrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int i=0, outlen, key_len;
+	int i=0, outlen;
 	zend_string *outbuf;
-	unsigned char *key;
-	zend_bool free_iv = 0;
+	zend_bool free_iv = 0, free_password = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsz/sl", &data, &data_len, &method, &method_len,
 					&password, &password_len, &options, &iv, &iv_len, &tag, &aad, &aad_len, &tag_len) == FAILURE) {
@@ -5337,19 +5356,11 @@ PHP_FUNCTION(openssl_encrypt)
 		RETURN_FALSE;
 	}
 
-	key_len = EVP_CIPHER_key_length(cipher_type);
-	if (key_len > password_len) {
-		key = emalloc(key_len);
-		memset(key, 0, key_len);
-		memcpy(key, password, password_len);
-	} else {
-		key = (unsigned char*)password;
-	}
-
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
-			password_len, key, key_len, &iv, &iv_len, &free_iv, options, 1) == FAILURE) {
+			&password, &password_len, &free_password,
+			&iv, &iv_len, &free_iv, options, 1) == FAILURE) {
 		RETVAL_FALSE;
 		goto openssl_encrypt_clean;
 	}
@@ -5379,8 +5390,8 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 openssl_encrypt_clean:
-	if (key != (unsigned char*)password) {
-		efree(key);
+	if (free_password) {
+		efree(password);
 	}
 	if (free_iv) {
 		efree(iv);
@@ -5400,11 +5411,10 @@ PHP_FUNCTION(openssl_decrypt)
 	const EVP_CIPHER *cipher_type;
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
-	int i, outlen, key_len;
+	int i, outlen;
 	zend_string *outbuf;
-	unsigned char *key;
 	zend_string *base64_str = NULL;
-	zend_bool free_iv = 0;
+	zend_bool free_iv = 0, free_password = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lsss", &data, &data_len, &method, &method_len,
 					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
@@ -5446,17 +5456,9 @@ PHP_FUNCTION(openssl_decrypt)
 		data = ZSTR_VAL(base64_str);
 	}
 
-	key_len = EVP_CIPHER_key_length(cipher_type);
-	if (key_len > password_len) {
-		key = emalloc(key_len);
-		memset(key, 0, key_len);
-		memcpy(key, password, password_len);
-	} else {
-		key = (unsigned char*)password;
-	}
-
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
-			password_len, key, key_len, &iv, &iv_len, &free_iv, options, 0) == FAILURE) {
+			&password, &password_len, &free_password,
+			&iv, &iv_len, &free_iv, options, 0) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Failed to initialize cipher decryption");
 		RETVAL_FALSE;
 		goto openssl_decrypt_clean;
@@ -5478,8 +5480,8 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 openssl_decrypt_clean:
-	if (key != (unsigned char*)password) {
-		efree(key);
+	if (free_password) {
+		efree(password);
 	}
 	if (free_iv) {
 		efree(iv);
