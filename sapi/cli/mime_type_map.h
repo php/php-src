@@ -71,7 +71,6 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "ma", "application/mathematica" },
 	{ "nb", "application/mathematica" },
 	{ "mb", "application/mathematica" },
-	{ "map", "application/json" },
 	{ "mathml", "application/mathml+xml" },
 	{ "mbox", "application/mbox" },
 	{ "mscml", "application/mediaservercontrol+xml" },
@@ -1010,6 +1009,7 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "movie", "video/x-sgi-movie" },
 	{ "smv", "video/x-smv" },
 	{ "ice", "x-conference/x-cooltalk" },
+	{ "map", "application/json" },
 	{ NULL, NULL }
 };
 
