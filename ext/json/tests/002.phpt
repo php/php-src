@@ -20,7 +20,6 @@ var_dump(json_encode(array(), JSON_FORCE_OBJECT));
 var_dump(json_encode(1));
 var_dump(json_encode("руссиш"));
 
-
 echo "Done\n";
 ?>
 --EXPECTF--	

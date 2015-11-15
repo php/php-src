@@ -4,8 +4,8 @@ JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 precision=14
 --SKIPIF--
 <?php
-  if (!extension_loaded('json')) die('skip: json extension not available');
-  if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (!extension_loaded('json')) die('skip');
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php

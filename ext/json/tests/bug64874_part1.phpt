@@ -5,9 +5,9 @@ Whitespace part of bug #64874 ("json_decode handles whitespace and case-sensitiv
 --FILE--
 <?php
 function decode($json) {
-    var_dump(json_decode($json));
-    var_dump(json_last_error() !== 0);
-    echo "\n";
+	var_dump(json_decode($json));
+	var_dump(json_last_error() !== 0);
+	echo "\n";
 }
 
 // Leading whitespace should be ignored
