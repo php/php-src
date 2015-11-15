@@ -5180,6 +5180,10 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED, CONST)
 		} else {
 			if (OP1_TYPE == IS_UNUSED) {
 				ce = zend_fetch_class(NULL, opline->op1.num);
+				if (UNEXPECTED(ce == NULL)) {
+					ZEND_ASSERT(EG(exception));
+					HANDLE_EXCEPTION();
+				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
