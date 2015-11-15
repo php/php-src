@@ -215,6 +215,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
+		zval_dtor(object);
 		ZVAL_NULL(object);
 		return;
 	}
@@ -239,6 +240,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via INI: %s)", alt_dsn);
+			zval_dtor(object);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -249,12 +251,14 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn) TSRMLS_CC);
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source URI");
+			zval_dtor(object);
 			ZVAL_NULL(object);
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via URI)");
+			zval_dtor(object);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -266,6 +270,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "could not find driver");
+		zval_dtor(object);
 		ZVAL_NULL(object);
 		return;
 	}
@@ -427,6 +432,7 @@ options:
 
 	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
+	zval_dtor(object);
 	ZVAL_NULL(object);
 }
 /* }}} */
