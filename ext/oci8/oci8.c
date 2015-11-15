@@ -1452,7 +1452,7 @@ static void php_oci_pconnection_list_np_dtor(zend_resource *entry)
 		/* Remove the hash entry if present */
 		if (connection->hash_key) {
 			zvp = zend_hash_find(&EG(persistent_list), connection->hash_key);
-			le = zvp ? Z_RES_P(zvp) : NULL;		/* PHPNG TODO check for null zvp */
+			le = zvp ? Z_RES_P(zvp) : NULL;
 			if (le != NULL && le->type == le_pconnection && le->ptr == connection) {
 				zend_hash_del(&EG(persistent_list), connection->hash_key);
 			}
@@ -1927,13 +1927,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	}
 
 	/* make it lowercase */
-	/* PHPNG TODO is this safe to do? What about interned strings? */
-	php_strtolower(hashed_details.s->val, hashed_details.s->len);
+	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
 		zend_bool found = 0;
 
-		/* PHPNG TODO Check hashed_details is used correctly */
 		if (persistent && ((zvp = zend_hash_find(&EG(persistent_list), hashed_details.s))) != NULL) {
 			zend_resource *le = Z_RES_P(zvp);
 
@@ -1948,7 +1946,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			if (le->type == le_index_ptr) {
 				zend_resource *ptr;
 
-				ptr = (zend_resource *) le->ptr; /* PHPNG TODO */
+				ptr = (zend_resource *) le->ptr;
 				if (ptr && (ptr->type == le_connection)) {
 					connection = (php_oci_connection *)ptr->ptr;
 				}
@@ -2011,8 +2009,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 							}
 							
 							if ((tmp_val != NULL) && (tmp != NULL) &&
-								(tmp->hash_key->len == hashed_details.s->len) &&
-								(memcmp(tmp->hash_key->val, hashed_details.s->val, tmp->hash_key->len) == 0)) {
+								(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
+								(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s), ZSTR_LEN(tmp->hash_key)) == 0)) {
 								connection = tmp;
 								++GC_REFCOUNT(connection->id);
 								/* do nothing */
@@ -2866,7 +2864,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	}
 
 	/* Populate key if passed */
-	if (hash_key && hash_key->val) {
+	if (hash_key && (ZSTR_LEN(hash_key) > 0)) {
 		session_pool->spool_hash_key = zend_string_dup(hash_key, 1);
 		if (session_pool->spool_hash_key == NULL) {
 			iserror = 1;
@@ -3022,8 +3020,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	/* Session Pool Hash Key : oci8spool***username**edition**hashedpassword**dbname**charset */
 
 	smart_str_0(&spool_hashed_details);
-	/* PHPNG TODO is this safe to do? */
-	php_strtolower(spool_hashed_details.s->val, spool_hashed_details.s->len);
+	php_strtolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
 	/* }}} */
 
 	spool_out_zv = zend_hash_find(&EG(persistent_list), spool_hashed_details.s);
@@ -3044,8 +3041,8 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 		PHP_OCI_REGISTER_RESOURCE(session_pool, le_psessionpool);
 		zend_hash_update_mem(&EG(persistent_list), session_pool->spool_hash_key, (void *)&spool_le, sizeof(zend_resource));
 	} else if (spool_out_le->type == le_psessionpool &&
-		((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key->len == spool_hashed_details.s->len &&
-		memcmp(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key->val, spool_hashed_details.s->val, spool_hashed_details.s->len) == 0) {
+		ZSTR_LEN(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == ZSTR_LEN(spool_hashed_details.s) &&
+		memcmp(ZSTR_VAL(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key), ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s)) == 0) {
 		/* retrieve the cached session pool */
 		session_pool = (php_oci_spool *)(spool_out_le->ptr);
 	}
