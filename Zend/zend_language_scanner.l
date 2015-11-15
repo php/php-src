@@ -568,6 +568,48 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 }
 END_EXTERN_C()
 
+static zend_op_array *zend_compile(int type)
+{
+	zend_op_array *op_array = NULL;
+	zend_bool original_in_compilation = CG(in_compilation);
+
+	CG(in_compilation) = 1;
+	CG(ast) = NULL;
+	CG(ast_arena) = zend_arena_create(1024 * 32);
+
+	if (!zendparse()) {
+		zend_file_context original_file_context;
+		zend_oparray_context original_oparray_context;
+		zend_op_array *original_active_op_array = CG(active_op_array);
+
+		op_array = emalloc(sizeof(zend_op_array));
+		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
+		CG(active_op_array) = op_array;
+
+		if (zend_ast_process) {
+			zend_ast_process(CG(ast));
+		}
+
+		zend_file_context_begin(&original_file_context);
+		zend_oparray_context_begin(&original_oparray_context);
+		zend_compile_top_stmt(CG(ast));
+		zend_emit_final_return(type == ZEND_USER_FUNCTION);
+		op_array->line_start = 1;
+		op_array->line_end = CG(zend_lineno);
+		pass_two(op_array);
+		zend_oparray_context_end(&original_oparray_context);
+		zend_file_context_end(&original_file_context);
+
+		CG(active_op_array) = original_active_op_array;
+	}
+
+	zend_ast_destroy(CG(ast));
+	zend_arena_destroy(CG(ast_arena));
+
+	CG(in_compilation) = original_in_compilation;
+
+	return op_array;
+}
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 {
@@ -583,41 +625,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
 	} else {
-		zend_bool original_in_compilation = CG(in_compilation);
-		CG(in_compilation) = 1;
-
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
-		if (!zendparse()) {
-			zval retval_zv;
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-			ZVAL_LONG(&retval_zv, 1);
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(&retval_zv);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
-		CG(in_compilation) = original_in_compilation;
+		op_array = zend_compile(ZEND_USER_FUNCTION);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -732,13 +740,11 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-
 zend_op_array *compile_string(zval *source_string, char *filename)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
 	zval tmp;
-	zend_bool original_in_compilation = CG(in_compilation);
 
 	if (Z_STRLEN_P(source_string)==0) {
 		return NULL;
@@ -748,45 +754,15 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
 		BEGIN(ST_IN_SCRIPTING);
-
-		if (!zendparse()) {
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(NULL);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
+		op_array = zend_compile(ZEND_EVAL_CODE);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&tmp);
-	CG(in_compilation) = original_in_compilation;
+
 	return op_array;
 }
 

@@ -39,7 +39,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	ALLOCA_FLAG(use_heap);
 
 	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = DO_ALLOCA(ZSTR_LEN(name) + 1);
+		lookup_name = do_alloca(ZSTR_LEN(name) + 1, use_heap);
 		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
 		zend_str_tolower(lookup_name, ZSTR_LEN(name));
 
@@ -50,7 +50,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 		} else {
 			retval = 0;
 		}
-		FREE_ALLOCA(lookup_name);
+		free_alloca(lookup_name, use_heap);
 	}
 
 	if (retval) {
@@ -125,18 +125,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	while (opline < end) {
 		switch((unsigned)opline->opcode) {
 			case ZEND_FAST_CALL:
-				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
-				if (opline->extended_value) {
-					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				}
-				START_BLOCK_OP(opno + 1);
-				break;
-			case ZEND_FAST_RET:
-				if (opline->extended_value) {
-					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
-				}
-				START_BLOCK_OP(opno + 1);
-				break;
 			case ZEND_JMP:
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
@@ -147,6 +135,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_GENERATOR_RETURN:
 			case ZEND_EXIT:
 			case ZEND_THROW:
+			case ZEND_FAST_RET:
 				/* start new block from this+1 */
 				START_BLOCK_OP(opno + 1);
 				break;
@@ -197,60 +186,18 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 	/* Currently, we don't optimize op_arrays with BRK/CONT/GOTO opcodes,
 	 * but, we have to keep brk_cont_array to avoid memory leaks during
 	 * exception handling */
-	if (op_array->last_brk_cont) {
-		int i, j;
+	if (op_array->last_live_range) {
+		int i;
 
-		j = 0;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			if (op_array->brk_cont_array[i].start >= 0 &&
-			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-				int parent = op_array->brk_cont_array[i].parent;
-
-				while (parent >= 0 &&
-				       op_array->brk_cont_array[parent].start < 0 &&
-				       (op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FE_FREE ||
-					     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode != ZEND_ROPE_END ||
-				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_END_SILENCE)) {
-					parent = op_array->brk_cont_array[parent].parent;
-				}
-				op_array->brk_cont_array[i].parent = parent;
-				j++;
-			}
-		}
-		if (j) {
-			cfg->loop_start = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_cont  = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			cfg->loop_brk   = zend_arena_calloc(&ctx->arena, op_array->last_brk_cont, sizeof(zend_code_block *));
-			j = 0;
-			for (i = 0; i< op_array->last_brk_cont; i++) {
-				if (op_array->brk_cont_array[i].start >= 0 &&
-				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_ROPE_END ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
-					if (i != j) {
-						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
-					}
-					cfg->loop_start[j] = &blocks[op_array->brk_cont_array[j].start];
-					cfg->loop_cont[j]  = &blocks[op_array->brk_cont_array[j].cont];
-					cfg->loop_brk[j]   = &blocks[op_array->brk_cont_array[j].brk];
-					START_BLOCK_OP(op_array->brk_cont_array[j].start);
-					START_BLOCK_OP(op_array->brk_cont_array[j].cont);
-					START_BLOCK_OP(op_array->brk_cont_array[j].brk);
-					blocks[op_array->brk_cont_array[j].start].protected = 1;
-					blocks[op_array->brk_cont_array[j].brk].protected = 1;
-					j++;
-				}
-			}
-			op_array->last_brk_cont = j;
-		} else {
-			efree(op_array->brk_cont_array);
-			op_array->brk_cont_array = NULL;
-			op_array->last_brk_cont = 0;
+		cfg->live_range_start = zend_arena_calloc(&ctx->arena, op_array->last_live_range, sizeof(zend_code_block *));
+		cfg->live_range_end   = zend_arena_calloc(&ctx->arena, op_array->last_live_range, sizeof(zend_code_block *));
+		for (i = 0; i< op_array->last_live_range; i++) {
+			cfg->live_range_start[i] = &blocks[op_array->live_range[i].start];
+			cfg->live_range_end[i]   = &blocks[op_array->live_range[i].end];
+			START_BLOCK_OP(op_array->live_range[i].start);
+			START_BLOCK_OP(op_array->live_range[i].end);
+			blocks[op_array->live_range[i].start].protected = 1;
+			blocks[op_array->live_range[i].end].protected = 1;
 		}
 	}
 
@@ -272,21 +219,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_GENERATOR_RETURN:
 				case ZEND_EXIT:
 				case ZEND_THROW:
-					break;
-				case ZEND_FAST_CALL:
-					if (opline->extended_value) {
-						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
-					}
-					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
-					break;
 				case ZEND_FAST_RET:
-					if (opline->extended_value) {
-						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
-					}
 					break;
 				case ZEND_JMP:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
 					break;
+				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
@@ -525,12 +463,11 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	zend_access_path(start, ctx);
 
 	/* Add brk/cont paths */
-	if (op_array->last_brk_cont) {
+	if (op_array->last_live_range) {
 		int i;
-		for (i=0; i< op_array->last_brk_cont; i++) {
-			zend_access_path(cfg->loop_start[i], ctx);
-			zend_access_path(cfg->loop_cont[i], ctx);
-			zend_access_path(cfg->loop_brk[i], ctx);
+		for (i=0; i< op_array->last_live_range; i++) {
+			zend_access_path(cfg->live_range_start[i], ctx);
+			zend_access_path(cfg->live_range_end[i], ctx);
 		}
 	}
 
@@ -648,6 +585,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zval c = ZEND_OP1_LITERAL(src);
 			zval_copy_ctor(&c);
 			if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
+				zend_optimizer_remove_live_range(op_array, op1.var);
 				VAR_SOURCE(op1) = NULL;
 				literal_dtor(&ZEND_OP1_LITERAL(src));
 				MAKE_NOP(src);
@@ -664,6 +602,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zval c = ZEND_OP1_LITERAL(src);
 			zval_copy_ctor(&c);
 			if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
+				zend_optimizer_remove_live_range(op_array, op2.var);
 				VAR_SOURCE(op2) = NULL;
 				literal_dtor(&ZEND_OP1_LITERAL(src));
 				MAKE_NOP(src);
@@ -1205,12 +1144,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	}
 
 	/* adjust loop jump targets */
-	if (op_array->last_brk_cont) {
+	if (op_array->last_live_range) {
 		int i;
-		for (i = 0; i< op_array->last_brk_cont; i++) {
-			op_array->brk_cont_array[i].start = cfg->loop_start[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].cont = cfg->loop_cont[i]->start_opline - new_opcodes;
-			op_array->brk_cont_array[i].brk = cfg->loop_brk[i]->start_opline - new_opcodes;
+		for (i = 0; i< op_array->last_live_range; i++) {
+			op_array->live_range[i].start = cfg->live_range_start[i]->start_opline - new_opcodes;
+			op_array->live_range[i].end   = cfg->live_range_end[i]->start_opline - new_opcodes;
 		}
 	}
 

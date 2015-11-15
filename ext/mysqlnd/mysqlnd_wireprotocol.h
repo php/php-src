@@ -17,13 +17,8 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 #ifndef MYSQLND_WIREPROTOCOL_H
 #define MYSQLND_WIREPROTOCOL_H
-
-#include "mysqlnd_net.h"
 
 #define MYSQLND_HEADER_SIZE 4
 #define COMPRESSED_HEADER_SIZE 3
@@ -36,8 +31,8 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
-#define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn)))
-#define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn)))
+#define PACKET_WRITE(packet)	((packet)->header.m->write_to_net((packet)))
+#define PACKET_READ(packet)		((packet)->header.m->read_from_net((packet)))
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
@@ -51,17 +46,26 @@ PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
 	size_t				struct_size;
-	enum_func_status	(*read_from_net)(void * packet, MYSQLND_CONN_DATA * conn);
-	size_t				(*write_to_net)(void * packet, MYSQLND_CONN_DATA * conn);
+	enum_func_status	(*read_from_net)(void * packet);
+	size_t				(*write_to_net)(void * packet);
 	void				(*free_mem)(void *packet, zend_bool stack_allocation);
 } mysqlnd_packet_methods;
 
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
-	mysqlnd_packet_methods *m;
 	zend_uchar	packet_no;
 	zend_bool	persistent;
+
+	mysqlnd_packet_methods *m;
+
+	MYSQLND_CONN_DATA * conn;
+	MYSQLND_PFC * protocol_frame_codec;
+	MYSQLND_VIO * vio;
+	MYSQLND_ERROR_INFO * error_info;
+	MYSQLND_STATS * stats;
+	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory;
+	MYSQLND_CONNECTION_STATE * connection_state;
 } MYSQLND_PACKET_HEADER;
 
 /* Server greets the client */
@@ -70,9 +74,8 @@ typedef struct st_mysqlnd_packet_greet {
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
-	zend_uchar	intern_auth_plugin_data[SCRAMBLE_LENGTH];
-	zend_uchar	* auth_plugin_data;
-	size_t		auth_plugin_data_len;
+	char		intern_auth_plugin_data[SCRAMBLE_LENGTH];
+	MYSQLND_STRING authentication_plugin_data;
 	/* 1 byte pad */
 	uint32_t	server_capabilities;
 	uint8_t		charset_no;
@@ -157,8 +160,7 @@ typedef struct st_mysqlnd_packet_ok {
 typedef struct st_mysqlnd_packet_command {
 	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
-	const zend_uchar				*argument;
-	size_t							arg_len;
+	MYSQLND_CSTRING	argument;
 } MYSQLND_PACKET_COMMAND;
 
 
@@ -178,7 +180,7 @@ typedef struct st_mysqlnd_packet_eof {
 
 /* Result Set header*/
 typedef struct st_mysqlnd_packet_rset_header {
-	MYSQLND_PACKET_HEADER		header;
+	MYSQLND_PACKET_HEADER header;
 	/*
 	  0x00 => ok
 	  ~0   => LOAD DATA LOCAL
@@ -195,8 +197,7 @@ typedef struct st_mysqlnd_packet_rset_header {
 	uint64_t	affected_rows;
 	uint64_t	last_insert_id;
 	/* This is for both LOAD DATA or info, when no result set */
-	char		*info_or_local_file;
-	size_t		info_or_local_file_len;
+	MYSQLND_STRING info_or_local_file;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
 } MYSQLND_PACKET_RSET_HEADER;
@@ -208,7 +209,6 @@ typedef struct st_mysqlnd_packet_res_field {
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
-	zend_bool				stupid_list_fields_eof;
 	zend_bool				persistent_alloc;
 
 	MYSQLND_ERROR_INFO		error_info;
@@ -247,9 +247,7 @@ typedef struct st_mysqlnd_packet_row {
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_stats {
 	MYSQLND_PACKET_HEADER	header;
-	char *message;
-	/* message_len is not part of the packet*/
-	size_t message_len;
+	MYSQLND_STRING message;
 } MYSQLND_PACKET_STATS;
 
 
@@ -300,7 +298,7 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
-zend_ulong	php_mysqlnd_net_field_length(zend_uchar **packet);
+zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
@@ -320,8 +318,8 @@ enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent);
-PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol);
+PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, zend_bool persistent);
+PHPAPI void mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

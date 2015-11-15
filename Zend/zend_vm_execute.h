@@ -1490,7 +1490,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 			 * are logically thrown at the end of the foreach loop, so adjust the
 			 * op_num.
 			 */
-			op_num = EX(func)->op_array.brk_cont_array[exc_opline->op2.num].brk;
+			op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
 		}
 	}
 
@@ -1514,11 +1514,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		}
 	}
 
-	i_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
+	cleanup_unfinished_calls(execute_data, op_num);
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
 
+		cleanup_live_vars(execute_data, op_num, finally_op_num);
 		if (in_finally && Z_OBJ_P(fast_call)) {
 			zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call));
 		}
@@ -1528,6 +1529,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
+		cleanup_live_vars(execute_data, op_num, catch_op_num);
 		if (in_finally) {
 			/* we are going out of current finally scope */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
@@ -1631,7 +1633,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
 		ZEND_VM_SET_OPCODE(fast_ret + 1);
 		if (fast_ret->extended_value & ZEND_FAST_CALL_FROM_FINALLY) {
-			fast_call->u2.lineno = fast_ret->op2.opline_num;
+			fast_call->u2.lineno = EX(func)->op_array.try_catch_array[fast_ret->op2.num].finally_op - 2;
 		}
 		ZEND_VM_CONTINUE();
 	} else {
@@ -1639,20 +1641,29 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 		USE_OPLINE
 
 		if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
-			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
+			uint32_t finally_op = EX(func)->op_array.try_catch_array[opline->op2.num].finally_op;
+
+			cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, finally_op);
+			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op]);
 			ZEND_VM_CONTINUE();
 		} else {
 			EG(exception) = Z_OBJ_P(fast_call);
 			Z_OBJ_P(fast_call) = NULL;
 			if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
-				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
+				uint32_t catch_op = EX(func)->op_array.try_catch_array[opline->op2.num].catch_op;
+
+				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, catch_op);
+				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op]);
 				ZEND_VM_CONTINUE();
-			} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				zend_generator *generator = zend_get_running_generator(execute_data);
-				zend_generator_close(generator, 1);
-				ZEND_VM_RETURN();
 			} else {
-				ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				cleanup_live_vars(execute_data, opline - EX(func)->op_array.opcodes, 0);
+				if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+					zend_generator *generator = zend_get_running_generator(execute_data);
+					zend_generator_close(generator, 1);
+					ZEND_VM_RETURN();
+				} else {
+					ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				}
 			}
 		}
 	}
@@ -5830,6 +5841,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 		} else {
 			if (IS_CONST == IS_UNUSED) {
 				ce = zend_fetch_class(NULL, opline->op1.num);
+				if (UNEXPECTED(ce == NULL)) {
+					ZEND_ASSERT(EG(exception));
+					HANDLE_EXCEPTION();
+				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
@@ -7579,8 +7594,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_CONST == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif
@@ -13432,8 +13445,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_TMP_VAR == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-				zval_ptr_dtor_nogc(free_op1);
 			}
 		}
 #endif
@@ -15759,13 +15770,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor(array);
 					HANDLE_EXCEPTION();
 				}
 				if (UNEXPECTED(iter->funcs->valid(iter) == FAILURE)) {
 					/* reached end of iteration */
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						zval_ptr_dtor(array);
 						HANDLE_EXCEPTION();
 					}
 					goto fe_fetch_r_exit;
@@ -15773,7 +15782,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 			}
 			value = iter->funcs->get_current_data(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				zval_ptr_dtor(array);
 				HANDLE_EXCEPTION();
 			}
 			if (!value) {
@@ -15784,7 +15792,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						zval_ptr_dtor(array);
 						HANDLE_EXCEPTION();
 					}
 				} else {
@@ -15951,13 +15958,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor(array);
 					HANDLE_EXCEPTION();
 				}
 				if (UNEXPECTED(iter->funcs->valid(iter) == FAILURE)) {
 					/* reached end of iteration */
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						zval_ptr_dtor(array);
 						HANDLE_EXCEPTION();
 					}
 					goto fe_fetch_w_exit;
@@ -15965,7 +15970,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 			}
 			value = iter->funcs->get_current_data(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				zval_ptr_dtor(array);
 				HANDLE_EXCEPTION();
 			}
 			if (!value) {
@@ -15976,7 +15980,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR(opline->result.var));
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						zval_ptr_dtor(array);
 						HANDLE_EXCEPTION();
 					}
 				} else {
@@ -17508,6 +17511,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 		} else {
 			if (IS_VAR == IS_UNUSED) {
 				ce = zend_fetch_class(NULL, opline->op1.num);
+				if (UNEXPECTED(ce == NULL)) {
+					ZEND_ASSERT(EG(exception));
+					HANDLE_EXCEPTION();
+				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
@@ -19122,8 +19129,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_VAR == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-				zval_ptr_dtor_nogc(free_op1);
 			}
 		}
 #endif
@@ -23909,6 +23914,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 		} else {
 			if (IS_UNUSED == IS_UNUSED) {
 				ce = zend_fetch_class(NULL, opline->op1.num);
+				if (UNEXPECTED(ce == NULL)) {
+					ZEND_ASSERT(EG(exception));
+					HANDLE_EXCEPTION();
+				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
@@ -25224,8 +25233,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_UNUSED == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif
@@ -34856,8 +34863,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (IS_CV == IS_CONST) {
 				zval_ptr_dtor_nogc(retval_ptr);
-			} else {
-
 			}
 		}
 #endif

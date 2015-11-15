@@ -381,10 +381,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		end = opline + op_array->last;
 		while (opline < end) {
 # if ZEND_USE_ABS_CONST_ADDR
-			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
 			}
-			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
 # endif
@@ -463,7 +463,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 
 		SERIALIZE_STR(op_array->function_name);
 		SERIALIZE_STR(op_array->filename);
-		SERIALIZE_PTR(op_array->brk_cont_array);
+		SERIALIZE_PTR(op_array->live_range);
 		SERIALIZE_PTR(op_array->scope);
 		SERIALIZE_STR(op_array->doc_comment);
 		SERIALIZE_PTR(op_array->try_catch_array);
@@ -546,8 +546,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 	zend_file_cache_serialize_hash(&ce->constants_table, script, info, buf, zend_file_cache_serialize_zval);
-	SERIALIZE_STR(ZEND_CE_FILENAME(ce));
-	SERIALIZE_STR(ZEND_CE_DOC_COMMENT(ce));
+	SERIALIZE_STR(ce->info.user.filename);
+	SERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
 	if (ce->trait_aliases) {
@@ -659,11 +659,11 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	memcpy(buf, script->mem, script->size);
 
 	new_script = (zend_persistent_script*)((char*)buf + info->script_offset);
-	SERIALIZE_STR(new_script->full_path);
+	SERIALIZE_STR(new_script->script.filename);
 
-	zend_file_cache_serialize_hash(&new_script->class_table, script, info, buf, zend_file_cache_serialize_class);
-	zend_file_cache_serialize_hash(&new_script->function_table, script, info, buf, zend_file_cache_serialize_func);
-	zend_file_cache_serialize_op_array(&new_script->main_op_array, script, info, buf);
+	zend_file_cache_serialize_hash(&new_script->script.class_table, script, info, buf, zend_file_cache_serialize_class);
+	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
+	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
 
 	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
@@ -711,7 +711,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #endif
 	void *mem, *buf;
 
-	filename = zend_file_cache_get_bin_file_path(script->full_path);
+	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
 	if (zend_file_cache_mkdir(filename, strlen(ZCG(accel_directives).file_cache)) != SUCCESS) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot create directory for file '%s'\n", filename);
@@ -936,10 +936,10 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		end = opline + op_array->last;
 		while (opline < end) {
 # if ZEND_USE_ABS_CONST_ADDR
-			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+			if (opline->op1_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op1.zv);
 			}
-			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+			if (opline->op2_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op2.zv);
 			}
 # endif
@@ -1014,7 +1014,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 
 		UNSERIALIZE_STR(op_array->function_name);
 		UNSERIALIZE_STR(op_array->filename);
-		UNSERIALIZE_PTR(op_array->brk_cont_array);
+		UNSERIALIZE_PTR(op_array->live_range);
 		UNSERIALIZE_PTR(op_array->scope);
 		UNSERIALIZE_STR(op_array->doc_comment);
 		UNSERIALIZE_PTR(op_array->try_catch_array);
@@ -1091,8 +1091,8 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	}
 	zend_file_cache_unserialize_hash(&ce->constants_table,
 			script, buf, zend_file_cache_unserialize_zval, NULL);
-	UNSERIALIZE_STR(ZEND_CE_FILENAME(ce));
-	UNSERIALIZE_STR(ZEND_CE_DOC_COMMENT(ce));
+	UNSERIALIZE_STR(ce->info.user.filename);
+	UNSERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, ZVAL_PTR_DTOR);
 
@@ -1192,13 +1192,13 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 {
 	script->mem = buf;
 
-	UNSERIALIZE_STR(script->full_path);
+	UNSERIALIZE_STR(script->script.filename);
 
-	zend_file_cache_unserialize_hash(&script->class_table,
+	zend_file_cache_unserialize_hash(&script->script.class_table,
 			script, buf, zend_file_cache_unserialize_class, ZEND_CLASS_DTOR);
-	zend_file_cache_unserialize_hash(&script->function_table,
+	zend_file_cache_unserialize_hash(&script->script.function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
-	zend_file_cache_unserialize_op_array(&script->main_op_array, script, buf);
+	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 
 	UNSERIALIZE_PTR(script->arena_mem);
 }
@@ -1351,7 +1351,7 @@ use_process_mem:
 	if (cache_it) {
 		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 
-		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->full_path), ZSTR_LEN(script->full_path), 0, script);
+		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
 
 		zend_shared_alloc_unlock();
 		zend_arena_release(&CG(arena), checkpoint);

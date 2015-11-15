@@ -22,7 +22,14 @@
 #ifndef ZEND_OPTIMIZER_INTERNAL_H
 #define ZEND_OPTIMIZER_INTERNAL_H
 
-#include "ZendAccelerator.h"
+#define ZEND_RESULT_TYPE(opline)		(opline)->result_type
+#define ZEND_RESULT(opline)				(opline)->result
+#define ZEND_OP1_TYPE(opline)			(opline)->op1_type
+#define ZEND_OP1(opline)				(opline)->op1
+#define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
+#define ZEND_OP2_TYPE(opline)			(opline)->op2_type
+#define ZEND_OP2(opline)				(opline)->op2
+#define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
 
 #define VAR_NUM(v) EX_VAR_TO_NUM(v)
 #define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)ZEND_CALL_VAR_NUM(0, v))
@@ -51,8 +58,9 @@
 
 typedef struct _zend_optimizer_ctx {
 	zend_arena             *arena;
-	zend_persistent_script *script;
+	zend_script            *script;
 	HashTable              *constants;
+	zend_long               optimization_level;
 } zend_optimizer_ctx;
 
 typedef struct _zend_code_block zend_code_block;
@@ -76,9 +84,8 @@ typedef struct _zend_cfg {
 	zend_code_block    *blocks;
 	zend_code_block   **try;
 	zend_code_block   **catch;
-	zend_code_block   **loop_start;
-	zend_code_block   **loop_cont;
-	zend_code_block   **loop_brk;
+	zend_code_block   **live_range_start;
+	zend_code_block   **live_range_end;
 	zend_op           **Tsource;
 	char               *same_t;
 } zend_cfg;
@@ -87,9 +94,6 @@ struct _zend_block_source {
 	zend_code_block    *from;
 	zend_block_source  *next;
 };
-
-#define OPTIMIZATION_LEVEL \
-	ZCG(accel_directives).optimization_level
 
 #define LITERAL_LONG(op, val) do { \
 		zval _c; \
@@ -130,6 +134,7 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      uint32_t       var,
                                      zval          *val);
 
+void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var);
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);

@@ -1267,7 +1267,11 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 	unsigned int	i;
-	zend_ulong	*ret;
+#if defined(MYSQLI_USE_MYSQLND)
+	const size_t	*ret;
+#else
+	const zend_ulong *ret;
+#endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;

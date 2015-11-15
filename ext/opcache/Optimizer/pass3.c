@@ -63,7 +63,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 	uint32_t opline_num = 0;
 	ALLOCA_FLAG(use_heap);
 
-	jmp_hitlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t)*op_array->last);
+	jmp_hitlist = (uint32_t *)do_alloca(sizeof(uint32_t)*op_array->last, use_heap);
 	opline = op_array->opcodes;
 
 	while (opline < end) {
@@ -429,5 +429,5 @@ done_jmp_optimization:
 		opline++;
 		opline_num++;
 	}
-	FREE_ALLOCA(jmp_hitlist);
+	free_alloca(jmp_hitlist, use_heap);
 }

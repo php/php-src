@@ -302,7 +302,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								(ce->type == ZEND_INTERNAL_CLASS &&
 								 ce->info.internal.module->type != MODULE_PERSISTENT) ||
 								(ce->type == ZEND_USER_CLASS &&
-								 ZEND_CE_FILENAME(ce) != op_array->filename)) {
+								 ce->info.user.filename != op_array->filename)) {
 							break;
 						}
 					}
@@ -644,68 +644,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 			collect_constants = 0;
-			break;
-		case ZEND_FETCH_R:
-		case ZEND_FETCH_W:
-		case ZEND_FETCH_RW:
-		case ZEND_FETCH_FUNC_ARG:
-		case ZEND_FETCH_IS:
-		case ZEND_FETCH_UNSET:
-			if (opline != op_array->opcodes &&
-			    (opline-1)->opcode == ZEND_BEGIN_SILENCE &&
-			    (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL &&
-				opline->op1_type == IS_CONST &&
-			    opline->op2_type == IS_UNUSED &&
-			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    (Z_STRLEN(ZEND_OP1_LITERAL(opline)) != sizeof("this")-1 ||
-			     memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "this", sizeof("this") - 1) != 0)) {
-
-			    int var = opline->result.var;
-			    int level = 0;
-				zend_op *op = opline + 1;
-				zend_op *use = NULL;
-
-				while (op < end) {
-					if (op->opcode == ZEND_BEGIN_SILENCE) {
-						level++;
-					} else if (op->opcode == ZEND_END_SILENCE) {
-						if (level == 0) {
-							break;
-						} else {
-							level--;
-						}
-					}
-					if (op->op1_type == IS_VAR && op->op1.var == var) {
-						if (use) {
-							/* used more than once */
-							use = NULL;
-							break;
-						}
-						use = op;
-					} else if (op->op2_type == IS_VAR && op->op2.var == var) {
-						if (use) {
-							/* used more than once */
-							use = NULL;
-							break;
-						}
-						use = op;
-					}
-					op++;
-				}
-				if (use) {
-					if (use->op1_type == IS_VAR && use->op1.var == var) {
-						use->op1_type = IS_CV;
-						use->op1.var = zend_optimizer_lookup_cv(op_array,
-							Z_STR(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-					} else if (use->op2_type == IS_VAR && use->op2.var == var) {
-						use->op2_type = IS_CV;
-						use->op2.var = zend_optimizer_lookup_cv(op_array,
-							Z_STR(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-					}
-				}
-			}
 			break;
 		}
 		opline++;

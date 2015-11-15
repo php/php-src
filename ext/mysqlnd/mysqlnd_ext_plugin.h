@@ -14,66 +14,152 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
-  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-/* $Id: mysqlnd.h 318221 2011-10-19 15:04:12Z andrey $ */
-
 #ifndef MYSQLND_EXT_PLUGIN_H
 #define MYSQLND_EXT_PLUGIN_H
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_connection_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data((c), (p_id))
+struct st_mysqlnd_plugin__plugin_area_getters
+{
+	void ** (*get_connection_area)(const MYSQLND * conn, unsigned int plugin_id);
+	void ** (*get_connection_data_area)(const MYSQLND_CONN_DATA * conn, unsigned int plugin_id);
+	void ** (*get_result_area)(const MYSQLND_RES * result, unsigned int plugin_id);
+	void ** (*get_unbuffered_area)(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id);
+	void ** (*get_result_buffered_area)(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id);
+	void ** (*get_result_buffered_aread_c)(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id);
+	void ** (*get_stmt_area)(const MYSQLND_STMT * stmt, unsigned int plugin_id);
+	void ** (*get_protocol_decoder_area)(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, unsigned int plugin_id);
+	void ** (*get_ppec_area)(const MYSQLND_PFC * ppec, unsigned int plugin_id);
+	void ** (*get_vio_area)(const MYSQLND_VIO * vio, unsigned int plugin_id);
+};
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data_data(const MYSQLND_CONN_DATA * conn, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data_data((c), (p_id))
+extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_result_data(r, p_id) _mysqlnd_plugin_get_plugin_result_data((r), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_result_unbuffered_data(r, p_id) _mysqlnd_plugin_get_plugin_result_unbuffered_data((r), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_zval(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_result_buffered_data_zval(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_zval((r), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_result_buffered_data_c(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_c((r), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id))
-
-PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id);
-#define mysqlnd_plugin_get_plugin_net_data(n, p_id) _mysqlnd_plugin_get_plugin_net_data((n), (p_id))
+#define mysqlnd_plugin_get_plugin_connection_data(c, p_id)				mysqlnd_plugin_area_getters.get_connection_area((c), (p_id))
+#define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id)			mysqlnd_plugin_area_getters.get_connection_data_area((c), (p_id))
+#define mysqlnd_plugin_get_plugin_result_data(res, p_id)				mysqlnd_plugin_area_getters.get_result_area((res), (p_id))
+#define mysqlnd_plugin_get_plugin_result_unbuffered_data(res, p_id)		mysqlnd_plugin_area_getters.get_unbuffered_area((res), (p_id))
+#define mysqlnd_plugin_get_plugin_result_buffered_data_zval(res, p_id)	mysqlnd_plugin_area_getters.get_result_buffered_area((res), (p_id))
+#define mysqlnd_plugin_get_plugin_result_buffered_data_c(res, p_id)		mysqlnd_plugin_area_getters.get_result_buffered_aread_c((res), (p_id))
+#define mysqlnd_plugin_get_plugin_stmt_data(stmt, p_id)					mysqlnd_plugin_area_getters.get_stmt_area((stmt), (p_id))
+#define mysqlnd_plugin_get_plugin_protocol_data(proto, p_id)			mysqlnd_plugin_area_getters.get_protocol_decoder_area((proto), (p_id))
+#define mysqlnd_plugin_get_plugin_ppec_data(ppec, p_id)					mysqlnd_plugin_area_getters.get_ppec_area((ppec), (p_id))
+#define mysqlnd_plugin_get_plugin_vio_data(vio, p_id)					mysqlnd_plugin_area_getters.get_ppec_area((vio), (p_id))
 
 
-PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
-PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods * methods);
+struct st_mysqlnd_plugin_methods_xetters
+{
+	struct st_mnd_object_factory_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *methods);
+	} object_factory;
 
-PHPAPI struct st_mysqlnd_conn_data_methods * mysqlnd_conn_data_get_methods();
-PHPAPI void mysqlnd_conn_data_set_methods(struct st_mysqlnd_conn_data_methods * methods);
+	struct st_mnd_connection_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *methods);
+	} connection;
 
-PHPAPI struct st_mysqlnd_res_methods * mysqlnd_result_get_methods();
-PHPAPI void mysqlnd_result_set_methods(struct st_mysqlnd_res_methods * methods);
+	struct st_mnd_connection_data_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) *methods);
+	} connection_data;
 
-PHPAPI struct st_mysqlnd_result_unbuffered_methods * mysqlnd_result_unbuffered_get_methods();
-PHPAPI void mysqlnd_result_unbuffered_set_methods(struct st_mysqlnd_result_unbuffered_methods * methods);
+	struct st_mnd_result_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) *methods);
+	} result;
 
-PHPAPI struct st_mysqlnd_result_buffered_methods * mysqlnd_result_buffered_get_methods();
-PHPAPI void mysqlnd_result_buffered_set_methods(struct st_mysqlnd_result_buffered_methods * methods);
+	struct st_mnd_unbuffered_result_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) *methods);
+	} unbuffered_result;
 
-PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods();
-PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods * methods);
+	struct st_mnd_buffered_result_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered)* (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) *methods);
+	} buffered_result;
 
-PHPAPI struct st_mysqlnd_protocol_methods * mysqlnd_protocol_get_methods();
-PHPAPI void mysqlnd_protocol_set_methods(struct st_mysqlnd_protocol_methods * methods);
+	struct st_mnd_stmt_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * methods);
+	} statement;
 
-PHPAPI struct st_mysqlnd_net_methods * mysqlnd_net_get_methods();
-PHPAPI void mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods);
+	struct st_mnd_protocol_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)* (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *methods);
+	} protocol;
 
+	struct st_mnd_ppec_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods);
+	} ppec;
+
+	struct st_mnd_vio_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods);
+	} vio;
+
+	struct st_mnd_error_info_xetters
+	{
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * methods);
+	} error_info;
+
+	struct st_mnd_command_factory_xetters
+	{
+		func_mysqlnd__command_factory (*get)();
+		void (*set)(func_mysqlnd__command_factory factory);
+	} command_factory;
+};
+
+extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
+
+
+#define mysqlnd_object_factory_get_methods()	mysqlnd_plugin_methods_xetters.object_factory.get()
+#define mysqlnd_object_factory_set_methods(m)	mysqlnd_plugin_methods_xetters.object_factory.set((m))
+
+#define mysqlnd_conn_get_methods()			mysqlnd_plugin_methods_xetters.connection.get()
+#define mysqlnd_conn_set_methods(m)			mysqlnd_plugin_methods_xetters.connection.set((m))
+
+#define mysqlnd_conn_data_get_methods()		mysqlnd_plugin_methods_xetters.connection_data.get()
+#define mysqlnd_conn_data_set_methods(m)	mysqlnd_plugin_methods_xetters.connection_data.set((m))
+
+#define mysqlnd_result_get_methods()		mysqlnd_plugin_methods_xetters.result.get()
+#define mysqlnd_result_set_methods(m)		mysqlnd_plugin_methods_xetters.result.set((m))
+
+#define mysqlnd_result_unbuffered_get_methods()		mysqlnd_plugin_methods_xetters.unbuffered_result.get()
+#define mysqlnd_result_unbuffered_set_methods(m)	mysqlnd_plugin_methods_xetters.unbuffered_result.set((m))
+
+#define mysqlnd_result_buffered_get_methods()		mysqlnd_plugin_methods_xetters.buffered_result.get()
+#define mysqlnd_result_buffered_set_methods(m)		mysqlnd_plugin_methods_xetters.buffered_result.set((m))
+
+#define mysqlnd_stmt_get_methods()		mysqlnd_plugin_methods_xetters.statement.get()
+#define mysqlnd_stmt_set_methods(m)		mysqlnd_plugin_methods_xetters.statement.set((m))
+
+#define mysqlnd_protocol_get_methods()	mysqlnd_plugin_methods_xetters.protocol.get()
+#define mysqlnd_protocol_set_methods(m)	mysqlnd_plugin_methods_xetters.protocol.set((m))
+
+#define mysqlnd_pfc_get_methods()		mysqlnd_plugin_methods_xetters.ppec.get()
+#define mysqlnd_pfc_set_methods(m)		mysqlnd_plugin_methods_xetters.ppec.set((m))
+
+#define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
+#define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))
+
+#define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
+#define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))
+
+#define mysqlnd_error_info_get_methods()	mysqlnd_plugin_methods_xetters.error_info.get()
+#define mysqlnd_error_info_set_methods(m)	mysqlnd_plugin_methods_xetters.error_info.set((m))
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
 

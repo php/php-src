@@ -12,14 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 #ifndef MYSQLND_DEBUG_H
 #define MYSQLND_DEBUG_H
 
@@ -69,6 +65,17 @@ struct st_mysqlnd_plugin_trace_log
 void mysqlnd_debug_trace_plugin_register(void);
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
+
+#define MYSQLND_DEBUG_DUMP_TIME				1
+#define MYSQLND_DEBUG_DUMP_TRACE			2
+#define MYSQLND_DEBUG_DUMP_PID				4
+#define MYSQLND_DEBUG_DUMP_LINE				8
+#define MYSQLND_DEBUG_DUMP_FILE				16
+#define MYSQLND_DEBUG_DUMP_LEVEL			32
+#define MYSQLND_DEBUG_APPEND				64
+#define MYSQLND_DEBUG_FLUSH					128
+#define MYSQLND_DEBUG_TRACE_MEMORY_CALLS	256
+#define MYSQLND_DEBUG_PROFILE_CALLS			512
 
 
 #if defined(__GNUC__) || defined(PHP_WIN32)

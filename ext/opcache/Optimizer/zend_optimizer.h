@@ -44,4 +44,13 @@
 
 #define DEFAULT_OPTIMIZATION_LEVEL  "0xFFFFFFFF"
 
+typedef struct _zend_script {
+	zend_string   *filename;
+	zend_op_array  main_op_array;
+	HashTable      function_table;
+	HashTable      class_table;
+} zend_script;
+
+int zend_optimize_script(zend_script *script, zend_long optimization_level);
+
 #endif
