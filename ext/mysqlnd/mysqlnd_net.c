@@ -978,6 +978,10 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		ZVAL_BOOL(&verify_peer_zval, verify);
 		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
 		php_stream_context_set_option(context, "ssl", "verify_peer_name", &verify_peer_zval);
+		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DONT_VERIFY) {
+			ZVAL_TRUE(&verify_peer_zval);
+			php_stream_context_set_option(context, "ssl", "allow_self_signed", &verify_peer_zval);
+		}
 	}
 #if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, context);
