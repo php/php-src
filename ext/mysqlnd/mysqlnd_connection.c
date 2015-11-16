@@ -468,7 +468,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 static unsigned int
 MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags)
 {
+#ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+#endif
 	MYSQLND_VIO * vio = conn->vio;
 
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
