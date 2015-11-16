@@ -940,7 +940,7 @@ dnl PHP_NEW_EXTENSION(extname, sources [, shared [, sapi_class [, extra-cflags [
 dnl
 dnl Includes an extension in the build.
 dnl
-dnl "extname" is the name of the ext/ subdir where the extension resides.
+dnl "extname" is the name of the extension.
 dnl "sources" is a list of files relative to the subdir which are used
 dnl to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as
@@ -953,22 +953,23 @@ dnl "zend_ext" indicates a zend extension.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
+  ext_dir=[]PHP_EXT_DIR($1)
 
   ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
-    PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
-    EXT_STATIC="$EXT_STATIC $1"
+    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+    EXT_STATIC="$EXT_STATIC $1;$ext_dir"
     if test "$3" != "nocli"; then
-      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+      EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
     fi
   else
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
       [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
-      PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
+      PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
         *netware*[)]
           PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6, $7)
@@ -986,14 +987,14 @@ dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
       cgi|embed[)]
-        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
-        EXT_STATIC="$EXT_STATIC $1"
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+        EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
       *[)]
-        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,cli)
         ;;
     esac
-    EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+    EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
   fi
   PHP_ADD_BUILD_DIR($ext_builddir)
 
