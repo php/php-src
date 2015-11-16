@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2016, PHP 7.1.0
 
+Core:
+  . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+
 Standard
   . Implemented FR #55716 (Add an option to pass a custom stream context to
     get_headers()). (Ferenc)

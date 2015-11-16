@@ -358,7 +358,7 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 		map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
 
 		do {
-			if (op_array->opcodes[op_array->live_range[i].end].op1.var != var) {
+			if ((op_array->live_range[i].var & ~ZEND_LIVE_MASK) != var) {
 				map[i] = j;
 				if (i != j) {
 					op_array->live_range[j] = op_array->live_range[i];
