@@ -1674,10 +1674,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_SSL_CIPHER:
 		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 		case MYSQL_OPT_CONNECT_TIMEOUT:
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->vio->data->m.set_client_option(conn->vio, option, value);
 			break;
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQL_OPT_COMPRESS:
 		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->protocol_frame_codec->data->m.set_client_option(conn->protocol_frame_codec, option, value);

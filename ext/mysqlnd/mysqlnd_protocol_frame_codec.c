@@ -430,6 +430,19 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			}
 			pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
 			break;
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
+			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
+				DBG_RETURN(FAIL);
+			}
+			pfc->cmd_buffer.length = *(unsigned int*) value;
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, pfc->cmd_buffer.length);
+			if (!pfc->cmd_buffer.buffer) {
+				pfc->cmd_buffer.buffer = mnd_pemalloc(pfc->cmd_buffer.length, pfc->persistent);
+			} else {
+				pfc->cmd_buffer.buffer = mnd_perealloc(pfc->cmd_buffer.buffer, pfc->cmd_buffer.length, pfc->persistent);
+			}
+			break;
 		}
 		default:
 			DBG_RETURN(FAIL);
@@ -464,7 +477,13 @@ MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
-	return PASS;
+	unsigned int buf_size;
+	DBG_ENTER("mysqlnd_pfc::init");
+
+	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
+	pfc->data->m.set_client_option(pfc, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size);
+
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
@@ -476,6 +495,12 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 	DBG_ENTER("mysqlnd_pfc::dtor");
 	if (pfc) {
 		pfc->data->m.free_contents(pfc);
+
+		if (pfc->cmd_buffer.buffer) {
+			DBG_INF("Freeing cmd buffer");
+			mnd_pefree(pfc->cmd_buffer.buffer, pfc->persistent);
+			pfc->cmd_buffer.buffer = NULL;
+		}
 
 		mnd_pefree(pfc->data, pfc->data->persistent);
 		mnd_pefree(pfc, pfc->persistent);

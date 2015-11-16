@@ -835,9 +835,6 @@ struct st_mysqlnd_vio_data
 
 struct st_mysqlnd_vio
 {
-	/* cmd buffer */
-	MYSQLND_CMD_BUFFER	cmd_buffer;
-
 	struct st_mysqlnd_vio_data * data;
 
 	zend_bool persistent;
@@ -1130,6 +1127,8 @@ struct st_mysqlnd_protocol_frame_codec_data
 
 struct st_mysqlnd_protocol_frame_codec
 {
+	MYSQLND_CMD_BUFFER	cmd_buffer;
+
 	struct st_mysqlnd_protocol_frame_codec_data * data;
 
 	zend_bool 		persistent;
