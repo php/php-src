@@ -372,7 +372,12 @@ PHP_FUNCTION(ldap_connect)
 			}
 
 			url = emalloc(urllen);
-			snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+			if (host && (strchr(host, ':') != NULL)) {
+				/* Legacy support for host:port */
+				snprintf( url, urllen, "ldap://%s", host );
+			} else {
+				snprintf( url, urllen, "ldap://%s:%ld", host ? host : "", port );
+			}
 		}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
