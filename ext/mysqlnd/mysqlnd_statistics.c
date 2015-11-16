@@ -208,25 +208,9 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 /* }}} */
 
 
-/* {{{ _mysqlnd_get_client_stats */
-PHPAPI void
-_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC)
-{
-	MYSQLND_STATS stats, *stats_ptr = mysqlnd_global_stats;
-	DBG_ENTER("_mysqlnd_get_client_stats");
-	if (!stats_ptr) {
-		memset(&stats, 0, sizeof(stats));
-		stats_ptr = &stats;
-	}
-	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent)
 {
 	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	if (*stats == NULL) {
@@ -245,7 +229,7 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persisten
 
 /* {{{ mysqlnd_stats_end */
 PHPAPI void
-mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent)
+mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
@@ -289,6 +273,25 @@ mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+
+/************ MYSQLND specific code **********/
+
+/* {{{ _mysqlnd_get_client_stats */
+PHPAPI void
+_mysqlnd_get_client_stats(MYSQLND_STATS * stats_ptr, zval *return_value ZEND_FILE_LINE_DC)
+{
+	MYSQLND_STATS stats;
+	DBG_ENTER("_mysqlnd_get_client_stats");
+	if (!stats_ptr) {
+		memset(&stats, 0, sizeof(stats));
+		stats_ptr = &stats;
+	}
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
 
 
 /*

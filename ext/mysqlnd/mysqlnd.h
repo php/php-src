@@ -111,7 +111,7 @@ PHPAPI void mysqlnd_debug(const char *mode);
 #define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
 #define mysqlnd_result_fetch_field_data(res,offset,ret)	(res)->m.fetch_field_data((res), (offset), (ret))
 #define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)
-#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats((values) ZEND_FILE_LINE_CC)
+#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats(mysqlnd_global_stats, (values) ZEND_FILE_LINE_CC)
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
@@ -257,7 +257,50 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 
 
 /* Performance statistics */
-PHPAPI void			_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC);
+PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
+PHPAPI extern const MYSQLND_STRING mysqlnd_stats_values_names[];
+PHPAPI void			_mysqlnd_get_client_stats(MYSQLND_STATS * stats, zval *return_value ZEND_FILE_LINE_DC);
+
+
+#ifndef MYSQLND_CORE_STATISTICS_DISABLED
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
+
+#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic) \
+	MYSQLND_DEC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
+
+#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2) \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2))
+
+#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic) \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic)); \
+	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), (conn_stats), (statistic));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
+	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic), (value)); \
+	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), (conn_stats), (statistic), (value));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2) \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2)); \
+	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2));
+
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
+	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2), (statistic3), (value3)); \
+	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2), (statistic3), (value3));
+
+#else
+
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
+#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2)
+#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3)
+
+#endif /* MYSQLND_CORE_STATISTICS_DISABLED */
+
 
 /* double check the class name to avoid naming conflicts when using these: */
 #define MYSQLND_METHOD(class, method) 			mysqlnd_##class##_##method##_pub
