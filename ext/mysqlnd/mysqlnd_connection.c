@@ -477,10 +477,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 
 	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
 
-	if (PG(open_basedir) && strlen(PG(open_basedir))) {
-		mysql_flags ^= CLIENT_LOCAL_FILES;
-	}
-
 #ifndef MYSQLND_COMPRESSION_ENABLED
 	if (mysql_flags & CLIENT_COMPRESS) {
 		mysql_flags &= ~CLIENT_COMPRESS;
