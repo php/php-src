@@ -1824,6 +1824,7 @@ PHP_FUNCTION(mysqli_options)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_INITIALIZED);
 
+#if !defined(MYSQLI_USE_MYSQLND)
 #if PHP_API_VERSION < 20100412
 	if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode)) {
 #else
@@ -1833,6 +1834,7 @@ PHP_FUNCTION(mysqli_options)
 			RETURN_FALSE;
 		}
 	}
+#endif
 	expected_type = mysqli_options_get_option_zval_type(mysql_option);
 	if (expected_type != Z_TYPE_PP(mysql_value)) {
 		switch (expected_type) {

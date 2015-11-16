@@ -120,9 +120,11 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 		/* remove some insecure options */
 		flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
+#if !defined(MYSQLI_USE_MYSQLND)
 		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
 			flags &= ~CLIENT_LOCAL_FILES;
 		}
+#endif
 	}
 
 	if (!socket_len || !socket) {

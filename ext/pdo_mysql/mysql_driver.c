@@ -629,6 +629,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			goto cleanup;
 		}
 
+#ifndef PDO_USE_MYSQLND
 #if PHP_API_VERSION < 20100412
 		if ((PG(open_basedir) && PG(open_basedir)[0] != '\0') || PG(safe_mode))
 #else
@@ -637,6 +638,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{
 			local_infile = 0;
 		}
+#endif
 #if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
 		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
 			pdo_mysql_error(dbh);
