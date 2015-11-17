@@ -1082,7 +1082,7 @@ typedef enum_func_status	(*func_mysqlnd_pfc__receive)(MYSQLND_PFC * const pfc, M
 typedef enum_func_status	(*func_mysqlnd_pfc__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_PFC * pfc, MYSQLND_VIO * const vio, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info);
 typedef void				(*func_mysqlnd_pfc__free_contents)(MYSQLND_PFC * pfc);
 
-MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec)
+MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec)
 {
 	func_mysqlnd_pfc__init init;
 	func_mysqlnd_pfc__dtor dtor;
@@ -1121,7 +1121,7 @@ struct st_mysqlnd_protocol_frame_codec_data
 
 	zend_bool		persistent;
 
-	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) m;
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) m;
 };
 
 

@@ -324,19 +324,19 @@ _mysqlnd_protocol_payload_decoder_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE
 
 
 /* {{{ _mysqlnd_pfc_get_methods */
-static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) *
+static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) *
 _mysqlnd_pfc_get_methods()
 {
-	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec);
+	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_frame_codec);
 }
 /* }}} */
 
 
 /* {{{ _mysqlnd_pfc_set_methods */
 static void
-_mysqlnd_pfc_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods)
+_mysqlnd_pfc_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * methods)
 {
-	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_envelope_codec) = *methods;
+	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_frame_codec) = *methods;
 }
 /* }}} */
 

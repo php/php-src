@@ -448,7 +448,7 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 /* }}} */
 
 
-MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_envelope_codec)
+MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_frame_codec)
 	MYSQLND_METHOD(mysqlnd_pfc, init),
 	MYSQLND_METHOD(mysqlnd_pfc, dtor),
 	MYSQLND_METHOD(mysqlnd_pfc, reset),

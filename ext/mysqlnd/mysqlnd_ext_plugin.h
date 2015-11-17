@@ -99,8 +99,8 @@ struct st_mysqlnd_plugin_methods_xetters
 
 	struct st_mnd_ppec_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * (*get)();
-		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods);
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * methods);
 	} ppec;
 
 	struct st_mnd_vio_xetters
