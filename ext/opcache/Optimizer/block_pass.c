@@ -1713,25 +1713,18 @@ next_target_znz:
 
 /* Global data dependencies */
 
-#define T_USAGE(op) do { \
-		if ((op ## _type & (IS_VAR | IS_TMP_VAR)) && \
-		   !zend_bitset_in(defined_here, VAR_NUM(op.var)) && !zend_bitset_in(used_ext, VAR_NUM(op.var))) {	\
-			zend_bitset_incl(used_ext, VAR_NUM(op.var));									\
-		} \
-	} while (0)
-
-#define NEVER_USED(op) ((op ## _type & (IS_VAR | IS_TMP_VAR)) && !zend_bitset_in(usage, VAR_NUM(op.var))) /* !zend_bitset_in(used_ext, op.var) && */
-#define RES_NEVER_USED(opline) (opline->result_type == IS_UNUSED || NEVER_USED(opline->result))
-
 /* Find a set of variables which are used outside of the block where they are
  * defined. We won't apply some optimization patterns for such variables. */
-static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
+static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
 {
-	zend_code_block *next_block = block->next;
+	zend_code_block *block;
+	uint32_t var_num;
 	uint32_t bitset_len;
 	zend_bitset usage;
 	zend_bitset defined_here;
 	void *checkpoint;
+	zend_op *opline, *end;
+
 
 	if (op_array->T == 0) {
 		/* shortcut - if no Ts, nothing to do */
@@ -1740,42 +1733,61 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
-	usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
-	zend_bitset_clear(usage, bitset_len);
+	usage = zend_arena_calloc(&ctx->arena, bitset_len, ZEND_BITSET_ELM_SIZE);
 	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
-	while (next_block) {
-		zend_op *opline = next_block->start_opline;
-		zend_op *end = opline + next_block->len;
+	for (block = cfg->blocks; block; block = block->next) {
 
-		if (!next_block->access) {
-			next_block = next_block->next;
+		if (!block->access) {
 			continue;
 		}
+
+		opline = block->start_opline;
+		end = opline + block->len;
 		zend_bitset_clear(defined_here, bitset_len);
 
 		while (opline<end) {
-			T_USAGE(opline->op1);
-			if (opline->op2_type & (IS_VAR | IS_TMP_VAR)) {
-				if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
+			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+				var_num = VAR_NUM(opline->op1.var);
+				if (!zend_bitset_in(defined_here, var_num)) {
+					zend_bitset_incl(used_ext, var_num);
+				}
+			}
+			if (opline->op2_type == IS_VAR) {
+				var_num = VAR_NUM(opline->op2.var);
+				if (opline->opcode == ZEND_FE_FETCH_R ||
+				    opline->opcode == ZEND_FE_FETCH_RW) {
 					/* these opcode use the op2 as result */
-					zend_bitset_incl(defined_here, VAR_NUM(ZEND_OP2(opline).var));
-				} else {
-					T_USAGE(opline->op2);
+					zend_bitset_incl(defined_here, var_num);
+				} else if (!zend_bitset_in(defined_here, var_num)) {
+					zend_bitset_incl(used_ext, var_num);
+				}
+			} else if (opline->op2_type == IS_TMP_VAR) {
+				var_num = VAR_NUM(opline->op2.var);
+				if (!zend_bitset_in(defined_here, var_num)) {
+					zend_bitset_incl(used_ext, var_num);
 				}
 			}
 
-			if (RESULT_USED(opline)) {
-				if (!zend_bitset_in(defined_here, VAR_NUM(ZEND_RESULT(opline).var)) && !zend_bitset_in(used_ext, VAR_NUM(ZEND_RESULT(opline).var)) &&
-					opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
-					/* these opcode use the result as argument */
-					zend_bitset_incl(used_ext, VAR_NUM(ZEND_RESULT(opline).var));
+			if (opline->result_type == IS_VAR) {
+				var_num = VAR_NUM(opline->result.var);
+				zend_bitset_incl(defined_here, var_num);
+			} else if (opline->result_type == IS_TMP_VAR) {
+				var_num = VAR_NUM(opline->result.var);
+				switch (opline->opcode) {
+					case ZEND_ADD_ARRAY_ELEMENT:
+					case ZEND_ROPE_ADD:
+						/* these opcodes use the result as argument */
+						if (!zend_bitset_in(defined_here, var_num)) {
+							zend_bitset_incl(used_ext, var_num);
+						}
+						break;
+					default :
+						zend_bitset_incl(defined_here, var_num);
 				}
-				zend_bitset_incl(defined_here, VAR_NUM(ZEND_RESULT(opline).var));
 			}
 			opline++;
 		}
-		next_block = next_block->next;
 	}
 
 #if DEBUG_BLOCKPASS
@@ -1787,90 +1799,106 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, zend_b
 	}
 #endif
 
-	while (block) {
-		zend_op *opline = block->start_opline + block->len - 1;
+	for (block = cfg->blocks; block; block = block->next) {
 
 		if (!block->access) {
-			block = block->next;
 			continue;
 		}
 
+		opline = block->start_opline + block->len - 1;
+		end = block->start_opline;
 		zend_bitset_copy(usage, used_ext, bitset_len);
 
-		while (opline >= block->start_opline) {
+		while (opline >= end) {
 			/* usage checks */
-			if (RES_NEVER_USED(opline)) {
+			if (opline->result_type == IS_VAR) {
+				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN_ADD:
+						case ZEND_ASSIGN_SUB:
+						case ZEND_ASSIGN_MUL:
+						case ZEND_ASSIGN_DIV:
+						case ZEND_ASSIGN_POW:
+						case ZEND_ASSIGN_MOD:
+						case ZEND_ASSIGN_SL:
+						case ZEND_ASSIGN_SR:
+						case ZEND_ASSIGN_CONCAT:
+						case ZEND_ASSIGN_BW_OR:
+						case ZEND_ASSIGN_BW_AND:
+						case ZEND_ASSIGN_BW_XOR:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_ASSIGN:
+						case ZEND_ASSIGN_REF:
+						case ZEND_DO_FCALL:
+						case ZEND_DO_ICALL:
+						case ZEND_DO_UCALL:
+						case ZEND_DO_FCALL_BY_NAME:
+							opline->result_type |= EXT_TYPE_UNUSED;
+							break;
+					}
+				} else {
+					zend_bitset_excl(usage, VAR_NUM(opline->result.var));
+				}
+			} else if (opline->result_type == IS_TMP_VAR) {
+				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
+					switch (opline->opcode) {
+						case ZEND_POST_INC:
+						case ZEND_POST_DEC:
+							opline->opcode -= 2;
+							opline->result_type = IS_VAR | EXT_TYPE_UNUSED;
+							break;
+						case ZEND_QM_ASSIGN:
+						case ZEND_BOOL:
+						case ZEND_BOOL_NOT:
+							if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+								literal_dtor(&ZEND_OP1_LITERAL(opline));
+							}
+							MAKE_NOP(opline);
+							break;
+						case ZEND_JMPZ_EX:
+						case ZEND_JMPNZ_EX:
+							opline->opcode -= 3;
+							SET_UNUSED(opline->result);
+							break;
+						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_ROPE_ADD:
+							zend_bitset_incl(usage, VAR_NUM(opline->result.var));
+							break;
+					}
+				} else {
+					switch (opline->opcode) {
+						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_ROPE_ADD:
+							break;
+						default:
+							zend_bitset_excl(usage, VAR_NUM(opline->result.var));
+							break;
+					}
+				}
+			}
+
+			if (opline->op2_type == IS_VAR) {
 				switch (opline->opcode) {
-					case ZEND_ASSIGN_ADD:
-					case ZEND_ASSIGN_SUB:
-					case ZEND_ASSIGN_MUL:
-					case ZEND_ASSIGN_DIV:
-					case ZEND_ASSIGN_POW:
-					case ZEND_ASSIGN_MOD:
-					case ZEND_ASSIGN_SL:
-					case ZEND_ASSIGN_SR:
-					case ZEND_ASSIGN_CONCAT:
-					case ZEND_ASSIGN_BW_OR:
-					case ZEND_ASSIGN_BW_AND:
-					case ZEND_ASSIGN_BW_XOR:
-					case ZEND_PRE_INC:
-					case ZEND_PRE_DEC:
-					case ZEND_POST_INC:
-					case ZEND_POST_DEC:
-					case ZEND_ASSIGN:
-					case ZEND_ASSIGN_REF:
-					case ZEND_DO_FCALL:
-					case ZEND_DO_ICALL:
-					case ZEND_DO_UCALL:
-					case ZEND_DO_FCALL_BY_NAME:
-						if (ZEND_RESULT_TYPE(opline) == IS_VAR) {
-							ZEND_RESULT_TYPE(opline) |= EXT_TYPE_UNUSED;
-						}
+					case ZEND_FE_FETCH_R:
+					case ZEND_FE_FETCH_RW:
+						zend_bitset_excl(usage, VAR_NUM(opline->op2.var));
 						break;
-					case ZEND_QM_ASSIGN:
-					case ZEND_BOOL:
-					case ZEND_BOOL_NOT:
-						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						}
-						MAKE_NOP(opline);
-						break;
-					case ZEND_JMPZ_EX:
-					case ZEND_JMPNZ_EX:
-						opline->opcode -= 3;
-						SET_UNUSED(opline->result);
+					default:
+						zend_bitset_incl(usage, VAR_NUM(opline->op2.var));
 						break;
 				}
+			} else if (opline->op2_type == IS_TMP_VAR) {
+				zend_bitset_incl(usage, VAR_NUM(opline->op2.var));
 			}
 
-			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
-				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
-					zend_bitset_incl(usage, VAR_NUM(ZEND_RESULT(opline).var));
-				}
-			} else {
-				if (RESULT_USED(opline)) {
-					zend_bitset_excl(usage, VAR_NUM(ZEND_RESULT(opline).var));
-				}
+			if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
+				zend_bitset_incl(usage, VAR_NUM(opline->op1.var));
 			}
-
-			if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
-				zend_bitset_incl(usage, VAR_NUM(ZEND_OP1(opline).var));
-			}
-
-			if (ZEND_OP2_TYPE(opline) == IS_VAR || ZEND_OP2_TYPE(opline) == IS_TMP_VAR) {
-				zend_bitset_incl(usage, VAR_NUM(ZEND_OP2(opline).var));
-			}
-
-			if ((ZEND_RESULT_TYPE(opline) & IS_VAR) &&
-                (ZEND_RESULT_TYPE(opline) & EXT_TYPE_UNUSED) &&
-                zend_bitset_in(usage, VAR_NUM(ZEND_RESULT(opline).var))) {
-				ZEND_RESULT_TYPE(opline) &= ~EXT_TYPE_UNUSED;
- 			}
 
 			opline--;
 		}
-		block = block->next;
-	} /* end blocks */
+	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
 }
@@ -1918,7 +1946,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	for (pass = 0; pass < PASSES; pass++) {
 		/* Compute data dependencies */
 		zend_bitset_clear(usage, bitset_len);
-		zend_t_usage(cfg.blocks, op_array, usage, ctx);
+		zend_t_usage(&cfg, op_array, usage, ctx);
 
 		/* optimize each basic block separately */
 		for (cur_block = cfg.blocks; cur_block; cur_block = cur_block->next) {
@@ -1941,7 +1969,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	}
 
 	zend_bitset_clear(usage, bitset_len);
-	zend_t_usage(cfg.blocks, op_array, usage, ctx);
+	zend_t_usage(&cfg, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array);
 
 	/* Destroy CFG */

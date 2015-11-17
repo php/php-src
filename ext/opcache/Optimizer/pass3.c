@@ -415,14 +415,7 @@ continue_jmpznz_optimization:
 					if (next_op->opcode == ZEND_FREE &&
 						ZEND_OP1(next_op).var == ZEND_RESULT(opline).var) {
 						MAKE_NOP(next_op);
-						switch (opline->opcode) {
-							case ZEND_POST_INC:
-								opline->opcode = ZEND_PRE_INC;
-								break;
-							case ZEND_POST_DEC:
-								opline->opcode = ZEND_PRE_DEC;
-								break;
-						}
+						opline->opcode -= 2;
 						ZEND_RESULT_TYPE(opline) = IS_VAR | EXT_TYPE_UNUSED;
 					}
 				}
