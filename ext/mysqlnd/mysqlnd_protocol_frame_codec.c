@@ -20,6 +20,7 @@
 #include "mysqlnd.h"
 #include "mysqlnd_connection.h"
 #include "mysqlnd_priv.h"
+#include "mysqlnd_read_buffer.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
@@ -183,69 +184,6 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
-/* {{{ php_mysqlnd_read_buffer_is_empty */
-static zend_bool
-php_mysqlnd_read_buffer_is_empty(MYSQLND_READ_BUFFER * buffer)
-{
-	return buffer->len? FALSE:TRUE;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_read */
-static void
-php_mysqlnd_read_buffer_read(MYSQLND_READ_BUFFER * buffer, size_t count, zend_uchar * dest)
-{
-	if (buffer->len >= count) {
-		memcpy(dest, buffer->data + buffer->offset, count);
-		buffer->offset += count;
-		buffer->len -= count;
-	}
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_bytes_left */
-static size_t
-php_mysqlnd_read_buffer_bytes_left(MYSQLND_READ_BUFFER * buffer)
-{
-	return buffer->len;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_free */
-static void
-php_mysqlnd_read_buffer_free(MYSQLND_READ_BUFFER ** buffer)
-{
-	DBG_ENTER("php_mysqlnd_read_buffer_free");
-	if (*buffer) {
-		mnd_efree((*buffer)->data);
-		mnd_efree(*buffer);
-		*buffer = NULL;
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_create_read_buffer */
-static MYSQLND_READ_BUFFER *
-mysqlnd_create_read_buffer(size_t count)
-{
-	MYSQLND_READ_BUFFER * ret = mnd_emalloc(sizeof(MYSQLND_READ_BUFFER));
-	DBG_ENTER("mysqlnd_create_read_buffer");
-	ret->is_empty = php_mysqlnd_read_buffer_is_empty;
-	ret->read = php_mysqlnd_read_buffer_read;
-	ret->bytes_left = php_mysqlnd_read_buffer_bytes_left;
-	ret->free_buffer = php_mysqlnd_read_buffer_free;
-	ret->data = mnd_emalloc(count);
-	ret->size = ret->len = count;
-	ret->offset = 0;
-	DBG_RETURN(ret);
-}
-/* }}} */
-
 
 /* {{{ mysqlnd_pfc::read_compressed_packet_from_stream_and_fill_read_buffer */
 static enum_func_status
