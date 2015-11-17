@@ -1732,7 +1732,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	usage = zend_arena_calloc(&ctx->arena, bitset_len, ZEND_BITSET_ELM_SIZE);
 	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
-	for (block = cfg->blocks; block; block = block->next) {
+	for (block = cfg->blocks->next; block; block = block->next) {
 
 		if (!block->access) {
 			continue;
