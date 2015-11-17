@@ -473,7 +473,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_PFC * pfc;
 	DBG_ENTER("mysqlnd_pfc_init");
