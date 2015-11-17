@@ -924,16 +924,12 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
                 zval_get_long(&ZEND_OP2_LITERAL(opline)) == 0) {
-				if (RESULT_USED(opline)) {
-					SET_VAR_SOURCE(opline);
-				}
+				SET_VAR_SOURCE(opline);
                 opline++;
 				continue;
             } else if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR) &&
                 zval_get_long(&ZEND_OP2_LITERAL(opline)) < 0) {
-				if (RESULT_USED(opline)) {
-					SET_VAR_SOURCE(opline);
-				}
+				SET_VAR_SOURCE(opline);
                 opline++;
 				continue;
 			}
@@ -1057,7 +1053,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(opline);
 		}
 		/* get variable source */
-		if (RESULT_USED(opline)) {
+		if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
 			SET_VAR_SOURCE(opline);
 		}
 		if (opline->opcode != ZEND_NOP) {

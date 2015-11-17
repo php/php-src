@@ -41,22 +41,8 @@
 #define INV_COND_EX(op)    ((op) == ZEND_JMPZ    ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 #define INV_EX_COND_EX(op) ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 
-#undef MAKE_NOP
-
-#define MAKE_NOP(opline) do { \
-	(opline)->op1.num = 0; \
-	(opline)->op2.num = 0; \
-	(opline)->result.num = 0; \
-	(opline)->opcode = ZEND_NOP; \
-	(opline)->op1_type =  IS_UNUSED; \
-	(opline)->op2_type = IS_UNUSED; \
-	(opline)->result_type = IS_UNUSED; \
-	 zend_vm_set_opcode_handler(opline); \
-} while (0)
-
-#define RESULT_USED(op)	    (((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
 #define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)
-#define SAME_VAR(op1, op2)  ((((op1 ## _type & IS_VAR) && (op2 ## _type & IS_VAR)) || (op1 ## _type == IS_TMP_VAR && op2 ## _type == IS_TMP_VAR)) && op1.var == op2.var)
+#define SAME_VAR(op1, op2)  (op1 ## _type == op2 ## _type && op1.var == op2.var)
 
 typedef struct _zend_optimizer_ctx {
 	zend_arena             *arena;

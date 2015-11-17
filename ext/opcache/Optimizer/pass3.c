@@ -93,7 +93,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 						break;
 					}
 
-					if ((ZEND_OP2_TYPE(opline) == IS_VAR || ZEND_OP2_TYPE(opline) == IS_CV)
+					if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_CV))
 						&& ZEND_OP2(opline).var == ZEND_OP1(next_opline).var &&
 						(opline->opcode == ZEND_ADD ||
 						 opline->opcode == ZEND_MUL ||
@@ -112,7 +112,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 							COPY_NODE(opline->op2, tmp);
 						}
 					}
-					if ((ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_CV)
+					if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_CV))
 						&& ZEND_OP1(opline).var == ZEND_OP1(next_opline).var
 						&& ZEND_OP1_TYPE(opline) == ZEND_OP1_TYPE(next_opline)) {
 						switch (opline->opcode) {
