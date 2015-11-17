@@ -10,7 +10,7 @@ if (!extension_loaded('sockets')) {
 ?>
 --FILE--
 <?php
-$host = ""yahoo.com"";
+$host = "yahoo.com";
 $port = 80;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
