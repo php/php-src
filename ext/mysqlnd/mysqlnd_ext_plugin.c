@@ -139,16 +139,16 @@ mysqlnd_plugin__get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plu
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin__get_plugin_ppec_data */
+/* {{{ mysqlnd_plugin__get_plugin_pfc_data */
 static void **
-mysqlnd_plugin__get_plugin_ppec_data(const MYSQLND_PFC * ppec, unsigned int plugin_id)
+mysqlnd_plugin__get_plugin_pfc_data(const MYSQLND_PFC * pfc, unsigned int plugin_id)
 {
-	DBG_ENTER("mysqlnd_plugin__get_plugin_ppec_data");
+	DBG_ENTER("mysqlnd_plugin__get_plugin_pfc_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!ppec || plugin_id >= mysqlnd_plugin_count()) {
+	if (!pfc || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)((char *)ppec + sizeof(MYSQLND_PFC) + plugin_id * sizeof(void *)));
+	DBG_RETURN((void *)((char *)pfc + sizeof(MYSQLND_PFC) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -176,7 +176,7 @@ struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters =
 	mysqlnd_plugin__get_plugin_result_buffered_data_c,
 	mysqlnd_plugin__get_plugin_stmt_data,
 	mysqlnd_plugin__get_plugin_protocol_data,
-	mysqlnd_plugin__get_plugin_ppec_data,
+	mysqlnd_plugin__get_plugin_pfc_data,
 	mysqlnd_plugin__get_plugin_vio_data,
 };
 
