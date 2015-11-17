@@ -610,17 +610,31 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(src);
 		}
 
-       /* T = BOOL(X), FREE(T) => NOP */
-		if (opline->opcode == ZEND_FREE &&
-			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-			VAR_SOURCE(opline->op1)) {
-			zend_op *src = VAR_SOURCE(opline->op1);
-			if (src->opcode == ZEND_BOOL) {
-				if (ZEND_OP1_TYPE(src) == IS_CONST) {
-					literal_dtor(&ZEND_OP1_LITERAL(src));
+		if (opline->opcode == ZEND_FREE) {
+			if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
+				/* T = BOOL(X), FREE(T) => NOP */
+				zend_op *src = VAR_SOURCE(opline->op1);
+
+				if (src &&
+				    (src->opcode == ZEND_BOOL || src->opcode == ZEND_BOOL_NOT)) {
+					if (ZEND_OP1_TYPE(src) == IS_CONST) {
+						literal_dtor(&ZEND_OP1_LITERAL(src));
+					}
+					MAKE_NOP(src);
+					MAKE_NOP(opline);
 				}
-				MAKE_NOP(src);
-				MAKE_NOP(opline);
+			} else if (ZEND_OP1_TYPE(opline) == IS_VAR) {
+				/* V = OP, FREE(V) => OP. NOP */
+				zend_op *src = VAR_SOURCE(opline->op1);
+
+				if (src &&
+				    src->opcode != ZEND_FETCH_R &&
+				    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
+				    src->opcode != ZEND_FETCH_DIM_R &&
+				    src->opcode != ZEND_FETCH_OBJ_R) {
+					ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
+					MAKE_NOP(opline);
+				}
 			}
 		}
 
@@ -776,53 +790,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_UNSET(opline->op1);
 			MAKE_NOP(src);
 			continue;
-		} else if ((opline->opcode == ZEND_JMPZ ||
-		            opline->opcode == ZEND_JMPNZ) &&
-		           block->op2_to == block->follow_to) {
-			/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
-
-			if (opline->op1_type == IS_VAR) {
-				zend_op *src = VAR_SOURCE(opline->op1);
-
-				if (src &&
-				    src->opcode != ZEND_FETCH_R &&
-				    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
-				    src->opcode != ZEND_FETCH_DIM_R &&
-				    src->opcode != ZEND_FETCH_OBJ_R) {
-					ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
-					MAKE_NOP(opline);
-				}
-			}
-			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-				opline->opcode = ZEND_FREE;
-				opline->op2.num = 0;
-			} else {
-				MAKE_NOP(opline);
-			}
-			block->op2_to = NULL;
-		} else if (opline->opcode == ZEND_JMPZNZ &&
-		           block->op2_to == block->ext_to) {
-			if (opline->op1_type == IS_VAR) {
-				zend_op *src = VAR_SOURCE(opline->op1);
-
-				if (src &&
-				    src->opcode != ZEND_FETCH_R &&
-				    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
-				    src->opcode != ZEND_FETCH_DIM_R &&
-				    src->opcode != ZEND_FETCH_OBJ_R) {
-					ZEND_RESULT_TYPE(src) |= EXT_TYPE_UNUSED;
-					MAKE_NOP(opline);
-				}
-			}
-			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-				opline->opcode = ZEND_FREE;
-				opline->op2.num = opline->extended_value = 0;
-			} else {
-				MAKE_NOP(opline);
-			}
-			block->follow_to = block->op2_to;
-			block->op2_to = NULL;
-			block->ext_to = NULL;
 		} else
 #if 0
 		/* T = BOOL_NOT(X) + T = JMPZ_EX(T, X) -> T = BOOL_NOT(X), JMPNZ(X) */
@@ -1385,6 +1352,19 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 				break;
 			}
 
+			if (block->op2_to == block->follow_to) {
+				/* L: JMPZ(X, L+1) -> NOP or FREE(X) */
+
+				if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+					last_op->opcode = ZEND_FREE;
+					last_op->op2.num = 0;
+				} else {
+					MAKE_NOP(last_op);
+				}
+				block->op2_to = NULL;
+				break;
+			}
+
 			if (block->op2_to) {
 				zend_uchar same_type = ZEND_OP1_TYPE(last_op);
 				uint32_t same_var = VAR_NUM_EX(last_op->op1);
@@ -1642,6 +1622,17 @@ next_target_ex:
 					block->op2_to = NULL;
 					block->ext_to = NULL;
 					del_source(block, todel);
+				}
+			} else if (block->op2_to == block->ext_to) {
+				/* both goto the same one - it's JMP */
+				if (!(last_op->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					/* JMPZNZ(?,L,L) -> JMP(L) */
+					last_op->opcode = ZEND_JMP;
+					SET_UNUSED(last_op->op1);
+					SET_UNUSED(last_op->op2);
+					block->op1_to = block->op2_to;
+					block->op2_to = NULL;
+					block->ext_to = NULL;
 				}
 			} else if (block->op2_to == next) {
 				/* jumping to next on Z - can follow to it and jump only on NZ */
