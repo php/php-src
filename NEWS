@@ -17,6 +17,11 @@ PHP                                                                        NEWS
   . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
     (Laruence)
 
+- Mysqlnd:
+  . Fixed bug #68344 (MySQLi does not provide way to disable peer certificate
+    validation) by introducing MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+	connection flag. (Andrey)
+
 - OCI8:
   . Fixed bug #68298 (OCI int overflow) (Senthil).
 
