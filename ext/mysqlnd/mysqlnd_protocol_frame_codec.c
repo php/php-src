@@ -62,14 +62,14 @@ MYSQLND_METHOD(mysqlnd_pfc, reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * cons
   count + MYSQLND_HEADER_SIZE = sizeof(buffer) (not the pointer but the actual buffer)
 */
 static size_t
-MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count,
+MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count,
 								  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
 	zend_uchar * safe_storage = safe_buf;
 	size_t bytes_sent, packets_sent = 1;
 	size_t left = count;
-	zend_uchar * p = (zend_uchar *) buffer;
+	const zend_uchar * p = buffer;
 	zend_uchar * compress_buf = NULL;
 	size_t to_be_sent;
 
@@ -93,7 +93,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 			/* here we need to compress the data and then write it, first comes the compressed header */
 			size_t tmp_complen = to_be_sent;
 			size_t payload_size;
-			zend_uchar * uncompressed_payload = p; /* should include the header */
+			const zend_uchar * uncompressed_payload = p; /* should include the header */
 
 			STORE_HEADER_SIZE(safe_storage, uncompressed_payload);
 			int3store(uncompressed_payload, to_be_sent);

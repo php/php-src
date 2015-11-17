@@ -1077,7 +1077,7 @@ typedef enum_func_status	(*func_mysqlnd_pfc__reset)(MYSQLND_PFC * const pfc, MYS
 typedef enum_func_status	(*func_mysqlnd_pfc__set_client_option)(MYSQLND_PFC * const pfc, enum_mysqlnd_client_option option, const char * const value);
 typedef enum_func_status	(*func_mysqlnd_pfc__decode)(zend_uchar * uncompressed_data, const size_t uncompressed_data_len, const zend_uchar * const compressed_data, const size_t compressed_data_len);
 typedef enum_func_status	(*func_mysqlnd_pfc__encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len, const zend_uchar * const uncompressed_data, const size_t uncompressed_data_len);
-typedef size_t				(*func_mysqlnd_pfc__send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef size_t				(*func_mysqlnd_pfc__send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef enum_func_status	(*func_mysqlnd_pfc__receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const vio, zend_uchar * const buffer, const size_t count, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef enum_func_status	(*func_mysqlnd_pfc__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_PFC * pfc, MYSQLND_VIO * const vio, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info);
 typedef void				(*func_mysqlnd_pfc__free_contents)(MYSQLND_PFC * pfc);
