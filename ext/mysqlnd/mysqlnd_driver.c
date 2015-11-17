@@ -96,7 +96,7 @@ PHPAPI void mysqlnd_library_init(void)
 
 /* {{{ mysqlnd_object_factory::get_connection */
 static MYSQLND *
-MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_factory_methods * factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(struct st_mysqlnd_object_factory_methods * factory, const zend_bool persistent)
 {
 	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -186,7 +186,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn, const zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
@@ -245,7 +245,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 
 /* {{{ mysqlnd_object_factory::get_pfc */
 static MYSQLND_PFC *
-MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	size_t pfc_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -280,7 +280,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(zend_bool persistent, MYSQLND_ST
 
 /* {{{ mysqlnd_object_factory::get_vio */
 static MYSQLND_VIO *
-MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	size_t vio_alloc_size = sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -315,7 +315,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(zend_bool persistent, MYSQLND_ST
 
 /* {{{ mysqlnd_object_factory::get_protocol_payload_decoder_factory */
 static MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
-MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *ret = mnd_pecalloc(1, alloc_size, persistent);

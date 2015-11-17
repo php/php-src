@@ -112,6 +112,8 @@ mysqlnd_run_authentication(
 			zend_bool is_change_user
 			);
 
+PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, const size_t pass_len);
+
 #endif /* MYSQLND_AUTH_H */
 
 /*
