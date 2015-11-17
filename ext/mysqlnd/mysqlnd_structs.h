@@ -365,7 +365,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio)
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 
-typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(struct st_mysqlnd_object_factory_methods * factory, const zend_bool persistent);
+typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * factory, const zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
 typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
 typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
@@ -533,8 +533,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 
 	func_mysqlnd_conn_data__get_reference get_reference;
 	func_mysqlnd_conn_data__free_reference free_reference;
-
-//	func_mysqlnd_conn_data__send_command_handle_response send_command_handle_response;
 
 	func_mysqlnd_conn_data__restart_psession restart_psession;
 	func_mysqlnd_conn_data__end_psession end_psession;
