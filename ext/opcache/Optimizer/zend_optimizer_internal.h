@@ -27,9 +27,11 @@
 #define ZEND_OP1_TYPE(opline)			(opline)->op1_type
 #define ZEND_OP1(opline)				(opline)->op1
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
+#define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
 #define ZEND_OP2_TYPE(opline)			(opline)->op2_type
 #define ZEND_OP2(opline)				(opline)->op2
 #define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
+#define ZEND_OP2_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op2)
 
 #define VAR_NUM(v) EX_VAR_TO_NUM(v)
 #define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)ZEND_CALL_VAR_NUM(0, v))

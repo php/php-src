@@ -608,38 +608,6 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline->op2);
 		}
-		switch (opline->opcode) {
-			case ZEND_JMP:
-			case ZEND_FAST_CALL:
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
-				break;
-			case ZEND_CATCH:
-				/* relative offset into absolute index */
-				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
-				break;
-			case ZEND_JMPZNZ:
-				/* relative offset into absolute index */
-				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
-				/* break omitted intentionally */
-			case ZEND_JMPZ:
-			case ZEND_JMPNZ:
-			case ZEND_JMPZ_EX:
-			case ZEND_JMPNZ_EX:
-			case ZEND_JMP_SET:
-			case ZEND_COALESCE:
-			case ZEND_NEW:
-			case ZEND_FE_RESET_R:
-			case ZEND_FE_RESET_RW:
-			case ZEND_ASSERT_CHECK:
-				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
-				break;
-			case ZEND_FE_FETCH_R:
-			case ZEND_FE_FETCH_RW:
-				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
-				break;
-		}
 		opline++;
 	}
 
@@ -655,38 +623,6 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
-		}
-		switch (opline->opcode) {
-			case ZEND_JMP:
-			case ZEND_FAST_CALL:
-			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
-				break;
-			case ZEND_CATCH:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				break;
-			case ZEND_JMPZNZ:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				/* break omitted intentionally */
-			case ZEND_JMPZ:
-			case ZEND_JMPNZ:
-			case ZEND_JMPZ_EX:
-			case ZEND_JMPNZ_EX:
-			case ZEND_JMP_SET:
-			case ZEND_COALESCE:
-			case ZEND_NEW:
-			case ZEND_FE_RESET_R:
-			case ZEND_FE_RESET_RW:
-			case ZEND_ASSERT_CHECK:
-				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
-				break;
-			case ZEND_FE_FETCH_R:
-			case ZEND_FE_FETCH_RW:
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;

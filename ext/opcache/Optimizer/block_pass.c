@@ -113,13 +113,14 @@ static inline void print_block(zend_code_block *block, zend_op *opcodes, char *t
 static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline;
-	zend_op *end = op_array->opcodes + op_array->last;
+	zend_op *opcodes = op_array->opcodes;
+	zend_op *end = opcodes + op_array->last;
 	zend_code_block *blocks, *cur_block;
 	uint32_t opno = 0;
 
 	memset(cfg, 0, sizeof(zend_cfg));
 	blocks = cfg->blocks = zend_arena_calloc(&ctx->arena, op_array->last + 2, sizeof(zend_code_block));
-	opline = op_array->opcodes;
+	opline = opcodes;
 	blocks[0].start_opline = opline;
 	blocks[0].start_opline_no = 0;
 	while (opline < end) {
@@ -128,7 +129,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_JMP:
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
+				START_BLOCK_OP(ZEND_OP1_JMP_ADDR(opline) - opcodes);
 				/* break missing intentionally */
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
@@ -139,14 +140,9 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				/* start new block from this+1 */
 				START_BLOCK_OP(opno + 1);
 				break;
-				/* TODO: if conditional jmp depends on constant,
-						 don't start block that won't be executed */
-			case ZEND_CATCH:
-				START_BLOCK_OP(opline->extended_value);
-				START_BLOCK_OP(opno + 1);
-				break;
 			case ZEND_JMPZNZ:
-				START_BLOCK_OP(opline->extended_value);
+				START_BLOCK_OP(ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes);
+				/* break missing intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -157,12 +153,13 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
-				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
+				START_BLOCK_OP(ZEND_OP2_JMP_ADDR(opline) - opcodes);
 				START_BLOCK_OP(opno + 1);
 				break;
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
-				START_BLOCK_OP(opline->extended_value);
+			case ZEND_CATCH:
+				START_BLOCK_OP(ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes);
 				START_BLOCK_OP(opno + 1);
 				break;
 		}
@@ -210,9 +207,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			cur_block->next = &blocks[opno];
 			/* what is the last OP of previous block? */
 			opline = blocks[opno].start_opline - 1;
-			if (opline->opcode == ZEND_OP_DATA) {
-				opline--;
-			}
 			switch((unsigned)opline->opcode) {
 				case ZEND_RETURN:
 				case ZEND_RETURN_BY_REF:
@@ -222,25 +216,22 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_FAST_RET:
 					break;
 				case ZEND_JMP:
-					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					cur_block->op1_to = &blocks[ZEND_OP1_JMP_ADDR(opline) - opcodes];
 					break;
 				case ZEND_FAST_CALL:
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
-					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					cur_block->op1_to = &blocks[ZEND_OP1_JMP_ADDR(opline) - opcodes];
 					cur_block->follow_to = &blocks[opno];
 					break;
 				case ZEND_JMPZNZ:
-					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
-					cur_block->ext_to = &blocks[opline->extended_value];
-					break;
-				case ZEND_CATCH:
-					cur_block->ext_to = &blocks[opline->extended_value];
-					cur_block->follow_to = &blocks[opno];
+					cur_block->op2_to = &blocks[ZEND_OP2_JMP_ADDR(opline) - opcodes];
+					cur_block->ext_to = &blocks[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes];
 					break;
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
-					cur_block->ext_to = &blocks[opline->extended_value];
+				case ZEND_CATCH:
+					cur_block->ext_to = &blocks[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes];
 					cur_block->follow_to = &blocks[opno];
 					break;
 				case ZEND_JMPZ:
@@ -253,7 +244,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
 				case ZEND_ASSERT_CHECK:
-					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
+					cur_block->op2_to = &blocks[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes];
 					/* break missing intentionally */
 				default:
 					/* next block follows this */
@@ -774,12 +765,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				case ZEND_JMPZNZ:
 				{
 					/* T = BOOL_NOT(X) + JMPZNZ(T,L1,L2) -> NOP, JMPZNZ(X,L2,L1) */
-					int op_t;
 					zend_code_block *op_b;
-
-					op_t = opline->extended_value;
-					opline->extended_value = ZEND_OP2(opline).opline_num;
-					ZEND_OP2(opline).opline_num = op_t;
 
 					op_b = block->ext_to;
 					block->ext_to = block->op2_to;
@@ -1087,36 +1073,35 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 {
 	zend_code_block *blocks = cfg->blocks;
-	zend_op *new_opcodes = emalloc(op_array->last * sizeof(zend_op));
-	zend_op *opline = new_opcodes;
-	zend_code_block *cur_block = blocks;
+	zend_op *new_opcodes;
+	zend_op *opline;
+	zend_code_block *cur_block;
+	int len = 0;
 
-	/* Copy code of reachable blocks into a single buffer */
-	while (cur_block) {
-		if (cur_block->access) {
-			memcpy(opline, cur_block->start_opline, cur_block->len * sizeof(zend_op));
-			cur_block->start_opline = opline;
-			opline += cur_block->len;
-			if ((opline - 1)->opcode == ZEND_JMP) {
+	for (cur_block = blocks; cur_block; cur_block = cur_block->next) {
+		if (cur_block->access && cur_block->len) {
+			opline = cur_block->start_opline + cur_block->len - 1;
+			if (opline->opcode == ZEND_JMP) {
 				zend_code_block *next;
+
 				next = cur_block->next;
-				while (next && !next->access) {
+				while (next && (!next->access || !next->len)) {
 					next = next->next;
 				}
 				if (next && next == cur_block->op1_to) {
 					/* JMP to the next block - strip it */
 					cur_block->follow_to = cur_block->op1_to;
 					cur_block->op1_to = NULL;
-					MAKE_NOP((opline - 1));
-					opline--;
+					MAKE_NOP(opline);
 					cur_block->len--;
 				}
 			}
-		} else {
+			len += cur_block->len;
+		} else if (cur_block->start_opline && cur_block->len) {
 			/* this block will not be used, delete all constants there */
 			zend_op *_opl;
 			zend_op *end = cur_block->start_opline + cur_block->len;
-			for (_opl = cur_block->start_opline; _opl && _opl < end; _opl++) {
+			for (_opl = cur_block->start_opline; _opl < end; _opl++) {
 				if (ZEND_OP1_TYPE(_opl) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(_opl));
 				}
@@ -1125,10 +1110,20 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				}
 			}
 		}
-		cur_block = cur_block->next;
 	}
 
-	op_array->last = opline-new_opcodes;
+	op_array->last = len;
+	new_opcodes = emalloc(op_array->last * sizeof(zend_op));
+	opline = new_opcodes;
+
+	/* Copy code of reachable blocks into a single buffer */
+	for (cur_block = blocks; cur_block; cur_block = cur_block->next) {
+		if (cur_block->access && cur_block->len) {
+			memcpy(opline, cur_block->start_opline, cur_block->len * sizeof(zend_op));
+			cur_block->start_opline = opline;
+			opline += cur_block->len;
+		}
+	}
 
 	/* adjust exception jump targets */
 	if (op_array->last_try_catch) {
@@ -1153,27 +1148,25 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	}
 
     /* adjust jump targets */
+	efree(op_array->opcodes);
+	op_array->opcodes = new_opcodes;
+
 	for (cur_block = blocks; cur_block; cur_block = cur_block->next) {
 		if (!cur_block->access) {
 			continue;
 		}
 		opline = cur_block->start_opline + cur_block->len - 1;
-		if (opline->opcode == ZEND_OP_DATA) {
-			opline--;
-		}
 		if (cur_block->op1_to) {
-			ZEND_OP1(opline).opline_num = cur_block->op1_to->start_opline - new_opcodes;
+			ZEND_SET_OP_JMP_ADDR(opline, opline->op1, cur_block->op1_to->start_opline);
 		}
 		if (cur_block->op2_to) {
-			ZEND_OP2(opline).opline_num = cur_block->op2_to->start_opline - new_opcodes;
+			ZEND_SET_OP_JMP_ADDR(opline, opline->op2, cur_block->op2_to->start_opline);
 		}
 		if (cur_block->ext_to) {
-			opline->extended_value = cur_block->ext_to->start_opline - new_opcodes;
+			opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, cur_block->ext_to->start_opline);
 		}
 		print_block(cur_block, new_opcodes, "Out ");
 	}
-	efree(op_array->opcodes);
-	op_array->opcodes = erealloc(new_opcodes, op_array->last * sizeof(zend_op));
 
 	/* adjust early binding list */
 	if (op_array->early_binding != (uint32_t)-1) {
