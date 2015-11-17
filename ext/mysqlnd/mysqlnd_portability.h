@@ -208,9 +208,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define sint8korr(A)    (*((int64_t *) (A)))
 #define int2store(T,A)    *((uint16_t*) (T))= (uint16_t) (A)
 #define int3store(T,A)   { \
-                  *(((char *)(T)))=  (zend_uchar) ((A));\
-                  *(((char *)(T))+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
-                  *(((char *)(T))+2)=(zend_uchar) (((A) >> 16)); }
+                  *(T)=  (zend_uchar) ((A));\
+                  *(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
+                  *(T+2)=(zend_uchar) (((A) >> 16)); }
 #define int4store(T,A)    *((zend_long *) (T))= (zend_long) (A)
 #define int5store(T,A)    { \
               *((zend_uchar *)(T))= (zend_uchar)((A));\
