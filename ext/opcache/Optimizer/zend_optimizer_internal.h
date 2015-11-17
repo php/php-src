@@ -74,8 +74,6 @@ typedef struct _zend_cfg {
 	zend_code_block   **catch;
 	zend_code_block   **live_range_start;
 	zend_code_block   **live_range_end;
-	zend_op           **Tsource;
-	char               *same_t;
 } zend_cfg;
 
 struct _zend_block_source {
