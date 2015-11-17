@@ -7,13 +7,22 @@ require_once('skipifconnectfailure.inc');
 if (!$IS_MYSQLND) {
 	die("skip: test applies only to mysqlnd");
 }
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	die("skip Cannot connect to MySQL");
+
+include_once("local_infile_tools.inc");
+if ($msg = check_local_infile_support($link, $engine))
+	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+
+mysqli_close($link);
 ?>
 --INI--
-open_basedir={PWD}
+open_basedir=
 --FILE--
 <?php
 	require_once("connect.inc");
 
+	ini_set("open_basedir", __DIR__);
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
@@ -39,7 +48,8 @@ open_basedir={PWD}
 		echo "done\n";
 	}
 
-	if (!$link->query("LOAD DATA LOCAL INFILE '../../bug53503.data' INTO TABLE test")) {
+	ini_set("open_basedir", __DIR__ . "/dummy");
+	if (!$link->query("LOAD DATA LOCAL INFILE '" . __DIR__ . "/bug53503.data' INTO TABLE test")) {
 		printf("[006] [%d] %s\n", $link->errno, $link->error);
 		echo "done\n";
 	} else {
