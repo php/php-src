@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     array property). (Laruence)
   . Fixed bug #70898, #70895 (null ptr deref and segfault with crafted callable).
     (Anatol, Laruence)
+  . Fixed bug #70899 (buildconf failure in extensions). (Bob, Reeze)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
