@@ -440,8 +440,8 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					int brk = op_array->last_live_range;
 					zend_bool in_switch = 0;
 					while (brk--) {
-						if (op_array->live_range[brk].start <= (opline - op_array->opcodes) &&
-						    op_array->live_range[brk].end > (opline - op_array->opcodes)) {
+						if (op_array->live_range[brk].start <= (uint32_t)(opline - op_array->opcodes) &&
+						    op_array->live_range[brk].end > (uint32_t)(opline - op_array->opcodes)) {
 							in_switch = 1;
 							break;
 						}

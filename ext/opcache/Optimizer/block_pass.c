@@ -711,31 +711,74 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	/* Walk thorough all paths */
 	zend_access_path(start, ctx);
 
-	/* Add brk/cont paths */
-	if (op_array->last_live_range) {
-		int i;
-		for (i=0; i< op_array->last_live_range; i++) {
-			zend_access_path(cfg->live_range_start[i], ctx);
-			zend_access_path(cfg->live_range_end[i], ctx);
-		}
-	}
+	if (op_array->last_live_range || op_array->last_try_catch) {
+		int i, changed;
 
-	/* Add exception paths */
-	if (op_array->last_try_catch) {
-		int changed;
 		do {
-			int i;
-
 			changed = 0;
-			for (i=0; i< op_array->last_try_catch; i++) {
-				if (cfg->try[i]->access) {
-					if (!cfg->catch[i]->access) {
+			/* Add brk/cont paths */
+			for (i = 0; i< op_array->last_live_range; i++) {
+				if (cfg->live_range_start[i]->access) {
+					if (!cfg->live_range_end[i]->access) {
 						changed = 1;
-						zend_access_path(cfg->catch[i], ctx);
+						zend_access_path(cfg->live_range_end[i], ctx);
+					}
+				} else {
+					ZEND_ASSERT(!cfg->live_range_end[i]->access);
+				}
+			}
+
+			/* Add exception paths */
+			for (i = 0; i< op_array->last_try_catch; i++) {
+				if (cfg->try[i]->access) {
+					if (op_array->try_catch_array[i].catch_op) {
+						if (!cfg->catch[i]->access) {
+							changed = 1;
+							zend_access_path(cfg->catch[i], ctx);
+						}
+					} else {
+						ZEND_ASSERT(!cfg->catch[i]->access);
 					}
 				}
 			}
 		} while (changed);
+
+		/* remove unused live ranges */
+		if (op_array->last_live_range) {
+			int j = 0;
+			uint32_t *map;
+			ALLOCA_FLAG(use_heap);
+
+			map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
+
+			for (i = 0; i < op_array->last_live_range; i++) {
+				if (!cfg->live_range_start[i]->access) {
+					ZEND_ASSERT(!cfg->live_range_end[i]->access);
+				} else {
+					map[i] = j;
+					if (i != j) {
+						op_array->live_range[j]  = op_array->live_range[i];
+						cfg->live_range_start[j] = cfg->live_range_start[i];
+						cfg->live_range_end[j]   = cfg->live_range_end[i];
+					}
+					j++;
+				}
+			}
+
+			if (i != j) {
+				zend_op *opline = op_array->opcodes;
+				zend_op *end = opline + op_array->last;
+
+				op_array->last_live_range = j;
+				while (opline != end) {
+					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
+					    opline->extended_value == ZEND_FREE_ON_RETURN) {
+						opline->op2.num = map[opline->op2.num];
+					}
+					opline++;
+				}
+			}
+		}
 	}
 }
 
