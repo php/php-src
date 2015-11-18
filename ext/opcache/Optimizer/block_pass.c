@@ -166,7 +166,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_code_block *b
 	fprintf(stderr, "\n");
 }
 
-static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg)
+static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, int all)
 {
 	int i;
 
@@ -174,7 +174,7 @@ static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cf
 		zend_code_block *block;
 
 		for (block = cfg->blocks; block; block = block->next) {
-			if (block->access) {
+			if (all || block->access) {
 				const zend_op *opline = block->start_opline;
 				const zend_op *end = opline + block->len;
 				int printed = 0;
@@ -514,7 +514,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 		}
 	}
 	cur_block->len = end - cur_block->start_opline;
-	cur_block->next = &blocks[op_array->last + 1];
+	cur_block->next = NULL;
 	print_block(cur_block, op_array->opcodes, "");
 
 	return 1;
@@ -2107,7 +2107,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 		if (printed) {
 			fprintf(stderr, "\n");
-			zend_dump_op_array(op_array, cfg);
+			zend_dump_op_array(op_array, cfg, 0);
 		}
 	}
 #endif
@@ -2249,7 +2249,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 #if DEBUG_BLOCKPASS
 	fprintf(stderr, "\nBEFORE-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
-	zend_dump_op_array(op_array, &cfg);
+	zend_dump_op_array(op_array, &cfg, 1);
 #endif
 
 	if (op_array->last_var || op_array->T) {
@@ -2294,7 +2294,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 #if DEBUG_BLOCKPASS
 	fprintf(stderr, "\nAFTER-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
-	zend_dump_op_array(op_array, &cfg);
+	zend_dump_op_array(op_array, &cfg, 0);
 #endif
 
 	/* Destroy CFG */
