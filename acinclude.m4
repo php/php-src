@@ -826,6 +826,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
+  php_sapi_module=static
 ])
 
 dnl
@@ -910,6 +911,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
     install_sapi="install-sapi"
     ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
   ])
+  AC_MSG_WARN([+++$1: $php_sapi_module])
 ])
 
 dnl deprecated
