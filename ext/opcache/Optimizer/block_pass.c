@@ -142,10 +142,13 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_code_block *b
 		fprintf(stderr, " T%u", EX_VAR_TO_NUM(opline->op2.var));
 	}
 	if (ZEND_VM_EXT_JMP_ADDR & flags) {
-		if (block) {
-			fprintf(stderr, " BB%d", (uint32_t)(block->ext_to->start_opline - op_array->opcodes));
-		} else {
-			fprintf(stderr, " L" ZEND_LONG_FMT, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));		}
+		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
+			if (block) {
+				fprintf(stderr, " BB%d", (uint32_t)(block->ext_to->start_opline - op_array->opcodes));
+			} else {
+				fprintf(stderr, " L" ZEND_LONG_FMT, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+			}
+		}
 	}
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CT_CONSTANT_EX(op_array, opline->result.constant));
@@ -403,8 +406,13 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				break;
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
-			case ZEND_CATCH:
 				START_BLOCK_OP(ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes);
+				START_BLOCK_OP(opno + 1);
+				break;
+			case ZEND_CATCH:
+				if (!opline->result.num) {
+					START_BLOCK_OP(ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes);
+				}
 				START_BLOCK_OP(opno + 1);
 				break;
 		}
@@ -475,8 +483,13 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 					break;
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
-				case ZEND_CATCH:
 					cur_block->ext_to = &blocks[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes];
+					cur_block->follow_to = &blocks[opno];
+					break;
+				case ZEND_CATCH:
+					if (!opline->result.num) {
+						cur_block->ext_to = &blocks[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - opcodes];
+					}
 					cur_block->follow_to = &blocks[opno];
 					break;
 				case ZEND_JMPZ:
@@ -709,12 +722,20 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 
 	/* Add exception paths */
 	if (op_array->last_try_catch) {
-		int i;
-		for (i=0; i< op_array->last_try_catch; i++) {
-			if (!cfg->catch[i]->access) {
-				zend_access_path(cfg->catch[i], ctx);
+		int changed;
+		do {
+			int i;
+
+			changed = 0;
+			for (i=0; i< op_array->last_try_catch; i++) {
+				if (cfg->try[i]->access) {
+					if (!cfg->catch[i]->access) {
+						changed = 1;
+						zend_access_path(cfg->catch[i], ctx);
+					}
+				}
 			}
-		}
+		} while (changed);
 	}
 }
 
