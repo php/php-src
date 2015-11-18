@@ -292,7 +292,7 @@ PHPAPI void			_mysqlnd_get_client_stats(MYSQLND_STATS * stats, zval *return_valu
 #else
 
 #define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
-#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
+#define MYSQLND_DEC_GLOBAL_STATISTIC(statistic)
 #define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
 #define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
 #define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value)
