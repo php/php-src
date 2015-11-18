@@ -165,6 +165,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_code_block *b
 
 static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg)
 {
+	int i;
+
 	if (cfg) {
 		zend_code_block *block;
 
@@ -230,6 +232,40 @@ static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cf
 				}
 			}
 		}
+		if (op_array->last_live_range) {
+			fprintf(stderr, "LIVE RANGES:\n");
+			for (i = 0; i < op_array->last_live_range; i++) {
+				fprintf(stderr, "\t%u: BB%u - BB%u\n",
+					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+					(uint32_t)(cfg->live_range_start[i]->start_opline - op_array->opcodes),
+					(uint32_t)(cfg->live_range_end[i]->start_opline - op_array->opcodes));
+			}
+		}
+		if (op_array->last_try_catch) {
+			fprintf(stderr, "EXCEPTION TABLE:\n");
+			for (i = 0; i < op_array->last_try_catch; i++) {
+				fprintf(stderr, "\tBB%u",
+					(uint32_t)(cfg->try[i]->start_opline - op_array->opcodes));
+				if (op_array->try_catch_array[i].catch_op) {
+					fprintf(stderr, ", BB%u",
+						(uint32_t)(cfg->catch[i]->start_opline - op_array->opcodes));
+				} else {
+					fprintf(stderr, ", -");
+				}
+				if (op_array->try_catch_array[i].finally_op) {
+					fprintf(stderr, ", BB%u",
+						op_array->try_catch_array[i].finally_op);
+				} else {
+					fprintf(stderr, ", -");
+				}
+				if (op_array->try_catch_array[i].finally_end) {
+					fprintf(stderr, ", BB%u\n",
+						op_array->try_catch_array[i].finally_end);
+				} else {
+					fprintf(stderr, ", -\n");
+				}
+			}
+		}
 	} else {
 		const zend_op *opline = op_array->opcodes;
 		const zend_op *end = opline + op_array->last;
@@ -237,6 +273,40 @@ static void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cf
 		while (opline < end) {
 			zend_dump_op(op_array, NULL, opline);
 			opline++;
+		}
+		if (op_array->last_live_range) {
+			fprintf(stderr, "LIVE RANGES:\n");
+			for (i = 0; i < op_array->last_live_range; i++) {
+				fprintf(stderr, "\t%u: L%u - L%u\n",
+					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+					op_array->live_range[i].start,
+					op_array->live_range[i].end);
+			}
+		}
+		if (op_array->last_try_catch) {
+			fprintf(stderr, "EXCEPTION TABLE:\n");
+			for (i = 0; i < op_array->last_try_catch; i++) {
+				fprintf(stderr, "\tL%u",
+					op_array->try_catch_array[i].try_op);
+				if (op_array->try_catch_array[i].catch_op) {
+					fprintf(stderr, ", L%u",
+						op_array->try_catch_array[i].catch_op);
+				} else {
+					fprintf(stderr, ", -");
+				}
+				if (op_array->try_catch_array[i].finally_op) {
+					fprintf(stderr, ", L%u",
+						op_array->try_catch_array[i].finally_op);
+				} else {
+					fprintf(stderr, ", -");
+				}
+				if (op_array->try_catch_array[i].finally_end) {
+					fprintf(stderr, ", L%u\n",
+						op_array->try_catch_array[i].finally_end);
+				} else {
+					fprintf(stderr, ", -\n");
+				}
+			}
 		}
 	}
 }
@@ -2114,7 +2184,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_rebuild_access_path(&cfg, op_array, 0, ctx);
 
 #if DEBUG_BLOCKPASS
-	fprintf(stderr, "BEFORE-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
+	fprintf(stderr, "\nBEFORE-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
 	zend_dump_op_array(op_array, &cfg);
 #endif
 
@@ -2159,7 +2229,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	assemble_code_blocks(&cfg, op_array);
 
 #if DEBUG_BLOCKPASS
-	fprintf(stderr, "AFTER-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
+	fprintf(stderr, "\nAFTER-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
 	zend_dump_op_array(op_array, &cfg);
 #endif
 
