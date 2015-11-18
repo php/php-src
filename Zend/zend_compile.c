@@ -153,6 +153,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("static")},
 	{ZEND_STRL("string")},
 	{ZEND_STRL("true")},
+	{ZEND_STRL("resource")},
 	{NULL, 0}
 };
 
@@ -196,6 +197,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("float"), IS_DOUBLE},
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
+	{ZEND_STRL("resource"), IS_RESOURCE},
 	{NULL, 0, IS_UNDEF}
 };
 
