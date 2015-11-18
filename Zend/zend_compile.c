@@ -4371,7 +4371,9 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		}
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
-		opline->extended_value = get_next_op_number(CG(active_op_array));
+		if (!is_last_catch) {
+			opline->extended_value = get_next_op_number(CG(active_op_array));
+		}
 	}
 
 	for (i = 0; i < catches->children; ++i) {
