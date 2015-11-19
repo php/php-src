@@ -730,6 +730,21 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 
 			/* Add exception paths */
 			for (i = 0; i< op_array->last_try_catch; i++) {
+				/* check for jumps into the middle of try block */
+				if (!cfg->try[i]->access) {
+					if (op_array->try_catch_array[i].catch_op) {
+						zend_code_block *b = cfg->try[i];
+						zend_code_block *end = cfg->catch[i];
+						while (b != end) {
+							if (b->access) {
+								cfg->try[i] = b;
+								op_array->try_catch_array[i].try_op = b->start_opline - op_array->opcodes;
+								break;
+							}
+							b = b->next;
+						}
+					}
+				}
 				if (cfg->try[i]->access) {
 					if (op_array->try_catch_array[i].catch_op) {
 						if (!cfg->catch[i]->access) {
