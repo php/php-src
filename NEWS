@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
+  . Fixed bug #70940 (Segfault in soep / type_to_strin). (Remi)
 
 - Standard:
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
