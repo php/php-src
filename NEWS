@@ -1,5 +1,25 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+???
+
+- Core:
+  . Fixed bug #70914 (zend_throw_or_error() format string vulnerability).
+    (Taoguang Chen)
+  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid 
+    array property). (Laruence)
+  . Fixed bug #70895, #70898 (null ptr deref and segfault with crafted calable).
+    (Anatol, Laruence)
+
+- OCI8:
+  . Fixed memory leak with LOBs. (Senthil)
+
+- SOAP:
+  . Fixed bug #70940 (Segfault in soap / type_to_string). (Remi)
+  . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
+
+- Standard:
+  . Fixed bug #70910 (extract() breaks variable references). (Laruence)
+
 12 Nov 2015, PHP 7.0.0 RC 7
 
 - Core:
