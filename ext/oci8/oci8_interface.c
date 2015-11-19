@@ -534,7 +534,7 @@ PHP_FUNCTION(oci_lob_write)
 {
 	zval *tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	zend_long data_len;
+	size_t data_len;
 	zend_long write_len = 0;
 	ub4 bytes_written;
 	char *data;
@@ -545,7 +545,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 		
 		if (ZEND_NUM_ARGS() == 2) {
-			data_len = MIN(data_len, write_len);
+			data_len = MIN((zend_long) data_len, write_len);
 		}
 	}
 	else {
@@ -554,7 +554,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 
 		if (ZEND_NUM_ARGS() == 3) {
-			data_len = MIN(data_len, write_len);
+			data_len = MIN((zend_long) data_len, write_len);
 		}
 	}
 	
