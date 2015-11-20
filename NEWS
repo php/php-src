@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
   . Fixed bug #70914 (zend_throw_or_error() format string vulnerability).
