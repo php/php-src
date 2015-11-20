@@ -436,7 +436,7 @@ int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants
 				blocks[blocks_count].end = i - 1;
 			}
 			blocks_count++;
-			blocks[blocks_count].flags = block_map[i];
+			blocks[blocks_count].flags = 0;
 			blocks[blocks_count].start = i;
 			blocks[blocks_count].successors[0] = -1;
 			blocks[blocks_count].successors[1] = -1;
