@@ -85,7 +85,7 @@ typedef struct _zend_basic_block {
 +------------+---+---+---+---+---+
 */
 
-typedef struct _zend_jit_cfg {
+typedef struct _zend_cfg {
 	int               blocks_count;       /* number of basic blocks      */
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
