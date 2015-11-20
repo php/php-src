@@ -753,13 +753,12 @@ optimize_const_unary_op:
 /* Rebuild plain (optimized) op_array from CFG */
 static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 {
-	int n;
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
 	zend_basic_block *b;
 	zend_op *new_opcodes;
 	zend_op *opline;
-	int len = 0;
+	uint32_t len = 0;
 
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
@@ -799,14 +798,14 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	/* Copy code of reachable blocks into a single buffer */
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
-			uint32_t len;
+			uint32_t n;
 
 			ZEND_ASSERT(b->start <= b->end);
-			len = b->end - b->start + 1;
-			memcpy(opline, op_array->opcodes + b->start, len * sizeof(zend_op));
+			n = b->end - b->start + 1;
+			memcpy(opline, op_array->opcodes + b->start, n * sizeof(zend_op));
 			b->start = opline - new_opcodes;
-			b->end = opline - new_opcodes + len - 1;
-			opline += len;
+			b->end = opline - new_opcodes + n - 1;
+			opline += n;
 		}
 	}
 
