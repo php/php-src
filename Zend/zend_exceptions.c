@@ -70,7 +70,8 @@ ZEND_API zend_class_entry *zend_get_exception_base(zval *object)
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous)
 {
-    zval tmp, *previous, zv, *pzv, rv;
+    zval *previous, *pzv;
+	zval tmp, zv, rv;
 	zend_class_entry *base_ce;
 
 	if (exception == add_previous || !add_previous || !exception) {
@@ -80,6 +81,13 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	if (!instanceof_function(Z_OBJCE(tmp), zend_ce_throwable)) {
 		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
 		return;
+	}
+	pzv = zend_read_property(i_get_exception_base(&tmp), &tmp, "previous", sizeof("previous")-1, 1, &rv);
+	while (Z_TYPE_P(pzv) == IS_OBJECT) { 
+		if (Z_OBJ_P(pzv) == exception) {
+			return;
+		}
+		pzv = zend_read_property(i_get_exception_base(pzv), pzv, "previous", sizeof("previous")-1, 1, &rv);
 	}
 	ZVAL_OBJ(&zv, exception);
 	pzv = &zv;
