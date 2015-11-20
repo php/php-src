@@ -109,8 +109,13 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 		ZVAL_PSTRINGL(op1, str->val, str->len);
 		zend_string_release(str);
 	}
-
 	op1_len = (int)Z_STRLEN_P(op1);
+	
+	if (Z_TYPE_P(op2) != IS_STRING) {
+		zend_string *str = zval_get_string(op2);
+		ZVAL_PSTRINGL(op2, str->val, str->len);
+		zend_string_release(str);
+	}
 	length = op1_len + (int)Z_STRLEN_P(op2);
 
 	ZVAL_NEW_STR(result, zend_string_extend(Z_STR_P(op1), length, 1));
