@@ -2,15 +2,36 @@
 Bug #70944 (try{ } finally{} can create infinite chains of exceptions)
 --FILE--
 <?php
-$e = new Exception("Bar");
 try {
-	  throw new Exception("Foo", 0, $e);
-} finally {
-	  throw $e;
+	$e = new Exception("Foo");
+	try {
+		throw  new Exception("Bar", 0, $e);
+	} finally {
+		throw $e;
+	}
+} catch (Exception $e) {
+	var_dump((string)$e);
+}
+
+try {
+	$e = new Exception("Foo");
+	try {
+		throw new Exception("Bar", 0, $e);
+	} finally {
+		throw new Exception("Dummy", 0, $e);
+	}
+} catch (Exception $e) {
+	var_dump((string)$e);
 }
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Bar in %sbug70944.php:%d
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
+Stack trace:
+#0 {main}"
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug70944.php on line %d
+
+Next exception 'Exception' with message 'Dummy' in %sbug70944.php:%d
+Stack trace:
+#0 {main}"
