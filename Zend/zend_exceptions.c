@@ -242,7 +242,6 @@ ZEND_METHOD(exception, __wakeup)
 {
 	zval *value;
 	zval *object = getThis();
-	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
 	CHECK_EXC_TYPE("message", IS_STRING);
 	CHECK_EXC_TYPE("string", IS_STRING);
 	CHECK_EXC_TYPE("code", IS_LONG);
@@ -653,6 +652,7 @@ ZEND_METHOD(exception, getPrevious)
 	previous = zend_read_property(default_exception_ce, getThis(), "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 	RETURN_ZVAL(previous, 1, 0);
 }
+/* }}} */
 
 int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ */
 {
