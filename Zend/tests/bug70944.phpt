@@ -10,7 +10,7 @@ try {
 		throw $e;
 	}
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+	var_dump((string)$e);
 }
 
 try {
@@ -21,9 +21,17 @@ try {
 		throw new Exception("Dummy", 0, $e);
 	}
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+	var_dump((string)$e);
 }
 ?>
---EXPECT--
-string(3) "Foo"
-string(5) "Dummy"
+--EXPECTF--
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
+Stack trace:
+#0 {main}"
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
+Stack trace:
+#0 {main}
+
+Next exception 'Exception' with message 'Dummy' in %sbug70944.php:%d
+Stack trace:
+#0 {main}"
