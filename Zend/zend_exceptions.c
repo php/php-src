@@ -45,14 +45,15 @@ void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 		zend_error(E_ERROR, "Cannot set non exception as previous exception");
 		return;
 	}
-	ancestor = zend_read_property(default_exception_ce, add_previous, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	while (Z_TYPE_P(ancestor) == IS_OBJECT) { 
-		if (Z_OBJ_HANDLE_P(ancestor) == Z_OBJ_HANDLE_P(exception)) {
-			return;
-		}
-		ancestor = zend_read_property(default_exception_ce, ancestor, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	}
 	while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
+		ancestor = zend_read_property(default_exception_ce, add_previous, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+		while (Z_TYPE_P(ancestor) == IS_OBJECT) {
+			if (Z_OBJ_HANDLE_P(ancestor) == Z_OBJ_HANDLE_P(exception)) {
+				zval_ptr_dtor(&add_previous);
+				return;
+			}
+			ancestor = zend_read_property(default_exception_ce, ancestor, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+		}
 		previous = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
