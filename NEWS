@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #70940 (Segfault in soap / type_to_string). (Remi)
 
 - Standard:
+  . Fixed bug (count on symbol tables). (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
 
 - Streams/Socket
