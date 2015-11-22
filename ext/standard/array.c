@@ -757,6 +757,41 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
+static uint32_t php_array_recalc_elements(HashTable *ht) /* {{{ */
+{
+	zval *val;
+	uint32_t num = ht->nNumOfElements;
+
+	ZEND_HASH_FOREACH_VAL(ht, val) {
+		if (Z_TYPE_P(val) == IS_UNDEF) continue;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) {
+				num--;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return num;
+}
+/* }}} */
+
+static uint32_t php_array_num_elements(zval *arr) /* {{{ */
+{
+	uint32_t num;
+	HashTable *ht = Z_ARRVAL_P(arr);
+	if (UNEXPECTED(Z_SYMBOLTABLE_P(arr))) {
+		num = php_array_recalc_elements(ht);
+	} else if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		num = php_array_recalc_elements(ht);
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
+		}
+	} else {
+		num = zend_hash_num_elements(ht);
+	}
+	return num;
+}
+/* }}} */
+
 PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 {
 	zend_long cnt = 0;
@@ -768,7 +803,7 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 			return 0;
 		}
 
-		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
+		cnt = php_array_num_elements(array);
 		if (mode == COUNT_RECURSIVE) {
 		    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
 				Z_ARRVAL_P(array)->u.v.nApplyCount++;
@@ -813,7 +848,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
-			cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
+			cnt = php_array_num_elements(array);
 			if (mode == COUNT_RECURSIVE) {
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
 					ZVAL_DEREF(element);
