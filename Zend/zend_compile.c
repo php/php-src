@@ -7472,10 +7472,13 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, name_ast, 0)) {
 				if (Z_TYPE(result) == IS_NULL) {
+					if (zend_get_class_fetch_type(zend_ast_get_str(class_ast)) == ZEND_FETCH_CLASS_SELF) {
+						zend_ast_destroy(ast);
+						*ast_ptr = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C);
+					}
 					return;
-				} else {
-					break;
 				}
+				break;
 			}
 
 			zend_eval_const_expr(&class_ast);
