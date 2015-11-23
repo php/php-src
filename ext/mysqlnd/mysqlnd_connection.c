@@ -753,8 +753,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			}
 			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
-		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
-		/* todo: check if charset is available */
 
 		SET_EMPTY_ERROR(conn->error_info);
 

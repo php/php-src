@@ -890,7 +890,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_STRING	connect_or_select_db;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
-	zend_ulong		max_packet_size;
 	unsigned int	port;
 	zend_ulong		server_capabilities;
 
