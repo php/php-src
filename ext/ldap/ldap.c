@@ -349,9 +349,6 @@ PHP_FUNCTION(ldap_connect)
 		RETURN_FALSE;
 	}
 #endif
-	if (!port) {
-		port = LDAP_PORT;
-	}
 
 	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", LDAPG(num_links));
