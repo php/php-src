@@ -400,7 +400,9 @@ fi
 	Optimizer/block_pass.c \
 	Optimizer/optimize_temp_vars_5.c \
 	Optimizer/nop_removal.c \
-	Optimizer/compact_literals.c,
+	Optimizer/compact_literals.c \
+	Optimizer/zend_cfg.c \
+	Optimizer/zend_dump.c,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)

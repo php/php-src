@@ -51,36 +51,6 @@ typedef struct _zend_optimizer_ctx {
 	zend_long               optimization_level;
 } zend_optimizer_ctx;
 
-typedef struct _zend_code_block zend_code_block;
-typedef struct _zend_block_source zend_block_source;
-
-struct _zend_code_block {
-	int                 access;
-	zend_op            *start_opline;
-	int                 start_opline_no;
-	int                 len;
-	zend_code_block    *op1_to;
-	zend_code_block    *op2_to;
-	zend_code_block    *ext_to;
-	zend_code_block    *follow_to;
-	zend_code_block    *next;
-	zend_block_source  *sources;
-	zend_bool           protected; /* don't merge this block with others */
-};
-
-typedef struct _zend_cfg {
-	zend_code_block    *blocks;
-	zend_code_block   **try;
-	zend_code_block   **catch;
-	zend_code_block   **live_range_start;
-	zend_code_block   **live_range_end;
-} zend_cfg;
-
-struct _zend_block_source {
-	zend_code_block    *from;
-	zend_block_source  *next;
-};
-
 #define LITERAL_LONG(op, val) do { \
 		zval _c; \
 		ZVAL_LONG(&_c, val); \

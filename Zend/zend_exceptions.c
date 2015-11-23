@@ -58,17 +58,19 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 }
 /* }}} */
 
-static inline zend_class_entry *i_get_exception_base(zval *object)
+static inline zend_class_entry *i_get_exception_base(zval *object) /* {{{ */
 {
 	return instanceof_function(Z_OBJCE_P(object), zend_ce_exception) ? zend_ce_exception : zend_ce_error;
 }
+/* }}} */
 
-ZEND_API zend_class_entry *zend_get_exception_base(zval *object)
+ZEND_API zend_class_entry *zend_get_exception_base(zval *object) /* {{{ */
 {
 	return i_get_exception_base(object);
 }
+/* }}} */
 
-void zend_exception_set_previous(zend_object *exception, zend_object *add_previous)
+void zend_exception_set_previous(zend_object *exception, zend_object *add_previous) /* {{{ */
 {
     zval *previous, *ancestor, *ex;
 	zval  pv, zv, rv;
@@ -103,6 +105,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		ex = previous;
 	} while (Z_OBJ_P(ex) != add_previous);
 }
+/* }}} */
 
 void zend_exception_save(void) /* {{{ */
 {
@@ -456,63 +459,6 @@ ZEND_METHOD(error_exception, getSeverity)
 		} \
 	} while (0)
 
-/* Windows uses VK_ESCAPE instead of \e */
-#ifndef VK_ESCAPE
-#define VK_ESCAPE '\e'
-#endif
-
-static size_t compute_escaped_string_len(const char *s, size_t l) {
-	size_t i, len = l;
-	for (i = 0; i < l; ++i) {
-		char c = s[i];
-		if (c == '\n' || c == '\r' || c == '\t' ||
-			c == '\f' || c == '\v' || c == '\\' || c == VK_ESCAPE) {
-			len += 1;
-		} else if (c < 32 || c > 126) {
-			len += 3;
-		}
-	}
-	return len;
-}
-
-static void smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
-	char *res;
-	size_t i, len = compute_escaped_string_len(s, l);
-
-	smart_str_alloc(str, len, 0);
-	res = &ZSTR_VAL(str->s)[ZSTR_LEN(str->s)];
-	ZSTR_LEN(str->s) += len;
-
-	for (i = 0; i < l; ++i) {
-		unsigned char c = s[i];
-		if (c < 32 || c == '\\' || c > 126) {
-			*res++ = '\\';
-			switch (c) {
-				case '\n': *res++ = 'n'; break;
-				case '\r': *res++ = 'r'; break;
-				case '\t': *res++ = 't'; break;
-				case '\f': *res++ = 'f'; break;
-				case '\v': *res++ = 'v'; break;
-				case '\\': *res++ = '\\'; break;
-				case VK_ESCAPE: *res++ = 'e'; break;
-				default:
-					*res++ = 'x';
-					if ((c >> 4) < 10) {
-						*res++ = (c >> 4) + '0';
-					} else {
-						*res++ = (c >> 4) + 'A' - 10;
-					}
-					if ((c & 0xf) < 10) {
-						*res++ = (c & 0xf) + '0';
-					} else {
-						*res++ = (c & 0xf) + 'A' - 10;
-					}
-			}
-		} else {
-			*res++ = c;
-		}
-	}
-}
 
 static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 {
@@ -979,7 +925,7 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 }
 /* }}} */
 
-static void zend_error_helper(int type, const char *filename, const uint lineno, const char *format, ...)
+static void zend_error_helper(int type, const char *filename, const uint lineno, const char *format, ...) /* {{{ */
 {
 	va_list va;
 
@@ -987,6 +933,7 @@ static void zend_error_helper(int type, const char *filename, const uint lineno,
 	zend_error_cb(type, filename, lineno, format, va);
 	va_end(va);
 }
+/* }}} */
 
 /* This function doesn't return if it uses E_ERROR */
 ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {{{ */
