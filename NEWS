@@ -33,7 +33,7 @@ PHP                                                                        NEWS
 	connection flag. (Andrey)
 
 - OCI8:
-  . Fixed bug #68298 (OCI int overflow) (Senthil).
+  . Fixed bug #68298 (OCI int overflow). (Senthil)
 
 - PDO_DBlib:
   . Fixed bug #69757 (Segmentation fault on nextRowset).
@@ -44,7 +44,7 @@ PHP                                                                        NEWS
     attribute). (Matteo)
 
 - SPL:
-  . Fixed bug #70852 Segfault getting NULL offset of an ArrayObject.
+  . Fixed bug #70852 (Segfault getting NULL offset of an ArrayObject).
     (Reeze Xia)
 
 29 Oct 2015, PHP 5.6.15
@@ -87,7 +87,7 @@ PHP                                                                        NEWS
   . Fixed bug #70001 (Assigning to DOMNode::textContent does additional entity
     encoding). (cmb)
 
-- ldap
+- ldap:
   . Fixed bug #70465 (Bug in ldap_search() modifies LDAP_OPT_TIMELIMIT/DEREF's values). (Tyson Andre)
   . Fixed bug #69574 (ldap timeouts not enforced). (Côme Bernigaud)
 
