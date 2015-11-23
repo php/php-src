@@ -25,6 +25,9 @@ PHP                                                                        NEWS
     by gcov. (Senthil)
   . Fixed memory leak with LOBs. (Senthil)
 
+- Phpdbg:
+  . Fixed stderr being written to stdout. (Bob)
+
 - SOAP:
   . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
   . Fixed bug #70940 (Segfault in soap / type_to_string). (Remi)
