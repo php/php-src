@@ -21,12 +21,17 @@ PHP                                                                        NEWS
     (Laruence)
 
 - OCI8:
-  . Fixed LOB implementation size_t/zend_long mismatch reported by gcov. (Senthil)
+  . Fixed LOB implementation size_t/zend_long mismatch reported
+    by gcov. (Senthil)
   . Fixed memory leak with LOBs. (Senthil)
 
 - SOAP:
   . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
   . Fixed bug #70940 (Segfault in soap / type_to_string). (Remi)
+
+- SPL:
+  . Fixed bug #70959 (ArrayObject unserialize does not restore protected
+    fields). (Laruence)
 
 - Standard:
   . Fixed bug (count on symbol tables). (Laruence)
