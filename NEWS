@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     abstract class). (Laruence)
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
+  . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
+    php_register_internal_extensions). (Lior Kaplan)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
