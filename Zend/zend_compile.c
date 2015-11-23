@@ -2214,7 +2214,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 			if (!CG(active_class_entry)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
 			}
-			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
+			if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 				constant_name.op_type = IS_CONST;
 				ZVAL_STRINGL(&constant_name.u.constant, "class", sizeof("class")-1, 1);
 				zend_do_fetch_constant(result, class_name, &constant_name, ZEND_RT, 1 TSRMLS_CC);
