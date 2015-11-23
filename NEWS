@@ -39,7 +39,7 @@ PHP                                                                        NEWS
     fields). (Laruence)
 
 - Standard:
-  . Fixed bug (count on symbol tables). (Laruence)
+  . Fixed count on symbol tables. (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
 
 - Streams/Socket
@@ -68,7 +68,7 @@ PHP                                                                        NEWS
 	connection flag. (Andrey)
 
 - OCI8:
-  . Fixed bug #68298 (OCI int overflow) (Senthil).
+  . Fixed bug #68298 (OCI int overflow). (Senthil)
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
