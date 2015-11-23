@@ -70,37 +70,38 @@ ZEND_API zend_class_entry *zend_get_exception_base(zval *object)
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous)
 {
-    zval *previous, *pzv;
-	zval tmp, zv, rv;
+    zval *previous, *ancestor, *ex;
+	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 
 	if (exception == add_previous || !add_previous || !exception) {
 		return;
 	}
-	ZVAL_OBJ(&tmp, add_previous);
-	if (!instanceof_function(Z_OBJCE(tmp), zend_ce_throwable)) {
+	ZVAL_OBJ(&pv, add_previous);
+	if (!instanceof_function(Z_OBJCE(pv), zend_ce_throwable)) {
 		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
 		return;
 	}
-	pzv = zend_read_property(i_get_exception_base(&tmp), &tmp, "previous", sizeof("previous")-1, 1, &rv);
-	while (Z_TYPE_P(pzv) == IS_OBJECT) { 
-		if (Z_OBJ_P(pzv) == exception) {
-			return;
-		}
-		pzv = zend_read_property(i_get_exception_base(pzv), pzv, "previous", sizeof("previous")-1, 1, &rv);
-	}
 	ZVAL_OBJ(&zv, exception);
-	pzv = &zv;
+	ex = &zv;
 	do {
-		base_ce = i_get_exception_base(pzv);
-		previous = zend_read_property(base_ce, pzv, "previous", sizeof("previous")-1, 1, &rv);
+		ancestor = zend_read_property(i_get_exception_base(&pv), &pv, "previous", sizeof("previous")-1, 1, &rv);
+		while (Z_TYPE_P(ancestor) == IS_OBJECT) {
+			if (Z_OBJ_P(ancestor) == Z_OBJ_P(ex)) {
+				OBJ_RELEASE(add_previous);
+				return;
+			}
+			ancestor = zend_read_property(i_get_exception_base(ancestor), ancestor, "previous", sizeof("previous")-1, 1, &rv);
+		}
+		base_ce = i_get_exception_base(ex);
+		previous = zend_read_property(base_ce, ex, "previous", sizeof("previous")-1, 1, &rv);
 		if (Z_TYPE_P(previous) == IS_NULL) {
-			zend_update_property(base_ce, pzv, "previous", sizeof("previous")-1, &tmp);
+			zend_update_property(base_ce, ex, "previous", sizeof("previous")-1, &pv);
 			GC_REFCOUNT(add_previous)--;
 			return;
 		}
-		pzv = previous;
-	} while (pzv && Z_OBJ_P(pzv) != add_previous);
+		ex = previous;
+	} while (Z_OBJ_P(ex) != add_previous);
 }
 
 void zend_exception_save(void) /* {{{ */
