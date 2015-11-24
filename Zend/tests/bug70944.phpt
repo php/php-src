@@ -25,13 +25,13 @@ try {
 }
 ?>
 --EXPECTF--
-string(%d) "Exception: Foo in %sbug70944.php:%d
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
 Stack trace:
 #0 {main}"
-string(%d) "Exception: Foo in %sbug70944.php:%d
+string(%d) "exception 'Exception' with message 'Foo' in %sbug70944.php:%d
 Stack trace:
 #0 {main}
 
-Next Exception: Dummy in %sbug70944.php:%d
+Next exception 'Exception' with message 'Dummy' in %sbug70944.php:%d
 Stack trace:
 #0 {main}"
