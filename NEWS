@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
 
 - Standard:
+  . Fixed bug #70940 (count on symbol tables). (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
 
 12 Nov 2015, PHP 7.0.0 RC 7
