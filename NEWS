@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-???
+26 Nov 2015, PHP 7.0.0 RC 8
 
 - Core:
   . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
