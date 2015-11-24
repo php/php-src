@@ -473,11 +473,12 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_PFC * pfc;
 	DBG_ENTER("mysqlnd_pfc_init");
-	pfc = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_frame_codec(persistent, stats, error_info);
+	pfc = factory->get_protocol_frame_codec(persistent, stats, error_info);
 	DBG_RETURN(pfc);
 }
 /* }}} */

@@ -19,7 +19,7 @@
 #ifndef MYSQLND_VIO_H
 #define MYSQLND_VIO_H
 
-PHPAPI MYSQLND_VIO * mysqlnd_vio_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
+PHPAPI MYSQLND_VIO * mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 PHPAPI void mysqlnd_vio_free(MYSQLND_VIO * const vio, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 
 #endif /* MYSQLND_VIO_H */
