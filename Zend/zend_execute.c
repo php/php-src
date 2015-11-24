@@ -1564,10 +1564,8 @@ num_index:
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
-		if (dim_type != IS_CONST) {
-			if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
-				goto num_index;
-			}
+		if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
+			goto num_index;
 		}
 str_index:
 		retval = zend_hash_find(ht, offset_key);
