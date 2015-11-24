@@ -39,6 +39,7 @@ PHP                                                                        NEWS
     fields). (Laruence)
 
 - Standard:
+  . Fixed bug #70963 (Unserialize shows UNKNOW in result). (Laruence)
   . Fixed count on symbol tables. (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
 
