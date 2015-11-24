@@ -369,13 +369,22 @@ string_key:
 			}
 		}
 
-		zval_dtor(&key);
-
 		if (!php_var_unserialize_ex(data, p, max, var_hash, classes)) {
+			zval_dtor(&key);
 			return 0;
 		}
 
-		var_push_dtor(var_hash, data);
+		if (UNEXPECTED(Z_ISUNDEF_P(data))) {
+			if (Z_TYPE(key) == IS_LONG) {
+				zend_hash_index_del(ht, Z_LVAL(key));
+			} else {
+				zend_hash_del_ind(ht, Z_STR(key));
+			}
+		} else {
+			var_push_dtor(var_hash, data);
+		}
+
+		zval_dtor(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -522,14 +531,12 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 	}
 
 	zval_ptr_dtor(rval);
-	if (Z_ISREF_P(rval_ref)) {
-		if (!Z_ISUNDEF_P(Z_REFVAL_P(rval_ref))) {
-			ZVAL_COPY(rval, rval_ref);
-		} else {
-			ZVAL_UNDEF(rval);
-		}
-	} else if (Z_ISUNDEF_P(rval_ref)) {
+	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
 		ZVAL_UNDEF(rval);
+		return 1;
+	}
+	if (Z_ISREF_P(rval_ref)) {
+		ZVAL_COPY(rval, rval_ref);
 	} else {
 		ZVAL_NEW_REF(rval_ref, rval_ref);
 		ZVAL_COPY(rval, rval_ref);
@@ -547,6 +554,11 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 	id = parse_iv(start + 2) - 1;
 	if (id == -1 || (rval_ref = var_access(var_hash, id)) == NULL) {
 		return 0;
+	}
+
+	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
+		ZVAL_UNDEF(rval);
+		return 1;
 	}
 
 	ZVAL_COPY(rval, rval_ref);
