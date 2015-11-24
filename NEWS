@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     php_register_internal_extensions). (Lior Kaplan)
   . Fixed \int (or generally every scalar type name with leading backslash)
     to not be accepted as type name. (Bob)
+  . Fixed bug #70904 (yield from incorrectly marks valid generator as finished).
+    (Bob)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
