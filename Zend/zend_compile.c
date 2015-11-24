@@ -2700,7 +2700,6 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 		dim_node.op_type = IS_UNUSED;
 	} else {
 		zend_compile_expr(&dim_node, dim_ast);
-		zend_handle_numeric_op(&dim_node);
 	}
 
 	return zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);

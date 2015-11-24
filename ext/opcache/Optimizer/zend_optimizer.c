@@ -413,13 +413,6 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_LIST:
-			if (Z_TYPE_P(val) == IS_STRING) {
-				zend_ulong index;
-				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
-					zval_ptr_dtor_nogc(val);
-					ZVAL_LONG(val, index);
-				}
-			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			break;
 		case ZEND_ROPE_INIT:
