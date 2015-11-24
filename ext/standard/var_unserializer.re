@@ -523,10 +523,16 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 
 	zval_ptr_dtor(rval);
 	if (Z_ISREF_P(rval_ref)) {
-		ZVAL_COPY(rval, rval_ref);
+	if (!Z_ISUNDEF_P(Z_REFVAL_P(rval_ref))) {
+	ZVAL_COPY(rval, rval_ref);
 	} else {
-		ZVAL_NEW_REF(rval_ref, rval_ref);
-		ZVAL_COPY(rval, rval_ref);
+	ZVAL_UNDEF(rval);
+	}
+	} else if (Z_ISUNDEF_P(rval_ref)) {
+	ZVAL_UNDEF(rval);
+	} else {
+	ZVAL_NEW_REF(rval_ref, rval_ref);
+	ZVAL_COPY(rval, rval_ref);
 	}
 
 	return 1;
