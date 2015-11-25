@@ -4384,7 +4384,7 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 
 		if (type != 0) {
 			if (ast->attr == ZEND_NAME_FQ) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the scalar type '%s' as fully qualified with a leading backslash", ZSTR_VAL(class_name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the builtin type '%s' as fully qualified with a leading backslash", ZSTR_VAL(zend_string_tolower(class_name)));
 			}
 			arg_info->type_hint = type;
 		} else {
