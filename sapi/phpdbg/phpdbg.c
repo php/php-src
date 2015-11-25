@@ -916,7 +916,7 @@ static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t co
 			return count;
 		}
 		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
-			phpdbg_script(P_STDERR, "%.*s", (int) count, buf);
+			phpdbg_script_ex(PHPDBG_G(io)[PHPDBG_STDERR].fd, P_STDERR, "%.*s", (int) count, buf);
 			return count;
 		}
 		break;
