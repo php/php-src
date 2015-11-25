@@ -66,6 +66,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 		case ZEND_BOOL_XOR:
+		case ZEND_SPACESHIP:
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				ZEND_OP2_TYPE(opline) == IS_CONST) {
 				/* binary operation with constant operands */
