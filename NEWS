@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-12 Nov 2015, PHP 5.6.16RC1
+26 Nov 2015, PHP 5.6.16
 
 - Core:
   . Fixed bug #70828 (php-fpm 5.6 with opcache crashes when referencing a
@@ -8,8 +8,13 @@ PHP                                                                        NEWS
   . Fixed bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l).
     (Laruence)
 
+- Mysqlnd:
+  . Fixed bug #68344 (MySQLi does not provide way to disable peer certificate
+    validation) by introducing MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+        connection flag. (Andrey)
+
 - OCI8:
-  . Fixed bug #68298 (OCI int overflow) (Senthil).
+  . Fixed bug #68298 (OCI int overflow). (Senthil)
 
 - PDO_DBlib:
   . Fixed bug #69757 (Segmentation fault on nextRowset).
@@ -20,7 +25,7 @@ PHP                                                                        NEWS
     attribute). (Matteo)
 
 - SPL:
-  . Fixed bug #70852 Segfault getting NULL offset of an ArrayObject.
+  . Fixed bug #70852 (Segfault getting NULL offset of an ArrayObject).
     (Reeze Xia)
 
 29 Oct 2015, PHP 5.6.15
