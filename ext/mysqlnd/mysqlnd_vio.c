@@ -776,11 +776,12 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_vio_init */
 PHPAPI MYSQLND_VIO *
-mysqlnd_vio_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_VIO * vio;
 	DBG_ENTER("mysqlnd_vio_init");
-	vio = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_vio(persistent, stats, error_info);
+	vio = factory->get_vio(persistent, stats, error_info);
 	DBG_RETURN(vio);
 }
 /* }}} */
