@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70970 (Segfault when combining error handler with output
+    buffering). (Laruence)
   . Fixed bug #70958 (Invalid opcode while using ::class as trait method
     paramater default value). (Laruence)
   . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
