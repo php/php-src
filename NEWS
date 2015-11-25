@@ -4,19 +4,18 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #70970 (Segfault when combining error handler with output
-    buffering). (Laruence)
+	buffering). (Laruence)
   . Fixed bug #70958 (Invalid opcode while using ::class as trait method
     paramater default value). (Laruence)
-  . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
-  . Fixed bug #70914 (zend_throw_or_error() format string vulnerability).
-    (Taoguang Chen)
-  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid
-    array property). (Laruence)
-  . Fixed bug #70898, #70895 (null ptr deref and segfault with crafted callable).
-    (Anatol, Laruence)
   . Fixed bug #70899 (buildconf failure in extensions). (Bob, Reeze)
+  . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
+    php_register_internal_extensions). (Lior Kaplan)
+  . Fixed \int (or generally every scalar type name with leading backslash)
+    to not be accepted as type name. (Bob)
+  . Fixed bug #70904 (yield from incorrectly marks valid generator as finished).
+    (Bob)
 
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
@@ -25,6 +24,29 @@ PHP                                                                        NEWS
 - OCI8:
   . Fixed LOB implementation size_t/zend_long mismatch reported
     by gcov. (Senthil)
+
+- Phpdbg:
+  . Fixed stderr being written to stdout. (Bob)
+
+- Standard:
+  . Fixed bug #70960 (ReflectionFunction for array_unique returns wrong number
+    of parameters). (Laruence)
+
+- Streams/Socket
+  . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
+
+26 Nov 2015, PHP 7.0.0 RC 8
+
+- Core:
+  . Fixed bug #70947 (INI parser segfault with INI_SCANNER_TYPED). (Laruence)
+  . Fixed bug #70914 (zend_throw_or_error() format string vulnerability).
+    (Taoguang Chen)
+  . Fixed bug #70912 (Null ptr dereference instantiating class with invalid
+    array property). (Laruence)
+  . Fixed bug #70898, #70895 (null ptr deref and segfault with crafted callable).
+    (Anatol, Laruence)
+
+- OCI8:
   . Fixed memory leak with LOBs. (Senthil)
 
 - SOAP:
@@ -36,11 +58,9 @@ PHP                                                                        NEWS
     fields). (Laruence)
 
 - Standard:
-  . Fixed bug (count on symbol tables). (Laruence)
+  . Fixed count on symbol tables. (Laruence)
+  . Fixed bug #70963 (Unserialize shows UNKNOWN in result). (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
-
-- Streams/Socket
-  . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
 
 12 Nov 2015, PHP 7.0.0 RC 7
 
@@ -65,7 +85,7 @@ PHP                                                                        NEWS
 	connection flag. (Andrey)
 
 - OCI8:
-  . Fixed bug #68298 (OCI int overflow) (Senthil).
+  . Fixed bug #68298 (OCI int overflow). (Senthil)
 
 - Opcache:
   . Fixed bug #70843 (Segmentation fault on MacOSX with
