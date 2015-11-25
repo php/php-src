@@ -18,7 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
     php_register_internal_extensions). (Lior Kaplan)
   . Fixed \int (or generally every scalar type name with leading backslash)
-    to not be accepted as type name. (Bob, Laruence)
+    to not be accepted as type name. (Bob)
   . Fixed bug #70904 (yield from incorrectly marks valid generator as finished).
     (Bob)
 
