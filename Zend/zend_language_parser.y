@@ -643,6 +643,12 @@ optional_type:
 type:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
+	|	T_NS_SEPARATOR T_ARRAY
+					{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use the builtin type 'array' as fully qualified with a leading backslash"); }
+	|	T_NS_SEPARATOR T_CALLABLE
+					{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use the builtin type 'callable' as fully qualified with a leading backslash"); }
 	|	name		{ $$ = $1; }
 ;
 
