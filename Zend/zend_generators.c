@@ -287,6 +287,12 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 
 static void zend_generator_throw_exception(zend_generator *generator, zval *exception)
 {
+	/* if we don't stop an array/iterator yield from, the exception will only reach the generator after the values were all iterated over */
+	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
+		zval_ptr_dtor(&generator->values);
+		ZVAL_UNDEF(&generator->values);
+	}
+
 	/* Throw the exception in the context of the generator. Decrementing the opline
 	 * to pretend the exception happened during the YIELD opcode. */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
