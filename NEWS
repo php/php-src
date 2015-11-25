@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed count on symbol tables. (Laruence)
+  . Fixed bug #70963 (Unserialize shows UNKNOWN in result). (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
 
 12 Nov 2015, PHP 7.0.0 RC 7
