@@ -763,7 +763,7 @@ static inline int php_output_lock_error(int op)
 	if (op && OG(active) && OG(running)) {
 		/* fatal error */
 		php_output_deactivate();
-		php_error_docref("ref.outcontrol", E_RECOVERABLE_ERROR, "Cannot use output buffering in output buffering display handlers");
+		php_error_docref("ref.outcontrol", E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return 1;
 	}
 	return 0;
