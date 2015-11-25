@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #70940 (Segfault in soap / type_to_string). (Remi)
   . Fixed bug #70900 (SoapClient systematic out of memory error). (Dmitry)
 
+- SPL:
+  . Fixed bug #70959 (ArrayObject unserialize does not restore protected
+    fields). (Laruence)
+
 - Standard:
   . Fixed count on symbol tables. (Laruence)
   . Fixed bug #70910 (extract() breaks variable references). (Laruence)
