@@ -621,17 +621,17 @@ try_again:
 		return;
 	}
 
+	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
+		/* We must not advance Generator if we yield from a Generator being currently run */
+		return;
+	}
+
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
 			return;
 		}
 		/* If there are no more deletegated values, resume the generator
 		 * after the "yield from" expression. */
-	}
-
-	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
-		/* We must not advance Generator if we yield from a Generator being currently run */
-		return;
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
