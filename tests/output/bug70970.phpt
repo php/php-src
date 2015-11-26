@@ -4,7 +4,7 @@ Bug #70970 (Segfault when combining error handler with output buffering)
 <?php
 function exception_error_handler($severity, $message, $file, $line)
 {
-	throw new Exception($message, 0, $severity, $file, $line);
+	throw new Exception($message, 0);
 }
 
 set_error_handler('exception_error_handler');
