@@ -239,6 +239,9 @@ php_apache_sapi_get_stat(void)
 	return &ctx->finfo;
 }
 
+/**
+ * 读取cookie函数
+ */
 static char *
 php_apache_sapi_read_cookies(void)
 {
@@ -352,6 +355,10 @@ static int php_apache2_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
+/**
+ * Apache的SAPI结构体
+ * 对于每一个服务器在加载时，我们都指定了sapi_module，而Apache的sapi_module是apache2_sapi_module
+ */
 static sapi_module_struct apache2_sapi_module = {
 	"apache2handler",
 	"Apache 2.0 Handler",
@@ -374,6 +381,7 @@ static sapi_module_struct apache2_sapi_module = {
 	NULL,						/* send header handler */
 
 	php_apache_sapi_read_post,			/* read POST data */
+	/*PHP读取Cookie*/
 	php_apache_sapi_read_cookies,			/* read Cookies */
 
 	php_apache_sapi_register_variables,

@@ -26,6 +26,7 @@
 #include "php_apache.h"
 
 AP_MODULE_DECLARE_DATA module php7_module = {
+   /* 宏，包括版本，小版本，模块索引，模块名，下一个模块指针等信息，其中模块名以__FILE__体现 */
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */
@@ -33,6 +34,7 @@ AP_MODULE_DECLARE_DATA module php7_module = {
 	NULL,					/* merge per-server config structures */
 	php_dir_cmds,			/* command apr_table_t */
 	php_ap2_register_hook	/* register hooks */
+   /* 注册钩子，此函数通过ap_hook_开头的函数在一次请求处理过程中对于指定的步骤注册钩子 */
 };
 
 /*

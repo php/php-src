@@ -44,6 +44,7 @@
     #define EMBED_SAPI_API
 #endif
 
+//ZTS Zend Thread Safety
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_EXTERN();
 #endif

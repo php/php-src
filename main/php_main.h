@@ -44,7 +44,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
 PHPAPI int php_handle_special_queries(void);
 PHPAPI int php_lint_script(zend_file_handle *file);
 
-PHPAPI void php_handle_aborted_connection(void);
+PHPAPI void php_handle_aborted_connection(void);//中断处理程序
 PHPAPI int php_handle_auth_data(const char *auth);
 
 PHPAPI void php_html_puts(const char *str, size_t siz);
