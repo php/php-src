@@ -4587,8 +4587,10 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
 		if (type != 0) {
-			if (ast->attr == ZEND_NAME_FQ) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the scalar type '%s' as fully qualified with a leading backslash", ZSTR_VAL(zend_string_tolower(class_name)));
+			if (ast->attr != ZEND_NAME_NOT_FQ) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Scalar type declaration '%s' must be unqualified",
+					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
 			arg_info->type_hint = type;
 		} else {
