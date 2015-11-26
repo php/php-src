@@ -1,12 +1,10 @@
 --TEST--
-Fully qualified (leading backslash) type names must fail
+namespace\int is not a valid type hint
 --FILE--
 <?php
 
-function foo(\int $foo) {
-	var_dump($foo);
-}
-foo(1);
+function test(namespace\int $i) {}
+test(0);
 
 ?>
 --EXPECTF--
