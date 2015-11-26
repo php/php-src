@@ -100,7 +100,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			if (b) {
 				fprintf(stderr, " BB%d", b->successors[n++]);
 			} else {
-				fprintf(stderr, " L" ZEND_LONG_FMT, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			}
 		}
 	}
