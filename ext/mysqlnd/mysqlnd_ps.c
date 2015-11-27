@@ -1115,6 +1115,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 						ZVAL_COPY_VALUE(result, data);
 						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
+					} else {
+						ZVAL_NULL(result);
 					}
 				}
 			}
