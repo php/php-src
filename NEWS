@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     from an array. (Bob)
 
 - Mysqlnd:
+  . Fixed bug #70949 (SQL Result Sets With NULL Can Cause Fatal Memory Errors).
+    (Laruence)
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
     (Laruence)
 
