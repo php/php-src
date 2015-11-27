@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed LOB implementation size_t/zend_long mismatch reported
     by gcov. (Senthil)
 
+- Opcache:
+  . Fixed bug #70977 (Segmentation fault with opcache.huge_code_pages=1).
+    (Laruence)
+
 - Phpdbg:
   . Fixed stderr being written to stdout. (Bob)
 
