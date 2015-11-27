@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Phpdbg:
   . Fixed stderr being written to stdout. (Bob)
 
+- Reflection:
+  . Fixed bug #70982 (setStaticPropertyValue behaviors inconsistently with
+    5.6). (Laruence)
+
 - Standard:
   . Fixed bug #70960 (ReflectionFunction for array_unique returns wrong number
     of parameters). (Laruence)
