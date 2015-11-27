@@ -6,7 +6,7 @@ class Foo {
 	static $abc;
 	function __construct()
 	{
-		var_dump(static::$abc);
+		var_dump(self::$abc);
 	}
 }
 
