@@ -2550,7 +2550,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 		munmap(mem, size);
 		zend_error(E_WARNING,
-			ACCELERATOR_PRODUCT_NAME "huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
 			strerror(errno), errno);
 		return -1;
 #  endif
