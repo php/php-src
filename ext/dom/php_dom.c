@@ -337,7 +337,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
-		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", obj->std.ce->name->val);
+		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
 	}
 
 	if (hnd) {
@@ -507,7 +507,6 @@ static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 	dom_object *clone = dom_objects_set_class(intern->std.ce, 0);
 
 	clone->std.handlers = dom_get_obj_handlers();
-	zend_objects_clone_members(&clone->std, &intern->std);
 
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
@@ -527,6 +526,8 @@ static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 
 		}
 	}
+
+	zend_objects_clone_members(&clone->std, &intern->std);
 
 	return &clone->std;
 }
@@ -614,7 +615,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
 	INIT_CLASS_ENTRY(ce, "DOMException", php_dom_domexception_class_functions);
-	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default());
+	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
 
@@ -1056,7 +1057,8 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
-	//??? if (basenode)
+	ZEND_ASSERT(basenode != NULL);
+
 	ZVAL_OBJ(&mapptr->baseobj_zv, &basenode->std);
 	Z_ADDREF(mapptr->baseobj_zv);
 

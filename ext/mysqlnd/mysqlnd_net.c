@@ -61,6 +61,27 @@ mysqlnd_set_sock_no_delay(php_stream * stream)
 /* }}} */
 
 
+/* {{{ mysqlnd_set_sock_keepalive */
+static int
+mysqlnd_set_sock_keepalive(php_stream * stream)
+{
+
+	int socketd = ((php_netstream_data_t*)stream->abstract)->socket;
+	int ret = SUCCESS;
+	int flag = 1;
+	int result = setsockopt(socketd, SOL_SOCKET, SO_KEEPALIVE, (char *) &flag, sizeof(int));
+
+	DBG_ENTER("mysqlnd_set_sock_keepalive");
+
+	if (result == -1) {
+		ret = FAILURE;
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_net::network_read_ex */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar * const buffer, const size_t count,
@@ -190,9 +211,11 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			mnd_sprintf_free(hashed_details);
 		}
 		errcode = CR_CONNECTION_ERROR;
-		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr->val);
+		SET_CLIENT_ERROR(*error_info,
+						 CR_CONNECTION_ERROR,
+						 UNKNOWN_SQLSTATE,
+						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			/* no mnd_ since we don't allocate it */
 			zend_string_release(errstr);
 		}
 		DBG_RETURN(NULL);
@@ -260,6 +283,8 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 		if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
 			/* TCP -> Set TCP_NODELAY */
 			mysqlnd_set_sock_no_delay(net_stream);
+			/* TCP -> Set SO_KEEPALIVE */
+			mysqlnd_set_sock_keepalive(net_stream);
 		}
 	}
 
@@ -781,8 +806,27 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 				break;
 			}
 		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
-			net->data->options.ssl_verify_peer = value? ((*(zend_bool *)value)? TRUE:FALSE): FALSE;
+		{
+			enum mysqlnd_ssl_peer val = *((enum mysqlnd_ssl_peer *)value);
+			switch (val) {
+				case MYSQLND_SSL_PEER_VERIFY:
+					DBG_INF("MYSQLND_SSL_PEER_VERIFY");
+					break;
+				case MYSQLND_SSL_PEER_DONT_VERIFY:
+					DBG_INF("MYSQLND_SSL_PEER_DONT_VERIFY");
+					break;
+				case MYSQLND_SSL_PEER_DEFAULT:
+					DBG_INF("MYSQLND_SSL_PEER_DEFAULT");
+					val = MYSQLND_SSL_PEER_DEFAULT;
+					break;
+				default:
+					DBG_INF("default = MYSQLND_SSL_PEER_DEFAULT_ACTION");
+					val = MYSQLND_SSL_PEER_DEFAULT;
+					break;
+			}
+			net->data->options.ssl_verify_peer = val;
 			break;
+		}
 		case MYSQL_OPT_READ_TIMEOUT:
 			net->data->options.timeout_read = *(unsigned int*) value;
 			break;
@@ -869,6 +913,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 #ifdef MYSQLND_SSL_SUPPORTED
 	php_stream_context * context = php_stream_context_alloc();
 	php_stream * net_stream = net->data->m.get_stream(net);
+	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_net::enable_ssl");
 	if (!context) {
@@ -879,11 +924,8 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		zval key_zval;
 		ZVAL_STRING(&key_zval, net->data->options.ssl_key);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
-	}
-	if (net->data->options.ssl_verify_peer) {
-		zval verify_peer_zval;
-		ZVAL_TRUE(&verify_peer_zval);
-		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
+		zval_ptr_dtor(&key_zval);
+		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_cert) {
 		zval cert_zval;
@@ -892,26 +934,54 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 		if (!net->data->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
 		}
+		zval_ptr_dtor(&cert_zval);
+		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_ca) {
 		zval cafile_zval;
 		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
+		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_capath) {
 		zval capath_zval;
 		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath);
-		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
+		php_stream_context_set_option(context, "ssl", "capath", &capath_zval);
+		zval_ptr_dtor(&capath_zval);
+		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
 		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase);
 		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
+		zval_ptr_dtor(&passphrase_zval);
+		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_cipher) {
 		zval cipher_zval;
 		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
+		zval_ptr_dtor(&cipher_zval);
+		any_flag = TRUE;
+	}
+	{
+		zval verify_peer_zval;
+		zend_bool verify;
+
+		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DEFAULT) {
+			net->data->options.ssl_verify_peer = any_flag? MYSQLND_SSL_PEER_DEFAULT_ACTION:MYSQLND_SSL_PEER_DONT_VERIFY;
+		}
+
+		verify = net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_VERIFY? TRUE:FALSE;
+
+		DBG_INF_FMT("VERIFY=%d", verify);
+		ZVAL_BOOL(&verify_peer_zval, verify);
+		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
+		php_stream_context_set_option(context, "ssl", "verify_peer_name", &verify_peer_zval);
+		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DONT_VERIFY) {
+			ZVAL_TRUE(&verify_peer_zval);
+			php_stream_context_set_option(context, "ssl", "allow_self_signed", &verify_peer_zval);
+		}
 	}
 #if PHP_API_VERSION >= 20131106
 	php_stream_context_set(net_stream, context);

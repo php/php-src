@@ -106,7 +106,10 @@ mysqli_close($link);
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (mysqli_get_server_version($link) > 50600) {
+	$is_maria_db = strpos(mysqli_get_server_info($link), "MariaDB") !== false;
+	if ($is_maria_db) {
+		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY UNSIGNED NOT_NULL';
+	} else if (mysqli_get_server_version($link) > 50600) {
 		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY NOT_NULL';
 	}
 

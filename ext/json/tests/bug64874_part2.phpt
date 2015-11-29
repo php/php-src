@@ -5,8 +5,8 @@ Case-sensitivity part of bug #64874 ("json_decode handles whitespace and case-se
 --FILE--
 <?php
 function decode($json) {
-    var_dump(json_decode($json));
-    echo ((json_last_error() !== 0) ? 'ERROR' : 'SUCCESS') . PHP_EOL;
+	var_dump(json_decode($json));
+	echo ((json_last_error() !== 0) ? 'ERROR' : 'SUCCESS') . PHP_EOL;
 }
 
 // Only lowercase should work

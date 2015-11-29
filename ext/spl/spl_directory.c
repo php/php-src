@@ -122,10 +122,6 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		spl_filesystem_file_free_line(intern);
 		break;
 	}
-
-	if (intern->it) {
-		//????zend_iterator_dtor(&intern->it->intern);
-	}
 } /* }}} */
 
 /* {{{ spl_ce_dir_object_new */
@@ -359,7 +355,7 @@ static zend_object *spl_filesystem_object_clone(zval *zobject)
 			intern->u.dir.index = index;
 			break;
 		case SPL_FS_FILE:
-			php_error_docref(NULL, E_ERROR, "An object of class %s cannot be cloned", old_object->ce->name->val);
+			php_error_docref(NULL, E_ERROR, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
 			break;
 	}
 
@@ -786,7 +782,8 @@ SPL_METHOD(DirectoryIterator, current)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_ZVAL(getThis(), 1, 0);
+	ZVAL_OBJ(return_value, Z_OBJ_P(getThis()));
+	Z_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -837,7 +834,8 @@ SPL_METHOD(DirectoryIterator, seek)
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
-			break;
+			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", pos);
+			return;
 		}
 		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_next, "next", NULL);
 	}
@@ -937,11 +935,10 @@ SPL_METHOD(SplFileInfo, getExtension)
 
 	ret = php_basename(fname, flen, NULL, 0);
 
-	p = zend_memrchr(ret->val, '.', ret->len);
+	p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
 	if (p) {
-		assert(p > ret->val);
-		idx = (int)(p - ret->val);
-		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
+		idx = (int)(p - ZSTR_VAL(ret));
+		RETVAL_STRINGL(ZSTR_VAL(ret) + idx + 1, ZSTR_LEN(ret) - idx - 1);
 		zend_string_release(ret);
 		return;
 	} else {
@@ -966,10 +963,10 @@ SPL_METHOD(DirectoryIterator, getExtension)
 
 	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0);
 
-	p = zend_memrchr(fname->val, '.', fname->len);
+	p = zend_memrchr(ZSTR_VAL(fname), '.', ZSTR_LEN(fname));
 	if (p) {
-		idx = (int)(p - fname->val);
-		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
+		idx = (int)(p - ZSTR_VAL(fname));
+		RETVAL_STRINGL(ZSTR_VAL(fname) + idx + 1, ZSTR_LEN(fname) - idx - 1);
 		zend_string_release(fname);
 	} else {
 		zend_string_release(fname);
@@ -978,7 +975,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
 }
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getBasename([string $suffix]) U
+/* {{{ proto string SplFileInfo::getBasename([string $suffix])
    Returns filename component of path */
 SPL_METHOD(SplFileInfo, getBasename)
 {
@@ -1005,7 +1002,7 @@ SPL_METHOD(SplFileInfo, getBasename)
 }
 /* }}}*/
 
-/* {{{ proto string DirectoryIterator::getBasename([string $suffix]) U
+/* {{{ proto string DirectoryIterator::getBasename([string $suffix])
    Returns filename component of current dir entry */
 SPL_METHOD(DirectoryIterator, getBasename)
 {
@@ -1080,7 +1077,8 @@ SPL_METHOD(FilesystemIterator, current)
 		spl_filesystem_object_get_file_name(intern);
 		spl_filesystem_object_create_type(0, intern, SPL_FS_INFO, NULL, return_value);
 	} else {
-		RETURN_ZVAL(getThis(), 1, 0);
+		ZVAL_OBJ(return_value, Z_OBJ_P(getThis()));
+		Z_ADDREF_P(return_value);
 		/*RETURN_STRING(intern->u.dir.entry.d_name, 1);*/
 	}
 }
@@ -1215,7 +1213,7 @@ FileInfoFunction(isDir, FS_IS_DIR)
 FileInfoFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto string SplFileInfo::getLinkTarget() U
+/* {{{ proto string SplFileInfo::getLinkTarget()
    Return the target of a symbolic link */
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
@@ -1544,8 +1542,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	char *sub_name;
-	size_t len;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1553,9 +1549,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	}
 
 	if (intern->u.dir.sub_path) {
-		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
-		RETVAL_STRINGL(sub_name, len);
-		efree(sub_name);
+		RETURN_NEW_STR(strpprintf(0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name));
 	} else {
 		RETURN_STRING(intern->u.dir.entry.d_name);
 	}
@@ -1649,8 +1643,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(object);
 	}
 	/* Otherwise we were called from the owning object free storage handler as
-	 * it sets
-	 * iterator->intern.data to NULL.
+	 * it sets iterator->intern.data to IS_UNDEF.
 	 * We don't even need to destroy iterator->current as we didn't add a
 	 * reference to it in move_forward or get_iterator */
 }
@@ -1854,8 +1847,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_COPY_VALUE(writeobj, retval_ptr);
 			} else {
 				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
 			}
@@ -1866,8 +1859,8 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 				zval *retval_ptr = &retval;
 
 				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name);
-				zval_dtor(readobj);
-				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+				zval_ptr_dtor(readobj);
+				ZVAL_COPY_VALUE(writeobj, retval_ptr);
 			} else {
 				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
 			}
@@ -1878,7 +1871,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 		return SUCCESS;
 	}
 	if (readobj == writeobj) {
-		zval_dtor(readobj);
+		zval_ptr_dtor(readobj);
 	}
 	ZVAL_NULL(writeobj);
 	return FAILURE;
@@ -2031,7 +2024,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 
 	if (intern->u.file.max_line_len > 0) {
 		buf = safe_emalloc((intern->u.file.max_line_len + 1), sizeof(char), 0);
-		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len, &line_len) == NULL) {
+		if (php_stream_get_line(intern->u.file.stream, buf, intern->u.file.max_line_len + 1, &line_len) == NULL) {
 			efree(buf);
 			buf = NULL;
 		} else {
@@ -2123,6 +2116,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
+	zval *value;
 
 	do {
 		ret = spl_filesystem_file_read(intern, 1);
@@ -2139,11 +2133,10 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 
 		php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
 		if (return_value) {
-			if (Z_TYPE_P(return_value) != IS_NULL) {
-				zval_dtor(return_value);
-				ZVAL_NULL(return_value);
-			}
-			ZVAL_ZVAL(return_value, &intern->u.file.current_zval, 1, 0);
+			zval_ptr_dtor(return_value);
+			value = &intern->u.file.current_zval;
+			ZVAL_DEREF(value);
+			ZVAL_COPY(return_value, value);
 		}
 	}
 	return ret;
@@ -2177,7 +2170,10 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 				intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 				intern->u.file.current_line_len = Z_STRLEN(retval);
 			} else {
-				ZVAL_ZVAL(&intern->u.file.current_zval, &retval, 1, 0);
+				zval *value = &retval;
+
+				ZVAL_DEREF(value);
+				ZVAL_COPY(&intern->u.file.current_zval, value);
 			}
 			zval_ptr_dtor(&retval);
 			return SUCCESS;
@@ -2438,7 +2434,11 @@ SPL_METHOD(SplFileObject, current)
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		RETURN_ZVAL(&intern->u.file.current_zval, 1, 0);
+		zval *value = &intern->u.file.current_zval;
+
+		ZVAL_DEREF(value);
+		ZVAL_COPY(return_value, value);
+		return;
 	}
 	RETURN_FALSE;
 } /* }}} */
@@ -2656,7 +2656,7 @@ SPL_METHOD(SplFileObject, fputcsv)
 }
 /* }}} */
 
-/* {{{ proto void SplFileObject::setCsvControl([string delimiter = ',' [, string enclosure = '"' [, string escape = '\\']]])
+/* {{{ proto void SplFileObject::setCsvControl([string delimiter [, string enclosure [, string escape ]]])
    Set the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
 {

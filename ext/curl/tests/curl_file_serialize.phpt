@@ -31,7 +31,7 @@ array(2) {
   string(3) "foo"
 }
 
-Fatal error: Uncaught exception 'Exception' with message 'Unserialization of CURLFile instances with file name is not allowed' in %s
+Fatal error: Uncaught Exception: Unserialization of CURLFile instances with file name is not allowed in %s
 Stack trace:
 #0 [internal function]: CURLFile->__wakeup()
 #1 %s

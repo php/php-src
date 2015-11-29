@@ -39,10 +39,6 @@
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
 
-#ifndef _S_IFDIR
-# define _S_IFDIR		S_IFDIR
-#endif
-
 /* {{{ macros and type definitions */
 typedef struct _php_fileinfo {
 	zend_long options;
@@ -532,7 +528,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path");
+				php_error_docref(NULL, E_WARNING, "Invalid path");
 				RETVAL_FALSE;
 				goto clean;
 			}

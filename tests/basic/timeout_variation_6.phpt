@@ -1,5 +1,5 @@
 --TEST--
-Timeout within function trowing exteption before timeout reached
+Timeout within function trowing exception before timeout reached
 --SKIPIF--
 <?php 
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -22,7 +22,7 @@ f($t);
 never reached here
 --EXPECTF--
 call
-Fatal error: Uncaught exception 'Exception' with message 'exception before timeout' in %s:%d
+Fatal error: Uncaught Exception: exception before timeout in %s:%d
 Stack trace:
 #0 %s(%d): f(%d)
 #1 {main}

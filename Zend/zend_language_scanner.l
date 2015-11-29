@@ -33,7 +33,7 @@
 
 #include <errno.h>
 #include "zend.h"
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 # include <Winuser.h>
 #endif
 #include "zend_alloc.h"
@@ -193,6 +193,7 @@ void shutdown_scanner(void)
 	zend_stack_destroy(&SCNG(state_stack));
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
+	SCNG(on_event) = NULL;
 }
 
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
@@ -222,6 +223,8 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 	lex_state->input_filter = SCNG(input_filter);
 	lex_state->output_filter = SCNG(output_filter);
 	lex_state->script_encoding = SCNG(script_encoding);
+
+	lex_state->on_event = SCNG(on_event);
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
@@ -260,6 +263,8 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
 
+	SCNG(on_event) = lex_state->on_event;
+
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
 
@@ -274,6 +279,13 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	if (file_handle->free_filename) {
 		file_handle->filename = NULL;
 	}
+}
+
+ZEND_API void zend_lex_tstring(zval *zv)
+{
+	if (SCNG(on_event)) SCNG(on_event)(ON_FEEDBACK, T_STRING, 0);
+
+	ZVAL_STRINGL(zv, (char*)SCNG(yy_text), SCNG(yy_leng));
 }
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
@@ -556,6 +568,48 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 }
 END_EXTERN_C()
 
+static zend_op_array *zend_compile(int type)
+{
+	zend_op_array *op_array = NULL;
+	zend_bool original_in_compilation = CG(in_compilation);
+
+	CG(in_compilation) = 1;
+	CG(ast) = NULL;
+	CG(ast_arena) = zend_arena_create(1024 * 32);
+
+	if (!zendparse()) {
+		zend_file_context original_file_context;
+		zend_oparray_context original_oparray_context;
+		zend_op_array *original_active_op_array = CG(active_op_array);
+
+		op_array = emalloc(sizeof(zend_op_array));
+		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
+		CG(active_op_array) = op_array;
+
+		if (zend_ast_process) {
+			zend_ast_process(CG(ast));
+		}
+
+		zend_file_context_begin(&original_file_context);
+		zend_oparray_context_begin(&original_oparray_context);
+		zend_compile_top_stmt(CG(ast));
+		zend_emit_final_return(type == ZEND_USER_FUNCTION);
+		op_array->line_start = 1;
+		op_array->line_end = CG(zend_lineno);
+		pass_two(op_array);
+		zend_oparray_context_end(&original_oparray_context);
+		zend_file_context_end(&original_file_context);
+
+		CG(active_op_array) = original_active_op_array;
+	}
+
+	zend_ast_destroy(CG(ast));
+	zend_arena_destroy(CG(ast_arena));
+
+	CG(in_compilation) = original_in_compilation;
+
+	return op_array;
+}
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 {
@@ -571,41 +625,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
 	} else {
-		zend_bool original_in_compilation = CG(in_compilation);
-		CG(in_compilation) = 1;
-
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
-		if (!zendparse()) {
-			zval retval_zv;
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-			ZVAL_LONG(&retval_zv, 1);
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(&retval_zv);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
-		CG(in_compilation) = original_in_compilation;
+		op_array = zend_compile(ZEND_USER_FUNCTION);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -720,13 +740,11 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-
 zend_op_array *compile_string(zval *source_string, char *filename)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
 	zval tmp;
-	zend_bool original_in_compilation = CG(in_compilation);
 
 	if (Z_STRLEN_P(source_string)==0) {
 		return NULL;
@@ -736,45 +754,15 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
 		BEGIN(ST_IN_SCRIPTING);
-
-		if (!zendparse()) {
-			zend_file_context original_file_context;
-			zend_oparray_context original_oparray_context;
-			zend_op_array *original_active_op_array = CG(active_op_array);
-			op_array = emalloc(sizeof(zend_op_array));
-			init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
-			CG(active_op_array) = op_array;
-
-			if (zend_ast_process) {
-				zend_ast_process(CG(ast));
-			}
-
-			zend_file_context_begin(&original_file_context);
-			zend_oparray_context_begin(&original_oparray_context);
-			zend_compile_top_stmt(CG(ast));
-			zend_emit_final_return(NULL);
-			op_array->line_start = 1;
-			op_array->line_end = CG(zend_lineno);
-			pass_two(op_array);
-			zend_oparray_context_end(&original_oparray_context);
-			zend_file_context_end(&original_file_context);
-
-			CG(active_op_array) = original_active_op_array;
-		}
-
-		zend_ast_destroy(CG(ast));
-		zend_arena_destroy(CG(ast_arena));
+		op_array = zend_compile(ZEND_EVAL_CODE);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&tmp);
-	CG(in_compilation) = original_in_compilation;
+
 	return op_array;
 }
 
@@ -915,7 +903,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'e':
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 					*t++ = VK_ESCAPE;
 #else
 					*t++ = '\e';
@@ -996,9 +984,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						}
 
 						if (!valid) {
-							zend_throw_exception(zend_get_parse_exception(),
-								"Invalid UTF-8 codepoint escape sequence", E_PARSE);
+							zend_throw_exception(zend_ce_parse_error,
+								"Invalid UTF-8 codepoint escape sequence", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1007,9 +996,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						/* per RFC 3629, UTF-8 can only represent 21 bits */
 						if (codepoint > 0x10FFFF || errno) {
-							zend_throw_exception(zend_get_parse_exception(),
-								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", E_PARSE);
+							zend_throw_exception(zend_ce_parse_error,
+								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
 							zval_ptr_dtor(zendlval);
+							ZVAL_UNDEF(zendlval);
 							return FAILURE;
 						}
 
@@ -1083,9 +1073,20 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 	return SUCCESS;
 }
 
+static zend_always_inline int emit_token(int token, int token_line)
+{
+	if(SCNG(on_event)) SCNG(on_event)(ON_TOKEN, token, token_line);
+
+	return token;
+}
+
+#define RETURN_TOKEN(token) return emit_token(token, start_line);
 
 int lex_scan(zval *zendlval)
 {
+
+int start_line = CG(zend_lineno);
+
 restart:
 	SCNG(yy_text) = YYCURSOR;
 
@@ -1107,183 +1108,183 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
 <ST_IN_SCRIPTING>"exit" {
-	return T_EXIT;
+	RETURN_TOKEN(T_EXIT);
 }
 
 <ST_IN_SCRIPTING>"die" {
-	return T_EXIT;
+	RETURN_TOKEN(T_EXIT);
 }
 
 <ST_IN_SCRIPTING>"function" {
-	return T_FUNCTION;
+	RETURN_TOKEN(T_FUNCTION);
 }
 
 <ST_IN_SCRIPTING>"const" {
-	return T_CONST;
+	RETURN_TOKEN(T_CONST);
 }
 
 <ST_IN_SCRIPTING>"return" {
-	return T_RETURN;
+	RETURN_TOKEN(T_RETURN);
 }
 
 <ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
-	return T_YIELD_FROM;
+	RETURN_TOKEN(T_YIELD_FROM);
 }
 
 <ST_IN_SCRIPTING>"yield" {
-	return T_YIELD;
+	RETURN_TOKEN(T_YIELD);
 }
 
 <ST_IN_SCRIPTING>"try" {
-	return T_TRY;
+	RETURN_TOKEN(T_TRY);
 }
 
 <ST_IN_SCRIPTING>"catch" {
-	return T_CATCH;
+	RETURN_TOKEN(T_CATCH);
 }
 
 <ST_IN_SCRIPTING>"finally" {
-	return T_FINALLY;
+	RETURN_TOKEN(T_FINALLY);
 }
 
 <ST_IN_SCRIPTING>"throw" {
-	return T_THROW;
+	RETURN_TOKEN(T_THROW);
 }
 
 <ST_IN_SCRIPTING>"if" {
-	return T_IF;
+	RETURN_TOKEN(T_IF);
 }
 
 <ST_IN_SCRIPTING>"elseif" {
-	return T_ELSEIF;
+	RETURN_TOKEN(T_ELSEIF);
 }
 
 <ST_IN_SCRIPTING>"endif" {
-	return T_ENDIF;
+	RETURN_TOKEN(T_ENDIF);
 }
 
 <ST_IN_SCRIPTING>"else" {
-	return T_ELSE;
+	RETURN_TOKEN(T_ELSE);
 }
 
 <ST_IN_SCRIPTING>"while" {
-	return T_WHILE;
+	RETURN_TOKEN(T_WHILE);
 }
 
 <ST_IN_SCRIPTING>"endwhile" {
-	return T_ENDWHILE;
+	RETURN_TOKEN(T_ENDWHILE);
 }
 
 <ST_IN_SCRIPTING>"do" {
-	return T_DO;
+	RETURN_TOKEN(T_DO);
 }
 
 <ST_IN_SCRIPTING>"for" {
-	return T_FOR;
+	RETURN_TOKEN(T_FOR);
 }
 
 <ST_IN_SCRIPTING>"endfor" {
-	return T_ENDFOR;
+	RETURN_TOKEN(T_ENDFOR);
 }
 
 <ST_IN_SCRIPTING>"foreach" {
-	return T_FOREACH;
+	RETURN_TOKEN(T_FOREACH);
 }
 
 <ST_IN_SCRIPTING>"endforeach" {
-	return T_ENDFOREACH;
+	RETURN_TOKEN(T_ENDFOREACH);
 }
 
 <ST_IN_SCRIPTING>"declare" {
-	return T_DECLARE;
+	RETURN_TOKEN(T_DECLARE);
 }
 
 <ST_IN_SCRIPTING>"enddeclare" {
-	return T_ENDDECLARE;
+	RETURN_TOKEN(T_ENDDECLARE);
 }
 
 <ST_IN_SCRIPTING>"instanceof" {
-	return T_INSTANCEOF;
+	RETURN_TOKEN(T_INSTANCEOF);
 }
 
 <ST_IN_SCRIPTING>"as" {
-	return T_AS;
+	RETURN_TOKEN(T_AS);
 }
 
 <ST_IN_SCRIPTING>"switch" {
-	return T_SWITCH;
+	RETURN_TOKEN(T_SWITCH);
 }
 
 <ST_IN_SCRIPTING>"endswitch" {
-	return T_ENDSWITCH;
+	RETURN_TOKEN(T_ENDSWITCH);
 }
 
 <ST_IN_SCRIPTING>"case" {
-	return T_CASE;
+	RETURN_TOKEN(T_CASE);
 }
 
 <ST_IN_SCRIPTING>"default" {
-	return T_DEFAULT;
+	RETURN_TOKEN(T_DEFAULT);
 }
 
 <ST_IN_SCRIPTING>"break" {
-	return T_BREAK;
+	RETURN_TOKEN(T_BREAK);
 }
 
 <ST_IN_SCRIPTING>"continue" {
-	return T_CONTINUE;
+	RETURN_TOKEN(T_CONTINUE);
 }
 
 <ST_IN_SCRIPTING>"goto" {
-	return T_GOTO;
+	RETURN_TOKEN(T_GOTO);
 }
 
 <ST_IN_SCRIPTING>"echo" {
-	return T_ECHO;
+	RETURN_TOKEN(T_ECHO);
 }
 
 <ST_IN_SCRIPTING>"print" {
-	return T_PRINT;
+	RETURN_TOKEN(T_PRINT);
 }
 
 <ST_IN_SCRIPTING>"class" {
-	return T_CLASS;
+	RETURN_TOKEN(T_CLASS);
 }
 
 <ST_IN_SCRIPTING>"interface" {
-	return T_INTERFACE;
+	RETURN_TOKEN(T_INTERFACE);
 }
 
 <ST_IN_SCRIPTING>"trait" {
-	return T_TRAIT;
+	RETURN_TOKEN(T_TRAIT);
 }
 
 <ST_IN_SCRIPTING>"extends" {
-	return T_EXTENDS;
+	RETURN_TOKEN(T_EXTENDS);
 }
 
 <ST_IN_SCRIPTING>"implements" {
-	return T_IMPLEMENTS;
+	RETURN_TOKEN(T_IMPLEMENTS);
 }
 
 <ST_IN_SCRIPTING>"->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
-	return T_OBJECT_OPERATOR;
+	RETURN_TOKEN(T_OBJECT_OPERATOR);
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
 	HANDLE_NEWLINES(yytext, yyleng);
-	return T_WHITESPACE;
+	RETURN_TOKEN(T_WHITESPACE);
 }
 
 <ST_LOOKING_FOR_PROPERTY>"->" {
-	return T_OBJECT_OPERATOR;
+	RETURN_TOKEN(T_OBJECT_OPERATOR);
 }
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state();
 	zend_copy_value(zendlval, yytext, yyleng);
-	return T_STRING;
+	RETURN_TOKEN(T_STRING);
 }
 
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
@@ -1293,283 +1294,283 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"::" {
-	return T_PAAMAYIM_NEKUDOTAYIM;
+	RETURN_TOKEN(T_PAAMAYIM_NEKUDOTAYIM);
 }
 
 <ST_IN_SCRIPTING>"\\" {
-	return T_NS_SEPARATOR;
+	RETURN_TOKEN(T_NS_SEPARATOR);
 }
 
 <ST_IN_SCRIPTING>"..." {
-	return T_ELLIPSIS;
+	RETURN_TOKEN(T_ELLIPSIS);
 }
 
 <ST_IN_SCRIPTING>"??" {
-	return T_COALESCE;
+	RETURN_TOKEN(T_COALESCE);
 }
 
 <ST_IN_SCRIPTING>"new" {
-	return T_NEW;
+	RETURN_TOKEN(T_NEW);
 }
 
 <ST_IN_SCRIPTING>"clone" {
-	return T_CLONE;
+	RETURN_TOKEN(T_CLONE);
 }
 
 <ST_IN_SCRIPTING>"var" {
-	return T_VAR;
+	RETURN_TOKEN(T_VAR);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
-	return T_INT_CAST;
+	RETURN_TOKEN(T_INT_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
-	return T_DOUBLE_CAST;
+	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
-	return T_STRING_CAST;
+	RETURN_TOKEN(T_STRING_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
-	return T_ARRAY_CAST;
+	RETURN_TOKEN(T_ARRAY_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
-	return T_OBJECT_CAST;
+	RETURN_TOKEN(T_OBJECT_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
-	return T_BOOL_CAST;
+	RETURN_TOKEN(T_BOOL_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
-	return T_UNSET_CAST;
+	RETURN_TOKEN(T_UNSET_CAST);
 }
 
 <ST_IN_SCRIPTING>"eval" {
-	return T_EVAL;
+	RETURN_TOKEN(T_EVAL);
 }
 
 <ST_IN_SCRIPTING>"include" {
-	return T_INCLUDE;
+	RETURN_TOKEN(T_INCLUDE);
 }
 
 <ST_IN_SCRIPTING>"include_once" {
-	return T_INCLUDE_ONCE;
+	RETURN_TOKEN(T_INCLUDE_ONCE);
 }
 
 <ST_IN_SCRIPTING>"require" {
-	return T_REQUIRE;
+	RETURN_TOKEN(T_REQUIRE);
 }
 
 <ST_IN_SCRIPTING>"require_once" {
-	return T_REQUIRE_ONCE;
+	RETURN_TOKEN(T_REQUIRE_ONCE);
 }
 
 <ST_IN_SCRIPTING>"namespace" {
-	return T_NAMESPACE;
+	RETURN_TOKEN(T_NAMESPACE);
 }
 
 <ST_IN_SCRIPTING>"use" {
-	return T_USE;
+	RETURN_TOKEN(T_USE);
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
-        return T_INSTEADOF;
+    RETURN_TOKEN(T_INSTEADOF);
 }
 
 <ST_IN_SCRIPTING>"global" {
-	return T_GLOBAL;
+	RETURN_TOKEN(T_GLOBAL);
 }
 
 <ST_IN_SCRIPTING>"isset" {
-	return T_ISSET;
+	RETURN_TOKEN(T_ISSET);
 }
 
 <ST_IN_SCRIPTING>"empty" {
-	return T_EMPTY;
+	RETURN_TOKEN(T_EMPTY);
 }
 
 <ST_IN_SCRIPTING>"__halt_compiler" {
-	return T_HALT_COMPILER;
+	RETURN_TOKEN(T_HALT_COMPILER);
 }
 
 <ST_IN_SCRIPTING>"static" {
-	return T_STATIC;
+	RETURN_TOKEN(T_STATIC);
 }
 
 <ST_IN_SCRIPTING>"abstract" {
-	return T_ABSTRACT;
+	RETURN_TOKEN(T_ABSTRACT);
 }
 
 <ST_IN_SCRIPTING>"final" {
-	return T_FINAL;
+	RETURN_TOKEN(T_FINAL);
 }
 
 <ST_IN_SCRIPTING>"private" {
-	return T_PRIVATE;
+	RETURN_TOKEN(T_PRIVATE);
 }
 
 <ST_IN_SCRIPTING>"protected" {
-	return T_PROTECTED;
+	RETURN_TOKEN(T_PROTECTED);
 }
 
 <ST_IN_SCRIPTING>"public" {
-	return T_PUBLIC;
+	RETURN_TOKEN(T_PUBLIC);
 }
 
 <ST_IN_SCRIPTING>"unset" {
-	return T_UNSET;
+	RETURN_TOKEN(T_UNSET);
 }
 
 <ST_IN_SCRIPTING>"=>" {
-	return T_DOUBLE_ARROW;
+	RETURN_TOKEN(T_DOUBLE_ARROW);
 }
 
 <ST_IN_SCRIPTING>"list" {
-	return T_LIST;
+	RETURN_TOKEN(T_LIST);
 }
 
 <ST_IN_SCRIPTING>"array" {
-	return T_ARRAY;
+	RETURN_TOKEN(T_ARRAY);
 }
 
 <ST_IN_SCRIPTING>"callable" {
- return T_CALLABLE;
+	RETURN_TOKEN(T_CALLABLE);
 }
 
 <ST_IN_SCRIPTING>"++" {
-	return T_INC;
+	RETURN_TOKEN(T_INC);
 }
 
 <ST_IN_SCRIPTING>"--" {
-	return T_DEC;
+	RETURN_TOKEN(T_DEC);
 }
 
 <ST_IN_SCRIPTING>"===" {
-	return T_IS_IDENTICAL;
+	RETURN_TOKEN(T_IS_IDENTICAL);
 }
 
 <ST_IN_SCRIPTING>"!==" {
-	return T_IS_NOT_IDENTICAL;
+	RETURN_TOKEN(T_IS_NOT_IDENTICAL);
 }
 
 <ST_IN_SCRIPTING>"==" {
-	return T_IS_EQUAL;
+	RETURN_TOKEN(T_IS_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"!="|"<>" {
-	return T_IS_NOT_EQUAL;
+	RETURN_TOKEN(T_IS_NOT_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"<=>" {
-	return T_SPACESHIP;
+	RETURN_TOKEN(T_SPACESHIP);
 }
 
 <ST_IN_SCRIPTING>"<=" {
-	return T_IS_SMALLER_OR_EQUAL;
+	RETURN_TOKEN(T_IS_SMALLER_OR_EQUAL);
 }
 
 <ST_IN_SCRIPTING>">=" {
-	return T_IS_GREATER_OR_EQUAL;
+	RETURN_TOKEN(T_IS_GREATER_OR_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"+=" {
-	return T_PLUS_EQUAL;
+	RETURN_TOKEN(T_PLUS_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"-=" {
-	return T_MINUS_EQUAL;
+	RETURN_TOKEN(T_MINUS_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"*=" {
-	return T_MUL_EQUAL;
+	RETURN_TOKEN(T_MUL_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"*\*" {
-	return T_POW;
+	RETURN_TOKEN(T_POW);
 }
 
 <ST_IN_SCRIPTING>"*\*=" {
-	return T_POW_EQUAL;
+	RETURN_TOKEN(T_POW_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"/=" {
-	return T_DIV_EQUAL;
+	RETURN_TOKEN(T_DIV_EQUAL);
 }
 
 <ST_IN_SCRIPTING>".=" {
-	return T_CONCAT_EQUAL;
+	RETURN_TOKEN(T_CONCAT_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"%=" {
-	return T_MOD_EQUAL;
+	RETURN_TOKEN(T_MOD_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"<<=" {
-	return T_SL_EQUAL;
+	RETURN_TOKEN(T_SL_EQUAL);
 }
 
 <ST_IN_SCRIPTING>">>=" {
-	return T_SR_EQUAL;
+	RETURN_TOKEN(T_SR_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"&=" {
-	return T_AND_EQUAL;
+	RETURN_TOKEN(T_AND_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"|=" {
-	return T_OR_EQUAL;
+	RETURN_TOKEN(T_OR_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"^=" {
-	return T_XOR_EQUAL;
+	RETURN_TOKEN(T_XOR_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"||" {
-	return T_BOOLEAN_OR;
+	RETURN_TOKEN(T_BOOLEAN_OR);
 }
 
 <ST_IN_SCRIPTING>"&&" {
-	return T_BOOLEAN_AND;
+	RETURN_TOKEN(T_BOOLEAN_AND);
 }
 
 <ST_IN_SCRIPTING>"OR" {
-	return T_LOGICAL_OR;
+	RETURN_TOKEN(T_LOGICAL_OR);
 }
 
 <ST_IN_SCRIPTING>"AND" {
-	return T_LOGICAL_AND;
+	RETURN_TOKEN(T_LOGICAL_AND);
 }
 
 <ST_IN_SCRIPTING>"XOR" {
-	return T_LOGICAL_XOR;
+	RETURN_TOKEN(T_LOGICAL_XOR);
 }
 
 <ST_IN_SCRIPTING>"<<" {
-	return T_SL;
+	RETURN_TOKEN(T_SL);
 }
 
 <ST_IN_SCRIPTING>">>" {
-	return T_SR;
+	RETURN_TOKEN(T_SR);
 }
 
 <ST_IN_SCRIPTING>{TOKENS} {
-	return yytext[0];
+	RETURN_TOKEN(yytext[0]);
 }
 
 
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING);
-	return '{';
+	RETURN_TOKEN('{');
 }
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
 	yy_push_state(ST_LOOKING_FOR_VARNAME);
-	return T_DOLLAR_OPEN_CURLY_BRACES;
+	RETURN_TOKEN(T_DOLLAR_OPEN_CURLY_BRACES);
 }
 
 
@@ -1578,7 +1579,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state();
 	}
-	return '}';
+	RETURN_TOKEN('}');
 }
 
 
@@ -1587,7 +1588,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_copy_value(zendlval, yytext, yyleng);
 	yy_pop_state();
 	yy_push_state(ST_IN_SCRIPTING);
-	return T_STRING_VARNAME;
+	RETURN_TOKEN(T_STRING_VARNAME);
 }
 
 
@@ -1617,12 +1618,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
 			ZEND_ASSERT(!errno && end == yytext + yyleng);
 		}
-		return T_LNUMBER;
+		RETURN_TOKEN(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == yytext + yyleng);
-		return T_DNUMBER;
+		RETURN_TOKEN(T_DNUMBER);
 	}
 }
 
@@ -1635,8 +1636,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		 * Because the lexing itself doesn't do that for us
 		 */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_get_parse_exception(), "Invalid numeric literal", E_PARSE);
-			return T_ERROR;
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
+			RETURN_TOKEN(T_LNUMBER);
 		}
 	} else {
 		errno = 0;
@@ -1651,21 +1653,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			}
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
-				zend_throw_exception(zend_get_parse_exception(),
-					"Invalid numeric literal", E_PARSE);
-				return T_ERROR;
+				zend_throw_exception(zend_ce_parse_error,
+					"Invalid numeric literal", 0);
+				ZVAL_UNDEF(zendlval);
+				RETURN_TOKEN(T_DNUMBER);
 			}
 			ZEND_ASSERT(!errno);
-			return T_DNUMBER;
+			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
-			zend_throw_exception(zend_get_parse_exception(), "Invalid numeric literal", E_PARSE);
-			return T_ERROR;
+			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+			ZVAL_UNDEF(zendlval);
+			RETURN_TOKEN(T_DNUMBER);
 		}
 	}
 	ZEND_ASSERT(!errno);
-	return T_LNUMBER;
+	RETURN_TOKEN(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
@@ -1687,12 +1691,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, &end, 16));
 			ZEND_ASSERT(!errno && end == hex + len);
 		}
-		return T_LNUMBER;
+		RETURN_TOKEN(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
-		return T_DNUMBER;
+		RETURN_TOKEN(T_DNUMBER);
 	}
 }
 
@@ -1709,12 +1713,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 string:
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
-	return T_NUM_STRING;
+	RETURN_TOKEN(T_NUM_STRING);
 }
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	return T_NUM_STRING;
+	RETURN_TOKEN(T_NUM_STRING);
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
@@ -1723,59 +1727,59 @@ string:
 	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
 	/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 	ZEND_ASSERT(end == yytext + yyleng);
-	return T_DNUMBER;
+	RETURN_TOKEN(T_DNUMBER);
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	return T_CLASS_C;
+	RETURN_TOKEN(T_CLASS_C);
 }
 
 <ST_IN_SCRIPTING>"__TRAIT__" {
-	return T_TRAIT_C;
+	RETURN_TOKEN(T_TRAIT_C);
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	return T_FUNC_C;
+	RETURN_TOKEN(T_FUNC_C);
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	return T_METHOD_C;
+	RETURN_TOKEN(T_METHOD_C);
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	return T_LINE;
+	RETURN_TOKEN(T_LINE);
 }
 
 <ST_IN_SCRIPTING>"__FILE__" {
-	return T_FILE;
+	RETURN_TOKEN(T_FILE);
 }
 
 <ST_IN_SCRIPTING>"__DIR__" {
-	return T_DIR;
+	RETURN_TOKEN(T_DIR);
 }
 
 <ST_IN_SCRIPTING>"__NAMESPACE__" {
-	return T_NS_C;
+	RETURN_TOKEN(T_NS_C);
 }
 
 
 <INITIAL>"<?=" {
 	BEGIN(ST_IN_SCRIPTING);
-	return T_OPEN_TAG_WITH_ECHO;
+	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
 }
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
-	return T_OPEN_TAG;
+	RETURN_TOKEN(T_OPEN_TAG);
 }
 
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
-		return T_OPEN_TAG;
+		RETURN_TOKEN(T_OPEN_TAG);
 	} else {
 		goto inline_char_handler;
 	}
@@ -1783,7 +1787,7 @@ string:
 
 <INITIAL>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 
 inline_char_handler:
@@ -1823,7 +1827,7 @@ inline_char_handler:
 	  ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
 	HANDLE_NEWLINES(yytext, yyleng);
-	return T_INLINE_HTML;
+	RETURN_TOKEN(T_INLINE_HTML);
 }
 
 
@@ -1834,7 +1838,7 @@ inline_char_handler:
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	return T_VARIABLE;
+	RETURN_TOKEN(T_VARIABLE);
 }
 
 /* A [ always designates a variable offset, regardless of what follows
@@ -1843,22 +1847,22 @@ inline_char_handler:
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	return T_VARIABLE;
+	RETURN_TOKEN(T_VARIABLE);
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	return T_VARIABLE;
+	RETURN_TOKEN(T_VARIABLE);
 }
 
 <ST_VAR_OFFSET>"]" {
 	yy_pop_state();
-	return ']';
+	RETURN_TOKEN(']');
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[{}"`] {
 	/* Only '[' can be valid, but returning other tokens will allow a more explicit parse error */
-	return yytext[0];
+	RETURN_TOKEN(yytext[0]);
 }
 
 <ST_VAR_OFFSET>[ \n\r\t\\'#] {
@@ -1866,12 +1870,12 @@ inline_char_handler:
 	yyless(0);
 	yy_pop_state();
 	ZVAL_NULL(zendlval);
-	return T_ENCAPSED_AND_WHITESPACE;
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
-	return T_STRING;
+	RETURN_TOKEN(T_STRING);
 }
 
 
@@ -1901,7 +1905,7 @@ inline_char_handler:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	return T_COMMENT;
+	RETURN_TOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
@@ -1931,15 +1935,15 @@ inline_char_handler:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		return T_DOC_COMMENT;
+		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 
-	return T_COMMENT;
+	RETURN_TOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
-	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
+	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
 
 
@@ -1965,7 +1969,7 @@ inline_char_handler:
 			 * for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
 			 * rule, which continued in ST_IN_SCRIPTING state after the quote */
 			ZVAL_NULL(zendlval);
-			return T_ENCAPSED_AND_WHITESPACE;
+			RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 		}
 	}
 
@@ -2008,7 +2012,7 @@ inline_char_handler:
 		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
 		ZVAL_STRINGL(zendlval, str, sz);
 	}
-	return T_CONSTANT_ENCAPSED_STRING;
+	RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 }
 
 
@@ -2019,10 +2023,8 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				if (zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == FAILURE) {
-					return T_ERROR;
-				}
-				return T_CONSTANT_ENCAPSED_STRING;
+				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
+				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
@@ -2052,7 +2054,7 @@ inline_char_handler:
 	YYCURSOR = SCNG(yy_text) + yyleng;
 
 	BEGIN(ST_DOUBLE_QUOTES);
-	return '"';
+	RETURN_TOKEN('"');
 }
 
 
@@ -2100,13 +2102,13 @@ inline_char_handler:
 
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) heredoc_label);
 
-	return T_START_HEREDOC;
+	RETURN_TOKEN(T_START_HEREDOC);
 }
 
 
 <ST_IN_SCRIPTING>[`] {
 	BEGIN(ST_BACKQUOTE);
-	return '`';
+	RETURN_TOKEN('`');
 }
 
 
@@ -2120,7 +2122,7 @@ inline_char_handler:
 	efree(heredoc_label);
 
 	BEGIN(ST_IN_SCRIPTING);
-	return T_END_HEREDOC;
+	RETURN_TOKEN(T_END_HEREDOC);
 }
 
 
@@ -2128,18 +2130,18 @@ inline_char_handler:
 	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);
-	return T_CURLY_OPEN;
+	RETURN_TOKEN(T_CURLY_OPEN);
 }
 
 
 <ST_DOUBLE_QUOTES>["] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '"';
+	RETURN_TOKEN('"');
 }
 
 <ST_BACKQUOTE>[`] {
 	BEGIN(ST_IN_SCRIPTING);
-	return '`';
+	RETURN_TOKEN('`');
 }
 
 
@@ -2152,7 +2154,7 @@ inline_char_handler:
 	}
 
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2188,16 +2190,14 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '"') == FAILURE) {
-		return T_ERROR;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
+	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
 <ST_BACKQUOTE>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2232,10 +2232,8 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng, '`') == FAILURE) {
-		return T_ERROR;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
+	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
@@ -2245,7 +2243,7 @@ double_quotes_scan_done:
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 
 	YYCURSOR--;
@@ -2308,10 +2306,8 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == FAILURE) {
-		return T_ERROR;
-	}
-	return T_ENCAPSED_AND_WHITESPACE;
+	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
@@ -2321,7 +2317,7 @@ heredoc_scan_done:
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 
 	YYCURSOR--;
@@ -2368,13 +2364,13 @@ nowdoc_scan_done:
 
 	zend_copy_value(zendlval, yytext, yyleng - newline);
 	HANDLE_NEWLINES(yytext, yyleng - newline);
-	return T_ENCAPSED_AND_WHITESPACE;
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		return 0;
+		RETURN_TOKEN(END);
 	}
 
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);

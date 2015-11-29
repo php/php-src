@@ -28,6 +28,6 @@ object(OCI-Collection)#%d (1) {
 }
 bool(true)
 
-Warning: OCI-Collection::size(): %d is not a valid oci8 collection resource in %s on line %d
+Warning: OCI-Collection::size(): supplied resource is not a valid oci8 collection resource in %s on line %d
 bool(false)
 Done

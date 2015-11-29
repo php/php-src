@@ -39,9 +39,8 @@ typedef char * caddr_t;
 #define		_IFLNK	0120000	/* symbolic link */
 #define S_IFIFO		_IFIFO
 #define S_IFBLK		_IFBLK
-#define	S_IFLNK		_IFLNK
-#ifndef S_ISREG
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#ifndef S_IFLNK
+# define	S_IFLNK		_IFLNK
 #endif
 #define chdir(path) _chdir(path)
 #define mkdir(a, b)	_mkdir(a)

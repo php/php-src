@@ -15,7 +15,7 @@ $it = new AppendIterator;
 
 try {
 	$it->append(array());
-} catch (EngineException $e) {
+} catch (Error $e) {
 	test_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 }
 $it->append(new ArrayIterator(array(1)));

@@ -229,7 +229,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	}
 
 	if (errstr) {
-		php_stream_wrapper_log_error(wrapper, options, "%s", errstr->val);
+		php_stream_wrapper_log_error(wrapper, options, "%s", ZSTR_VAL(errstr));
 		zend_string_release(errstr);
 		errstr = NULL;
 	}
@@ -243,6 +243,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
+			zval_ptr_dtor(&ssl_proxy_peer_name);
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
@@ -310,7 +311,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 finish:
 		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
 
-		if (php_stream_write(stream, header.s->val, header.s->len) != header.s->len) {
+		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
@@ -448,22 +449,22 @@ finish:
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
 			tmp = php_trim(Z_STR_P(tmpzval), NULL, 0, 3);
 		}
-		if (tmp && tmp->len) {
+		if (tmp && ZSTR_LEN(tmp)) {
 			char *s;
 			char *t;
 
-			user_headers = estrndup(tmp->val, tmp->len);
+			user_headers = estrndup(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 
-			if (IS_INTERNED(tmp)) {
-				tmp = zend_string_init(tmp->val, tmp->len, 0);
+			if (ZSTR_IS_INTERNED(tmp)) {
+				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			} else if (GC_REFCOUNT(tmp) > 1) {
 				GC_REFCOUNT(tmp)--;
-				tmp = zend_string_init(tmp->val, tmp->len, 0);
+				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
-			php_strtolower(tmp->val, tmp->len);
-			t = tmp->val;
+			php_strtolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+			t = ZSTR_VAL(tmp);
 
 			if (!header_init) {
 				/* strip POST headers on redirect */
@@ -552,7 +553,7 @@ finish:
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
 
-		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", stmp->val) > 0) {
+		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", ZSTR_VAL(stmp)) > 0) {
 			php_stream_write(stream, scratch, strlen(scratch));
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 		}
@@ -579,13 +580,13 @@ finish:
 		}
 	}
 
-	/* Send a Connection: close header when using HTTP 1.1 or later to avoid
-	 * hanging when the server interprets the RFC literally and establishes a
-	 * keep-alive connection, unless the user specifically requests something
-	 * else by specifying a Connection header in the context options. */
-	if (protocol_version &&
-	    ((have_header & HTTP_HEADER_CONNECTION) == 0) &&
-	    (strncmp(protocol_version, "1.0", MIN(protocol_version_len, 3)) > 0)) {
+	/* Send a Connection: close header to avoid hanging when the server
+	 * interprets the RFC literally and establishes a keep-alive connection,
+	 * unless the user specifically requests something else by specifying a
+	 * Connection header in the context options. Send that header even for
+	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * keep-alive response, which is the preferred response type. */
+	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		php_stream_write_string(stream, "Connection: close\r\n");
 	}
 

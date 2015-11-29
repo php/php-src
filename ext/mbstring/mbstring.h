@@ -202,11 +202,10 @@ struct mb_overload_def {
 	char *save_func;
 };
 
-#ifdef ZTS
-#define MBSTRG(v) ZEND_TSRMG(mbstring_globals_id, zend_mbstring_globals *, v)
+#define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_MBSTRING)
 ZEND_TSRMLS_CACHE_EXTERN();
-#else
-#define MBSTRG(v) (mbstring_globals.v)
 #endif
 
 #else	/* HAVE_MBSTRING */

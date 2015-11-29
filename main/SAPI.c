@@ -43,12 +43,6 @@
 
 #include "rfc1867.h"
 
-#ifdef PHP_WIN32
-#define STRCASECMP stricmp
-#else
-#define STRCASECMP strcasecmp
-#endif
-
 #include "php_content_types.h"
 
 #ifdef ZTS
@@ -285,7 +279,12 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			read_bytes = sapi_read_post_block(buffer, SAPI_POST_BLOCK_SIZE);
 
 			if (read_bytes > 0) {
-				php_stream_write(SG(request_info).request_body, buffer, read_bytes);
+				if (php_stream_write(SG(request_info).request_body, buffer, read_bytes) != read_bytes) {
+					/* if parts of the stream can't be written, purge it completely */
+					php_stream_truncate_set_size(SG(request_info).request_body, 0);
+					php_error_docref(NULL, E_WARNING, "POST data can't be buffered; all data discarded");
+					break;
+				}
 			}
 
 			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
@@ -773,7 +772,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		colon_offset = strchr(header_line, ':');
 		if (colon_offset) {
 			*colon_offset = 0;
-			if (!STRCASECMP(header_line, "Content-Type")) {
+			if (!strcasecmp(header_line, "Content-Type")) {
 				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
 				size_t len = header_line_len - (ptr - header_line), newlen;
 				while (*ptr == ' ') {
@@ -805,7 +804,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
-			} else if (!STRCASECMP(header_line, "Content-Length")) {
+			} else if (!strcasecmp(header_line, "Content-Length")) {
 				/* Script is setting Content-length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
 				 * do disable compression altogether. This contributes to making scripts
@@ -815,7 +814,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release(key);
-			} else if (!STRCASECMP(header_line, "Location")) {
+			} else if (!strcasecmp(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 399) &&
 					SG(sapi_headers).http_response_code != 201) {
@@ -831,7 +830,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 						sapi_update_response_code(302);
 					}
 				}
-			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
+			} else if (!strcasecmp(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				sapi_update_response_code(401); /* authentication-required */
 			}
 			if (sapi_header.header==header_line) {

@@ -49,8 +49,6 @@ static void ResourceBundle_object_destroy( zend_object *object )
 	if (rb->child) {
 		ures_close( rb->child );
 	}
-
-	//???zend_object_std_dtor( object );
 }
 /* }}} */
 

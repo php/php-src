@@ -44,7 +44,11 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
+if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
+	var_dump(`"$php" -n -l "$filename"`);
+} else {
+	var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
+}
 
 @unlink($filename);
 

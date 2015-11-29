@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -39,12 +40,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-
 				ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
-
-				/* break possible cycles */
-				GC_REMOVE_FROM_BUFFER(arr);
-				GC_TYPE_INFO(arr) = IS_NULL | (GC_WHITE << 16);
 				zend_array_destroy(arr);
 				break;
 			}
@@ -97,9 +93,6 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
 
-				/* break possible cycles */
-				GC_REMOVE_FROM_BUFFER(arr);
-				GC_TYPE_INFO(arr) = IS_NULL | (GC_WHITE << 16);
 				zend_array_destroy(arr);
 				break;
 			}
@@ -294,14 +287,14 @@ ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash
 				zend_hash_add_new(symbol_table, key->key, &tmp);
 				Z_ADDREF_P(p);
 			} else {
-				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
+				zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
 			}
 		} else {
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
 				p = Z_INDIRECT_P(p);
 				if (Z_TYPE_P(p) == IS_UNDEF) {
 					if (!is_ref) {
-						zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
+						zend_error(E_NOTICE,"Undefined variable: %s", ZSTR_VAL(key->key));
 						p = &tmp;
 						ZVAL_NULL(&tmp);
 					} else {

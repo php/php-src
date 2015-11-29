@@ -110,7 +110,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue) {
+				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
 					goto parse_port;
 				} else {
 					goto just_path;
@@ -320,7 +320,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	nohost:
 
 	if ((p = memchr(s, '?', (ue - s)))) {
-		pp = strchr(s, '#');
+		pp = memchr(s, '#', (ue - s));
 
 		if (pp && pp < p) {
 			if (pp - s) {
@@ -494,7 +494,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
 	start = zend_string_alloc(3 * len, 0);
-	to = (unsigned char*)start->val;
+	to = (unsigned char*)ZSTR_VAL(start);
 
 	while (from < end) {
 		c = *from++;
@@ -524,7 +524,7 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 	}
 	*to = '\0';
 
-	start = zend_string_truncate(start, to - (unsigned char*)start->val, 0);
+	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
 
 	return start;
 }
@@ -546,7 +546,7 @@ PHP_FUNCTION(urlencode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_STR(php_url_encode(in_str->val, in_str->len));
+	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -566,8 +566,8 @@ PHP_FUNCTION(urldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
-	out_str->len = php_url_decode(out_str->val, out_str->len);
+	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
+	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
     RETURN_NEW_STR(out_str);
 }
@@ -613,24 +613,24 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 
 	str = zend_string_alloc(3 * len, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
-		str->val[y] = (unsigned char) s[x];
+		ZSTR_VAL(str)[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC
-		if ((str->val[y] < '0' && str->val[y] != '-' && str->val[y] != '.') ||
-			(str->val[y] < 'A' && str->val[y] > '9') ||
-			(str->val[y] > 'Z' && str->val[y] < 'a' && str->val[y] != '_') ||
-			(str->val[y] > 'z' && str->val[y] != '~')) {
-			str->val[y++] = '%';
-			str->val[y++] = hexchars[(unsigned char) s[x] >> 4];
-			str->val[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((ZSTR_VAL(str)[y] < '0' && ZSTR_VAL(str)[y] != '-' && ZSTR_VAL(str)[y] != '.') ||
+			(ZSTR_VAL(str)[y] < 'A' && ZSTR_VAL(str)[y] > '9') ||
+			(ZSTR_VAL(str)[y] > 'Z' && ZSTR_VAL(str)[y] < 'a' && ZSTR_VAL(str)[y] != '_') ||
+			(ZSTR_VAL(str)[y] > 'z' && ZSTR_VAL(str)[y] != '~')) {
+			ZSTR_VAL(str)[y++] = '%';
+			ZSTR_VAL(str)[y++] = hexchars[(unsigned char) s[x] >> 4];
+			ZSTR_VAL(str)[y] = hexchars[(unsigned char) s[x] & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(str->val[y]) && str->valchr("_-.~", str->val[y]) != NULL) {
-			str->val[y++] = '%';
-			str->val[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			str->val[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(ZSTR_VAL(str)[y]) && strchr("_-.~", ZSTR_VAL(str)[y]) != NULL) {
+			ZSTR_VAL(str)[y++] = '%';
+			ZSTR_VAL(str)[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
+			ZSTR_VAL(str)[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	str->val[y] = '\0';
+	ZSTR_VAL(str)[y] = '\0';
 	str = zend_string_truncate(str, y, 0);
 
 	return str;
@@ -653,7 +653,7 @@ PHP_FUNCTION(rawurlencode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	RETURN_STR(php_raw_url_encode(in_str->val, in_str->len));
+	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
 }
 /* }}} */
 
@@ -673,8 +673,8 @@ PHP_FUNCTION(rawurldecode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	out_str = zend_string_init(in_str->val, in_str->len, 0);
-	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
+	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
+	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
     RETURN_NEW_STR(out_str);
 }
@@ -708,22 +708,24 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format])
+/* {{{ proto array get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	size_t url_len;
-	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
 	HashTable *hashT;
 	zend_long format = 0;
+	zval *zcontext = NULL;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &url, &url_len, &format, &zcontext) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
@@ -767,9 +769,9 @@ no_name_header:
 					s++;
 				}
 
-				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
+				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
+				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}

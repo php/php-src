@@ -3,7 +3,9 @@ Check cli_process_title support in Windows
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
-  die("skip");
+  die("skip this test is for Windows platforms only");
+if (shell_exec('PowerShell -Help') === NULL)
+  die("skip this test requires powershell.exe");
 ?>
 --FILE--
 <?php

@@ -113,6 +113,10 @@ PHP_FUNCTION(posix_getpwuid);
 PHP_FUNCTION(posix_getrlimit);
 #endif
 
+#ifdef HAVE_SETRLIMIT
+PHP_FUNCTION(posix_setrlimit);
+#endif
+
 #ifdef HAVE_INITGROUPS
 PHP_FUNCTION(posix_initgroups);
 #endif

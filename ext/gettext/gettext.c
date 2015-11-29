@@ -199,8 +199,8 @@ PHP_NAMED_FUNCTION(zif_gettext)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid->len)
-	msgstr = gettext(msgid->val);
+	PHP_GETTEXT_LENGTH_CHECK("msgid", ZSTR_LEN(msgid))
+	msgstr = gettext(ZSTR_VAL(msgid));
 
 	RETURN_STRING(msgstr);
 }

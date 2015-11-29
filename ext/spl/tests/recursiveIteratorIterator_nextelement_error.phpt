@@ -28,7 +28,7 @@ var_dump($recItIt->next());
 --EXPECTF--
 NULL
 
-Fatal error: Uncaught exception 'Exception' in %s
+Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 [internal function]: MyRecursiveIteratorIterator->nextelement()
 #1 %s: RecursiveIteratorIterator->next()

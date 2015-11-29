@@ -101,6 +101,14 @@ PHP_FUNCTION(odbc_primarykeys);
 PHP_FUNCTION(odbc_specialcolumns);
 PHP_FUNCTION(odbc_statistics);
 
+#ifdef PHP_WIN32
+# define PHP_ODBC_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_ODBC_API __attribute__ ((visibility("default")))
+#else
+# define PHP_ODBC_API
+#endif
+
 #else
 
 #define odbc_module_ptr NULL

@@ -73,8 +73,9 @@ PHPDBG_API int phpdbg_get_element(const char *name, size_t len); /* }}} */
 PHPDBG_API void phpdbg_set_prompt(const char*);
 PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
-/* {{{ Console Width */
-PHPDBG_API int phpdbg_get_terminal_width(void); /* }}} */
+/* {{{ Console size */
+PHPDBG_API int phpdbg_get_terminal_width(void);
+PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 
@@ -93,6 +94,8 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 int phpdbg_is_auto_global(char *name, int len);
 
 PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
+
+char *phpdbg_short_zval_print(zval *zv, int maxlen);
 
 PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
 

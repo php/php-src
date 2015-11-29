@@ -54,8 +54,8 @@ foreach ($functions as $type => $function) {
         var_dump($value);
         try {
             var_dump($function($value));
-        } catch (TypeException $e) {
-            echo "*** Caught " . $e->getMessage() . PHP_EOL;
+        } catch (TypeError $e) {
+            echo "*** Caught ", $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine(), PHP_EOL;
         }
     }
 }

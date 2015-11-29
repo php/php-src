@@ -36,7 +36,7 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 
 
 static int phpdbg_dearm_autoglobals(zend_auto_global *auto_global) {
-	if (auto_global->name->len != sizeof("GLOBALS") - 1 || memcmp(auto_global->name->val, "GLOBALS", sizeof("GLOBALS") - 1)) {
+	if (ZSTR_LEN(auto_global->name) != sizeof("GLOBALS") - 1 || memcmp(ZSTR_VAL(auto_global->name), "GLOBALS", sizeof("GLOBALS") - 1)) {
 		auto_global->armed = 0;
 	}
 
@@ -50,7 +50,7 @@ typedef struct {
 
 static int phpdbg_array_data_compare(const void *a, const void *b) {
 	Bucket *f, *s;
-	zval result;
+	int result;
 	zval *first, *second;
 
 	f = *((Bucket **) a);
@@ -59,13 +59,11 @@ static int phpdbg_array_data_compare(const void *a, const void *b) {
 	first = &f->val;
 	second = &s->val;
 
-	if (string_compare_function(&result, first, second) == FAILURE) {
-		return 0;
-	}
+	result = string_compare_function(first, second);
 
-	if (Z_LVAL(result) < 0) {
+	if (result < 0) {
 		return -1;
-	} else if (Z_LVAL(result) > 0) {
+	} else if (result > 0) {
 		return 1;
 	}
 

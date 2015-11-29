@@ -122,9 +122,6 @@ php_file_globals file_globals;
 # include <wchar.h>
 #endif
 
-#ifndef S_ISDIR
-# define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
-#endif
 /* }}} */
 
 #define PHP_STREAM_TO_ZVAL(stream, arg) \
@@ -522,7 +519,7 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
-	zend_long maxlen = PHP_STREAM_COPY_ALL;
+	zend_long maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	zend_string *contents;
@@ -659,11 +656,11 @@ PHP_FUNCTION(file_put_contents)
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
 					zend_string *str = zval_get_string(tmp);
-					if (str->len) {
-						numbytes += str->len;
-						bytes_written = php_stream_write(stream, str->val, str->len);
-						if (bytes_written != str->len) {
-							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
+					if (ZSTR_LEN(str)) {
+						numbytes += ZSTR_LEN(str);
+						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
+						if (bytes_written != ZSTR_LEN(str)) {
+							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
 							ret_ok = 0;
 							zend_string_release(str);
 							break;
@@ -746,8 +743,8 @@ PHP_FUNCTION(file)
 	array_init(return_value);
 
 	if ((target_buf = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
-		s = target_buf->val;
-		e = target_buf->val + target_buf->len;
+		s = ZSTR_VAL(target_buf);
+		e = ZSTR_VAL(target_buf) + ZSTR_LEN(target_buf);
 
 		if (!(p = (char*)php_stream_locate_eol(stream, target_buf))) {
 			p = e;
@@ -770,7 +767,7 @@ parse_eol:
 		} else {
 			do {
 				int windows_eol = 0;
-				if (p != target_buf->val && eol_marker == '\n' && *(p - 1) == '\r') {
+				if (p != ZSTR_VAL(target_buf) && eol_marker == '\n' && *(p - 1) == '\r') {
 					windows_eol++;
 				}
 				if (skip_blank_lines && !(p-s-windows_eol)) {
@@ -815,13 +812,13 @@ PHP_FUNCTION(tempnam)
 	}
 
 	p = php_basename(prefix, prefix_len, NULL, 0);
-	if (p->len > 64) {
-		p->val[63] = '\0';
+	if (ZSTR_LEN(p) > 64) {
+		ZSTR_VAL(p)[63] = '\0';
 	}
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, 1)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
@@ -979,9 +976,15 @@ PHPAPI PHP_FUNCTION(feof)
 	zval *res;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1002,11 +1005,20 @@ PHPAPI PHP_FUNCTION(fgets)
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
+	zend_string *str;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1014,37 +1026,30 @@ PHPAPI PHP_FUNCTION(fgets)
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
-			goto exit_failed;
+			RETURN_FALSE;
 		}
+		// TODO: avoid reallocation ???
+		RETVAL_STRINGL(buf, line_len);
+		efree(buf);
 	} else if (argc > 1) {
 		if (len <= 0) {
 			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
-		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
-			goto exit_failed;
+		str = zend_string_alloc(len, 0);
+		if (php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len) == NULL) {
+			zend_string_free(str);
+			RETURN_FALSE;
 		}
-	}
-
-	/* resize buffer if it's much larger than the result.
-	 * Only needed if the user requested a buffer size. */
-//??	if (argc > 1 && line_len < len / 2) {
-//???
-		ZVAL_STRINGL(return_value, buf, line_len);
-		efree(buf);
-//??	} else {
-//???
-//???		ZVAL_STRINGL(return_value, buf, line_len);
-//???	efree(buf);
-//???	}
-	return;
-
-exit_failed:
-	RETVAL_FALSE;
-	if (buf) {
-		efree(buf);
+		/* resize buffer if it's much larger than the result.
+		 * Only needed if the user requested a buffer size. */
+		if (line_len < (size_t)len / 2) {
+			str = zend_string_truncate(str, line_len, 0);
+		} else {
+			ZSTR_LEN(str) = line_len;
+		}
+		RETURN_NEW_STR(str);
 	}
 }
 /* }}} */
@@ -1087,11 +1092,10 @@ PHPAPI PHP_FUNCTION(fgetss)
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
 	php_stream *stream;
-	zend_string *allowed = NULL;
 	char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|lS", &fd, &bytes, &allowed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ls", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1116,23 +1120,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		RETURN_FALSE;
 	}
 
-	if (allowed != NULL) {
-// TODO: reimplement to avoid reallocation ???
-		if (IS_INTERNED(allowed)) {
-			allowed_tags = estrndup(allowed->val, allowed->len);
-			allowed_tags_len = allowed->len;
-		} else {
-			allowed_tags = allowed->val;
-			allowed_tags_len = allowed->len;
-		}
-	}
-
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-// TODO: reimplement to avoid reallocation ???
-	if (allowed && IS_INTERNED(allowed)) {
-		efree(allowed_tags);
-	}
 
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL(retval, retval_len);
@@ -1192,9 +1180,18 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zend_long maxlen = 0;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &input, &inputlen, &maxlen) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_STRING(input, inputlen)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(maxlen)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	if (ZEND_NUM_ARGS() == 2) {
 		num_bytes = inputlen;
@@ -1224,9 +1221,15 @@ PHPAPI PHP_FUNCTION(fflush)
 	int ret;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1245,9 +1248,15 @@ PHPAPI PHP_FUNCTION(rewind)
 	zval *res;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1266,9 +1275,15 @@ PHPAPI PHP_FUNCTION(ftell)
 	zend_long ret;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(res)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1288,9 +1303,18 @@ PHPAPI PHP_FUNCTION(fseek)
 	zend_long offset, whence = SEEK_SET;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &res, &offset, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_LONG(offset)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(whence)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1593,34 +1617,34 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_blocks,-1);
 #endif
 	/* Store numeric indexes in proper order */
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_nlink);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_uid);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_gid);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_rdev);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_size);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_atime);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_mtime);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_ctime);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_blksize);
-	zend_hash_next_index_insert(HASH_OF(return_value), &stat_blocks);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_dev);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ino);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mode);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_nlink);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_uid);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_gid);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_rdev);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_size);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_atime);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mtime);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ctime);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blksize);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 	/* Store string indexes referencing the same zval*/
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 }
 /* }}} */
 
@@ -1769,9 +1793,16 @@ PHPAPI PHP_FUNCTION(fread)
 	zend_long len;
 	php_stream *stream;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1826,7 +1857,7 @@ quit_loop:
 }
 /* }}} */
 
-#define FPUTCSV_FLD_CHK(c) memchr(field_str->val, c, field_str->len)
+#define FPUTCSV_FLD_CHK(c) memchr(ZSTR_VAL(field_str), c, ZSTR_LEN(field_str))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
    Format line as CSV and write to file pointer */
@@ -1911,8 +1942,8 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 			FPUTCSV_FLD_CHK('\t') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
-			char *ch = field_str->val;
-			char *end = ch + field_str->len;
+			char *ch = ZSTR_VAL(field_str);
+			char *end = ch + ZSTR_LEN(field_str);
 			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
@@ -1941,7 +1972,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);
 
-	ret = php_stream_write(stream, csvline.s->val, csvline.s->len);
+	ret = php_stream_write(stream, ZSTR_VAL(csvline.s), ZSTR_LEN(csvline.s));
 
 	smart_str_free(&csvline);
 

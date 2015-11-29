@@ -23,9 +23,9 @@ $o->func();
 ?>
 ===DONE===
 --EXPECTF--
-Test::{closure}()
+{closure}()
 
-Fatal error: Uncaught exception 'EngineException' with message 'Call to private method Test::func() from context ''' in %sclosure_033.php:%d
+Fatal error: Uncaught Error: Call to private method Test::func() from context '' in %sclosure_033.php:%d
 Stack trace:
 #0 {main}
   thrown in %sclosure_033.php on line %d

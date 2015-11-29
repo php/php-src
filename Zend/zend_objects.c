@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -55,7 +56,11 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	zval *p, *end;
 
 	if (object->properties) {
-		zend_array_destroy(object->properties);
+		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
+			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+				zend_array_destroy(object->properties);
+			}
+		}
 	}
 	p = object->properties_table;
 	if (EXPECTED(object->ce->default_properties_count)) {
@@ -89,11 +94,17 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
-						"Call to private %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
-						EG(current_execute_data) ? "" : " during shutdown ignored");
+					if (EG(current_execute_data)) {
+						zend_throw_error(NULL,
+							"Call to private %s::__destruct() from context '%s'",
+							ZSTR_VAL(ce->name),
+							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					} else {
+						zend_error(E_WARNING,
+							"Call to private %s::__destruct() from context '%s' during shutdown ignored",
+							ZSTR_VAL(ce->name),
+							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					}
 					return;
 				}
 			} else {
@@ -102,11 +113,17 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(current_execute_data) ? E_EXCEPTION | E_ERROR : E_WARNING,
-						"Call to protected %s::__destruct() from context '%s'%s",
-						ce->name->val,
-						EG(scope) ? EG(scope)->name->val : "",
-						EG(current_execute_data) ? "" : " during shutdown ignored");
+					if (EG(current_execute_data)) {
+						zend_throw_error(NULL,
+							"Call to protected %s::__destruct() from context '%s'",
+							ZSTR_VAL(ce->name),
+							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					} else {
+						zend_error(E_WARNING,
+							"Call to protected %s::__destruct() from context '%s' during shutdown ignored",
+							ZSTR_VAL(ce->name),
+							EG(scope) ? ZSTR_VAL(EG(scope)->name) : "");
+					}
 					return;
 				}
 			}
@@ -163,8 +180,19 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			src++;
 			dst++;
 		} while (src != end);
+	} else if (old_object->properties && !old_object->ce->clone) {
+		/* fast copy */
+		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
+			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_REFCOUNT(old_object->properties)++;
+			}
+			new_object->properties = old_object->properties;
+			return;
+		}
 	}
-	if (old_object->properties) {
+
+	if (old_object->properties &&
+	    EXPECTED(zend_hash_num_elements(old_object->properties))) {
 		zval *prop, new_prop;
 		zend_ulong num_key;
 		zend_string *key;
@@ -172,7 +200,13 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		if (!new_object->properties) {
 			ALLOC_HASHTABLE(new_object->properties);
 			zend_hash_init(new_object->properties, zend_hash_num_elements(old_object->properties), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_real_init(new_object->properties, 0);
+		} else {
+			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
+
+		new_object->properties->u.v.flags |=
+			old_object->properties->u.v.flags & HASH_FLAG_HAS_EMPTY_IND;
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
@@ -181,8 +215,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
-			if (key) {
-				zend_hash_add_new(new_object->properties, key, &new_prop);
+			if (EXPECTED(key)) {
+				_zend_hash_append(new_object->properties, key, &new_prop);
 			} else {
 				zend_hash_index_add_new(new_object->properties, num_key, &new_prop);
 			}

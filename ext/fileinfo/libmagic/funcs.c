@@ -455,8 +455,8 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 		goto out;
 	}
 
-	strncpy(ms->o.buf, res->val, res->len);
-	ms->o.buf[res->len] = '\0';
+	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
+	ms->o.buf[ZSTR_LEN(res)] = '\0';
 
 	zend_string_release(res);
 

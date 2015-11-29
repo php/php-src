@@ -71,6 +71,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 PHP_METHOD(ce_SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -80,7 +81,9 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 		return; /* return NULL */
 	}
 
-	RETURN_ZVAL(&sxe->iter.data, 1, 0);
+	data = &sxe->iter.data;
+	ZVAL_DEREF(data);
+	ZVAL_COPY(return_value, data);
 }
 /* }}} */
 
@@ -158,6 +161,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -166,7 +170,10 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
 		return; /* return NULL */
 	}
-	RETURN_ZVAL(&sxe->iter.data, 1, 0);
+
+	data = &sxe->iter.data;
+	ZVAL_DEREF(data);
+	ZVAL_COPY(return_value, data);
 }
 
 /* {{{ arginfo */

@@ -5,6 +5,9 @@ Test glob() function: usage variations
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
+if (!defined('GLOB_BRACE')) {
+    die('skip this test requires GLOB_BRACE support');
+}
 ?>
 --FILE--
 <?php

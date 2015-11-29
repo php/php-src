@@ -144,7 +144,6 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
  */
 static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 {
-	int rc     = SUCCESS;
 	zval num1, num2;
 	zval *num1_p = NULL;
 	zval *num2_p = NULL;
@@ -161,14 +160,14 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 		op2 = num2_p;
 	}
 
-	rc = numeric_compare_function( result, op1, op2);
+	ZVAL_LONG(result, numeric_compare_function(op1, op2));
 
 	if( num1_p )
 		zval_ptr_dtor( num1_p );
 	if( num2_p )
 		zval_ptr_dtor( num2_p );
 
-	return rc;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -310,7 +309,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	/* Set 'compare function' according to sort flags. */
 	INTL_G(compare_func) = collator_get_compare_function( sort_flags );
 
-	hash = HASH_OF( array );
+	hash = Z_ARRVAL_P( array );
 
 	/* Convert strings in the specified array from UTF-8 to UTF-16. */
 	collator_convert_hash_from_utf8_to_utf16( hash, COLLATOR_ERROR_CODE_P( co ) );
@@ -385,8 +384,6 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;       /* the length of utf16_buf */
 	int         utf16_len            = 0;                        /* length of converted string */
 
-	HashTable* sortedHash            = NULL;
-
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
@@ -414,7 +411,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/*
 	 * Sort specified array.
 	 */
-	hash = HASH_OF( array );
+	hash = Z_ARRVAL_P( array );
 
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
@@ -549,8 +546,8 @@ PHP_FUNCTION( collator_get_sort_key )
 	size_t           str_len  = 0;
 	UChar*           ustr     = NULL;
 	int32_t          ustr_len = 0;
-	uint8_t*         key     = NULL;
 	int              key_len = 0;
+	zend_string*     key_str;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -597,20 +594,19 @@ PHP_FUNCTION( collator_get_sort_key )
 
 	/* ucol_getSortKey is exception in that the key length includes the
 	 * NUL terminator*/
-	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, NULL, 0);
 	if(!key_len) {
 		efree( ustr );
 		RETURN_FALSE;
 	}
-	key = emalloc(key_len);
-	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, key_len);
+	key_str = zend_string_alloc(key_len, 0);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, (uint8_t*)ZSTR_VAL(key_str), key_len);
 	efree( ustr );
 	if(!key_len) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL((char *)key, key_len - 1);
-	//????
-	efree(key);
+	ZSTR_LEN(key_str) = key_len - 1;
+	RETVAL_NEW_STR(key_str);
 }
 /* }}} */
 

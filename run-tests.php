@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2010 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,27 +59,6 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
-// Version constants only available as of 5.2.8
-if (!defined("PHP_VERSION_ID")) {
-	list($major, $minor, $bug) = explode(".", phpversion(), 3);
-	$bug = (int)$bug; // Many distros make up their own versions
-	if ($bug < 10) {
-		$bug = "0$bug";
-	}
-
-	define("PHP_VERSION_ID", "{$major}0{$minor}$bug");
-	define("PHP_MAJOR_VERSION", $major);
-}
-
-// __DIR__ is available from 5.3.0
-if (PHP_VERSION_ID < 50300) {
-	define('__DIR__', realpath(dirname(__FILE__)));
-	// FILE_BINARY is available from 5.2.7
-	if (PHP_VERSION_ID < 50207) {
-		define('FILE_BINARY', 0);
-	}
-}
-
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -113,22 +92,6 @@ while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
-if (PHP_MAJOR_VERSION < 6) {
-	if (ini_get('safe_mode')) {
-		echo <<< SAFE_MODE_WARNING
-
-+-----------------------------------------------------------+
-|                       ! WARNING !                         |
-| You are running the test-suite with "safe_mode" ENABLED ! |
-|                                                           |
-| Chances are high that no test will work at all,           |
-| depending on how you configured "safe_mode" !             |
-+-----------------------------------------------------------+
-
-
-SAFE_MODE_WARNING;
-	}
-}
 
 $environment = isset($_ENV) ? $_ENV : array();
 if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
@@ -141,6 +104,7 @@ if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
 
 $php = null;
 $php_cgi = null;
+$phpdbg = null;
 
 if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
@@ -158,6 +122,16 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 				$php_cgi = null;
 			}
 		}
+
+		if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
+			$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
+
+			if (file_exists($phpdbg)) {
+				putenv("TEST_PHP_CGI_EXECUTABLE=$phpdbg");
+			} else {
+				$phpdbg = null;
+			}
+		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
@@ -171,6 +145,17 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	}
 
 	$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+}
+
+if (getenv('TEST_PHPDBG_EXECUTABLE')) {
+	$phpdbg = getenv('TEST_PHPDBG_EXECUTABLE');
+
+	if ($phpdbg=='auto') {
+		$phpdbg = $cwd . '/sapi/phpdbg/phpdbg';
+		putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
+	}
+
+	$environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 }
 
 function verify_config()
@@ -218,7 +203,6 @@ $exts_to_test = array();
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
-		'safe_mode=0',
 		'disable_functions=',
 		'output_buffering=Off',
 		'error_reporting=' . (E_ALL | E_STRICT),
@@ -247,7 +231,7 @@ $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
+	global $cwd, $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header, $no_file_cache;
 
 	// Get info from php
 	$info_file = __DIR__ . '/run-test-info.php';
@@ -272,6 +256,14 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
 	} else {
 		$php_cgi_info = '';
+	}
+
+	if ($phpdbg) {
+		$phpdbg_info = `$phpdbg $pass_options $info_params $no_file_cache -qrr "$info_file"`;
+		$php_info_sep = "\n---------------------------------------------------------------------";
+		$phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
+	} else {
+		$phpdbg_info = '';
 	}
 
 	@unlink($info_file);
@@ -299,7 +291,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	// Write test context information.
 	echo "
 =====================================================================
-PHP         : $php $php_info $php_cgi_info
+PHP         : $php $php_info $php_cgi_info $phpdbg_info
 CWD         : $cwd
 Extra dirs  : ";
 	foreach ($user_tests as $test_dir) {
@@ -324,7 +316,7 @@ function save_or_mail_results()
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 	if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 		$fp = fopen("php://stdin", "r+");
-		if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) {
+		if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED']) {
 			echo "\nYou may have found a problem in PHP.";
 		}
 		echo "\nThis report can be automatically sent to the PHP QA team at\n";
@@ -854,7 +846,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
-$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi', 'sapi/fpm');
+$optionals = array('tests', 'ext', 'Zend', 'sapi');
 
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
@@ -1205,6 +1197,10 @@ function run_test($php, $file, $env)
 		$php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
 	}
 
+	if (isset($env['TEST_PHPDBG_EXECUTABLE'])) {
+		$phpdbg = $env['TEST_PHPDBG_EXECUTABLE'];
+	}
+
 	if (is_array($file)) {
 		$file = $file[0];
 	}
@@ -1290,7 +1286,7 @@ TEST $file
 
 		} else {
 
-			if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
 				$bork_info = "missing section --FILE--";
 				$borked = true;
 			}
@@ -1367,6 +1363,38 @@ TEST $file
 
 				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
+				return 'SKIPPED';
+			}
+		}
+	}
+
+	/* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
+	if (array_key_exists('PHPDBG', $section_text)) {
+		if (!isset($section_text['STDIN'])) {
+			$section_text['STDIN'] = $section_text['PHPDBG']."\n";
+		}
+
+		if (isset($phpdbg)) {
+			$old_php = $php;
+			$php = $phpdbg . ' -qIb';
+		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
+			$old_php = $php;
+			$php = realpath(dirname($php) . "/phpdbg.exe") . ' -qIb ';
+		} else {
+			if (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
+				$old_php = $php;
+				$php = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg") . ' -qIb ';
+			} else if (file_exists("./sapi/phpdbg/phpdbg")) {
+				$old_php = $php;
+				$php = realpath("./sapi/phpdbg/phpdbg") . ' -qIb ';
+			} else if (file_exists(dirname($php) . "/phpdbg")) {
+				$old_php = $php;
+				$php = realpath(dirname($php) . "/phpdbg") . ' -qIb ';
+			} else {
+				show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
+
+				junit_init_suite(junit_get_suitename_for($shortname));
+				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'phpdbg not available');
 				return 'SKIPPED';
 			}
 		}
@@ -1652,8 +1680,12 @@ TEST $file
 	}
 
 	// We've satisfied the preconditions - run the test!
-	show_file_block('php', $section_text['FILE'], 'TEST');
-	save_text($test_file, $section_text['FILE'], $temp_file);
+	if (isset($section_text['FILE'])) {
+		show_file_block('php', $section_text['FILE'], 'TEST');
+		save_text($test_file, $section_text['FILE'], $temp_file);
+	} else {
+		$test_file = $temp_file = "";
+	}
 
 	if (array_key_exists('GET', $section_text)) {
 		$query_string = trim($section_text['GET']);
@@ -1662,9 +1694,15 @@ TEST $file
 	}
 
 	$env['REDIRECT_STATUS'] = '1';
-	$env['QUERY_STRING']    = $query_string;
-	$env['PATH_TRANSLATED'] = $test_file;
-	$env['SCRIPT_FILENAME'] = $test_file;
+	if (empty($env['QUERY_STRING'])) {
+		$env['QUERY_STRING']    = $query_string;
+	}
+	if (empty($env['PATH_TRANSLATED'])) {
+		$env['PATH_TRANSLATED'] = $test_file;
+	}
+	if (empty($env['SCRIPT_FILENAME'])) {
+		$env['SCRIPT_FILENAME'] = $test_file;
+	}
 
 	if (array_key_exists('COOKIE', $section_text)) {
 		$env['HTTP_COOKIE'] = trim($section_text['COOKIE']);
@@ -1735,7 +1773,7 @@ TEST $file
 		$env['REQUEST_METHOD'] = 'PUT';
 
 		if (empty($request)) {
-            junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
+			junit_mark_test_as('BORK', $shortname, $tested, null, 'empty $request');
 			return 'BORKED';
 		}
 
@@ -1745,6 +1783,26 @@ TEST $file
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
+		$content_length = strlen($post);
+		save_text($tmp_post, $post);
+
+		$env['REQUEST_METHOD'] = 'POST';
+		if (empty($env['CONTENT_TYPE'])) {
+			$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		}
+
+		if (empty($env['CONTENT_LENGTH'])) {
+			$env['CONTENT_LENGTH'] = $content_length;
+		}
+
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+	} else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
+
+		$post = trim($section_text['GZIP_POST']);
+		$post = gzencode($post, 9, FORCE_GZIP);
+		$env['HTTP_CONTENT_ENCODING'] = 'gzip';
+
 		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
@@ -1754,34 +1812,18 @@ TEST $file
 
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 
-    } else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
+	} else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
+		$post = trim($section_text['DEFLATE_POST']);
+		$post = gzcompress($post, 9);
+		$env['HTTP_CONTENT_ENCODING'] = 'deflate';
+		save_text($tmp_post, $post);
+		$content_length = strlen($post);
 
-        $post = trim($section_text['GZIP_POST']);
-        $post = gzencode($post, 9, FORCE_GZIP);
-        $env['HTTP_CONTENT_ENCODING'] = 'gzip';
+		$env['REQUEST_METHOD'] = 'POST';
+		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+		$env['CONTENT_LENGTH'] = $content_length;
 
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
-
-        $env['REQUEST_METHOD'] = 'POST';
-        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
-        $env['CONTENT_LENGTH'] = $content_length;
-
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
-
-    } else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
-        $post = trim($section_text['DEFLATE_POST']);
-        $post = gzcompress($post, 9);
-        $env['HTTP_CONTENT_ENCODING'] = 'deflate';
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
-
-        $env['REQUEST_METHOD'] = 'POST';
-        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
-        $env['CONTENT_LENGTH'] = $content_length;
-
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
-
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
 
 	} else {
 
@@ -1796,11 +1838,14 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
-		if (version_compare($valgrind_version, '3.3.0', '>=')) {
+		/* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
+		if (version_compare($valgrind_version, '3.8.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
+		} elseif (version_compare($valgrind_version, '3.3.0', '>=')) {
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
 		} else {
-			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file-exactly=$memcheck_filename $cmd";
+			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --vex-iropt-precise-memory-exns=yes --log-file-exactly=$memcheck_filename $cmd";
 		}
 
 	} else {

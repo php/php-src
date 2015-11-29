@@ -378,13 +378,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-n**                          Disable default php.ini" CR
 "  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
-"  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
 "  **-i**      **-i**my.init           Set .phpdbginit file" CR
 "  **-I**                          Ignore default .phpdbginit" CR
 "  **-O**      **-O**my.oplog          Sets oplog output file" CR
 "  **-r**                          Run execution context" CR
-"  **-rr**                         Run execution context and quit after execution" CR
+"  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
+"  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
@@ -810,7 +810,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv"
+"or completion of the script. Add parameters you want to use as $argv" CR CR
 "**Examples**" CR CR
 "    $P run" CR
 "    $P r" CR

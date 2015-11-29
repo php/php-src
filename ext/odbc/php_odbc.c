@@ -387,7 +387,7 @@ const zend_function_entry odbc_functions[] = {
 };
 /* }}} */
 
-ZEND_DECLARE_MODULE_GLOBALS(odbc)
+PHP_ODBC_API ZEND_DECLARE_MODULE_GLOBALS(odbc)
 static PHP_GINIT_FUNCTION(odbc);
 
 /* {{{ odbc_module_entry
@@ -526,9 +526,9 @@ static PHP_INI_DISP(display_link_nums)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -550,9 +550,9 @@ static PHP_INI_DISP(display_defPW)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -580,9 +580,9 @@ static PHP_INI_DISP(display_binmode)
 	char *value;
 	
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -610,9 +610,9 @@ static PHP_INI_DISP(display_lrl)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -635,9 +635,9 @@ static PHP_INI_DISP(display_cursortype)
 	char *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value->val;
+		value = ZSTR_VAL(ini_entry->orig_value);
 	} else if (ini_entry->value) {
-		value = ini_entry->value->val;
+		value = ZSTR_VAL(ini_entry->value);
 	} else {
 		value = NULL;
 	}
@@ -1012,6 +1012,13 @@ int odbc_bindcols(odbc_result *result)
 					charextraalloc = 1;
 					rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 								NULL, 0, NULL, &displaysize);
+				}
+
+				/* Workaround for drivers that report NVARCHAR(MAX) columns as SQL_WVARCHAR with size 0 (bug #69975) */
+				if (result->values[i].coltype == SQL_WVARCHAR && displaysize == 0) {
+					result->values[i].coltype = SQL_WLONGVARCHAR;
+					result->values[i].value = NULL;
+					break;
 				}
 #endif
 				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
@@ -1843,7 +1850,7 @@ PHP_FUNCTION(odbc_fetch_array)
 /* }}} */
 #endif
 
-/* {{{ proto int odbc_fetch_into(resource result_id, array &result_array, [, int rownumber])
+/* {{{ proto int odbc_fetch_into(resource result_id, array &result_array [, int rownumber])
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
@@ -2058,6 +2065,7 @@ PHP_FUNCTION(odbc_fetch_row)
 PHP_FUNCTION(odbc_result)
 {
 	char *field;
+	zend_string *field_str;
 	int field_ind;
 	SQLSMALLINT sql_c_type = SQL_C_CHAR;
 	odbc_result *result;
@@ -2163,25 +2171,25 @@ PHP_FUNCTION(odbc_result)
 			}
 			/* For char data, the length of the returned string will be longreadlen - 1 */
 			fieldsize = (result->longreadlen <= 0) ? 4096 : result->longreadlen;
-			field = emalloc(fieldsize);
+			field_str = zend_string_alloc(fieldsize, 0);
 
 		/* SQLGetData will truncate CHAR data to fieldsize - 1 bytes and append \0.
 		 * For binary data it is truncated to fieldsize bytes. 
 		 */
 			rc = SQLGetData(result->stmt, (SQLUSMALLINT)(field_ind + 1), sql_c_type,
-							field, fieldsize, &result->values[field_ind].vallen);
+							ZSTR_VAL(field_str), fieldsize, &result->values[field_ind].vallen);
 
 			if (rc == SQL_ERROR) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
-				efree(field);
+				zend_string_free(field_str);
 				RETURN_FALSE;
 			}
 
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
-				efree(field);
+				zend_string_free(field_str);
 				RETURN_NULL();
 			} else if (rc == SQL_NO_DATA_FOUND) {
-				efree(field);
+				zend_string_free(field_str);
 				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might 
@@ -2196,10 +2204,10 @@ PHP_FUNCTION(odbc_result)
 			/* Don't duplicate result, saves one emalloc.
 			   For SQL_SUCCESS, the length is in vallen.
 			 */
-			RETVAL_STRINGL(field, (rc == SQL_SUCCESS_WITH_INFO) ? fieldsize : result->values[field_ind].vallen);
-			// TODO: avoid dpouble reallocation ???
-			efree(field);
-			return;
+			if (rc != SQL_SUCCESS_WITH_INFO) {
+				field_str = zend_string_truncate(field_str, result->values[field_ind].vallen, 0);
+			}
+			RETURN_NEW_STR(field_str);
 			break;
 			
 		default:
@@ -3046,16 +3054,16 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 		ptr = zend_string_alloc(len + 1, 0);
 		if (mode == 0) {
-			strlcpy(ptr->val, conn->laststate, len+1);
+			strlcpy(ZSTR_VAL(ptr), conn->laststate, len+1);
 		} else {
-			strlcpy(ptr->val, conn->lasterrormsg, len+1);
+			strlcpy(ZSTR_VAL(ptr), conn->lasterrormsg, len+1);
 		}
 	} else {
 		ptr = zend_string_alloc(len, 0);
 		if (mode == 0) {
-			strlcpy(ptr->val, ODBCG(laststate), len+1);
+			strlcpy(ZSTR_VAL(ptr), ODBCG(laststate), len+1);
 		} else {
-			strlcpy(ptr->val, ODBCG(lasterrormsg), len+1);
+			strlcpy(ZSTR_VAL(ptr), ODBCG(lasterrormsg), len+1);
 		}
 	}
 	RETVAL_STR(ptr);

@@ -305,7 +305,7 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_erase_empty_line;
 			if (value) {
 				convert_to_long_ex(value);
-				rl_erase_empty_line = Z_LVAL_PP(value);
+				rl_erase_empty_line = Z_LVAL_P(value);
 			}
 			RETVAL_LONG(oldval);
 #endif
@@ -520,7 +520,7 @@ PHP_FUNCTION(readline_completion_function)
 	}
 
 	if (!zend_is_callable(arg, 0, &name)) {
-		php_error_docref(NULL, E_WARNING, "%s is not callable", name->val);
+		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
@@ -569,7 +569,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 	}
 
 	if (!zend_is_callable(callback, 0, &name)) {
-		php_error_docref(NULL, E_WARNING, "%s is not callable", name->val);
+		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
 		zend_string_release(name);
 		RETURN_FALSE;
 	}

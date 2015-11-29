@@ -148,7 +148,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 					if (func->type == ZEND_INTERNAL_FUNCTION) {
 						arg_name = (char *)((zend_internal_arg_info *)&arginfo[j])->name;
 					} else {
-						arg_name = arginfo[j].name->val;
+						arg_name = ZSTR_VAL(arginfo[j].name);
 					}
 				}
 
@@ -164,7 +164,11 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 			}
 			++j;
 
-			zend_print_flat_zval_r(argstmp);
+			{
+				char *arg_print = phpdbg_short_zval_print(argstmp, 40);
+				php_printf("%s", arg_print);
+				efree(arg_print);
+			}
 
 			phpdbg_xml("</arg>");
 		} ZEND_HASH_FOREACH_END();

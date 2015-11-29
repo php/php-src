@@ -37,13 +37,9 @@ ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
 
-static zend_class_entry *assertion_exception_ce;
+static zend_class_entry *assertion_error_ce;
 
-#ifdef ZTS
-#define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
-#else
-#define ASSERTG(v) (assert_globals.v)
-#endif
+#define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -63,17 +59,17 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_UNDEF(&ASSERTG(callback));
 		}
-		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || new_value->len)) {
+		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || ZSTR_LEN(new_value))) {
 			ZVAL_STR_COPY(&ASSERTG(callback), new_value);
 		}
 	} else {
 		if (ASSERTG(cb)) {
 			pefree(ASSERTG(cb), 1);
 		}
-		if (new_value && new_value->len) {
-			ASSERTG(cb) = pemalloc(new_value->len + 1, 1);
-			memcpy(ASSERTG(cb), new_value->val, new_value->len);
-			ASSERTG(cb)[new_value->len] = '\0';
+		if (new_value && ZSTR_LEN(new_value)) {
+			ASSERTG(cb) = pemalloc(ZSTR_LEN(new_value) + 1, 1);
+			memcpy(ASSERTG(cb), ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+			ASSERTG(cb)[ZSTR_LEN(new_value)] = '\0';
 		} else {
 			ASSERTG(cb) = NULL;
 		}
@@ -113,8 +109,8 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "AssertionException", NULL);
-	assertion_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default());
+	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
+	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
 
 	return SUCCESS;
 }
@@ -168,6 +164,7 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
+		zend_class_entry *orig_scope = EG(scope);
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -183,7 +180,7 @@ PHP_FUNCTION(assert)
 				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
 				zend_string *str = zval_get_string(description);
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, str->val, myeval);
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, ZSTR_VAL(str), myeval);
 				zend_string_release(str);
 			}
 			if (ASSERTG(bail)) {
@@ -196,6 +193,8 @@ PHP_FUNCTION(assert)
 		if (ASSERTG(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
 		}
+
+		EG(scope) = orig_scope;
 
 		convert_to_boolean(&retval);
 		val = Z_TYPE(retval) == IS_TRUE;
@@ -244,14 +243,14 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(exception)) {
 		if (!description) {
-			zend_throw_exception(assertion_exception_ce, NULL, E_ERROR);
+			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
 		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), assertion_exception_ce)) {
+			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
 			Z_ADDREF_P(description);
 			zend_throw_exception_object(description);
 		} else {
 			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_exception_ce, str->val, E_ERROR);
+			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
 			zend_string_release(str);
 		}
 	} else if (ASSERTG(warning)) {
@@ -264,9 +263,9 @@ PHP_FUNCTION(assert)
 		} else {
 			zend_string *str = zval_get_string(description);
 			if (myeval) {
-				php_error_docref(NULL, E_WARNING, "%s: \"%s\" failed", str->val, myeval);
+				php_error_docref(NULL, E_WARNING, "%s: \"%s\" failed", ZSTR_VAL(str), myeval);
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s failed", str->val);
+				php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
 		}
@@ -275,6 +274,8 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
+	
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -343,7 +344,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_CALLBACK:
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
-			RETVAL_ZVAL(&ASSERTG(callback), 1, 0);
+			ZVAL_COPY(return_value, &ASSERTG(callback));
 		} else if (ASSERTG(cb)) {
 			RETVAL_STRING(ASSERTG(cb));
 		} else {

@@ -10,6 +10,6 @@ namespace {
     var_dump ($hello);
 }
 --EXPECTF--
-object(lone\class@%s)#1 (0) {
+object(class@%s)#1 (0) {
 }
 

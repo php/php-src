@@ -15,7 +15,7 @@ foreach ($strVals as $strVal) {
 	  echo "--- testing: '$strVal' >> '$otherVal' ---\n";
 	  try {
         var_dump($strVal>>$otherVal);
-      } catch (Exception $e) {
+      } catch (ArithmeticError $e) {
         echo "Exception: " . $e->getMessage() . "\n";
       }
    }

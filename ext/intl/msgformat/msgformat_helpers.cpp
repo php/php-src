@@ -413,12 +413,12 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
 		} else { //string; assumed to be in UTF-8
-			intl_stringFromChar(key, str_index->val, str_index->len, &err.code);
+			intl_stringFromChar(key, ZSTR_VAL(str_index), ZSTR_LEN(str_index), &err.code);
 
 			if (U_FAILURE(err.code)) {
 				char *message;
 				spprintf(&message, 0,
-					"Invalid UTF-8 data in argument key: '%s'", str_index->val);
+					"Invalid UTF-8 data in argument key: '%s'", ZSTR_VAL(str_index));
 				intl_errors_set(&err, err.code,	message, 1);
 				efree(message);
 				continue;
@@ -536,14 +536,15 @@ retry_kint64:
 				{
 					double dd = intl_zval_to_millis(elem, &err, "msgfmt_format");
 					if (U_FAILURE(err.code)) {
-						char *message, *key_char;
-						size_t key_len;
+						char *message;
+						zend_string *u8key;
 						UErrorCode status = UErrorCode();
-						if (intl_charFromString(key, &key_char, &key_len, &status) == SUCCESS) {
+						u8key = intl_charFromString(key, &status);
+						if (u8key) {
 							spprintf(&message, 0, "The argument for key '%s' "
-								"cannot be used as a date or time", key_char);
+								"cannot be used as a date or time", ZSTR_VAL(u8key));
 							intl_errors_set(&err, err.code, message, 1);
-							efree(key_char);
+							zend_string_release(u8key);
 							efree(message);
 						}
 						continue;
@@ -579,17 +580,17 @@ retry_kint64:
 				goto string_arg;
 			default:
 				{
-					char *message, *key_char;
-					size_t key_len;
+					char *message;
+					zend_string *u8key;
 					UErrorCode status = UErrorCode();
-					if (intl_charFromString(key, &key_char, &key_len,
-							&status) == SUCCESS) {
+					u8key = intl_charFromString(key, &status);
+					if (u8key) {
 						spprintf(&message, 0, "No strategy to convert the "
 							"value given for the argument with key '%s' "
-							"is available", key_char);
+							"is available", ZSTR_VAL(u8key));
 						intl_errors_set(&err,
 							U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-						efree(key_char);
+						zend_string_release(u8key);
 						efree(message);
 					}
 				}
@@ -643,8 +644,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 	    int64_t aInt64;
 		double aDate;
 		UnicodeString temp;
-		char *stmp;
-		size_t stmp_len;
+		zend_string *u8str;
 
 		switch(fargs[i].getType()) {
         case Formattable::kDate:
@@ -671,14 +671,12 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
 
         case Formattable::kString:
             fargs[i].getString(temp);
-			intl_convert_utf16_to_utf8(&stmp, &stmp_len, temp.getBuffer(), temp.length(), status);
-			if(U_FAILURE(*status)) {
+			u8str = intl_convert_utf16_to_utf8(temp.getBuffer(), temp.length(), status);
+			if(!u8str) {
 				cleanup_zvals();
 				return;
 			}
-			ZVAL_STRINGL(&(*args)[i], stmp, stmp_len);
-			//???
-			efree(stmp);
+			ZVAL_NEW_STR(&(*args)[i], u8str);
             break;
 
         case Formattable::kObject:

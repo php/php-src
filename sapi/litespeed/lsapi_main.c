@@ -173,6 +173,7 @@ static int sapi_lsapi_deactivate(void)
     if ( SG(request_info).path_translated )
     {
         efree( SG(request_info).path_translated );
+        SG(request_info).path_translated = NULL;
     }
 
     return SUCCESS;
@@ -417,7 +418,7 @@ static void sapi_lsapi_log_message(char *message)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.7",
+    "LiteSpeed V6.8",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -601,11 +602,12 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
         else
 		{
 #if PHP_MAJOR_VERSION >= 7
-			psKey = zend_string_init(pKey, keyLen, 1);
+            --keyLen;
+            psKey = zend_string_init(pKey, keyLen, 1);
             zend_alter_ini_entry_chars(psKey,
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);
-			zend_string_release(psKey);
+            zend_string_release(psKey);
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
@@ -1003,6 +1005,10 @@ int main( int argc, char * argv[] )
 
 #ifdef ZTS
     tsrm_startup(1, 1, 0, NULL);
+#endif
+
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
 #endif
 
     if (argc > 1 ) {

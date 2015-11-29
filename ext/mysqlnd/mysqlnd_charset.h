@@ -12,12 +12,11 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
-
 #ifndef MYSQLND_CHARSET_H
 #define MYSQLND_CHARSET_H
 

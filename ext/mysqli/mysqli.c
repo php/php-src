@@ -306,7 +306,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	obj = Z_MYSQLI_P(object);
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
+		ZVAL_COPY(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
 	}
@@ -341,7 +341,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	mysqli_prop_handler *hnd = NULL;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
+		ZVAL_COPY(&tmp_member, member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
 	}
@@ -354,11 +354,6 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 
 	if (hnd) {
 		hnd->write_func(obj, value);
-		/* ???
-		if (! PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) == 0) {
-			Z_ADDREF_P(value);
-			zval_ptr_dtor(&value);
-		} */
 	} else {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
@@ -496,7 +491,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 		mysqli_object *intern = Z_MYSQLI_P(zv);
 		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
 			/* We know that we have a mysqli object, so this failure should be emitted */
-			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));
 			return NULL;
 		}
 		mysql = (MY_MYSQL *)(my_res->ptr);
@@ -611,7 +606,7 @@ PHP_MINIT_FUNCTION(mysqli)
 #ifdef HAVE_SPL
 	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
 #else
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_get_default());
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_ce_exception);
 #endif
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
@@ -723,6 +718,12 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_NO_SCHEMA", CLIENT_NO_SCHEMA, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_FOUND_ROWS", CLIENT_FOUND_ROWS, CONST_CS | CONST_PERSISTENT);
+#ifdef CLIENT_SSL_VERIFY_SERVER_CERT
+	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT", CLIENT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
+#if defined(MYSQLI_USE_MYSQLND)
+	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT", CLIENT_SSL_DONT_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
+#endif
+#endif
 #if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS", CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS", MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
@@ -806,7 +807,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_CHAR", FIELD_TYPE_CHAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_INTERVAL", FIELD_TYPE_INTERVAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_GEOMETRY", FIELD_TYPE_GEOMETRY, CONST_CS | CONST_PERSISTENT);
-
+#ifdef FIELD_TYPE_JSON
+	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_JSON", FIELD_TYPE_JSON, CONST_CS | CONST_PERSISTENT);
+#endif
 #if MYSQL_VERSION_ID > 50002 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_NEWDECIMAL", FIELD_TYPE_NEWDECIMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_BIT", FIELD_TYPE_BIT, CONST_CS | CONST_PERSISTENT);
@@ -1245,7 +1248,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
 		}
 		if (!ce) {
-			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", class_name->val);
+			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", ZSTR_VAL(class_name));
 			return;
 		}
 		fetchtype = MYSQLI_ASSOC;
@@ -1280,9 +1283,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 		object_and_properties_init(return_value, ce, NULL);
 		if (!ce->default_properties_count && !ce->__set) {
-			ALLOC_HASHTABLE(Z_OBJ_P(return_value)->properties);
-			*Z_OBJ_P(return_value)->properties = *Z_ARRVAL(dataset);
-			efree(Z_ARR(dataset));
+			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 		} else {
 			zend_merge_properties(return_value, Z_ARRVAL(dataset));
 			zval_ptr_dtor(&dataset);
@@ -1307,7 +1308,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_throw_exception(zend_exception_get_default(), "Parameter ctor_params must be an array", 0);
+					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
 					return;
 				}
 			}
@@ -1319,7 +1320,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fcc.object = Z_OBJ_P(return_value);
 
 			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_exception_get_default(), 0, "Could not execute %s::%s()", ce->name->val, ce->constructor->common.function_name->val);
+				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
 			} else {
 				zval_ptr_dtor(&retval);
 			}
@@ -1327,7 +1328,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				efree(fci.params);
 			}
 		} else if (ctor_params) {
-			zend_throw_exception_ex(zend_exception_get_default(), 0, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name->val);
+			zend_throw_exception_ex(zend_ce_exception, 0, "Class %s does not have a constructor hence you cannot use ctor_params", ZSTR_VAL(ce->name));
 		}
 	}
 }

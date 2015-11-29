@@ -202,11 +202,7 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
-#ifdef ZTS
-#define DATEG(v) ZEND_TSRMG(date_globals_id, zend_date_globals *, v)
-#else
-#define DATEG(v) (date_globals.v)
-#endif
+#define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(char *string, zend_long *now);

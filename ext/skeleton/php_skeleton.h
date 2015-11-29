@@ -34,14 +34,10 @@ ZEND_END_MODULE_GLOBALS(extname)
    You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
+#define EXTNAME_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(extname, v)
 
-#ifdef ZTS
-#define EXTNAME_G(v) ZEND_TSRMG(extname_globals_id, zend_extname_globals *, v)
-#ifdef COMPILE_DL_EXTNAME
+#if defined(ZTS) && defined(COMPILE_DL_EXTNAME)
 ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define EXTNAME_G(v) (extname_globals.v)
 #endif
 
 #endif	/* PHP_EXTNAME_H */

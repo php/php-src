@@ -84,7 +84,7 @@ static void zend_resource_dtor(zend_resource *res)
 ZEND_API int zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
-		return zend_list_delete(res);
+		return zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
@@ -102,12 +102,14 @@ ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type
 
 ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
-	if (resource_type1 == res->type) {
-		return res->ptr;
-	}
+	if (res) {
+		if (resource_type1 == res->type) {
+			return res->ptr;
+		}
 
-	if (resource_type2 == res->type) {
-		return res->ptr;
+		if (resource_type2 == res->type) {
+			return res->ptr;
+		}
 	}
 
 	if (resource_type_name) {

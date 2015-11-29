@@ -34,7 +34,7 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (!is_null($tmp = @$res->fetch_object($link, $link)))
 			printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 	try {
 		if (!is_null($tmp = @$res->fetch_object($link, $link, $link)))
 			printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 	}
 
@@ -84,7 +84,7 @@ require_once('skipifconnectfailure.inc');
 			printf("[009] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
 			var_dump($obj);
 		}
-	} catch (EngineException $e) {
+	} catch (Error $e) {
 		handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 		mysqli_fetch_object($res);
 	}
@@ -129,9 +129,9 @@ require_once('skipifconnectfailure.inc');
 %s on line %d
 [E_WARNING] mysqli_result::fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 [E_WARNING] mysqli_result::fetch_object() expects parameter 1 to be string, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
-[E_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[0] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
 [E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
 [E_NOTICE] Undefined variable: b in %s on line %d
 NULL

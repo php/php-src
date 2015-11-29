@@ -523,7 +523,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	}
 
 	if (params && bindno != zend_hash_num_elements(params) && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
-		/* extra bit of validation for instances when same params are bound more then once */
+		/* extra bit of validation for instances when same params are bound more than once */
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
 			for (plc = placeholders; plc; plc = plc->next) {
@@ -575,7 +575,10 @@ safe:
 						zend_string *buf;
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
-						if (!stmt->dbh->methods->quoter(stmt->dbh, buf->val, buf->len, &plc->quoted, &plc->qlen,
+						if (!buf) {
+							buf = ZSTR_EMPTY_ALLOC();
+						}
+						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 								param->param_type)) {
 							/* bork */
 							ret = -1;

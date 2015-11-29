@@ -125,14 +125,9 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 #define ARRAY_FILTER_USE_KEY	2
 
 ZEND_BEGIN_MODULE_GLOBALS(array)
-	int *multisort_flags[2];
-	int (*compare_func)(zval *result, zval *op1, zval *op2);
+	compare_func_t *multisort_func;
 ZEND_END_MODULE_GLOBALS(array)
 
-#ifdef ZTS
-#define ARRAYG(v) ZEND_TSRMG(array_globals_id, zend_array_globals *, v)
-#else
-#define ARRAYG(v) (array_globals.v)
-#endif
+#define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
 
 #endif /* PHP_ARRAY_H */

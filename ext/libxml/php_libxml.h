@@ -86,7 +86,7 @@ typedef struct _php_libxml_node_object {
 
 
 static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *obj) {
-	return (php_libxml_node_object *)((char*)(obj) - XtOffsetOf(php_libxml_node_object, std));
+	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
@@ -115,13 +115,10 @@ PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable);
 PHP_LIBXML_API void php_libxml_initialize(void);
 PHP_LIBXML_API void php_libxml_shutdown(void);
 
-#ifdef ZTS
-#define LIBXML(v) ZEND_TSRMG(libxml_globals_id, zend_libxml_globals *, v)
-#ifdef COMPILE_DL_LIBXML
+#define LIBXML(v) ZEND_MODULE_GLOBALS_ACCESSOR(libxml, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_LIBXML)
 ZEND_TSRMLS_CACHE_EXTERN();
-#endif
-#else
-#define LIBXML(v) (libxml_globals.v)
 #endif
 
 #else /* HAVE_LIBXML */

@@ -342,6 +342,22 @@ foreach ($ENCHANT_DLLS as $dll) {
 	}
 }
 
+$SASL_DLLS = $php_build_dir . "/bin/sasl2/sasl*.dll";
+$fls = glob($SASL_DLLS);
+if (!empty($fls)) {
+	$sasl_dest_dir = "$dist_dir/sasl2";
+	if (!file_exists($sasl_dest_dir) || !is_dir($sasl_dest_dir)) {
+		if (!mkdir("$sasl_dest_dir", 0777, true)) {
+			echo "WARNING: couldn't create '$sasl_dest_dir' for SASL2 auth plugins ";
+		}
+	}
+	foreach ($fls as $fl) {
+		if (!copy($fl, "$sasl_dest_dir/" . basename($fl))) {
+			echo "WARNING: couldn't copy $fl into the $sasl_dest_dir";
+		}
+	}
+}
+
 /* and those for pecl */
 foreach ($pecl_dll_deps as $dll) {
 	if (in_array($dll, $extra_dll_deps)) {
@@ -482,7 +498,7 @@ if (!$use_pear_template) {
 
 	/* grab the bootstrap script */
 	echo "Downloading go-pear\n";
-	copy("http://pear.php.net/go-pear", "$dist_dir/PEAR/go-pear.php");
+	copy("https://pear.php.net/go-pear.phar", "$dist_dir/PEAR/go-pear.php");
 
 	/* import the package list -- sets $packages variable */
 	include "pear/go-pear-list.php";

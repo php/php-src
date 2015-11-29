@@ -1772,9 +1772,13 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 
 	if (x >= im->sx) {
 		x = im->sx - 1;
+	} else if (x < 0) {
+		x = 0;
 	}
 	if (y >= im->sy) {
 		y = im->sy - 1;
+	} else if (y < 0) {
+		y = 0;
 	}
 
 	for (i = x; i >= 0; i--) {
@@ -2042,7 +2046,9 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		t=y1;
 		y1 = y2;
 		y2 = t;
-
+	}
+	
+	if (x2 < x1) {
 		t = x1;
 		x1 = x2;
 		x2 = t;
@@ -2093,12 +2099,16 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 		return;
 	} else {
-		y1v = y1h + 1;
-		y2v = y2h - 1;
-		gdImageLine(im, x1h, y1h, x2h, y1h, color);
-		gdImageLine(im, x1h, y2h, x2h, y2h, color);
-		gdImageLine(im, x1v, y1v, x1v, y2v, color);
-		gdImageLine(im, x2v, y1v, x2v, y2v, color);
+		if (x1 == x2 || y1 == y2) {
+			gdImageLine(im, x1, y1, x2, y2, color);
+		} else {
+			y1v = y1h + 1;
+			y2v = y2h - 1;
+			gdImageLine(im, x1h, y1h, x2h, y1h, color);
+			gdImageLine(im, x1h, y2h, x2h, y2h, color);
+			gdImageLine(im, x1v, y1v, x1v, y2v, color);
+			gdImageLine(im, x2v, y1v, x2v, y2v, color);
+		}
 	}
 }
 

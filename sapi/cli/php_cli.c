@@ -94,6 +94,10 @@
 # include "win32/select.h"
 #endif
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
@@ -678,17 +682,20 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2015 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2015 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
-#if ZEND_DEBUG && defined(HAVE_GCOV)
-					"(DEBUG GCOV)",
-#elif ZEND_DEBUG
-					"(DEBUG)",
-#elif defined(HAVE_GCOV)
-					"(GCOV)",
+#if ZTS
+					"ZTS "
 #else
-					"",
+					"NTS "
 #endif
+#if ZEND_DEBUG
+					"DEBUG "
+#endif
+#ifdef HAVE_GCOV
+					"GCOV "
+#endif
+					,
 					get_zend_version()
 				);
 				sapi_deactivate();
@@ -1086,7 +1093,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						zval tmp, *msg, rv;
 
 						ZVAL_OBJ(&tmp, EG(exception));
-						msg = zend_read_property(zend_exception_get_default(), &tmp, "message", sizeof("message")-1, 0, &rv);
+						msg = zend_read_property(zend_ce_exception, &tmp, "message", sizeof("message")-1, 0, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;
@@ -1214,6 +1221,10 @@ int main(int argc, char *argv[])
 	tsrm_startup(1, 1, 0, NULL);
 	(void)ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
 #endif
 
 #ifdef PHP_WIN32

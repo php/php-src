@@ -255,7 +255,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init)
 							"SSL operation failed with code %d. %s%s",
 							err,
 							ebuf.s ? "OpenSSL Error messages:\n" : "",
-							ebuf.s ? ebuf.s->val : "");
+							ebuf.s ? ZSTR_VAL(ebuf.s) : "");
 					if (ebuf.s) {
 						smart_str_free(&ebuf);
 					}
@@ -313,7 +313,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 
 	fingerprint = php_openssl_x509_fingerprint(peer, method, 0);
 	if (fingerprint) {
-		result = strcasecmp(expected, fingerprint->val);
+		result = strcasecmp(expected, ZSTR_VAL(fingerprint));
 		zend_string_release(fingerprint);
 	}
 
@@ -350,7 +350,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
 				return 0;
 			}
-			if (php_x509_fingerprint_cmp(peer, key->val, Z_STRVAL_P(current)) != 0) {
+			if (php_x509_fingerprint_cmp(peer, ZSTR_VAL(key), Z_STRVAL_P(current)) != 0) {
 				return 0;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1389,7 +1389,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 				SSL_CTX_free(ctx);
 				return FAILURE;
 			} else {
-				sslsock->sni_certs[i].name = pestrdup(key->val, php_stream_is_persistent(stream));
+				sslsock->sni_certs[i].name = pestrdup(ZSTR_VAL(key), php_stream_is_persistent(stream));
 				sslsock->sni_certs[i].ctx = ctx;
 				++i;
 			}
@@ -1728,6 +1728,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 	) {
 		ZVAL_RES(&zcert, zend_register_resource(peer_cert, php_openssl_get_x509_list_id()));
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate", &zcert);
+		zval_ptr_dtor(&zcert);
 		cert_captured = 1;
 	}
 
@@ -1755,7 +1756,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 		}
 
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate_chain", &arr);
-		zval_dtor(&arr);
+		zval_ptr_dtor(&arr);
 	}
 
 	return cert_captured;
@@ -1874,7 +1875,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 						zval meta_arr;
 						ZVAL_ARR(&meta_arr, capture_session_meta(sslsock->ssl_handle));
 						php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "session_meta", &meta_arr);
-						zval_dtor(&meta_arr);
+						zval_ptr_dtor(&meta_arr);
 					}
 				}
 			}
@@ -1946,7 +1947,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC) == SUCCESS) {
+		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
 			sslsock->s.is_blocked = 0;
 		}
 

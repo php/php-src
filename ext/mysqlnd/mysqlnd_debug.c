@@ -12,14 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -440,7 +436,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 						"   min_own=%5llu  max_own=%7llu  avg_own=%7llu   "
 						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
 						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
-						,string_key->val
+						,ZSTR_VAL(string_key)
 						,(uint64_t) f_profile->calls
 						,(uint64_t) f_profile->own_underporm_calls
 						,(uint64_t) f_profile->in_calls_underporm_calls

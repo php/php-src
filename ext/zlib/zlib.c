@@ -124,7 +124,6 @@ static int php_zlib_output_encoding(void)
 static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		/* start up */
@@ -210,7 +209,6 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
-	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (!php_zlib_output_encoding()) {
 		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
@@ -351,9 +349,9 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 		out = zend_string_alloc(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
 
 		Z.next_in = (Bytef *) in_buf;
-		Z.next_out = (Bytef *) out->val;
+		Z.next_out = (Bytef *) ZSTR_VAL(out);
 		Z.avail_in = in_len;
-		Z.avail_out = out->len;
+		Z.avail_out = ZSTR_LEN(out);
 
 		status = deflate(&Z, Z_FINISH);
 		deflateEnd(&Z);
@@ -361,7 +359,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 		if (Z_STREAM_END == status) {
 			/* size buffer down to actual length */
 			out = zend_string_truncate(out, Z.total_out, 0);
-			out->val[out->len] = '\0';
+			ZSTR_VAL(out)[ZSTR_LEN(out)] = '\0';
 			return out;
 		} else {
 			zend_string_free(out);
@@ -687,7 +685,7 @@ static PHP_FUNCTION(name) \
 			php_error_docref(NULL, E_WARNING, "encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE"); \
 			RETURN_FALSE; \
 	} \
-	if ((out = php_zlib_encode(in->val, in->len, encoding, level)) == NULL) { \
+	if ((out = php_zlib_encode(ZSTR_VAL(in), ZSTR_LEN(in), encoding, level)) == NULL) { \
 		RETURN_FALSE; \
 	} \
 	RETURN_STR(out); \
@@ -759,60 +757,87 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 	zval *option_buffer;
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
-		HashTable *dictionary;
-
 		ZVAL_DEREF(option_buffer);
-		if (Z_TYPE_P(option_buffer) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "dictionary must be of type array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
-			return 0;
-		}
-		dictionary = Z_ARR_P(option_buffer);
-
-		if (zend_hash_num_elements(dictionary) > 0) {
-			char *dictptr;
-			zval *cur;
-			zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
-			zend_string **end, **ptr = strings - 1;
-
-			ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+		switch (Z_TYPE_P(option_buffer)) {
+			case IS_STRING: {
+				zend_string *str = Z_STR_P(option_buffer);
 				int i;
+				zend_bool last_null = 1;
 
-				*++ptr = zval_get_string(cur);
-				if (!*ptr || (*ptr)->len == 0) {
-					if (*ptr) {
-						efree(*ptr);
+				for (i = 0; i < ZSTR_LEN(str); i++) {
+					if (ZSTR_VAL(str)[i]) {
+						last_null = 0;
+					} else {
+						if (last_null) {
+							php_error_docref(NULL, E_WARNING, "dictionary string must not contain empty entries (two consecutive NULL-bytes or one at the very beginning)");
+							return 0;
+						}
+						last_null = 1;
 					}
-					while (--ptr >= strings) {
-						efree(ptr);
-					}
+				}
+				if (!last_null) {
+					php_error_docref(NULL, E_WARNING, "dictionary string must be NULL-byte terminated (each dictionary entry has to be NULL-terminated)");
+				}
+
+				*dict = emalloc(ZSTR_LEN(str));
+				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
+				*dictlen = ZSTR_LEN(str);
+			} break;
+
+			case IS_ARRAY: {
+				HashTable *dictionary = Z_ARR_P(option_buffer);
+
+				if (zend_hash_num_elements(dictionary) > 0) {
+					char *dictptr;
+					zval *cur;
+					zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
+					zend_string **end, **ptr = strings - 1;
+
+					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+						int i;
+
+						*++ptr = zval_get_string(cur);
+						if (!*ptr || ZSTR_LEN(*ptr) == 0) {
+							if (*ptr) {
+								efree(*ptr);
+							}
+							while (--ptr >= strings) {
+								efree(ptr);
+							}
+							efree(strings);
+							php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
+							return 0;
+						}
+						for (i = 0; i < ZSTR_LEN(*ptr); i++) {
+							if (ZSTR_VAL(*ptr)[i] == 0) {
+								do {
+									efree(ptr);
+								} while (--ptr >= strings);
+								efree(strings);
+								php_error_docref(NULL, E_WARNING, "dictionary entries must not contain a NULL-byte");
+								return 0;
+							}
+						}
+
+						*dictlen += ZSTR_LEN(*ptr) + 1;
+					} ZEND_HASH_FOREACH_END();
+
+					dictptr = *dict = emalloc(*dictlen);
+					ptr = strings;
+					end = strings + zend_hash_num_elements(dictionary);
+					do {
+						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
+						dictptr += ZSTR_LEN(*ptr);
+						*dictptr++ = 0;
+						zend_string_release(*ptr);
+					} while (++ptr != end);
 					efree(strings);
-					php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
-					return 0;
 				}
-				for (i = 0; i < (*ptr)->len; i++) {
-					if ((*ptr)->val[i] == 0) {
-						do {
-							efree(ptr);
-						} while (--ptr >= strings);
-						efree(strings);
-						php_error_docref(NULL, E_WARNING, "dictionary entries must not contain a NULL-byte");
-						return 0;
-					}
-				}
+			} break;
 
-				*dictlen += (*ptr)->len + 1;
-			} ZEND_HASH_FOREACH_END();
-
-			dictptr = *dict = emalloc(*dictlen);
-			ptr = strings;
-			end = strings + zend_hash_num_elements(dictionary);
-			do {
-				memcpy(dictptr, *ptr, (*ptr)->len);
-				dictptr += (*ptr)->len;
-				*dictptr++ = 0;
-				zend_string_release(*ptr);
-			} while (++ptr != end);
-			efree(strings);
+			default:
+				php_error_docref(NULL, E_WARNING, "dictionary must be of type zero-terminated string or array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
+				return 0;
 		}
 	}
 
@@ -920,21 +945,21 @@ PHP_FUNCTION(inflate_add)
 
 	out = zend_string_alloc((in_len > CHUNK_SIZE) ? in_len : CHUNK_SIZE, 0);
 	ctx->next_in = (Bytef *) in_buf;
-	ctx->next_out = (Bytef *) out->val;
+	ctx->next_out = (Bytef *) ZSTR_VAL(out);
 	ctx->avail_in = in_len;
-	ctx->avail_out = out->len;
+	ctx->avail_out = ZSTR_LEN(out);
 
 	do {
 		status = inflate(ctx, flush_type);
-		buffer_used = out->len - ctx->avail_out;
+		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
 
 		switch (status) {
 			case Z_OK:
 				if (ctx->avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->avail_out = CHUNK_SIZE;
-					ctx->next_out = (Bytef *) out->val + buffer_used;
+					ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
 				} else {
 					goto complete;
@@ -945,9 +970,9 @@ PHP_FUNCTION(inflate_add)
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, out->len + CHUNK_SIZE, 0);
+					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->avail_out = CHUNK_SIZE;
-					ctx->next_out = (Bytef *) out->val + buffer_used;
+					ctx->next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
 				} else {
 					/* No more input data; we're finished */
@@ -983,7 +1008,7 @@ PHP_FUNCTION(inflate_add)
 
 	complete: {
 		out = zend_string_realloc(out, buffer_used, 0);
-		out->val[buffer_used] = 0;
+		ZSTR_VAL(out)[buffer_used] = 0;
 		RETURN_STR(out);
 	}
 }
@@ -1135,20 +1160,20 @@ PHP_FUNCTION(deflate_add)
 	out = zend_string_alloc(out_size, 0);
 
 	ctx->next_in = (Bytef *) in_buf;
-	ctx->next_out = (Bytef *) out->val;
+	ctx->next_out = (Bytef *) ZSTR_VAL(out);
 	ctx->avail_in = in_len;
-	ctx->avail_out = out->len;
+	ctx->avail_out = ZSTR_LEN(out);
 
 	status = deflate(ctx, flush_type);
 	switch (status) {
 		case Z_OK:
-			out->len = (char *) ctx->next_out - out->val;
-			out->val[out->len] = 0;
+			ZSTR_LEN(out) = (char *) ctx->next_out - ZSTR_VAL(out);
+			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			RETURN_STR(out);
 			break;
 		case Z_STREAM_END:
-			out->len = (char *) ctx->next_out - out->val;
-			out->val[out->len] = 0;
+			ZSTR_LEN(out) = (char *) ctx->next_out - ZSTR_VAL(out);
+			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			deflateReset(ctx);
 			RETURN_STR(out);
 			break;
@@ -1343,12 +1368,12 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
-	if (!strncasecmp(new_value->val, "off", sizeof("off"))) {
+	if (!strncasecmp(ZSTR_VAL(new_value), "off", sizeof("off"))) {
 		int_value = 0;
-	} else if (!strncasecmp(new_value->val, "on", sizeof("on"))) {
+	} else if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
 		int_value = 1;
 	} else {
-		int_value = zend_atoi(new_value->val, new_value->len);
+		int_value = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	}
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
 

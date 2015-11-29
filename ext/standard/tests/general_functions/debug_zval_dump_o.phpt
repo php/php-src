@@ -120,36 +120,36 @@ echo "Done\n";
 -- Iteration 1 --
 object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
@@ -161,44 +161,44 @@ object(no_member_class)#%d (0) refcount(%d){
 -- Iteration 3 --
 object(contains_object_class)#%d (9) refcount(%d){
   ["p"]=>
-  long(30)
+  int(30)
   ["p1":protected]=>
-  long(40)
+  int(40)
   ["p2":"contains_object_class":private]=>
-  long(50)
+  int(50)
   ["class_object1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
@@ -207,36 +207,36 @@ object(contains_object_class)#%d (9) refcount(%d){
   ["class_object2"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
@@ -245,36 +245,36 @@ object(contains_object_class)#%d (9) refcount(%d){
   ["class_object3":"contains_object_class":private]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
@@ -283,36 +283,36 @@ object(contains_object_class)#%d (9) refcount(%d){
   ["class_object4":protected]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
@@ -324,44 +324,44 @@ object(contains_object_class)#%d (9) refcount(%d){
   ["class_object5"]=>
   object(contains_object_class)#%d (9) refcount(%d){
     ["p"]=>
-    long(30)
+    int(30)
     ["p1":protected]=>
-    long(40)
+    int(40)
     ["p2":"contains_object_class":private]=>
-    long(50)
+    int(50)
     ["class_object1"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -370,36 +370,36 @@ object(contains_object_class)#%d (9) refcount(%d){
     ["class_object2"]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -408,36 +408,36 @@ object(contains_object_class)#%d (9) refcount(%d){
     ["class_object3":"contains_object_class":private]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -446,36 +446,36 @@ object(contains_object_class)#%d (9) refcount(%d){
     ["class_object4":protected]=>
     object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -491,36 +491,36 @@ object(contains_object_class)#%d (9) refcount(%d){
 -- Iteration 4 --
 object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
@@ -529,36 +529,36 @@ object(object_class)#%d (6) refcount(%d){
 -- Iteration 5 --
 object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
@@ -572,36 +572,36 @@ NULL
 -- Iteration 8 --
 object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
@@ -610,121 +610,121 @@ object(object_class)#%d (6) refcount(%d){
 -- Iteration 9 --
 object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 10 --
-long(30)
+int(30)
 -- Iteration 11 --
 NULL
 
 -- Testing debug_zval_dump() on overwritten object variables --
-long(500)
-long(500)
-long(500)
-long(500)
+int(500)
+int(500)
+int(500)
+int(500)
 
 -- Testing debug_zval_dump() on objects having circular reference --
 object(object_class)#%d (7) refcount(%d){
   ["value1"]=>
-  long(5)
+  int(5)
   ["value2":"object_class":private]=>
-  long(10)
+  int(10)
   ["value3":protected]=>
-  long(20)
+  int(20)
   ["value4"]=>
-  long(30)
+  int(30)
   ["array_var"]=>
   array(2) refcount(%d){
     ["key1"]=>
-    long(1)
+    int(1)
     ["key2 "]=>
-    long(3)
+    int(3)
   }
   ["object_class1"]=>
   object(object_class)#%d (7) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     *RECURSION*
     ["obj"]=>
     &object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -738,55 +738,55 @@ object(object_class)#%d (7) refcount(%d){
   ["obj"]=>
   &object(object_class)#%d (7) refcount(%d){
     ["value1"]=>
-    long(5)
+    int(5)
     ["value2":"object_class":private]=>
-    long(10)
+    int(10)
     ["value3":protected]=>
-    long(20)
+    int(20)
     ["value4"]=>
-    long(30)
+    int(30)
     ["array_var"]=>
     array(2) refcount(%d){
       ["key1"]=>
-      long(1)
+      int(1)
       ["key2 "]=>
-      long(3)
+      int(3)
     }
     ["object_class1"]=>
     object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
       ["obj"]=>
       &object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -797,38 +797,38 @@ object(object_class)#%d (7) refcount(%d){
     ["obj"]=>
     &object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5)
+      int(5)
       ["value2":"object_class":private]=>
-      long(10)
+      int(10)
       ["value3":protected]=>
-      long(20)
+      int(20)
       ["value4"]=>
-      long(30)
+      int(30)
       ["array_var"]=>
       array(2) refcount(%d){
         ["key1"]=>
-        long(1)
+        int(1)
         ["key2 "]=>
-        long(3)
+        int(3)
       }
       ["object_class1"]=>
       *RECURSION*
       ["obj"]=>
       &object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5)
+        int(5)
         ["value2":"object_class":private]=>
-        long(10)
+        int(10)
         ["value3":protected]=>
-        long(20)
+        int(20)
         ["value4"]=>
-        long(30)
+        int(30)
         ["array_var"]=>
         array(2) refcount(%d){
           ["key1"]=>
-          long(1)
+          int(1)
           ["key2 "]=>
-          long(3)
+          int(3)
         }
         ["object_class1"]=>
         *RECURSION*

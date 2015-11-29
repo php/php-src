@@ -221,21 +221,19 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	timeZone = NULL;
 
 	{
-		char *ret_str;
-		size_t ret_str_len;
+		zend_string *u8str;
 		UnicodeString result = UnicodeString();
 		df->format(date, result);
 
-		if (intl_charFromString(result, &ret_str, &ret_str_len, &status) == FAILURE) {
+		u8str = intl_charFromString(result, &status);
+		if (!u8str) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error converting result to UTF-8",
 					0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
-		RETVAL_STRINGL(ret_str, ret_str_len);
-		//???
-		efree(ret_str);
+		RETVAL_STR(u8str);
 	}
 
 

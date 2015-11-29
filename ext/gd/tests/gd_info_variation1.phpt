@@ -28,8 +28,6 @@ array(%d) {
   string(%d) %a
   ["FreeType Support"]=>
   bool%a
-  ["T1Lib Support"]=>
-  bool%a
   ["GIF Read Support"]=>
   bool%a
   ["GIF Create Support"]=>

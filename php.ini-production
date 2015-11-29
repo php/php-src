@@ -876,7 +876,6 @@ default_socket_timeout = 60
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
-;extension=php_mysql.dll
 ;extension=php_mysqli.dll
 ;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
@@ -887,11 +886,10 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
-;extension=php_pspell.dll
 ;extension=php_shmop.dll
 
-; The MIBS data available in the PHP distribution must be installed. 
-; See http://www.php.net/manual/en/snmp.installation.php 
+; The MIBS data available in the PHP distribution must be installed.
+; See http://www.php.net/manual/en/snmp.installation.php
 ;extension=php_snmp.dll
 
 ;extension=php_soap.dll
@@ -976,6 +974,10 @@ cli_server.color = On
 ;stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
+
+;Enables or disables JIT compilation of patterns. This requires the PCRE
+;library to be compiled with JIT support.
+;pcre.jit=1
 
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
@@ -1109,64 +1111,6 @@ ibase.dateformat = "%Y-%m-%d"
 
 ; Default time format.
 ibase.timeformat = "%H:%M:%S"
-
-[MySQL]
-; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
-; http://php.net/mysql.allow_local_infile
-mysql.allow_local_infile = On
-
-; Allow or prevent persistent links.
-; http://php.net/mysql.allow-persistent
-mysql.allow_persistent = On
-
-; If mysqlnd is used: Number of cache slots for the internal result set cache
-; http://php.net/mysql.cache_size
-mysql.cache_size = 2000
-
-; Maximum number of persistent links.  -1 means no limit.
-; http://php.net/mysql.max-persistent
-mysql.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://php.net/mysql.max-links
-mysql.max_links = -1
-
-; Default port number for mysql_connect().  If unset, mysql_connect() will use
-; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
-; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
-; at MYSQL_PORT.
-; http://php.net/mysql.default-port
-mysql.default_port =
-
-; Default socket name for local MySQL connects.  If empty, uses the built-in
-; MySQL defaults.
-; http://php.net/mysql.default-socket
-mysql.default_socket =
-
-; Default host for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-host
-mysql.default_host =
-
-; Default user for mysql_connect() (doesn't apply in safe mode).
-; http://php.net/mysql.default-user
-mysql.default_user =
-
-; Default password for mysql_connect() (doesn't apply in safe mode).
-; Note that this is generally a *bad* idea to store passwords in this file.
-; *Any* user with PHP access can run 'echo get_cfg_var("mysql.default_password")
-; and reveal this password!  And of course, any users with read access to this
-; file will be able to reveal the password as well.
-; http://php.net/mysql.default-password
-mysql.default_password =
-
-; Maximum time (in seconds) for connect timeout. -1 means no limit
-; http://php.net/mysql.connect-timeout
-mysql.connect_timeout = 60
-
-; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
-; SQL-Errors will be displayed.
-; http://php.net/mysql.trace-mode
-mysql.trace_mode = Off
 
 [MySQLi]
 
@@ -1578,9 +1522,9 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ;  0: Jump over assertion at run-time
 ;  1: Execute assertions
 ; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.assertions = 1)
-; Default Value: 1 
-; Development Value: 1 
-; Production Value: -1 
+; Default Value: 1
+; Development Value: 1
+; Production Value: -1
 ; http://php.net/zend.assertions
 zend.assertions = -1
 
@@ -1826,11 +1770,6 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
-; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
-; may be always stored (save_comments=1), but not loaded by applications
-; that don't need them anyway.
-;opcache.load_comments=1
-
 ; If enabled, a fast shutdown sequence is used for the accelerated code
 ;opcache.fast_shutdown=0
 
@@ -1889,6 +1828,21 @@ ldap.max_links = -1
 ; directive allows to manually fix the "Unable to reattach to base address"
 ; errors.
 ;opcache.mmap_base=
+
+; Enables and sets the second level cache directory.
+; It should improve performance when SHM memory is full, at server restart or
+; SHM reset. The default "" disables file based caching.
+;opcache.file_cache=
+
+; Enables or disables opcode caching in shared memory.
+;opcache.file_cache_only=0
+
+; Enables or disables checksum validation when script loaded from file cache.
+;opcache.file_cache_consistency_checks=1
+
+; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
+; This should improve performance, but requires appropriate OS configuration.
+;opcache.huge_code_pages=1
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an

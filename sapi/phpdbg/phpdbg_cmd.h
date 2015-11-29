@@ -137,6 +137,7 @@ PHPDBG_API int phpdbg_ask_user_permission(const char *question);
  * Stack Management
  */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
+PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param);
 PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top);
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack);
 PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe);

@@ -187,6 +187,11 @@ int zend_shared_alloc_startup(size_t requested_size)
 		smm_shared_globals = NULL;
 		return res;
 	}
+#if ENABLE_FILE_CACHE_FALLBACK
+	if (ALLOC_FALLBACK == res) {
+		return ALLOC_FALLBACK;
+	}
+#endif
 
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
@@ -207,6 +212,11 @@ int zend_shared_alloc_startup(size_t requested_size)
 	if (res == SUCCESSFULLY_REATTACHED) {
 		return res;
 	}
+#if ENABLE_FILE_CACHE_FALLBACK
+	if (ALLOC_FALLBACK == res) {
+		return ALLOC_FALLBACK;
+	}
+#endif
 
 	shared_segments_array_size = ZSMMG(shared_segments_count) * S_H(segment_type_size)();
 
@@ -313,6 +323,7 @@ void *zend_shared_alloc(size_t size)
 			ZSMMG(shared_segments)[i]->pos += block_size;
 			ZSMMG(shared_free) -= block_size;
 			memset(retval, 0, block_size);
+			ZEND_ASSERT(((zend_uintptr_t)retval & 0x7) == 0); /* should be 8 byte aligned */
 			return retval;
 		}
 	}
@@ -435,7 +446,7 @@ void zend_shared_alloc_clear_xlat_table(void)
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
 {
-	zend_hash_index_update_ptr(&ZCG(xlat_table), (zend_ulong)old, (void*)new);
+	zend_hash_index_add_new_ptr(&ZCG(xlat_table), (zend_ulong)old, (void*)new);
 }
 
 void *zend_shared_alloc_get_xlat_entry(const void *old)

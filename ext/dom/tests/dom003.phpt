@@ -28,13 +28,13 @@ $rootNode->appendChild($rootNode);
 object(DOMException)#%d (%d) {
   ["message":protected]=>
   string(23) "Hierarchy Request Error"
-  ["string":"BaseException":private]=>
+  ["string":"Exception":private]=>
   string(0) ""
   ["file":protected]=>
   string(%d) "%sdom003.php"
   ["line":protected]=>
   int(8)
-  ["trace":"BaseException":private]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
@@ -55,14 +55,14 @@ object(DOMException)#%d (%d) {
       }
     }
   }
-  ["previous":"BaseException":private]=>
+  ["previous":"Exception":private]=>
   NULL
   ["code"]=>
   int(3)
 }
 --- Don't catch exception with try/catch
 
-Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
+Fatal error: Uncaught DOMException: Hierarchy Request Error in %sdom003.php:%d
 Stack trace:
 #0 %sdom003.php(%d): DOMNode->appendChild(Object(DOMElement))
 #1 {main}

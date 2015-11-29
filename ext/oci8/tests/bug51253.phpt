@@ -93,15 +93,15 @@ echo "Done\n";
 Test 1
 array(5) {
   [0]=>
-  string(4) "five"
+  string(3) "one"
   [1]=>
-  string(4) "four"
+  string(3) "two"
   [2]=>
   string(5) "three"
   [3]=>
-  string(3) "two"
+  string(4) "four"
   [4]=>
-  string(3) "one"
+  string(4) "five"
 }
 array(5) {
   [0]=>

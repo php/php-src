@@ -338,7 +338,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_snmp_void, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
-	ZEND_ARG_INFO(0, session)
 	ZEND_ARG_INFO(0, sec_level)
 	ZEND_ARG_INFO(0, auth_protocol)
 	ZEND_ARG_INFO(0, auth_passphrase)
@@ -346,7 +345,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
 	ZEND_ARG_INFO(0, priv_passphrase)
 	ZEND_ARG_INFO(0, contextName)
 	ZEND_ARG_INFO(0, contextEngineID)
-	ZEND_ARG_INFO(0, )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get, 0, 0, 1)
@@ -1820,7 +1818,7 @@ PHP_METHOD(snmp, __construct)
 		case SNMP_VERSION_3:
 			break;
 		default:
-			zend_throw_exception(zend_exception_get_default(), "Unknown SNMP protocol version", 0);
+			zend_throw_exception(zend_ce_exception, "Unknown SNMP protocol version", 0);
 			return;
 	}
 
@@ -2305,16 +2303,16 @@ static void free_php_snmp_properties(zval *el)  /* {{{ */
 
 /* {{{ php_snmp_class_methods[] */
 static zend_function_entry php_snmp_class_methods[] = {
-	PHP_ME(snmp,	 __construct,			arginfo_snmp_create,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 close,				arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 setSecurity,			arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 __construct,		arginfo_snmp_create,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 close,				arginfo_snmp_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 setSecurity,		arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
 
-	PHP_ME(snmp,	 get,				arginfo_snmp_get,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 set,				arginfo_snmp_set,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getError,			arginfo_snmp_void,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 get,				arginfo_snmp_get,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 set,				arginfo_snmp_set,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getError,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
 
 	PHP_FE_END
 };
@@ -2419,7 +2417,7 @@ PHP_MINIT_FUNCTION(snmp)
 #ifdef HAVE_SPL
 	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException);
 #else
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_exception_get_default());
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_ce_exception);
 #endif
 
 	return SUCCESS;

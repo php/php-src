@@ -421,7 +421,6 @@ AC_ARG_ENABLE(gcc-global-regs,
 AC_MSG_CHECKING(for global register variables support)
 if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
   AC_TRY_COMPILE([
-  ],[
 #if defined(__GNUC__)
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
 #else
@@ -434,6 +433,9 @@ if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
 # define ZEND_VM_FP_GLOBAL_REG "%r14"
 # define ZEND_VM_IP_GLOBAL_REG "%r15"
 #elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__powerpc64__)
+# define ZEND_VM_FP_GLOBAL_REG "r28"
+# define ZEND_VM_IP_GLOBAL_REG "r29"
+#elif defined(__IBMC__) && ZEND_GCC_VERSION >= 4002 && defined(__powerpc64__)
 # define ZEND_VM_FP_GLOBAL_REG "r28"
 # define ZEND_VM_IP_GLOBAL_REG "r29"
 #else
@@ -452,6 +454,7 @@ int emu(const opcode_handler_t *ip, void *fp) {
 	IP = orig_ip;
 }
   ], [
+  ], [
     ZEND_GCC_GLOBAL_REGS=yes
   ], [
     ZEND_GCC_GLOBAL_REGS=no
@@ -462,4 +465,4 @@ if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
 else
   HAVE_GCC_GLOBAL_REGS=no
 fi
-AC_MSG_RESULT(ZEND_GCC_GLOBAL_REGS)
+AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)

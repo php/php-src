@@ -48,6 +48,10 @@
 #	include <arpa/inet.h>
 #endif /* }}} */
 
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+# include "openssl/applink.c"
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 int phpdbg_startup_run = 0;
 
@@ -57,7 +61,7 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	return phpdbg_eol_global_update(new_value->val);
+	return phpdbg_eol_global_update(ZSTR_VAL(new_value));
 }
 
 PHP_INI_BEGIN()
@@ -68,12 +72,6 @@ PHP_INI_END()
 static zend_bool phpdbg_booted = 0;
 static zend_bool phpdbg_fully_started = 0;
 
-#if PHP_VERSION_ID >= 50500
-void (*zend_execute_old)(zend_execute_data *execute_data);
-#else
-void (*zend_execute_old)(zend_op_array *op_array);
-#endif
-
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
 	pg->prompt[0] = NULL;
@@ -83,6 +81,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->colors[1] = NULL;
 	pg->colors[2] = NULL;
 
+	pg->lines = phpdbg_get_terminal_height();
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->buffer = NULL;
@@ -98,6 +97,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->sapi_name_ptr = NULL;
 	pg->socket_fd = -1;
 	pg->socket_server_fd = -1;
+	pg->unclean_eval = 0;
 
 	pg->req_id = 0;
 	pg->err_buf.active = 0;
@@ -106,6 +106,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
 	pg->sigsegv_bailout = NULL;
+
+	pg->oplog_list = NULL;
 
 #ifdef PHP_WIN32
 	pg->sigio_watcher_thread = INVALID_HANDLE_VALUE;
@@ -120,13 +122,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
 	REGISTER_INI_ENTRIES();
 
-#if PHP_VERSION_ID >= 50500
-	zend_execute_old = zend_execute_ex;
 	zend_execute_ex = phpdbg_execute_ex;
-#else
-	zend_execute_old = zend_execute;
-	zend_execute = phpdbg_execute_ex;
-#endif
 
 	REGISTER_STRINGL_CONSTANT("PHPDBG_VERSION", PHPDBG_VERSION, sizeof(PHPDBG_VERSION)-1, CONST_CS|CONST_PERSISTENT);
 
@@ -145,43 +141,47 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
 	zend_hash_destroy(Z_ARRVAL_P(brake));
+	efree(Z_ARRVAL_P(brake));
 } /* }}} */
 
 static void php_phpdbg_destroy_bp_symbol(zval *brake) /* {{{ */
 {
 	efree((char *) ((phpdbg_breaksymbol_t *) Z_PTR_P(brake))->symbol);
+	efree(Z_PTR_P(brake));
 } /* }}} */
 
 static void php_phpdbg_destroy_bp_opcode(zval *brake) /* {{{ */
 {
 	efree((char *) ((phpdbg_breakop_t *) Z_PTR_P(brake))->name);
+	efree(Z_PTR_P(brake));
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_opline(zval *brake) /* {{{ */
+{
+	efree(Z_PTR_P(brake));
+} /* }}} */
 
 static void php_phpdbg_destroy_bp_methods(zval *brake) /* {{{ */
 {
 	zend_hash_destroy(Z_ARRVAL_P(brake));
+	efree(Z_ARRVAL_P(brake));
 } /* }}} */
 
 static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 {
 	phpdbg_breakcond_t *brake = (phpdbg_breakcond_t *) Z_PTR_P(data);
 
-	if (brake) {
-		if (brake->ops) {
-
-			destroy_op_array(brake->ops);
-			efree(brake->ops);
-		}
-		efree((char*) brake->code);
+	if (brake->ops) {
+		destroy_op_array(brake->ops);
+		efree(brake->ops);
 	}
+	efree((char*) brake->code);
+	efree(brake);
 } /* }}} */
 
 static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
 {
 	zend_function *function = (zend_function *) Z_PTR_P(data);
-
-
 	destroy_zend_function(function);
 } /* }}} */
 
@@ -194,7 +194,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
@@ -209,6 +209,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
@@ -218,14 +219,14 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
-	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(file_sources));
+	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
 	if (PHPDBG_G(buffer)) {
-		efree(PHPDBG_G(buffer));
+		free(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
 	}
 
@@ -234,19 +235,8 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		PHPDBG_G(exec) = NULL;
 	}
 
-	if (PHPDBG_G(prompt)[0]) {
-		free(PHPDBG_G(prompt)[0]);
-	}
-	if (PHPDBG_G(prompt)[1]) {
-		free(PHPDBG_G(prompt)[1]);
-	}
-
-	PHPDBG_G(prompt)[0] = NULL;
-	PHPDBG_G(prompt)[1] = NULL;
-
 	if (PHPDBG_G(oplog)) {
-		fclose(
-				PHPDBG_G(oplog));
+		fclose(PHPDBG_G(oplog));
 		PHPDBG_G(oplog) = NULL;
 	}
 
@@ -254,6 +244,18 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		destroy_op_array(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
+	}
+
+	if (PHPDBG_G(oplog_list)) {
+		phpdbg_oplog_list *cur = PHPDBG_G(oplog_list);
+		do {
+			phpdbg_oplog_list *prev = cur->prev;
+			efree(cur);
+			cur = prev;
+		} while (cur != NULL);
+
+		zend_arena_destroy(PHPDBG_G(oplog_arena));
+		PHPDBG_G(oplog_list) = NULL;
 	}
 
 	return SUCCESS;
@@ -276,7 +278,7 @@ static PHP_FUNCTION(phpdbg_exec)
 		zend_stat_t sb;
 		zend_bool result = 1;
 
-		if (VCWD_STAT(exec->val, &sb) != FAILURE) {
+		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
 					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
@@ -284,18 +286,18 @@ static PHP_FUNCTION(phpdbg_exec)
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = estrndup(exec->val, exec->len);
-				PHPDBG_G(exec_len) = exec->len;
+				PHPDBG_G(exec) = estrndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {
 					ZVAL_TRUE(return_value);
 				}
 			} else {
-				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", exec);
+				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", ZSTR_VAL(exec));
 				ZVAL_FALSE(return_value);
 			}
 		} else {
-			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", exec);
+			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", ZSTR_VAL(exec));
 
 			ZVAL_FALSE(return_value);
 		}
@@ -306,19 +308,25 @@ static PHP_FUNCTION(phpdbg_exec)
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
-	if (zend_parse_parameters_none() == FAILURE && EG(current_execute_data)) {
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
+		ex = ex->prev_execute_data;
+	}
+
+	if (zend_parse_parameters_none() == FAILURE || !ex) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1);
+	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_file(string file, integer line) */
 static PHP_FUNCTION(phpdbg_break_file)
 {
-	char    *file = NULL;
-	size_t   flen = 0;
-	long     line;
+	char *file;
+	size_t flen;
+	zend_long line;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &file, &flen, &line) == FAILURE) {
 		return;
@@ -371,9 +379,9 @@ static PHP_FUNCTION(phpdbg_clear)
 /* {{{ proto void phpdbg_color(integer element, string color) */
 static PHP_FUNCTION(phpdbg_color)
 {
-	long element = 0L;
-	char *color = NULL;
-	size_t color_len = 0;
+	zend_long element;
+	char *color;
+	size_t color_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -402,6 +410,275 @@ static PHP_FUNCTION(phpdbg_prompt)
 
 	phpdbg_set_prompt(prompt);
 } /* }}} */
+
+/* {{{ proto void phpdbg_start_oplog() */
+static PHP_FUNCTION(phpdbg_start_oplog)
+{
+	phpdbg_oplog_list *prev;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	prev = PHPDBG_G(oplog_list);
+
+	if (!prev) {
+		PHPDBG_G(oplog_arena) = zend_arena_create(64 * 1024);
+
+		PHPDBG_G(oplog_cur) = ((phpdbg_oplog_entry *) zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry))) + 1;
+		PHPDBG_G(oplog_cur)->next = NULL;
+	}
+
+	PHPDBG_G(oplog_list) = emalloc(sizeof(phpdbg_oplog_list));
+	PHPDBG_G(oplog_list)->prev = prev;
+	PHPDBG_G(oplog_list)->start = PHPDBG_G(oplog_cur);
+}
+
+static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *insert_ht, zend_bool by_opcode) {
+	/* ignore RECV_* opcodes */
+	zend_op *cur = op_array->opcodes + op_array->num_args + !!(op_array->fn_flags & ZEND_ACC_VARIADIC);
+	zend_op *end = op_array->opcodes + op_array->last;
+
+	zend_long insert_idx;
+	zval zero;
+	ZVAL_LONG(&zero, 0);
+
+	/* ignore autogenerated return (well, not too precise with finally branches, but that's okay) */
+	if (op_array->last >= 1 && (((end - 1)->opcode == ZEND_RETURN || (end - 1)->opcode == ZEND_RETURN_BY_REF || (end - 1)->opcode == ZEND_GENERATOR_RETURN)
+	 && ((op_array->last > 1 && ((end - 2)->opcode == ZEND_RETURN || (end - 2)->opcode == ZEND_RETURN_BY_REF || (end - 2)->opcode == ZEND_GENERATOR_RETURN || (end - 2)->opcode == ZEND_THROW))
+	  || op_array->function_name == NULL || (end - 1)->extended_value == -1))) {
+		end--;
+	}
+
+	for (; cur < end; cur++) {
+		if (cur->opcode == ZEND_NOP || cur->opcode == ZEND_OP_DATA || cur->opcode == ZEND_FE_FREE || cur->opcode == ZEND_FREE || cur->opcode == ZEND_ASSERT_CHECK || cur->opcode == ZEND_VERIFY_RETURN_TYPE
+		 || cur->opcode == ZEND_DECLARE_CONST || cur->opcode == ZEND_DECLARE_CLASS || cur->opcode == ZEND_DECLARE_INHERITED_CLASS || cur->opcode == ZEND_DECLARE_FUNCTION
+		 || cur->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED || cur->opcode == ZEND_VERIFY_ABSTRACT_CLASS || cur->opcode == ZEND_ADD_TRAIT || cur->opcode == ZEND_BIND_TRAITS
+		 || cur->opcode == ZEND_DECLARE_ANON_CLASS || cur->opcode == ZEND_DECLARE_ANON_INHERITED_CLASS || cur->opcode == ZEND_FAST_RET || cur->opcode == ZEND_TICKS
+		 || cur->opcode == ZEND_EXT_STMT || cur->opcode == ZEND_EXT_FCALL_BEGIN || cur->opcode == ZEND_EXT_FCALL_END || cur->opcode == ZEND_EXT_NOP || cur->opcode == ZEND_BIND_GLOBAL) {
+			continue;
+		}
+
+		if (by_opcode) {
+			insert_idx = cur - op_array->opcodes;
+		} else {
+			insert_idx = cur->lineno;
+		}
+
+		if (cur->opcode == ZEND_NEW && (cur + 1)->opcode == ZEND_DO_FCALL) {
+			cur++;
+		}
+
+		zend_hash_index_update(insert_ht, insert_idx, &zero);
+	}
+}
+
+static inline HashTable* phpdbg_add_empty_array(HashTable *ht, zend_string *name) {
+	zval *ht_zv = zend_hash_find(ht, name);
+	if (!ht_zv) {
+		zval zv;
+		array_init(&zv);
+		ht_zv = zend_hash_add_new(ht, name, &zv);
+	}
+	return Z_ARR_P(ht_zv);
+}
+
+/* {{{ proto void phpdbg_end_oplog() */
+static PHP_FUNCTION(phpdbg_get_executable)
+{
+	HashTable *options = NULL;
+	zval *option_buffer;
+	zend_bool by_function = 0;
+	zend_bool by_opcode = 0;
+	HashTable *insert_ht;
+
+	zend_function *func;
+	zend_class_entry *ce;
+	zend_string *name;
+	HashTable *files = &PHPDBG_G(file_sources);
+	HashTable files_tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
+		return;
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
+		by_function = zend_is_true(option_buffer);
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("opcodes")))) {
+		if (by_function) {
+			by_opcode = zend_is_true(option_buffer);
+		}
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("files")))) {
+		ZVAL_DEREF(option_buffer);
+		if (Z_TYPE_P(option_buffer) == IS_ARRAY && zend_hash_num_elements(Z_ARR_P(option_buffer)) > 0) {
+			zval *filename;
+
+			files = &files_tmp;
+			zend_hash_init(files, 0, NULL, NULL, 0);
+
+			ZEND_HASH_FOREACH_VAL(Z_ARR_P(option_buffer), filename) {
+				zend_hash_add_empty_element(files, zval_get_string(filename));
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			GC_REFCOUNT(files)++;
+		}
+	} else {
+		GC_REFCOUNT(files)++;
+	}
+
+	array_init(return_value);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+		if (func->type == ZEND_USER_FUNCTION) {
+			if (zend_hash_exists(files, func->op_array.filename)) {
+				insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
+
+				if (by_function) {
+					insert_ht = phpdbg_add_empty_array(insert_ht, name);
+				}
+
+				phpdbg_oplog_fill_executable(&func->op_array, insert_ht, by_opcode);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
+		if (ce->type == ZEND_USER_CLASS) {
+			if (zend_hash_exists(files, ce->info.user.filename)) {
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+					if (func->type == ZEND_USER_FUNCTION) {
+						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
+
+						if (by_function) {
+							zend_string *fn_name = strpprintf(ZSTR_LEN(name) + ZSTR_LEN(func->op_array.function_name) + 2, "%.*s::%.*s", ZSTR_LEN(name), ZSTR_VAL(name), ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
+							insert_ht = phpdbg_add_empty_array(insert_ht, fn_name);
+							zend_string_release(fn_name);
+						}
+
+						phpdbg_oplog_fill_executable(&func->op_array, insert_ht, by_opcode);
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_STR_KEY(files, name) {
+		phpdbg_file_source *source = zend_hash_find_ptr(&PHPDBG_G(file_sources), name);
+		if (source) {
+			phpdbg_oplog_fill_executable(
+				&source->op_array,
+				phpdbg_add_empty_array(Z_ARR_P(return_value), source->op_array.filename),
+				by_opcode);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!--GC_REFCOUNT(files)) {
+		zend_hash_destroy(files);
+	}
+}
+
+/* {{{ proto void phpdbg_end_oplog() */
+static PHP_FUNCTION(phpdbg_end_oplog)
+{
+	phpdbg_oplog_entry *cur;
+	phpdbg_oplog_list *prev;
+
+	HashTable *options = NULL;
+	zval *option_buffer;
+	zend_bool by_function = 0;
+	zend_bool by_opcode = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
+		return;
+	}
+
+	if (!PHPDBG_G(oplog_list)) {
+		zend_error(E_WARNING, "Can not end an oplog without starting it");
+		return;
+	}
+
+	cur = PHPDBG_G(oplog_list)->start;
+	prev = PHPDBG_G(oplog_list)->prev;
+
+	efree(PHPDBG_G(oplog_list));
+	PHPDBG_G(oplog_list) = prev;
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
+		by_function = zend_is_true(option_buffer);
+	}
+
+	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("opcodes")))) {
+		if (by_function) {
+			by_opcode = zend_is_true(option_buffer);
+		}
+	}
+
+	array_init(return_value);
+
+	{
+		zend_string *last_file = NULL;
+		HashTable *file_ht;
+		zend_string *last_function = (void *)~(uintptr_t)0;
+		zend_class_entry *last_scope = NULL;
+
+		HashTable *insert_ht;
+		zend_long insert_idx;
+
+		do {
+			zval zero;
+			ZVAL_LONG(&zero, 0);
+
+			if (cur->filename != last_file) {
+				last_file = cur->filename;
+				file_ht = insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), last_file);
+			}
+
+			if (by_function) {
+				if (cur->function_name == NULL) {
+					if (last_function != NULL) {
+						insert_ht = file_ht;
+					}
+					last_function = NULL;
+				} else if (cur->function_name != last_function || cur->scope != last_scope) {
+					zend_string *fn_name;
+					last_function = cur->function_name;
+					last_scope = cur->scope;
+					if (last_scope == NULL) {
+						fn_name = zend_string_copy(last_function);
+					} else {
+						fn_name = strpprintf(ZSTR_LEN(last_function) + ZSTR_LEN(last_scope->name) + 2, "%.*s::%.*s", ZSTR_LEN(last_scope->name), ZSTR_VAL(last_scope->name), ZSTR_LEN(last_function), ZSTR_VAL(last_function));
+					}
+					insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), fn_name);
+					zend_string_release(fn_name);
+				}
+			}
+
+			if (by_opcode) {
+				insert_idx = cur->op - cur->opcodes;
+			} else {
+				insert_idx = cur->op->lineno;
+			}
+
+			{
+				zval *num = zend_hash_index_find(insert_ht, insert_idx);
+				if (!num) {
+					num = zend_hash_index_add_new(insert_ht, insert_idx, &zero);
+				}
+				Z_LVAL_P(num)++;
+			}
+
+			cur = cur->next;
+		} while (cur != NULL);
+	}
+
+	if (!prev) {
+		zend_arena_destroy(PHPDBG_G(oplog_arena));
+	}
+}
 
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -436,6 +713,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_start_oplog_arginfo, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_end_oplog_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
 	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
@@ -445,6 +733,9 @@ zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_exec,  phpdbg_exec_arginfo)
 	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
 	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
+	PHP_FE(phpdbg_start_oplog, phpdbg_start_oplog_arginfo)
+	PHP_FE(phpdbg_end_oplog, phpdbg_end_oplog_arginfo)
+	PHP_FE(phpdbg_get_executable, phpdbg_get_executable_arginfo)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else
@@ -503,7 +794,7 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 {
 	/*
-	* We must not request TSRM before being boot
+	* We must not request TSRM before being booted
 	*/
 	if (phpdbg_booted) {
 		if (PHPDBG_G(flags) & PHPDBG_IN_EVAL) {
@@ -512,6 +803,10 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 		}
 
 		phpdbg_error("php", "msg=\"%s\"", "%s", message);
+
+		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
+			return;
+		}
 
 		switch (PG(last_error_type)) {
 			case E_ERROR:
@@ -523,7 +818,7 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 				const char *file_char = zend_get_executed_filename();
 				zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
 				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
-				efree(file);
+				zend_string_release(file);
 
 				if (!phpdbg_fully_started) {
 					return;
@@ -548,23 +843,8 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 
 static int php_sapi_phpdbg_deactivate(void) /* {{{ */
 {
-	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) == PHPDBG_IS_CLEANING) {
-		zend_phpdbg_globals *pg = PHPDBG_G(backup) = calloc(1, sizeof(zend_phpdbg_globals));
-
-		php_phpdbg_globals_ctor(pg);
-
-		pg->exec = zend_strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
-		pg->exec_len = PHPDBG_G(exec_len);
-		pg->oplog = PHPDBG_G(oplog);
-		pg->prompt[0] = PHPDBG_G(prompt)[0];
-		pg->prompt[1] = PHPDBG_G(prompt)[1];
-		memcpy(pg->colors, PHPDBG_G(colors), sizeof(pg->colors));
-		pg->eol = PHPDBG_G(eol);
-		pg->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
-	}
-
 	fflush(stdout);
-	if(SG(request_info).argv0) {
+	if (SG(request_info).argv0) {
 		free(SG(request_info).argv0);
 		SG(request_info).argv0 = NULL;
 	}
@@ -636,7 +916,7 @@ static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t co
 			return count;
 		}
 		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
-			phpdbg_script(P_STDERR, "%.*s", (int) count, buf);
+			phpdbg_script_ex(PHPDBG_G(io)[PHPDBG_STDERR].fd, P_STDERR, "%.*s", (int) count, buf);
 			return count;
 		}
 		break;
@@ -645,14 +925,8 @@ static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t co
 	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
 
-#if PHP_VERSION_ID >= 50700
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
-#else
-static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
-{
-#endif
-
 	if (!phpdbg_active_sigsafe_mem()) {
 		fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 	}
@@ -749,12 +1023,12 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	/* phpdbg options */
 	{'q', 0, "no banner"},
 	{'v', 0, "disable quietness"},
-	{'s', 0, "enable stepping"},
 	{'b', 0, "boring colours"},
 	{'i', 1, "specify init"},
 	{'I', 0, "ignore init"},
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
+	{'e', 0, "generate ext_stmt opcodes"},
 	{'E', 0, "step-through-eval"},
 	{'S', 1, "sapi-name"},
 #ifndef _WIN32
@@ -782,7 +1056,6 @@ const char phpdbg_ini_hardcoded[] =
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
 	ZVAL_STRINGL(&tmp, value, sizeof(value) - 1); \
-	Z_SET_REFCOUNT(tmp, 0); \
 	zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
 
 void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
@@ -828,17 +1101,21 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 		}
 	} else {
 		/* set signalled only when not interactive */
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-			if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
-				char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
+		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+			char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
 
-				phpdbg_set_sigsafe_mem(mem);
-				zend_try {
-					phpdbg_force_interruption();
-				} zend_end_try()
-				phpdbg_clear_sigsafe_mem();
-				return;
+			phpdbg_set_sigsafe_mem(mem);
+			zend_try {
+				phpdbg_force_interruption();
+			} zend_end_try()
+			phpdbg_clear_sigsafe_mem();
+
+			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+			if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+				zend_bailout();
 			}
+		} else {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	}
@@ -925,9 +1202,13 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 							phpdbg_force_interruption();
 						} zend_end_try();
 						phpdbg_clear_sigsafe_mem();
-						break;
-					}
-					if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+
+						PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+
+						if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+							zend_bailout();
+						}
+					} else if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 						PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 					}
 					break;
@@ -968,37 +1249,32 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 } /* }}} */
 #endif
 
-static inline zend_mm_heap *phpdbg_mm_get_heap() /* {{{ */
+void phpdbg_sighup_handler(int sig) /* {{{ */
 {
-	zend_mm_heap *mm_heap;
-
-
-	mm_heap = zend_mm_set_heap(NULL);
-	zend_mm_set_heap(mm_heap);
-
-	return mm_heap;
+	exit(0);
 } /* }}} */
 
-void *phpdbg_malloc_wrapper(size_t size) /* {{{ */
+void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
-	return zend_mm_alloc(phpdbg_mm_get_heap(), size);
+	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
-void phpdbg_free_wrapper(void *p) /* {{{ */
+void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
-	zend_mm_heap *heap = phpdbg_mm_get_heap();
+	zend_mm_heap *heap = zend_mm_get_heap();
 	if (UNEXPECTED(heap == p)) {
 		/* TODO: heap maybe allocated by mmap(zend_mm_init) or malloc(USE_ZEND_ALLOC=0) 
 		 * let's prevent it from segfault for now
 		 */
 	} else {
-		zend_mm_free(heap, p);
+		phpdbg_watch_efree(p);
+		return _zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 } /* }}} */
 
-void *phpdbg_realloc_wrapper(void *ptr, size_t size) /* {{{ */
+void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
-	return zend_mm_realloc(phpdbg_mm_get_heap(), ptr, size);
+	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
@@ -1021,8 +1297,8 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = -1;
+	volatile zend_bool quit_immediately = 0; /* somehow some gcc release builds will play a bit around with order in combination with setjmp..., hence volatile */
 	zend_bool remote = 0;
-	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
 	char *bp_tmp = NULL;
 	char *address;
@@ -1031,6 +1307,10 @@ int main(int argc, char **argv) /* {{{ */
 	int socket = -1;
 	FILE* stream = NULL;
 	char *print_opline_func;
+	zend_bool ext_stmt = 0;
+	zend_bool use_mm_wrappers = 0;
+	zend_bool is_exit;
+	int exit_status;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1041,9 +1321,10 @@ int main(int argc, char **argv) /* {{{ */
 	struct sigaction signal_struct;
 	signal_struct.sa_sigaction = phpdbg_signal_handler;
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+	sigemptyset(&signal_struct.sa_mask);
 	sigio_struct.sa_sigaction = phpdbg_sigio_handler;
 	sigio_struct.sa_flags = SA_SIGINFO;
-
+	sigemptyset(&sigio_struct.sa_mask);
 
 	address = strdup("127.0.0.1");
 #endif
@@ -1061,6 +1342,10 @@ int main(int argc, char **argv) /* {{{ */
 	tsrm_ls = ts_resource(0);
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 phpdbg_main:
 	ini_entries = NULL;
 	ini_entries_len = 0;
@@ -1074,11 +1359,12 @@ phpdbg_main:
 	oplog_file = NULL;
 	oplog_file_len = 0;
 	flags = PHPDBG_DEFAULT_FLAGS;
+	is_exit = 0;
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
-	step = 0;
 	sapi_name = NULL;
+	exit_status = 0;
 	if (settings) {
 		exec = settings->exec;
 	}
@@ -1086,7 +1372,9 @@ phpdbg_main:
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
-				phpdbg_startup_run++;
+				if (settings == NULL) {
+					phpdbg_startup_run++;
+				}
 				break;
 			case 'n':
 				ini_ignore = 1;
@@ -1170,8 +1458,8 @@ phpdbg_main:
 				flags &= ~PHPDBG_IS_QUIET;
 			break;
 
-			case 's': /* set stepping on */
-				step = 1;
+			case 'e':
+				ext_stmt = 1;
 			break;
 
 			case 'E': /* stepping through eval on */
@@ -1217,6 +1505,10 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				PHPDBG_G(flags) = 0;
+				/* It ain't gonna proceed to real execution anyway,
+					but the correct descriptor is needed already. */
+				PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+				PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 				phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 				phpdbg_do_help(NULL);
 				sapi_deactivate();
@@ -1245,11 +1537,8 @@ phpdbg_main:
 	}
 
 	/* set exec if present on command line */
-	if (!exec && (argc > php_optind) && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
-		if (strlen(argv[php_optind])) {
-			if (exec) {
-				free(exec);
-			}
+	if (argc > php_optind && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
+		if (!exec && strlen(argv[php_optind])) {
 			exec = strdup(argv[php_optind]);
 		}
 		php_optind++;
@@ -1305,11 +1594,11 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+		zend_mm_heap *mm_heap;
 #ifdef _WIN32
     EXCEPTION_POINTERS *xp;
     __try {
 #endif
-		zend_mm_heap *mm_heap;
 		void* (*_malloc)(size_t);
 		void (*_free)(void*);
 		void* (*_realloc)(void*, size_t);
@@ -1323,12 +1612,13 @@ phpdbg_main:
 #else
 			phpdbg_globals = *settings;
 #endif
+			free(settings);
 		}
 
 		/* setup remote server if necessary */
 		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen);
-				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
+			if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 				exit(0);
 			}
 
@@ -1338,29 +1628,32 @@ phpdbg_main:
 
 			/* set remote flag to stop service shutting down upon quit */
 			remote = 1;
+#ifndef _WIN32
+		} else {
+
+			signal(SIGHUP, phpdbg_sighup_handler);
+#endif
 		}
 
-		mm_heap = phpdbg_mm_get_heap();
+		mm_heap = zend_mm_get_heap();
 		zend_mm_get_custom_handlers(mm_heap, &_malloc, &_free, &_realloc);
 
-		if (!_malloc) {
-			_malloc = phpdbg_malloc_wrapper;
-		}
-		if (!_realloc) {
-			_realloc = phpdbg_realloc_wrapper;
-		}
-		if (!_free) {
-			_free = phpdbg_free_wrapper;
-		}
-
-		zend_activate();
+		use_mm_wrappers = !_malloc && !_realloc && !_free;
 
 		phpdbg_init_list();
 
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
-		zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
+		if (use_mm_wrappers) {
+#if ZEND_DEBUG
+			zend_mm_set_custom_debug_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
+#else
+			zend_mm_set_custom_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
+#endif
+		} else {
+			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
+		}
 
 		phpdbg_setup_watchpoints();
 
@@ -1380,12 +1673,25 @@ phpdbg_main:
 
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
+		if (exec) { /* set execution context */
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec);
+			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
+
+			free(exec);
+			exec = NULL;
+		}
+
 		php_output_activate();
 		php_output_deactivate();
 
+		if (SG(sapi_headers).mimetype) {
+			efree(SG(sapi_headers).mimetype);
+			SG(sapi_headers).mimetype = NULL;
+		}
+
 		php_output_activate();
 
-		if (php_request_startup() == SUCCESS) {
+		{
 			int i;
 
 			SG(request_info).argc = argc - php_optind + 1;
@@ -1393,9 +1699,12 @@ phpdbg_main:
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
-			SG(request_info).argv[i] = exec ? estrdup(exec) : estrdup("");
+			SG(request_info).argv[0] = PHPDBG_G(exec) ? estrdup(PHPDBG_G(exec)) : estrdup("");
+		}
 
-			php_hash_environment();
+		if (php_request_startup() == FAILURE) {
+			PUTS("Could not startup");
+			return 1;
 		}
 
 		/* do not install sigint handlers for remote consoles */
@@ -1410,20 +1719,13 @@ phpdbg_main:
 #endif
 #ifndef _WIN32
 		}
-#endif
 
-		PG(modules_activated) = 0;
-
-#ifndef _WIN32
 		/* setup io here */
 		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
 
 			signal(SIGPIPE, SIG_IGN);
 		}
-#endif
-
-#ifndef _WIN32
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
 		PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
@@ -1454,20 +1756,13 @@ phpdbg_main:
 		php_stream_stdio_ops.write = phpdbg_stdiop_write;
 #endif
 
-		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(exec);
-			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
-
-			free(exec);
-			exec = NULL;
-		}
-
 		if (oplog_file) { /* open oplog */
 			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
 			if (!PHPDBG_G(oplog)) {
 				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
+			oplog_file = NULL;
 		}
 
 		/* set default colors */
@@ -1481,12 +1776,18 @@ phpdbg_main:
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles();
 
+		phpdbg_list_update();
+
 		if (show_banner && cleaning < 2) {
 			/* print blurb */
 			phpdbg_welcome(cleaning == 1);
 		}
 
 		cleaning = -1;
+
+		if (ext_stmt) {
+			CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+		}
 
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
@@ -1509,7 +1810,7 @@ phpdbg_main:
 
 		/* auto compile */
 		if (PHPDBG_G(exec)) {
-			if (settings) {
+			if (settings || phpdbg_startup_run > 0) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			}
 
@@ -1524,15 +1825,12 @@ phpdbg_main:
 			if (PHPDBG_G(ops)) {
 				phpdbg_print_opcodes(print_opline_func);
 			} else {
-				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
+				quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("No opcodes could be compiled | No file specified or compilation failed?\n"));
 			}
 			goto phpdbg_out;
 		}
 
-		/* step from here, not through init */
-		if (step) {
-			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-		}
+		PG(during_request_startup) = 0;
 
 		phpdbg_fully_started = 1;
 
@@ -1540,21 +1838,29 @@ phpdbg_main:
 #ifndef _WIN32
 phpdbg_interact:
 #endif
-
 		/* phpdbg main() */
 		do {
 			zend_try {
 				if (phpdbg_startup_run) {
-					zend_bool quit_immediately = phpdbg_startup_run > 1;
+					quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
-					PHPDBG_COMMAND_HANDLER(run)(NULL);
+					if (quit_immediately) {
+						PHPDBG_G(flags) = (PHPDBG_G(flags) & ~PHPDBG_HAS_PAGINATION) | PHPDBG_IS_INTERACTIVE | PHPDBG_PREVENT_INTERACTIVE;
+					} else {
+						PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
+					}
+					zend_try {
+						PHPDBG_COMMAND_HANDLER(run)(NULL);
+					} zend_end_try();
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
 						EG(bailout) = __orig_bailout; /* reset zend_try */
+						exit_status = EG(exit_status);
 						break;
 					}
 				}
 
+				CG(unclean_shutdown) = 0;
 				phpdbg_interactive(1);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
@@ -1598,16 +1904,6 @@ phpdbg_interact:
 		} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
 
 
-		if (PHPDBG_G(exec) && (PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
-			exec = strdup(PHPDBG_G(exec)); /* preserve exec, don't reparse that from cmd */
-		}
-
-		/* this must be forced */
-		CG(unclean_shutdown) = 0;
-
-		/* this is just helpful */
-		PG(report_memleaks) = 0;
-
 #ifndef _WIN32
 phpdbg_out:
 		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
@@ -1631,22 +1927,12 @@ phpdbg_out:
 		{
 			int i;
 			/* free argv */
-			for (i = SG(request_info).argc; --i;) {
+			for (i = SG(request_info).argc; i--;) {
 				efree(SG(request_info).argv[i]);
 			}
 			efree(SG(request_info).argv);
 		}
 
-#ifndef _WIN32
-		/* reset it... else we risk a stack overflow upon next run (when clean'ing) */
-		php_stream_stdio_ops.write = PHPDBG_G(php_stdiop_write);
-#endif
-
-#ifndef ZTS
-		/* force cleanup of auto and core globals */
-		zend_hash_clean(CG(auto_globals));
-		memset(	&core_globals, 0, sizeof(php_core_globals));
-#endif
 		if (ini_entries) {
 			free(ini_entries);
 		}
@@ -1655,43 +1941,83 @@ phpdbg_out:
 			free(ini_override);
 		}
 
-		/* this must be forced */
-		CG(unclean_shutdown) = 0;
-
-		/* this is just helpful */
-		PG(report_memleaks) = 0;
+		/* In case we aborted during script execution, we may not reset CG(unclean_shutdown) */
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
+			is_exit = !PHPDBG_G(in_execution);
+			CG(unclean_shutdown) = is_exit || PHPDBG_G(unclean_eval);
+		}
 
 		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
 			php_free_shutdown_functions();
 			zend_objects_store_mark_destructed(&EG(objects_store));
 		}
 
-		/* sapi_module.deactivate is where to backup things, last chance before mm_shutdown... */
+		/* backup globals when cleaning */
+		if ((cleaning > 0 || remote) && !quit_immediately) {
+			settings = calloc(1, sizeof(zend_phpdbg_globals));
 
+			php_phpdbg_globals_ctor(settings);
+
+			if (PHPDBG_G(exec)) {
+				settings->exec = zend_strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
+				settings->exec_len = PHPDBG_G(exec_len);
+			}
+			settings->oplog = PHPDBG_G(oplog);
+			settings->prompt[0] = PHPDBG_G(prompt)[0];
+			settings->prompt[1] = PHPDBG_G(prompt)[1];
+			memcpy(settings->colors, PHPDBG_G(colors), sizeof(settings->colors));
+			settings->eol = PHPDBG_G(eol);
+			settings->input_buflen = PHPDBG_G(input_buflen);
+			memcpy(settings->input_buffer, PHPDBG_G(input_buffer), settings->input_buflen);
+			settings->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
+		} else {
+			if (PHPDBG_G(prompt)[0]) {
+				free(PHPDBG_G(prompt)[0]);
+			}
+			if (PHPDBG_G(prompt)[1]) {
+				free(PHPDBG_G(prompt)[1]);
+			}
+		}
+
+		/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
+		if (use_mm_wrappers) {
+			/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
+			*(int *) mm_heap = 0;
+		}
 		zend_try {
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING) {
-			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
-			cleaning++;
+		if (exit_status == 0) {
+			exit_status = EG(exit_status);
 		}
 
-		if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) == PHPDBG_IS_CLEANING) {
-			settings = PHPDBG_G(backup);
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+			if (PHPDBG_G(in_execution) || is_exit) {
+				if (!quit_immediately && !phpdbg_startup_run) {
+					phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+					cleaning++;
+				}
+			}
 		}
-
 		php_output_deactivate();
 
 		zend_try {
 			php_module_shutdown();
 		} zend_end_try();
 
-		sapi_shutdown();
+#ifndef _WIN32
+		/* reset it... else we risk a stack overflow upon next run (when clean'ing) */
+		php_stream_stdio_ops.write = PHPDBG_G(php_stdiop_write);
+#endif
 
+		sapi_shutdown();
 	}
 
-	if (cleaning > 0 || remote) {
+	if ((cleaning > 0 || remote) && !quit_immediately) {
+		/* reset internal php_getopt state */
+		php_getopt(-1, argv, OPTIONS, NULL, &php_optind, 0, 0);
+
 		goto phpdbg_main;
 	}
 
@@ -1710,5 +2036,6 @@ phpdbg_out:
 		free(PHPDBG_G(sapi_name_ptr));
 	}
 
-	return 0;
+	/* usually 0; just for -rr */
+	return exit_status;
 } /* }}} */

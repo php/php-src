@@ -5,13 +5,21 @@ dnl
 PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
 [  --disable-opcache       Disable Zend OPcache support], yes)
 
-PHP_ARG_ENABLE(opcache-file, whether to enable file based caching (experimental),
-[  --enable-opcache-file   Enable file based caching], no)
+PHP_ARG_ENABLE(opcache-file, whether to enable file based caching,
+[  --disable-opcache-file  Disable file based caching], yes)
+
+PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES,
+[  --disable-huge-code-pages
+                          Disable copying PHP CODE pages into HUGE PAGES], yes)
 
 if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_FILE" == "yes"; then
     AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
+  fi
+
+  if test "$PHP_HUGE_CODE_PAGES" == "yes"; then
+    AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
 
   AC_CHECK_FUNC(mprotect,[
@@ -392,7 +400,9 @@ fi
 	Optimizer/block_pass.c \
 	Optimizer/optimize_temp_vars_5.c \
 	Optimizer/nop_removal.c \
-	Optimizer/compact_literals.c,
+	Optimizer/compact_literals.c \
+	Optimizer/zend_cfg.c \
+	Optimizer/zend_dump.c,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)

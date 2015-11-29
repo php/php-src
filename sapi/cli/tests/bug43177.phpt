@@ -13,7 +13,7 @@ php_cli_server_start(<<<'SCRIPT'
 	        case "/parse":
 	                try {
                         eval("this is a parse error");
-                    } catch (ParseException $e) {
+                    } catch (ParseError $e) {
                     }
 					echo "OK\n";
 	                break;

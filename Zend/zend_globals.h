@@ -249,6 +249,12 @@ struct _zend_ini_scanner_globals {
 	int scanner_mode;
 };
 
+typedef enum {
+	ON_TOKEN,
+	ON_FEEDBACK,
+	ON_STOP
+} zend_php_scanner_event;
+
 struct _zend_php_scanner_globals {
 	zend_file_handle *yy_in;
 	zend_file_handle *yy_out;
@@ -278,6 +284,9 @@ struct _zend_php_scanner_globals {
 
 	/* initial string length after scanning to first variable */
 	int scanned_string_len;
+
+	/* hooks */
+	void (* on_event)(zend_php_scanner_event event, int token, int line);
 };
 
 #endif /* ZEND_GLOBALS_H */

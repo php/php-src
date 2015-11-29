@@ -85,18 +85,6 @@
 #include "basic_functions.h"
 #include "php_filestat.h"
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
-#endif
-#ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
-#endif
-#ifndef S_ISLNK
-#define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
-#endif
-
-#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
-
 PHP_RINIT_FUNCTION(filestat) /* {{{ */
 {
 	BG(CurrentStatFile)=NULL;
@@ -1049,35 +1037,35 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		ZVAL_LONG(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in proper order */
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_nlink);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_uid);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_gid);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_dev);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ino);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mode);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_nlink);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_uid);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_gid);
 
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_rdev);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_size);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_atime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mtime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ctime);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blksize);
-		zend_hash_next_index_insert(HASH_OF(return_value), &stat_blocks);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_rdev);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_size);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_atime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mtime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ctime);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blksize);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-		zend_hash_str_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 
 		return;
 	}

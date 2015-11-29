@@ -161,7 +161,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	ut = utext_openUTF8(ut, text->val, text->len, BREAKITER_ERROR_CODE_P(bio));
+	ut = utext_openUTF8(ut, ZSTR_VAL(text), ZSTR_LEN(text), BREAKITER_ERROR_CODE_P(bio));
 	INTL_METHOD_CHECK_STATUS_OR_NULL(bio, "breakiter_set_text: error opening UText");
 
 	bio->biter->setText(ut, BREAKITER_ERROR_CODE(bio));

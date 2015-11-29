@@ -75,6 +75,10 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
 
+#ifdef ZTS
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
 	if (EXPECTED(SIGG(active))) {
 		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
 			if (UNEXPECTED(SIGG(blocked))) {

@@ -17,6 +17,6 @@ array(4) {
   [2]=>
   %s(9) "Directory"
   [3]=>
-  %s(18) "AssertionException"
+  %s(14) "AssertionError"
 }
 ==DONE==

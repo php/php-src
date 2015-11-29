@@ -21,36 +21,36 @@ class myNoRewindIterator extends NoRewindIterator  {}
 
 try {
 	$it = new myFilterIterator();	
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
 	$it = new myCachingIterator();	
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
 	$it = new myRecursiveCachingIterator();	
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
 	$it = new myParentIterator();	
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
 	$it = new myLimitIterator();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
 	$it = new myNoRewindIterator();
-} catch (TypeException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
