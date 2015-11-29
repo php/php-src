@@ -296,8 +296,6 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 } MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE;
 
 
-PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
-
 zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
@@ -318,7 +316,7 @@ enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, zend_bool persistent);
+PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
 PHPAPI void mysqlnd_protocol_payload_decoder_factory_free(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */

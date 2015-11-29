@@ -666,8 +666,8 @@ php_mysqlnd_auth_response_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
-	size_t buf_len = vio->cmd_buffer.buffer? vio->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
-	zend_uchar *buf = vio->cmd_buffer.buffer? (zend_uchar *) vio->cmd_buffer.buffer : local_buf;
+	size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
+	zend_uchar *buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
@@ -792,7 +792,7 @@ php_mysqlnd_change_auth_response_write(void * _packet)
 	MYSQLND_VIO * vio = packet->header.vio;
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	zend_uchar * buffer = vio->cmd_buffer.length >= packet->auth_data_len? vio->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
+	zend_uchar * buffer = pfc->cmd_buffer.length >= packet->auth_data_len? pfc->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
 	zend_uchar * p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
 
 	DBG_ENTER("php_mysqlnd_change_auth_response_write");
@@ -804,7 +804,7 @@ php_mysqlnd_change_auth_response_write(void * _packet)
 
 	{
 		size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
-		if (buffer != vio->cmd_buffer.buffer) {
+		if (buffer != pfc->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
 		if (!sent) {
@@ -841,8 +841,8 @@ php_mysqlnd_ok_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	zend_uchar local_buf[OK_BUFFER_SIZE];
-	size_t buf_len = vio->cmd_buffer.buffer? vio->cmd_buffer.length : OK_BUFFER_SIZE;
-	zend_uchar * buf = vio->cmd_buffer.buffer? (zend_uchar *) vio->cmd_buffer.buffer : local_buf;
+	size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length : OK_BUFFER_SIZE;
+	zend_uchar * buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	zend_ulong net_len;
@@ -938,8 +938,8 @@ php_mysqlnd_eof_read(void * _packet)
 	MYSQLND_VIO * vio = packet->header.vio;
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	size_t buf_len = vio->cmd_buffer.length;
-	zend_uchar * buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
@@ -1045,7 +1045,7 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 	} else {
 		size_t tmp_len = packet->argument.l + 1 + MYSQLND_HEADER_SIZE;
 		zend_uchar *tmp, *p;
-		tmp = (tmp_len > vio->cmd_buffer.length)? mnd_emalloc(tmp_len):vio->cmd_buffer.buffer;
+		tmp = (tmp_len > pfc->cmd_buffer.length)? mnd_emalloc(tmp_len):pfc->cmd_buffer.buffer;
 		if (!tmp) {
 			goto end;
 		}
@@ -1057,7 +1057,7 @@ size_t php_mysqlnd_cmd_write(void * _packet)
 		memcpy(p, packet->argument.s, packet->argument.l);
 
 		sent = pfc->data->m.send(pfc, vio, tmp, tmp_len - MYSQLND_HEADER_SIZE, stats, error_info);
-		if (tmp != vio->cmd_buffer.buffer) {
+		if (tmp != pfc->cmd_buffer.buffer) {
 			MYSQLND_INC_CONN_STATISTIC(stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
 		}
@@ -1098,8 +1098,8 @@ php_mysqlnd_rset_header_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	enum_func_status ret = PASS;
-	size_t buf_len = vio->cmd_buffer.length;
-	zend_uchar * buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	size_t len;
@@ -1243,8 +1243,8 @@ php_mysqlnd_rset_field_read(void * _packet)
 	MYSQLND_VIO * vio = packet->header.vio;
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	size_t buf_len = vio->cmd_buffer.length, total_len = 0;
-	zend_uchar * buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length, total_len = 0;
+	zend_uchar * buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	char *root_ptr;
@@ -1944,8 +1944,8 @@ php_mysqlnd_stats_read(void * _packet)
 	MYSQLND_VIO * vio = packet->header.vio;
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
-	size_t buf_len = vio->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 
 	DBG_ENTER("php_mysqlnd_stats_read");
 
@@ -1994,8 +1994,8 @@ php_mysqlnd_prepare_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	/* In case of an error, we should have place to put it */
-	size_t buf_len = vio->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;
 	unsigned int data_size;
@@ -2089,8 +2089,8 @@ php_mysqlnd_chg_user_read(void * _packet)
 	MYSQLND_STATS * stats = packet->header.stats;
 	MYSQLND_CONNECTION_STATE * connection_state = packet->header.connection_state;
 	/* There could be an error message */
-	size_t buf_len = vio->cmd_buffer.length;
-	zend_uchar *buf = (zend_uchar *) vio->cmd_buffer.buffer;
+	size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar *buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;
 
@@ -2368,7 +2368,7 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 
 /* {{{ mysqlnd_protocol::get_greet_packet */
 static struct st_mysqlnd_packet_greet *
-MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_greet * packet = mnd_pecalloc(1, packet_methods[PROT_GREET_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_greet_packet");
@@ -2391,7 +2391,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECO
 
 /* {{{ mysqlnd_protocol::get_auth_packet */
 static struct st_mysqlnd_packet_auth *
-MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_auth * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_auth_packet");
@@ -2415,7 +2415,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECOD
 
 /* {{{ mysqlnd_protocol::get_auth_response_packet */
 static struct st_mysqlnd_packet_auth_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_auth_response_packet");
@@ -2438,7 +2438,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL_PAYL
 
 /* {{{ mysqlnd_protocol::get_change_auth_response_packet */
 static struct st_mysqlnd_packet_change_auth_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_change_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_CHANGE_AUTH_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_change_auth_response_packet");
@@ -2461,7 +2461,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOC
 
 /* {{{ mysqlnd_protocol::get_ok_packet */
 static struct st_mysqlnd_packet_ok *
-MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_ok * packet = mnd_pecalloc(1, packet_methods[PROT_OK_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_ok_packet");
@@ -2484,7 +2484,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER
 
 /* {{{ mysqlnd_protocol::get_eof_packet */
 static struct st_mysqlnd_packet_eof *
-MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_eof * packet = mnd_pecalloc(1, packet_methods[PROT_EOF_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_eof_packet");
@@ -2507,7 +2507,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODE
 
 /* {{{ mysqlnd_protocol::get_command_packet */
 static struct st_mysqlnd_packet_command *
-MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_command * packet = mnd_pecalloc(1, packet_methods[PROT_CMD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_command_packet");
@@ -2530,7 +2530,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DE
 
 /* {{{ mysqlnd_protocol::get_rset_packet */
 static struct st_mysqlnd_packet_rset_header *
-MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_rset_header * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_HEADER_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_rset_header_packet");
@@ -2553,7 +2553,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOA
 
 /* {{{ mysqlnd_protocol::get_result_field_packet */
 static struct st_mysqlnd_packet_res_field *
-MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_res_field * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_FLD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_result_field_packet");
@@ -2576,7 +2576,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL_PAYLO
 
 /* {{{ mysqlnd_protocol::get_row_packet */
 static struct st_mysqlnd_packet_row *
-MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_row * packet = mnd_pecalloc(1, packet_methods[PROT_ROW_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_row_packet");
@@ -2600,7 +2600,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODE
 
 /* {{{ mysqlnd_protocol::get_stats_packet */
 static struct st_mysqlnd_packet_stats *
-MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_stats * packet = mnd_pecalloc(1, packet_methods[PROT_STATS_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_stats_packet");
@@ -2623,7 +2623,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECO
 
 /* {{{ mysqlnd_protocol::get_prepare_response_packet */
 static struct st_mysqlnd_packet_prepare_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_prepare_response * packet = mnd_pecalloc(1, packet_methods[PROT_PREPARE_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_prepare_response_packet");
@@ -2646,7 +2646,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL_P
 
 /* {{{ mysqlnd_protocol::get_change_user_response_packet */
 static struct st_mysqlnd_packet_chg_user_resp*
-MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_chg_user_resp * packet = mnd_pecalloc(1, packet_methods[PROT_CHG_USER_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_change_user_response_packet");
@@ -2669,7 +2669,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 
 /* {{{ mysqlnd_protocol::get_sha256_pk_request_packet */
 static struct st_mysqlnd_packet_sha256_pk_request *
-MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_sha256_pk_request * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_packet");
@@ -2692,7 +2692,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_
 
 /* {{{ mysqlnd_protocol::get_sha256_pk_request_response_packet */
 static struct st_mysqlnd_packet_sha256_pk_request_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent)
 {
 	struct st_mysqlnd_packet_sha256_pk_request_response * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_response_packet");
@@ -2951,7 +2951,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_protocol_payload_decoder_factory_init */
 PHPAPI MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY *
-mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, zend_bool persistent)
+mysqlnd_protocol_payload_decoder_factory_init(MYSQLND_CONN_DATA * conn, const zend_bool persistent)
 {
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * ret;
 	DBG_ENTER("mysqlnd_protocol_payload_decoder_factory_init");

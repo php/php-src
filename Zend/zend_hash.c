@@ -283,6 +283,40 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 	}
 }
 
+static uint32_t zend_array_recalc_elements(HashTable *ht)
+{
+       zval *val;
+       uint32_t num = ht->nNumOfElements;
+
+	   ZEND_HASH_FOREACH_VAL(ht, val) {
+		   if (Z_TYPE_P(val) == IS_UNDEF) continue;
+		   if (Z_TYPE_P(val) == IS_INDIRECT) {
+			   if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
+				   num--;
+			   }
+		   }
+       } ZEND_HASH_FOREACH_END();
+       return num;
+}
+/* }}} */
+
+ZEND_API uint32_t zend_array_count(HashTable *ht)
+{
+	uint32_t num;
+	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+		num = zend_array_recalc_elements(ht);
+		if (UNEXPECTED(ht->nNumOfElements == num)) {
+			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
+		}
+	} else if (UNEXPECTED(ht == &EG(symbol_table))) {
+		num = zend_array_recalc_elements(ht);
+	} else {
+		num = zend_hash_num_elements(ht);
+	}
+	return num;
+}
+/* }}} */
+
 ZEND_API void ZEND_FASTCALL zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProtection)
 {
 	if (bApplyProtection) {
@@ -1056,6 +1090,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 					} else {
 						ZVAL_UNDEF(data);
 					}
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
@@ -1099,6 +1134,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 						ht->pDestructor(data);
 					}
 					ZVAL_UNDEF(data);
+					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);

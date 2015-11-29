@@ -27,9 +27,11 @@
 #define ZEND_OP1_TYPE(opline)			(opline)->op1_type
 #define ZEND_OP1(opline)				(opline)->op1
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
+#define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
 #define ZEND_OP2_TYPE(opline)			(opline)->op2_type
 #define ZEND_OP2(opline)				(opline)->op2
 #define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
+#define ZEND_OP2_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op2)
 
 #define VAR_NUM(v) EX_VAR_TO_NUM(v)
 #define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)ZEND_CALL_VAR_NUM(0, v))
@@ -39,22 +41,8 @@
 #define INV_COND_EX(op)    ((op) == ZEND_JMPZ    ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 #define INV_EX_COND_EX(op) ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 
-#undef MAKE_NOP
-
-#define MAKE_NOP(opline) do { \
-	(opline)->op1.num = 0; \
-	(opline)->op2.num = 0; \
-	(opline)->result.num = 0; \
-	(opline)->opcode = ZEND_NOP; \
-	(opline)->op1_type =  IS_UNUSED; \
-	(opline)->op2_type = IS_UNUSED; \
-	(opline)->result_type = IS_UNUSED; \
-	 zend_vm_set_opcode_handler(opline); \
-} while (0)
-
-#define RESULT_USED(op)	    (((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
 #define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)
-#define SAME_VAR(op1, op2)  ((((op1 ## _type & IS_VAR) && (op2 ## _type & IS_VAR)) || (op1 ## _type == IS_TMP_VAR && op2 ## _type == IS_TMP_VAR)) && op1.var == op2.var)
+#define SAME_VAR(op1, op2)  (op1 ## _type == op2 ## _type && op1.var == op2.var)
 
 typedef struct _zend_optimizer_ctx {
 	zend_arena             *arena;
@@ -62,38 +50,6 @@ typedef struct _zend_optimizer_ctx {
 	HashTable              *constants;
 	zend_long               optimization_level;
 } zend_optimizer_ctx;
-
-typedef struct _zend_code_block zend_code_block;
-typedef struct _zend_block_source zend_block_source;
-
-struct _zend_code_block {
-	int                 access;
-	zend_op            *start_opline;
-	int                 start_opline_no;
-	int                 len;
-	zend_code_block    *op1_to;
-	zend_code_block    *op2_to;
-	zend_code_block    *ext_to;
-	zend_code_block    *follow_to;
-	zend_code_block    *next;
-	zend_block_source  *sources;
-	zend_bool           protected; /* don't merge this block with others */
-};
-
-typedef struct _zend_cfg {
-	zend_code_block    *blocks;
-	zend_code_block   **try;
-	zend_code_block   **catch;
-	zend_code_block   **live_range_start;
-	zend_code_block   **live_range_end;
-	zend_op           **Tsource;
-	char               *same_t;
-} zend_cfg;
-
-struct _zend_block_source {
-	zend_code_block    *from;
-	zend_block_source  *next;
-};
 
 #define LITERAL_LONG(op, val) do { \
 		zval _c; \

@@ -768,7 +768,7 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
 			return 0;
 		}
 
-		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
+		cnt = zend_array_count(Z_ARRVAL_P(array));
 		if (mode == COUNT_RECURSIVE) {
 		    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
 				Z_ARRVAL_P(array)->u.v.nApplyCount++;
@@ -813,7 +813,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
-			cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
+			cnt = zend_array_count(Z_ARRVAL_P(array));
 			if (mode == COUNT_RECURSIVE) {
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
 					ZVAL_DEREF(element);
@@ -5158,7 +5158,7 @@ PHP_FUNCTION(array_filter)
 		}
 	}
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
 			if (use_type) {
 				/* Set up the key */

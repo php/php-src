@@ -20,6 +20,7 @@
 #include "mysqlnd.h"
 #include "mysqlnd_connection.h"
 #include "mysqlnd_priv.h"
+#include "mysqlnd_read_buffer.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
@@ -183,69 +184,6 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
-/* {{{ php_mysqlnd_read_buffer_is_empty */
-static zend_bool
-php_mysqlnd_read_buffer_is_empty(MYSQLND_READ_BUFFER * buffer)
-{
-	return buffer->len? FALSE:TRUE;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_read */
-static void
-php_mysqlnd_read_buffer_read(MYSQLND_READ_BUFFER * buffer, size_t count, zend_uchar * dest)
-{
-	if (buffer->len >= count) {
-		memcpy(dest, buffer->data + buffer->offset, count);
-		buffer->offset += count;
-		buffer->len -= count;
-	}
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_bytes_left */
-static size_t
-php_mysqlnd_read_buffer_bytes_left(MYSQLND_READ_BUFFER * buffer)
-{
-	return buffer->len;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_read_buffer_free */
-static void
-php_mysqlnd_read_buffer_free(MYSQLND_READ_BUFFER ** buffer)
-{
-	DBG_ENTER("php_mysqlnd_read_buffer_free");
-	if (*buffer) {
-		mnd_efree((*buffer)->data);
-		mnd_efree(*buffer);
-		*buffer = NULL;
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ php_mysqlnd_create_read_buffer */
-static MYSQLND_READ_BUFFER *
-mysqlnd_create_read_buffer(size_t count)
-{
-	MYSQLND_READ_BUFFER * ret = mnd_emalloc(sizeof(MYSQLND_READ_BUFFER));
-	DBG_ENTER("mysqlnd_create_read_buffer");
-	ret->is_empty = php_mysqlnd_read_buffer_is_empty;
-	ret->read = php_mysqlnd_read_buffer_read;
-	ret->bytes_left = php_mysqlnd_read_buffer_bytes_left;
-	ret->free_buffer = php_mysqlnd_read_buffer_free;
-	ret->data = mnd_emalloc(count);
-	ret->size = ret->len = count;
-	ret->offset = 0;
-	DBG_RETURN(ret);
-}
-/* }}} */
-
 
 /* {{{ mysqlnd_pfc::read_compressed_packet_from_stream_and_fill_read_buffer */
 static enum_func_status
@@ -430,6 +368,19 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			}
 			pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
 			break;
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
+			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
+				DBG_RETURN(FAIL);
+			}
+			pfc->cmd_buffer.length = *(unsigned int*) value;
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, pfc->cmd_buffer.length);
+			if (!pfc->cmd_buffer.buffer) {
+				pfc->cmd_buffer.buffer = mnd_pemalloc(pfc->cmd_buffer.length, pfc->persistent);
+			} else {
+				pfc->cmd_buffer.buffer = mnd_perealloc(pfc->cmd_buffer.buffer, pfc->cmd_buffer.length, pfc->persistent);
+			}
+			break;
 		}
 		default:
 			DBG_RETURN(FAIL);
@@ -464,7 +415,13 @@ MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
-	return PASS;
+	unsigned int buf_size;
+	DBG_ENTER("mysqlnd_pfc::init");
+
+	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
+	pfc->data->m.set_client_option(pfc, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size);
+
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
@@ -477,6 +434,12 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 	if (pfc) {
 		pfc->data->m.free_contents(pfc);
 
+		if (pfc->cmd_buffer.buffer) {
+			DBG_INF("Freeing cmd buffer");
+			mnd_pefree(pfc->cmd_buffer.buffer, pfc->persistent);
+			pfc->cmd_buffer.buffer = NULL;
+		}
+
 		mnd_pefree(pfc->data, pfc->data->persistent);
 		mnd_pefree(pfc, pfc->persistent);
 	}
@@ -485,7 +448,7 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 /* }}} */
 
 
-MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_envelope_codec)
+MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_packet_frame_codec)
 	MYSQLND_METHOD(mysqlnd_pfc, init),
 	MYSQLND_METHOD(mysqlnd_pfc, dtor),
 	MYSQLND_METHOD(mysqlnd_pfc, reset),
@@ -510,11 +473,12 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_pfc_init */
 PHPAPI MYSQLND_PFC *
-mysqlnd_pfc_init(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_pfc_init(const zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
+	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_PFC * pfc;
 	DBG_ENTER("mysqlnd_pfc_init");
-	pfc = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_frame_codec(persistent, stats, error_info);
+	pfc = factory->get_protocol_frame_codec(persistent, stats, error_info);
 	DBG_RETURN(pfc);
 }
 /* }}} */

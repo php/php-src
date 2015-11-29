@@ -17,7 +17,7 @@
  */
 
 #include <zend.h>
-#include "zend_smart_str_public.h"
+#include "zend_smart_str.h"
 
 #define SMART_STR_OVERHEAD (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE)
 
@@ -57,5 +57,63 @@ ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 	} else {
 		str->a = SMART_STR_NEW_SIZE(len);
 		str->s = (zend_string *) realloc(str->s, _ZSTR_HEADER_SIZE + str->a + 1);
+	}
+}
+
+/* Windows uses VK_ESCAPE instead of \e */
+#ifndef VK_ESCAPE
+#define VK_ESCAPE '\e'
+#endif
+
+static size_t zend_compute_escaped_string_len(const char *s, size_t l) {
+	size_t i, len = l;
+	for (i = 0; i < l; ++i) {
+		char c = s[i];
+		if (c == '\n' || c == '\r' || c == '\t' ||
+			c == '\f' || c == '\v' || c == '\\' || c == VK_ESCAPE) {
+			len += 1;
+		} else if (c < 32 || c > 126) {
+			len += 3;
+		}
+	}
+	return len;
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
+	char *res;
+	size_t i, len = zend_compute_escaped_string_len(s, l);
+
+	smart_str_alloc(str, len, 0);
+	res = &ZSTR_VAL(str->s)[ZSTR_LEN(str->s)];
+	ZSTR_LEN(str->s) += len;
+
+	for (i = 0; i < l; ++i) {
+		unsigned char c = s[i];
+		if (c < 32 || c == '\\' || c > 126) {
+			*res++ = '\\';
+			switch (c) {
+				case '\n': *res++ = 'n'; break;
+				case '\r': *res++ = 'r'; break;
+				case '\t': *res++ = 't'; break;
+				case '\f': *res++ = 'f'; break;
+				case '\v': *res++ = 'v'; break;
+				case '\\': *res++ = '\\'; break;
+				case VK_ESCAPE: *res++ = 'e'; break;
+				default:
+					*res++ = 'x';
+					if ((c >> 4) < 10) {
+						*res++ = (c >> 4) + '0';
+					} else {
+						*res++ = (c >> 4) + 'A' - 10;
+					}
+					if ((c & 0xf) < 10) {
+						*res++ = (c & 0xf) + '0';
+					} else {
+						*res++ = (c & 0xf) + 'A' - 10;
+					}
+			}
+		} else {
+			*res++ = c;
+		}
 	}
 }

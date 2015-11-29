@@ -153,6 +153,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("static")},
 	{ZEND_STRL("string")},
 	{ZEND_STRL("true")},
+	{ZEND_STRL("void")},
 	{NULL, 0}
 };
 
@@ -196,6 +197,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("float"), IS_DOUBLE},
 	{ZEND_STRL("string"), IS_STRING},
 	{ZEND_STRL("bool"), _IS_BOOL},
+	{ZEND_STRL("void"), IS_VOID},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -2164,6 +2166,11 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
+	/* `return ...;` is illegal in a void function (but `return;` isn't) */
+	if (expr && return_info->type_hint == IS_VOID) {
+		zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+	}
+
 	if (return_info->type_hint != IS_UNDEF) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
 		if (expr && expr->op_type == IS_CONST) {
@@ -4364,7 +4371,9 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		}
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
-		opline->extended_value = get_next_op_number(CG(active_op_array));
+		if (!is_last_catch) {
+			opline->extended_value = get_next_op_number(CG(active_op_array));
+		}
 	}
 
 	for (i = 0; i < catches->children; ++i) {
@@ -4578,6 +4587,11 @@ static void zend_compile_typename(zend_ast *ast, zend_arg_info *arg_info) /* {{{
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
 		if (type != 0) {
+			if (ast->attr != ZEND_NAME_NOT_FQ) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Scalar type declaration '%s' must be unqualified",
+					ZSTR_VAL(zend_string_tolower(class_name)));
+			}
 			arg_info->type_hint = type;
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
@@ -4705,6 +4719,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			arg_info->allow_null = has_null_default;
 
 			zend_compile_typename(type_ast, arg_info);
+
+			if (arg_info->type_hint == IS_VOID) {
+				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+			}
 
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				if (arg_info->type_hint == IS_ARRAY) {
@@ -5825,7 +5843,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		}
 		if (num > 0) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
-				"the very first statement in the script");
+				"the very first statement or after any declare call in the script");
 		}
 	}
 
@@ -7652,10 +7670,13 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 			if (zend_try_compile_const_expr_resolve_class_name(&result, class_ast, name_ast, 0)) {
 				if (Z_TYPE(result) == IS_NULL) {
+					if (zend_get_class_fetch_type(zend_ast_get_str(class_ast)) == ZEND_FETCH_CLASS_SELF) {
+						zend_ast_destroy(ast);
+						*ast_ptr = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C);
+					}
 					return;
-				} else {
-					break;
 				}
+				break;
 			}
 
 			zend_eval_const_expr(&class_ast);

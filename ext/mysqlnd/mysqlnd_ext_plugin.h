@@ -21,16 +21,16 @@
 
 struct st_mysqlnd_plugin__plugin_area_getters
 {
-	void ** (*get_connection_area)(const MYSQLND * conn, unsigned int plugin_id);
-	void ** (*get_connection_data_area)(const MYSQLND_CONN_DATA * conn, unsigned int plugin_id);
-	void ** (*get_result_area)(const MYSQLND_RES * result, unsigned int plugin_id);
-	void ** (*get_unbuffered_area)(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id);
-	void ** (*get_result_buffered_area)(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id);
-	void ** (*get_result_buffered_aread_c)(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id);
-	void ** (*get_stmt_area)(const MYSQLND_STMT * stmt, unsigned int plugin_id);
-	void ** (*get_protocol_decoder_area)(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, unsigned int plugin_id);
-	void ** (*get_ppec_area)(const MYSQLND_PFC * ppec, unsigned int plugin_id);
-	void ** (*get_vio_area)(const MYSQLND_VIO * vio, unsigned int plugin_id);
+	void ** (*get_connection_area)(const MYSQLND * conn, const unsigned int plugin_id);
+	void ** (*get_connection_data_area)(const MYSQLND_CONN_DATA * conn, const unsigned int plugin_id);
+	void ** (*get_result_area)(const MYSQLND_RES * result, const unsigned int plugin_id);
+	void ** (*get_unbuffered_area)(const MYSQLND_RES_UNBUFFERED * result, const unsigned int plugin_id);
+	void ** (*get_result_buffered_area)(const MYSQLND_RES_BUFFERED_ZVAL * result, const unsigned int plugin_id);
+	void ** (*get_result_buffered_aread_c)(const MYSQLND_RES_BUFFERED_C * result, const unsigned int plugin_id);
+	void ** (*get_stmt_area)(const MYSQLND_STMT * stmt, const unsigned int plugin_id);
+	void ** (*get_protocol_decoder_area)(const MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory, const unsigned int plugin_id);
+	void ** (*get_pfc_area)(const MYSQLND_PFC * pfc, const unsigned int plugin_id);
+	void ** (*get_vio_area)(const MYSQLND_VIO * vio, const unsigned int plugin_id);
 };
 
 extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
@@ -43,8 +43,8 @@ extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters
 #define mysqlnd_plugin_get_plugin_result_buffered_data_c(res, p_id)		mysqlnd_plugin_area_getters.get_result_buffered_aread_c((res), (p_id))
 #define mysqlnd_plugin_get_plugin_stmt_data(stmt, p_id)					mysqlnd_plugin_area_getters.get_stmt_area((stmt), (p_id))
 #define mysqlnd_plugin_get_plugin_protocol_data(proto, p_id)			mysqlnd_plugin_area_getters.get_protocol_decoder_area((proto), (p_id))
-#define mysqlnd_plugin_get_plugin_ppec_data(ppec, p_id)					mysqlnd_plugin_area_getters.get_ppec_area((ppec), (p_id))
-#define mysqlnd_plugin_get_plugin_vio_data(vio, p_id)					mysqlnd_plugin_area_getters.get_ppec_area((vio), (p_id))
+#define mysqlnd_plugin_get_plugin_pfc_data(pfc, p_id)					mysqlnd_plugin_area_getters.get_pfc_area((pfc), (p_id))
+#define mysqlnd_plugin_get_plugin_vio_data(vio, p_id)					mysqlnd_plugin_area_getters.get_pfc_area((vio), (p_id))
 
 
 struct st_mysqlnd_plugin_methods_xetters
@@ -97,11 +97,11 @@ struct st_mysqlnd_plugin_methods_xetters
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *methods);
 	} protocol;
 
-	struct st_mnd_ppec_xetters
+	struct st_mnd_pfc_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * (*get)();
-		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_envelope_codec) * methods);
-	} ppec;
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * methods);
+	} pfc;
 
 	struct st_mnd_vio_xetters
 	{
@@ -149,8 +149,8 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 #define mysqlnd_protocol_get_methods()	mysqlnd_plugin_methods_xetters.protocol.get()
 #define mysqlnd_protocol_set_methods(m)	mysqlnd_plugin_methods_xetters.protocol.set((m))
 
-#define mysqlnd_pfc_get_methods()		mysqlnd_plugin_methods_xetters.ppec.get()
-#define mysqlnd_pfc_set_methods(m)		mysqlnd_plugin_methods_xetters.ppec.set((m))
+#define mysqlnd_pfc_get_methods()		mysqlnd_plugin_methods_xetters.pfc.get()
+#define mysqlnd_pfc_set_methods(m)		mysqlnd_plugin_methods_xetters.pfc.set((m))
 
 #define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
 #define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))

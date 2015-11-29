@@ -528,7 +528,10 @@ struct _zend_execute_data {
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
+#define EX_VAR_TO_NUM(n)		((uint32_t)(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0)))
+
+#define ZEND_OPLINE_TO_OFFSET(opline, target) \
+	((char*)(target) - (char*)(opline))
 
 #define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
 	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
@@ -545,6 +548,10 @@ struct _zend_execute_data {
 # define OP_JMP_ADDR(opline, node) \
 	(node).jmp_addr
 
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_addr = (val); \
+	} while (0)
+
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
 		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
@@ -560,6 +567,10 @@ struct _zend_execute_data {
 /* run-time jump target */
 # define OP_JMP_ADDR(opline, node) \
 	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_offset = ZEND_OPLINE_TO_OFFSET(opline, val); \
+	} while (0)
 
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \

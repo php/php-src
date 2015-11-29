@@ -946,6 +946,24 @@ static ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf,
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
+static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
+{
+	const char *fname = ZSTR_VAL(zf->common.function_name);
+	const char *fsep;
+	const char *fclass;
+
+	if (zf->common.scope) {
+		fsep =  "::";
+		fclass = ZSTR_VAL(zf->common.scope->name);
+	} else {
+		fsep =  "";
+		fclass = "";
+	}
+
+	zend_type_error("%s%s%s() must not return a value, %s%s returned",
+		fclass, fsep, fname, returned_msg, returned_kind);
+}
+
 #if ZEND_DEBUG
 static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
@@ -975,6 +993,8 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
+			} else if (ret_info->type_hint == IS_VOID) {
+				zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
 			} else {
 				/* Use strict check to verify return value of internal function */
 				zend_verify_internal_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
@@ -1035,6 +1055,12 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 			} else if (ret_info->type_hint == _IS_BOOL &&
 			           EXPECTED(Z_TYPE_P(ret) == IS_FALSE || Z_TYPE_P(ret) == IS_TRUE)) {
 				/* pass */
+			/* There would be a check here for the IS_VOID type hint, which
+			 * would trigger an error because a value had been returned.
+			 * However, zend_compile.c already does a compile-time check
+			 * that bans `return ...;` within a void function. Thus we can skip
+			 * this part of the runtime check for non-internal functions.
+			 */
 			} else if (UNEXPECTED(!zend_verify_scalar_type_hint(ret_info->type_hint, ret, ZEND_RET_USES_STRICT_TYPES()))) {
 				zend_verify_return_error(zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 			}
@@ -1048,7 +1074,7 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 	char *need_msg;
 	zend_class_entry *ce;
 
-	if (ret_info->type_hint) {
+	if (ret_info->type_hint && EXPECTED(ret_info->type_hint != IS_VOID)) {
 		if (ret_info->class_name) {
 			if (EXPECTED(*cache_slot)) {
 				ce = (zend_class_entry*)*cache_slot;

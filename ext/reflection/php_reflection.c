@@ -3858,6 +3858,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		return;
 	}
+	ZVAL_DEREF(variable_ptr);
 	zval_ptr_dtor(variable_ptr);
 	ZVAL_COPY(variable_ptr, value);
 }

@@ -19,10 +19,6 @@
 #ifndef MYSQLND_STATISTICS_H
 #define MYSQLND_STATISTICS_H
 
-PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
-
-extern const MYSQLND_STRING mysqlnd_stats_values_names[];
-
 #ifdef ZTS
 #define MYSQLND_STATS_LOCK(stats) tsrm_mutex_lock((stats)->LOCK_access)
 #define MYSQLND_STATS_UNLOCK(stats) tsrm_mutex_unlock((stats)->LOCK_access)
@@ -113,49 +109,10 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 
 
-#ifndef MYSQLND_CORE_STATISTICS_DISABLED
-
-#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) \
-	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
-
-#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic) \
-	MYSQLND_DEC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic))
-
-#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2) \
-	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2))
-
-#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic) \
-	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic)); \
-	MYSQLND_INC_STATISTIC(MYSQLND_G(collect_statistics), (conn_stats), (statistic));
-
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value) \
-	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic), (value)); \
-	MYSQLND_INC_STATISTIC_W_VALUE(MYSQLND_G(collect_statistics), (conn_stats), (statistic), (value));
-
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2) \
-	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2)); \
-	MYSQLND_INC_STATISTIC_W_VALUE2(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2));
-
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3) \
-	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), mysqlnd_global_stats, (statistic1), (value1), (statistic2), (value2), (statistic3), (value3)); \
-	MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2), (statistic3), (value3));
-
-#else
-
-#define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
-#define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
-#define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
-#define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn_stats, statistic, value)
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn_stats, statistic1, value1, statistic2, value2)
-#define MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn_stats, statistic1, value1, statistic2, value2, statistic3, value3)
-
-#endif /* MYSQLND_CORE_STATISTICS_DISABLED */
+PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const zend_bool persistent);
+PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, const zend_bool persistent);
 
 PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
-
-PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count, int persistent);
-PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats, int persistent);
 
 PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger);
 PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats);

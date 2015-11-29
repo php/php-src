@@ -318,6 +318,7 @@ struct _zend_ast_ref {
 /* fake types */
 #define _IS_BOOL					13
 #define IS_CALLABLE					14
+#define IS_VOID						18
 
 /* internal types */
 #define IS_INDIRECT             	15
