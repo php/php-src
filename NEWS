@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     paramater default value). (Laruence)
   . Fixed bug #70944 (try{ } finally{} can create infinite chains of
     exceptions). (Laruence)
+  . Fixed bug #70931 (Two errors messages are in conflict). (dams, Laruence)
   . Fixed bug #70899 (buildconf failure in extensions). (Bob, Reeze)
   . Fixed bug #61751 (SAPI build problem on AIX: Undefined symbol:
     php_register_internal_extensions). (Lior Kaplan)
