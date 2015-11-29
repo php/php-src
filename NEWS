@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70967 (Weird error handling for __toString when Error is
+    thrown). (Laruence)
   . Fixed bug #70970 (Segfault when combining error handler with output
 	buffering). (Laruence)
   . Fixed bug #70958 (Invalid opcode while using ::class as trait method
