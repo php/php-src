@@ -2941,6 +2941,7 @@ PHP_METHOD(SoapClient, __call)
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
 			/*zval_add_ref(param);*/
+			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
 		} ZEND_HASH_FOREACH_END();
