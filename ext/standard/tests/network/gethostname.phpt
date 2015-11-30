@@ -14,7 +14,7 @@ var_dump(gethostname());
 var_dump(gethostname("php-zend-brazil"));
 ?>
 --EXPECTF--
-testing-worker-linux-docker-%d-%d-linux-%d
+%s
 
 Warning: gethostname() expects exactly %d parameters, %d given in %s on line %d
 NULL
