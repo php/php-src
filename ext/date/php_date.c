@@ -2195,8 +2195,16 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 	if (!o2->time->sse_uptodate) {
 		timelib_update_ts(o2->time, o2->time->tz_info);
 	}
-	
-	return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
+
+	if (o1->time->sse == o2->time->sse) {
+		if (o1->time->f == o2->time->f) {
+			return 0;
+		}
+
+		return (o1->time->f < o2->time->f) ? -1 : 1;
+	}
+
+	return (o1->time->sse < o2->time->sse) ? -1 : 1;
 }
 
 static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_DC)
