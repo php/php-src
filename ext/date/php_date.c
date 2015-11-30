@@ -2201,7 +2201,11 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 			return 0;
 		}
 
-		return (o1->time->f < o2->time->f) ? -1 : 1;
+		if (o1->time->sse < 0) {
+			return (o1->time->f < o2->time->f) ? 1 : -1;
+		} else {
+			return (o1->time->f < o2->time->f) ? -1 : 1;
+		}
 	}
 
 	return (o1->time->sse < o2->time->sse) ? -1 : 1;
