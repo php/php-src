@@ -3102,8 +3102,8 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
-		}
-		if (!object) {
+			ce = object->ce;
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				/* Allowed for PHP 4 compatibility. */
 				zend_error(
