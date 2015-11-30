@@ -50,6 +50,10 @@ PHP                                                                        NEWS
 - Streams/Socket
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
 
+- Soap:
+  . Fixed bug #70993 (Array key references break argument processing).
+    (Laruence)
+
 26 Nov 2015, PHP 7.0.0 RC 8
 
 - Core:
