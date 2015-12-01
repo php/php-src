@@ -48,6 +48,7 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/php_rand.h" /* for RAND_MAX */
 #include "ext/standard/info.h"
+#include "ext/standard/php_random.h"
 #include "zend_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
@@ -359,11 +360,10 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	efree(buf);
 
 	if (PS(entropy_length) > 0) {
-#ifdef PHP_WIN32
 		unsigned char rbuf[2048];
 		size_t toread = PS(entropy_length);
 
-		if (php_win32_get_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
+		if (php_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
 
 			switch (PS(hash_func)) {
 				case PS_HASH_FUNC_MD5:
@@ -379,37 +379,6 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 # endif /* HAVE_HASH_EXT */
 			}
 		}
-#else
-		int fd;
-
-		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
-		if (fd >= 0) {
-			unsigned char rbuf[2048];
-			int n;
-			int to_read = PS(entropy_length);
-
-			while (to_read > 0) {
-				n = read(fd, rbuf, MIN(to_read, sizeof(rbuf)));
-				if (n <= 0) break;
-
-				switch (PS(hash_func)) {
-					case PS_HASH_FUNC_MD5:
-						PHP_MD5Update(&md5_context, rbuf, n);
-						break;
-					case PS_HASH_FUNC_SHA1:
-						PHP_SHA1Update(&sha1_context, rbuf, n);
-						break;
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-					case PS_HASH_FUNC_OTHER:
-						PS(hash_ops)->hash_update(hash_context, rbuf, n);
-						break;
-#endif /* HAVE_HASH_EXT */
-				}
-				to_read -= n;
-			}
-			close(fd);
-		}
-#endif
 	}
 
 	digest = emalloc(digest_len + 1);
