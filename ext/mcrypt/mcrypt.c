@@ -1354,8 +1354,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	iv = ecalloc(size + 1, 1);
 
 	if (source == RANDOM || source == URANDOM) {
-		BYTE *iv_b = (BYTE *) iv;
-		if (php_random_bytes(iv_b, (size_t) size) == FAILURE){
+		if (php_random_bytes(iv, (size_t) size) == FAILURE){
 			efree(iv);
 			php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 			RETURN_FALSE;
