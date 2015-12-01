@@ -5230,12 +5230,23 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 }
 /* }}} */
 
-static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len, zend_bool *free_iv) /* {{{ */
+static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len,
+		zend_bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode) /* {{{ */
 {
 	char *iv_new;
 
 	/* Best case scenario, user behaved */
 	if (*piv_len == iv_required_len) {
+		return SUCCESS;
+	}
+
+	if (mode->is_aead) {
+		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) != 1) {
+			php_error_docref(NULL, E_WARNING,
+					"Setting of IV length for AEAD mode failed, the expected length is %d bytes",
+					iv_required_len);
+			return FAILURE;
+		}
 		return SUCCESS;
 	}
 
@@ -5250,7 +5261,9 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 	}
 
 	if (*piv_len < iv_required_len) {
-		php_error_docref(NULL, E_WARNING, "IV passed is only %d bytes long, cipher expects an IV of precisely %d bytes, padding with \\0", *piv_len, iv_required_len);
+		php_error_docref(NULL, E_WARNING,
+				"IV passed is only %d bytes long, cipher expects an IV of precisely %d bytes, padding with \\0",
+				*piv_len, iv_required_len);
 		memcpy(iv_new, *piv, *piv_len);
 		*piv_len = iv_required_len;
 		*piv     = iv_new;
@@ -5258,7 +5271,9 @@ static int php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_requir
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "IV passed is %d bytes long which is longer than the %d expected by selected cipher, truncating", *piv_len, iv_required_len);
+	php_error_docref(NULL, E_WARNING,
+			"IV passed is %d bytes long which is longer than the %d expected by selected cipher, truncating",
+			*piv_len, iv_required_len);
 	memcpy(iv_new, *piv, iv_required_len);
 	*piv_len = iv_required_len;
 	*piv     = iv_new;
@@ -5298,11 +5313,11 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		php_error_docref(NULL, E_WARNING,
 				"Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
-	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv) == FAILURE) {
-		return FAILURE;
-	}
 
 	if (!EVP_CipherInit_ex(cipher_ctx, cipher_type, NULL, NULL, NULL, enc)) {
+		return FAILURE;
+	}
+	if (php_openssl_validate_iv(piv, piv_len, max_iv_len, free_iv, cipher_ctx, mode) == FAILURE) {
 		return FAILURE;
 	}
 	if (password_len > key_len) {
