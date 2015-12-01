@@ -26,18 +26,16 @@ var B = FSO.CreateTextFile("configure.bat", true);
 
 var modules = "";
 var MODULES = WScript.CreateObject("Scripting.Dictionary");
-var module_dirs = new Array();
+var module_dirs = [];
 
-function file_get_contents(filename)
-{
+function file_get_contents(filename) {
 	var F = FSO.OpenTextFile(filename, 1);
 	var t = F.ReadAll();
 	F.Close();
 	return t;
 }
 
-function Module_Item(module_name, config_path, dir_line, deps, content)
-{
+function Module_Item(module_name, config_path, dir_line, deps, content) {
 	this.module_name = module_name;
 	this.config_path = config_path;
 	this.dir_line = dir_line;
@@ -45,29 +43,28 @@ function Module_Item(module_name, config_path, dir_line, deps, content)
 	this.content = content;
 }
 
-function find_config_w32(dirname)
-{
+function find_config_w32(dirname) {
 	if (!FSO.FolderExists(dirname)) {
 		return;
 	}
 
 	var f = FSO.GetFolder(dirname);
-	var	fc = new Enumerator(f.SubFolders);
+	var fc = new Enumerator(f.SubFolders);
 	var c, i, ok, n;
 	var item = null;
 	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\)", "gm");
-	
-	for (; !fc.atEnd(); fc.moveNext())
-	{
+
+	for (; !fc.atEnd(); fc.moveNext()) {
 		ok = true;
 		/* check if we already picked up a module with the same dirname;
 		 * if we have, don't include it here */
 		n = FSO.GetFileName(fc.item());
-		
-		if (n == '.svn' || n == 'tests')
+
+		if (n === '.svn' || n === 'tests') {
 			continue;
-			
-	//	WScript.StdOut.WriteLine("checking " + dirname + "/" + n);
+		}
+
+		//	WScript.StdOut.WriteLine("checking " + dirname + "/" + n);
 		if (MODULES.Exists(n)) {
 			WScript.StdOut.WriteLine("Skipping " + dirname + "/" + n + " -- already have a module with that name");
 			continue;
@@ -77,14 +74,14 @@ function find_config_w32(dirname)
 		if (FSO.FileExists(c)) {
 //			WScript.StdOut.WriteLine(c);
 
-			var dir_line = "configure_module_dirname = condense_path(FSO.GetParentFolderName('"
-							   	+ c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
+			var dir_line = "configure_module_dirname = condense_path(FSO.GetParentFolderName('" +
+				c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
 			var contents = file_get_contents(c);
-			var deps = new Array();
+			var deps = [];
 
 			// parse out any deps from the file
 			var calls = contents.match(re_dep_line);
-			if (calls != null) {
+			if (calls !== null) {
 				for (i = 0; i < calls.length; i++) {
 					// now we need the extension name out of this thing
 					if (calls[i].match(re_dep_line)) {
@@ -104,14 +101,11 @@ function find_config_w32(dirname)
 // Emit core modules array.  This is used by a snapshot
 // build to override a default "yes" value so that external
 // modules don't break the build by becoming statically compiled
-function emit_core_module_list()
-{
+function emit_core_module_list() {
 	var module_names = (new VBArray(MODULES.Keys())).toArray();
-	var i, mod_name, j;
-	var item;
-	var output = "";
+	var i, mod_name;
 
-	C.WriteLine("core_module_list = new Array(");
+	C.WriteLine("core_module_list = [");
 
 	// first, look for modules with empty deps; emit those first
 	for (i in module_names) {
@@ -121,18 +115,16 @@ function emit_core_module_list()
 
 	C.WriteLine("false // dummy");
 
-	C.WriteLine(");");
+	C.WriteLine("];");
 }
 
 
-function emit_module(item)
-{
+function emit_module(item) {
 	return item.dir_line + item.content;
 }
 
-function emit_dep_modules(module_names)
-{
-	var i, mod_name, j;
+function emit_dep_modules(module_names) {
+	var i, mod_name;
 	var output = "";
 	var item = null;
 
@@ -152,10 +144,9 @@ function emit_dep_modules(module_names)
 	return output;
 }
 
-function gen_modules()
-{
+function gen_modules() {
 	var module_names = (new VBArray(MODULES.Keys())).toArray();
-	var i, mod_name, j;
+	var i, mod_name;
 	var item;
 	var output = "";
 
@@ -163,7 +154,7 @@ function gen_modules()
 	for (i in module_names) {
 		mod_name = module_names[i];
 		item = MODULES.Item(mod_name);
-		if (item.deps.length == 0) {
+		if (item.deps.length === 0) {
 			MODULES.Remove(mod_name);
 			output += emit_module(item);
 		}
@@ -177,9 +168,9 @@ function gen_modules()
 }
 
 // Process buildconf arguments
-function buildconf_process_args()
-{
-	args = WScript.Arguments;
+function buildconf_process_args() {
+	var i, arg, argname, argval,
+		args = WScript.Arguments;
 
 	for (i = 0; i < args.length; i++) {
 		arg = args(i);
@@ -192,7 +183,7 @@ function buildconf_process_args()
 			argval = null;
 		}
 
-		if (argname == '--add-modules-dir' && argval != null) {
+		if (argname === '--add-modules-dir' && argval !== null) {
 			WScript.StdOut.WriteLine("Adding " + argval + " to the module search path");
 			module_dirs[module_dirs.length] = argval;
 		}
@@ -203,7 +194,7 @@ buildconf_process_args();
 
 // Write the head of the configure script
 C.WriteLine("/* This file automatically generated from win32/build/confutils.js */");
-C.WriteLine("MODE_PHPIZE=false;");
+C.WriteLine("var MODE_PHPIZE = false;");
 C.Write(file_get_contents("win32/build/confutils.js"));
 
 // Pull in code from sapi and extensions
@@ -216,13 +207,13 @@ find_config_w32("ext");
 emit_core_module_list();
 
 // If we have not specified any module dirs let's add some defaults
-if (module_dirs.length == 0) {
+if (module_dirs.length === 0) {
 	find_config_w32("pecl");
 	find_config_w32("..\\pecl");
 	find_config_w32("pecl\\rpc");
 	find_config_w32("..\\pecl\\rpc");
 } else {
-	for (i = 0; i < module_dirs.length; i++) {
+	for (var i = 0; i < module_dirs.length; i++) {
 		find_config_w32(module_dirs[i]);
 	}
 }
@@ -232,10 +223,10 @@ if (module_dirs.length == 0) {
 modules += gen_modules();
 
 // Look for ARG_ENABLE or ARG_WITH calls
-re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");
-calls = modules.match(re);
+var re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");
+var calls = modules.match(re);
 for (i = 0; i < calls.length; i++) {
-	item = calls[i];
+	var item = calls[i];
 	C.WriteLine("try {");
 	C.WriteLine(item);
 	C.WriteLine("} catch (e) {");
