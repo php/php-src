@@ -706,7 +706,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	int fd;
 	char *filename;
 	zend_file_cache_metainfo info;
-#ifndef ZEND_WIN32
+#ifdef HAVE_SYS_UIO_H
 	struct iovec vec[3];
 #endif
 	void *mem, *buf;
@@ -761,7 +761,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
 	info.checksum = zend_adler32(info.checksum, (signed char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
 
-#ifndef ZEND_WIN32
+#ifdef HAVE_SYS_UIO_H
 	vec[0].iov_base = &info;
 	vec[0].iov_len = sizeof(info);
 	vec[1].iov_base = buf;

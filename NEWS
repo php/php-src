@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     by gcov. (Senthil)
 
 - Opcache:
+  . Fixed bug #70991 (zend_file_cache.c:710: error: array type has incomplete
+    element type). (Laruence)
   . Fixed bug #70977 (Segmentation fault with opcache.huge_code_pages=1).
     (Laruence)
 
@@ -47,6 +49,8 @@ PHP                                                                        NEWS
     5.6). (Laruence)
 
 - Standard:
+  . Fixed bug #70999 (php_random_bytes: called object is not a function).
+    (Scott)
   . Fixed bug #70960 (ReflectionFunction for array_unique returns wrong number
     of parameters). (Laruence)
 
