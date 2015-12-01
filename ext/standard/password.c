@@ -31,6 +31,7 @@
 #include "base64.h"
 #include "zend_interfaces.h"
 #include "info.h"
+#include "php_random.h"
 
 #if PHP_WIN32
 #include "win32/winutil.h"
@@ -124,10 +125,10 @@ static int php_password_make_salt(size_t length, char *ret) /* {{{ */
 
 	buffer = (char *) safe_emalloc(raw_length, 1, 1);
 
-	if (php_random_bytes(buffer, raw_length) == FAILURE) {
-		for (i = 0; i < raw_length; i++) {
-			buffer[i] ^= (char) (255.0 * php_rand() / RAND_MAX);
-		}
+	if (FAILURE == php_random_bytes(buffer, raw_length)) {
+		php_error_docref(NULL, E_WARNING, "Unable to generate salt");
+		efree(buffer);
+		return FAILURE;
 	}
 
 	result = safe_emalloc(length, 1, 1);

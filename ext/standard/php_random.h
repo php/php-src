@@ -27,7 +27,7 @@ PHP_FUNCTION(random_int);
 PHP_MINIT_FUNCTION(random);
 PHP_MSHUTDOWN_FUNCTION(random);
 
-PHPAPI extern int php_random_bytes(void *bytes, size_t size);
+PHPAPI int php_random_bytes(void *bytes, size_t size);
 
 typedef struct {
 	int fd;
