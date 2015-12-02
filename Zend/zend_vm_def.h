@@ -800,8 +800,9 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	}
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(*var_ptr == &EG(error_zval))) {
 		if (RETURN_VALUE_USED(opline)) {
-			PZVAL_LOCK(&EG(uninitialized_zval));
-			EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
+			zval *retval = &EX_T(opline->result.var).tmp_var;
+			ZVAL_COPY_VALUE(retval, &EG(uninitialized_zval));
+			zendi_zval_copy_ctor(*retval);
 		}
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
@@ -824,8 +825,9 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
-		PZVAL_LOCK(*var_ptr);
-		EX_T(opline->result.var).var.ptr = *var_ptr;
+		zval *retval = &EX_T(opline->result.var).tmp_var;
+		ZVAL_COPY_VALUE(retval, *var_ptr);
+		zendi_zval_copy_ctor(*retval);
 	}
 
 	FREE_OP1_VAR_PTR();
