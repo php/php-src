@@ -1,5 +1,5 @@
 --TEST--
-string gethostname ( void );
+string gethostname (void);
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
