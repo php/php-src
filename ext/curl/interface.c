@@ -2032,6 +2032,79 @@ PHP_FUNCTION(curl_init)
 }
 /* }}} */
 
+void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
+{
+	if (!Z_ISUNDEF(source->handlers->write->stream)) {
+		Z_ADDREF(source->handlers->write->stream);
+	}
+	ch->handlers->write->stream = source->handlers->write->stream;
+	ch->handlers->write->method = source->handlers->write->method;
+	if (!Z_ISUNDEF(source->handlers->read->stream)) {
+		Z_ADDREF(source->handlers->read->stream);
+	}
+	ch->handlers->read->stream  = source->handlers->read->stream;
+	ch->handlers->read->method  = source->handlers->read->method;
+	ch->handlers->write_header->method = source->handlers->write_header->method;
+	if (!Z_ISUNDEF(source->handlers->write_header->stream)) {
+		Z_ADDREF(source->handlers->write_header->stream);
+	}
+	ch->handlers->write_header->stream = source->handlers->write_header->stream;
+
+	ch->handlers->write->fp = source->handlers->write->fp;
+	ch->handlers->write_header->fp = source->handlers->write_header->fp;
+	ch->handlers->read->fp = source->handlers->read->fp;
+	ch->handlers->read->res = source->handlers->read->res;
+#if CURLOPT_PASSWDDATA != 0
+	if (!Z_ISUNDEF(source->handlers->passwd)) {
+		ZVAL_COPY(&ch->handlers->passwd, &source->handlers->passwd);
+		curl_easy_setopt(source->cp, CURLOPT_PASSWDDATA, (void *) ch);
+	}
+#endif
+	if (!Z_ISUNDEF(source->handlers->write->func_name)) {
+		ZVAL_COPY(&ch->handlers->write->func_name, &source->handlers->write->func_name);
+	}
+	if (!Z_ISUNDEF(source->handlers->read->func_name)) {
+		ZVAL_COPY(&ch->handlers->read->func_name, &source->handlers->read->func_name);
+	}
+	if (!Z_ISUNDEF(source->handlers->write_header->func_name)) {
+		ZVAL_COPY(&ch->handlers->write_header->func_name, &source->handlers->write_header->func_name);
+	}
+
+	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
+	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
+
+	if (source->handlers->progress) {
+		ch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
+		if (!Z_ISUNDEF(source->handlers->progress->func_name)) {
+			ZVAL_COPY(&ch->handlers->progress->func_name, &source->handlers->progress->func_name);
+		}
+		ch->handlers->progress->method = source->handlers->progress->method;
+		curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, (void *) ch);
+	}
+
+#if LIBCURL_VERSION_NUM >= 0x071500
+	if (source->handlers->fnmatch) {
+		ch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
+		if (!Z_ISUNDEF(source->handlers->fnmatch->func_name)) {
+			ZVAL_COPY(&ch->handlers->fnmatch->func_name, &source->handlers->fnmatch->func_name);
+		}
+		ch->handlers->fnmatch->method = source->handlers->fnmatch->method;
+		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
+	}
+#endif
+
+	efree(ch->to_free->slist);
+	efree(ch->to_free);
+	ch->to_free = source->to_free;
+	efree(ch->clone);
+	ch->clone = source->clone;
+
+	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
+	(*source->clone)++;
+}
+
 /* {{{ proto resource curl_copy_handle(resource ch)
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
@@ -2055,79 +2128,11 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 
 	dupch = alloc_curl_handle();
-
 	dupch->cp = cp;
+
+	_php_setup_easy_copy_handlers(dupch, ch);
+
 	Z_ADDREF_P(zid);
-	if (!Z_ISUNDEF(ch->handlers->write->stream)) {
-		Z_ADDREF(ch->handlers->write->stream);
-	}
-	dupch->handlers->write->stream = ch->handlers->write->stream;
-	dupch->handlers->write->method = ch->handlers->write->method;
-	if (!Z_ISUNDEF(ch->handlers->read->stream)) {
-		Z_ADDREF(ch->handlers->read->stream);
-	}
-	dupch->handlers->read->stream  = ch->handlers->read->stream;
-	dupch->handlers->read->method  = ch->handlers->read->method;
-	dupch->handlers->write_header->method = ch->handlers->write_header->method;
-	if (!Z_ISUNDEF(ch->handlers->write_header->stream)) {
-		Z_ADDREF(ch->handlers->write_header->stream);
-	}
-	dupch->handlers->write_header->stream = ch->handlers->write_header->stream;
-
-	dupch->handlers->write->fp = ch->handlers->write->fp;
-	dupch->handlers->write_header->fp = ch->handlers->write_header->fp;
-	dupch->handlers->read->fp = ch->handlers->read->fp;
-	dupch->handlers->read->res = ch->handlers->read->res;
-#if CURLOPT_PASSWDDATA != 0
-	if (!Z_ISUNDEF(ch->handlers->passwd)) {
-		ZVAL_COPY(&dupch->handlers->passwd, &ch->handlers->passwd);
-		curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA, (void *) dupch);
-	}
-#endif
-	if (!Z_ISUNDEF(ch->handlers->write->func_name)) {
-		ZVAL_COPY(&dupch->handlers->write->func_name, &ch->handlers->write->func_name);
-	}
-	if (!Z_ISUNDEF(ch->handlers->read->func_name)) {
-		ZVAL_COPY(&dupch->handlers->read->func_name, &ch->handlers->read->func_name);
-	}
-	if (!Z_ISUNDEF(ch->handlers->write_header->func_name)) {
-		ZVAL_COPY(&dupch->handlers->write_header->func_name, &ch->handlers->write_header->func_name);
-	}
-
-	curl_easy_setopt(dupch->cp, CURLOPT_ERRORBUFFER,       dupch->err.str);
-	curl_easy_setopt(dupch->cp, CURLOPT_FILE,              (void *) dupch);
-	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
-	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
-
-	if (ch->handlers->progress) {
-		dupch->handlers->progress = ecalloc(1, sizeof(php_curl_progress));
-		if (!Z_ISUNDEF(ch->handlers->progress->func_name)) {
-			ZVAL_COPY(&dupch->handlers->progress->func_name, &ch->handlers->progress->func_name);
-		}
-		dupch->handlers->progress->method = ch->handlers->progress->method;
-		curl_easy_setopt(dupch->cp, CURLOPT_PROGRESSDATA, (void *) dupch);
-	}
-
-/* Available since 7.21.0 */
-#if LIBCURL_VERSION_NUM >= 0x071500
-	if (ch->handlers->fnmatch) {
-		dupch->handlers->fnmatch = ecalloc(1, sizeof(php_curl_fnmatch));
-		if (!Z_ISUNDEF(ch->handlers->fnmatch->func_name)) {
-			ZVAL_COPY(&dupch->handlers->fnmatch->func_name, &ch->handlers->fnmatch->func_name);
-		}
-		dupch->handlers->fnmatch->method = ch->handlers->fnmatch->method;
-		curl_easy_setopt(dupch->cp, CURLOPT_FNMATCH_DATA, (void *) dupch);
-	}
-#endif
-
-	efree(dupch->to_free->slist);
-	efree(dupch->to_free);
-	dupch->to_free = ch->to_free;
-	efree(dupch->clone);
-	dupch->clone = ch->clone;
-
-	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
-	(*ch->clone)++;
 
 	ZVAL_RES(return_value, zend_register_resource(dupch, le_curl));
 	dupch->res = Z_RES_P(return_value);

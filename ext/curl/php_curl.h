@@ -209,6 +209,7 @@ typedef struct {
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, int reporterror);
+void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
 void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
