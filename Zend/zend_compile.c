@@ -1185,7 +1185,7 @@ void zend_do_pre_incdec(znode *result, const znode *op1, zend_uchar op TSRMLS_DC
 
 		if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 			last_op->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
-			last_op->result_type = IS_VAR;
+			last_op->result_type = IS_TMP_VAR;
 			last_op->result.var = get_temporary_variable(CG(active_op_array));
 			GET_NODE(result, last_op->result);
 			return;
@@ -1196,7 +1196,7 @@ void zend_do_pre_incdec(znode *result, const znode *op1, zend_uchar op TSRMLS_DC
 	opline->opcode = op;
 	SET_NODE(opline->op1, op1);
 	SET_UNUSED(opline->op2);
-	opline->result_type = IS_VAR;
+	opline->result_type = IS_TMP_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	GET_NODE(result, opline->result);
 }
