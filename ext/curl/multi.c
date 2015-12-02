@@ -135,6 +135,29 @@ static int curl_compare_resources( zval *z1, zval *z2 ) /* {{{ */
 }
 /* }}} */
 
+/* Used to find the php_curl resource for a given curl easy handle */
+static zval *_php_curl_multi_find_easy_handle(php_curlm *mh, CURL *easy) /* {{{ */
+{
+	php_curl 			*tmp_ch;
+	zend_llist_position pos;
+	zval				*pz_ch_temp;
+
+	for(pz_ch_temp = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch_temp;
+		pz_ch_temp = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+
+		if ((tmp_ch = (php_curl *)zend_fetch_resource(Z_RES_P(pz_ch_temp), le_curl_name, le_curl)) == NULL) {
+			return NULL;
+		}
+
+		if (tmp_ch->cp == easy) {
+			return pz_ch_temp;
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
+
 /* {{{ proto int curl_multi_remove_handle(resource mh, resource ch)
    Remove a multi handle from a set of cURL handles */
 PHP_FUNCTION(curl_multi_remove_handle)
@@ -318,35 +341,21 @@ PHP_FUNCTION(curl_multi_info_read)
 
 	/* find the original easy curl handle */
 	{
-		zend_llist_position pos;
-		php_curl *ch;
-		zval	*pz_ch;
+		zval	*pz_ch = _php_curl_multi_find_easy_handle(mh, tmp_msg->easy_handle);
+		if (pz_ch != NULL) {
+			/* we are adding a reference to the underlying php_curl
+			   resource, so we need to add one to the resource's refcount
+			   in order to ensure it doesn't get destroyed when the
+			   underlying curl easy handle goes out of scope.
+			   Normally you would call zval_copy_ctor( pz_ch ), or
+			   SEPARATE_ZVAL, but those create new zvals, which is already
+			   being done in add_assoc_resource */
+			Z_ADDREF_P(pz_ch);
 
-		/* search the list of easy handles hanging off the multi-handle */
-		for(pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
-			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
+			/* add_assoc_resource automatically creates a new zval to
+			   wrap the "resource" represented by the current pz_ch */
 
-			if ((ch = (php_curl *)zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl)) == NULL) {
-				RETURN_FALSE;
-			}
-			if (ch->cp == tmp_msg->easy_handle) {
-
-				/* we are adding a reference to the underlying php_curl
-				   resource, so we need to add one to the resource's refcount
-				   in order to ensure it doesn't get destroyed when the
-				   underlying curl easy handle goes out of scope.
-				   Normally you would call zval_copy_ctor( pz_ch ), or
-				   SEPARATE_ZVAL, but those create new zvals, which is already
-				   being done in add_assoc_resource */
-				Z_ADDREF_P(pz_ch);
-
-				/* add_assoc_resource automatically creates a new zval to
-				   wrap the "resource" represented by the current pz_ch */
-
-				add_assoc_zval(return_value, "handle", pz_ch);
-
-				break;
-			}
+			add_assoc_zval(return_value, "handle", pz_ch);
 		}
 	}
 }
