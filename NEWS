@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     to not be accepted as type name. (Bob)
   . Fixed exception not being thrown immediately into a generator yielding
     from an array. (Bob)
+  . Fixed bug #70987 (static::class within Closure::call() causes segfault).
+    (Andrea)
 
 - CLI server:
   . Fixed bug #71005 (Segfault in php_cli_server_dispatch_router()). (Adam)
