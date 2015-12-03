@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #71006 (symbol referencing errors on Sparc/Solaris). (Dmitry)
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
     context changed). (Dmitry)
   . Fixed bug #70970 (Segfault when combining error handler with output

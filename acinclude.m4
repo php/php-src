@@ -3050,3 +3050,57 @@ AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
 
 ])
+
+dnl PHP_CHECK_BUILTIN_CLZ
+AC_DEFUN([PHP_CHECK_BUILTIN_CLZ], [
+  AC_MSG_CHECKING([for __builtin_clz])
+
+  AC_TRY_LINK(, [
+    return __builtin_clz(1) ? 1 : 0;
+  ], [
+    have_builtin_clz=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_clz=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZ], [$have_builtin_clz], [Whether the compiler supports __builtin_clz])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CTZL
+AC_DEFUN([PHP_CHECK_BUILTIN_CTZL], [
+  AC_MSG_CHECKING([for __builtin_ctzl])
+
+  AC_TRY_LINK(, [
+    return __builtin_ctzl(2L) ? 1 : 0;
+  ], [
+    have_builtin_ctzl=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ctzl=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZL], [$have_builtin_ctzl], [Whether the compiler supports __builtin_ctzl])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CTZLL
+AC_DEFUN([PHP_CHECK_BUILTIN_CTZLL], [
+  AC_MSG_CHECKING([for __builtin_ctzll])
+
+  AC_TRY_LINK(, [
+    return __builtin_ctzll(2LL) ? 1 : 0;
+  ], [
+    have_builtin_ctzll=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_ctzll=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZLL], [$have_builtin_ctzll], [Whether the compiler supports __builtin_ctzll])
+
+])
