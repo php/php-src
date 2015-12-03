@@ -506,9 +506,9 @@ static void zend_mm_munmap(void *addr, size_t size)
 /* number of trailing set (1) bits */
 static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(~bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -545,9 +545,9 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 /* number of trailing zero bits (0x01 -> 1; 0x40 -> 6; 0x00 -> LEN) */
 static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -1161,7 +1161,7 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 /* higher set bit number (0->N/A, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
 static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
-#if defined(__GNUC__) || __has_builtin(__builtin_clz)
+#if (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
 #elif defined(_WIN32)
 	unsigned long index;
