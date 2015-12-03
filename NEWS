@@ -7,7 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
     context changed). (Dmitry)
   . Fixed bug #70970 (Segfault when combining error handler with output
-	buffering). (Laruence)
+    buffering). (Laruence)
   . Fixed bug #70967 (Weird error handling for __toString when Error is
     thrown). (Laruence)
   . Fixed bug #70958 (Invalid opcode while using ::class as trait method
@@ -60,7 +60,7 @@ PHP                                                                        NEWS
   . Fixed bug #70960 (ReflectionFunction for array_unique returns wrong number
     of parameters). (Laruence)
 
-- Streams/Socket
+- Streams/Socket:
   . Add IPV6_V6ONLY constant / make it usable in stream contexts. (Bob)
 
 - Soap:
@@ -155,7 +155,7 @@ PHP                                                                        NEWS
   . Fixed bug #69487 (SAPI may truncate POST data). (cmb)
   . Fixed bug #70198 (Checking liveness does not work as expected).
     (Shafreeck Sea, Anatol Belski)
-  . Fixed bug #70241/#70293 (Skipped assertions affect Generator returns). (Bob)
+  . Fixed bug #70241,#70293 (Skipped assertions affect Generator returns). (Bob)
   . Fixed bug #70239 (Creating a huge array doesn't result in exhausted,
     but segfault). (Laruence, Anatol)
   . Fixed "finally" issues. (Nikita, Dmitry)
@@ -195,7 +195,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #69521 (Segfault in gc_collect_cycles()).
     (arjen at react dot com, Laruence)
-  . Improved zend_string API (Francois Laupretre)
+  . Improved zend_string API. (Francois Laupretre)
   . Fixed bug #69955 (Segfault when trying to combine [] and assign-op on
     ArrayAccess object). (Laruence)
   . Fixed bug #69957 (Different ways of handling div/mod/intdiv). (Bob)
@@ -345,8 +345,8 @@ PHP                                                                        NEWS
     (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
   . Added "v" DateTime format modifier to get the 3-digit version of fraction 
     of seconds. (Mariano Iglesias)
-  . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
-    RFC3339 Extended format which includes fraction of seconds. (Mariano
+  . Implemented FR #69089 (Added DateTime::RFC3339_EXTENDED to output in
+    RFC3339 Extended format which includes fraction of seconds). (Mariano
     Iglesias)
 
 - DBA:
@@ -379,7 +379,7 @@ PHP                                                                        NEWS
     reqeusts). (Laruence)
   . Fixed bug #68945 (Unknown admin values segfault pools). (Laruence)
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
-  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
+  . Implemented FR #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - FTP:
   . Fixed bug #69082 (FTPS support on Windows). (Anatol) 
@@ -528,7 +528,7 @@ PHP                                                                        NEWS
     and WIFCONTINUED). (Matteo)
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
-  . Request #68505 (Added wifcontinued and wcontinued). (xilon-jul)
+  . Implemented FR #68505 (Added wifcontinued and wcontinued). (xilon-jul)
   . Added rusage support to pcntl_wait() and pcntl_waitpid(). (Anton Stepanenko,
     Tony)
 
@@ -544,7 +544,7 @@ PHP                                                                        NEWS
   . Fixed bug #69864 (Segfault in preg_replace_callback). (cmb, ab)
 
 - PDO:
-  . Fix bug #70861 (Segmentation fault in pdo_parse_params() during Drupal 8
+  . Fixed bug #70861 (Segmentation fault in pdo_parse_params() during Drupal 8
     test suite). (Anatol)
   . Fixed bug #70389 (PDO constructor changes unrelated variables). (Laruence)
   . Fixed bug #70272 (Segfault in pdo_mysql). (Laruence)
@@ -657,7 +657,7 @@ PHP                                                                        NEWS
     Allowed modification of iterated ArrayObject using the same behavior
     as proposed in `Fix "foreach" behavior`. Removed "Array was modified
     outside object and internal position is no longer valid" hack. (Dmitry)
-  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
+  . Implemented FR #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
