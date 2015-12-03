@@ -15,4 +15,7 @@ Standard
 Hash
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
 
+PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
