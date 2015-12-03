@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #70960 (ReflectionFunction for array_unique returns wrong number
     of parameters). (Laruence)
 
+- PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+
 26 Nov 2015, PHP 5.6.16
 
 - Core:
