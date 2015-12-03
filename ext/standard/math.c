@@ -146,6 +146,18 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
+	if (mode == PHP_ROUND_DOWN || mode == PHP_ROUND_UP) {
+		f1 = php_intpow10(places);
+		tmp_value = value * f1;
+		if (mode == PHP_ROUND_DOWN) {
+			tmp_value = floor(tmp_value);
+		} else {
+			tmp_value = ceil(tmp_value);
+		}
+		tmp_value = tmp_value / f1;
+		return tmp_value;
+	}
+
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));

@@ -171,4 +171,12 @@ PHP_FUNCTION(atanh);
 #define PHP_ROUND_HALF_ODD       0x04
 #endif
 
+#ifndef PHP_ROUND_UP
+#define PHP_ROUND_UP             0x05    /* Always rounding, up == away from zero */
+#endif
+
+#ifndef PHP_ROUND_DOWN
+#define PHP_ROUND_DOWN           0x06    /* Always rounding, down == towards zero */
+#endif
+
 #endif /* PHP_MATH_H */
