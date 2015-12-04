@@ -287,7 +287,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
@@ -322,7 +332,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_internal_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
