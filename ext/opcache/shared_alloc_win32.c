@@ -22,14 +22,15 @@
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
+#include "php_version.h"
 #include <winbase.h>
 #include <process.h>
 #include <LMCONS.H>
 
-#define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea"
-#define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex"
+#define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea." PHP_VERSION "." ARCHITECTURE
+#define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex." PHP_VERSION "." ARCHITECTURE
 #define ACCEL_FILEMAP_BASE_DEFAULT 0x01000000
-#define ACCEL_FILEMAP_BASE "ZendOPcache.MemoryBase"
+#define ACCEL_FILEMAP_BASE "ZendOPcache.MemoryBase." PHP_VERSION "." ARCHITECTURE
 #define ACCEL_EVENT_SOURCE "Zend OPcache"
 
 static HANDLE memfile = NULL, memory_mutex = NULL;
