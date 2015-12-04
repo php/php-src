@@ -5448,31 +5448,16 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
 		if (variable_ptr != value) {
-			if (Z_ISREF_P(variable_ptr)) {
-				zval garbage;
+			zval garbage;
 
-				ZVAL_COPY_VALUE(&garbage, variable_ptr); /* old value should be destroyed */
+			ZVAL_DEREF(variable_ptr);
+			ZVAL_DEREF(value);
 
-				/* To check: can't *variable_ptr be some system variable like error_zval here? */
-				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
-					zval_copy_ctor(variable_ptr);
-				}
-				zval_dtor(&garbage);
-			} else {
-				zval garbage;
+			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 
-				ZVAL_COPY_VALUE(&garbage, variable_ptr);
-				/* if we assign referenced variable, we should separate it */
-				if (Z_REFCOUNTED_P(value)) {
-					Z_ADDREF_P(value);
-				}
-				if (Z_ISREF_P(value)) {
-					SEPARATE_ZVAL(value);
-				}
-				ZVAL_COPY_VALUE(variable_ptr, value);
-				zval_ptr_dtor(&garbage);
-			}
+			ZVAL_COPY(variable_ptr, value);
+
+			zval_ptr_dtor(&garbage);
 		}
 	} else {
 		const char *class_name, *prop_name;

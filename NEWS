@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   . Fixed stderr being written to stdout. (Bob)
 
 - Reflection:
+  . Fixed bug #71018 (ReflectionProperty::setValue() behavior changed).
+    (Laruence)
   . Fixed bug #70982 (setStaticPropertyValue behaviors inconsistently with
     5.6). (Laruence)
 
