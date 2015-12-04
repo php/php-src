@@ -5341,6 +5341,32 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 }
 /* }}} */
 
+static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
+		EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode,
+		zend_string **poutbuf, int *poutlen, char *data, size_t data_len,
+		char *aad, size_t aad_len, int enc)  /* {{{ */
+{
+	int i = 0;
+
+	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
+
+	if ((!enc || data_len > 0) &&
+			!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
+					&i, (unsigned char *)data, (int)data_len)) {
+		if (mode->is_single_run_aead && !enc) {
+			php_error_docref(NULL, E_WARNING, "Tag verifycation failed");
+		} else {
+			php_error_docref(NULL, E_WARNING, enc ? "Encryption failed" : "Decryption failed");
+		}
+		return FAILURE;
+	}
+
+	*poutlen = i;
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, long $tag_length = 16]]]]])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
@@ -5381,19 +5407,13 @@ PHP_FUNCTION(openssl_encrypt)
 	php_openssl_load_cipher_mode(&mode, cipher_type);
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
-			&password, &password_len, &free_password,
-			&iv, &iv_len, &free_iv, NULL, tag_len, options, 1) == FAILURE) {
+				&password, &password_len, &free_password,
+				&iv, &iv_len, &free_iv, NULL, tag_len, options, 1) == FAILURE ||
+			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
+				data, data_len, aad, aad_len, 1) == FAILURE) {
+		zend_string_release(outbuf);
 		RETVAL_FALSE;
-		goto openssl_encrypt_clean;
-	}
-
-	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
-	outbuf = zend_string_alloc(outlen, 0);
-	if (data_len > 0) {
-		EVP_EncryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
-	}
-	outlen = i;
-	if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		if (options & OPENSSL_RAW_DATA) {
 			ZSTR_VAL(outbuf)[outlen] = '\0';
@@ -5411,7 +5431,6 @@ PHP_FUNCTION(openssl_encrypt)
 		RETVAL_FALSE;
 	}
 
-openssl_encrypt_clean:
 	if (free_password) {
 		efree(password);
 	}
@@ -5479,19 +5498,13 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	if (php_openssl_cipher_init(cipher_type, cipher_ctx, &mode,
-			&password, &password_len, &free_password,
-			&iv, &iv_len, &free_iv, tag, tag_len, options, 0) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Failed to initialize cipher decryption");
+				&password, &password_len, &free_password,
+				&iv, &iv_len, &free_iv, tag, tag_len, options, 0) == FAILURE ||
+			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
+				data, data_len, aad, aad_len, 0) == FAILURE) {
+		zend_string_release(outbuf);
 		RETVAL_FALSE;
-		goto openssl_decrypt_clean;
-	}
-
-	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
-	outbuf = zend_string_alloc(outlen, 0);
-
-	EVP_DecryptUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(outbuf), &i, (unsigned char *)data, (int)data_len);
-	outlen = i;
-	if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
+	} else if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
 		ZSTR_VAL(outbuf)[outlen] = '\0';
 		ZSTR_LEN(outbuf) = outlen;
@@ -5501,7 +5514,6 @@ PHP_FUNCTION(openssl_decrypt)
 		RETVAL_FALSE;
 	}
 
-openssl_decrypt_clean:
 	if (free_password) {
 		efree(password);
 	}
