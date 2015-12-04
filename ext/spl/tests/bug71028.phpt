@@ -14,8 +14,11 @@ cast($b);
 
 var_dump(isset($a[$b]));
 $a[$b] = "okey";
-echo $a[$b];
+var_dump($a[$b]);
+unset($a[$b]);
+var_dump(isset($a[$b]));
 ?>
 --EXPECT--
 bool(true)
-okey
+string(4) "okey"
+bool(false)

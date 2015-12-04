@@ -514,7 +514,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	switch(Z_TYPE_P(offset)) {
+try_again:
+	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern, 0);
 		if (ht->u.v.nApplyCount > 0) {
@@ -574,6 +575,9 @@ num_index:
 			zend_error(E_NOTICE,"Undefined offset: %pd", index);
 		}
 		break;
+	case IS_REFERENCE:
+		ZVAL_DEREF(offset);
+		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return;
