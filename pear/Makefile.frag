@@ -21,7 +21,7 @@ install-pear:
 			cp $(srcdir)/install-pear-nozlib.phar $(builddir)/install-pear-nozlib.phar; \
 		else \
 			if test ! -z "$(WGET)" && test -x "$(WGET)"; then \
-				"$(WGET)" "${PEAR_INSTALLER_URL}" -nd -P $(builddir)/; \
+				"$(WGET)" --no-check-certificate "${PEAR_INSTALLER_URL}" -nd -P $(builddir)/; \
 			elif test ! -z "$(FETCH)" && test -x "$(FETCH)"; then \
 				"$(FETCH)" -o $(builddir)/ "${PEAR_INSTALLER_URL}"; \
 			else \
