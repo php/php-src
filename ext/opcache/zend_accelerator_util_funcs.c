@@ -226,18 +226,19 @@ static zend_ast *zend_ast_clone(zend_ast *ast)
 	}
 }
 
-static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
+static void zend_hash_clone_const_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce)
 {
 	Bucket *p, *q, *end;
 	zend_ulong nIndex;
+	zend_class_constant_info *const_info;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
+	ht->pDestructor = NULL;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
@@ -245,7 +246,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 		return;
 	}
 
-	ZEND_ASSERT((source->u.flags & HASH_FLAG_PACKED) == 0);
+	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -253,6 +254,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+
 		nIndex = p->h | ht->nTableMask;
 
 		/* Insert into hash collision list */
@@ -262,11 +264,17 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 
 		/* Initialize key */
 		q->h = p->h;
+		ZEND_ASSERT(p->key != NULL);
 		q->key = p->key;
 
 		/* Copy data */
-		ZVAL_COPY_VALUE(&q->val, &p->val);
-		zend_clone_zval(&q->val);
+		const_info = ARENA_REALLOC(Z_PTR(p->val));
+		ZVAL_PTR(&q->val, const_info);
+
+		if ((void*)const_info->ce >= ZCG(current_persistent_script)->arena_mem &&
+		    (void*)const_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+			const_info->ce = ARENA_REALLOC(const_info->ce);
+		}
 	}
 }
 
@@ -427,8 +435,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_hash_clone_prop_info(&ce->properties_info, &old_ce->properties_info, old_ce);
 
 	/* constants table */
-	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
-	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+	zend_hash_clone_const_info(&ce->constants_info, &old_ce->constants_info, old_ce);
 
 	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {

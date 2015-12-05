@@ -97,6 +97,16 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void zend_destroy_class_constant_info_internal(zval *zv) /* {{{ */
+{
+	zend_class_constant_info *const_info = Z_PTR_P(zv);
+
+	zend_string_release(const_info->name);
+	free(const_info);
+}
+/* }}} */
+
+
 static zend_string *zend_new_interned_string_safe(zend_string *str) /* {{{ */ {
 	zend_string *interned_str;
 
@@ -1438,26 +1448,31 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 {
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 	zval *c;
-
-	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
-		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
-	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-		if (ce) {
-			c = zend_hash_find(&ce->constants_table, name);
-		} else {
-			return 0;
-		}
-	} else {
-		return 0;
-	}
+	zend_class_entry *ce = NULL;
+	zend_class_constant_info *const_info;
 
 	if (CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION) {
 		return 0;
 	}
 
-	/* Substitute case-sensitive (or lowercase) persistent class constants */
-	if (c && Z_TYPE_P(c) < IS_OBJECT) {
+	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
+		ce = CG(active_class_entry);
+	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
+		ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	}
+
+	if (ce != NULL && (const_info = zend_hash_find_ptr(&ce->constants_info, name)) != NULL) {
+		c = OBJ_CONST_NUM(const_info->ce, const_info->offset);
+
+		if (c == NULL || Z_TYPE_P(c) > IS_OBJECT) {
+			return 0;
+		}
+
+		if (!zend_verify_const_access(const_info, CG(active_class_entry))) {
+			zend_error(E_ERROR, "Cannot access %s const %s::%s", zend_visibility_string(const_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			return 0;
+		}
+
 		ZVAL_DUP(zv, c);
 		return 1;
 	}
@@ -1638,7 +1653,6 @@ again:
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers) /* {{{ */
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
-	dtor_func_t zval_ptr_dtor_func = ((persistent_hashes) ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR);
 
 	ce->refcount = 1;
 	ce->ce_flags = ZEND_ACC_CONSTANTS_UPDATED;
@@ -1649,8 +1663,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
+	ce->constants_table = NULL;
 	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
-	zend_hash_init_ex(&ce->constants_table, 8, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->constants_info, 8, NULL, (persistent_hashes ? zend_destroy_class_constant_info_internal : NULL), persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
@@ -1674,6 +1689,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
+	ce->constants_count = 0;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
@@ -1843,7 +1859,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 {
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
-	
+
 	switch (type & BP_VAR_MASK) {
 		case BP_VAR_R:
 			return;
@@ -2059,7 +2075,7 @@ static void zend_emit_tick(void) /* {{{ */
 	if (CG(active_op_array)->last && CG(active_op_array)->opcodes[CG(active_op_array)->last - 1].opcode == ZEND_TICKS) {
 		return;
 	}
-	
+
 	opline = get_next_op(CG(active_op_array));
 
 	opline->opcode = ZEND_TICKS;
@@ -2417,7 +2433,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
 	}
 
-	if (name_node.op_type == IS_CONST && 
+	if (name_node.op_type == IS_CONST &&
 	    zend_is_auto_global(Z_STR(name_node.u.constant))) {
 
 		opline->extended_value = ZEND_FETCH_GLOBAL;
@@ -4237,7 +4253,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		} else if (expr_node.op_type == IS_CONST
 			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
-		} else {		    
+		} else {
 			opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
 			SET_NODE(opline->result, &case_node);
 			if (opline->op1_type == IS_CONST) {
@@ -4382,7 +4398,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 	if (finally_ast) {
 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
-		
+
 		/* Pop FAST_CALL from unwind stack */
 		zend_stack_del_top(&CG(loop_var_stack));
 
@@ -4616,7 +4632,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
-	
+
 	if (return_type_ast) {
 		/* Use op_array->arg_info[-1] for return type hinting */
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
@@ -4751,7 +4767,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 									"with a float type hint can only be float, integer, or NULL");
 							}
 							break;
-							
+
 						default:
 							if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
@@ -4784,7 +4800,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			} else {
 				opline->op2.num = -1;
 			}
-		}	
+		}
 	}
 
 	/* These are assigned at the end to avoid unitialized memory in case of an error */
@@ -5183,25 +5199,23 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
+		zend_ast *doc_comment_ast = const_ast->child[2];
 		zend_string *name = zend_ast_get_str(name_ast);
+		zend_string *doc_comment = NULL;
 		zval value_zv;
 
-		if (zend_string_equals_literal_ci(name, "class")) {
-			zend_error(E_COMPILE_ERROR,
-				"A class constant must not be called 'class'; it is reserved for class name fetching");
-		}
-
 		zend_const_expr_to_zval(&value_zv, value_ast);
-
 		name = zend_new_interned_string_safe(name);
-		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
+		if (zend_hash_find_ptr(&ce->constants_info, name) != NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
-		if (Z_CONSTANT(value_zv)) {
-			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		if (doc_comment_ast) {
+			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
 		}
+
+		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 	}
 }
 /* }}} */
@@ -6950,7 +6964,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
 		while (i > 1) {
 			get_temporary_variable(CG(active_op_array));
-			i--;			
+			i--;
 		}
 
 		zend_end_live_range(CG(active_op_array), range, opline - CG(active_op_array)->opcodes,

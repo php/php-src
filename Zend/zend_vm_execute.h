@@ -5825,6 +5825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 {
 	zend_class_entry *ce;
 	zval *value;
+	zend_class_constant_info *const_info;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -5866,8 +5867,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+		if (EXPECTED((const_info = zend_hash_find_ptr(&ce->constants_info, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(const_info, EG(scope))) {
+				zend_error(E_ERROR, "Cannot access %s const %s::%s", zend_visibility_string(const_info->flags), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = OBJ_CONST_NUM(const_info->ce, const_info->offset);
 			ZVAL_DEREF(value);
+
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -17547,6 +17554,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 {
 	zend_class_entry *ce;
 	zval *value;
+	zend_class_constant_info *const_info;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -17588,8 +17596,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+		if (EXPECTED((const_info = zend_hash_find_ptr(&ce->constants_info, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(const_info, EG(scope))) {
+				zend_error(E_ERROR, "Cannot access %s const %s::%s", zend_visibility_string(const_info->flags), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = OBJ_CONST_NUM(const_info->ce, const_info->offset);
 			ZVAL_DEREF(value);
+
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -23970,6 +23984,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 {
 	zend_class_entry *ce;
 	zval *value;
+	zend_class_constant_info *const_info;
 	USE_OPLINE
 
 	SAVE_OPLINE();
@@ -24011,8 +24026,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+		if (EXPECTED((const_info = zend_hash_find_ptr(&ce->constants_info, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(const_info, EG(scope))) {
+				zend_error(E_ERROR, "Cannot access %s const %s::%s", zend_visibility_string(const_info->flags), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = OBJ_CONST_NUM(const_info->ce, const_info->offset);
 			ZVAL_DEREF(value);
+
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);

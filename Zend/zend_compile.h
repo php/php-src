@@ -310,6 +310,18 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+typedef struct _zend_class_constant_info {
+	uint32_t offset; /* offset for values in (zend_class_entry*)->constants_table  */
+	uint32_t flags;
+	zend_string *name;
+	zend_string *doc_comment;
+	zend_class_entry *ce;
+} zend_class_constant_info;
+
+
+#define OBJ_CONST_NUM(obj, num) \
+	(&(obj)->constants_table[(num)])
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;

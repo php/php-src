@@ -3848,7 +3848,7 @@ PHP_FUNCTION(constant)
 		return;
 	}
 
-	c = zend_get_constant_ex(const_name, NULL, ZEND_FETCH_CLASS_SILENT);
+	c = zend_get_constant_ex(const_name, NULL, NULL, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
 		ZVAL_COPY_VALUE(return_value, c);
 		if (Z_CONSTANT_P(return_value)) {

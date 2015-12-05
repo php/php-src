@@ -325,9 +325,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				if (ce) {
 					uint32_t tv = ZEND_RESULT(opline).var;
 					zval *c, t;
+					zend_class_constant_info *const_info;
 
-					if ((c = zend_hash_find(&ce->constants_table,
-							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
+					if ((const_info = zend_hash_find_ptr(&ce->constants_info, Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
+						c = OBJ_CONST_NUM(const_info->ce, const_info->offset);
+
 						ZVAL_DEREF(c);
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							break;
