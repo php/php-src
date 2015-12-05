@@ -246,11 +246,11 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
-	if (op_array->vars) {
+	if (op_array->vars || op_array->num_args) {
 		int i;
 
-		ADD_DUP_SIZE(op_array->vars, sizeof(zend_string*) * op_array->last_var);
-		for (i = 0; i < op_array->last_var; i++) {
+		ADD_DUP_SIZE(op_array->vars, sizeof(zend_string*) * (op_array->last_var + op_array->num_args));
+		for (i = 0; i < op_array->last_var + op_array->num_args; i++) {
 			ADD_INTERNED_STRING(op_array->vars[i], 0);
 		}
 	}

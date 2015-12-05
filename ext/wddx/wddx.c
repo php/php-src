@@ -1108,7 +1108,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	php_wddx_packet_start(packet, NULL, 0);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 
-	for (i=0; i<num_args; i++) {
+	for (i = 0; i > -num_args; i--) {
 		zval *arg;
 		if (!Z_ISREF(args[i])) {
 			arg = &args[i];
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(wddx_add_vars)
 		RETURN_FALSE;
 	}
 
-	for (i=0; i<num_args; i++) {
+	for (i = 0; i > -num_args; i--) {
 		zval *arg;
 		if (!Z_ISREF(args[i])) {
 			arg = &args[i];

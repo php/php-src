@@ -383,7 +383,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
 
 	if (op_array->vars) {
-		i = op_array->last_var;
+		i = op_array->last_var + op_array->num_args;
 		while (i > 0) {
 			i--;
 			zend_string_release(op_array->vars[i]);
@@ -599,9 +599,110 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
+static uint32_t zend_resolve_fcall(zend_op_array *op_array, zend_op **opline, uint32_t offset) {
+	uint32_t lr_off = 0, end;
+	uint32_t fcall_Ts, max_fcall_Ts = 0;
+	zend_op *init = *opline;
+	uint32_t num_args = init->extended_value;
+	uint32_t *live_ranges;
+
+	if (init->opcode == ZEND_INCLUDE_OR_EVAL) {
+		init->op1.var = offset;
+		init->op1_type = IS_TMP_VAR;
+		return ZEND_CALL_FRAME_SLOT;
+	}
+
+	live_ranges = emalloc(sizeof(uint32_t) * num_args);
+
+	if (init->opcode == ZEND_INIT_FCALL && init->result.num == 0) {
+		zend_function *fbc = zend_hash_find_ptr(CG(function_table), Z_STR_P(CT_CONSTANT_EX(op_array, init->op2.constant)));
+		ZEND_ASSERT(fbc);
+		if (ZEND_USER_CODE(fbc->type)) {
+			num_args = MAX(num_args, fbc->op_array.num_args);
+		}
+	} else {
+		num_args += ZEND_RESERVED_RECV_SLOTS;
+	}
+
+	if (init->opcode != ZEND_NEW) {
+		/* only one result var per opcode ... can't set object *and* execute_data as result ... maybe find a better solution? */
+		init->result.var = offset + num_args;
+		init->result_type = IS_TMP_VAR;
+	}
+
+	while (1) {
+		switch ((++*opline)->opcode) {
+			case ZEND_NEW:
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_FCALL:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_USER_CALL:
+			case ZEND_INIT_DYNAMIC_CALL:
+			case ZEND_INCLUDE_OR_EVAL:
+				fcall_Ts = zend_resolve_fcall(op_array, opline, offset + num_args + ZEND_CALL_FRAME_SLOT);
+				if (fcall_Ts > max_fcall_Ts) {
+					max_fcall_Ts = fcall_Ts;
+				}
+				break;
+
+			case ZEND_DO_FCALL:
+			case ZEND_DO_ICALL:
+			case ZEND_DO_UCALL:
+			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_DO_UNPACK_FCALL:
+				end = *opline - op_array->opcodes;
+				while (lr_off--) {
+					zend_live_range *range = op_array->live_range + live_ranges[lr_off];
+					if (range->start == end && live_ranges[lr_off] == op_array->last_live_range - 1) {
+						op_array->last_live_range--;
+					} else {
+						range->end = end;
+					}
+				}
+				zend_end_live_range(op_array, (*opline)->op1.num, *opline - op_array->opcodes, ZEND_LIVE_EXECUTE_DATA, offset + num_args);
+				(*opline)->op1_type = IS_TMP_VAR;
+				(*opline)->op1.var = offset + num_args;
+
+				efree(live_ranges);
+				return ZEND_CALL_FRAME_SLOT + num_args + max_fcall_Ts;
+
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_USER:
+				live_ranges[lr_off] = (*opline)->result.num;
+				(*opline)->result.var = num_args - ((*opline)->extended_value & ZEND_ARG_SEND_MASK) + offset;
+				(*opline)->result_type = IS_VAR;
+				op_array->live_range[live_ranges[lr_off]].var = ((*opline)->result.var * sizeof(zval)) | ZEND_LIVE_TMPVAR;
+				lr_off++;
+			case ZEND_SEND_UNPACK:
+			case ZEND_FETCH_FUNC_ARG:
+				(*opline)->op2.var = offset + num_args;
+				(*opline)->op2_type = IS_TMP_VAR;
+				break;
+
+			/* No operands left, using ZEND_OP_DATA here */
+			case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+			case ZEND_FETCH_DIM_FUNC_ARG:
+			case ZEND_FETCH_OBJ_FUNC_ARG:
+				(*opline)++;
+				ZEND_ASSERT((*opline)->opcode == ZEND_OP_DATA);
+				(*opline)->op2.var = offset + num_args;
+				(*opline)->op2_type = IS_TMP_VAR;
+				break;
+		}
+	}
+}
+
 ZEND_API int pass_two(zend_op_array *op_array)
 {
-	zend_op *opline, *end;
+	zend_op *opline, *end, *fcall_end = NULL;
+	uint32_t max_fcall_Ts = 0;
 
 	if (!ZEND_USER_CODE(op_array->type)) {
 		return 0;
@@ -616,8 +717,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	}
 
 	if (CG(context).vars_size != op_array->last_var) {
-		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
-		CG(context).vars_size = op_array->last_var;
+		uint32_t negative_vars = op_array->num_args + ((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0);
+		CG(context).vars_size = op_array->last_var + negative_vars;
+		op_array->vars = (zend_string **) erealloc(op_array->vars, sizeof(zend_string *) * CG(context).vars_size);
 	}
 	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
@@ -641,10 +743,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
-				/* break omitted intentionally */
-			case ZEND_DECLARE_INHERITED_CLASS:
-			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-				opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
 				break;
 			case ZEND_BRK:
 			case ZEND_CONT:
@@ -684,7 +782,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
-			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
@@ -715,6 +812,25 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_NEW:
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+			case ZEND_INIT_FCALL_BY_NAME:
+			case ZEND_INIT_FCALL:
+			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_METHOD_CALL:
+			case ZEND_INIT_STATIC_METHOD_CALL:
+			case ZEND_INIT_USER_CALL:
+			case ZEND_INIT_DYNAMIC_CALL:
+			case ZEND_INCLUDE_OR_EVAL:
+				if (opline > fcall_end) {
+					uint32_t fcall_Ts;
+					fcall_end = opline;
+					fcall_Ts = zend_resolve_fcall(op_array, &fcall_end, op_array->T);
+					if (max_fcall_Ts < fcall_Ts) {
+						max_fcall_Ts = fcall_Ts;
+					}
+				}
+				break;
 		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
@@ -729,9 +845,15 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
 		}
+		if ((zend_get_opcode_flags(opline->opcode) & ZEND_VM_EXT_MASK) == ZEND_VM_EXT_VAR) {
+			opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
+		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
+
+	op_array->T += max_fcall_Ts;
+	op_array->stack_size = (uint32_t)(zend_intptr_t)(((zval *) NULL) + (ZEND_CALL_FRAME_SLOT + op_array->T + op_array->last_var));
 
 	if (op_array->live_range) {
 		uint32_t i;

@@ -147,7 +147,7 @@ ZEND_METHOD(Closure, call)
 
 	fci.retval = &closure_result;
 	fci.params = my_params;
-	fci.param_count = my_param_count;
+	fci.param_count = -my_param_count;
 	fci.object = fci_cache.object = newobj;
 	fci_cache.initialized = 1;
 	fci_cache.called_scope = Z_OBJCE_P(newthis);
@@ -277,6 +277,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
 	invoke->internal_function.function_name = zend_string_init(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1, 0);
+	invoke->internal_function.stack_size = ZEND_CALL_FRAME_SLOT * sizeof(zval);
 	return invoke;
 }
 /* }}} */

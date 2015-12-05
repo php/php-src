@@ -47,16 +47,12 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 		/* There may be calls to zend_vm_stack_free_call_frame(), which modifies the VM stack
 		 * globals, so need to load/restore those. */
 		zend_vm_stack original_stack = EG(vm_stack);
-		original_stack->top = EG(vm_stack_top);
-		EG(vm_stack_top) = generator->stack->top;
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
 
 		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
 
 		generator->stack = EG(vm_stack);
-		generator->stack->top = EG(vm_stack_top);
-		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
 	}
@@ -90,7 +86,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			return;
 		}
 
-		zend_vm_stack_free_extra_args(generator->execute_data);
+		zend_free_args_user(generator->execute_data);
 
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
@@ -226,8 +222,6 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	zend_execute_data *execute_data;
 	zend_vm_stack current_stack = EG(vm_stack);
 
-	current_stack->top = EG(vm_stack_top);
-
 	/* Create new execution context. We have to back up and restore  EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
 	execute_data = zend_create_generator_execute_data(call, op_array, return_value);
@@ -243,8 +237,6 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	generator = (zend_generator *) Z_OBJ_P(return_value);
 	generator->execute_data = execute_data;
 	generator->stack = EG(vm_stack);
-	generator->stack->top = EG(vm_stack_top);
-	EG(vm_stack_top) = current_stack->top;
 	EG(vm_stack_end) = current_stack->end;
 	EG(vm_stack) = current_stack;
 
@@ -657,12 +649,10 @@ try_again:
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(vm_stack);
-		original_stack->top = EG(vm_stack_top);
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(scope) = generator->execute_data->func->common.scope;
-		EG(vm_stack_top) = generator->stack->top;
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
 
@@ -683,16 +673,14 @@ try_again:
 		zend_execute_ex(generator->execute_data);
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
-		/* Unlink generator call_frame from the caller and backup vm_stack_top */
+		/* Unlink generator call_frame from the caller and backup vm_stack */
 		if (EXPECTED(generator->execute_data)) {
 			generator->stack = EG(vm_stack);
-			generator->stack->top = EG(vm_stack_top);
 		}
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
-		EG(vm_stack_top) = original_stack->top;
 		EG(vm_stack_end) = original_stack->end;
 		EG(vm_stack) = original_stack;
 

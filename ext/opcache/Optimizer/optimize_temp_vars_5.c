@@ -39,10 +39,45 @@
 		max = i;							\
 	}
 
+/* we need to handle the fcall ops separately as they need to be always at the end of the op array */
+#define IS_FCALL_OP1_TMP(opcode) \
+	  (opcode == ZEND_DO_FCALL \
+	|| opcode == ZEND_DO_ICALL \
+	|| opcode == ZEND_DO_UCALL \
+	|| opcode == ZEND_DO_FCALL_BY_NAME \
+	|| opcode == ZEND_DO_UNPACK_FCALL \
+	|| opcode == ZEND_INCLUDE_OR_EVAL)
+#define IS_SEND_OPCODE(opcode) \
+	  (opcode == ZEND_SEND_VAL \
+	|| opcode == ZEND_SEND_VAR_EX \
+	|| opcode == ZEND_SEND_REF \
+	|| opcode == ZEND_SEND_VAR_NO_REF \
+	|| opcode == ZEND_SEND_VAL_EX \
+	|| opcode == ZEND_SEND_VAR \
+	|| opcode == ZEND_SEND_USER)
+#define IS_FCALL_OP2_TMP(opcode) \
+	  (IS_SEND_OPCODE(opcode) \
+	|| opcode == ZEND_SEND_UNPACK \
+	|| opcode == ZEND_FETCH_FUNC_ARG)
+#define IS_FCALL_RESULT_TMP(opcode) \
+	  (IS_SEND_OPCODE(opcode) \
+	|| opcode == ZEND_INIT_FCALL_BY_NAME \
+	|| opcode == ZEND_INIT_FCALL \
+	|| opcode == ZEND_INIT_NS_FCALL_BY_NAME \
+	|| opcode == ZEND_INIT_METHOD_CALL \
+	|| opcode == ZEND_INIT_STATIC_METHOD_CALL \
+	|| opcode == ZEND_INIT_USER_CALL \
+	|| opcode == ZEND_INIT_DYNAMIC_CALL)
+#define IS_FUNC_ARG_OP_DATA(opcode) \
+	  (opcode == ZEND_FETCH_DIM_FUNC_ARG \
+	|| opcode == ZEND_FETCH_OBJ_FUNC_ARG \
+	|| opcode == ZEND_FETCH_STATIC_PROP_FUNC_ARG)
+
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
 	int offset = op_array->last_var;
+	int max = -1, max_old = -1, max_diff;
 	uint32_t bitset_len;
 	zend_bitset taken_T;	/* T index in use */
 	zend_op **start_of_T;	/* opline where T is first used */
@@ -51,7 +86,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	zend_op *opline, *end;
 	int currT;
 	int i;
-	int max = -1;
 	int var_to_free = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
@@ -79,8 +113,11 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
     opline = &op_array->opcodes[op_array->last - 1];
 
     while (opline >= end) {
-		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
+		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && !IS_FCALL_OP1_TMP(opline->opcode)) {
 			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
+			if (currT > max_old) {
+				max_old = currT;
+			}
 			if (opline->opcode == ZEND_ROPE_END) {
 				int num = (((opline->extended_value + 1) * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
 				int var;
@@ -141,13 +178,16 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 
 		/* Skip OP_DATA */
 		if (opline->opcode == ZEND_OP_DATA &&
-		    (opline-1)->opcode == ZEND_ASSIGN_DIM) {
+		    ((opline-1)->opcode == ZEND_ASSIGN_DIM || IS_FUNC_ARG_OP_DATA((opline-1)->opcode))) {
 		    opline--;
 		    continue;
 		}
 
-		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
+		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && !IS_FCALL_OP2_TMP(opline->opcode)) {
 			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
+			if (currT > max_old) {
+				max_old = currT;
+			}
 			if (!zend_bitset_in(valid_T, currT)) {
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
@@ -181,8 +221,11 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 			var_to_free = i;
 		}
 
-		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
+		if ((ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) && !IS_FCALL_RESULT_TMP(opline->opcode)) {
 			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
+			if (currT > max_old) {
+				max_old = currT;
+			}
 			if (zend_bitset_in(valid_T, currT)) {
 				if (start_of_T[currT] == opline) {
 					/* ZEND_FAST_CALL can not share temporary var with others
@@ -224,6 +267,23 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		opline--;
 	}
 
+	max_diff = max_old - max;
+
+	for (opline = &op_array->opcodes[op_array->last - 1]; opline >= end; opline--) {
+		if (IS_FCALL_OP1_TMP(opline->opcode)) {
+			map_T[VAR_NUM(opline->op1.var) - offset] = VAR_NUM(opline->op1.var) - offset - max_diff;
+			opline->op1.var -= max_diff * sizeof(zval);
+		}
+		if (IS_FCALL_OP2_TMP(opline->opcode) || (opline->opcode == ZEND_OP_DATA && IS_FUNC_ARG_OP_DATA((opline-1)->opcode))) {
+			map_T[VAR_NUM(opline->op2.var) - offset] = VAR_NUM(opline->op2.var) - offset - max_diff;
+			opline->op2.var -= max_diff * sizeof(zval);
+		}
+		if (IS_FCALL_RESULT_TMP(opline->opcode)) {
+			map_T[VAR_NUM(opline->result.var) - offset] = VAR_NUM(opline->result.var) - offset - max_diff;
+			opline->result.var -= max_diff * sizeof(zval);
+		}
+	}
+
 	if (op_array->live_range) {
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =
@@ -233,5 +293,6 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
-	op_array->T = max + 1;
+	op_array->T -= max_diff;
+	op_array->stack_size -= max_diff * sizeof(zval);
 }

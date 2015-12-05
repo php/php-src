@@ -110,7 +110,6 @@ static void zend_collect_args_info(zend_call_info *call_info)
 					call_info->arg_info[num].opline = opline;
 				}
 				break;
-			case ZEND_SEND_ARRAY:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_UNPACK:
 				// ???
@@ -129,6 +128,7 @@ static void zend_collect_args_info(zend_call_info *call_info)
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_DO_UNPACK_FCALL:
 				level--;
 				break;
 		}
@@ -190,6 +190,7 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 			case ZEND_DO_FCALL:
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
+			case ZEND_DO_UNPACK_FCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 				func_info->flags |= ZEND_FUNC_HAS_CALLS;
 				call--;

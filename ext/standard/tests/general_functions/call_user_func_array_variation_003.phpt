@@ -109,102 +109,102 @@ foreach($inputs as $key =>$value) {
 *** Testing call_user_func_array() : usage variation ***
 
 --int 0--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, integer given, %s(%d)
 NULL
 
 --int 1--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, integer given, %s(%d)
 NULL
 
 --int 12345--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, integer given, %s(%d)
 NULL
 
 --int -12345--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, integer given, %s(%d)
 NULL
 
 --float 10.5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, float given, %s(%d)
 NULL
 
 --float -10.5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, float given, %s(%d)
 NULL
 
 --float 12.3456789000e10--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, float given, %s(%d)
 NULL
 
 --float -12.3456789000e10--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, float given, %s(%d)
 NULL
 
 --float .5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, float given, %s(%d)
 NULL
 
 --uppercase NULL--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, null given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, null given, %s(%d)
 NULL
 
 --lowercase null--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, null given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, null given, %s(%d)
 NULL
 
 --lowercase true--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, boolean given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, boolean given, %s(%d)
 NULL
 
 --lowercase false--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, boolean given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, boolean given, %s(%d)
 NULL
 
 --uppercase TRUE--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, boolean given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, boolean given, %s(%d)
 NULL
 
 --uppercase FALSE--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, boolean given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, boolean given, %s(%d)
 NULL
 
 --empty string DQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, string given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, object given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, object of type classWithToString given, %s(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, object given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, object of type classWithoutToString given, %s(%d)
 NULL
 
 --undefined var--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, null given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, null given, %s(%d)
 NULL
 
 --unset var--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, null given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array or Traversable, null given, %s(%d)
 NULL
 ===DONE===

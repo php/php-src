@@ -16,19 +16,19 @@ test(1, 2, 3, ...new StdClass, ...3.14, ...[4, 5]);
 
 ?>
 --EXPECTF--
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 1 requires array or Traversable, null given in %s on line %d
 array(0) {
 }
 
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 1 requires array or Traversable, integer given in %s on line %d
 array(0) {
 }
 
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 1 requires array or Traversable, object of type stdClass given in %s on line %d
 array(0) {
 }
 
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 4 requires array or Traversable, string given in %s on line %d
 array(5) {
   [0]=>
   int(1)
@@ -42,9 +42,9 @@ array(5) {
   int(5)
 }
 
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 4 requires array or Traversable, object of type stdClass given in %s on line %d
 
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
+Warning: Argument unpacking at parameter 4 requires array or Traversable, float given in %s on line %d
 array(5) {
   [0]=>
   int(1)

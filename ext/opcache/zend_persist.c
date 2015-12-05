@@ -645,15 +645,15 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
-	if (op_array->vars) {
+	if (op_array->vars || op_array->num_args) {
 		if (already_stored) {
 			persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->vars);
 			ZEND_ASSERT(persist_ptr != NULL);
 			op_array->vars = (zend_string**)persist_ptr;
 		} else {
 			int i;
-			zend_accel_store(op_array->vars, sizeof(zend_string*) * op_array->last_var);
-			for (i = 0; i < op_array->last_var; i++) {
+			zend_accel_store(op_array->vars, sizeof(zend_string*) * (op_array->num_args + op_array->last_var));
+			for (i = 0; i < op_array->last_var + op_array->num_args; i++) {
 				zend_accel_store_interned_string(op_array->vars[i]);
 			}
 		}

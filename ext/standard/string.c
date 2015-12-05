@@ -4499,7 +4499,7 @@ PHP_FUNCTION(setlocale)
 				break;
 			}
 		} else {
-			plocale = &args[i];
+			plocale = &args[-i];
 		}
 
 		loc = zval_get_string(plocale);

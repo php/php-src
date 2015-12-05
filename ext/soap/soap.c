@@ -93,7 +93,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	zend_bool _old_in_compilation = CG(in_compilation); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
-	zval *_old_stack_top = EG(vm_stack_top); \
+	zend_vm_stack _old_stack = EG(vm_stack); \
 	int _bailout = 0;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
@@ -108,17 +108,12 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		    !instanceof_function(EG(exception)->ce, soap_fault_class_entry)) {\
 			_bailout = 1;\
 		}\
-		if (_old_stack_top != EG(vm_stack_top)) { \
-			while (EG(vm_stack)->prev != NULL && \
-			       ((char*)_old_stack_top < (char*)EG(vm_stack) || \
-			        (char*) _old_stack_top > (char*)EG(vm_stack)->end)) { \
-				zend_vm_stack tmp = EG(vm_stack)->prev; \
-				efree(EG(vm_stack)); \
-				EG(vm_stack) = tmp; \
-				EG(vm_stack_end) = tmp->end; \
-			} \
-			EG(vm_stack)->top = _old_stack_top; \
+		while (EG(vm_stack)->prev != NULL && _old_stack != EG(vm_stack)) {\
+			zend_vm_stack tmp = EG(vm_stack)->prev; \
+			efree(EG(vm_stack)); \
+			EG(vm_stack) = tmp; \
 		} \
+		EG(vm_stack_end) = EG(vm_stack)->end; \
 	} zend_end_try();\
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
 	SOAP_GLOBAL(error_code) = _old_error_code;\

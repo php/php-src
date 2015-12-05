@@ -74,6 +74,17 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 
 /* Data dependencies macros */
 
+static zend_always_inline uint32_t linear_var_num(zend_op_array *op_array, uint32_t var) {
+	uint32_t num = VAR_NUM(var);
+	if (0 > (int32_t) num) {
+		return - 1 - num;
+	} else {
+		return num + op_array->num_args;
+	}
+}
+#undef VAR_NUM
+#define VAR_NUM(var) linear_var_num(op_array, var)
+
 #define VAR_NUM_EX(op) VAR_NUM((op).var)
 
 #define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
@@ -1285,7 +1296,7 @@ next_target:
 			if (1) {
 				zend_op *target, *target_end;
 				zend_basic_block *target_block;
-				int var_num = op_array->last_var + op_array->T;
+				int var_num = op_array->num_args + op_array->last_var + op_array->T;
 
 				if (var_num <= 0) {
    					return;
@@ -1608,6 +1619,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_DO_ICALL:
 						case ZEND_DO_UCALL:
 						case ZEND_DO_FCALL_BY_NAME:
+						case ZEND_DO_UNPACK_FCALL:
 							opline->result_type |= EXT_TYPE_UNUSED;
 							break;
 					}
@@ -1754,10 +1766,10 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
 	}
 
-	if (op_array->last_var || op_array->T) {
+	if (op_array->last_var || op_array->T || op_array->num_args) {
 		bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
-		Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
-		same_t = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+		Tsource = zend_arena_calloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T, sizeof(zend_op *));
+		same_t = zend_arena_alloc(&ctx->arena, op_array->num_args + op_array->last_var + op_array->T);
 		usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 	} else {
 		bitset_len = 0;
@@ -1781,7 +1793,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (!(b->flags & ZEND_BB_FOLLOW) ||
 			    (b->flags & ZEND_BB_TARGET)) {
 				/* Skip continuation of "extended" BB */
-				memset(Tsource, 0, (op_array->last_var + op_array->T) * sizeof(zend_op *));
+				memset(Tsource, 0, (op_array->num_args + op_array->last_var + op_array->T) * sizeof(zend_op *));
 			}
 			zend_optimize_block(b, op_array, usage, &cfg, Tsource);
 		}

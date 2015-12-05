@@ -70,7 +70,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 			ZVAL_COPY_VALUE(param_ptr, &new_tmp);
 		}
 		*param = param_ptr;
-		param_ptr++;
+		param_ptr--;
 	}
 	va_end(ptr);
 
@@ -97,7 +97,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
 		*param = param_ptr;
-		param_ptr++;
+		param_ptr--;
 	}
 	va_end(ptr);
 
@@ -120,7 +120,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 	while (param_count-->0) {
 		ZVAL_COPY_VALUE(argument_array, param_ptr);
 		argument_array++;
-		param_ptr++;
+		param_ptr--;
 	}
 
 	return SUCCESS;
@@ -144,7 +144,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array) /
 			Z_ADDREF_P(param_ptr);
 		}
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(argument_array), param_ptr);
-		param_ptr++;
+		param_ptr--;
 	}
 
 	return SUCCESS;
@@ -2158,6 +2158,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		internal_function->function_name = zend_new_interned_string(zend_string_init(ptr->fname, fname_len, 1));
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
+		internal_function->stack_size = ZEND_CALL_FRAME_SLOT * ZEND_MM_ALIGNED_SIZE(sizeof(zval));
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
 				if (ptr->flags != ZEND_ACC_DEPRECATED || scope) {

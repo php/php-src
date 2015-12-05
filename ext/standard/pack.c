@@ -179,8 +179,8 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					convert_to_string(&argv[currentarg]);
-					arg = Z_STRLEN(argv[currentarg]);
+					convert_to_string(&argv[-currentarg]);
+					arg = Z_STRLEN(argv[-currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -336,7 +336,7 @@ PHP_FUNCTION(pack)
 			case 'Z': {
 				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
 
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *str = zval_get_string(&argv[-currentarg++]);
 
 				memset(&ZSTR_VAL(output)[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
 				memcpy(&ZSTR_VAL(output)[outputpos], ZSTR_VAL(str),
@@ -352,7 +352,7 @@ PHP_FUNCTION(pack)
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
 
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *str = zval_get_string(&argv[-currentarg++]);
 				char *v = ZSTR_VAL(str);
 
 				outputpos--;
@@ -393,7 +393,7 @@ PHP_FUNCTION(pack)
 			case 'c':
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 1, byte_map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[-currentarg++], 1, byte_map, &ZSTR_VAL(output)[outputpos]);
 					outputpos++;
 				}
 				break;
@@ -411,7 +411,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 2, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[-currentarg++], 2, map, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 2;
 				}
 				break;
@@ -420,7 +420,7 @@ PHP_FUNCTION(pack)
 			case 'i':
 			case 'I':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], sizeof(int), int_map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[-currentarg++], sizeof(int), int_map, &ZSTR_VAL(output)[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
@@ -438,7 +438,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 4, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[-currentarg++], 4, map, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 4;
 				}
 				break;
@@ -458,7 +458,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 8, map, &ZSTR_VAL(output)[outputpos]);
+					php_pack(&argv[-currentarg++], 8, map, &ZSTR_VAL(output)[outputpos]);
 					outputpos += 8;
 				}
 				break;
@@ -467,7 +467,7 @@ PHP_FUNCTION(pack)
 
 			case 'f': {
 				while (arg-- > 0) {
-					float v = (float) zval_get_double(&argv[currentarg++]);
+					float v = (float) zval_get_double(&argv[-currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -476,7 +476,7 @@ PHP_FUNCTION(pack)
 
 			case 'd': {
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = (double) zval_get_double(&argv[-currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
