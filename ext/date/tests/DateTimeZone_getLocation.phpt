@@ -30,784 +30,784 @@ foreach($arrayDate as $value){
 --EXPECTF--
 Array
 (
-    [country_code] => AU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => South Australia
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CA
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Atlantic Time - Labrador - most locations
+    [comments] => %s
 )
 Array
 (
-    [country_code] => ET
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => AF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => US
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Alaska Time
+    [comments] => %s
 )
 Array
 (
-    [country_code] => KZ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Aqtobe (Aktobe)
+    [comments] => %s
 )
 Array
 (
-    [country_code] => AM
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => RU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Moscow+08 (Moscow+09 after 2014-10-26) - Bering Sea
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CW
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => AO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SA
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PT
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Azores
+    [comments] => %s
 )
 Array
 (
-    [country_code] => AZ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => GB
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => KE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => BB
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => BN
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MY
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Sabah & Sarawak
+    [comments] => %s
 )
 Array
 (
-    [country_code] => BO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => BR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => S & SE Brazil (GO, DF, MG, ES, RJ, SP, PR, SC, RS)
+    [comments] => %s
 )
 Array
 (
-    [country_code] => IN
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => ES
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Canary Islands
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CC
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => DE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => most locations
+    [comments] => %s
 )
 Array
 (
-    [country_code] => GL
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Scoresbysund / Ittoqqortoormiit
+    [comments] => %s
 )
 Array
 (
-    [country_code] => NZ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Chatham Islands
+    [comments] => %s
 )
 Array
 (
-    [country_code] => BZ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MN
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Dornod, Sukhbaatar
+    [comments] => %s
 )
 Array
 (
-    [country_code] => FM
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Chuuk (Truk) and Yap
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => CL
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => most locations
+    [comments] => %s
 )
 Array
 (
-    [country_code] => AR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Buenos Aires (BA, CF)
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => UA
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Zaporozh'ye, E Lugansk / Zaporizhia, E Luhansk
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CV
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => CX
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => GU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => AQ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Davis Station, Vestfold Hills
+    [comments] => %s
 )
 Array
 (
-    [country_code] => IE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TJ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SD
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => EC
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => mainland
+    [comments] => %s
 )
 Array
 (
-    [country_code] => FI
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => DO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MQ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => FJ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => FK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => KG
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Gambier Islands
+    [comments] => %s
 )
 Array
 (
-    [country_code] => GY
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => GE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => GF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => GH
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => KI
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Gilbert Islands
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CI
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => AE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => HK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => CU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TH
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => IL
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => LK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => IO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => IR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => IS
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => ID
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Java & Sumatra
+    [comments] => %s
 )
 Array
 (
-    [country_code] => KP
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => JP
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TW
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => KR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => LT
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MH
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Kwajalein
+    [comments] => %s
 )
 Array
 (
-    [country_code] => LR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => LV
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SG
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => MV
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NC
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NL
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PG
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => most locations
+    [comments] => %s
 )
 Array
 (
-    [country_code] => PH
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PM
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PN
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => HT
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => PY
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => RE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => UZ
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => west Uzbekistan
+    [comments] => %s
 )
 Array
 (
-    [country_code] => ZA
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SB
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => SC
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => WS
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => CR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => NA
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TK
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TL
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TO
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => TV
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => UY
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => VE
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => VU
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => UM
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => Wake Island
+    [comments] => %s
 )
 Array
 (
-    [country_code] => CG
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => FR
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
 )
 Array
 (
-    [country_code] => WF
+    [country_code] => %s
     [latitude] => %f
     [longitude] => %f
     [comments] => 
