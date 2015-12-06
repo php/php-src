@@ -38,47 +38,47 @@ Array
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %s
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %s
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => 
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => 
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %s
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %s
+    [comments] => %S
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => 
+    [comments] => %S
 )
