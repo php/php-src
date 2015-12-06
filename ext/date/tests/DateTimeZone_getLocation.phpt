@@ -80,5 +80,5 @@ Array
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] =>
 )
