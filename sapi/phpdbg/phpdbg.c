@@ -52,6 +52,10 @@
 # include "openssl/applink.c"
 #endif
 
+#if defined(PHP_WIN32) && defined(ZTS)
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 int phpdbg_startup_run = 0;
 
@@ -1312,10 +1316,6 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool is_exit;
 	int exit_status;
 
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
-
 #ifndef _WIN32
 	struct sigaction sigio_struct;
 	struct sigaction signal_struct;
@@ -1338,8 +1338,8 @@ int main(int argc, char **argv) /* {{{ */
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-
-	tsrm_ls = ts_resource(0);
+	(void*)ts_resource(0);
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 #ifdef ZEND_SIGNALS
@@ -1608,7 +1608,7 @@ phpdbg_main:
 
 		if (settings > (zend_phpdbg_globals *) 0x2) {
 #ifdef ZTS
-			*((zend_phpdbg_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
+			*((zend_phpdbg_globals *) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
 #else
 			phpdbg_globals = *settings;
 #endif
