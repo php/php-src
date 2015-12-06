@@ -5346,7 +5346,19 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		zend_string **poutbuf, int *poutlen, char *data, size_t data_len,
 		char *aad, size_t aad_len, int enc)  /* {{{ */
 {
-	int i = 0;
+	int ret, i = 0;
+
+	if (aad) {
+		ret = EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len);
+	} else {
+		unsigned char buf[4];
+		ret = EVP_CipherUpdate(cipher_ctx, NULL, &i, buf, 0);
+	}
+
+	if (!ret) {
+		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
+		return FAILURE;
+	}
 
 	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
 
@@ -5358,6 +5370,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		} else {
 			php_error_docref(NULL, E_WARNING, enc ? "Encryption failed" : "Decryption failed");
 		}
+		zend_string_release(*poutbuf);
 		return FAILURE;
 	}
 
@@ -5411,7 +5424,6 @@ PHP_FUNCTION(openssl_encrypt)
 				&iv, &iv_len, &free_iv, NULL, tag_len, options, 1) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 1) == FAILURE) {
-		zend_string_release(outbuf);
 		RETVAL_FALSE;
 	} else if (EVP_EncryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
@@ -5502,7 +5514,6 @@ PHP_FUNCTION(openssl_decrypt)
 				&iv, &iv_len, &free_iv, tag, tag_len, options, 0) == FAILURE ||
 			php_openssl_cipher_update(cipher_type, cipher_ctx, &mode, &outbuf, &outlen,
 				data, data_len, aad, aad_len, 0) == FAILURE) {
-		zend_string_release(outbuf);
 		RETVAL_FALSE;
 	} else if (EVP_DecryptFinal(cipher_ctx, (unsigned char *)ZSTR_VAL(outbuf) + i, &i)) {
 		outlen += i;
