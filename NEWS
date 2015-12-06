@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #70987 (static::class within Closure::call() causes segfault).
     (Andrea)
   . Fixed bug #71013 (Incorrect exception handler with yield from). (Bob)
+  . Fixed double free in error condition of format printer. (Bob)
 
 - CLI server:
   . Fixed bug #71005 (Segfault in php_cli_server_dispatch_router()). (Adam)
