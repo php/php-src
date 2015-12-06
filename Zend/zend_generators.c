@@ -573,7 +573,7 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 		if (iter->index++ > 0) {
 			iter->funcs->move_forward(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				goto failure;
+				goto exception;
 			}
 		}
 
@@ -583,7 +583,9 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 		}
 
 		value = iter->funcs->get_current_data(iter);
-		if (UNEXPECTED(EG(exception) != NULL || !value)) {
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto exception;
+		} else if (UNEXPECTED(!value)) {
 			goto failure;
 		}
 
@@ -595,13 +597,20 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 			iter->funcs->get_current_key(iter, &generator->key);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				ZVAL_UNDEF(&generator->key);
-				goto failure;
+				goto exception;
 			}
 		} else {
 			ZVAL_LONG(&generator->key, iter->index);
 		}
 	}
 	return SUCCESS;
+
+exception: {
+		zend_execute_data *ex = EG(current_execute_data);
+		EG(current_execute_data) = generator->execute_data;
+		zend_throw_exception_internal(NULL);
+		EG(current_execute_data) = ex;
+	}
 
 failure:
 	zval_ptr_dtor(&generator->values);

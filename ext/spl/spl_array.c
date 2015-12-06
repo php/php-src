@@ -276,6 +276,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 		return &EG(error_zval);;
 	}
 
+try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
 	   offset_key = ZSTR_EMPTY_ALLOC();
@@ -355,6 +356,9 @@ num_index:
 			}
 		}
 		return retval;
+	case IS_REFERENCE:
+		ZVAL_DEREF(offset);
+		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
@@ -442,6 +446,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
+
+try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
 			ht = spl_array_get_hash_table(intern, 0);
@@ -481,6 +487,9 @@ num_index:
 			}
 			zend_hash_next_index_insert(ht, value);
 			return;
+		case IS_REFERENCE:
+			ZVAL_DEREF(offset);
+			goto try_again;
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
 			return;
@@ -505,7 +514,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	switch(Z_TYPE_P(offset)) {
+try_again:
+	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern, 0);
 		if (ht->u.v.nApplyCount > 0) {
@@ -565,6 +575,9 @@ num_index:
 			zend_error(E_NOTICE,"Undefined offset: %pd", index);
 		}
 		break;
+	case IS_REFERENCE:
+		ZVAL_DEREF(offset);
+		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return;
@@ -603,7 +616,8 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	if (!value) {
 		HashTable *ht = spl_array_get_hash_table(intern, 0);
 
-		switch(Z_TYPE_P(offset)) {
+try_again:
+		switch (Z_TYPE_P(offset)) {
 			case IS_STRING:
 				if ((tmp = zend_symtable_find(ht, Z_STR_P(offset))) != NULL) {
 					if (check_empty == 2) {
@@ -637,7 +651,9 @@ num_index:
 					return 0;
 				}
 				break;
-
+			case IS_REFERENCE:
+				ZVAL_DEREF(offset);
+				goto try_again;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				return 0;

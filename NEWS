@@ -6,13 +6,16 @@ Core:
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
   . Added void return type. (Andrea)
 
-Standard
+Hash:
+  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
+
+PDO_Firebird:
+  . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
+
+Standard:
   . Implemented FR #55716 (Add an option to pass a custom stream context to
     get_headers()). (Ferenc)
   . Implemented FR #69359 (Provide a way to fetch the current environment
     variables). (Ferenc)
-
-Hash
-  . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

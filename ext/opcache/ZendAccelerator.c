@@ -2515,6 +2515,9 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		MAP_PRIVATE | MAP_ANONYMOUS,
 		-1, 0);
 	if (mem == MAP_FAILED) {
+		zend_error(E_WARNING,
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
+			strerror(errno), errno);
 		return -1;
 	}
 	memcpy(mem, start, size);
@@ -2525,20 +2528,36 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
 		-1, 0);
 #  endif
-#  ifdef MADV_HUGEPAGE
 	if (ret == MAP_FAILED) {
 		ret = mmap(start, size,
 			PROT_READ | PROT_WRITE | PROT_EXEC,
 			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
 			-1, 0);
+		/* this should never happen? */
+		ZEND_ASSERT(ret != MAP_FAILED);
+#  ifdef MADV_HUGEPAGE
 		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
+			memcpy(start, mem, size);
+			mprotect(start, size, PROT_READ | PROT_EXEC);
 			munmap(mem, size);
+			zend_error(E_WARNING,
+				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
+				strerror(errno), errno);
 			return -1;
 		}
-	}
+#  else
+		memcpy(start, mem, size);
+		mprotect(start, size, PROT_READ | PROT_EXEC);
+		munmap(mem, size);
+		zend_error(E_WARNING,
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
+			strerror(errno), errno);
+		return -1;
 #  endif
+	}
+
 	if (ret == start) {
-	    memcpy(start, mem, size);
+		memcpy(start, mem, size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 	}
 	munmap(mem, size);
