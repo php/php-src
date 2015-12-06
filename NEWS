@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 7.0.1
 
 - Core:
+  . Fixed bug #70831 (Compile fails on system with 160 CPUs).
+    (Daniel Axtens)
   . Fixed bug #71006 (symbol referencing errors on Sparc/Solaris). (Dmitry)
   . Fixed bug #70997 (When using parentClass:: instead of parent::, static
     context changed). (Dmitry)
