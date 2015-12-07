@@ -726,9 +726,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 		((void)_optional); \
 		\
 		do { \
-			if (UNEXPECTED(_num_args < _min_num_args) || \
-			    (UNEXPECTED(_num_args > _max_num_args) && \
-			     EXPECTED(_max_num_args >= 0))) { \
+			if (UNEXPECTED(_num_args < _min_num_args)) { \
 				if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
 					zend_wrong_parameters_count_error(_num_args, _min_num_args, _max_num_args); \
 				} \
