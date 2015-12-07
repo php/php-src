@@ -20,8 +20,8 @@ foo(1,2);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: func_get_arg() expects exactly 1 parameter, 3 given in %s on line %d
-NULL
+Warning: func_get_arg():  Called from the global scope - no function context in %s on line %d
+bool(false)
 
 Warning: func_get_arg():  Called from the global scope - no function context in %s on line %d
 bool(false)
