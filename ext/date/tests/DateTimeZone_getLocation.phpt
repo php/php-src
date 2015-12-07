@@ -38,42 +38,42 @@ Array
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => %s
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => %s
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => 
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => 
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => %s
 )
 Array
 (
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => %S
+    [comments] => %s
 )
 Array
 (
