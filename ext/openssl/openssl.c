@@ -5346,16 +5346,9 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		zend_string **poutbuf, int *poutlen, char *data, size_t data_len,
 		char *aad, size_t aad_len, int enc)  /* {{{ */
 {
-	int ret, i = 0;
+	int i = 0;
 
-	if (aad) {
-		ret = EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len);
-	} else {
-		unsigned char buf[4];
-		ret = EVP_CipherUpdate(cipher_ctx, NULL, &i, buf, 0);
-	}
-
-	if (!ret) {
+	if (mode->is_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, (unsigned char *)aad, (int)aad_len)) {
 		php_error_docref(NULL, E_WARNING, "Setting of additional application data failed");
 		return FAILURE;
 	}
