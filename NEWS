@@ -67,6 +67,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71028 (Undefined index with ArrayIterator). (Laruence)
 
+- SQLite3:
+  . Fixed bug #71049 (SQLite3Stmt::execute() releases bound parameter instead
+    of internal buffer). (Laruence)
+
 - Standard:
   . Fixed bug #70999 (php_random_bytes: called object is not a function).
     (Scott)
