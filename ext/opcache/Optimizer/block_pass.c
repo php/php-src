@@ -937,6 +937,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				opline++;
 			}
 		}
+		free_alloca(map, use_heap);
 	}
 
 	/* adjust early binding list */
