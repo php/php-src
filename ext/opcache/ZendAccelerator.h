@@ -228,9 +228,7 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	char                    system_id[32];
-#endif
 	HashTable               xlat_table;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
