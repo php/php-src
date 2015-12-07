@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #71005 (Segfault in php_cli_server_dispatch_router()). (Adam)
 
+- Intl:
+  . Fixed bug #71020 (Use after free in Collator::sortWithSortKeys).
+    (emmanuel dot law at gmail dot com, Laruence)
+
 - Mysqlnd:
   . Fixed bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction).
     (Laruence)
