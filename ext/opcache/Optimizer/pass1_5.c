@@ -331,7 +331,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
 						(cc->flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
-						ZVAL_DEREF(c);
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							break;
 						}

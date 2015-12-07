@@ -714,11 +714,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 		if (Z_REFCOUNTED(parent_const->value)) {
 			Z_ADDREF(parent_const->value);
 		}
-	    if (ce->type & ZEND_INTERNAL_CLASS) {
+		if (ce->type & ZEND_INTERNAL_CLASS) {
 			c = pemalloc(sizeof(zend_class_constant), 1);
-	    } else {
+		} else {
 			c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
-	    }
+		}
 		memcpy(c, parent_const, sizeof(zend_class_constant));
 		_zend_hash_append_ptr(&ce->constants_table, name, c);
 	}

@@ -261,7 +261,6 @@ ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *
 		ZEND_ASSERT(c->flags & ZEND_ACC_PROTECTED);
 		return zend_check_protected(c->ce, scope);
 	}
-	return 0;
 }
 /* }}} */
 
@@ -390,9 +389,6 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 					return NULL;
 				}
 				ret_constant = &c->value;
-				if (Z_ISREF_P(ret_constant)) {
-					ret_constant = Z_REFVAL_P(ret_constant);
-				}
 			}
 		}
 		zend_string_release(class_name);

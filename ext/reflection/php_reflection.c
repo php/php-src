@@ -634,20 +634,8 @@ static void _const_string(string *str, char *name, zval *value, char *indent)
 static void _class_const_string(string *str, char *name, zend_class_constant *c, char *indent)
 {
 	char *type = zend_zval_type_name(&c->value);
-	char *visibility = NULL;
+	char *visibility = zend_visibility_string(c->flags);
 	zend_string *value_str = zval_get_string(&c->value);
-
-	switch (c->flags & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PUBLIC:
-			visibility = "public";
-			break;
-		case ZEND_ACC_PRIVATE:
-			visibility = "private";
-			break;
-		case ZEND_ACC_PROTECTED:
-			visibility =  "protected";
-			break;
-	}
 
 	string_printf(str, "%s    Constant [ %s %s %s ] { %s }\n",
 					indent, visibility, type, name, ZSTR_VAL(value_str));
@@ -3796,7 +3784,7 @@ ZEND_METHOD(reflection_class_constant, __toString)
 /* }}} */
 
 /* {{{ proto public string ReflectionClassConstant::getName()
-   Returns the class' name */
+   Returns the constant' name */
 ZEND_METHOD(reflection_class_constant, getName)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -3820,7 +3808,7 @@ static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /
 /* }}} */
 
 /* {{{ proto public bool ReflectionClassConstant::isPublic()
-   Returns whether this property is public */
+   Returns whether this constant is public */
 ZEND_METHOD(reflection_class_constant, isPublic)
 {
 	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC);
@@ -3828,7 +3816,7 @@ ZEND_METHOD(reflection_class_constant, isPublic)
 /* }}} */
 
 /* {{{ proto public bool ReflectionClassConstant::isPrivate()
-   Returns whether this property is private */
+   Returns whether this constant is private */
 ZEND_METHOD(reflection_class_constant, isPrivate)
 {
 	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE);
@@ -3836,7 +3824,7 @@ ZEND_METHOD(reflection_class_constant, isPrivate)
 /* }}} */
 
 /* {{{ proto public bool ReflectionClassConstant::isProtected()
-   Returns whether this property is protected */
+   Returns whether this constant is protected */
 ZEND_METHOD(reflection_class_constant, isProtected)
 {
 	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROTECTED);
@@ -3844,7 +3832,7 @@ ZEND_METHOD(reflection_class_constant, isProtected)
 /* }}} */
 
 /* {{{ proto public int ReflectionClassConstant::getModifiers()
-   Returns a bitfield of the access modifiers for this property */
+   Returns a bitfield of the access modifiers for this constant */
 ZEND_METHOD(reflection_class_constant, getModifiers)
 {
 	reflection_object *intern;
@@ -3860,7 +3848,7 @@ ZEND_METHOD(reflection_class_constant, getModifiers)
 /* }}} */
 
 /* {{{ proto public mixed ReflectionClassConstant::getValue()
-   Returns this property's value */
+   Returns this constant's value */
 ZEND_METHOD(reflection_class_constant, getValue)
 {
 	reflection_object *intern;
@@ -3892,7 +3880,7 @@ ZEND_METHOD(reflection_class_constant, getDeclaringClass)
 /* }}} */
 
 /* {{{ proto public string ReflectionClassConstant::getDocComment()
-   Returns the doc comment for this function */
+   Returns the doc comment for this constant */
 ZEND_METHOD(reflection_class_constant, getDocComment)
 {
 	reflection_object *intern;
@@ -4670,7 +4658,7 @@ ZEND_METHOD(reflection_class, getConstants)
 			return;
 		}
 		val = zend_hash_add_new(Z_ARRVAL_P(return_value), key, &c->value);
-		zval_add_ref_unref(val);
+		Z_TRY_ADDREF_P(val);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -4692,9 +4680,8 @@ ZEND_METHOD(reflection_class, getReflectionConstants)
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
 		zval class_const;
 		reflection_class_constant_factory(ce, name, constant, &class_const);
-		zend_hash_next_index_insert(HASH_OF(return_value), &class_const);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &class_const);
 	} ZEND_HASH_FOREACH_END();
-	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, zval_add_ref_unref);
 }
 /* }}} */
 

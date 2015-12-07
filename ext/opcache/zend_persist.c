@@ -732,12 +732,18 @@ static void zend_persist_class_constant(zval *zv)
 	c->ce = zend_shared_alloc_get_xlat_entry(c->ce);
 	if (c->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
-			zend_accel_store_string(c->doc_comment);
-		} else {
-			if (!zend_shared_alloc_get_xlat_entry(c->doc_comment)) {
-				zend_shared_alloc_register_xlat_entry(c->doc_comment, c->doc_comment);
+			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
+			if (doc_comment) {
+				c->doc_comment = doc_comment;
+			} else {
+				zend_accel_store_string(c->doc_comment);
 			}
-			zend_string_release(c->doc_comment);
+		} else {
+			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
+			if (!doc_comment) {
+				zend_shared_alloc_register_xlat_entry(c->doc_comment, c->doc_comment);
+				zend_string_release(c->doc_comment);
+			}
 			c->doc_comment = NULL;
 		}
 	}

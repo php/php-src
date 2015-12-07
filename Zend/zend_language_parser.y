@@ -702,7 +702,7 @@ class_statement:
 		variable_modifiers property_list ';'
 			{ $$ = $2; $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
-			{ $$ = $3; $$->attr = $1; RESET_DOC_COMMENT(); }
+			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
 	|	method_modifiers function returns_ref identifier '(' parameter_list ')'
