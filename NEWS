@@ -50,6 +50,8 @@ PHP                                                                        NEWS
     by gcov. (Senthil)
 
 - Opcache:
+  . Fixed #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32 on
+    the same server). (Anatol)
   . Fixed bug #70991 (zend_file_cache.c:710: error: array type has incomplete
     element type). (Laruence)
   . Fixed bug #70977 (Segmentation fault with opcache.huge_code_pages=1).
