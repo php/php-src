@@ -2459,8 +2459,6 @@ static void accel_globals_dtor(zend_accel_globals *accel_globals)
 	}
 }
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
-
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_CHAR) ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
 
 static void accel_gen_system_id(void)
@@ -2489,7 +2487,6 @@ static void accel_gen_system_id(void)
 		md5str[(i * 2) + 1] = c;
 	}
 }
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
@@ -2619,9 +2616,7 @@ static int accel_startup(zend_extension *extension)
 		return FAILURE;
 	}
 
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	accel_gen_system_id();
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 	if (ZCG(accel_directives).huge_code_pages &&
