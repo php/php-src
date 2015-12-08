@@ -5824,6 +5824,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CONST_HANDLER(
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce;
+	zend_class_constant *c;
 	zval *value;
 	USE_OPLINE
 
@@ -5833,7 +5834,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 		if (IS_CONST == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-				ZVAL_DEREF(value);
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -5861,13 +5861,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
-				ZVAL_DEREF(value);
 				break;
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
-			ZVAL_DEREF(value);
+		if (EXPECTED((c = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(c, EG(scope))) {
+				zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = &c->value;
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -17546,6 +17549,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce;
+	zend_class_constant *c;
 	zval *value;
 	USE_OPLINE
 
@@ -17555,7 +17559,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 		if (IS_VAR == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-				ZVAL_DEREF(value);
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -17583,13 +17586,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
-				ZVAL_DEREF(value);
 				break;
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
-			ZVAL_DEREF(value);
+		if (EXPECTED((c = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(c, EG(scope))) {
+				zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = &c->value;
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -23883,8 +23889,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
-		}
-		if (!object) {
+			ce = object->ce;
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				/* Allowed for PHP 4 compatibility. */
 				zend_error(
@@ -23969,6 +23975,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_UNUSED_CON
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce;
+	zend_class_constant *c;
 	zval *value;
 	USE_OPLINE
 
@@ -23978,7 +23985,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 		if (IS_UNUSED == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-				ZVAL_DEREF(value);
 #ifdef ZTS
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
 #endif
@@ -24006,13 +24012,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				ce = Z_CE_P(EX_VAR(opline->op1.var));
 			}
 			if ((value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), ce)) != NULL) {
-				ZVAL_DEREF(value);
 				break;
 			}
 		}
 
-		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
-			ZVAL_DEREF(value);
+		if (EXPECTED((c = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
+			if (!zend_verify_const_access(c, EG(scope))) {
+				zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				HANDLE_EXCEPTION();
+			}
+			value = &c->value;
 			if (Z_CONSTANT_P(value)) {
 				EG(scope) = ce;
 				zval_update_constant_ex(value, 1, NULL);
@@ -25234,8 +25243,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
-		}
-		if (!object) {
+			ce = object->ce;
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				/* Allowed for PHP 4 compatibility. */
 				zend_error(
@@ -26592,8 +26601,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
-		}
-		if (!object) {
+			ce = object->ce;
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				/* Allowed for PHP 4 compatibility. */
 				zend_error(
@@ -28225,8 +28234,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
-		}
-		if (!object) {
+			ce = object->ce;
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				/* Allowed for PHP 4 compatibility. */
 				zend_error(

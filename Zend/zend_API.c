@@ -1129,12 +1129,13 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			zend_class_entry **scope = EG(current_execute_data) ? &EG(scope) : &CG(active_class_entry);
 			zend_class_entry *old_scope = *scope;
 			zend_class_entry *ce;
+			zend_class_constant *c;
 			zval *val;
 			zend_property_info *prop_info;
 
 			*scope = class_type;
-			ZEND_HASH_FOREACH_VAL(&class_type->constants_table, val) {
-				ZVAL_DEREF(val);
+			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
+				val = &c->value;
 				if (Z_CONSTANT_P(val)) {
 					if (UNEXPECTED(zval_update_constant_ex(val, 1, class_type) != SUCCESS)) {
 						return FAILURE;
@@ -3737,13 +3738,46 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment) /* {{{ */
 {
+	zend_class_constant *c;
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (access_type != ZEND_ACC_PUBLIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	}
+
+	if (zend_string_equals_literal_ci(name, "class")) {
+		zend_error((ce->type == ZEND_INTERNAL_CLASS) ? E_CORE_ERROR : E_COMPILE_ERROR,
+				"A class constant must not be called 'class'; it is reserved for class name fetching");
+	}
+
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		c = pemalloc(sizeof(zend_class_constant), 1);
+	} else {
+		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+	}
+	ZVAL_COPY_VALUE(&c->value, value);
+	Z_ACCESS_FLAGS(c->value) = access_type;
+	c->doc_comment = doc_comment;
+	c->ce = ce;
 	if (Z_CONSTANT_P(value)) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
-	return zend_hash_str_update(&ce->constants_table, name, name_length, value) ?
+	return zend_hash_add_ptr(&ce->constants_table, name, c) ?
 		SUCCESS : FAILURE;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
+{
+	int ret;
+
+	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(key);
+	return ret;
 }
 /* }}} */
 
