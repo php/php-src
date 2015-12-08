@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 Core:
   . Fixed bug #62210 (Exceptions can leak temporary variables). (Dmitry, Bob)
+  . Implemented the RFC `Support Class Constant Visibility`. (Sean DuBois,
+    Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
 
 Hash:
