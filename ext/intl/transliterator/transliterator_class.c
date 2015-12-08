@@ -183,7 +183,7 @@ err:
 				"Could not clone transliterator", 0 );
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
-			php_error_docref( NULL, E_ERROR, "%s", ZSTR_VAL(err_msg) );
+			zend_throw_error( zend_ce_error, "%s", ZSTR_VAL(err_msg) );
 			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}

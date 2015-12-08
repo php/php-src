@@ -57,4 +57,3 @@ string(0) ""
 Warning: session_start(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
 
 Fatal error: session_start(): Failed to initialize storage module: files (path: ) in %s on line %d
-
