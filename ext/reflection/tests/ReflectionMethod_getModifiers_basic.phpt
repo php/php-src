@@ -239,4 +239,4 @@ Wrong number of params:
 Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %sReflectionMethod_getModifiers_basic.php on line %d
 
 ReflectionMethod::getModifiers() modifiers:
-0x00000100
+0x40000100
