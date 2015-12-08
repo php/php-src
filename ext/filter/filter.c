@@ -546,7 +546,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			if (PG(auto_globals_jit)) {
 				zend_is_auto_global_str(ZEND_STRL("_ENV"));
 			}
-			array_ptr = &IF_G(env_array) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
+			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
 		case PARSE_SESSION:
 			/* FIXME: Implement session source */
