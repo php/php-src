@@ -6,5 +6,7 @@ interface IA {
 	public const FOO = 10;
 }
 
+echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
+Done
