@@ -5206,7 +5206,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED, CONST)
 
 		if (EXPECTED((c = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(EX_CONSTANT(opline->op2)))) != NULL)) {
 			if (!zend_verify_const_access(c, EG(scope))) {
-				zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(c->flags), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+				zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(ce->name), Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 				HANDLE_EXCEPTION();
 			}
 			value = &c->value;

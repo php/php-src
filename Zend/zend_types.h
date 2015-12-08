@@ -138,6 +138,7 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
+		uint32_t     access_flags;         /* class constant access flags */
 	} u2;
 };
 
@@ -360,6 +361,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
+
+#define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
+#define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
 
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))

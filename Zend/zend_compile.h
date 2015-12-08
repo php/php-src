@@ -311,8 +311,7 @@ typedef struct _zend_property_info {
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 typedef struct _zend_class_constant {
-	zval value;
-	uint32_t flags;
+	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
 	zend_string *doc_comment;
 	zend_class_entry *ce;
 } zend_class_constant;

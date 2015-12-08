@@ -703,11 +703,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 	zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, name);
 
 	if (c != NULL) {
-		if (UNEXPECTED((c->flags & ZEND_ACC_PPP_MASK) > (parent_const->flags & ZEND_ACC_PPP_MASK))) {
+		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(parent_const->flags), ZSTR_VAL(ce->parent->name), (parent_const->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(ce->parent->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
-	} else if (!(parent_const->flags & ZEND_ACC_PRIVATE)) {
+	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
 		if (Z_CONSTANT(parent_const->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}

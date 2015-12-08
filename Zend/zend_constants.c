@@ -253,12 +253,12 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 
 ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
 {
-	if (c->flags & ZEND_ACC_PUBLIC) {
+	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
 		return 1;
-	} else if (c->flags & ZEND_ACC_PRIVATE) {
+	} else if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
 		return (c->ce == scope);
 	} else {
-		ZEND_ASSERT(c->flags & ZEND_ACC_PROTECTED);
+		ZEND_ASSERT(Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PROTECTED);
 		return zend_check_protected(c->ce, scope);
 	}
 }
@@ -374,16 +374,16 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		if (ce) {
 			zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, constant_name);
 			if (c == NULL) {
-				ret_constant = NULL;
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 					zend_string_release(class_name);
 					zend_string_free(constant_name);
 					return NULL;
 				}
+				ret_constant = NULL;
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
-					zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(c->flags), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 					zend_string_release(class_name);
 					zend_string_free(constant_name);
 					return NULL;

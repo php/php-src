@@ -634,7 +634,7 @@ static void _const_string(string *str, char *name, zval *value, char *indent)
 static void _class_const_string(string *str, char *name, zend_class_constant *c, char *indent)
 {
 	char *type = zend_zval_type_name(&c->value);
-	char *visibility = zend_visibility_string(c->flags);
+	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
 	zend_string *value_str = zval_get_string(&c->value);
 
 	string_printf(str, "%s    Constant [ %s %s %s ] { %s }\n",
@@ -3803,7 +3803,7 @@ static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
-	RETURN_BOOL(ref->flags & mask);
+	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & mask);
 }
 /* }}} */
 
@@ -3843,7 +3843,7 @@ ZEND_METHOD(reflection_class_constant, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ref->flags);
+	RETURN_LONG(Z_ACCESS_FLAGS(ref->value));
 }
 /* }}} */
 
