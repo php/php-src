@@ -105,7 +105,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 
 #define GET_REFLECTION_OBJECT()	                                                                   			\
 	intern = Z_REFLECTION_P(getThis());                                                      				\
-	if (intern == NULL || intern->ptr == NULL) {                                                            \
+	if (intern->ptr == NULL) {                                                            \
 		RETURN_ON_EXCEPTION                                                                                 \
 		php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
 	}                                                                                                       \
@@ -1497,7 +1497,7 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 	parameter_reference *param;
 
 	intern = Z_REFLECTION_P(getThis());
-	if (intern == NULL || intern->ptr == NULL) {
+	if (intern->ptr == NULL) {
 		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
 			return NULL;
 		}
@@ -1651,9 +1651,6 @@ ZEND_METHOD(reflection_function, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == SUCCESS) {
 		fptr = (zend_function*)zend_get_closure_method_def(closure);
@@ -2195,9 +2192,6 @@ ZEND_METHOD(reflection_generator, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
 		return;
@@ -2384,9 +2378,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	/* First, find the function */
 	switch (Z_TYPE_P(reference)) {
@@ -3089,9 +3080,6 @@ ZEND_METHOD(reflection_method, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	/* Find the class entry */
 	switch (Z_TYPE_P(classname)) {
@@ -3698,10 +3686,6 @@ ZEND_METHOD(reflection_method, setAccessible)
 
 	intern = Z_REFLECTION_P(getThis());
 
-	if (intern == NULL) {
-		return;
-	}
-
 	intern->ignore_visibility = visible;
 }
 /* }}} */
@@ -3722,9 +3706,6 @@ ZEND_METHOD(reflection_class_constant, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	/* Find the class entry */
 	switch (Z_TYPE_P(classname)) {
@@ -3926,9 +3907,6 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	if (Z_TYPE_P(argument) == IS_OBJECT) {
 		ZVAL_STR_COPY(&classname, Z_OBJCE_P(argument)->name);
@@ -5226,7 +5204,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(class_name);
-				if (argument == NULL || argument->ptr == NULL) {
+				if (argument->ptr == NULL) {
 					php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
 				}
@@ -5270,7 +5248,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(interface);
-				if (argument == NULL || argument->ptr == NULL) {
+				if (argument->ptr == NULL) {
 					php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
 				}
@@ -5475,9 +5453,6 @@ ZEND_METHOD(reflection_property, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	/* Find the class entry */
 	switch (Z_TYPE_P(classname)) {
@@ -5826,10 +5801,6 @@ ZEND_METHOD(reflection_property, setAccessible)
 
 	intern = Z_REFLECTION_P(getThis());
 
-	if (intern == NULL) {
-		return;
-	}
-
 	intern->ignore_visibility = visible;
 }
 /* }}} */
@@ -5861,9 +5832,6 @@ ZEND_METHOD(reflection_extension, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 	lcname = do_alloca(name_len + 1, use_heap);
 	zend_str_tolower_copy(lcname, name_str, name_len);
 	if ((module = zend_hash_str_find_ptr(&module_registry, lcname, name_len)) == NULL) {
@@ -6229,9 +6197,6 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
-	if (intern == NULL) {
-		return;
-	}
 
 	extension = zend_get_extension(name_str);
 	if (!extension) {
