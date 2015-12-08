@@ -1945,10 +1945,14 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 
 static zend_always_inline int zend_is_def_range(zend_op *opline, zend_uchar type, uint32_t var) /* {{{ */
 {
-	return opline->result_type == type &&
-	       opline->result.var == var &&
-		   opline->opcode != ZEND_ADD_ARRAY_ELEMENT &&
-	       opline->opcode != ZEND_ROPE_ADD;
+	if (opline->result_type == type && opline->result.var == var) {
+		return opline->opcode != ZEND_ADD_ARRAY_ELEMENT &&
+			opline->opcode != ZEND_ROPE_ADD;
+	} else if (opline->opcode == ZEND_OP_DATA) {
+		return (opline-1)->result_type == type &&
+			(opline-1)->result.var == var;
+	}
+	return 0;
 }
 /* }}} */
 
