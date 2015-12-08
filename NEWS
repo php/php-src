@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 ?? ??? 2015, PHP 5.5.31
 
+- GD:
+  . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
+    Out of Bounds). (emmanuel dot law at gmail dot com).
+
 01 Oct 2015, PHP 5.5.30
 
 - Phar:
