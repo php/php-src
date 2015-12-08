@@ -1,7 +1,9 @@
 --TEST--
-Bug #71063 filter_input(INPUT_ENV, ..) does not work
+Bug #71063 (filter_input(INPUT_ENV, ..) does not work)
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
+--ENV--
+PATH=/
 --FILE--
 <?php
 var_dump(count($_ENV['PATH']) > 0);
