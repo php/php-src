@@ -40,10 +40,10 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/standard/md5.h"
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 # include "zend_file_cache.h"
-# include "ext/standard/md5.h"
 #endif
 
 #ifndef ZEND_WIN32
