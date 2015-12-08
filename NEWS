@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2016 PHP 7.0.2
 
+- Filter:
+  . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
+
 
 ?? ??? 2015, PHP 7.0.1
 
@@ -36,9 +39,6 @@ PHP                                                                        NEWS
 
 - CLI server:
   . Fixed bug #71005 (Segfault in php_cli_server_dispatch_router()). (Adam)
-
-- Filter:
-  . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
 - Intl:
   . Fixed bug #71020 (Use after free in Collator::sortWithSortKeys).
