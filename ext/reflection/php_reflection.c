@@ -3878,6 +3878,197 @@ ZEND_METHOD(reflection_class_constant, getDocComment)
 }
 /* }}} */
 
+/* {{{ proto public void ReflectionClassConstant::__construct(mixed class, string name)
+   Constructor. Throws an Exception in case the given class constant does not exist */
+ZEND_METHOD(reflection_class_constant, __construct)
+{
+	zval *classname, *object, name, cname;
+	zend_string *constname;
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_class_constant *constant = NULL;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zS", &classname, &constname) == FAILURE) {
+		return;
+	}
+
+	object = getThis();
+	intern = Z_REFLECTION_P(object);
+	if (intern == NULL) {
+		return;
+	}
+
+	/* Find the class entry */
+	switch (Z_TYPE_P(classname)) {
+		case IS_STRING:
+			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
+						"Class %s does not exist", Z_STRVAL_P(classname));
+				return;
+			}
+			break;
+
+		case IS_OBJECT:
+			ce = Z_OBJCE_P(classname);
+			break;
+
+		default:
+			_DO_THROW("The parameter class is expected to be either a string or an object");
+			/* returns out of this function */
+	}
+
+	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
+		return;
+	}
+
+	ZVAL_STR_COPY(&name, constname);
+	ZVAL_STR_COPY(&cname, ce->name);
+
+	intern->ptr = constant;
+	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
+	intern->ce = constant->ce;
+	intern->ignore_visibility = 0;
+	reflection_update_property(object, "name", &name);
+	reflection_update_property(object, "class", &cname);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionClassConstant::__toString()
+   Returns a string representation */
+ZEND_METHOD(reflection_class_constant, __toString)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+	string str;
+	zval name;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	string_init(&str);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, &name);
+	_class_const_string(&str, Z_STRVAL(name), ref, "");
+	zval_ptr_dtor(&name);
+	RETURN_NEW_STR(str.buf);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionClassConstant::getName()
+   Returns the constant' name */
+ZEND_METHOD(reflection_class_constant, getName)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
+}
+/* }}} */
+
+static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	RETURN_BOOL(Z_ACCESS_FLAGS(ref->value) & mask);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClassConstant::isPublic()
+   Returns whether this constant is public */
+ZEND_METHOD(reflection_class_constant, isPublic)
+{
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClassConstant::isPrivate()
+   Returns whether this constant is private */
+ZEND_METHOD(reflection_class_constant, isPrivate)
+{
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClassConstant::isProtected()
+   Returns whether this constant is protected */
+ZEND_METHOD(reflection_class_constant, isProtected)
+{
+	_class_constant_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROTECTED);
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionClassConstant::getModifiers()
+   Returns a bitfield of the access modifiers for this constant */
+ZEND_METHOD(reflection_class_constant, getModifiers)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	RETURN_LONG(Z_ACCESS_FLAGS(ref->value));
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionClassConstant::getValue()
+   Returns this constant's value */
+ZEND_METHOD(reflection_class_constant, getValue)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	ZVAL_DUP(return_value, &ref->value);
+}
+/* }}} */
+
+/* {{{ proto public ReflectionClass ReflectionClassConstant::getDeclaringClass()
+   Get the declaring class */
+ZEND_METHOD(reflection_class_constant, getDeclaringClass)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_reflection_class_factory(ref->ce, return_value);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionClassConstant::getDocComment()
+   Returns the doc comment for this constant */
+ZEND_METHOD(reflection_class_constant, getDocComment)
+{
+	reflection_object *intern;
+	zend_class_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->doc_comment) {
+		RETURN_STR_COPY(ref->doc_comment);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionClass::export(mixed argument [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_class, export)
