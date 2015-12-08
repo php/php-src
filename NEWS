@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 ?? ??? 2015, PHP 5.5.31
 
+- FPM:
+  . Fixed bug #70755 (fpm_log.c memory leak and buffer overflow). (Stas)
+
 - GD:
   . Fixed bug #70976 (Memory Read via gdImageRotateInterpolated Array Index
     Out of Bounds). (emmanuel dot law at gmail dot com).
