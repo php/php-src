@@ -759,6 +759,9 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	zend_op *new_opcodes;
 	zend_op *opline;
 	uint32_t len = 0;
+#if DEBUG_BLOCKPASS
+	int n;
+#endif
 
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
