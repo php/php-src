@@ -128,7 +128,7 @@ static int s_pid_dump_debug_info = 0;
 
 LSAPI_Request g_req = { -1, -1 };
 
-static char         s_pSecret[24];
+static char         s_secret[24];
 
 
 void Flush_RespBuf_r( LSAPI_Request * pReq );
@@ -670,7 +670,7 @@ static int readSecret( const char * pSecretFile )
         close( fd );
         return -1;
     }
-    if ( read( fd, s_pSecret, 16 ) < 16 )
+    if ( read( fd, s_secret, 16 ) < 16 )
     {
         fprintf( stderr, "LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
         close( fd );
@@ -682,7 +682,7 @@ static int readSecret( const char * pSecretFile )
 
 int LSAPI_is_suEXEC_Daemon()
 {
-    if (( !s_uid )&&( s_pSecret[0] ))
+    if (( !s_uid )&&( s_secret[0] ))
         return 1;
     else
         return 0;
@@ -877,7 +877,7 @@ static int lsapi_suexec_auth( LSAPI_Request *pReq,
     if ( len < 32 )
         return -1;
     memmove( achMD5, pAuth + 16, 16 );
-    memmove( pAuth + 16, s_pSecret, 16 );
+    memmove( pAuth + 16, s_secret, 16 );
     lsapi_MD5Init( &md5ctx );
     lsapi_MD5Update( &md5ctx, (unsigned char *)pAuth, 32 );
     lsapi_MD5Update( &md5ctx, (unsigned char *)pUgid, 8 );
@@ -1170,8 +1170,11 @@ static int readReq( LSAPI_Request * pReq )
     pReq->m_reqState = LSAPI_ST_REQ_BODY | LSAPI_ST_RESP_HEADER;
 
     if ( !s_uid )
+    {
         if ( lsapi_changeUGid( pReq ) )
             return -1;
+        memset(s_secret, 0, sizeof(s_secret));
+    }
     pReq->m_bufProcessed = packetLen;
 
     //OPTIMIZATION
@@ -1191,7 +1194,7 @@ int LSAPI_Init(void)
     if ( !g_inited )
     {
         s_uid = geteuid();
-        s_pSecret[0] = 0;
+        s_secret[0] = 0;
         lsapi_signal(SIGPIPE, lsapi_sigpipe);
         lsapi_signal(SIGUSR1, lsapi_siguser1);
 
