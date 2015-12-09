@@ -418,7 +418,7 @@ static void sapi_lsapi_log_message(char *message)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.8",
+    "LiteSpeed V6.9",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -770,6 +770,8 @@ static int cli_main( int argc, char * argv[] )
 
         zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
         CG(in_compilation) = 0; /* not initialized but needed for several options */
+        SG(options) |= SAPI_OPTION_NO_CHDIR;
+        
 #if PHP_MAJOR_VERSION < 7
         EG(uninitialized_zval_ptr) = NULL;
 #endif
@@ -1247,7 +1249,7 @@ PHP_FUNCTION(apache_get_modules)
 {
     static const char * mod_names[] =
     {
-        "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", NULL
+        "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", "mod_auth_basic", NULL
     };
     const char **name = mod_names;
     /* TODO: */
