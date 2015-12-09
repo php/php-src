@@ -770,6 +770,8 @@ static int cli_main( int argc, char * argv[] )
 
         zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
         CG(in_compilation) = 0; /* not initialized but needed for several options */
+        SG(options) |= SAPI_OPTION_NO_CHDIR;
+        
 #if PHP_MAJOR_VERSION < 7
         EG(uninitialized_zval_ptr) = NULL;
 #endif
