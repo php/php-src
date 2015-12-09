@@ -776,7 +776,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				if (next < end && next == blocks + b->successors[0]) {
 					/* JMP to the next block - strip it */
 					MAKE_NOP(opline);
-					b->end--;
+					if (b->end == 0) {
+						b->start++;
+					} else {
+						b->end--;
+					}
 				}
 			} else if (b->start == b->end && opline->opcode == ZEND_NOP) {
 				/* skip empty block */
@@ -822,7 +826,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	op_array->last = len;
 
 	for (b = blocks; b < end; b++) {
-		if (!(b->flags & ZEND_BB_REACHABLE)) {
+		if (!(b->flags & ZEND_BB_REACHABLE) || b->start > b->end) {
 			continue;
 		}
 		opline = op_array->opcodes + b->end;
