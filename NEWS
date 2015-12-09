@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2016 PHP 7.0.2
 
+- Date:
+  . Fixed bug #71053 (Type Hint about DateTime::diff does not match with
+    informed). (Reeze Xia)
+
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
