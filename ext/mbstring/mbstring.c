@@ -4109,11 +4109,12 @@ PHP_FUNCTION(mb_send_mail)
 		_php_mbstr_parse_mail_headers(&ht_headers, headers, headers_len);
 	}
 
-	if ((s = zend_hash_str_find_ptr(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1))) {
 		char *tmp;
 		char *param_name;
 		char *charset = NULL;
 
+		ZEND_ASSERT(Z_TYPE_P(s) == IS_STRING);
 		p = strchr(Z_STRVAL_P(s), ';');
 
 		if (p != NULL) {

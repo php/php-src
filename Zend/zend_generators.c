@@ -65,12 +65,6 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
 {
-	zval_ptr_dtor(&generator->value);
-	ZVAL_UNDEF(&generator->value);
-
-	zval_ptr_dtor(&generator->key);
-	ZVAL_UNDEF(&generator->key);
-
 	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
 		zval_ptr_dtor(&generator->values);
 		ZVAL_UNDEF(&generator->values);
@@ -169,6 +163,10 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 	zend_generator *generator = (zend_generator*) object;
 
 	zend_generator_close(generator, 0);
+
+	/* we can't immediately free them in zend_generator_close() else yield from won't be able to fetch it */
+	zval_ptr_dtor(&generator->value);
+	zval_ptr_dtor(&generator->key);
 
 	if (EXPECTED(!Z_ISUNDEF(generator->retval))) {
 		zval_ptr_dtor(&generator->retval);
@@ -289,6 +287,12 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 
 static void zend_generator_throw_exception(zend_generator *generator, zval *exception)
 {
+	/* if we don't stop an array/iterator yield from, the exception will only reach the generator after the values were all iterated over */
+	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
+		zval_ptr_dtor(&generator->values);
+		ZVAL_UNDEF(&generator->values);
+	}
+
 	/* Throw the exception in the context of the generator. Decrementing the opline
 	 * to pretend the exception happened during the YIELD opcode. */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
@@ -508,6 +512,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 						EG(current_execute_data) = original_execute_data;
 					} else {
+						ZVAL_COPY(&root->value, &root->node.parent->value);
 						ZVAL_COPY(ZEND_CALL_VAR(root->execute_data, yield_from->result.var), &root->node.parent->retval);
 					}
 				}
@@ -568,7 +573,7 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 		if (iter->index++ > 0) {
 			iter->funcs->move_forward(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				goto failure;
+				goto exception;
 			}
 		}
 
@@ -578,7 +583,9 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 		}
 
 		value = iter->funcs->get_current_data(iter);
-		if (UNEXPECTED(EG(exception) != NULL || !value)) {
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			goto exception;
+		} else if (UNEXPECTED(!value)) {
 			goto failure;
 		}
 
@@ -590,13 +597,20 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 			iter->funcs->get_current_key(iter, &generator->key);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				ZVAL_UNDEF(&generator->key);
-				goto failure;
+				goto exception;
 			}
 		} else {
 			ZVAL_LONG(&generator->key, iter->index);
 		}
 	}
 	return SUCCESS;
+
+exception: {
+		zend_execute_data *ex = EG(current_execute_data);
+		EG(current_execute_data) = generator->execute_data;
+		zend_throw_exception_internal(NULL);
+		EG(current_execute_data) = ex;
+	}
 
 failure:
 	zval_ptr_dtor(&generator->values);
@@ -622,17 +636,17 @@ try_again:
 		return;
 	}
 
+	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
+		/* We must not advance Generator if we yield from a Generator being currently run */
+		return;
+	}
+
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
 			return;
 		}
 		/* If there are no more deletegated values, resume the generator
 		 * after the "yield from" expression. */
-	}
-
-	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0) && !Z_ISUNDEF(generator->value)) {
-		/* We must not advance Generator if we yield from a Generator being currently run */
-		return;
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
@@ -708,7 +722,7 @@ try_again:
 
 static void inline zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
 {
-	if (EXPECTED(generator->execute_data) && UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->node.parent == NULL)) {
+	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
 		generator->flags |= ZEND_GENERATOR_DO_INIT;
 		zend_generator_resume(generator);
 		generator->flags &= ~ZEND_GENERATOR_DO_INIT;
@@ -759,7 +773,7 @@ ZEND_METHOD(Generator, valid)
 
 	zend_generator_get_current(generator);
 
-	RETURN_BOOL(EXPECTED(Z_TYPE(generator->value) != IS_UNDEF || generator->node.parent != NULL));
+	RETURN_BOOL(EXPECTED(generator->execute_data != NULL));
 }
 /* }}} */
 
@@ -778,7 +792,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator_ensure_initialized(generator);
 
 	root = zend_generator_get_current(generator);
-	if (EXPECTED(Z_TYPE(root->value) != IS_UNDEF)) {
+	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
 		zval *value = &root->value;
 
 		ZVAL_DEREF(value);
@@ -802,7 +816,7 @@ ZEND_METHOD(Generator, key)
 	zend_generator_ensure_initialized(generator);
 
 	root = zend_generator_get_current(generator);
-	if (EXPECTED(Z_TYPE(root->key) != IS_UNDEF)) {
+	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
 		zval *key = &root->key;
 
 		ZVAL_DEREF(key);
@@ -865,7 +879,7 @@ ZEND_METHOD(Generator, send)
 	zend_generator_resume(generator);
 
 	root = zend_generator_get_current(generator);
-	if (EXPECTED(Z_TYPE(root->value) != IS_UNDEF)) {
+	if (EXPECTED(generator->execute_data)) {
 		zval *value = &root->value;
 
 		ZVAL_DEREF(value);
@@ -905,7 +919,7 @@ ZEND_METHOD(Generator, throw)
 		zend_generator_resume(generator);
 
 		root = zend_generator_get_current(generator);
-		if (Z_TYPE(root->value) != IS_UNDEF) {
+		if (generator->execute_data) {
 			zval *value = &root->value;
 
 			ZVAL_DEREF(value);
@@ -982,11 +996,7 @@ static int zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ 
 
 	zend_generator_get_current(generator);
 
-	if (EXPECTED(Z_TYPE(generator->value) != IS_UNDEF || generator->node.parent != NULL)) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	return generator->execute_data ? SUCCESS : FAILURE;
 }
 /* }}} */
 

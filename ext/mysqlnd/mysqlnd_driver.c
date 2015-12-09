@@ -140,8 +140,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 
 	mysqlnd_stats_init(&data->stats, STAT_LAST, persistent);
 
-	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, data->stats, data->error_info);
-	data->vio = mysqlnd_vio_init(persistent, data->stats, data->error_info);
+	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, factory, data->stats, data->error_info);
+	data->vio = mysqlnd_vio_init(persistent, factory, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
 	data->command_factory = mysqlnd_command_factory_get();
 

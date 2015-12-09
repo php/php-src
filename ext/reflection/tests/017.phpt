@@ -10,12 +10,12 @@ class Foo {
 $class = new ReflectionClass("Foo");
 echo $class;
 ?>
---EXPECTF--	
+--EXPECTF--
 Class [ <user> class Foo ] {
   @@ %s017.php 2-4
 
   - Constants [1] {
-    Constant [ string test ] { ok }
+    Constant [ public string test ] { ok }
   }
 
   - Static properties [0] {

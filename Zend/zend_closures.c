@@ -150,6 +150,7 @@ ZEND_METHOD(Closure, call)
 	fci.param_count = my_param_count;
 	fci.object = fci_cache.object = newobj;
 	fci_cache.initialized = 1;
+	fci_cache.called_scope = Z_OBJCE_P(newthis);
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;

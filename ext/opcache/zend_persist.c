@@ -716,6 +716,39 @@ static void zend_persist_property_info(zval *zv)
 	}
 }
 
+static void zend_persist_class_constant(zval *zv)
+{
+	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
+
+	if (c) {
+		Z_PTR_P(zv) = c;
+		return;
+	}
+	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_class_constant));
+	zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
+	c = Z_PTR_P(zv) = ZCG(arena_mem);
+	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_constant)));
+	zend_persist_zval(&c->value);
+	c->ce = zend_shared_alloc_get_xlat_entry(c->ce);
+	if (c->doc_comment) {
+		if (ZCG(accel_directives).save_comments) {
+			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
+			if (doc_comment) {
+				c->doc_comment = doc_comment;
+			} else {
+				zend_accel_store_string(c->doc_comment);
+			}
+		} else {
+			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
+			if (!doc_comment) {
+				zend_shared_alloc_register_xlat_entry(c->doc_comment, c->doc_comment);
+				zend_string_release(c->doc_comment);
+			}
+			c->doc_comment = NULL;
+		}
+	}
+}
+
 static void zend_persist_class_entry(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
@@ -745,7 +778,7 @@ static void zend_persist_class_entry(zval *zv)
 		}
 		ce->static_members_table = NULL;
 
-		zend_hash_persist(&ce->constants_table, zend_persist_zval);
+		zend_hash_persist(&ce->constants_table, zend_persist_class_constant);
 
 		if (ce->info.user.filename) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */

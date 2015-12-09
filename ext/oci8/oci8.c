@@ -2003,17 +2003,19 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 							/* okay, the connection is open and the server is still alive */
 							connection->used_this_request = 1;
-							tmp_val = zend_hash_index_find(&EG(regular_list), connection->id->handle);
-							if ((tmp_val != NULL) && (Z_TYPE_P(tmp_val) == IS_RESOURCE)) {
-								tmp = Z_RES_VAL_P(tmp_val);
-							}
+							if (connection->id) {
+								tmp_val = zend_hash_index_find(&EG(regular_list), connection->id->handle);
+								if ((tmp_val != NULL) && (Z_TYPE_P(tmp_val) == IS_RESOURCE)) {
+									tmp = Z_RES_VAL_P(tmp_val);
+								}
 							
-							if ((tmp_val != NULL) && (tmp != NULL) &&
-								(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
-								(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s), ZSTR_LEN(tmp->hash_key)) == 0)) {
-								connection = tmp;
-								++GC_REFCOUNT(connection->id);
-								/* do nothing */
+								if ((tmp_val != NULL) && (tmp != NULL) &&
+									(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
+									(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s),
+									 ZSTR_LEN(tmp->hash_key)) == 0)) {
+									connection = tmp;
+									++GC_REFCOUNT(connection->id);
+								}
 							} else {
 								PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
 								/* Persistent connections: For old close semantics we artificially
@@ -2467,6 +2469,7 @@ int php_oci_connection_release(php_oci_connection *connection)
 		connection->svc = NULL;
 		connection->server = NULL;
 		connection->session = NULL;
+		connection->id = NULL;
 
 		connection->is_attached = connection->is_open = connection->rb_on_disconnect = connection->used_this_request = 0;
 		connection->is_stub = 1;

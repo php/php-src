@@ -1536,8 +1536,7 @@ PHP_METHOD(sqlite3stmt, execute)
 						}
 						buffer = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					} else {
-						convert_to_string(parameter);
-						buffer = Z_STR_P(parameter);
+						buffer = zval_get_string(parameter);
 					}
 
 					if (buffer) {
