@@ -38,13 +38,7 @@ echo token_name(T_SL), "\n";
 echo token_name(T_SR), "\n";
 echo token_name(T_INC), "\n";
 echo token_name(T_DEC), "\n";
-echo token_name(T_INT_CAST), "\n";
-echo token_name(T_DOUBLE_CAST), "\n";
-echo token_name(T_STRING_CAST), "\n";
-echo token_name(T_ARRAY_CAST), "\n";
-echo token_name(T_OBJECT_CAST), "\n";
-echo token_name(T_BOOL_CAST), "\n";
-echo token_name(T_UNSET_CAST), "\n";
+echo token_name(T_CAST), "\n";
 echo token_name(T_NEW), "\n";
 echo token_name(T_EXIT), "\n";
 echo token_name(T_IF), "\n";
@@ -164,13 +158,7 @@ T_SL
 T_SR
 T_INC
 T_DEC
-T_INT_CAST
-T_DOUBLE_CAST
-T_STRING_CAST
-T_ARRAY_CAST
-T_OBJECT_CAST
-T_BOOL_CAST
-T_UNSET_CAST
+T_CAST
 T_NEW
 T_EXIT
 T_IF
