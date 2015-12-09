@@ -215,11 +215,13 @@ void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, uint
 				}
 				fprintf(stderr, "\n");
 
-				opline = op_array->opcodes + b->start;
-				end = op_array->opcodes + b->end + 1;
-				while (opline < end) {
-					zend_dump_op(op_array, b, opline);
-					opline++;
+				if (!(b->flags & ZEND_BB_EMPTY)) {
+					opline = op_array->opcodes + b->start;
+					end = op_array->opcodes + b->end + 1;
+					while (opline < end) {
+						zend_dump_op(op_array, b, opline);
+						opline++;
+					}
 				}
 			}
 		}

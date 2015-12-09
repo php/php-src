@@ -36,6 +36,7 @@
 #define ZEND_BB_FINALLY_END      (1<<8)  /* end of finally block   */
 #define ZEND_BB_GEN_VAR          (1<<9)  /* start of live range    */
 #define ZEND_BB_KILL_VAR         (1<<10) /* end of live range      */
+#define ZEND_BB_EMPTY            (1<<11)
 
 #define ZEND_BB_LOOP_HEADER      (1<<16)
 #define ZEND_BB_IRREDUCIBLE_LOOP (1<<17)
