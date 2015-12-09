@@ -418,7 +418,7 @@ static void sapi_lsapi_log_message(char *message)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.8",
+    "LiteSpeed V6.9",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
