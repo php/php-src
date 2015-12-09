@@ -1241,9 +1241,16 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 
 	/* verify header */
-	if (memcmp(info.magic, "OPCACHE", 8) != 0 ||
-	    memcmp(info.system_id, ZCG(system_id), 32) != 0) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s'\n", filename);
+	if (memcmp(info.magic, "OPCACHE", 8) != 0) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong header)\n", filename);
+		zend_file_cache_flock(fd, LOCK_UN);
+		close(fd);
+		unlink(filename);
+		efree(filename);
+		return NULL;
+	}
+	if (memcmp(info.system_id, ZCG(system_id), 32) != 0) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);
 		unlink(filename);
