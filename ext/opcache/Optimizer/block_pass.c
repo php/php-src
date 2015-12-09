@@ -30,8 +30,6 @@
 #include "zend_cfg.h"
 #include "zend_dump.h"
 
-#define DEBUG_BLOCKPASS 0
-
 /* Checks if a constant (like "true") may be replaced by its value */
 int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
@@ -1534,15 +1532,14 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 	}
 
-#if DEBUG_BLOCKPASS > 2
-	{
+	if (ctx->debug_level & ZEND_DUMP_BLOCK_PASS_VARS) {
 		int printed = 0;
 		uint32_t i;
 
 		for (i = op_array->last_var; i< op_array->T; i++) {
 			if (zend_bitset_in(used_ext, i)) {
 				if (!printed) {
-					fprintf(stderr, "NON-LOCAL-VARS: %s: %d", op_array->function_name ? op_array->function_name->val : "(null)", i);
+					fprintf(stderr, "NON-LOCAL-VARS: %d", i);
 					printed = 1;
 				} else {
 					fprintf(stderr, ", %d", i);
@@ -1551,10 +1548,8 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 		}
 		if (printed) {
 			fprintf(stderr, "\n");
-			zend_dump_op_array(op_array, cfg, 0);
 		}
 	}
-#endif
 
 	for (n = 0; n < cfg->blocks_count; n++) {
 		block = cfg->blocks + n;

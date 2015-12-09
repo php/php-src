@@ -62,8 +62,10 @@
 
 #define ZEND_DUMP_BEFORE_OPTIMIZER  (1<<16)
 #define ZEND_DUMP_AFTER_OPTIMIZER   (1<<17)
+
 #define ZEND_DUMP_BEFORE_BLOCK_PASS (1<<18)
 #define ZEND_DUMP_AFTER_BLOCK_PASS  (1<<19)
+#define ZEND_DUMP_BLOCK_PASS_VARS   (1<<20)
 
 typedef struct _zend_script {
 	zend_string   *filename;
