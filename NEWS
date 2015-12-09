@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2016 PHP 7.0.2
 
+- Core:
+  . Fixed bug #71067 (Local object in class method stays in memory for each
+    call). (Laruence)
+
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
