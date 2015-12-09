@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2016 PHP 7.0.2
 
+- Mbstring:
+  . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
+    Segmentation fault). (Laruence)
+
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
