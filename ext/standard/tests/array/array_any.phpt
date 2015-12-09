@@ -1,9 +1,9 @@
 --TEST--
-Test array_some() function
+Test array_any() function
 --FILE--
 <?php
 /* 
-	Prototype: bool array_some(array $array, mixed $callback);
+	Prototype: bool array_any(array $array, mixed $callback);
 	Description: Iterate array and stop based on return value of callback
 */
 
@@ -14,16 +14,16 @@ function is_int_ex($nr)
 
 echo "\n*** Testing not enough or wrong arguments ***\n";
 
-var_dump(array_some());
-var_dump(array_some(true));
-var_dump(array_some([]));
+var_dump(array_any());
+var_dump(array_any(true));
+var_dump(array_any([]));
 
 echo "\n*** Testing basic functionality ***\n";
 
-var_dump(array_some(array('hello', 'world'), 'is_int_ex'));
-var_dump(array_some(array('hello', 1, 2, 3), 'is_int_ex'));
+var_dump(array_any(array('hello', 'world'), 'is_int_ex'));
+var_dump(array_any(array('hello', 1, 2, 3), 'is_int_ex'));
 $iterations = 0;
-var_dump(array_some(array('hello', 1, 2, 3), function($item) use (&$iterations) {
+var_dump(array_any(array('hello', 1, 2, 3), function($item) use (&$iterations) {
 	++$iterations;
 	return is_int($item);
 }));
@@ -31,7 +31,7 @@ var_dump($iterations);
 
 echo "\n*** Testing traversable functionality ***\n";
 
-var_dump(array_some((function() {
+var_dump(array_any((function() {
 	yield 'foo' => 'bar';
 	yield 456;
 })(), function($value, $key) {
@@ -41,7 +41,7 @@ var_dump(array_some((function() {
 
 echo "\n*** Testing edge cases ***\n";
 
-var_dump(array_some(array(), 'is_int_ex'));
+var_dump(array_any(array(), 'is_int_ex'));
 
 echo "\nDone";
 ?> 
@@ -49,13 +49,13 @@ echo "\nDone";
 
 *** Testing not enough or wrong arguments ***
 
-Warning: array_some() expects exactly 2 parameters, 0 given in %s on line %d
+Warning: array_any() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_some() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: array_any() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_some() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: array_any() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 *** Testing basic functionality ***

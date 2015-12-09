@@ -5118,7 +5118,7 @@ PHP_FUNCTION(array_every)
 
 /* {{{ proto array array_filter(array input, mixed predicate)
    Determines whether the predicate holds for at least one element in the array. */
-PHP_FUNCTION(array_some)
+PHP_FUNCTION(array_any)
 {
 	php_array_until(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
