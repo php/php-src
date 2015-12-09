@@ -90,8 +90,22 @@ static void zend_mark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg, i
 
 			/* Add brk/cont paths */
 			for (j = 0; j < op_array->last_live_range; j++) {
+				if (op_array->live_range[j].var == (uint32_t)-1) {
+					/* this live range already removed */
+					continue;
+				}
 				b = blocks + block_map[op_array->live_range[j].start];
 				if (b->flags & ZEND_BB_REACHABLE) {
+					while (op_array->opcodes[b->start].opcode == ZEND_NOP && b->start != b->end) {
+						b->start++;
+					}
+					if (op_array->opcodes[b->start].opcode == ZEND_NOP &&
+					    b->start == b->end &&
+					    b->successors[0] == block_map[op_array->live_range[j].end]) {
+						/* mark as removed (empty live range) */
+						op_array->live_range[j].var = (uint32_t)-1;
+						continue;
+					}
 					b->flags |= ZEND_BB_GEN_VAR;
 					b = blocks + block_map[op_array->live_range[j].end];
 					b->flags |= ZEND_BB_KILL_VAR;
