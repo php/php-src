@@ -780,7 +780,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				}
 			} else if (b->start == b->end && opline->opcode == ZEND_NOP) {
 				/* skip empty block */
-				b->end--;
+				b->start++;
 			}
 			len += b->end - b->start + 1;
 		} else if (b->start <= b->end) {
