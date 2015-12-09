@@ -1980,6 +1980,12 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
 			retval = zend_hash_find(zobj->properties, Z_STR_P(prop_ptr));
 			if (EXPECTED(retval)) {
 				ZVAL_INDIRECT(result, retval);
