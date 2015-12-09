@@ -1277,7 +1277,7 @@ PHP_FUNCTION(apache_get_modules)
 {
     static const char * mod_names[] = 
     {
-        "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", NULL
+        "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", "mod_auth_basic", NULL
     };
     const char **name = mod_names;
     /* TODO: */
