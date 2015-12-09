@@ -44,6 +44,27 @@
 
 #define DEFAULT_OPTIMIZATION_LEVEL  "0xFFFFFFFF"
 
+
+#define ZEND_DUMP_AFTER_PASS_1		ZEND_OPTIMIZER_PASS_1
+#define ZEND_DUMP_AFTER_PASS_2		ZEND_OPTIMIZER_PASS_2
+#define ZEND_DUMP_AFTER_PASS_3		ZEND_OPTIMIZER_PASS_3
+#define ZEND_DUMP_AFTER_PASS_4		ZEND_OPTIMIZER_PASS_4
+#define ZEND_DUMP_AFTER_PASS_5		ZEND_OPTIMIZER_PASS_5
+#define ZEND_DUMP_AFTER_PASS_6		ZEND_OPTIMIZER_PASS_6
+#define ZEND_DUMP_AFTER_PASS_7		ZEND_OPTIMIZER_PASS_7
+#define ZEND_DUMP_AFTER_PASS_8		ZEND_OPTIMIZER_PASS_8
+#define ZEND_DUMP_AFTER_PASS_9		ZEND_OPTIMIZER_PASS_9
+#define ZEND_DUMP_AFTER_PASS_10		ZEND_OPTIMIZER_PASS_10
+#define ZEND_DUMP_AFTER_PASS_11		ZEND_OPTIMIZER_PASS_11
+#define ZEND_DUMP_AFTER_PASS_12		ZEND_OPTIMIZER_PASS_12
+#define ZEND_DUMP_AFTER_PASS_13		ZEND_OPTIMIZER_PASS_13
+#define ZEND_DUMP_AFTER_PASS_14		ZEND_OPTIMIZER_PASS_14
+
+#define ZEND_DUMP_BEFORE_OPTIMIZER  (1<<16)
+#define ZEND_DUMP_AFTER_OPTIMIZER   (1<<17)
+#define ZEND_DUMP_BEFORE_BLOCK_PASS (1<<18)
+#define ZEND_DUMP_AFTER_BLOCK_PASS  (1<<19)
+
 typedef struct _zend_script {
 	zend_string   *filename;
 	zend_op_array  main_op_array;
@@ -51,6 +72,6 @@ typedef struct _zend_script {
 	HashTable      class_table;
 } zend_script;
 
-int zend_optimize_script(zend_script *script, zend_long optimization_level);
+int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
 
 #endif

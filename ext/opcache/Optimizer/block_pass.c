@@ -759,9 +759,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	zend_op *new_opcodes;
 	zend_op *opline;
 	uint32_t len = 0;
-#if DEBUG_BLOCKPASS
 	int n;
-#endif
 
 	for (b = blocks; b < end; b++) {
 		if (b->flags & ZEND_BB_REACHABLE) {
@@ -979,7 +977,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		*opline_num = -1;
 	}
 
-#if DEBUG_BLOCKPASS
 	/* rebild map (judt for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
 	for (n = 0; n < cfg->blocks_count; n++) {
@@ -987,7 +984,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			cfg->map[cfg->blocks[n].start] = n;
 		}
 	}
-#endif
 }
 
 static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_array, zend_cfg *cfg, zend_uchar *same_t)
@@ -1731,11 +1727,6 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_op **Tsource;
 	zend_uchar *same_t;
 
-#if DEBUG_BLOCKPASS
-	fprintf(stderr, "File %s func %s\n", op_array->filename->val, op_array->function_name ? op_array->function_name->val : "main");
-	fflush(stderr);
-#endif
-
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 	if (zend_build_cfg(&ctx->arena, op_array, 0, 0, &cfg, NULL) != SUCCESS) {
@@ -1743,10 +1734,9 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
-#if DEBUG_BLOCKPASS
-	fprintf(stderr, "\nBEFORE-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
-	zend_dump_op_array(op_array, &cfg, 1);
-#endif
+	if (ctx->debug_level & ZEND_DUMP_BEFORE_BLOCK_PASS) {
+		zend_dump_op_array(op_array, &cfg, ZEND_DUMP_UNREACHABLE, "before block pass");
+	}
 
 	if (op_array->last_var || op_array->T) {
 		bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
@@ -1791,10 +1781,9 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_t_usage(&cfg, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array);
 
-#if DEBUG_BLOCKPASS
-	fprintf(stderr, "\nAFTER-BLOCK-PASS: %s:\n", op_array->function_name ? op_array->function_name->val : "(null)");
-	zend_dump_op_array(op_array, &cfg, 0);
-#endif
+	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
+		zend_dump_op_array(op_array, &cfg, 0, "after block pass");
+	}
 
 	/* Destroy CFG */
 	zend_arena_release(&ctx->arena, checkpoint);

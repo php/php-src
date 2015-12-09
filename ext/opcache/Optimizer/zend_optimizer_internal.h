@@ -49,6 +49,7 @@ typedef struct _zend_optimizer_ctx {
 	zend_script            *script;
 	HashTable              *constants;
 	zend_long               optimization_level;
+	zend_long               debug_level;
 } zend_optimizer_ctx;
 
 #define LITERAL_LONG(op, val) do { \

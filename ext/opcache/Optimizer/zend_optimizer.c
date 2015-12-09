@@ -26,6 +26,8 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_cfg.h"
+#include "zend_dump.h"
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
@@ -529,6 +531,10 @@ static void zend_optimize(zend_op_array      *op_array,
 		return;
 	}
 
+	if (ctx->debug_level & ZEND_DUMP_BEFORE_OPTIMIZER) {
+		zend_dump_op_array(op_array, NULL, 1, "before optimizer");
+	}
+
 	/* pass 1
 	 * - substitute persistent constants (true, false, null, etc)
 	 * - perform compile-time evaluation of constant binary and unary operations
@@ -537,6 +543,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_1) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+		}
 	}
 
 	/* pass 2:
@@ -547,6 +556,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_2 & ctx->optimization_level) {
 		zend_optimizer_pass2(op_array);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_2) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 2");
+		}
 	}
 
 	/* pass 3:
@@ -556,6 +568,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
 		zend_optimizer_pass3(op_array);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+		}
 	}
 
 	/* pass 4:
@@ -563,6 +578,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_4 & ctx->optimization_level) {
 		optimize_func_calls(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_4) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+		}
 	}
 
 	/* pass 5:
@@ -570,6 +588,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_5 & ctx->optimization_level) {
 		optimize_cfg(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_5) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 5");
+		}
 	}
 
 	/* pass 9:
@@ -577,6 +598,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_9 & ctx->optimization_level) {
 		optimize_temporary_variables(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_9) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 9");
+		}
 	}
 
 	/* pass 10:
@@ -584,6 +608,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (((ZEND_OPTIMIZER_PASS_10|ZEND_OPTIMIZER_PASS_5) & ctx->optimization_level) == ZEND_OPTIMIZER_PASS_10) {
 		zend_optimizer_nop_removal(op_array);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_10) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 10");
+		}
 	}
 
 	/* pass 11:
@@ -591,6 +618,13 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if (ZEND_OPTIMIZER_PASS_11 & ctx->optimization_level) {
 		zend_optimizer_compact_literals(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_11) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 11");
+		}
+	}
+
+	if (ctx->debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
+		zend_dump_op_array(op_array, NULL, 1, "after optimizer");
 	}
 }
 
@@ -650,7 +684,7 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	}
 }
 
-int zend_optimize_script(zend_script *script, zend_long optimization_level)
+int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	uint idx, j;
 	Bucket *p, *q;
@@ -662,6 +696,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level)
 	ctx.script = script;
 	ctx.constants = NULL;
 	ctx.optimization_level = optimization_level;
+	ctx.debug_level = debug_level;
 
 	zend_optimize_op_array(&script->main_op_array, &ctx);
 

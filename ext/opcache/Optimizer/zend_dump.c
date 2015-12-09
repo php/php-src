@@ -120,9 +120,28 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	fprintf(stderr, "\n");
 }
 
-void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, int all)
+void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t dump_flags, const char *msg)
 {
 	int i;
+
+	if (op_array->function_name) {
+		if (op_array->scope && op_array->scope->name) {
+			fprintf(stderr, "\n%s::%s", op_array->scope->name->val, op_array->function_name->val);
+		} else {
+			fprintf(stderr, "\n%s", op_array->function_name->val);
+		}
+	} else {
+		fprintf(stderr, "\n%s", "$_main");
+	}
+	fprintf(stderr, ": ; (lines=%d, args=%d, vars=%d, tmps=%d)\n",
+		op_array->last,
+		op_array->num_args,
+		op_array->last_var,
+		op_array->T);
+	if (msg) {
+		fprintf(stderr, "    ; (%s)\n", msg);
+	}
+	fprintf(stderr, "    ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
 
 	if (cfg) {
 		int n;
@@ -130,7 +149,7 @@ void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, int 
 
 		for (n = 0; n < cfg->blocks_count; n++) {
 			b = cfg->blocks + n;
-			if (all || (b->flags & ZEND_BB_REACHABLE)) {
+			if ((dump_flags & ZEND_DUMP_UNREACHABLE) || (b->flags & ZEND_BB_REACHABLE)) {
 				const zend_op *opline;
 				const zend_op *end;
 				int printed = 0;
@@ -169,7 +188,7 @@ void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, int 
 				if (b->flags & ZEND_BB_KILL_VAR) {
 					fprintf(stderr, " kill_var");
 				}
-				if (all & !(b->flags & ZEND_BB_REACHABLE)) {
+				if ((dump_flags & ZEND_DUMP_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
 					fprintf(stderr, " unreachable");
 				}
 
