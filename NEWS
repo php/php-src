@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #71067 (Local object in class method stays in memory for each
     call). (Laruence)
+  . Fixed bug #66909 (configure fails utf8_to_mutf7 test). (Michael Orlitzky)
+  . Fixed bug #70781 (Extension tests fail on dynamic ext dependency).
+    (Francois Laupretre)
 
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
