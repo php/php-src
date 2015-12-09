@@ -188,7 +188,7 @@ void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, int 
 					fprintf(stderr, " to=(BB%d", b->successors[0]);
 					printed = 1;
 					if (b->successors[1] != -1) {
-						fprintf(stderr, " , BB%d", b->successors[1]);
+						fprintf(stderr, ", BB%d", b->successors[1]);
 					}
 				}
 				if (printed) {
