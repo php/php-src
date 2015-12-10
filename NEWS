@@ -9,12 +9,16 @@ PHP                                                                        NEWS
   . Fixed bug #70781 (Extension tests fail on dynamic ext dependency).
     (Francois Laupretre)
 
+- Filter:
+  . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
+
 - Mbstring:
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
 
-- Filter:
-  . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
+- SPL:
+  . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
+    wrong number of parameters). (Laruence)
 
 
 ?? ??? 2015, PHP 7.0.1

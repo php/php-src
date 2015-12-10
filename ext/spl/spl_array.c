@@ -1810,8 +1810,10 @@ outexcept:
 } /* }}} */
 
 /* {{{ arginfo and function table */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, array)
+	ZEND_ARG_INFO(0, ar_flags)
+	ZEND_ARG_INFO(0, iterator_class)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_offsetGet, 0, 0, 1)
