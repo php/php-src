@@ -63,6 +63,10 @@ $vm_op_flags = array(
 	"ZEND_VM_OP1_JMP_ADDR"    => 0x20,
 	"ZEND_VM_OP1_TRY_CATCH"   => 0x30,
 	"ZEND_VM_OP1_LIVE_RANGE"  => 0x40,
+	"ZEND_VM_OP1_THIS"        => 0x50,
+	"ZEND_VM_OP1_NEXT"        => 0x60,
+	"ZEND_VM_OP1_CLASS_FETCH" => 0x70,
+	"ZEND_VM_OP1_CONSTRUCTOR" => 0x80,
 
 	"ZEND_VM_OP2_SPEC"        => 1<<8,
 	"ZEND_VM_OP2_CONST"       => 1<<9,
@@ -72,6 +76,10 @@ $vm_op_flags = array(
 	"ZEND_VM_OP2_JMP_ADDR"    => 0x2000,
 	"ZEND_VM_OP2_TRY_CATCH"   => 0x3000,
 	"ZEND_VM_OP2_LIVE_RANGE"  => 0x4000,
+	"ZEND_VM_OP2_THIS"        => 0x5000,
+	"ZEND_VM_OP2_NEXT"        => 0x6000,
+	"ZEND_VM_OP2_CLASS_FETCH" => 0x7000,
+	"ZEND_VM_OP2_CONSTRUCTOR" => 0x8000,
 
 	"ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
 	"ZEND_VM_EXT_ISSET"       => 1<<17,
@@ -90,6 +98,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_FAST_CALL"   => 0x09000000,
 	"ZEND_VM_EXT_FAST_RET"    => 0x0a000000,
 	"ZEND_VM_EXT_SRC"         => 0x0b000000,
+	"ZEND_VM_EXT_SEND"        => 0x0c000000,
 );
 
 foreach ($vm_op_flags as $name => $val) {
@@ -108,6 +117,10 @@ $vm_op_decode = array(
 	"JMP_ADDR"             => ZEND_VM_OP1_JMP_ADDR,
 	"TRY_CATCH"            => ZEND_VM_OP1_TRY_CATCH,
 	"LIVE_RANGE"           => ZEND_VM_OP1_LIVE_RANGE,
+	"THIS"                 => ZEND_VM_OP1_THIS,
+	"NEXT"                 => ZEND_VM_OP1_NEXT,
+	"CLASS_FETCH"          => ZEND_VM_OP1_CLASS_FETCH,
+	"CONSTRUCTOR"          => ZEND_VM_OP1_CONSTRUCTOR,
 );
 
 $vm_ext_decode = array(
@@ -127,6 +140,7 @@ $vm_ext_decode = array(
 	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
 	"REF"                  => ZEND_VM_EXT_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
+	"SEND"                 => ZEND_VM_EXT_SEND,
 );
 
 $vm_kind_name = array(

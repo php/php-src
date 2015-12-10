@@ -51,6 +51,39 @@ static void zend_dump_const(const zval *zv)
 	}
 }
 
+static void zend_dump_class_fetch_type(uint32_t fetch_type)
+{
+	switch (fetch_type & ZEND_FETCH_CLASS_MASK) {
+		case ZEND_FETCH_CLASS_SELF:
+			fprintf(stderr, " (self)");
+			break;
+		case ZEND_FETCH_CLASS_PARENT:
+			fprintf(stderr, " (parent)");
+			break;
+		case ZEND_FETCH_CLASS_STATIC:
+			fprintf(stderr, " (static)");
+			break;
+		case ZEND_FETCH_CLASS_AUTO:
+			fprintf(stderr, " (auto)");
+			break;
+		case ZEND_FETCH_CLASS_INTERFACE:
+			fprintf(stderr, " (interface)");
+			break;
+		case ZEND_FETCH_CLASS_TRAIT:
+			fprintf(stderr, " (trait)");
+			break;
+	}
+	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
+			fprintf(stderr, " (no-autolod)");
+	}
+	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
+			fprintf(stderr, " (silent)");
+	}
+	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {
+			fprintf(stderr, " (exception)");
+	}
+}
+
 static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline)
 {
 	const char *name = zend_get_opcode_name(opline->opcode);
@@ -71,35 +104,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			fprintf(stderr, " (obj)");
 		}
 	} else if (ZEND_VM_EXT_CLASS_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		switch (opline->extended_value & ZEND_FETCH_CLASS_MASK) {
-			case ZEND_FETCH_CLASS_SELF:
-				fprintf(stderr, " (self)");
-				break;
-			case ZEND_FETCH_CLASS_PARENT:
-				fprintf(stderr, " (parent)");
-				break;
-			case ZEND_FETCH_CLASS_STATIC:
-				fprintf(stderr, " (static)");
-				break;
-			case ZEND_FETCH_CLASS_AUTO:
-				fprintf(stderr, " (auto)");
-				break;
-			case ZEND_FETCH_CLASS_INTERFACE:
-				fprintf(stderr, " (interface)");
-				break;
-			case ZEND_FETCH_CLASS_TRAIT:
-				fprintf(stderr, " (trait)");
-				break;
-		}
-		if (opline->extended_value & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-				fprintf(stderr, " (no-autolod)");
-		}
-		if (opline->extended_value & ZEND_FETCH_CLASS_SILENT) {
-				fprintf(stderr, " (silent)");
-		}
-		if (opline->extended_value & ZEND_FETCH_CLASS_EXCEPTION) {
-				fprintf(stderr, " (exception)");
-		}
+		zend_dump_class_fetch_type(opline->extended_value);
 	} else if (ZEND_VM_EXT_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->extended_value & IS_CONSTANT_UNQUALIFIED) {
 				fprintf(stderr, " (unqualified)");
@@ -189,6 +194,19 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		} else if (opline->extended_value == ZEND_RETURNS_FUNCTION) {
 			fprintf(stderr, " (function)");
 		}
+	} else if (ZEND_VM_EXT_SEND == (flags & ZEND_VM_EXT_MASK)) {
+		if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
+			fprintf(stderr, " (ref)");
+		}
+		if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
+			fprintf(stderr, " (compile-time)");
+		}
+		if (opline->extended_value & ZEND_ARG_SEND_FUNCTION) {
+			fprintf(stderr, " (function)");
+		}
+		if (opline->extended_value & ZEND_ARG_SEND_SILENT) {
+			fprintf(stderr, " (silent)");
+		}
 	} else {
 		if (ZEND_VM_EXT_VAR_FETCH & flags) {
 			switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
@@ -256,6 +274,14 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		fprintf(stderr, " V%u", EX_VAR_TO_NUM(opline->op1.var));
 	} else if ( opline->op1_type == IS_TMP_VAR) {
 		fprintf(stderr, " T%u", EX_VAR_TO_NUM(opline->op1.var));
+	} else if (ZEND_VM_OP1_THIS == (flags & ZEND_VM_OP1_MASK)) {
+		fprintf(stderr, " THIS");
+	} else if (ZEND_VM_OP1_NEXT == (flags & ZEND_VM_OP1_MASK)) {
+		fprintf(stderr, " NEXT");
+	} else if (ZEND_VM_OP1_CLASS_FETCH == (flags & ZEND_VM_OP1_MASK)) {
+		zend_dump_class_fetch_type(opline->op1.num);
+	} else if (ZEND_VM_OP1_CONSTRUCTOR == (flags & ZEND_VM_OP1_MASK)) {
+		fprintf(stderr, " CONSTRUCTOR");
 	}
 	if (ZEND_VM_OP2_JMP_ADDR == (flags & ZEND_VM_OP2_MASK)) {
 		if (b) {
@@ -279,6 +305,14 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		fprintf(stderr, " V%u", EX_VAR_TO_NUM(opline->op2.var));
 	} else if ( opline->op2_type == IS_TMP_VAR) {
 		fprintf(stderr, " T%u", EX_VAR_TO_NUM(opline->op2.var));
+	} else if (ZEND_VM_OP2_THIS == (flags & ZEND_VM_OP2_MASK)) {
+		fprintf(stderr, " THIS");
+	} else if (ZEND_VM_OP2_NEXT == (flags & ZEND_VM_OP2_MASK)) {
+		fprintf(stderr, " NEXT");
+	} else if (ZEND_VM_OP2_CLASS_FETCH == (flags & ZEND_VM_OP2_MASK)) {
+		zend_dump_class_fetch_type(opline->op2.num);
+	} else if (ZEND_VM_OP2_CONSTRUCTOR == (flags & ZEND_VM_OP2_MASK)) {
+		fprintf(stderr, " CONSTRUCTOR");
 	}
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
