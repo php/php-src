@@ -2903,7 +2903,6 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 {
-	/* TODO.AST &var error */
 	zend_ast_list *args = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool uses_arg_unpack = 0;
@@ -5492,7 +5491,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	opline = get_next_op(CG(active_op_array));
 	zend_make_var_result(&declare_node, opline);
 
-	// TODO.AST drop this
 	GET_NODE(&FC(implementing_class), opline->result);
 
 	opline->op2_type = IS_CONST;
