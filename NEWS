@@ -24,7 +24,7 @@ PHP                                                                        NEWS
     wrong number of parameters). (Laruence)
 
 
-?? ??? 2015, PHP 7.0.1
+17 Dec 2015, PHP 7.0.1
 
 - Core:
   . Fixed bug #70831 (Compile fails on system with 160 CPUs).
