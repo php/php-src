@@ -5231,10 +5231,7 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_const_expr_to_zval(&value_zv, value_ast);
 
 		name = zend_new_interned_string_safe(name);
-		if (zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment) != SUCCESS) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		}
+		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 	}
 }
 /* }}} */
