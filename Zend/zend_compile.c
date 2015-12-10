@@ -2626,7 +2626,6 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 	} else {
 		SET_NODE(opline->op2, &class_node);
 	}
-	opline->extended_value |= ZEND_FETCH_STATIC_MEMBER;
 
 	return opline;
 }
