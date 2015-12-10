@@ -175,6 +175,21 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			op_array->cache_size += sizeof(void*);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
+		case ZEND_FETCH_R:
+		case ZEND_FETCH_W:
+		case ZEND_FETCH_RW:
+		case ZEND_FETCH_IS:
+		case ZEND_FETCH_UNSET:
+		case ZEND_FETCH_FUNC_ARG:
+			TO_STRING_NOWARN(val);
+			ZEND_OP1_TYPE(opline) = IS_CONST;
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
+			if (opline->extended_value == ZEND_FETCH_STATIC_MEMBER) {
+				Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
+				op_array->cache_size += 2 * sizeof(void*);
+			}
+			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			TO_STRING_NOWARN(val);

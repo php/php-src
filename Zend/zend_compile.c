@@ -2379,6 +2379,7 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 		opline = zend_emit_op(result, ZEND_FETCH_R, &prop_node, NULL);
 	}
 	if (opline->op1_type == IS_CONST) {
+		convert_to_string(CT_CONSTANT(opline->op1));
 		zend_alloc_polymorphic_cache_slot(opline->op1.constant);
 	}
 	if (class_node.op_type == IS_CONST) {

@@ -1537,6 +1537,9 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED|CONST|V
 		}
 		retval = zend_std_get_static_property(ce, name, 0);
 		if (UNEXPECTED(EG(exception))) {
+			if (OP1_TYPE != IS_CONST) {
+				zend_string_release(name);
+			}
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
