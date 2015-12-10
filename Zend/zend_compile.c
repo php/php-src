@@ -3642,12 +3642,16 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node);
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
-		zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL);
+		/* name_ast should be evaluated only. FETCH_GLOBAL_LOCK instructs FETCH_W
+		 * to not free the name_node operand, so it can be reused in the following
+		 * ASSIGN_REF, which then frees it. */
+		zend_op *opline = zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL);
+		opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
 
-		// TODO.AST Avoid double fetch
-		//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
-
-		zend_emit_assign_ref_znode(var_ast, &result);
+		zend_emit_assign_ref_znode(
+			zend_ast_create(ZEND_AST_VAR, zend_ast_create_znode(&name_node)),
+			&result
+		);
 	}
 }
 /* }}} */
