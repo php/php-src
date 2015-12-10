@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_object, 0, 0, 2)
 	ZEND_ARG_INFO(0, parser)
-	ZEND_ARG_INFO(1, obj)
+	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_element_handler, 0, 0, 3)
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(xml_set_object)
 	xml_parser *parser;
 	zval *pind, *mythis;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro/", &pind, &mythis) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &pind, &mythis) == FAILURE) {
 		return;
 	}
 
