@@ -29,6 +29,7 @@ extern zend_module_entry php_ftp_module_entry;
 
 #define PHP_FTP_OPT_TIMEOUT_SEC	0
 #define PHP_FTP_OPT_AUTOSEEK	1
+#define PHP_FTP_OPT_USEPASVADDRESS	2
 #define PHP_FTP_AUTORESUME		-1
 
 PHP_MINIT_FUNCTION(ftp);

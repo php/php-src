@@ -722,10 +722,11 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	memset(&ftp->pasvaddr, 0, n);
 	sa = (struct sockaddr *) &ftp->pasvaddr;
 
-#if HAVE_IPV6
 	if (getpeername(ftp->fd, sa, &n) < 0) {
 		return 0;
 	}
+
+#if HAVE_IPV6
 	if (sa->sa_family == AF_INET6) {
 		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sa;
 		char *endptr, delimiter;
@@ -778,8 +779,9 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 		ipbox.c[n] = (unsigned char) b[n];
 	}
 	sin = (struct sockaddr_in *) sa;
-	sin->sin_family = AF_INET;
-	sin->sin_addr = ipbox.ia[0];
+	if (ftp->usepasvaddress) {
+		sin->sin_addr = ipbox.ia[0];
+	}
 	sin->sin_port = ipbox.s[2];
 
 	ftp->pasv = 2;
