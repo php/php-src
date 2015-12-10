@@ -1672,6 +1672,9 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (OP1_TYPE != IS_CONST) {
+			zend_string_release(name);
+		}
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	}

@@ -134,6 +134,10 @@ static inline void drop_leading_backslash(zval *val) {
 	}
 }
 
+static inline void alloc_cache_slots_op1(zend_op_array *op_array, zend_op *opline, uint32_t num) {
+	Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
+	op_array->cache_size += num * sizeof(void *);
+}
 static inline void alloc_cache_slots_op2(zend_op_array *op_array, zend_op *opline, uint32_t num) {
 	Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
 	op_array->cache_size += num * sizeof(void *);
@@ -162,7 +166,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FREE:
 			MAKE_NOP(opline);
 			zval_dtor(val);
-			break;
+			return 1;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
 		case ZEND_FETCH_CONSTANT:
@@ -170,27 +174,40 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_DEFINED:
 		case ZEND_NEW:
 			REQUIRES_STRING(val);
-			ZEND_OP1_TYPE(opline) = IS_CONST;
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
-			Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
-			op_array->cache_size += sizeof(void*);
+			alloc_cache_slots_op1(op_array, opline, 1);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
+			break;
+		case ZEND_FETCH_STATIC_PROP_R:
+		case ZEND_FETCH_STATIC_PROP_W:
+		case ZEND_FETCH_STATIC_PROP_RW:
+		case ZEND_FETCH_STATIC_PROP_IS:
+		case ZEND_FETCH_STATIC_PROP_UNSET:
+		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
+			TO_STRING_NOWARN(val);
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			alloc_cache_slots_op1(op_array, opline, 2);
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
+		case ZEND_FETCH_R:
+		case ZEND_FETCH_W:
+		case ZEND_FETCH_RW:
+		case ZEND_FETCH_IS:
+		case ZEND_FETCH_UNSET:
+		case ZEND_FETCH_FUNC_ARG:
 			TO_STRING_NOWARN(val);
 			/* break missing intentionally */
 		default:
-			ZEND_OP1_TYPE(opline) = IS_CONST;
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (Z_TYPE_P(val) == IS_STRING) {
-				zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
-			}
 			break;
 	}
 
+	ZEND_OP1_TYPE(opline) = IS_CONST;
+	if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
+		zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
+	}
 	return 1;
 }
 

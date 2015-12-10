@@ -5011,6 +5011,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -6811,6 +6814,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -7347,6 +7353,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CONST != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -31604,6 +31613,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CV != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -33721,6 +33733,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CV != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -34704,6 +34719,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if (IS_CV != IS_CONST) {
+			zend_string_release(name);
+		}
 
 		HANDLE_EXCEPTION();
 	}
@@ -41959,6 +41977,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(name);
+		}
 		zval_ptr_dtor_nogc(free_op1);
 		HANDLE_EXCEPTION();
 	}
@@ -42857,6 +42878,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(name);
+		}
 		zval_ptr_dtor_nogc(free_op1);
 		HANDLE_EXCEPTION();
 	}
@@ -43305,6 +43329,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 	}
 	retval = zend_std_get_static_property(ce, name, 0);
 	if (UNEXPECTED(EG(exception))) {
+		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
+			zend_string_release(name);
+		}
 		zval_ptr_dtor_nogc(free_op1);
 		HANDLE_EXCEPTION();
 	}
