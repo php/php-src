@@ -232,9 +232,10 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
 
-		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		len = Z_STRLEN(tmp);
-
+		if (Z_STRLEN(tmp)) {
+			*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		}
 		zval_ptr_dtor(&tmp);
 		return len;
 	}
@@ -281,8 +282,14 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		RETURN_FALSE; \
 	}
 
-#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE(info, id)
-#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE(info, id)
+#define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
+	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
+		DBA_ID_DONE; \
+		RETURN_FALSE; \
+	}
+
+#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
+#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE_WITH_ID(info, id)
 
 #define DBA_ID_DONE												\
 	if (key_free) efree(key_free)
@@ -578,7 +585,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	DBA_FETCH_RESOURCE(info, id);
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	DBA_WRITE_CHECK_WITH_ID;
 

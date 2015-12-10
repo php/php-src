@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #70781 (Extension tests fail on dynamic ext dependency).
     (Francois Laupretre)
 
+- DBA:
+  . Fixed key leak with invalid resource. (Laruence)
+
 - Filter:
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
