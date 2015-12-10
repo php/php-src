@@ -209,7 +209,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
 			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
-			return -1;
+			return 0;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
 		group = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
@@ -233,7 +233,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		convert_to_string(&tmp);
 
 		len = Z_STRLEN(tmp);
-		if (Z_STRLEN(tmp)) {
+		if (len) {
 			*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
 		zval_ptr_dtor(&tmp);
