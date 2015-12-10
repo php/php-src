@@ -3749,7 +3749,7 @@ ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *n
 	}
 
 	if (zend_string_equals_literal_ci(name, "class")) {
-		zend_error((ce->type == ZEND_INTERNAL_CLASS) ? E_CORE_ERROR : E_COMPILE_ERROR,
+		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 				"A class constant must not be called 'class'; it is reserved for class name fetching");
 	}
 
@@ -3765,8 +3765,13 @@ ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *n
 	if (Z_CONSTANT_P(value)) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
-	return zend_hash_add_ptr(&ce->constants_table, name, c) ?
-		SUCCESS : FAILURE;
+
+	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
+		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
+			"Cannot redefine class constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 
