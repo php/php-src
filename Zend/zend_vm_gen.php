@@ -84,6 +84,9 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_FAST_CALL"   => 1<<26,
 	"ZEND_VM_EXT_FAST_RET"    => 1<<27,
 	"ZEND_VM_EXT_ISSET"       => 1<<28,
+	"ZEND_VM_EXT_ARG_NUM"     => 1<<29,
+	"ZEND_VM_EXT_REF"         => 1<<30,
+	"ZEND_VM_EXT_SRC"         => 1<<31,
 );
 
 foreach ($vm_op_flags as $name => $val) {
@@ -118,6 +121,9 @@ $vm_ext_decode = array(
 	"FAST_CALL"            => ZEND_VM_EXT_FAST_CALL,
 	"FAST_RET"             => ZEND_VM_EXT_FAST_RET,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
+	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
+	"REF"                  => ZEND_VM_EXT_REF,
+	"SRC"                  => ZEND_VM_EXT_SRC,
 );
 
 $vm_kind_name = array(
