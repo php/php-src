@@ -5077,19 +5077,15 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 	} while (0);
 
 	ce = Z_OBJCE_P(obj);
-	clone = ce ? ce->clone : NULL;
-	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
+	clone = ce->clone;
+	clone_call = Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
-		if (ce) {
-			zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
-		} else {
-			zend_throw_error(NULL, "Trying to clone an uncloneable object");
-		}
+		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	}
 
-	if (ce && clone) {
+	if (clone) {
 		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
@@ -5109,12 +5105,11 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|CV, ANY)
 		}
 	}
 
-	if (EXPECTED(EG(exception) == NULL)) {
-		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj));
-		if (UNEXPECTED(!RETURN_VALUE_USED(opline)) || UNEXPECTED(EG(exception) != NULL)) {
-			OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
-		}
+	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj));
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
 	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
