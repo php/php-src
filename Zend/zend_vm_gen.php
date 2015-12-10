@@ -527,6 +527,25 @@ function helper_name($name, $spec, $op1, $op2) {
 	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
 }
 
+function opcode_name($name, $spec, $op1, $op2) {
+	global $prefix, $opnames, $opcodes;
+
+	if (isset($opnames[$name])) {
+		$opcode = $opcodes[$opnames[$name]];
+		// If we haven't helper with specified spicialized operands then
+		// using unspecialized helper
+		if (!isset($opcode["op1"][$op1]) &&
+		    isset($opcode["op1"]["ANY"])) {
+			$op1 = "ANY";
+		}
+		if (!isset($opcode["op2"][$op2]) &&
+		    isset($opcode["op2"]["ANY"])) {
+			$op2 = "ANY";
+		}
+	}
+	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
+}
+
 // Generates code for opcode handler or helper
 function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 	global $op1_type, $op2_type, $op1_get_zval_ptr, $op2_get_zval_ptr,
@@ -651,7 +670,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "ZEND_VM_TAIL_CALL(" . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
+						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -675,7 +694,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_LABEL";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -699,7 +718,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER";
+						return "goto " . opcode_name($matches[1], $spec, $op1, $op2) . "_HANDLER";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
