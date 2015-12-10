@@ -1483,6 +1483,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
 	defined_here = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
 
+	zend_bitset_clear(defined_here, bitset_len);
 	for (n = 1; n < cfg->blocks_count; n++) {
 		block = cfg->blocks + n;
 
