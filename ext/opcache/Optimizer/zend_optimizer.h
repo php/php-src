@@ -30,7 +30,7 @@
 #define ZEND_OPTIMIZER_PASS_3		(1<<2)   /* ++, +=, series of jumps      */
 #define ZEND_OPTIMIZER_PASS_4		(1<<3)   /* INIT_FCALL_BY_NAME -> DO_FCALL */
 #define ZEND_OPTIMIZER_PASS_5		(1<<4)   /* CFG based optimization       */
-#define ZEND_OPTIMIZER_PASS_6		(1<<5)
+#define ZEND_OPTIMIZER_PASS_6		(1<<5)   /* DFA based optimization       */
 #define ZEND_OPTIMIZER_PASS_7		(1<<6)
 #define ZEND_OPTIMIZER_PASS_8		(1<<7)
 #define ZEND_OPTIMIZER_PASS_9		(1<<8)   /* TMP VAR usage                */
@@ -66,6 +66,11 @@
 #define ZEND_DUMP_BEFORE_BLOCK_PASS (1<<18)
 #define ZEND_DUMP_AFTER_BLOCK_PASS  (1<<19)
 #define ZEND_DUMP_BLOCK_PASS_VARS   (1<<20)
+
+#define ZEND_DUMP_BEFORE_DFA_PASS   (1<<21)
+#define ZEND_DUMP_AFTER_DFA_PASS    (1<<22)
+#define ZEND_DUMP_DFA_CFG           (1<<23)
+#define ZEND_DUMP_DFA_DOMINATORS    (1<<24)
 
 typedef struct _zend_script {
 	zend_string   *filename;

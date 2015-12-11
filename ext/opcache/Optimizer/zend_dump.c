@@ -341,6 +341,99 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	fprintf(stderr, "\n");
 }
 
+void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)
+{
+	zend_basic_block *b = cfg->blocks + n;
+	int printed = 0;
+
+	fprintf(stderr, "BB%d:", n);
+	if (b->flags & ZEND_BB_START) {
+		fprintf(stderr, " start");
+	}
+	if (b->flags & ZEND_BB_FOLLOW) {
+		fprintf(stderr, " follow");
+	}
+	if (b->flags & ZEND_BB_TARGET) {
+		fprintf(stderr, " target");
+	}
+	if (b->flags & ZEND_BB_EXIT) {
+		fprintf(stderr, " exit");
+	}
+	if (b->flags & ZEND_BB_ENTRY) {
+		fprintf(stderr, " entry");
+	}
+	if (b->flags & ZEND_BB_TRY) {
+		fprintf(stderr, " try");
+	}
+	if (b->flags & ZEND_BB_CATCH) {
+		fprintf(stderr, " catch");
+	}
+	if (b->flags & ZEND_BB_FINALLY) {
+		fprintf(stderr, " finally");
+	}
+	if (b->flags & ZEND_BB_FINALLY_END) {
+		fprintf(stderr, " finally_end");
+	}
+	if (b->flags & ZEND_BB_GEN_VAR) {
+		fprintf(stderr, " gen_var");
+	}
+	if (b->flags & ZEND_BB_KILL_VAR) {
+		fprintf(stderr, " kill_var");
+	}
+	if ((dump_flags & ZEND_DUMP_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
+		fprintf(stderr, " unreachable");
+	}
+	if (b->flags & ZEND_BB_LOOP_HEADER) {
+		fprintf(stderr, " loop_header");
+	}
+	if (b->flags & ZEND_BB_IRREDUCIBLE_LOOP) {
+		fprintf(stderr, " irreducible");
+	}
+	fprintf(stderr, "\n");
+
+	if (b->predecessors_count) {
+		int *p = cfg->predecessors + b->predecessor_offset;
+		int *end = p + b->predecessors_count;
+
+		fprintf(stderr, "    ; from=(BB%d", *p);
+		for (p++; p < end; p++) {
+			fprintf(stderr, ", BB%d", *p);
+		}
+		fprintf(stderr, ")\n");
+	}
+
+	if (b->successors[0] != -1) {
+		fprintf(stderr, "    ; to=(BB%d", b->successors[0]);
+		printed = 1;
+		if (b->successors[1] != -1) {
+			fprintf(stderr, ", BB%d", b->successors[1]);
+		}
+	}
+	if (printed) {
+		fprintf(stderr, ")\n");
+	}
+
+	if (b->idom >= 0) {
+		fprintf(stderr, "    ; idom=%d\n", b->idom);
+	}
+	if (b->level >= 0) {
+		fprintf(stderr, "    ; level=%d\n", b->level);
+	}
+	if (b->loop_header >= 0) {
+		fprintf(stderr, "    ; loop_header=%d\n", b->level);
+	}
+	if (b->children >= 0) {
+		int j = b->children;
+		fprintf(stderr, "    ; children=(BB%d", j);
+		j = cfg->blocks[j].next_child;
+		while (j >= 0) {
+			fprintf(stderr, ", BB%d", j);
+			j = cfg->blocks[j].next_child;
+		}
+		fprintf(stderr, ")\n");
+	}
+}
+
 void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t dump_flags, const char *msg)
 {
 	int i;
@@ -373,69 +466,8 @@ void zend_dump_op_array(const zend_op_array *op_array, const zend_cfg *cfg, uint
 			if ((dump_flags & ZEND_DUMP_UNREACHABLE) || (b->flags & ZEND_BB_REACHABLE)) {
 				const zend_op *opline;
 				const zend_op *end;
-				int printed = 0;
 
-				fprintf(stderr, "BB%d:", n);
-				if (b->flags & ZEND_BB_START) {
-					fprintf(stderr, " start");
-				}
-				if (b->flags & ZEND_BB_FOLLOW) {
-					fprintf(stderr, " follow");
-				}
-				if (b->flags & ZEND_BB_TARGET) {
-					fprintf(stderr, " target");
-				}
-				if (b->flags & ZEND_BB_EXIT) {
-					fprintf(stderr, " exit");
-				}
-				if (b->flags & ZEND_BB_ENTRY) {
-					fprintf(stderr, " entry");
-				}
-				if (b->flags & ZEND_BB_TRY) {
-					fprintf(stderr, " try");
-				}
-				if (b->flags & ZEND_BB_CATCH) {
-					fprintf(stderr, " catch");
-				}
-				if (b->flags & ZEND_BB_FINALLY) {
-					fprintf(stderr, " finally");
-				}
-				if (b->flags & ZEND_BB_FINALLY_END) {
-					fprintf(stderr, " finally_end");
-				}
-				if (b->flags & ZEND_BB_GEN_VAR) {
-					fprintf(stderr, " gen_var");
-				}
-				if (b->flags & ZEND_BB_KILL_VAR) {
-					fprintf(stderr, " kill_var");
-				}
-				if ((dump_flags & ZEND_DUMP_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
-					fprintf(stderr, " unreachable");
-				}
-
-				if (b->predecessors_count) {
-					int *p = cfg->predecessors + b->predecessor_offset;
-					int *end = p + b->predecessors_count;
-
-					fprintf(stderr, " from=(BB%d", *p);
-					for (p++; p < end; p++) {
-						fprintf(stderr, ", BB%d", *p);
-					}
-					fprintf(stderr, ")");
-				}
-
-				if (b->successors[0] != -1) {
-					fprintf(stderr, " to=(BB%d", b->successors[0]);
-					printed = 1;
-					if (b->successors[1] != -1) {
-						fprintf(stderr, ", BB%d", b->successors[1]);
-					}
-				}
-				if (printed) {
-					fprintf(stderr, ")");
-				}
-				fprintf(stderr, "\n");
-
+				zend_dump_block_info(cfg, n, dump_flags);
 				if (!(b->flags & ZEND_BB_EMPTY)) {
 					opline = op_array->opcodes + b->start;
 					end = op_array->opcodes + b->end + 1;

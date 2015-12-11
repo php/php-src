@@ -97,6 +97,7 @@ void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);
 void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_nop_removal(zend_op_array *op_array);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);

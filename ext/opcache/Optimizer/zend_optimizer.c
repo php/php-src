@@ -610,6 +610,16 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
+	/* pass 6:
+	 * - DFA optimization
+	 */
+	if (ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) {
+		optimize_dfa(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
+			zend_dump_op_array(op_array, NULL, 1, "after pass 6");
+		}
+	}
+
 	/* pass 9:
 	 * - Optimize temp variables usage
 	 */

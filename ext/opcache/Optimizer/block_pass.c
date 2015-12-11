@@ -1794,7 +1794,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		}
 
 		/* Eliminate unreachable basic blocks */
-		zend_remark_reachable_blocks(op_array, &cfg);
+		zend_cfg_remark_reachable_blocks(op_array, &cfg);
 
 		/* Merge Blocks */
 		zend_merge_blocks(op_array, &cfg);

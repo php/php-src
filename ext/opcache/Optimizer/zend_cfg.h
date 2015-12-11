@@ -23,6 +23,8 @@
 #define ZEND_FUNC_TOO_DYNAMIC    (1<<0)
 #define ZEND_FUNC_HAS_CALLS      (1<<1)
 #define ZEND_FUNC_VARARG         (1<<2)
+#define ZEND_FUNC_NO_LOOPS       (1<<3)
+#define ZEND_FUNC_IRREDUCIBLE    (1<<4)
 
 /* zend_basic_bloc.flags */
 #define ZEND_BB_START            (1<<0)  /* fist block             */
@@ -93,11 +95,20 @@ typedef struct _zend_cfg {
 	uint32_t         *map;
 } zend_cfg;
 
+#define CRT_CONSTANT(node) \
+	(rt_constants ? \
+		RT_CONSTANT(op_array, (node)) \
+	: \
+		CT_CONSTANT_EX(op_array, (node).constant) \
+	)
+
 BEGIN_EXTERN_C()
 
-int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants, int stackless, zend_cfg *cfg, uint32_t *func_flags);
-void zend_remark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg);
-int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
+int  zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants, int stackless, zend_cfg *cfg, uint32_t *func_flags);
+void zend_cfg_remark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg);
+int  zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
+int  zend_cfg_compute_dominators_tree(zend_op_array *op_array, zend_cfg *cfg);
+int  zend_cfg_identify_loops(zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags);
 
 END_EXTERN_C()
 
