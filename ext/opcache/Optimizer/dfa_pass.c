@@ -45,7 +45,7 @@ void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build SSA */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	
+
 	if (zend_build_cfg(&ctx->arena, op_array, 0, 0, &cfg, &flags) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;

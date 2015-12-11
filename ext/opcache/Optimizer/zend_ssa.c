@@ -384,7 +384,7 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 		return FAILURE;
 	}
 	ssa->blocks = ssa_blocks;
-	
+
 	/* Compute Variable Liveness */
 	dfg.vars = op_array->last_var + op_array->T;
 	dfg.size = set_size = zend_bitset_len(dfg.vars);
@@ -395,7 +395,7 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 	dfg.use = dfg.def + set_size * blocks_count;
 	dfg.in  = dfg.use + set_size * blocks_count;
 	dfg.out = dfg.in  + set_size * blocks_count;
-	
+
 	if (zend_build_dfg(op_array, cfg, &dfg) != SUCCESS) {
 		return FAILURE;
 	}
@@ -525,7 +525,7 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 					bt = cfg->blocks[j].successors[0];
 					bf = cfg->blocks[j].successors[1];
 				}
-		    	break;
+				break;
 			default:
 				continue;
 		}
@@ -550,33 +550,33 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 					if (op->result_type == IS_TMP_VAR &&
 					    op->result.var == (opline-1)->op1.var) {
 					    if (op->opcode == ZEND_POST_DEC) {
-					    	if (op->op1_type == IS_CV) {
-					    		var1 = EX_VAR_TO_NUM(op->op1.var);
-					    		val2--;
-					    	}
+							if (op->op1_type == IS_CV) {
+								var1 = EX_VAR_TO_NUM(op->op1.var);
+								val2--;
+							}
 					    } else if (op->opcode == ZEND_POST_INC) {
-					    	if (op->op1_type == IS_CV) {
-					    		var1 = EX_VAR_TO_NUM(op->op1.var);
-					    		val2++;
-					    	}
+							if (op->op1_type == IS_CV) {
+								var1 = EX_VAR_TO_NUM(op->op1.var);
+								val2++;
+							}
 					    } else if (op->opcode == ZEND_ADD) {
-					    	if (op->op1_type == IS_CV &&
-					    	    op->op2_type == IS_CONST &&
+							if (op->op1_type == IS_CV &&
+							    op->op2_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-					    		var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2 -= Z_LVAL_P(CRT_CONSTANT(op->op2));						
-					    	} else if (op->op2_type == IS_CV &&
-					    	    op->op1_type == IS_CONST &&
+								var1 = EX_VAR_TO_NUM(op->op1.var);
+								val2 -= Z_LVAL_P(CRT_CONSTANT(op->op2));
+							} else if (op->op2_type == IS_CV &&
+							           op->op1_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
-					    		var1 = EX_VAR_TO_NUM(op->op2.var);
+								var1 = EX_VAR_TO_NUM(op->op2.var);
 								val2 -= Z_LVAL_P(CRT_CONSTANT(op->op1));
-							}							
+							}
 					    } else if (op->opcode == ZEND_SUB) {
-					    	if (op->op1_type == IS_CV &&
-					    	    op->op2_type == IS_CONST &&
+							if (op->op1_type == IS_CV &&
+							    op->op2_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-					    		var1 = EX_VAR_TO_NUM(op->op1.var);
-								val2 += Z_LVAL_P(CRT_CONSTANT(op->op2));						
+								var1 = EX_VAR_TO_NUM(op->op1.var);
+								val2 += Z_LVAL_P(CRT_CONSTANT(op->op2));
 							}
 					    }
 					    break;
@@ -593,33 +593,33 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 					if (op->result_type == IS_TMP_VAR &&
 					    op->result.var == (opline-1)->op2.var) {
 					    if (op->opcode == ZEND_POST_DEC) {
-					    	if (op->op1_type == IS_CV) {
-					    		var2 = EX_VAR_TO_NUM(op->op1.var);
-					    		val1--;
-					    	}
+							if (op->op1_type == IS_CV) {
+								var2 = EX_VAR_TO_NUM(op->op1.var);
+								val1--;
+							}
 					    } else if (op->opcode == ZEND_POST_INC) {
-					    	if (op->op1_type == IS_CV) {
-					    		var2 = EX_VAR_TO_NUM(op->op1.var);
-					    		val1++;
-					    	}
+							if (op->op1_type == IS_CV) {
+								var2 = EX_VAR_TO_NUM(op->op1.var);
+								val1++;
+							}
 					    } else if (op->opcode == ZEND_ADD) {
-					    	if (op->op1_type == IS_CV &&
-					    	    op->op2_type == IS_CONST &&
+							if (op->op1_type == IS_CV &&
+							    op->op2_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-					    		var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1 -= Z_LVAL_P(CRT_CONSTANT(op->op2));						
-					    	} else if (op->op2_type == IS_CV &&
-					    	    op->op1_type == IS_CONST &&
+								var2 = EX_VAR_TO_NUM(op->op1.var);
+								val1 -= Z_LVAL_P(CRT_CONSTANT(op->op2));
+							} else if (op->op2_type == IS_CV &&
+							           op->op1_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op1)) == IS_LONG) {
-					    		var2 = EX_VAR_TO_NUM(op->op2.var);
+								var2 = EX_VAR_TO_NUM(op->op2.var);
 								val1 -= Z_LVAL_P(CRT_CONSTANT(op->op1));
-							}							
+							}
 					    } else if (op->opcode == ZEND_SUB) {
-					    	if (op->op1_type == IS_CV &&
-					    	    op->op2_type == IS_CONST &&
+							if (op->op1_type == IS_CV &&
+							    op->op2_type == IS_CONST &&
 							    Z_TYPE_P(CRT_CONSTANT(op->op2)) == IS_LONG) {
-					    		var2 = EX_VAR_TO_NUM(op->op1.var);
-								val1 += Z_LVAL_P(CRT_CONSTANT(op->op2));						
+								var2 = EX_VAR_TO_NUM(op->op1.var);
+								val1 += Z_LVAL_P(CRT_CONSTANT(op->op2));
 							}
 					    }
 					    break;
@@ -641,8 +641,8 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 				} else if ((opline-1)->op2_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op2)) == IS_TRUE) {
 					val2 += 12;
-			    } else {
-			    	var1 = -1;
+				} else {
+					var1 = -1;
 				}
 			} else if (var1 < 0 && var2 >= 0) {
 				if ((opline-1)->op1_type == IS_CONST &&
@@ -654,13 +654,13 @@ int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, i
 				} else if ((opline-1)->op1_type == IS_CONST &&
 				    Z_TYPE_P(CRT_CONSTANT((opline-1)->op1)) == IS_TRUE) {
 					val1 += 1;
-			    } else {
-			    	var2 = -1;
+				} else {
+					var2 = -1;
 				}
 			}
 
 			if (var1 >= 0) {
-				if ((opline-1)->opcode == ZEND_IS_EQUAL) {					
+				if ((opline-1)->opcode == ZEND_IS_EQUAL) {
 					if (add_pi(arena, op_array, cfg, &dfg, ssa, j, bt, var1, var2, var2, val2, val2, 0, 0, 0) != SUCCESS) {
 						return FAILURE;
 					}
