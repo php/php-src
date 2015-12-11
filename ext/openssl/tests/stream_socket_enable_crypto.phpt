@@ -10,7 +10,7 @@ if (phpversion() < "5.3.0") {
 ?>
 --FILE--
 <?php
-$serverUri = "ssl://127.0.0.1:64321";
+$serverUri = "tcp://127.0.0.1:12342";
 $clientFlags = STREAM_CLIENT_CONNECT;
 $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => true]]);
 $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
