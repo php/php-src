@@ -15,7 +15,7 @@ $clientFlags = STREAM_CLIENT_CONNECT;
 $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => true]]);
 $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
 
-if (is_resource($db_link)) {
+if (is_resource($sock)) {
   var_dump(stream_socket_enable_crypto($sock, false));
   var_dump(stream_socket_enable_crypto($sock, true));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv2_CLIENT));
