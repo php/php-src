@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
 
+- Readline:
+  . Fixed bug #71094 (readline_completion_function corrupts static array on
+    second TAB). (Nikita)
+
 - SPL:
   . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
     wrong number of parameters). (Laruence)

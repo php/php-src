@@ -188,7 +188,7 @@ PHP_MSHUTDOWN_FUNCTION(readline)
 
 PHP_RSHUTDOWN_FUNCTION(readline)
 {
-	zval_dtor(&_readline_completion);
+	zval_ptr_dtor(&_readline_completion);
 	ZVAL_UNDEF(&_readline_completion);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
@@ -505,7 +505,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 	for (i = 0; i < 3; i++) {
 		zval_ptr_dtor(&params[i]);
 	}
-	zval_dtor(&_readline_array);
+	zval_ptr_dtor(&_readline_array);
 
 	return matches;
 }
@@ -526,8 +526,8 @@ PHP_FUNCTION(readline_completion_function)
 	}
 	zend_string_release(name);
 
-	zval_dtor(&_readline_completion);
-	ZVAL_DUP(&_readline_completion, arg);
+	zval_ptr_dtor(&_readline_completion);
+	ZVAL_COPY(&_readline_completion, arg);
 
 	rl_attempted_completion_function = _readline_completion_cb;
 	if (rl_attempted_completion_function == NULL) {
@@ -552,7 +552,7 @@ static void php_rl_callback_handler(char *the_line)
 	call_user_function(CG(function_table), NULL, &_prepped_callback, &dummy, 1, params);
 
 	zval_ptr_dtor(&params[0]);
-	zval_dtor(&dummy);
+	zval_ptr_dtor(&dummy);
 }
 
 /* {{{ proto void readline_callback_handler_install(string prompt, mixed callback)
@@ -577,10 +577,10 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
-		zval_dtor(&_prepped_callback);
+		zval_ptr_dtor(&_prepped_callback);
 	}
 
-	ZVAL_DUP(&_prepped_callback, callback);
+	ZVAL_COPY(&_prepped_callback, callback);
 
 	rl_callback_handler_install(prompt, php_rl_callback_handler);
 
@@ -604,7 +604,7 @@ PHP_FUNCTION(readline_callback_handler_remove)
 {
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
-		zval_dtor(&_prepped_callback);
+		zval_ptr_dtor(&_prepped_callback);
 		ZVAL_UNDEF(&_prepped_callback);
 		RETURN_TRUE;
 	}
