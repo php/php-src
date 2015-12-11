@@ -31,3 +31,27 @@ bool(false)
 
 Warning: stream_socket_enable_crypto(): When enabling encryption you must specify the crypto type in %s on line %d
 bool(false)
+
+Warning: stream_socket_enable_crypto(): SSLv2 unavailable in the OpenSSL library against which PHP is linked in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL: Broken pipe in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
+
+Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d
+bool(false)
