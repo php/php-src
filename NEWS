@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #66909 (configure fails utf8_to_mutf7 test). (Michael Orlitzky)
   . Fixed bug #70781 (Extension tests fail on dynamic ext dependency).
     (Francois Laupretre)
+  . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
 
 - DBA:
   . Fixed key leak with invalid resource. (Laruence)
