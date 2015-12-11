@@ -1860,7 +1860,6 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 		case BP_VAR_R:
 			return;
 		case BP_VAR_W:
-		case BP_VAR_REF:
 			opline->opcode += 1 * factor;
 			return;
 		case BP_VAR_RW:
@@ -2830,7 +2829,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(target_ast);
 
 	zend_compile_var(&target_node, target_ast, BP_VAR_W);
-	zend_compile_var(&source_node, source_ast, BP_VAR_REF);
+	zend_compile_var(&source_node, source_ast, BP_VAR_W);
 
 	if (source_node.op_type != IS_VAR && zend_is_call(source_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
@@ -3805,7 +3804,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
 	} else if (by_ref && zend_is_variable(expr_ast) && !zend_is_call(expr_ast)) {
-		zend_compile_var(&expr_node, expr_ast, BP_VAR_REF);
+		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
@@ -6502,7 +6501,7 @@ void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 
 	if (value_ast) {
 		if (returns_by_ref && zend_is_variable(value_ast) && !zend_is_call(value_ast)) {
-			zend_compile_var(&value_node, value_ast, BP_VAR_REF);
+			zend_compile_var(&value_node, value_ast, BP_VAR_W);
 		} else {
 			zend_compile_expr(&value_node, value_ast);
 		}
@@ -7467,9 +7466,7 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			*result = *zend_ast_get_znode(ast);
 			return;
 		default:
-			if (type == BP_VAR_W || type == BP_VAR_REF
-				|| type == BP_VAR_RW || type == BP_VAR_UNSET
-			) {
+			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use temporary expression in write context");
 			}
