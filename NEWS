@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Jan 2016 PHP 7.0.2
 
 - Core:
+  . Fixed bug memleak in header_register_callback. (Laruence)
   . Fixed bug #71067 (Local object in class method stays in memory for each
     call). (Laruence)
   . Fixed bug #66909 (configure fails utf8_to_mutf7 test). (Michael Orlitzky)
