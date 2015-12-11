@@ -136,7 +136,6 @@ typedef struct _sapi_globals_struct {
 	HashTable known_post_content_types;
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
-	zend_bool callback_run;
 } sapi_globals_struct;
 
 
