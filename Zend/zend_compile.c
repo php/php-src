@@ -3809,8 +3809,6 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	zend_handle_loops_and_finally();
-
 	if (CG(context).in_finally) {
 		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL);
 		opline->op1_type = IS_TMP_VAR;
@@ -3821,6 +3819,9 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
 	}
+
+	zend_handle_loops_and_finally();
+
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
 
