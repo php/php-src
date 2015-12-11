@@ -6,6 +6,10 @@ PHP                                                                        NEWS
 
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
 
+- Opcache:
+  . Fixed bug #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32
+    on the same server). (Anatol)
+
 17 Dec 2015, PHP 5.6.17
 
 - Core:
