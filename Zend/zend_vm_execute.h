@@ -4253,7 +4253,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(
 		if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			if (EXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
 			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}
@@ -4286,7 +4286,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DEFINED_SPEC_CONST_HANDLER(ZEN
 		result = 1;
 	} else if ((c = zend_quick_get_constant(EX_CONSTANT(opline->op1), 0)) == NULL) {
 		result = 0;
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	} else {
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), c);
 		result = 1;
@@ -12491,7 +12490,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZE
 		if (IS_TMP_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			if (EXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
 			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}
@@ -16304,7 +16303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZE
 		if (IS_VAR != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			if (EXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
 			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}
@@ -30296,7 +30295,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEN
 		if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			if (EXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
 			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}

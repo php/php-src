@@ -7906,7 +7906,7 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY, TYPE)
 		if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
 			zend_class_entry *ce = Z_OBJCE_P(value);
 
-			if (UNEXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
+			if (EXPECTED(ZSTR_LEN(ce->name) != sizeof("__PHP_Incomplete_Class") - 1) ||
 			    EXPECTED(memcmp(ZSTR_VAL(ce->name), "__PHP_Incomplete_Class", sizeof("__PHP_Incomplete_Class") - 1) != 0)) {
 				result = 1;
 			}
@@ -7939,7 +7939,6 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
 		result = 1;
 	} else if ((c = zend_quick_get_constant(EX_CONSTANT(opline->op1), 0)) == NULL) {
 		result = 0;
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	} else {
 		CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), c);
 		result = 1;
