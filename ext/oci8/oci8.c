@@ -40,6 +40,8 @@
 /* PHP 5.2 is the minimum supported version for OCI8 2.0 */
 #if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
 #error Use PHP OCI8 1.4 for your version of PHP
+#elif PHP_MAJOR_VERSION >= 7
+#error Use PHP OCI8 2.1 for your version of PHP
 #endif
 
 #include "php_oci8.h"
