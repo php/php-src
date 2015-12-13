@@ -4,6 +4,8 @@ Bug #71063 (filter_input(INPUT_ENV, ..) does not work)
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --ENV--
 PATH=/
+--INI--
+variables_order=E
 --FILE--
 <?php
 var_dump(count($_ENV['PATH']) > 0);
