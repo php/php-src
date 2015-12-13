@@ -218,7 +218,7 @@ static void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, 
 	zend_vspprintf(&message, 0, format, va);
 
 	if (fetch_type & ZEND_FETCH_CLASS_EXCEPTION) {
-		zend_throw_error(exception_ce, message);
+		zend_throw_error(exception_ce, "%s", message);
 	} else {
 		zend_error(E_ERROR, "%s", message);
 	}
