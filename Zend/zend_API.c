@@ -25,6 +25,7 @@
 #include "zend_execute.h"
 #include "zend_API.h"
 #include "zend_modules.h"
+#include "zend_extensions.h"
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
@@ -2001,7 +2002,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 				lcname = zend_string_alloc(name_len, 0);
 				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
 
-				if (zend_hash_exists(&module_registry, lcname)) {
+				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
 					zend_string_free(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
