@@ -810,7 +810,7 @@ PHP_FUNCTION(com_message_pump)
 }
 /* }}} */
 
-/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitive])
+/* {{{ proto bool com_load_typelib(string typelib_name [, bool case_insensitive])
    Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
 {
