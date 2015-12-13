@@ -5431,6 +5431,19 @@ PHP_FUNCTION(openssl_encrypt)
 			zend_string_release(outbuf);
 			RETVAL_STR(base64_str);
 		}
+		if (mode.is_aead) {
+			zend_string *tag_str = zend_string_alloc(tag_len, 0);
+
+			if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode.aead_get_tag_flag, tag_len, ZSTR_VAL(tag_str)) == 1) {
+				zval_dtor(tag);
+				ZSTR_VAL(tag_str)[tag_len] = '\0';
+				ZSTR_LEN(tag_str) = tag_len;
+				ZVAL_NEW_STR(tag, tag_str);
+			} else {
+				zend_string_release(tag_str);
+				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
+			}
+		}
 	} else {
 		zend_string_release(outbuf);
 		RETVAL_FALSE;
