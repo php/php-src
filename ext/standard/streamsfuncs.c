@@ -1330,7 +1330,7 @@ PHP_FUNCTION(stream_get_line)
 
 /* }}} */
 
-/* {{{ proto bool stream_set_blocking(resource socket, int mode)
+/* {{{ proto bool stream_set_blocking(resource socket, bool mode)
    Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(stream_set_blocking)
 {

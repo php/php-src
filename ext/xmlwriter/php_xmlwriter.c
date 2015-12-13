@@ -1622,7 +1622,7 @@ static PHP_FUNCTION(xmlwriter_end_dtd_entity)
 }
 /* }}} */
 
-/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content [, int pe [, string pubid [, string sysid [, string ndataid]]]])
+/* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content [, bool pe [, string pubid [, string sysid [, string ndataid]]]])
 Write full DTD Entity tag - returns FALSE on error */
 static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 {
