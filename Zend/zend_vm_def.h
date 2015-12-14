@@ -1652,6 +1652,10 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+				if (OP1_TYPE != IS_CONST) {
+					zend_string_release(name);
+				}
+				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -3120,6 +3124,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 		ce = zend_fetch_class(NULL, opline->op1.num);
 		if (UNEXPECTED(ce == NULL)) {
 			ZEND_ASSERT(EG(exception));
+			FREE_UNFETCHED_OP2();
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -5696,6 +5701,10 @@ ZEND_VM_HANDLER(179, ZEND_UNSET_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CLASS_FETCH
 		ce = zend_fetch_class(NULL, opline->op2.num);
 		if (UNEXPECTED(ce == NULL)) {
 			ZEND_ASSERT(EG(exception));
+			if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
+				zend_string_release(Z_STR(tmp));
+			}
+			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
 	} else {
@@ -6589,6 +6598,10 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CLA
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+				if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
+					zend_string_release(Z_STR(tmp));
+				}
+				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
 		} else {
