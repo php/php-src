@@ -324,6 +324,7 @@ ZEND_API int zend_declare_property_double(zend_class_entry *ce, const char *name
 ZEND_API int zend_declare_property_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value, int access_type);
 ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_len, int access_type);
 
+ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment);
 ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value);
 ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length);
 ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value);
@@ -692,9 +693,9 @@ typedef enum _zend_expected_type {
 	Z_EXPECTED_LAST
 } zend_expected_type;
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramers_count_error(int num_args, int min_num_args, int max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_type_error(int num, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_paramer_class_error(int num, char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int num_args, int min_num_args, int max_num_args);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, int num, char *error);
 
 #define ZPP_ERROR_OK             0
@@ -729,7 +730,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 			    (UNEXPECTED(_num_args > _max_num_args) && \
 			     EXPECTED(_max_num_args >= 0))) { \
 				if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-					zend_wrong_paramers_count_error(_num_args, _min_num_args, _max_num_args); \
+					zend_wrong_parameters_count_error(_num_args, _min_num_args, _max_num_args); \
 				} \
 				error_code = ZPP_ERROR_FAILURE; \
 				break; \
@@ -747,9 +748,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int severity, in
 				if (error_code == ZPP_ERROR_WRONG_CALLBACK) { \
 					zend_wrong_callback_error(E_WARNING, _i, _error); \
 				} else if (error_code == ZPP_ERROR_WRONG_CLASS) { \
-					zend_wrong_paramer_class_error(_i, _error, _arg); \
+					zend_wrong_parameter_class_error(_i, _error, _arg); \
 				} else if (error_code == ZPP_ERROR_WRONG_ARG) { \
-					zend_wrong_paramer_type_error(_i, _expected_type, _arg); \
+					zend_wrong_parameter_type_error(_i, _expected_type, _arg); \
 				} \
 			} \
 			failure; \

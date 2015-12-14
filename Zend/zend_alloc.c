@@ -506,9 +506,9 @@ static void zend_mm_munmap(void *addr, size_t size)
 /* number of trailing set (1) bits */
 static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(~bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -545,9 +545,9 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 /* number of trailing zero bits (0x01 -> 1; 0x40 -> 6; 0x00 -> LEN) */
 static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(bitset);
-#elif defined(__GNUC__) || __has_builtin(__builtin_ctzll)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -1161,7 +1161,7 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 /* higher set bit number (0->N/A, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
 static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
-#if defined(__GNUC__) || __has_builtin(__builtin_clz)
+#if (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
 #elif defined(_WIN32)
 	unsigned long index;
@@ -1462,7 +1462,15 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 #if ZEND_DEBUG
 			size = real_size;
 #endif
+#ifdef ZEND_WIN32
+			/* On Windows we don't have ability to extend huge blocks in-place.
+			 * We allocate them with 2MB size granularity, to avoid many 
+			 * reallocations when they are extended by small pieces
+			 */
+			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 			if (new_size == old_size) {
 #if ZEND_DEBUG
 				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1507,7 +1515,9 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 					heap->real_size += new_size - old_size;
 #endif
 #if ZEND_MM_STAT
+					heap->real_peak = MAX(heap->real_peak, heap->real_size);
 					heap->size += new_size - old_size;
+					heap->peak = MAX(heap->peak, heap->size);
 #endif
 #if ZEND_DEBUG
 					zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1618,9 +1628,19 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 	}
 
 	/* Naive reallocation */
+#if ZEND_MM_STAT
+	do {
+		size_t orig_peak = heap->peak;
+		size_t orig_real_peak = heap->real_peak;
+#endif
 	ret = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	memcpy(ret, ptr, MIN(old_size, copy_size));
 	zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+#if ZEND_MM_STAT
+		heap->peak = MAX(orig_peak, heap->size);
+		heap->real_peak = MAX(orig_real_peak, heap->real_size);
+	} while (0);
+#endif
 	return ret;
 }
 
@@ -1710,7 +1730,15 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 
 static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+#ifdef ZEND_WIN32
+	/* On Windows we don't have ability to extend huge blocks in-place.
+	 * We allocate them with 2MB size granularity, to avoid many 
+	 * reallocations when they are extended by small pieces
+	 */
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+#else
 	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+#endif
 	void *ptr;
 
 #if ZEND_MM_LIMIT

@@ -714,7 +714,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		if (Z_ISUNDEF(agg_context->zval_context)) {
 			ZVAL_NULL(&agg_context->zval_context);
 		}
-		ZVAL_COPY_VALUE(&zargs[0], &agg_context->zval_context);
+		ZVAL_DUP(&zargs[0], &agg_context->zval_context);
 		ZVAL_LONG(&zargs[1], agg_context->row_count);
 	}
 
@@ -748,6 +748,10 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 
 	if ((ret = zend_call_function(&fc->fci, &fc->fcc)) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
+	}
+
+	if (is_agg) {
+		zval_ptr_dtor(&zargs[0]);
 	}
 
 	/* clean up the params */
@@ -867,6 +871,8 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 		if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
 		}
+	} else {
+		ZVAL_UNDEF(&retval);
 	}
 
 	zval_ptr_dtor(&zargs[0]);
@@ -1521,7 +1527,7 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_BLOB:
 				{
 					php_stream *stream = NULL;
-					zend_string *buffer;
+					zend_string *buffer = NULL;
 					if (Z_TYPE_P(parameter) == IS_RESOURCE) {
 						php_stream_from_zval_no_verify(stream, parameter);
 						if (stream == NULL) {
@@ -1530,14 +1536,14 @@ PHP_METHOD(sqlite3stmt, execute)
 						}
 						buffer = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					} else {
-						convert_to_string(parameter);
-						buffer = Z_STR_P(parameter);
+						buffer = zval_get_string(parameter);
 					}
 
-					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
-
-					if (stream) {
+					if (buffer) {
+						sqlite3_bind_blob(stmt_obj->stmt, param->param_number, ZSTR_VAL(buffer), ZSTR_LEN(buffer), SQLITE_TRANSIENT);
 						zend_string_release(buffer);
+					} else {
+						sqlite3_bind_null(stmt_obj->stmt, param->param_number);
 					}
 					break;
 				}

@@ -2780,7 +2780,7 @@ PHP_METHOD(DateTime, __set_state)
 		RETURN_FALSE;
 	}
 
-	myht = HASH_OF(array);
+	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_date, return_value);
 	dateobj = Z_PHPDATE_P(return_value);
@@ -2802,7 +2802,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 		RETURN_FALSE;
 	}
 
-	myht = HASH_OF(array);
+	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	dateobj = Z_PHPDATE_P(return_value);
@@ -3579,9 +3579,9 @@ PHP_FUNCTION(date_diff)
 	zval         *object1, *object2;
 	php_date_obj *dateobj1, *dateobj2;
 	php_interval_obj *interval;
-	zend_long          absolute = 0;
+	zend_bool      absolute = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|b", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj1 = Z_PHPDATE_P(object1);
@@ -3699,7 +3699,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 		RETURN_FALSE;
 	}
 
-	myht = HASH_OF(array);
+	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
@@ -4161,7 +4161,7 @@ PHP_METHOD(DateInterval, __set_state)
 		RETURN_FALSE;
 	}
 
-	myht = HASH_OF(array);
+	myht = Z_ARRVAL_P(array);
 
 	php_date_instantiate(date_ce_interval, return_value);
 	intobj = Z_PHPINTERVAL_P(return_value);
@@ -4570,7 +4570,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 			add_assoc_null_ex(&element, "timezone_id", sizeof("timezone_id") - 1);
 		}
 
-		abbr_array_p = zend_hash_str_find(HASH_OF(return_value), entry->name, strlen(entry->name));
+		abbr_array_p = zend_hash_str_find(Z_ARRVAL_P(return_value), entry->name, strlen(entry->name));
 		if (!abbr_array_p) {
 			array_init(&abbr_array);
 			add_assoc_zval(return_value, entry->name, &abbr_array);

@@ -707,10 +707,9 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 				if (!Z_ISREF(param->parameter)) {
 					continue;
 				}
-				// ???? convert_to_string(&param->parameter);
 
 				/* delete old value */
-				zval_dtor(Z_REFVAL(param->parameter));
+				zval_ptr_dtor(Z_REFVAL(param->parameter));
 
 				/* set new value */
 				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, (int *)&param->param_type);
@@ -809,7 +808,7 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
 		if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
-		    /* Added to free constructor arguments ??? */
+		    /* Added to free constructor arguments */
 			zend_fcall_info_args_clear(&stmt->fetch.cls.fci, 1);
 		} else {
 			efree(stmt->fetch.cls.fci.params);
@@ -1005,8 +1004,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 		}
 
 		if (return_all && how != PDO_FETCH_KEY_PAIR) {
-			//???
-			//ZVAL_NULL(&grp_val);
 			if (flags == PDO_FETCH_GROUP && how == PDO_FETCH_COLUMN && stmt->fetch.column > 0) {
 				fetch_value(stmt, &grp_val, colno, NULL);
 			} else {
@@ -1510,9 +1507,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	}
 	if (!error) {
 		if ((how & PDO_FETCH_GROUP)) {
-			do {
-				//??? MAKE_STD_ZVAL(data);
-			} while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
 		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
 			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
 		} else {
@@ -2509,9 +2504,6 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 				if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
 				    strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
 					fetch_value(stmt, rv, colno, NULL);
-					//???
-					//Z_SET_REFCOUNT_P(rv, 0);
-					//Z_UNSET_ISREF_P(rv);
 					return rv;
 				}
 			}
@@ -2522,10 +2514,6 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 			}
 		}
 	}
-
-	//???
-	//Z_SET_REFCOUNT_P(return_value, 0);
-	//Z_UNSET_ISREF_P(return_value);
 
 	return rv;
 }

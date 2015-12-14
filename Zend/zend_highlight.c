@@ -25,6 +25,7 @@
 #include "zend_highlight.h"
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
+#include "zend_exceptions.h"
 
 ZEND_API void zend_html_putc(char c)
 {
@@ -168,6 +169,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	}
 	zend_printf("</span>\n");
 	zend_printf("</code>");
+
+	/* Discard parse errors thrown during tokenization */
+	zend_clear_exception();
 }
 
 ZEND_API void zend_strip(void)

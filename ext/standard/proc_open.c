@@ -101,7 +101,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		return env;
 	}
 
-	target_hash = HASH_OF(environment);
+	target_hash = Z_ARRVAL_P(environment);
 	if (!target_hash) {
 		return env;
 	}

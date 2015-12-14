@@ -105,15 +105,24 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				call_stack[call].opline = NULL;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
+			case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (call_stack[call - 1].func) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
-						opline->opcode -= 9;
+						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
+							opline->opcode -= 9;
+						} else {
+							opline->opcode = ZEND_FETCH_STATIC_PROP_W;
+						}
 					} else {
 						opline->extended_value &= ZEND_FETCH_TYPE_MASK;
-						opline->opcode -= 12;
+						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
+							opline->opcode -= 12;
+						} else {
+							opline->opcode = ZEND_FETCH_STATIC_PROP_R;
+						}
 					}
 				}
 				break;

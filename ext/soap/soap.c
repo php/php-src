@@ -2941,6 +2941,7 @@ PHP_METHOD(SoapClient, __call)
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
 			/*zval_add_ref(param);*/
+			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
 		} ZEND_HASH_FOREACH_END();
@@ -3097,14 +3098,15 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
    SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-  char *buf, *location, *action;
-  size_t   buf_size, location_size, action_size;
-  zend_long  version;
-  zend_long  one_way = 0;
-  zval *this_ptr = getThis();
+	zend_string *buf;
+	char      *location, *action;
+	size_t     location_size, action_size;
+	zend_long  version;
+	zend_long  one_way = 0;
+	zval      *this_ptr = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl|l",
-	    &buf, &buf_size,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|l",
+	    &buf,
 	    &location, &location_size,
 	    &action, &action_size,
 	    &version, &one_way) == FAILURE) {
@@ -3114,10 +3116,10 @@ PHP_METHOD(SoapClient, __doRequest)
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
 	    return_value)) {
 		return;
 	}
@@ -4801,7 +4803,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 						enc = enc->details.sdl_type->encode;
 					}
 					if (enc) {
-						smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						if (spaces.s) {
+							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						}
 						smart_str_appendc(buf, ' ');
 						smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
 						smart_str_appendl(buf, " _;\n", 4);
@@ -4814,7 +4818,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					sdlAttributePtr attr;
 
 					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
-						smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						if (spaces.s) {
+							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
+						}
 						smart_str_appendc(buf, ' ');
 						if (attr->encode && attr->encode->details.type_str) {
 							smart_str_appends(buf, attr->encode->details.type_str);

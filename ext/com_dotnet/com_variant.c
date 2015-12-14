@@ -44,10 +44,10 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	zval *item;
 
 	/* find the largest array index, and assert that all keys are integers */
-	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
-	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(z), &pos);
+	for (;; zend_hash_move_forward_ex(Z_ARRVAL_P(z), &pos)) {
 
-		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, &pos);
+		keytype = zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
 
 		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
@@ -61,7 +61,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 
 	/* allocate the structure */
 	bound.lLbound = 0;
-	bound.cElements = zend_hash_num_elements(HASH_OF(z));
+	bound.cElements = zend_hash_num_elements(Z_ARRVAL_P(z));
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
@@ -69,12 +69,12 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	va = (VARIANT*)sa->pvData;
 
 	/* now fill it in */
-	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
-	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
-		if (NULL == (item = zend_hash_get_current_data_ex(HASH_OF(z), &pos))) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(z), &pos);
+	for (;; zend_hash_move_forward_ex(Z_ARRVAL_P(z), &pos)) {
+		if (NULL == (item = zend_hash_get_current_data_ex(Z_ARRVAL_P(z), &pos))) {
 			break;
 		}
-		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, &pos);
+		zend_hash_get_current_key_ex(Z_ARRVAL_P(z), &strindex, &intindex, &pos);
 		php_com_variant_from_zval(&va[intindex], item, codepage);
 	}
 

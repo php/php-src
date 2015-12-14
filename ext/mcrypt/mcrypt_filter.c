@@ -174,7 +174,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("mode")))) {
+	if ((tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("mode")))) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING) {
 			mode = Z_STRVAL_P(tmpzval);
 		} else {
@@ -182,7 +182,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if ((tmpzval=zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("algorithms_dir")))) {
+	if ((tmpzval=zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("algorithms_dir")))) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING) {
 			algo_dir = Z_STRVAL_P(tmpzval);
 		} else {
@@ -190,7 +190,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if ((tmpzval=zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("modes_dir")))) {
+	if ((tmpzval=zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("modes_dir")))) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING) {
 			mode_dir = Z_STRVAL_P(tmpzval);
 		} else {
@@ -198,7 +198,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("key"))) &&
+	if ((tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("key"))) &&
 		Z_TYPE_P(tmpzval) == IS_STRING) {
 		key = Z_STRVAL_P(tmpzval);
 		key_len = (int)Z_STRLEN_P(tmpzval);
@@ -218,7 +218,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		key_len = keyl;
 	}
 
-	if (!(tmpzval = zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("iv"))) ||
+	if (!(tmpzval = zend_hash_str_find(Z_ARRVAL_P(filterparams), ZEND_STRL("iv"))) ||
 		Z_TYPE_P(tmpzval) != IS_STRING) {
 		php_error_docref(NULL, E_WARNING, "Filter parameter[iv] not provided or not of type: string");
 		mcrypt_module_close(mcrypt_module);

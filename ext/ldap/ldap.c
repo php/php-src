@@ -730,7 +730,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					goto cleanup;
 				}
 
-				SEPARATE_ZVAL(attr);
 				convert_to_string_ex(attr);
 				ldap_attrs[i] = Z_STRVAL_P(attr);
 			}

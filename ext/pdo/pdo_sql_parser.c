@@ -575,6 +575,9 @@ safe:
 						zend_string *buf;
 
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+						if (!buf) {
+							buf = ZSTR_EMPTY_ALLOC();
+						}
 						if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf), ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 								param->param_type)) {
 							/* bork */

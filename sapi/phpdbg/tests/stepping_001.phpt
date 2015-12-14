@@ -1,5 +1,7 @@
 --TEST--
 Stepping with exceptions must not be stuck at CATCH
+--INI--
+opcache.enable=0
 --PHPDBG--
 b ZEND_THROW
 r

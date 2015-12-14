@@ -598,6 +598,11 @@ dnl
 AC_CHECK_DECLS([arc4random_buf])
 
 dnl
+dnl Check for getrandom on newer Linux kernels
+dnl
+AC_CHECK_DECLS([getrandom])
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \

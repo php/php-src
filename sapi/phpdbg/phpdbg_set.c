@@ -32,6 +32,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s", 0),
+	PHPDBG_SET_COMMAND_D(pagination,   "usage: set pagination [<on|off>]",        'P', set_pagination,   NULL, "|b", PHPDBG_ASYNC_SAFE),
 #ifndef _WIN32
 	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b", PHPDBG_ASYNC_SAFE),
@@ -42,6 +43,7 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(stepping,     "usage: set stepping [<line|op>]",         's', set_stepping,     NULL, "|s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(lines,        "usage: set lines [<number>]",             'l', set_lines,        NULL, "|l", PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 };
 
@@ -53,6 +55,42 @@ PHPDBG_SET(prompt) /* {{{ */
 		phpdbg_set_prompt(param->str);
 	}
 
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(pagination) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("setpagination", "active=\"%s\"", "Pagination %s", PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION ? "on" : "off");
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			if (param->num) {
+				PHPDBG_G(flags) |= PHPDBG_HAS_PAGINATION;
+			} else {
+				PHPDBG_G(flags) &= ~PHPDBG_HAS_PAGINATION;
+			}
+		} break;
+
+		default:
+			phpdbg_error("setpagination", "type=\"wrongargs\"", "set pagination used incorrectly: set pagination <on|off>");
+	}
+	
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(lines) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("setlines", "active=\"%s\"", "Lines %ld", PHPDBG_G(lines));
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			PHPDBG_G(lines) = param->num;
+		} break;
+
+		default:
+			phpdbg_error("setlines", "type=\"wrongargs\"", "set lines used incorrectly: set lines <number>");
+	}
+	
 	return SUCCESS;
 } /* }}} */
 

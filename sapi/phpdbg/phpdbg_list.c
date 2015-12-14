@@ -234,7 +234,7 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 
 zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
-	zend_file_handle fake = {{0}};
+	zend_file_handle fake;
 	zend_op_array *ret;
 	char *filename = (char *)(file->opened_path ? ZSTR_VAL(file->opened_path) : file->filename);
 	uint line;
@@ -253,11 +253,11 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	data.filename = filename;
 	data.line[0] = 0;
 
+	memset(&fake, 0, sizeof(fake));
 	fake.type = ZEND_HANDLE_MAPPED;
 	fake.handle.stream.mmap.buf = data.buf;
 	fake.handle.stream.mmap.len = data.len;
 	fake.free_filename = 0;
-	fake.opened_path = file->opened_path;
 	fake.filename = filename;
 	fake.opened_path = file->opened_path;
 

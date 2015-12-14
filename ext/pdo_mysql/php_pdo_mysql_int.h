@@ -126,9 +126,9 @@ typedef struct {
 	const MYSQL_FIELD		*fields;
 	MYSQL_ROW				current_data;
 #if PDO_USE_MYSQLND
-	zend_ulong		*current_lengths;
+	const size_t			*current_lengths;
 #else
-	zend_long		*current_lengths;
+	zend_long				*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
 #if PDO_USE_MYSQLND
@@ -144,7 +144,7 @@ typedef struct {
 #endif
 	PDO_MYSQL_PARAM_BIND	*bound_result;
 	my_bool					*out_null;
-	zend_ulong			*out_length;
+	zend_ulong				*out_length;
 	unsigned int			params_given;
 	unsigned				max_length:1;
 } pdo_mysql_stmt;

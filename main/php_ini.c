@@ -421,7 +421,7 @@ int php_init_config(void)
 
 			SetLastError(0);
 
-			/*If the given bugger is not large enough to hold the data, the return value is
+			/*If the given buffer is not large enough to hold the data, the return value is
 			the buffer size,  in characters, required to hold the string and its terminating
 			null character. We use this return value to alloc the final buffer. */
 			size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
@@ -638,7 +638,7 @@ int php_init_config(void)
 			}
 			if (!debpath[0]) {
 				/* empty string means default builtin value
-				   to allow "/foo/phd.d:" or ":/foo/php.d" */
+				   to allow "/foo/php.d:" or ":/foo/php.d" */
 				debpath = PHP_CONFIG_FILE_SCAN_DIR;
 			}
 			lenpath = (int)strlen(debpath);

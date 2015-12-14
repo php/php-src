@@ -187,6 +187,11 @@ int zend_shared_alloc_startup(size_t requested_size)
 		smm_shared_globals = NULL;
 		return res;
 	}
+#if ENABLE_FILE_CACHE_FALLBACK
+	if (ALLOC_FALLBACK == res) {
+		return ALLOC_FALLBACK;
+	}
+#endif
 
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
@@ -207,6 +212,11 @@ int zend_shared_alloc_startup(size_t requested_size)
 	if (res == SUCCESSFULLY_REATTACHED) {
 		return res;
 	}
+#if ENABLE_FILE_CACHE_FALLBACK
+	if (ALLOC_FALLBACK == res) {
+		return ALLOC_FALLBACK;
+	}
+#endif
 
 	shared_segments_array_size = ZSMMG(shared_segments_count) * S_H(segment_type_size)();
 

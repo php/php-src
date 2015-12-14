@@ -472,6 +472,12 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 #ifdef SO_REUSEADDR
 			setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
 #endif
+#ifdef IPV6_V6ONLY
+			if (sockopts & STREAM_SOCKOP_IPV6_V6ONLY) {
+				int ipv6_val = !!(sockopts & STREAM_SOCKOP_IPV6_V6ONLY_ENABLED);
+				setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&ipv6_val, sizeof(sockoptval));
+			}
+#endif
 #ifdef SO_REUSEPORT
 			if (sockopts & STREAM_SOCKOP_SO_REUSEPORT) {
 				setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&sockoptval, sizeof(sockoptval));

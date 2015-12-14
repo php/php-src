@@ -463,7 +463,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 			PHP_CLEANUP_CLASS_ATTRIBUTES();
 
-			objhash = HASH_OF(obj);
+			objhash = Z_OBJPROP_P(obj);
 
 			ZEND_HASH_FOREACH_VAL(sleephash, varname) {
 				if (Z_TYPE_P(varname) != IS_STRING) {
@@ -493,7 +493,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 		PHP_CLEANUP_CLASS_ATTRIBUTES();
 
-		objhash = HASH_OF(obj);
+		objhash = Z_OBJPROP_P(obj);
 		ZEND_HASH_FOREACH_KEY_VAL(objhash, idx, key, ent) {
 			if (ent == obj) {
 				continue;
@@ -533,7 +533,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	char tmp_buf[WDDX_BUF_LEN];
 	zend_ulong ind = 0;
 
-	target_hash = HASH_OF(arr);
+	target_hash = Z_ARRVAL_P(arr);
 	ZEND_HASH_FOREACH_KEY(target_hash, idx, key) {
 		if (key) {
 			is_struct = 1;

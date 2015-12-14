@@ -757,7 +757,7 @@ static zend_always_inline int fast_is_not_identical_function(zval *op1, zval *op
 		int ret;                                                                                           \
 		zval rv;                                                                                           \
 		zval *objval = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);                                      \
-		Z_ADDREF_P(objval);                                                                                \
+		Z_TRY_ADDREF_P(objval);                                                                                \
 		ret = binary_op(objval, objval, op2);                                                    \
 		Z_OBJ_HANDLER_P(op1, set)(op1, objval);                                                  \
 		zval_ptr_dtor(objval);                                                                             \

@@ -18,10 +18,16 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 1. Backward Incompatible Changes
 ========================================
+- Core:
+  . 'void' can no longer be used as the name of a class, interface, or trait.
+    This applies to declarations, class_alias() and use statements.
 
 ========================================
 2. New Features
 ========================================
+- Core
+  . Added void return type, which requires that a function not return a value.
+    (RFC: https://wiki.php.net/rfc/void_return_type)
 
 ========================================
 3. Changes in SAPI modules
@@ -34,6 +40,12 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+- get_headers() has an extra parameter which allows passing a custom stream
+  context.
+- The first $varname argument for getenv() is no longer mandatory, the
+  current environment variables will be returned as an associative array
+  when omitted.
+- long2ip accepts integer as parameter now
 
 ========================================
 6. New Functions
@@ -62,6 +74,9 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Core:
+  . Support for ftok()
 
 ========================================
 13. Other Changes

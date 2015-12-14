@@ -1,7 +1,7 @@
 bz2-1.0.6
 cclient-2007f
 freetype-2.6
-icu-55.1
+icu-56.1
 jpeglib-9a
 libcurl-7.43.0
 libiconv-1.14

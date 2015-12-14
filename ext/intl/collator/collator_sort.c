@@ -309,7 +309,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	/* Set 'compare function' according to sort flags. */
 	INTL_G(compare_func) = collator_get_compare_function( sort_flags );
 
-	hash = HASH_OF( array );
+	hash = Z_ARRVAL_P( array );
 
 	/* Convert strings in the specified array from UTF-8 to UTF-16. */
 	collator_convert_hash_from_utf8_to_utf16( hash, COLLATOR_ERROR_CODE_P( co ) );
@@ -363,6 +363,7 @@ static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_ke
 PHP_FUNCTION( collator_sort_with_sort_keys )
 {
 	zval*       array                = NULL;
+	zval        garbage;
 	HashTable*  hash                 = NULL;
 	zval*       hashData             = NULL;                     /* currently processed item of input hash */
 
@@ -411,7 +412,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/*
 	 * Sort specified array.
 	 */
-	hash = HASH_OF( array );
+	hash = Z_ARRVAL_P( array );
 
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
@@ -505,7 +506,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	zend_sort( sortKeyIndxBuf, sortKeyCount,
 			sortKeyIndxSize, collator_cmp_sort_keys, (swap_func_t)collator_sortkey_swap);
 
-	zval_ptr_dtor( array );
+	ZVAL_COPY_VALUE(&garbage, array);
 	/* for resulting hash we'll assign new hash keys rather then reordering */
 	array_init(array);
 
@@ -518,6 +519,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( utf16_buf )
 		efree( utf16_buf );
 
+	zval_ptr_dtor(&garbage);
 	efree( sortKeyIndxBuf );
 	efree( sortKeyBuf );
 

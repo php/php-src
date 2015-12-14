@@ -3502,7 +3502,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 	i = 0;
 	different = FALSE;
 	cur_type = prev_type = 0;
-	ht = HASH_OF(array);
+	ht = Z_ARRVAL_P(array);
 
 	ZEND_HASH_FOREACH_VAL_IND(ht, tmp) {
 		if (Z_TYPE_P(tmp) == IS_OBJECT &&

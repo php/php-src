@@ -242,7 +242,6 @@ static ZEND_INI_MH(OnEnable)
 }
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
-
 static ZEND_INI_MH(OnUpdateFileCache)
 {
 	if (new_value) {
@@ -295,6 +294,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.fast_shutdown"         , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.fast_shutdown,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.opt_debug_level"       , "0"      , PHP_INI_SYSTEM, OnUpdateLong,             accel_directives.opt_debug_level,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_file_override"	, "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.file_override_enabled,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_cli"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.enable_cli,                zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.error_log"                , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.error_log,                 zend_accel_globals, accel_globals)
@@ -308,6 +308,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
+#endif
+#if ENABLE_FILE_CACHE_FALLBACK
+	STD_PHP_INI_ENTRY("opcache.file_cache_fallback"           , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_fallback,           zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_HUGE_CODE_PAGES
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
@@ -543,7 +546,7 @@ static int accelerator_get_scripts(zval *return_value)
 			script = (zend_persistent_script *)cache_entry->data;
 
 			array_init(&persistent_script_report);
-			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->full_path, 0));
+			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->script.filename, 0));
 			add_assoc_long(&persistent_script_report, "hits", (zend_long)script->dynamic_members.hits);
 			add_assoc_long(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
@@ -733,7 +736,11 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if ((!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled))
+#if ENABLE_FILE_CACHE_FALLBACK
+	&& !fallback_process
+#endif
+	) {
 		RETURN_FALSE;
 	}
 

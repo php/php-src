@@ -12,14 +12,10 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: mysqlnd_debug.h 306938 2011-01-01 02:17:06Z felipe $ */
-/* $Id: mysqlnd_debug.h 306938 2011-01-01 02:17:06Z felipe $ */
 
 #ifndef MYSQLND_ALLOC_H
 #define MYSQLND_ALLOC_H

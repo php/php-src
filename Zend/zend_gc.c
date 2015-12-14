@@ -242,6 +242,13 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		GC_REFCOUNT(ref)++;
 		gc_collect_cycles();
 		GC_REFCOUNT(ref)--;
+		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+			zval_dtor_func_for_ptr(ref);
+			return;
+		}
+		if (UNEXPECTED(GC_INFO(ref))) {
+			return;
+		}
 		newRoot = GC_G(unused);
 		if (!newRoot) {
 #if ZEND_GC_DEBUG

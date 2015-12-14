@@ -97,40 +97,6 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
     return &var_hash->data[var_hash->used_slots++];
 }
 
-//???
-#if 0
-PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval)
-{
-	var_entries *var_hash;
-
-    if (!var_hashx || !*var_hashx) {
-        return;
-    }
-
-    var_hash = (*var_hashx)->last_dtor;
-#if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor_no_addref(%p, %ld): %d (%d)\n", *rval, var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
-#endif
-
-	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
-		var_hash = emalloc(sizeof(var_dtor_entries));
-		var_hash->used_slots = 0;
-		var_hash->next = 0;
-
-		if (!(*var_hashx)->first_dtor) {
-			(*var_hashx)->first_dtor = var_hash;
-		} else {
-			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
-		}
-
-		(*var_hashx)->last_dtor = var_hash;
-	}
-
-	ZVAL_COPY_VALUE(&var_hash->data[var_hash->used_slots], rval);
-	var_hash->used_slots++;
-}
-#endif
-
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
 {
 	zend_long i;
@@ -403,13 +369,22 @@ string_key:
 			}
 		}
 
-		zval_dtor(&key);
-
 		if (!php_var_unserialize_ex(data, p, max, var_hash, classes)) {
+			zval_dtor(&key);
 			return 0;
 		}
 
-		var_push_dtor(var_hash, data);
+		if (UNEXPECTED(Z_ISUNDEF_P(data))) {
+			if (Z_TYPE(key) == IS_LONG) {
+				zend_hash_index_del(ht, Z_LVAL(key));
+			} else {
+				zend_hash_del_ind(ht, Z_STR(key));
+			}
+		} else {
+			var_push_dtor(var_hash, data);
+		}
+
+		zval_dtor(&key);
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -556,6 +531,10 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 	}
 
 	zval_ptr_dtor(rval);
+	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
+		ZVAL_UNDEF(rval);
+		return 1;
+	}
 	if (Z_ISREF_P(rval_ref)) {
 		ZVAL_COPY(rval, rval_ref);
 	} else {
@@ -577,14 +556,12 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-//???
-//???	if (rval == rval_ref) return 0;
+	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
+		ZVAL_UNDEF(rval);
+		return 1;
+	}
 
-//???	if (!ZVAL_IS_UNDEF(rval)) {
-//???		var_push_dtor_no_addref(var_hash, rval);
-//???	}
 	ZVAL_COPY(rval, rval_ref);
-//???	Z_UNSET_ISREF_PP(rval);
 
 	return 1;
 }
@@ -734,8 +711,6 @@ use_double:
 "o:" iv ":" ["] {
     if (!var_hash) return 0;
 
-//???	INIT_PZVAL(rval);
-
 	return object_common2(UNSERIALIZE_PASSTHRU,
 			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
@@ -759,7 +734,6 @@ object ":" uiv ":" ["]	{
 		custom_object = 1;
 	}
 
-//???	INIT_PZVAL(rval);
 	len2 = len = parse_uiv(start + 2);
 	maxlen = max - YYCURSOR;
 	if (maxlen < len || len == 0) {

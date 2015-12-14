@@ -36,6 +36,8 @@ PHPDBG_SET(breaks);
 PHPDBG_SET(quiet);
 PHPDBG_SET(stepping);
 PHPDBG_SET(refcount);
+PHPDBG_SET(pagination);
+PHPDBG_SET(lines);
 
 extern const phpdbg_command_t phpdbg_set_commands[];
 

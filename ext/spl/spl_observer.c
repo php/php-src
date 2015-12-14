@@ -90,7 +90,7 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	zend_object       std;
 } spl_SplObjectStorage; /* }}} */
 
-/* {{{ storage is an assoc aray of [zend_object_value]=>[zval *obj, zval *inf] */
+/* {{{ storage is an assoc aray of [zend_object*]=>[zval *obj, zval *inf] */
 typedef struct _spl_SplObjectStorageElement {
 	zval obj;
 	zval inf;
@@ -138,49 +138,11 @@ static zend_string *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zv
 		memcpy(ZSTR_VAL(hash), (void*)&Z_OBJ_P(obj), sizeof(zend_object*));
 		ZSTR_VAL(hash)[ZSTR_LEN(hash)] = '\0';
 		return hash;
-		/* !!! FIXME
-		int hash_len = sizeof(zend_object_value);
-
-#if HAVE_PACKED_OBJECT_VALUE
-
-		if (hash_len_ptr) {
-			*hash_len_ptr = hash_len;
-		}
-
-		return (char*)&Z_OBJVAL_P(obj);
-#else
-		char *hash = emalloc(hash_len + 1);
-
-		zend_object_value zvalue;
-		memset(&zvalue, 0, sizeof(zend_object_value));
-		zvalue.handle = Z_OBJ_HANDLE_P(obj);
-		zvalue.handlers = Z_OBJ_HT_P(obj);
-
-		memcpy(hash, (char *)&zvalue, hash_len);
-		hash[hash_len] = 0;
-
-		if (hash_len_ptr) {
-			*hash_len_ptr = hash_len;
-		}
-
-		return hash;
-#endif
-*/
-		return NULL;
 	}
 }
 
 static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_string *hash) {
 	zend_string_release(hash);
-/*
-	if (intern->fptr_get_hash) {
-	} else {
-#if HAVE_PACKED_OBJECT_VALUE
-#else
-		efree(hash);
-#endif
-	}
-*/
 }
 
 static void spl_object_storage_dtor(zval *element) /* {{{ */

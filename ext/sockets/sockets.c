@@ -716,6 +716,10 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("IPV6_MULTICAST_LOOP",		IPV6_MULTICAST_LOOP,	CONST_CS | CONST_PERSISTENT);
 #endif
 
+#ifdef IPV6_V6ONLY
+	REGISTER_LONG_CONSTANT("IPV6_V6ONLY",			IPV6_V6ONLY,		CONST_CS | CONST_PERSISTENT);
+#endif
+
 #ifndef WIN32
 # include "unix_socket_constants.h"
 #else
@@ -2035,7 +2039,7 @@ PHP_FUNCTION(socket_set_option)
 			const char l_linger_key[] = "l_linger";
 
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", l_onoff_key);
@@ -2063,7 +2067,7 @@ PHP_FUNCTION(socket_set_option)
 			const char usec_key[] = "usec";
 
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(arg4);
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", sec_key);

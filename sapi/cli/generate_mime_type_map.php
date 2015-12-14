@@ -27,6 +27,18 @@ array_walk($types, function ($line) use (&$extensions) {
 	}
 });
 
+$additional_mime_maps = [
+	"map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+];
+
+foreach($additional_mime_maps as $ext => $mime) {
+	if (!isset($extensions[$ext])) {
+		$extensions[$ext] = $mime;
+	} else {
+		printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
+	}
+}
+
 ?>
 /*
    +----------------------------------------------------------------------+

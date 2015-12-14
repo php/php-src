@@ -318,7 +318,7 @@ PHP_FUNCTION(ibase_blob_add)
 PHP_FUNCTION(ibase_blob_get)
 {
 	zval *blob_arg;
-	unsigned long len_arg;
+	zend_ulong len_arg;
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;

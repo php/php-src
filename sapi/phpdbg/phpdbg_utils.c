@@ -351,6 +351,24 @@ PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
 	return columns;
 } /* }}} */
 
+PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
+{
+	int lines;
+#ifdef _WIN32
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+#elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
+	struct winsize w;
+
+	lines = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_row : 40;
+#else
+	lines = 40;
+#endif
+	return lines;
+} /* }}} */
+
 PHPDBG_API void phpdbg_set_async_io(int fd) {
 #if !defined(_WIN32) && defined(FASYNC)
 	int flags;

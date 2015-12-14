@@ -1439,7 +1439,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!isupper(*c)) {
+		if (islower(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1508,7 +1508,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!islower(*c)) {
+		if (isupper(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -2426,10 +2426,6 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f > (zend_long)ZSTR_LEN(str)) {
-		RETURN_FALSE;
-	}
-
 	if ((f + l) > (zend_long)ZSTR_LEN(str)) {
 		l = ZSTR_LEN(str) - f;
 	}
@@ -3004,7 +3000,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	zend_ulong *num_bitset;
 
 	/* we will collect all possible key lengths */
-	num_bitset = ecalloc((slen + (sizeof(zend_ulong)-1)) / sizeof(zend_ulong), sizeof(zend_ulong));
+	num_bitset = ecalloc((slen + sizeof(zend_ulong)) / sizeof(zend_ulong), sizeof(zend_ulong));
 	memset(bitset, 0, sizeof(bitset));
 
 	/* check if original array has numeric keys */
@@ -3453,7 +3449,7 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (ac == 2) {
-		HashTable *pats = HASH_OF(from);
+		HashTable *pats = Z_ARRVAL_P(from);
 
 		if (zend_hash_num_elements(pats) < 1) {
 			RETURN_STR_COPY(str);
@@ -3973,7 +3969,6 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
 			ZVAL_DEREF(search_entry);
-			SEPARATE_ZVAL_NOREF(search_entry);
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {

@@ -106,9 +106,11 @@ typedef int php_socket_t;
 # define SOCK_RECV_ERR -1
 #endif
 
-#define STREAM_SOCKOP_NONE         1 << 0
-#define STREAM_SOCKOP_SO_REUSEPORT 1 << 1
-#define STREAM_SOCKOP_SO_BROADCAST 1 << 2
+#define STREAM_SOCKOP_NONE                (1 << 0)
+#define STREAM_SOCKOP_SO_REUSEPORT        (1 << 1)
+#define STREAM_SOCKOP_SO_BROADCAST        (1 << 2)
+#define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
+#define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */

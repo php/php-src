@@ -378,13 +378,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
-			int i;
 			intern->heap = spl_ptr_heap_clone(other->heap);
-			for (i = 0; i < intern->heap->count; ++i) {
-				if (Z_REFCOUNTED(intern->heap->elements[i])) {
-					Z_ADDREF(intern->heap->elements[i]);
-				}
-			}
 		} else {
 			intern->heap = other->heap;
 		}

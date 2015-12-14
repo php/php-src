@@ -276,6 +276,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 		return &EG(error_zval);;
 	}
 
+try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
 	   offset_key = ZSTR_EMPTY_ALLOC();
@@ -355,6 +356,9 @@ num_index:
 			}
 		}
 		return retval;
+	case IS_REFERENCE:
+		ZVAL_DEREF(offset);
+		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
@@ -386,12 +390,10 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 		}
 	}
 	ret = spl_array_get_dimension_ptr(check_inherited, object, offset, type);
-	//!!! FIXME?
-	//	ZVAL_COPY(result, ret);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
-	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1)
+	 * by separating (if necessary) and returning as IS_REFERENCE (with refcount == 1)
 	 */
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
@@ -444,6 +446,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
+
+try_again:
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
 			ht = spl_array_get_hash_table(intern, 0);
@@ -483,6 +487,9 @@ num_index:
 			}
 			zend_hash_next_index_insert(ht, value);
 			return;
+		case IS_REFERENCE:
+			ZVAL_DEREF(offset);
+			goto try_again;
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
 			return;
@@ -507,7 +514,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	switch(Z_TYPE_P(offset)) {
+try_again:
+	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern, 0);
 		if (ht->u.v.nApplyCount > 0) {
@@ -567,6 +575,9 @@ num_index:
 			zend_error(E_NOTICE,"Undefined offset: %pd", index);
 		}
 		break;
+	case IS_REFERENCE:
+		ZVAL_DEREF(offset);
+		goto try_again;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return;
@@ -605,7 +616,8 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	if (!value) {
 		HashTable *ht = spl_array_get_hash_table(intern, 0);
 
-		switch(Z_TYPE_P(offset)) {
+try_again:
+		switch (Z_TYPE_P(offset)) {
 			case IS_STRING:
 				if ((tmp = zend_symtable_find(ht, Z_STR_P(offset))) != NULL) {
 					if (check_empty == 2) {
@@ -639,7 +651,9 @@ num_index:
 					return 0;
 				}
 				break;
-
+			case IS_REFERENCE:
+				ZVAL_DEREF(offset);
+				goto try_again;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				return 0;
@@ -868,9 +882,7 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 		&& !std_object_handlers.has_property(object, member, 2, NULL)) {
 		return spl_array_get_dimension_ptr(1, object, member, type);
 	}
-	//!!! FIXME
-	//return std_object_handlers.get_property_ptr_ptr(object, member, type, key);
-	return NULL;
+	return std_object_handlers.get_property_ptr_ptr(object, member, type, cache_slot);
 } /* }}} */
 
 static int spl_array_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
@@ -1103,11 +1115,19 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
-			ZVAL_COPY(&intern->array, array);
 			if (handler != std_object_handlers.get_properties
 				|| !spl_array_get_hash_table(intern, 0)) {
+				ZVAL_UNDEF(&intern->array);
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
 			}
+			//??? TODO: try to avoid array duplication
+			if (Z_OBJ_P(array)->properties && GC_REFCOUNT(Z_OBJ_P(array)->properties) > 1) {
+				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array)->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(Z_OBJ_P(array)->properties)--;
+				}
+				Z_OBJ_P(array)->properties = zend_array_dup(Z_OBJ_P(array)->properties);
+			}
+			ZVAL_COPY(&intern->array, array);
 		}
 	}
 
@@ -1149,8 +1169,8 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::__construct(array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]])
-       proto void ArrayIterator::__construct(array|object ar = array() [, int flags = 0])
+/* {{{ proto void ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
+       proto void ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
    Constructs a new array iterator from a path. */
 SPL_METHOD(Array, __construct)
 {
@@ -1665,7 +1685,6 @@ SPL_METHOD(Array, serialize)
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
-	//!!! php_var_serialize need to be modified
 	php_var_serialize(&buf, &flags, &var_hash);
 
 	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF)) {
@@ -1679,11 +1698,9 @@ SPL_METHOD(Array, serialize)
 		rebuild_object_properties(&intern->std);
 	}
 
-	ZVAL_ARR(&members, zend_array_dup(intern->std.properties));
+	ZVAL_ARR(&members, intern->std.properties);
 
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
-
-	zval_ptr_dtor(&members);
 
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
@@ -1795,6 +1812,8 @@ outexcept:
 /* {{{ arginfo and function table */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
+	ZEND_ARG_INFO(0, ar_flags)
+	ZEND_ARG_INFO(0, iterator_class)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_offsetGet, 0, 0, 1)

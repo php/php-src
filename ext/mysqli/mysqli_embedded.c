@@ -51,16 +51,16 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 		RETURN_TRUE;
 	}
 	/* get arguments */
-	if ((argc = zend_hash_num_elements(HASH_OF(args)))) {
+	if ((argc = zend_hash_num_elements(Z_ARRVAL_P(args)))) {
 		arguments = safe_emalloc(sizeof(char *), argc + 1, 0);
 		arguments[0] = NULL;
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(args), &pos);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
 
-		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(args), &pos))	{
+		for (index = 0;; zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos))	{
 			zval **item;
 
-			if (zend_hash_get_current_data_ex(HASH_OF(args), (void **) &item, &pos) == FAILURE) {
+			if (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &item, &pos) == FAILURE) {
 				break;
 			}
 
@@ -72,16 +72,16 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	}
 
 	/* get groups */
-	if ((zend_hash_num_elements(HASH_OF(grps)))) {
-		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(grps)) + 1, 0);
+	if ((zend_hash_num_elements(Z_ARRVAL_P(grps)))) {
+		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(Z_ARRVAL_P(grps)) + 1, 0);
 		groups[0] = NULL;
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(grps), &pos);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(grps), &pos);
 
-		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(grps), &pos))	{
+		for (index = 0;; zend_hash_move_forward_ex(Z_ARRVAL_P(grps), &pos))	{
 			zval ** item;
 
-			if (zend_hash_get_current_data_ex(HASH_OF(grps), (void **) &item, &pos) == FAILURE) {
+			if (zend_hash_get_current_data_ex(Z_ARRVAL_P(grps), (void **) &item, &pos) == FAILURE) {
 				break;
 			}
 

@@ -635,6 +635,16 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		return -1;
 	}
 
+#ifdef IPV6_V6ONLY
+	if (PHP_STREAM_CONTEXT(stream)
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "ipv6_v6only")) != NULL
+		&& Z_TYPE_P(tmpzval) != IS_NULL
+	) {
+		sockopts |= STREAM_SOCKOP_IPV6_V6ONLY;
+		sockopts |= STREAM_SOCKOP_IPV6_V6ONLY_ENABLED * zend_is_true(tmpzval);
+	}
+#endif
+
 #ifdef SO_REUSEPORT
 	if (PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_reuseport")) != NULL

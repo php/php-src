@@ -1348,9 +1348,9 @@ PHP_FUNCTION(dom_node_clone_node)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	zend_long recursive = 0;
+	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &id, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b", &id, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 

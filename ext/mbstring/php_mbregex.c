@@ -653,8 +653,7 @@ _php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, O
    Returns the current encoding for regex as a string. */
 PHP_FUNCTION(mb_regex_encoding)
 {
-	size_t argc = ZEND_NUM_ARGS();
-	char *encoding;
+	char *encoding = NULL;
 	size_t encoding_len;
 	OnigEncoding mbctype;
 
@@ -662,7 +661,7 @@ PHP_FUNCTION(mb_regex_encoding)
 		return;
 	}
 
-	if (argc == 0) {
+	if (!encoding) {
 		const char *retval = _php_mb_regex_mbctype2name(MBREX(current_mbctype));
 
 		if (retval == NULL) {
@@ -670,7 +669,7 @@ PHP_FUNCTION(mb_regex_encoding)
 		}
 
 		RETURN_STRING((char *)retval);
-	} else if (argc == 1) {
+	} else {
 		mbctype = _php_mb_regex_name2mbctype(encoding);
 
 		if (mbctype == ONIG_ENCODING_UNDEF) {
@@ -687,7 +686,7 @@ PHP_FUNCTION(mb_regex_encoding)
 /* {{{ _php_mb_regex_ereg_exec */
 static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval *arg_pattern, *array;
+	zval *arg_pattern, *array = NULL;
 	char *string;
 	size_t string_len;
 	php_mb_regex_t *re;
@@ -695,8 +694,6 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	int i, match_len, beg, end;
 	OnigOptionType options;
 	char *str;
-
-	array = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z/", &arg_pattern, &string, &string_len, &array) == FAILURE) {
 		RETURN_FALSE;
@@ -1180,26 +1177,25 @@ PHP_FUNCTION(mb_ereg_match)
 static void
 _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	size_t argc = ZEND_NUM_ARGS();
-	char *arg_pattern, *arg_options;
+	char *arg_pattern = NULL, *arg_options = NULL;
 	size_t arg_pattern_len, arg_options_len;
 	int n, i, err, pos, len, beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
 
-	if (zend_parse_parameters(argc, "|ss", &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
 		return;
 	}
 
 	option = MBREX(regex_default_options);
 
-	if (argc == 2) {
+	if (arg_options) {
 		option = 0;
 		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
 	}
 
-	if (argc > 0) {
+	if (arg_pattern) {
 		/* create regex pattern buffer */
 		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), MBREX(regex_default_syntax))) == NULL) {
 			RETURN_FALSE;

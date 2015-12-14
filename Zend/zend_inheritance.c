@@ -698,21 +698,29 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
+static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
-	if (!zend_hash_exists(&ce->constants_table, name)) {
-		if (!Z_ISREF_P(zv)) {
-			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
-				ZVAL_NEW_PERSISTENT_REF(zv, zv);
-			} else {
-				ZVAL_NEW_REF(zv, zv);
-			}
+	zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, name);
+
+	if (c != NULL) {
+		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(ce->parent->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
-		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
+		if (Z_CONSTANT(parent_const->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		Z_ADDREF_P(zv);
-		_zend_hash_append(&ce->constants_table, name, zv);
+		if (Z_REFCOUNTED(parent_const->value)) {
+			Z_ADDREF(parent_const->value);
+		}
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			c = pemalloc(sizeof(zend_class_constant), 1);
+		} else {
+			c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+		}
+		memcpy(c, parent_const, sizeof(zend_class_constant));
+		_zend_hash_append_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */
@@ -722,7 +730,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_property_info *property_info;
 	zend_function *func;
 	zend_string *key;
-	zval *zv;
 
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		/* Interface can only inherit other interfaces */
@@ -859,12 +866,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 
 	if (zend_hash_num_elements(&parent_ce->constants_table)) {
+		zend_class_constant *c;
+
 		zend_hash_extend(&ce->constants_table,
 			zend_hash_num_elements(&ce->constants_table) +
 			zend_hash_num_elements(&parent_ce->constants_table), 0);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
-			do_inherit_class_constant(key, zv, ce, parent_ce);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, c) {
+			do_inherit_class_constant(key, c, ce);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -894,14 +903,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 }
 /* }}} */
 
-static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zend_class_constant *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
 {
-	zval *old_constant;
+	zend_class_constant *old_constant;
 
-	if ((old_constant = zend_hash_find(child_constants_table, name)) != NULL) {
-		if (!Z_ISREF_P(old_constant) ||
-		    !Z_ISREF_P(parent_constant) ||
-		    Z_REFVAL_P(old_constant) != Z_REFVAL_P(parent_constant)) {
+	if ((old_constant = zend_hash_find_ptr(child_constants_table, name)) != NULL) {
+		if (old_constant->ce != parent_constant->ce) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface->name));
 		}
 		return 0;
@@ -910,21 +917,16 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zva
 }
 /* }}} */
 
-static void do_inherit_iface_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
+static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c, zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
-	if (do_inherit_constant_check(&ce->constants_table, zv, name, iface)) {
-		if (!Z_ISREF_P(zv)) {
-			if (iface->type == ZEND_INTERNAL_CLASS) {
-				ZVAL_NEW_PERSISTENT_REF(zv, zv);
-			} else {
-				ZVAL_NEW_REF(zv, zv);
-			}
+	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
+		if (Z_REFCOUNTED(c->value)) {
+			Z_ADDREF(c->value);
 		}
-		Z_ADDREF_P(zv);
-		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+		if (Z_CONSTANT(c->value)) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
-		zend_hash_update(&ce->constants_table, name, zv);
+		zend_hash_update_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */
@@ -936,7 +938,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
 	zend_function *func;
 	zend_string *key;
-	zval *zv;
+	zend_class_constant *c;
 
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
@@ -952,8 +954,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	}
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, zv) {
-			do_inherit_constant_check(&iface->constants_table, zv, key, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+			do_inherit_constant_check(&iface->constants_table, c, key, iface);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
@@ -965,8 +967,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&iface->constants_table, key, zv) {
-			do_inherit_iface_constant(key, zv, ce, iface);
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+			do_inherit_iface_constant(key, c, ce, iface);
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {

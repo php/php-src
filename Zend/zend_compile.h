@@ -111,18 +111,6 @@ typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
 
-/* Compilation context that is different for each op array. */
-typedef struct _zend_oparray_context {
-	uint32_t   opcodes_size;
-	int        vars_size;
-	int        literals_size;
-	int        current_brk_cont;
-	int        backpatch_count;
-	int        in_finally;
-	uint32_t   fast_call_var;
-	HashTable *labels;
-} zend_oparray_context;
-
 /* Compilation context that is different for each file, but shared between op arrays. */
 typedef struct _zend_file_context {
 	zend_declarables declarables;
@@ -184,6 +172,32 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_op;
 	uint32_t finally_end;
 } zend_try_catch_element;
+
+#define ZEND_LIVE_TMPVAR  0
+#define ZEND_LIVE_LOOP    1
+#define ZEND_LIVE_SILENCE 2
+#define ZEND_LIVE_ROPE    3
+#define ZEND_LIVE_MASK    3
+
+typedef struct _zend_live_range {
+	uint32_t var; /* low bits are used for variable type (ZEND_LIVE_* macros) */
+	uint32_t start;
+	uint32_t end;
+} zend_live_range;
+
+/* Compilation context that is different for each op array. */
+typedef struct _zend_oparray_context {
+	uint32_t   opcodes_size;
+	int        vars_size;
+	int        literals_size;
+	int        backpatch_count;
+	int        in_finally;
+	uint32_t   fast_call_var;
+	int        current_brk_cont;
+	int        last_brk_cont;
+	zend_brk_cont_element *brk_cont_array;
+	HashTable *labels;
+} zend_oparray_context;
 
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
@@ -296,6 +310,12 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+typedef struct _zend_class_constant {
+	zval value; /* access flags are stored in reserved: zval.u2.access_flags */
+	zend_string *doc_comment;
+	zend_class_entry *ce;
+} zend_class_constant;
+
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
@@ -354,9 +374,9 @@ struct _zend_op_array {
 	uint32_t T;
 	zend_string **vars;
 
-	int last_brk_cont;
+	int last_live_range;
 	int last_try_catch;
-	zend_brk_cont_element *brk_cont_array;
+	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
 	/* static variables support */
@@ -396,6 +416,7 @@ typedef struct _zend_internal_function {
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	struct _zend_module_entry *module;
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
@@ -430,17 +451,17 @@ struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
 	zval                *return_value;
-	zend_function       *func;             /* executed op_array              */
-	zval                 This;
-#if ZEND_EX_USE_RUN_TIME_CACHE
-	void               **run_time_cache;
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;
-#endif
+	zend_function       *func;             /* executed funcrion              */
+	zval                 This;             /* this + call_info + num_args    */
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;   /* cache op_array->run_time_cache */
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;         /* cache op_array->literals       */
+#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
@@ -513,7 +534,10 @@ struct _zend_execute_data {
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
+#define EX_VAR_TO_NUM(n)		((uint32_t)(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0)))
+
+#define ZEND_OPLINE_TO_OFFSET(opline, target) \
+	((char*)(target) - (char*)(opline))
 
 #define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
 	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
@@ -530,6 +554,10 @@ struct _zend_execute_data {
 # define OP_JMP_ADDR(opline, node) \
 	(node).jmp_addr
 
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_addr = (val); \
+	} while (0)
+
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
 		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
@@ -545,6 +573,10 @@ struct _zend_execute_data {
 /* run-time jump target */
 # define OP_JMP_ADDR(opline, node) \
 	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+# define ZEND_SET_OP_JMP_ADDR(opline, node, val) do { \
+		(node).jmp_offset = ZEND_OPLINE_TO_OFFSET(opline, val); \
+	} while (0)
 
 /* convert jump target from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
@@ -693,11 +725,10 @@ ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_stop_lexing(void);
-void zend_emit_final_return(zval *zv);
+void zend_emit_final_return(int return_one);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
@@ -725,6 +756,7 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
+ZEND_API void zend_try_exception_handler();
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
@@ -754,7 +786,7 @@ zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
 int get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
+zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
@@ -828,7 +860,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_IS			3
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
-#define BP_VAR_REF          6   /* right-hand side of by-ref assignment */
 
 /* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
 #define BP_VAR_SHIFT 3
@@ -860,7 +891,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_GLOBAL			0x00000000
 #define ZEND_FETCH_LOCAL			0x10000000
 #define ZEND_FETCH_STATIC			0x20000000
-#define ZEND_FETCH_STATIC_MEMBER	0x30000000
 #define ZEND_FETCH_GLOBAL_LOCK		0x40000000
 #define ZEND_FETCH_LEXICAL			0x50000000
 
@@ -952,9 +982,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_GOTO 253
-#define ZEND_BRK  254
-#define ZEND_CONT 255
+#define ZEND_GOTO  253
+#define ZEND_BRK   254
+#define ZEND_CONT  255
 
 
 END_EXTERN_C()
@@ -1004,6 +1034,9 @@ END_EXTERN_C()
 
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
+
+/* force IS_OBJ_USE_GUARDS for all classes */
+#define ZEND_COMPILE_GUARDS						(1<<9)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

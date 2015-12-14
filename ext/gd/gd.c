@@ -1438,9 +1438,9 @@ PHP_FUNCTION(imagesetstyle)
 	}
 
 	/* copy the style values in the stylearr */
-	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(styles)), 0);
+	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(Z_ARRVAL_P(styles)), 0);
 
-	ZEND_HASH_FOREACH_VAL(HASH_OF(styles), item) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
 		stylearr[index++] = zval_get_long(item);
 	} ZEND_HASH_FOREACH_END();
 
@@ -3859,7 +3859,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		zend_string *key;
 
 		/* walk the assoc array */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(HASH_OF(EXT), key, item) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
 			if (key == NULL) {
 				continue;
 			}
@@ -4548,28 +4548,28 @@ PHP_FUNCTION(imagecrop)
 		RETURN_FALSE;
 	}
 
-	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "x", sizeof("x") -1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Missing x position");
 		RETURN_FALSE;
 	}
 
-	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "y", sizeof("y") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Missing y position");
 		RETURN_FALSE;
 	}
 
-	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "width", sizeof("width") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Missing width");
 		RETURN_FALSE;
 	}
 
-	if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "height", sizeof("height") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Missing height");
@@ -4731,28 +4731,28 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if (z_rect != NULL) {
-		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "x", sizeof("x") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Missing x position");
 			RETURN_FALSE;
 		}
 
-		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "y", sizeof("y") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Missing y position");
 			RETURN_FALSE;
 		}
 
-		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "width", sizeof("width") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Missing width");
 			RETURN_FALSE;
 		}
 
-		if ((tmp = zend_hash_str_find(HASH_OF(z_rect), "height", sizeof("height") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Missing height");
@@ -4801,14 +4801,14 @@ PHP_FUNCTION(imageaffinematrixget)
 				php_error_docref(NULL, E_WARNING, "Array expected as options");
 				RETURN_FALSE;
 			}
-			if ((tmp = zend_hash_str_find(HASH_OF(options), "x", sizeof("x") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Missing x position");
 				RETURN_FALSE;
 			}
 
-			if ((tmp = zend_hash_str_find(HASH_OF(options), "y", sizeof("y") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Missing y position");

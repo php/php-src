@@ -840,9 +840,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (NULL != (elem = zend_hash_str_find(Z_ARRVAL_P(array), #name, sizeof(#name)-1))) {     \
-		SEPARATE_ZVAL(elem);																	 \
-		convert_to_long(elem);                                                                   \
-		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
+		ssb->sb.st_##name2 = zval_get_long(elem);                                                      \
 	}
 
 #define STAT_PROP_ENTRY(name) STAT_PROP_ENTRY_EX(name,name)

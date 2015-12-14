@@ -958,7 +958,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(160) {
+array(161) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1202,6 +1202,8 @@ array(160) {
   [%u|b%"proto_binary_fetched_timestamp"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_binary_fetched_string"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_json"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_binary_fetched_blob"]=>
   %unicode|string%(1) "0"

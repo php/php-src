@@ -109,7 +109,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, zend_lon
 			return NULL;
 		}
 
-		zend_hash_index_update_ptr(connection->descriptors, descriptor->index, &descriptor);
+		zend_hash_index_update_ptr(connection->descriptors, descriptor->index, descriptor);
 	}
 	return descriptor;
 
@@ -666,11 +666,11 @@ void php_oci_lob_free (php_oci_descriptor *descriptor)
 	}
 
 	if (descriptor->connection->descriptors) {
-		/* delete descriptor from the hash */
-		zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 		if (zend_hash_num_elements(descriptor->connection->descriptors) == 0) {
 			descriptor->connection->descriptor_count = 0;
 		} else {
+            /* delete descriptor from the hash */
+            zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 			if (descriptor->index + 1 == descriptor->connection->descriptor_count) {
 				/* If the descriptor being freed is the end-most one
 				 * allocated, then the descriptor_count is reduced so

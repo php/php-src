@@ -52,7 +52,7 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
-ZEND_API int  ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot);
+ZEND_API void ZEND_FASTCALL zend_check_missing_arg(zend_execute_data *execute_data, uint32_t arg_num, void **cache_slot);
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
@@ -145,7 +145,7 @@ struct _zend_vm_stack {
 #define ZEND_VM_STACK_HEADER_SLOTS \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(struct _zend_vm_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
-#define ZEND_VM_STACK_ELEMETS(stack) \
+#define ZEND_VM_STACK_ELEMENTS(stack) \
 	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOTS)
 
 /*

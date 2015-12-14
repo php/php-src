@@ -471,8 +471,10 @@ ZEND_FUNCTION(func_get_arg)
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
-	ZVAL_DEREF(arg);
-	ZVAL_COPY(return_value, arg);
+	if (EXPECTED(!Z_ISUNDEF_P(arg))) {
+		ZVAL_DEREF(arg);
+		ZVAL_COPY(return_value, arg);
+	}
 }
 /* }}} */
 
@@ -482,7 +484,7 @@ ZEND_FUNCTION(func_get_args)
 {
 	zval *p, *q;
 	uint32_t arg_count, first_extra_arg;
-	uint32_t i;
+	uint32_t i, n;
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
@@ -498,6 +500,7 @@ ZEND_FUNCTION(func_get_args)
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
+			n = 0;
 			p = ZEND_CALL_ARG(ex, 1);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
@@ -507,8 +510,9 @@ ZEND_FUNCTION(func_get_args)
 						if (Z_OPT_REFCOUNTED_P(q)) { 
 							Z_ADDREF_P(q);
 						}
-						ZEND_HASH_FILL_ADD(q);
+						n++;
 					}
+					ZEND_HASH_FILL_ADD(q);
 					p++;
 					i++;
 				}
@@ -521,12 +525,14 @@ ZEND_FUNCTION(func_get_args)
 					if (Z_OPT_REFCOUNTED_P(q)) { 
 						Z_ADDREF_P(q);
 					}
-					ZEND_HASH_FILL_ADD(q);
+					n++;
 				}
+				ZEND_HASH_FILL_ADD(q);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
+		Z_ARRVAL_P(return_value)->nNumOfElements = n;
 	}
 }
 /* }}} */
@@ -2232,6 +2238,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 	array_init_size(arg_array, num_args);
 	if (num_args) {
 		uint32_t i = 0;
+		uint32_t n = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
@@ -2245,8 +2252,9 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(p)) {
 								Z_ADDREF_P(p);
 							}
-							ZEND_HASH_FILL_ADD(p);
+							n++;
 						}
+						ZEND_HASH_FILL_ADD(p);
 						p++;
 						i++;
 					}
@@ -2259,12 +2267,14 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					if (Z_OPT_REFCOUNTED_P(p)) {
 						Z_ADDREF_P(p);
 					}
-					ZEND_HASH_FILL_ADD(p);
+					n++;
 				}
+				ZEND_HASH_FILL_ADD(p);
 				p++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
+		Z_ARRVAL_P(arg_array)->nNumOfElements = n;
 	}
 }
 /* }}} */
@@ -2471,7 +2481,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *call, *ptr, *skip;
+	zend_execute_data *ptr, *skip, *call = NULL;
 	zend_object *object;
 	int lineno, frameno = 0;
 	zend_function *func;
@@ -2480,8 +2490,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_string *include_filename = NULL;
 	zval stack_frame;
 
-	call = NULL;
-	ptr = EG(current_execute_data);
+	array_init(return_value);
+
+	if (!(ptr = EG(current_execute_data))) {
+		return;
+	}
+
 	if (!ptr->func || !ZEND_USER_CODE(ptr->func->common.type)) {
 		call = ptr;
 		ptr = ptr->prev_execute_data;
@@ -2499,13 +2513,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				ptr = ptr->prev_execute_data;
 			}
 		}
+		if (!call) {
+			call = ptr;
+			ptr = ptr->prev_execute_data;
+		}
 	}
-	if (!call) {
-		call = ptr;
-		ptr = ptr->prev_execute_data;
-	}
-
-	array_init(return_value);
 
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;

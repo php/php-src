@@ -443,7 +443,7 @@ PS_CLOSE_FUNC(files)
 
 	efree(data->basedir);
 	efree(data);
-	*mod_data = NULL;
+	PS_SET_MOD_DATA(NULL);
 
 	return SUCCESS;
 }

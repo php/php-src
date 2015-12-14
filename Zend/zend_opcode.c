@@ -78,9 +78,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->scope = NULL;
 	op_array->prototype = NULL;
 
-	op_array->brk_cont_array = NULL;
+	op_array->live_range = NULL;
 	op_array->try_catch_array = NULL;
-	op_array->last_brk_cont = 0;
+	op_array->last_live_range = 0;
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
@@ -99,7 +99,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
-	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array);
+	if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_CTOR) {
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array);
+	}
 }
 
 ZEND_API void destroy_zend_function(zend_function *function)
@@ -285,7 +287,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
@@ -320,7 +332,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->constants_table);
+			if (zend_hash_num_elements(&ce->constants_table)) {
+				zend_class_constant *c;
+
+				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+					zval_internal_ptr_dtor(&c->value);
+					if (c->doc_comment && c->ce == ce) {
+						zend_string_release(c->doc_comment);
+					}
+				} ZEND_HASH_FOREACH_END();
+				zend_hash_destroy(&ce->constants_table);
+			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
@@ -385,14 +407,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->doc_comment) {
 		zend_string_release(op_array->doc_comment);
 	}
-	if (op_array->brk_cont_array) {
-		efree(op_array->brk_cont_array);
+	if (op_array->live_range) {
+		efree(op_array->live_range);
 	}
 	if (op_array->try_catch_array) {
 		efree(op_array->try_catch_array);
 	}
-	if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
+	if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_DTOR) {
+		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
+			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
+		}
 	}
 	if (op_array->arg_info) {
 		int32_t num_args = op_array->num_args;
@@ -447,11 +471,11 @@ int get_next_op_number(zend_op_array *op_array)
 	return op_array->last;
 }
 
-zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
+zend_brk_cont_element *get_next_brk_cont_element(void)
 {
-	op_array->last_brk_cont++;
-	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
-	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
+	CG(context).last_brk_cont++;
+	CG(context).brk_cont_array = erealloc(CG(context).brk_cont_array, sizeof(zend_brk_cont_element) * CG(context).last_brk_cont);
+	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
 }
 
 static void zend_update_extended_info(zend_op_array *op_array)
@@ -512,48 +536,52 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t op_num)
 {
 	int i;
-	uint32_t finally_op_num = 0;
+	uint32_t finally_num = (uint32_t)-1;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_num >= op_array->try_catch_array[i].finally_op
 				&& op_num < op_array->try_catch_array[i].finally_end) {
-			finally_op_num = op_array->try_catch_array[i].finally_op;
+			finally_num = i;
 		}
 	}
 
-	if (finally_op_num) {
+	if (finally_num != (uint32_t)-1) {
 		/* Must be ZEND_FAST_CALL */
-		ZEND_ASSERT(op_array->opcodes[finally_op_num - 2].opcode == ZEND_FAST_CALL);
+		ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[finally_num].finally_op - 2].opcode == ZEND_FAST_CALL);
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
-		op_array->opcodes[op_num].op2.opline_num = finally_op_num - 2;
+		op_array->opcodes[op_num].op2.num = finally_num;
 	}
 }
 
 static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
 {
 	int i;
-	uint32_t catch_op_num = 0, finally_op_num = 0;
+	uint32_t finally_num = (uint32_t)-1;
+	uint32_t catch_num = (uint32_t)-1;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_array->try_catch_array[i].try_op > op_num) {
 			break;
 		}
 		if (op_num < op_array->try_catch_array[i].finally_op) {
-			finally_op_num = op_array->try_catch_array[i].finally_op;
+			finally_num = i;
 		}
 		if (op_num < op_array->try_catch_array[i].catch_op) {
-			catch_op_num = op_array->try_catch_array[i].catch_op;
+			catch_num = i;
 		}
 	}
 
-	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
+	if (finally_num != (uint32_t)-1 &&
+	    (catch_num == (uint32_t)-1 ||
+	     op_array->try_catch_array[catch_num].catch_op >=
+	     op_array->try_catch_array[finally_num].finally_op)) {
 		/* in case of unhandled exception return to upward finally block */
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
-		op_array->opcodes[op_num].op2.opline_num = finally_op_num;
-	} else if (catch_op_num) {
+		op_array->opcodes[op_num].op2.num = finally_num;
+	} else if (catch_num != (uint32_t)-1) {
 		/* in case of unhandled exception return to upward catch block */
 		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
-		op_array->opcodes[op_num].op2.opline_num = catch_op_num;
+		op_array->opcodes[op_num].op2.num = catch_num;
 	}
 }
 
@@ -562,7 +590,7 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	int array_offset = opline->op1.num;
 	zend_brk_cont_element *jmp_to;
 	do {
-		jmp_to = &op_array->brk_cont_array[array_offset];
+		jmp_to = &CG(context).brk_cont_array[array_offset];
 		if (nest_levels > 1) {
 			array_offset = jmp_to->parent;
 		}
@@ -582,7 +610,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		zend_update_extended_info(op_array);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_HANDLE_OP_ARRAY) {
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array);
+		if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_PERSIST) {
+			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array);
+		}
 	}
 
 	if (CG(context).vars_size != op_array->last_var) {
@@ -640,6 +670,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_DECLARE_ANON_CLASS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;
+			case ZEND_CATCH:
+				/* absolute index to relative offset */
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
@@ -653,7 +687,13 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
 			case ZEND_ASSERT_CHECK:
+				/* If result of assert is unused, result of check is unused as well */
+				if (op_array->opcodes[opline->op2.opline_num - 1].result_type & EXT_TYPE_UNUSED) {
+					opline->result_type |= EXT_TYPE_UNUSED;
+				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_FE_FETCH_R:
@@ -691,6 +731,16 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
+	}
+
+	if (op_array->live_range) {
+		uint32_t i;
+
+		for (i = 0; i < op_array->last_live_range; i++) {
+			op_array->live_range[i].var =
+				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |
+				(op_array->live_range[i].var & ZEND_LIVE_MASK);
+		}
 	}
 
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;

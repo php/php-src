@@ -121,7 +121,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op) /*{{{ */
 	case ZEND_FAST_CALL:
 	case ZEND_FAST_RET:
 		if (op->extended_value != 0) {
-			spprintf(&decode[2], 0, "J%" PRIu32, op->op2.opline_num);
+			spprintf(&decode[2], 0, "%" PRIu32, op->op2.num);
 		}
 		break;
 
