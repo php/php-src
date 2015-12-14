@@ -17,3 +17,5 @@ var_dump(stream_socket_get_name($sock, false));
 var_dump(stream_socket_get_name($sock, true));
 ?>
 --EXPECT--
+string(15) "127.0.0.1:31854"
+bool(false)
