@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-10 Dec 2015, PHP 7.0.1RC1
+17 Dec 2015, PHP 7.0.1
 
 - Core:
   . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
