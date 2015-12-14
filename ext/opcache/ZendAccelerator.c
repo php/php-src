@@ -2434,6 +2434,7 @@ static inline int accel_find_sapi(TSRMLS_D)
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
+		"uwsgi",
 		NULL
 	};
 	const char **sapi_name;
