@@ -45,6 +45,7 @@ PHP 7.1 UPGRADE NOTES
 - The first $varname argument for getenv() is no longer mandatory, the
   current environment variables will be returned as an associative array
   when omitted.
+- long2ip accepts interge as parameter now
 
 ========================================
 6. New Functions
