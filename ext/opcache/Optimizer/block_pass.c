@@ -955,8 +955,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			op_array->last_live_range = j;
 			while (opline != end) {
 				if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-				    opline->extended_value == ZEND_FREE_ON_RETURN &&
-				    opline->op2.num < (uint32_t)j) {
+				    opline->extended_value == ZEND_FREE_ON_RETURN) {
+					ZEND_ASSERT(opline->op2.num < (uint32_t) i);
 					opline->op2.num = map[opline->op2.num];
 				}
 				opline++;
@@ -982,7 +982,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		*opline_num = -1;
 	}
 
-	/* rebild map (judt for printing) */
+	/* rebild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
 	for (n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & ZEND_BB_REACHABLE) {
