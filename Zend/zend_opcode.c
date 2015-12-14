@@ -687,7 +687,13 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_NEW:
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
 			case ZEND_ASSERT_CHECK:
+				/* If result of assert is unused, result of check is unused as well */
+				if (op_array->opcodes[opline->op2.opline_num - 1].result_type & EXT_TYPE_UNUSED) {
+					opline->result_type |= EXT_TYPE_UNUSED;
+				}
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_FE_FETCH_R:

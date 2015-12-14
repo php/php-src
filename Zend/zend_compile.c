@@ -3359,7 +3359,9 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
 
-		CG(active_op_array)->opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));
+		opline = &CG(active_op_array)->opcodes[check_op_number];
+		opline->op2.opline_num = get_next_op_number(CG(active_op_array));
+		SET_NODE(opline->result, result);
 	} else {
 		if (!fbc) {
 			zend_string_release(name);

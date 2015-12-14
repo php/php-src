@@ -7954,10 +7954,8 @@ ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, JMP_ADDR)
 
 	if (EG(assertions) <= 0) {
 		zend_op *target = OP_JMP_ADDR(opline, opline->op2);
-		zend_op *result = target - 1;
-		SKIP_EXT_OPLINE(result);
-		if (RETURN_VALUE_USED(result)) {
-			ZVAL_TRUE(EX_VAR(result->result.var));
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_TRUE(EX_VAR(opline->result.var));
 		}
 		ZEND_VM_JMP(target);
 	} else {
