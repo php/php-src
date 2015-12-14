@@ -110,8 +110,7 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 
 static int php_password_make_salt(size_t length, char *ret) /* {{{ */
 {
-	int buffer_valid = 0;
-	size_t i, raw_length;
+	size_t raw_length;
 	char *buffer;
 	char *result;
 
