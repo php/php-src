@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #71109 (ZEND_MOD_CONFLICTS("xdebug") doesn't work). (Laruence)
+  . Fixed bug #71105 (Format String Vulnerability in Class Name Error Message).
+    (andrew at jmpesp dot org)
   . Fixed bug #71092 (Segmentation fault with return type hinting). (Laruence)
   . Fixed bug memleak in header_register_callback. (Laruence)
   . Fixed bug #71067 (Local object in class method stays in memory for each
