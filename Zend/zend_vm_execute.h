@@ -33206,6 +33206,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -34096,6 +34097,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -35496,6 +35498,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -42855,6 +42858,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -43188,6 +43192,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
 		} else {
@@ -43764,6 +43769,7 @@ try_instanceof:
 			ce = zend_fetch_class(NULL, opline->op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				ZEND_ASSERT(EG(exception));
+				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
 			}
 		} else {

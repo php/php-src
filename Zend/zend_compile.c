@@ -6545,7 +6545,8 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 			"instanceof expects an object instance, constant given");
 	}
 
-	zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	zend_compile_class_ref_ex(&class_node, class_ast,
+		ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_EXCEPTION);
 
 	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL);
 
