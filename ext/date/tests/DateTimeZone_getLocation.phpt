@@ -30,7 +30,12 @@ foreach($arrayDate as $value){
         }
     }
 }
-
+?>
+--CLEAN--
+<?php
+unset($arrayDate);
+unset($countryCode);
+unset($countryCodeTest);
 ?>
 --EXPECTF--
 Array
