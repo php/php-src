@@ -1,7 +1,7 @@
 --TEST--
 bool openssl_csr_export_to_file ( resource $csr , string $outfilename [, bool $notext = true ] );
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) print "skip";
@@ -39,6 +39,15 @@ var_dump(file_exists($crs_exported_file_notext_false));
 ?>
 --CLEAN--
 <?php 
+unset($config);
+unset($config_arg);
+unset($crs_exported_file_notext_true);
+unset($crs_exported_file_notext_false);
+unset($dn);
+unset($args);
+unset($csr);
+openssl_free_key($privkey);
+unset($privkey);
 unlink(__DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-true.crs");
 unlink(__DIR__ . DIRECTORY_SEPARATOR . "crs-exported-file-notext-false.crs"); 
 ?>
