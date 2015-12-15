@@ -16,6 +16,11 @@ $sock = stream_socket_server($serverUri, $errno, $errstr);
 var_dump(stream_socket_get_name($sock, false));
 var_dump(stream_socket_get_name($sock, true));
 ?>
+--CLEAN--
+<?php
+unset($serverUri);
+unset($sock);
+?>
 --EXPECT--
 string(15) "127.0.0.1:31854"
 bool(false)
