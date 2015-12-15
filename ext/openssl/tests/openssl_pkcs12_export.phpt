@@ -1,7 +1,7 @@
 --TEST--
 bool openssl_pkcs12_export(mixed $x509 , string &$out , mixed $priv_key , string $pass [, array $args ]);
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) print "skip";
@@ -45,6 +45,17 @@ if ( false !== $cert ){
 } else {
     print("openssl x509 could not read pem file");
 }
+?>
+--CLEAN--
+<?php
+unset($pem_file);
+unset($key_file);
+unset($priv_key_file_pem);
+unset($priv_key_dir_pem);
+unset($pass_phrase);
+unset($args);
+unset($cert);
+openssl_free_key($priv_key);
 ?>
 --EXPECT--
 okey
