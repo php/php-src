@@ -10,7 +10,7 @@ if (phpversion() < "5.3.0") {
 ?>
 --FILE--
 <?php
-$serverUri = "http://yahoo.com:80";
+$serverUri = "yahoo.com:80";
 $sock = stream_socket_server($serverUri, $errno, $errstr);
 
 if (is_resource($sock)) {
