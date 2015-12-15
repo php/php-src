@@ -54,6 +54,7 @@ unset($pass_phrase);
 unset($args);
 unset($cert);
 openssl_free_key($priv_key);
+unset($priv_key);
 unlink(__DIR__."/openssl_pkcs12_export_to_file.pem");
 ?>
 --EXPECT--
