@@ -1,7 +1,7 @@
 --TEST--
 bool openssl_pkcs12_export_to_file ( mixed $x509 , string $filename , mixed $priv_key , string $pass [, array $args ] );
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) print "skip";
@@ -44,6 +44,16 @@ if ( false !== $cert ){
 ?>
 --CLEAN--
 <?php
+unset($pem_file);
+unset($key_file);
+unset($pkcs12_export);
+unset($priv_key_file_pem);
+unset($priv_key_dir_pem);
+unset($export_file);
+unset($pass_phrase);
+unset($args);
+unset($cert);
+openssl_free_key($priv_key);
 unlink(__DIR__."/openssl_pkcs12_export_to_file.pem");
 ?>
 --EXPECT--
