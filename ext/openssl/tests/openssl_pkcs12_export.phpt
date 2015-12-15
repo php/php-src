@@ -56,6 +56,7 @@ unset($pass_phrase);
 unset($args);
 unset($cert);
 openssl_free_key($priv_key);
+unset($priv_key);
 ?>
 --EXPECT--
 okey
