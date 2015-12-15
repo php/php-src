@@ -20,7 +20,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-int zend_build_dfg(zend_op_array *op_array, zend_cfg *cfg, zend_dfg *dfg) /* {{{ */
+int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg) /* {{{ */
 {
 	int set_size;
 	zend_basic_block *blocks = cfg->blocks;
@@ -222,18 +222,6 @@ int zend_build_dfg(zend_op_array *op_array, zend_cfg *cfg, zend_dfg *dfg) /* {{{
 			}
 		}
 	} while (changed);
-
-//???D	if (ZCG(accel_directives).jit_debug & JIT_DEBUG_DUMP_LIVENESS) {
-//???D		fprintf(stderr, "Variable Liveness\n");
-//???D		for (j = 0; j < blocks_count; j++) {
-//???D			fprintf(stderr, "  BB%d:\n", j);
-//???D			zend_jit_dump_var_set(op_array, "gen", dfg->gen + (j * dfg->size));
-//???D			zend_jit_dump_var_set(op_array, "def", dfg->def + (j * dfg->size));
-//???D			zend_jit_dump_var_set(op_array, "use", dfg->use + (j * dfg->size));
-//???D			zend_jit_dump_var_set(op_array, "in ", dfg->in  + (j * dfg->size));
-//???D			zend_jit_dump_var_set(op_array, "out", dfg->out + (j * dfg->size));
-//???D		}
-//???D	}
 
 	return SUCCESS;
 }

@@ -1745,13 +1745,13 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, 0, 0, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg, NULL) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_BLOCK_PASS) {
-		zend_dump_op_array(op_array, &cfg, ZEND_DUMP_UNREACHABLE, "before block pass");
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
 	}
 
 	if (op_array->last_var || op_array->T) {
@@ -1805,7 +1805,7 @@ void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	assemble_code_blocks(&cfg, op_array);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
-		zend_dump_op_array(op_array, &cfg, 0, "after block pass");
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);
 	}
 
 	/* Destroy CFG */

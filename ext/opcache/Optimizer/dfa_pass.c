@@ -26,6 +26,8 @@
 #include "zend_bitset.h"
 #include "zend_cfg.h"
 #include "zend_ssa.h"
+#include "zend_func_info.h"
+#include "zend_inference.h"
 #include "zend_dump.h"
 
 #ifndef HAVE_DFA_PASS
@@ -35,8 +37,8 @@
 void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint;
-	uint32_t flags;
-	zend_cfg cfg;
+	uint32_t build_flags;
+	uint32_t flags = 0;
 	zend_ssa ssa;
 
 #if !HAVE_DFA_PASS
@@ -44,9 +46,10 @@ void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 #endif
 
     /* Build SSA */
+	memset(&ssa, 0, sizeof(ssa));
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 
-	if (zend_build_cfg(&ctx->arena, op_array, 0, 0, &cfg, &flags) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, 0, &ssa.cfg, &flags) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
@@ -56,52 +59,79 @@ void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
-	if (zend_cfg_build_predecessors(&ctx->arena, &cfg) != SUCCESS) {
+	if (zend_cfg_build_predecessors(&ctx->arena, &ssa.cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_CFG) {
-		zend_dump_op_array(op_array, &cfg, 0, "dfa cfg");
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNUSED_VARS, "dfa cfg", &ssa.cfg);
 	}
 
 	/* Compute Dominators Tree */
-	if (zend_cfg_compute_dominators_tree(op_array, &cfg) != SUCCESS) {
+	if (zend_cfg_compute_dominators_tree(op_array, &ssa.cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
 	/* Identify reducible and irreducible loops */
-	if (zend_cfg_identify_loops(op_array, &cfg, &flags) != SUCCESS) {
+	if (zend_cfg_identify_loops(op_array, &ssa.cfg, &flags) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_DOMINATORS) {
-		int j;
-
-		fprintf(stderr, "DOMINATORS-TREE:\n");
-		for (j = 0; j < cfg.blocks_count; j++) {
-			zend_basic_block *b = cfg.blocks + j;
-			if (b->flags & ZEND_BB_REACHABLE) {
-				zend_dump_block_info(&cfg, j, 0);
-			}
-		}
+		zend_dump_dominators(op_array, &ssa.cfg);
 	}
 
-	if (zend_build_ssa(&ctx->arena, op_array, &cfg, 0, &ssa, &flags) != SUCCESS) {
+	build_flags = 0;
+	if (ctx->debug_level & ZEND_DUMP_DFA_LIVENESS) {
+		build_flags |= ZEND_SSA_DEBUG_LIVENESS;
+	}
+	if (ctx->debug_level & ZEND_DUMP_DFA_PHI) {
+		build_flags |= ZEND_SSA_DEBUG_PHI_PLACEMENT;
+	}
+	if (zend_build_ssa(&ctx->arena, op_array, build_flags, &ssa, &flags) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
 
-	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
-		zend_dump_op_array(op_array, &cfg, ZEND_DUMP_UNREACHABLE, "before dfa pass");
+	if (ctx->debug_level & ZEND_DUMP_DFA_SSA) {
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", &ssa);
 	}
 
-	//TODO: ???
+
+	if (zend_ssa_compute_use_def_chains(&ctx->arena, op_array, &ssa) != SUCCESS){
+		zend_arena_release(&ctx->arena, checkpoint);
+		return;
+	}
+
+	if (zend_ssa_find_false_dependencies(op_array, &ssa) != SUCCESS) {
+		zend_arena_release(&ctx->arena, checkpoint);
+		return;
+	}
+
+	if (zend_ssa_find_sccs(op_array, &ssa) != SUCCESS){
+		zend_arena_release(&ctx->arena, checkpoint);
+		return;
+	}
+
+	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, &ssa) != SUCCESS) {
+		return;
+	}
+
+	if (ctx->debug_level & ZEND_DUMP_DFA_SSA_VARS) {
+		zend_dump_ssa_variables(op_array, &ssa);
+	}
+
+	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", &ssa);
+	}
+
+	//TODO: Add optimization???
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
-		zend_dump_op_array(op_array, &cfg, 0, "after dfa pass");
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "after dfa pass", &ssa);
 	}
 
 	/* Destroy SSA */

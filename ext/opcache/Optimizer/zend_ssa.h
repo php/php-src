@@ -92,18 +92,57 @@ typedef struct _zend_ssa_var {
 	unsigned int           scc_entry : 1;
 } zend_ssa_var;
 
+typedef struct _zend_ssa_var_info {
+	uint32_t               type; /* inferred type (see zend_inference.h) */
+	zend_ssa_range         range;
+	zend_class_entry      *ce;
+	unsigned int           has_range : 1;
+	unsigned int           is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
+	unsigned int           recursive : 1;
+	unsigned int           use_as_double : 1;
+} zend_ssa_var_info;
+
 typedef struct _zend_ssa {
+	zend_cfg               cfg;            /* control flow graph             */
+	int                    rt_constants;   /* run-time or compile-time       */
 	int                    vars_count;     /* number of SSA variables        */
 	zend_ssa_block        *blocks;         /* array of SSA blocks            */
 	zend_ssa_op           *ops;            /* array of SSA instructions      */
 	zend_ssa_var          *vars;           /* use/def chain of SSA variables */
+	int                    sccs;           /* number of SCCs                 */
+	zend_ssa_var_info     *var_info;
 } zend_ssa;
 
 BEGIN_EXTERN_C()
 
-int zend_build_ssa(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg, int rt_constants, zend_ssa *ssa, uint32_t *func_flags);
+int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
+int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 
 END_EXTERN_C()
+
+static zend_always_inline int zend_ssa_next_use(zend_ssa_op *ssa_op, int var, int use)
+{
+	ssa_op += use;
+	if (ssa_op->result_use == var) {
+		return ssa_op->res_use_chain;
+	}
+	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
+}
+
+static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(zend_ssa *ssa, int var, zend_ssa_phi *p)
+{
+	if (p->pi >= 0) {
+		return p->use_chains[0];
+	} else {
+		int j;
+		for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+			if (p->sources[j] == var) {
+				return p->use_chains[j];
+			}
+		}
+	}
+	return NULL;
+}
 
 #endif /* ZEND_SSA_H */
 

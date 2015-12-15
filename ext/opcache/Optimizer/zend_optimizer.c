@@ -27,6 +27,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 #include "zend_cfg.h"
+#include "zend_func_info.h"
 #include "zend_dump.h"
 
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
@@ -549,7 +550,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_OPTIMIZER) {
-		zend_dump_op_array(op_array, NULL, 1, "before optimizer");
+		zend_dump_op_array(op_array, 0, "before optimizer", NULL);
 	}
 
 	/* pass 1
@@ -561,7 +562,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_1) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
 		}
 	}
 
@@ -574,7 +575,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_2 & ctx->optimization_level) {
 		zend_optimizer_pass2(op_array);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_2) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 2");
+			zend_dump_op_array(op_array, 0, "after pass 2", NULL);
 		}
 	}
 
@@ -586,7 +587,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
 		zend_optimizer_pass3(op_array);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
 		}
 	}
 
@@ -596,7 +597,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_4 & ctx->optimization_level) {
 		optimize_func_calls(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_4) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 1");
+			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
 		}
 	}
 
@@ -606,7 +607,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_5 & ctx->optimization_level) {
 		optimize_cfg(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_5) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 5");
+			zend_dump_op_array(op_array, 0, "after pass 5", NULL);
 		}
 	}
 
@@ -616,7 +617,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) {
 		optimize_dfa(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 6");
+			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
 		}
 	}
 
@@ -626,7 +627,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_9 & ctx->optimization_level) {
 		optimize_temporary_variables(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_9) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 9");
+			zend_dump_op_array(op_array, 0, "after pass 9", NULL);
 		}
 	}
 
@@ -636,7 +637,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (((ZEND_OPTIMIZER_PASS_10|ZEND_OPTIMIZER_PASS_5) & ctx->optimization_level) == ZEND_OPTIMIZER_PASS_10) {
 		zend_optimizer_nop_removal(op_array);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_10) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 10");
+			zend_dump_op_array(op_array, 0, "after pass 10", NULL);
 		}
 	}
 
@@ -646,12 +647,12 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_11 & ctx->optimization_level) {
 		zend_optimizer_compact_literals(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_11) {
-			zend_dump_op_array(op_array, NULL, 1, "after pass 11");
+			zend_dump_op_array(op_array, 0, "after pass 11", NULL);
 		}
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
-		zend_dump_op_array(op_array, NULL, 1, "after optimizer");
+		zend_dump_op_array(op_array, 0, "after optimizer", NULL);
 	}
 }
 
@@ -794,3 +795,21 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 
 	return 1;
 }
+
+int zend_optimizer_startup(void)
+{
+	return zend_func_info_startup();
+}
+
+int zend_optimizer_shutdown(void)
+{
+	return zend_func_info_shutdown();
+}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

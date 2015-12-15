@@ -19,6 +19,7 @@
 #include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
+#include "zend_func_info.h"
 #include "zend_worklist.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend_basic_block *b) /* {{{ */
@@ -75,7 +76,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_basic_block *blocks, zend
 }
 /* }}} */
 
-static void zend_mark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg, int start) /* {{{ */
+static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, int start) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -199,7 +200,7 @@ static void zend_mark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg, i
 }
 /* }}} */
 
-void zend_cfg_remark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int i;
@@ -232,7 +233,7 @@ static void record_successor(zend_basic_block *blocks, int pred, int n, int succ
 		block_map[i] = 1; \
 	} while (0)
 
-int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants, int stackless, zend_cfg *cfg, uint32_t *func_flags) /* {{{ */
+int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg, uint32_t *func_flags) /* {{{ */
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -270,7 +271,7 @@ int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				flags |= ZEND_FUNC_TOO_DYNAMIC;
-				if (stackless) {
+				if (build_flags & ZEND_CFG_STACKLESS) {
 					BB_START(i + 1);
 				}
 				break;
@@ -278,7 +279,7 @@ int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 				flags |= ZEND_FUNC_HAS_CALLS;
-				if (stackless) {
+				if (build_flags & ZEND_CFG_STACKLESS) {
 					BB_START(i + 1);
 				}
 				break;
@@ -532,7 +533,7 @@ int zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants
 	zend_mark_reachable_blocks(op_array, cfg, 0);
 
 	if (func_flags) {
-		*func_flags = flags;
+		*func_flags |= flags;
 	}
 
 	return SUCCESS;
@@ -602,7 +603,7 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 }
 /* }}} */
 
-int zend_cfg_compute_dominators_tree(zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
@@ -694,7 +695,7 @@ static int dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
 }
 /* }}} */
 
-int zend_cfg_identify_loops(zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
+int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
 {
 	int i, j, k;
 	int depth;

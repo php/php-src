@@ -19,13 +19,6 @@
 #ifndef ZEND_CFG_H
 #define ZEND_CFG_H
 
-/* func flags */
-#define ZEND_FUNC_TOO_DYNAMIC    (1<<0)
-#define ZEND_FUNC_HAS_CALLS      (1<<1)
-#define ZEND_FUNC_VARARG         (1<<2)
-#define ZEND_FUNC_NO_LOOPS       (1<<3)
-#define ZEND_FUNC_IRREDUCIBLE    (1<<4)
-
 /* zend_basic_bloc.flags */
 #define ZEND_BB_START            (1<<0)  /* fist block             */
 #define ZEND_BB_FOLLOW           (1<<1)  /* follows the next block */
@@ -95,20 +88,32 @@ typedef struct _zend_cfg {
 	uint32_t         *map;
 } zend_cfg;
 
-#define CRT_CONSTANT(node) \
-	(rt_constants ? \
+/* Build Flags */
+#define ZEND_RT_CONSTANTS              (1<<31)
+#define ZEND_CFG_STACKLESS             (1<<30)
+#define ZEND_SSA_DEBUG_LIVENESS        (1<<29)
+#define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)
+
+#define CRT_CONSTANT_EX(op_array, node, rt_constants) \
+	((rt_constants) ? \
 		RT_CONSTANT(op_array, (node)) \
 	: \
 		CT_CONSTANT_EX(op_array, (node).constant) \
 	)
 
+#define CRT_CONSTANT(node) \
+	CRT_CONSTANT_EX(op_array, node, (build_flags & ZEND_RT_CONSTANTS))
+
+#define RETURN_VALUE_USED(opline) \
+	(!((opline)->result_type & EXT_TYPE_UNUSED))
+
 BEGIN_EXTERN_C()
 
-int  zend_build_cfg(zend_arena **arena, zend_op_array *op_array, int rt_constants, int stackless, zend_cfg *cfg, uint32_t *func_flags);
-void zend_cfg_remark_reachable_blocks(zend_op_array *op_array, zend_cfg *cfg);
+int  zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg, uint32_t *func_flags);
+void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg);
 int  zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
-int  zend_cfg_compute_dominators_tree(zend_op_array *op_array, zend_cfg *cfg);
-int  zend_cfg_identify_loops(zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags);
+int  zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
+int  zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags);
 
 END_EXTERN_C()
 

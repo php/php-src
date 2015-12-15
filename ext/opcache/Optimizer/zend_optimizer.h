@@ -71,6 +71,10 @@
 #define ZEND_DUMP_AFTER_DFA_PASS    (1<<22)
 #define ZEND_DUMP_DFA_CFG           (1<<23)
 #define ZEND_DUMP_DFA_DOMINATORS    (1<<24)
+#define ZEND_DUMP_DFA_LIVENESS      (1<<25)
+#define ZEND_DUMP_DFA_PHI           (1<<26)
+#define ZEND_DUMP_DFA_SSA           (1<<27)
+#define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
 
 typedef struct _zend_script {
 	zend_string   *filename;
@@ -80,5 +84,7 @@ typedef struct _zend_script {
 } zend_script;
 
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
+int zend_optimizer_startup(void);
+int zend_optimizer_shutdown(void);
 
 #endif
