@@ -50,7 +50,7 @@ echo "\n";
 <?php
 unset($domain);
 unset($level);
-fclose($s);
+socket_close($s);
 unset($s);
 unset($r");
 ?>
