@@ -16,8 +16,8 @@ if (bzflush($bz)) {
 ?>
 --CLEAN--
 <?php
-unset($bz);
 bzclose($bz);
+unset($bz);
 ?>
 --EXPECT--
 OK
