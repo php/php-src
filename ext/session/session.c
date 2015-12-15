@@ -1608,9 +1608,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		PS(id) = NULL;
 	}
 
-	php_session_initialize(TSRMLS_C);
-	php_session_cache_limiter(TSRMLS_C);
-
+	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
 		int nrdels = -1;
 
@@ -1624,6 +1622,9 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 #endif
 		}
 	}
+
+	php_session_initialize(TSRMLS_C);
+	php_session_cache_limiter(TSRMLS_C);
 }
 /* }}} */
 
