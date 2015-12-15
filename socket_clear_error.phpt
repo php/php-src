@@ -21,7 +21,12 @@ $socketConn = socket_connect($socket, "127.0.0.1", 21);
 var_dump(socket_last_error($socket));
 socket_clear_error($socket);
 var_dump(socket_last_error($socket));
+?>
+--CLEAN--
+<?php
 socket_close($socket);
+unset($socket);
+unset($socketConn);
 ?>
 --EXPECTF--
 Warning: socket_connect(): unable to connect [%d]: Connection refused in %s on line %d
