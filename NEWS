@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #71094 (readline_completion_function corrupts static array on
     second TAB). (Nikita)
 
+- Session:
+  . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
+
 - SPL:
   . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
     wrong number of parameters). (Laruence)
