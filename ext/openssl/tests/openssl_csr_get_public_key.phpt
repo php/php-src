@@ -1,7 +1,7 @@
 --TEST--
 resource openssl_csr_get_public_key ( mixed $csr [, bool $use_shortnames = true ] );
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) print "skip";
@@ -32,6 +32,16 @@ $csr = openssl_csr_new($dn, $privkey, $args);
 
 var_dump(openssl_csr_get_public_key($csr, true));
 var_dump(openssl_csr_get_public_key($csr, false));
+?>
+--CLEAN--
+<?php
+unset($config);
+unset($config_arg);
+unset($dn);
+unset($args);
+unset($csr);
+openssl_free_key($privkey);
+unset($privkey);
 ?>
 --EXPECTF--
 resource(%d) of type (OpenSSL key)
