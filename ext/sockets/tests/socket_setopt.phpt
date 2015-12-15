@@ -24,6 +24,10 @@ if (!$socket) {
   die('Unable to create AF_INET socket [socket]');
 }
 var_dump(socket_setopt( $socket, SOL_SOCKET, SO_BINDTODEVICE, "lo"));
+?>
+--CLEAN--
+<?php
+unset(socket);
 socket_close($socket);
 ?>
 --EXPECT--
