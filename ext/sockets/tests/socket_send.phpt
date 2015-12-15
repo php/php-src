@@ -33,7 +33,15 @@ if(socket_send($socket, $stringSocket, $stringSocketLenght, MSG_EOF)===$stringSo
 if(socket_send($socket, $stringSocket, $stringSocketLenght, MSG_DONTROUTE)===$stringSocketLenght){
   print("okey\n");
 }
+?>
+<?php
 socket_close($socket);
+unset($port);
+unset($host);
+unset($stringSocket);
+unset($stringSocketLenght);
+unset($socket);
+unset($socketConn);
 ?>
 --EXPECTF--
 okey
