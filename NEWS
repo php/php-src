@@ -8,6 +8,10 @@ Core:
     Reeze Xia, Dmitry)
   . Added void return type. (Andrea)
 
+- FTP:
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
+    (abrender at elitehosts dot com)
+
 Hash:
   . Added SHA3 fixed mode algorithms (224, 256, 384, and 512 bit). (Sara)
 
