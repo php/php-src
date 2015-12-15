@@ -35,6 +35,13 @@ $socketConn = socket_connect($socket, $host, $port);
 var_dump(socket_shutdown($socket,-1));
 socket_close($socket);
 ?>
+--CLEAN--
+<?php
+unset($host);
+unset($port);
+unset($socket);
+unset($socketConn);
+?>
 --EXPECTF--
 bool(true)
 bool(true)
