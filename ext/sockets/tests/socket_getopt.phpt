@@ -46,6 +46,13 @@ $r = socket_getopt($s, $level, IP_MULTICAST_IF);
 var_dump($r);
 echo "\n";
 ?>
+--CLEAN--
+<?php
+unset($domain);
+unset($level);
+unset($s);
+unset($r");
+?>
 --EXPECT--
 Setting IP_MULTICAST_TTL
 bool(true)
