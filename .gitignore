@@ -219,10 +219,6 @@ ext/reflection/spl.chm
 ext/simplexml/examples/security.new.xml
 ext/spl/examples/.htaccess
 ext/spl/examples/*.phps
-ext/sqlite/weztest.sqlite
-ext/sqlite/libsqlite/src/sqlite.h
-ext/sqlite/libsqlite/src/parse.out
-ext/sqlite/libsqlite/src/libsqlite.dsw
 ext/sqlite3/tests/phpsql*
 ext/sqlite3/tests/*.db
 ext/sqlite3/tests/*.tmp

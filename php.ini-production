@@ -969,10 +969,6 @@ cli_server.color = On
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
 
-[sqlite]
-; http://php.net/sqlite.assoc-case
-;sqlite.assoc_case = 0
-
 [sqlite3]
 ;sqlite3.extension_dir =
 
