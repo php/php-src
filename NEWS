@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2016, PHP 5.6.18
 
 - Core:
-
   . Fixed bug #71089 (No check to duplicate zend_extension). (Remi)
 
 - FTP:
