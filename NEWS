@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #71024 (Unable to use PHP 7.0 x64 side-by-side with PHP 5.6 x32
     on the same server). (Anatol)
 
+- Session:
+  . Fixed bug #71122 (Session GC may not remove obsolete session data). (Yasuo)
+
 17 Dec 2015, PHP 5.6.17
 
 - Core:
