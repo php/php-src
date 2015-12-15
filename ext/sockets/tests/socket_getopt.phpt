@@ -50,6 +50,7 @@ echo "\n";
 <?php
 unset($domain);
 unset($level);
+fclose($s);
 unset($s);
 unset($r");
 ?>
