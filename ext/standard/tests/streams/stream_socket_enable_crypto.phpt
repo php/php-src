@@ -26,6 +26,13 @@ if (is_resource($sock)) {
   die("Test stream_socket_enable_crypto has failed; Unable to connect: {$errstr} ({$errno})");
 }
 ?>
+--CLEAN--
+<?php
+unset($serverUri);
+unset($sock);
+unset($errno);
+unset($errstr);
+?>
 --EXPECTF--
 bool(false)
 
