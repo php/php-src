@@ -28,14 +28,3 @@ fclose($sock);
 Notice: fwrite(): send of %d bytes failed with errno=%d Broken pipe in %s on line %d
 Warning: stream_socket_sendto(): Broken pipe in %s on line %d
 int(%i)
-
-Warning: stream_socket_sendto(): Broken pipe in %s on line %d
-int(%i)
-
-Warning: stream_socket_sendto(): php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %d
-
-Warning: stream_socket_sendto(): Failed to resolve `tcp': php_network_getaddresses: getaddrinfo failed: Name or service not known in %s on line %d
-
-Warning: stream_socket_sendto(): Failed to parse `%s' into a valid network address in %s on line %d
-
-bool(false)
