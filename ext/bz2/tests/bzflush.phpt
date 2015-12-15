@@ -13,7 +13,10 @@ if (bzflush($bz)) {
 } else {
     print("open bzip2 file has failed!");
 }
-
+?>
+--CLEAN--
+<?php
+unset($bz);
 bzclose($bz);
 ?>
 --EXPECT--
