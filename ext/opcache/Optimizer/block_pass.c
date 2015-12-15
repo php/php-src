@@ -982,7 +982,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		*opline_num = -1;
 	}
 
-	/* rebild map (just for printing) */
+	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
 	for (n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & ZEND_BB_REACHABLE) {
