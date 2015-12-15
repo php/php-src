@@ -2208,11 +2208,10 @@ double_str:
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	} else {
-		double low, high;
-		zend_long lstep;
+		zend_long low, high, lstep, __calc_size;
 long_str:
-		low = zval_get_double(zlow);
-		high = zval_get_double(zhigh);
+		low = zval_get_long(zlow);
+		high = zval_get_long(zhigh);
 		lstep = (zend_long) step;
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
@@ -2222,11 +2221,28 @@ long_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(low, high);
+			__calc_size = ((low - high) / lstep) + 1;
+
+			if ((low == ZEND_LONG_MAX && high < 1) /* overflow check */
+				|| (high == ZEND_LONG_MIN && low > -2) /* overflow check */
+				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
+			) {
+				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%ld end=%ld", high, low);
+				RETURN_FALSE;
+			}
+
+			array_init_size(return_value, (uint32_t)__calc_size);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+					Z_LVAL(tmp) = low;
 					ZEND_HASH_FILL_ADD(&tmp);
+					/* safety check from overflow */
+					/* for something like range(PHP_INT_MIN + 513, PHP_INT_MIN) */
+					if (low == ZEND_LONG_MIN) {
+						break;
+					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
@@ -2235,16 +2251,32 @@ long_str:
 				goto err;
 			}
 
-			RANGE_CHECK_INIT_ARRAY(high, low);
+			__calc_size = ((high - low) / lstep) + 1;
+
+			if ((high == ZEND_LONG_MAX && low < 1) /* overflow check */
+				|| (low == ZEND_LONG_MIN && high > -2) /* overflow check */
+				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
+			) {
+				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%ld end=%ld", low, high);
+				RETURN_FALSE;
+			}
+
+			array_init_size(return_value, (uint32_t)__calc_size);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += lstep) {
-					Z_LVAL(tmp) = (zend_long)low;
+					Z_LVAL(tmp) = low;
 					ZEND_HASH_FILL_ADD(&tmp);
+					/* safety check from overflow */
+					/* for something like range(PHP_INT_MAX - 512, PHP_INT_MAX) */
+					if (low == ZEND_LONG_MAX) {
+						break;
+					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
 			array_init(return_value);
-			Z_LVAL(tmp) = (zend_long)low;
+			Z_LVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
