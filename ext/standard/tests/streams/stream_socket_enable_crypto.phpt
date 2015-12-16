@@ -1,5 +1,5 @@
 --TEST--
-mixed stream_socket_enable_crypto(resource $stream , bool $enable [, int $crypto_type [, resource $session_stream ]]);
+mixed stream_socket_enable_crypto(resource $stream , bool $enable [, int $crypto_type [, resource $session_stream ]] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
