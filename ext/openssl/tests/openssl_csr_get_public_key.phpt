@@ -1,5 +1,5 @@
 --TEST--
-resource openssl_csr_get_public_key ( mixed $csr [, bool $use_shortnames = true ] );
+resource openssl_csr_get_public_key ( mixed $csr [, bool $use_shortnames = true ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
