@@ -1,5 +1,5 @@
 --TEST--
-void socket_clear_error ([ resource $socket ] );
+void socket_clear_error ([ resource $socket ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
