@@ -128,7 +128,62 @@ void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "before dfa pass", &ssa);
 	}
 
-	//TODO: Add optimization???
+	//TODO: Add optimization patterns ???
+	if (ssa.var_info) {
+		int i;
+		// 1: #1.T  = OP_Y                                   |  #3.CV = OP_Y
+		// 2: ASSIGN #2.CV [undef,null,bool] -> #3.cv, #1.T  |  NOP
+		for (i = 0; i < ssa.vars_count; i++) {
+			int op2 = ssa.vars[i].definition;
+
+			if (op2 >= 0
+			 && op_array->opcodes[op2].opcode == ZEND_ASSIGN
+			 && op_array->opcodes[op2].op1_type == IS_CV
+			 && (op_array->opcodes[op2].op2_type & (IS_TMP_VAR|IS_VAR))
+			 && !RETURN_VALUE_USED(&op_array->opcodes[op2])
+			) {
+
+				int var1 = ssa.ops[op2].op2_use;
+				int var2 = ssa.ops[op2].op1_use;
+
+				if (var1 >= 0
+				 && var2 >= 0
+				 && !(ssa.var_info[var2].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
+				 && !(ssa.var_info[var1].type & MAY_BE_REF)
+				 && ssa.vars[var1].definition >= 0
+				 && ssa.ops[ssa.vars[var1].definition].result_def == var1
+				 && ssa.ops[ssa.vars[var1].definition].result_use < 0
+				 && ssa.vars[var1].use_chain == op2
+				 && ssa.ops[op2].op2_use_chain < 0
+				 && !ssa.vars[var1].phi_use_chain
+				 && !ssa.vars[var1].sym_use_chain
+				) {
+					int op1 = ssa.vars[var1].definition;
+					int var3 = i;
+
+					if (zend_ssa_unlink_use_chain(&ssa, op2, var2)) {
+						/* Reconstruct SSA */
+						ssa.vars[var3].definition = op1;
+						ssa.ops[op1].result_def = var3;
+
+						ssa.vars[var1].definition = -1;
+						ssa.vars[var1].use_chain = -1;
+
+						ssa.ops[op2].op1_use = -1;
+						ssa.ops[op2].op2_use = -1;
+						ssa.ops[op2].op1_def = -1;
+						ssa.ops[op2].op1_use_chain = -1;
+
+						/* Update opcodes */
+						op_array->opcodes[op1].result_type = op_array->opcodes[op2].op1_type;
+						op_array->opcodes[op1].result.var = op_array->opcodes[op2].op1.var;
+						MAKE_NOP(&op_array->opcodes[op2]);
+					}
+				}
+			}
+		}
+	}
+
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_SSA | ZEND_DUMP_HIDE_UNUSED_VARS, "after dfa pass", &ssa);

@@ -117,6 +117,7 @@ BEGIN_EXTERN_C()
 
 int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
+int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
 END_EXTERN_C()
 
