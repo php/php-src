@@ -82,10 +82,11 @@ static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *va
 	uint32_t k;
 	zend_op *opline;
 	int *tmp = NULL;
+	ALLOCA_FLAG(use_heap);
 
 	// FIXME: Can we optimize this copying out in some cases?
 	if (blocks[n].next_child >= 0) {
-		tmp = alloca(sizeof(int) * (op_array->last_var + op_array->T));
+		tmp = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), use_heap);
 		memcpy(tmp, var, sizeof(int) * (op_array->last_var + op_array->T));
 		var = tmp;
 	}
@@ -365,6 +366,10 @@ static int zend_ssa_rename(const zend_op_array *op_array, zend_ssa *ssa, int *va
 		j = blocks[j].next_child;
 	}
 
+	if (tmp) {
+		free_alloca(tmp, use_heap);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -379,6 +384,8 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	int *var = NULL;
 	int i, j, k, changed;
 	zend_dfg dfg;
+	ALLOCA_FLAG(dfg_use_heap);
+	ALLOCA_FLAG(var_use_heap);
 
 	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
@@ -390,7 +397,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	/* Compute Variable Liveness */
 	dfg.vars = op_array->last_var + op_array->T;
 	dfg.size = set_size = zend_bitset_len(dfg.vars);
-	dfg.tmp = alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1));
+	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1), dfg_use_heap);
 	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 5 + 1));
 	dfg.gen = dfg.tmp + set_size;
 	dfg.def = dfg.gen + set_size * blocks_count;
@@ -399,6 +406,7 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	dfg.out = dfg.in  + set_size * blocks_count;
 
 	if (zend_build_dfg(op_array, &ssa->cfg, &dfg) != SUCCESS) {
+		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
 	}
 
@@ -435,8 +443,9 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	} while (changed);
 
 	/* SSA construction, Step 2: Phi placement based on Dominance Frontiers */
-	var = alloca(sizeof(int) * (op_array->last_var + op_array->T));
+	var = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), var_use_heap);
 	if (!var) {
+		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
 	}
 	zend_bitset_clear(tmp, set_size);
@@ -472,8 +481,9 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 							sizeof(int) * blocks[j].predecessors_count +
 							sizeof(void*) * blocks[j].predecessors_count);
 
-						if (!phi)
-							return FAILURE;
+						if (!phi) {
+							goto failure;
+						}
 						phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
 						memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
 						phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
@@ -668,34 +678,34 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			if (var1 >= 0) {
 				if ((opline-1)->opcode == ZEND_IS_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, var2, var2, val2, val2, 0, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, var2, val2, val2, 0, 0, 1) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_NOT_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, var2, val2, val2, 0, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, var2, var2, val2, val2, 0, 0, 1) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER) {
 					if (val2 > LONG_MIN) {
 						if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, -1, var2, LONG_MIN, val2-1, 1, 0, 0) != SUCCESS) {
-							return FAILURE;
+							goto failure;
 						}
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, -1, val2, LONG_MAX, 0, 1, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var1, -1, var2, LONG_MIN, val2, 1, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (val2 < LONG_MAX) {
 						if (add_pi(arena, op_array, &dfg, ssa, j, bf, var1, var2, -1, val2+1, LONG_MAX, 0, 1, 0) != SUCCESS) {
-							return FAILURE;
+							goto failure;
 						}
 					}
 				}
@@ -703,33 +713,34 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			if (var2 >= 0) {
 				if((opline-1)->opcode == ZEND_IS_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, var1, val1, val1, 0, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, var1, var1, val1, val1, 0, 0, 1) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_NOT_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, var1, var1, val1, val1, 0, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, var1, val1, val1, 0, 0, 1) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER) {
 					if (val1 < LONG_MAX) {
 						if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, -1, val1+1, LONG_MAX, 0, 1, 0) != SUCCESS) {
-							return FAILURE;
+							goto failure;
 						}
 					}
 					if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, -1, var1, LONG_MIN, val1, 1, 0, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 				} else if ((opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL) {
 					if (add_pi(arena, op_array, &dfg, ssa, j, bt, var2, var1, -1, val1, LONG_MAX, 0 ,1, 0) != SUCCESS) {
-						return FAILURE;
+						goto failure;
 					}
 					if (val1 > LONG_MIN) {
-						if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, -1, var1, LONG_MIN, val1-1, 1, 0, 0) != SUCCESS) {						return FAILURE;
+						if (add_pi(arena, op_array, &dfg, ssa, j, bf, var2, -1, var1, LONG_MIN, val1-1, 1, 0, 0) != SUCCESS) {
+							goto failure;
 						}
 					}
 				}
@@ -743,17 +754,17 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 			if ((opline-1)->opcode == ZEND_POST_DEC) {
 				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, -1, -1, 0, 0, 0) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, -1, -1, 0, 0, 1) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 			} else if ((opline-1)->opcode == ZEND_POST_INC) {
 				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 1, 1, 0, 0, 0) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 1, 1, 0, 0, 1) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 			}
 		} else if (opline->op1_type == IS_VAR &&
@@ -765,19 +776,19 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 			if ((opline-1)->opcode == ZEND_PRE_DEC) {
 				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 0, 0, 0, 0, 0) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 				/* speculative */
 				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 0, 0, 0, 0, 1) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 			} else if ((opline-1)->opcode == ZEND_PRE_INC) {
 				if (add_pi(arena, op_array, &dfg, ssa, j, bf, var, -1, -1, 0, 0, 0, 0, 0) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 				/* speculative */
 				if (add_pi(arena, op_array, &dfg, ssa, j, bt, var, -1, -1, 0, 0, 0, 0, 1) != SUCCESS) {
-					return FAILURE;
+					goto failure;
 				}
 			}
 		}
@@ -836,8 +847,9 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 								sizeof(int) * blocks[j].predecessors_count +
 								sizeof(void*) * blocks[j].predecessors_count);
 
-							if (!phi)
-								return FAILURE;
+							if (!phi) {
+								goto failure;
+							}
 							phi->sources = (int*)(((char*)phi) + sizeof(zend_ssa_phi));
 							memset(phi->sources, 0xff, sizeof(int) * blocks[j].predecessors_count);
 							phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + sizeof(int) * ssa->cfg.blocks[j].predecessors_count);
@@ -868,8 +880,14 @@ int zend_build_ssa(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	}
 	ssa->vars_count = op_array->last_var;
 	if (zend_ssa_rename(op_array, ssa, var, 0) != SUCCESS) {
+failure:
+		free_alloca(var, var_use_heap);
+		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
 	}
+
+	free_alloca(var, var_use_heap);
+	free_alloca(dfg.tmp, dfg_use_heap);
 
 	return SUCCESS;
 }

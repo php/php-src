@@ -142,8 +142,10 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 	zend_function *func;
 	zend_call_info *call_info;
 	int call = 0;
-	zend_call_info **call_stack = alloca((op_array->last / 2) * sizeof(zend_call_info*));
+	zend_call_info **call_stack;
+	ALLOCA_FLAG(use_heap);
 
+	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
 	while (opline != end) {
 		call_info = NULL;
 		switch (opline->opcode) {
@@ -199,6 +201,7 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 		}
 		opline++;
 	}
+	free_alloca(call_stack, use_heap);
 	return SUCCESS;
 }
 

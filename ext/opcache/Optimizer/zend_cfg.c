@@ -703,9 +703,11 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 	int *dj_spanning_tree;
 	zend_worklist work;
 	int flag = ZEND_FUNC_NO_LOOPS;
+	ALLOCA_FLAG(list_use_heap);
+	ALLOCA_FLAG(tree_use_heap);
 
-	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count);
-	dj_spanning_tree = alloca(sizeof(int) * cfg->blocks_count);
+	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
+	dj_spanning_tree = do_alloca(sizeof(int) * cfg->blocks_count, tree_use_heap);
 
 	for (i = 0; i < cfg->blocks_count; i++) {
 		dj_spanning_tree[i] = -1;
@@ -794,6 +796,8 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 		}
 	}
 
+	free_alloca(dj_spanning_tree, tree_use_heap);
+	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 	*flags |= flag;
 
 	return SUCCESS;

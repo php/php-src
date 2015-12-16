@@ -158,11 +158,14 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
 	int j;
+	ALLOCA_FLAG(dfs_use_heap);
+	ALLOCA_FLAG(root_use_heap);
+	ALLOCA_FLAG(stack_use_heap);
 
-	dfs = alloca(sizeof(int) * ssa->vars_count);
+	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
 	memset(dfs, -1, sizeof(int) * ssa->vars_count);
-	root = alloca(sizeof(int) * ssa->vars_count);
-	ZEND_WORKLIST_STACK_ALLOCA(&stack, ssa->vars_count);
+	root = do_alloca(sizeof(int) * ssa->vars_count, root_use_heap);
+	ZEND_WORKLIST_STACK_ALLOCA(&stack, ssa->vars_count, stack_use_heap);
 
 	/* Find SCCs */
 	for (j = 0; j < ssa->vars_count; j++) {
@@ -188,6 +191,10 @@ int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 		}
 	}
 
+	ZEND_WORKLIST_STACK_FREE_ALLOCA(&stack, stack_use_heap);
+	free_alloca(root, root_use_heap);
+	free_alloca(dfs, dfs_use_heap);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -200,11 +207,13 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 	zend_bitset worklist;
 	int i, j, use;
 	zend_ssa_phi *p;
+	ALLOCA_FLAG(use_heap);
 
-	if (!op_array->function_name || !ssa->vars || !ssa->ops)
+	if (!op_array->function_name || !ssa->vars || !ssa->ops) {
 		return SUCCESS;
+	}
 
-	worklist = alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
 	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
 
 	for (i = 0; i < ssa_vars_count; i++) {
@@ -242,6 +251,8 @@ int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ss
 			}
 		}
 	}
+
+	free_alloca(worklist, use_heap);
 
 	return SUCCESS;
 }
@@ -1757,13 +1768,16 @@ static int zend_check_inner_cycles(const zend_op_array *op_array, zend_ssa *ssa,
 static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ssa, int *scc_var, int *next_scc_var, int scc)
 {
 	int worklist_len = zend_bitset_len(ssa->vars_count);
-	zend_bitset worklist = alloca(sizeof(zend_ulong) * worklist_len);
-	zend_bitset visited = alloca(sizeof(zend_ulong) * worklist_len);
+	zend_bitset worklist;
+	zend_bitset visited;
 	int j, n;
 	zend_ssa_range tmp;
 #ifdef NEG_RANGE
 	int has_inner_cycles = 0;
+	ALLOCA_FLAG(use_heap);
 
+	worklist = do_alloca(sizeof(zend_ulong) * worklist_len * 2, use_heap);
+	visited = worklist + worklist_len;
 	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
 	memset(visited, 0, sizeof(zend_ulong) * worklist_len);
 	j= scc_var[scc];
@@ -1860,17 +1874,26 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 			}
 		}
 	}
+	free_alloca(worklist, use_heap);
 }
 
 static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	int worklist_len = zend_bitset_len(ssa->vars_count);
-	zend_bitset worklist = alloca(sizeof(zend_ulong) * worklist_len);
-	int *next_scc_var = alloca(sizeof(int) * ssa->vars_count);
-	int *scc_var = alloca(sizeof(int) * ssa->sccs);
+	zend_bitset worklist;
+	int *next_scc_var;
+	int *scc_var;
 	zend_ssa_phi *p;
 	zend_ssa_range tmp;
 	int scc, j;
+	ALLOCA_FLAG(use_heap);
+
+	worklist = do_alloca(
+		sizeof(zend_ulong) * worklist_len +
+		sizeof(int) * ssa->vars_count +
+		sizeof(int) * ssa->sccs, use_heap);
+	next_scc_var = (int*)(worklist + worklist_len);
+	scc_var = next_scc_var + ssa->vars_count;
 
 #ifdef LOG_SSA_RANGE
 	fprintf(stderr, "Range Inference\n");
@@ -1948,6 +1971,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			}
 		}
 	}
+
+	free_alloca(worklist, use_heap);
 
 	return SUCCESS;
 }
@@ -3655,10 +3680,11 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	int ssa_vars_count = ssa->vars_count;
 	int j;
 	zend_bitset worklist, types;
+	ALLOCA_FLAG(use_heap);
 
-	types = alloca(sizeof(zend_ulong) * op_array->last_var);
+	types = do_alloca(sizeof(zend_ulong) * (op_array->last_var + zend_bitset_len(ssa_vars_count)), use_heap);
 	memset(types, 0, sizeof(zend_ulong) * op_array->last_var);
-	worklist = alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	worklist = types + op_array->last_var;
 	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
 
 	/* Find variables that may be only LONG or DOUBLE */
@@ -3673,6 +3699,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 		}
 	}
 	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
+		free_alloca(types, use_heap);
 		return SUCCESS;
 	}
 
@@ -3694,6 +3721,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 		}
 	}
 	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
+		free_alloca(types, use_heap);
 		return SUCCESS;
 	}
 
@@ -3708,6 +3736,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 		}
 	}
 	if (zend_bitset_empty(worklist, zend_bitset_len(ssa_vars_count))) {
+		free_alloca(types, use_heap);
 		return SUCCESS;
 	}
 
@@ -3731,9 +3760,11 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 	}
 
 	if (zend_infer_types_ex(op_array, script, ssa, worklist) != SUCCESS) {
+		free_alloca(types, use_heap);
 		return FAILURE;
 	}
 
+	free_alloca(types, use_heap);
 	return SUCCESS;
 }
 
@@ -3957,8 +3988,9 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	int ssa_vars_count = ssa->vars_count;
 	int j;
 	zend_bitset worklist;
+	ALLOCA_FLAG(use_heap);
 
-	worklist = alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
 	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
 
 	/* Type Inference */
@@ -3968,6 +4000,7 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	}
 
 	if (zend_infer_types_ex(op_array, script, ssa, worklist) != SUCCESS) {
+		free_alloca(worklist,  use_heap);
 		return FAILURE;
 	}
 
@@ -3978,6 +4011,7 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 		zend_func_return_info(op_array, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
 
+	free_alloca(worklist,  use_heap);
 	return SUCCESS;
 }
 
@@ -4026,12 +4060,13 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	zend_call_info *call_info;
 	zend_bitset worklist;
 	int worklist_len;
+	ALLOCA_FLAG(use_heap);
 
 	if (!info->ssa.var_info || !(info->flags & ZEND_FUNC_RECURSIVE)) {
 		return;
 	}
 	worklist_len = zend_bitset_len(info->ssa.vars_count);
-	worklist = alloca(sizeof(zend_ulong) * worklist_len);
+	worklist = do_alloca(sizeof(zend_ulong) * worklist_len, use_heap);
 	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
 	call_info = info->callee_info;
 	while (call_info) {
@@ -4049,6 +4084,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 			add_usages(op_array, &info->ssa, worklist, i);
 		}
 	}
+	free_alloca(worklist, use_heap);
 }
 
 /*

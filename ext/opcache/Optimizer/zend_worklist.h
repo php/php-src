@@ -30,11 +30,14 @@ typedef struct _zend_worklist_stack {
 	int capacity;
 } zend_worklist_stack;
 
-#define ZEND_WORKLIST_STACK_ALLOCA(s, _len) do { \
-		(s)->buf = (int*)alloca(sizeof(int) * _len); \
+#define ZEND_WORKLIST_STACK_ALLOCA(s, _len, use_heap) do { \
+		(s)->buf = (int*)do_alloca(sizeof(int) * _len, use_heap); \
 		(s)->len = 0; \
 		(s)->capacity = _len; \
 	} while (0)
+
+#define ZEND_WORKLIST_STACK_FREE_ALLOCA(s, use_heap) \
+	free_alloca((s)->buf, use_heap)
 
 static inline int zend_worklist_stack_prepare(zend_arena **arena, zend_worklist_stack *stack, int len)
 {
@@ -73,11 +76,16 @@ typedef struct _zend_worklist {
 	zend_worklist_stack stack;
 } zend_worklist;
 
-#define ZEND_WORKLIST_ALLOCA(w, _len) do { \
-		(w)->visited = (zend_bitset)alloca(sizeof(zend_ulong) * zend_bitset_len(_len)); \
+#define ZEND_WORKLIST_ALLOCA(w, _len, use_heap) do { \
+		(w)->stack.buf = (int*)do_alloca(sizeof(int) * _len + sizeof(zend_ulong) * zend_bitset_len(_len), use_heap); \
+		(w)->stack.len = 0; \
+		(w)->stack.capacity = _len; \
+		(w)->visited = (zend_bitset)((w)->stack.buf + _len); \
 		memset((w)->visited, 0, sizeof(zend_ulong) * zend_bitset_len(_len)); \
-		ZEND_WORKLIST_STACK_ALLOCA(&(w)->stack, _len); \
 	} while (0)
+
+#define ZEND_WORKLIST_FREE_ALLOCA(w, use_heap) \
+	free_alloca((w)->stack.buf, use_heap)
 
 static inline int zend_worklist_prepare(zend_arena **arena, zend_worklist *worklist, int len)
 {
