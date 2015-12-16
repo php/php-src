@@ -477,6 +477,28 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 }
 /* }}} */
 
+
+static void php_session_gc(void) /* {{{ */
+{
+	int nrand;
+
+	/* GC must be done before reading session data. */
+	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
+		int nrdels = -1;
+
+		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
+		if (nrand < PS(gc_probability)) {
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+#ifdef SESSION_DEBUG
+			if (nrdels != -1) {
+				php_error_docref(NULL, E_NOTICE, "purged %d expired session objects", nrdels);
+			}
+#endif
+		}
+	}
+} /* }}} */
+
+
 static void php_session_initialize(void) /* {{{ */
 {
 	zend_string *val = NULL;
@@ -520,6 +542,9 @@ static void php_session_initialize(void) /* {{{ */
 
 	php_session_reset_id();
 	PS(session_status) = php_session_active;
+
+	/* GC must be done before read */
+	php_session_gc();
 
 	/* Read data */
 	php_session_track_init();
@@ -1513,7 +1538,6 @@ PHPAPI void php_session_start(void) /* {{{ */
 	zval *ppid;
 	zval *data;
 	char *p, *value;
-	int nrand;
 	size_t lensess;
 
 	switch (PS(session_status)) {
@@ -1620,23 +1644,8 @@ PHPAPI void php_session_start(void) /* {{{ */
 		PS(id) = NULL;
 	}
 
-	/* GC must be done before reading session data. */
-	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
-		int nrdels = -1;
-
-		nrand = (int) ((float) PS(gc_divisor) * php_combined_lcg());
-		if (nrand < PS(gc_probability)) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
-#ifdef SESSION_DEBUG
-			if (nrdels != -1) {
-				php_error_docref(NULL, E_NOTICE, "purged %d expired session objects", nrdels);
-			}
-#endif
-		}
-	}
-
-	php_session_initialize(TSRMLS_C);
-	php_session_cache_limiter(TSRMLS_C);
+	php_session_initialize();
+	php_session_cache_limiter();
 }
 /* }}} */
 
