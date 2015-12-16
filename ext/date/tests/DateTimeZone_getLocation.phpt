@@ -1,6 +1,6 @@
 --TEST--
 DateTimeZone::getLocation -- timezone_location_get — Returns location information for a timezone
-public array DateTimeZone::getLocation ( void );
+public array DateTimeZone::getLocation ( void ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
