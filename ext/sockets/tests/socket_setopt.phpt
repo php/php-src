@@ -1,5 +1,5 @@
 --TEST--
-bool socket_setopt( resource $socket , int $level , int $optname , mixed $optval );
+bool socket_setopt( resource $socket , int $level , int $optname , mixed $optval ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --DESCRIPTION--
