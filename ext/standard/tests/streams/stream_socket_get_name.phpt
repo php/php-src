@@ -1,5 +1,5 @@
 --TEST--
-string stream_socket_get_name ( resource $handle , bool $want_peer );
+string stream_socket_get_name ( resource $handle , bool $want_peer ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
