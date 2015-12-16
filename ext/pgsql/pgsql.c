@@ -961,29 +961,24 @@ static void _close_pgsql_plink(zend_resource *rsrc)
  */
 static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
-	php_pgsql_notice *notice;
+	zval *notices;
+	zval tmp;
+	char *trimed_message;
+	size_t trimed_message_len;
 
 	if (! PGG(ignore_notices)) {
-		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
-		notice->message = _php_pgsql_trim_message(message, &notice->len);
-		if (PGG(log_notices)) {
-			php_error_docref(NULL, E_NOTICE, "%s", notice->message);
+		notices = zend_hash_index_find(&PGG(notices), (zend_ulong)resource_id);
+		if (!notices) {
+			array_init(&tmp);
+			notices = &tmp;
+			zend_hash_index_update(&PGG(notices), (zend_ulong)resource_id, notices);
 		}
-		zend_hash_index_update_ptr(&PGG(notices), (zend_ulong)resource_id, notice);
-	}
-}
-/* }}} */
-
-#define PHP_PGSQL_NOTICE_PTR_DTOR _php_pgsql_notice_ptr_dtor
-
-/* {{{ _php_pgsql_notice_dtor
- */
-static void _php_pgsql_notice_ptr_dtor(zval *el)
-{
-	php_pgsql_notice *notice = (php_pgsql_notice *)Z_PTR_P(el);
-	if (notice) {
-		efree(notice->message);
-		efree(notice);
+		trimed_message = _php_pgsql_trim_message(message, &trimed_message_len);
+		if (PGG(log_notices)) {
+			php_error_docref(NULL, E_NOTICE, "%s", trimed_message);
+		}
+		add_next_index_stringl(notices, trimed_message, trimed_message_len);
+		efree(trimed_message);
 	}
 }
 /* }}} */
@@ -1096,7 +1091,7 @@ static PHP_GINIT_FUNCTION(pgsql)
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initilize notice message hash at MINIT only */
-	zend_hash_init_ex(&pgsql_globals->notices, 0, NULL, PHP_PGSQL_NOTICE_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 }
 /* }}} */
 
@@ -2306,15 +2301,16 @@ PHP_FUNCTION(pg_affected_rows)
 /* }}} */
 #endif
 
-/* {{{ proto string pg_last_notice(resource connection)
+/* {{{ proto string pg_last_notice(resource connection [, bool all_notices])
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice)
 {
 	zval *pgsql_link = NULL;
+	zval *notice, *notices;
 	PGconn *pg_link;
-	php_pgsql_notice *notice;
+	zend_bool all_notices = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &pgsql_link, &all_notices) == FAILURE) {
 		return;
 	}
 
@@ -2323,10 +2319,26 @@ PHP_FUNCTION(pg_last_notice)
 		RETURN_FALSE;
 	}
 
-	if ((notice = zend_hash_index_find_ptr(&PGG(notices), (zend_ulong)Z_RES_HANDLE_P(pgsql_link))) == NULL) {
-		RETURN_FALSE;
+	/* PHP 7.0 and earlier returns FALSE for empty notice.
+	   PHP 7.1> returns empty array or string */
+	notices = zend_hash_index_find(&PGG(notices), (zend_ulong)Z_RES_HANDLE_P(pgsql_link));
+	if (all_notices) {
+		if (notices) {
+			RETURN_ZVAL(notices, 1, 0);
+		} else {
+			array_init(return_value);
+		}
+	} else {
+		if (notices) {
+			zend_hash_internal_pointer_end(Z_ARRVAL_P(notices));
+			if ((notice = zend_hash_get_current_data(Z_ARRVAL_P(notices))) == NULL) {
+				RETURN_EMPTY_STRING();
+			}
+			RETURN_ZVAL(notice, 1, 0);
+		} else {
+			RETURN_EMPTY_STRING();
+		}
 	}
-	RETURN_STRINGL(notice->message, notice->len);
 }
 /* }}} */
 

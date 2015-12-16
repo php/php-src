@@ -45,7 +45,10 @@ PHP 7.1 UPGRADE NOTES
 - The first $varname argument for getenv() is no longer mandatory, the
   current environment variables will be returned as an associative array
   when omitted.
-- long2ip accepts integer as parameter now
+- long2ip() accepts integer as parameter now
+- pg_last_notice() accepts optional 2nd bool parameter to get all notices and
+  returns empty string or array on successful calls. It returned FALSE for
+  empty notice previously.
 
 ========================================
 6. New Functions
