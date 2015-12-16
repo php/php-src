@@ -143,17 +143,14 @@ PHP_FUNCTION(ibase_wait_event)
 
 	if (Z_TYPE(args[0]) == IS_RESOURCE) {
 		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(&args[0], "InterBase link", le_link, le_plink)) == NULL) {
-			efree(args);
 			RETURN_FALSE;
 		}
 		i = 1;
 	} else {
 		if (ZEND_NUM_ARGS() > 15) {
-			efree(args);
 			WRONG_PARAM_COUNT;
 		}
 		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), "InterBase link", le_link, le_plink)) == NULL) {
-			efree(args);
 			RETURN_FALSE;
 		}
 	}
@@ -170,7 +167,6 @@ PHP_FUNCTION(ibase_wait_event)
 	if (isc_wait_for_event(IB_STATUS, &ib_link->handle, buffer_size, event_buffer, result_buffer)) {
 		_php_ibase_error();
 		_php_ibase_event_free(event_buffer,result_buffer);
-		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -180,7 +176,6 @@ PHP_FUNCTION(ibase_wait_event)
 		if (occurred_event[i]) {
 			zend_string *result = zend_string_init(events[i], strlen(events[i]), 0);
 			_php_ibase_event_free(event_buffer,result_buffer);
-			efree(args);
 			RETURN_STR(result);
 		}
 	}
@@ -188,7 +183,6 @@ PHP_FUNCTION(ibase_wait_event)
 	/* If we reach this line, isc_wait_for_event() did return, but we don't know
 	   which event fired. */
 	_php_ibase_event_free(event_buffer,result_buffer);
-	efree(args);
 	RETURN_FALSE;
 }
 /* }}} */
