@@ -1,5 +1,5 @@
 --TEST--
-bool openssl_csr_export_to_file ( resource $csr , string $outfilename [, bool $notext = true ] );
+bool openssl_csr_export_to_file ( resource $csr , string $outfilename [, bool $notext = true ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
