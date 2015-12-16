@@ -1,5 +1,5 @@
 --TEST--
-int socket_send ( resource $socket , string $buf , int $len , int $flags ) ;
+int socket_send ( resource $socket , string $buf , int $len , int $flags );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
