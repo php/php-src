@@ -469,7 +469,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 /* }}} */
 
 
-static void php_session_gc(void) /* {{{ */
+static void php_session_gc(TSRMLS_D) /* {{{ */
 {
 	int nrand;
 
@@ -525,7 +525,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 	}
 
 	/* GC must be done before read */
-	php_session_gc();
+	php_session_gc(TSRMLS_C);
 
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
