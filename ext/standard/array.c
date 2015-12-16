@@ -2228,7 +2228,7 @@ long_str:
 				|| (high == ZEND_LONG_MIN && low > -2) /* overflow check */
 				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
 			) {
-				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%ld end=%ld", high, low);
+				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", high, low);
 				RETURN_FALSE;
 			}
 
@@ -2259,7 +2259,7 @@ long_str:
 				|| (low == ZEND_LONG_MIN && high > -2) /* overflow check */
 				|| __calc_size > HT_MAX_SIZE /* the array size is too big */
 			) {
-				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%ld end=%ld", low, high);
+				php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%pd end=%pd", low, high);
 				RETURN_FALSE;
 			}
 
