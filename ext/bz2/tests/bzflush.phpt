@@ -1,5 +1,5 @@
 --TEST--
-int bzflush ( resource $bz );
+int bzflush(resource $bz);
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
