@@ -2216,7 +2216,8 @@ long_str:
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
-			if (low - high < lstep || lstep <= 0) {
+			/* overflow may occur if high = ZEND_LONG_MIN and low = 0 */
+			if ((high != ZEND_LONG_MIN && low != 0) && (low - high < lstep || lstep <= 0)) {
 				err = 1;
 				goto err;
 			}
@@ -2246,7 +2247,8 @@ long_str:
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if (high - low < lstep || lstep <= 0) {
+			/* overflow may occur if low = ZEND_LONG_MIN and high = 0 */
+			if ((low != ZEND_LONG_MIN && high != 0) && (high - low < lstep || lstep <= 0)) {
 				err = 1;
 				goto err;
 			}
