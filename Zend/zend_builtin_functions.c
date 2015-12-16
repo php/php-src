@@ -2028,14 +2028,14 @@ ZEND_FUNCTION(zend_test_func)
 {
 	zval *arg1, *arg2;
 
-	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
 ZEND_FUNCTION(zend_test_func2)
 {
 	zval *arg1, *arg2;
 
-	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
 }
 
 
