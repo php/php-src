@@ -834,6 +834,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 
 	if (dump_flags & (ZEND_DUMP_CFG|ZEND_DUMP_SSA)) {
 		cfg = (const zend_cfg*)data;
+		if (!cfg->blocks) {
+			cfg = data = NULL;
+		}
 	}
 	if (dump_flags & ZEND_DUMP_SSA) {
 		ssa = (const zend_ssa*)data;
