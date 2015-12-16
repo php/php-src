@@ -1573,7 +1573,7 @@ static void fpm_conf_dump() /* {{{ */
 	/*
 	 * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
 	 */
-	zlog(ZLOG_NOTICE, "[General]");
+	zlog(ZLOG_NOTICE, "[global]");
 	zlog(ZLOG_NOTICE, "\tpid = %s",                         STR2STR(fpm_global_config.pid_file));
 	zlog(ZLOG_NOTICE, "\terror_log = %s",                   STR2STR(fpm_global_config.error_log));
 #ifdef HAVE_SYSLOG_H
