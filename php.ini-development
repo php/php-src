@@ -1516,6 +1516,10 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
 
+; Only write session data when session data is changed. Enabled by default.
+; http://php.net/session.lazy-write
+;session.lazy_write = On
+
 [Assertion]
 ; Switch whether to compile assertions at all (to have no overhead at run-time)
 ; -1: Do not compile at all
