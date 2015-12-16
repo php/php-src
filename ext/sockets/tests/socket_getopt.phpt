@@ -1,5 +1,5 @@
 --TEST--
-mixed socket_getopt( resource $socket , int $level , int $optname );
+mixed socket_getopt( resource $socket , int $level , int $optname ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
