@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #71066 (mb_send_mail: Program terminated with signal SIGSEGV,
     Segmentation fault). (Laruence)
 
+- Opcache:
+  . Fixed bug #71127 (Define in auto_prepend_file is overwrite). (Laruence)
+
 - Readline:
   . Fixed bug #71094 (readline_completion_function corrupts static array on
     second TAB). (Nikita)
