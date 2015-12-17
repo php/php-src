@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #71063 (filter_input(INPUT_ENV, ..) does not work). (Reeze Xia)
 
 - FTP:
-  . Implement FR #55651 (Option to ignore the returned FTP PASV address).
+  . Implemented FR #55651 (Option to ignore the returned FTP PASV address).
     (abrender at elitehosts dot com)
 
 - Mbstring:
