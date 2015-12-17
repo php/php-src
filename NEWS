@@ -20,6 +20,8 @@ PDO_Firebird:
 
 Pgsql:
   . Implemented FR #31021 (pg_result_notice() is needed to get all notice messages).
+    (Yasuo)
+  . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
 
 Standard:
   . Fixed bug #71100 (long2ip() doesn't accept integers in strict mode).

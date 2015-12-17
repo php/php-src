@@ -276,6 +276,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, numeric_index)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all_columns, 0, 0, 1)
@@ -1194,6 +1195,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_DML_EXEC", PGSQL_DML_EXEC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_ASYNC", PGSQL_DML_ASYNC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_FETCH_NUM", PGSQL_FETCH_NUM, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -2882,15 +2884,16 @@ PHP_FUNCTION(pg_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_all(resource result)
+/* {{{ proto array pg_fetch_all(resource result [, bool numeric_index])
    Fetch all rows into array */
 PHP_FUNCTION(pg_fetch_all)
 {
 	zval *result;
+	zend_bool numeric_index = 0;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &result) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &result, &numeric_index) == FAILURE) {
 		return;
 	}
 
@@ -2900,7 +2903,7 @@ PHP_FUNCTION(pg_fetch_all)
 
 	pgsql_result = pg_result->result;
 	array_init(return_value);
-	if (php_pgsql_result2array(pgsql_result, return_value) == FAILURE) {
+	if (php_pgsql_result2array(pgsql_result, return_value, numeric_index) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -7014,7 +7017,7 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array)
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, zend_bool numeric_index)
 {
 	zval row;
 	char *field_name;
@@ -7026,23 +7029,39 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array)
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
 		return FAILURE;
 	}
-	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
-		array_init(&row);
-		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
-			if (PQgetisnull(pg_result, pg_row, i)) {
-				field_name = PQfname(pg_result, i);
-				add_assoc_null(&row, field_name);
-			} else {
-				char *element = PQgetvalue(pg_result, pg_row, i);
-				if (element) {
-					const size_t element_len = strlen(element);
-
-					field_name = PQfname(pg_result, i);
-					add_assoc_stringl(&row, field_name, element, element_len);
+	if (numeric_index) {
+		for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
+			array_init(&row);
+			for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
+				if (PQgetisnull(pg_result, pg_row, i)) {
+					add_next_index_null(&row);
+				} else {
+					char *element = PQgetvalue(pg_result, pg_row, i);
+					if (element) {
+						const size_t element_len = strlen(element);
+						add_next_index_stringl(&row, element, element_len);
+					}
 				}
 			}
+			add_index_zval(ret_array, pg_row, &row);
 		}
-		add_index_zval(ret_array, pg_row, &row);
+	} else {
+		for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
+			array_init(&row);
+			for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
+				field_name = PQfname(pg_result, i);
+				if (PQgetisnull(pg_result, pg_row, i)) {
+					add_assoc_null(&row, field_name);
+				} else {
+					char *element = PQgetvalue(pg_result, pg_row, i);
+					if (element) {
+						const size_t element_len = strlen(element);
+						add_assoc_stringl(&row, field_name, element, element_len);
+					}
+				}
+			}
+			add_index_zval(ret_array, pg_row, &row);
+		}
 	}
 	return SUCCESS;
 }
@@ -7088,7 +7107,7 @@ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids
 
 	pg_result = PQexec(pg_link, ZSTR_VAL(querystr.s));
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
-		ret = php_pgsql_result2array(pg_result, ret_array);
+		ret = php_pgsql_result2array(pg_result, ret_array, (opt & PGSQL_FETCH_NUM));
 	} else {
 		php_error_docref(NULL, E_NOTICE, "Failed to execute '%s'", ZSTR_VAL(querystr.s));
 	}

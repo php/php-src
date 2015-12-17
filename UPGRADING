@@ -49,6 +49,9 @@ PHP 7.1 UPGRADE NOTES
 - pg_last_notice() accepts optional 2nd bool parameter to get all notices and
   returns empty string or array on successful calls. It returned FALSE for
   empty notice previously.
+- pg_fetch_all() accepts optional 2nd bool parameter to get numerically indexed
+  rows.
+- pg_select() accepts PGSQL_FETCH_NUM option to get numerically indexed rows.
 
 ========================================
 6. New Functions
