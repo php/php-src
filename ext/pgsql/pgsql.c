@@ -208,6 +208,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_notice, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, all_notices)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PQFTABLE
@@ -2303,7 +2304,7 @@ PHP_FUNCTION(pg_affected_rows)
 /* }}} */
 #endif
 
-/* {{{ proto string pg_last_notice(resource connection [, bool all_notices])
+/* {{{ proto mixed pg_last_notice(resource connection [, bool all_notices])
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice)
 {
