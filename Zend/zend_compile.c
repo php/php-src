@@ -6043,12 +6043,17 @@ static inline void zend_ct_eval_unary_op(zval *result, uint32_t opcode, zval *op
 
 static inline void zend_ct_eval_unary_pm(zval *result, zend_ast_kind kind, zval *op) /* {{{ */
 {
-	binary_op_type fn = kind == ZEND_AST_UNARY_PLUS
-		? add_function : sub_function;
-
 	zval left;
-	ZVAL_LONG(&left, 0);
-	fn(result, &left, op);
+	if (kind == ZEND_AST_UNARY_PLUS) {
+		ZVAL_LONG(&left, 0);
+		add_function(result, &left, op);
+	} else {
+		/* We use `(-1) * $a` instead of `0 - $a`, because the latter handles
+		 * negative zero wrong.
+		 */
+		ZVAL_LONG(&left, -1);
+		mul_function(result, &left, op);
+	}
 }
 /* }}} */
 
@@ -6238,7 +6243,7 @@ void zend_compile_unary_op(znode *result, zend_ast *ast) /* {{{ */
 void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
-	znode zero_node, expr_node;
+	znode expr_node;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_UNARY_PLUS || ast->kind == ZEND_AST_UNARY_MINUS);
 
@@ -6251,11 +6256,22 @@ void zend_compile_unary_pm(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zero_node.op_type = IS_CONST;
-	ZVAL_LONG(&zero_node.u.constant, 0);
+	if (ast->kind == ZEND_AST_UNARY_PLUS) {
+		znode zero_node;
+		zero_node.op_type = IS_CONST;
+		ZVAL_LONG(&zero_node.u.constant, 0);
 
-	zend_emit_op_tmp(result, ast->kind == ZEND_AST_UNARY_PLUS ? ZEND_ADD : ZEND_SUB,
-		&zero_node, &expr_node);
+		zend_emit_op_tmp(result, ZEND_ADD, &zero_node, &expr_node);
+	} else {
+		/* We use `(-1) * $a` instead of `0 - $a`, because the latter handles
+		 * negative zero wrong.
+		 */
+		znode neg_one_node;
+		neg_one_node.op_type = IS_CONST;
+		ZVAL_LONG(&neg_one_node.u.constant, -1);
+
+		zend_emit_op_tmp(result, ZEND_MUL, &neg_one_node, &expr_node);
+	}
 }
 /* }}} */
 

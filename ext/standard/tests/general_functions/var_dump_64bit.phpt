@@ -368,7 +368,7 @@ int(-2147483648)
 
 *** Testing var_dump() on float variables ***
 -- Iteration 1 --
-float(0)
+float(-0)
 -- Iteration 2 --
 float(0)
 -- Iteration 3 --
@@ -893,7 +893,7 @@ array(4) {
 -- Iteration 4 --
 array(6) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   string(11) "Where am I?"
   [2]=>
@@ -1519,7 +1519,7 @@ array(6) {
   [3]=>
   array(6) {
     [0]=>
-    float(0)
+    float(-0)
     [1]=>
     string(11) "Where am I?"
     [2]=>
