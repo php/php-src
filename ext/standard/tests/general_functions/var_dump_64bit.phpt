@@ -1022,7 +1022,7 @@ array(15) {
 }
 array(32) {
   [0]=>
-  float(0)
+  float(-0)
   [1]=>
   float(0)
   [2]=>
