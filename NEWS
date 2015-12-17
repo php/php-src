@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #71077 (ReflectionMethod for ArrayObject constructor returns
     wrong number of parameters). (Laruence)
+  . Fixed bug #71153 (Performance Degradation in ArrayIterator with large
+    arrays). (Nikita)
 
 17 Dec 2015, PHP 7.0.1
 
