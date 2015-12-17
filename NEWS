@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     highlight_string() function). (Nikita)
   . Fixed bug #71154 (Incorrect HT iterator invalidation causes iterator reuse).
     (Nikita)
+  . Fixed bug #52355 (Negating zero does not produce negative zero). (Andrea)
 
 - DBA:
   . Fixed key leak with invalid resource. (Laruence)
