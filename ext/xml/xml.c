@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_object, 0, 0, 2)
 	ZEND_ARG_INFO(0, parser)
-	ZEND_ARG_INFO(1, obj)
+	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_element_handler, 0, 0, 3)
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(xml_set_object)
 	xml_parser *parser;
 	zval *pind, *mythis;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro/", &pind, &mythis) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &pind, &mythis) == FAILURE) {
 		return;
 	}
 
@@ -1383,7 +1383,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_parse(resource parser, string data [, int isFinal]) 
+/* {{{ proto int xml_parse(resource parser, string data [, bool isFinal])
    Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
 {
@@ -1392,9 +1392,9 @@ PHP_FUNCTION(xml_parse)
 	char *data;
 	size_t data_len;
 	int ret;
-	zend_long isFinal = 0;
+	zend_bool isFinal = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
 

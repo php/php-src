@@ -49,6 +49,7 @@ typedef struct _zend_optimizer_ctx {
 	zend_script            *script;
 	HashTable              *constants;
 	zend_long               optimization_level;
+	zend_long               debug_level;
 } zend_optimizer_ctx;
 
 #define LITERAL_LONG(op, val) do { \
@@ -96,6 +97,7 @@ void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array);
 void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_nop_removal(zend_op_array *op_array);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);

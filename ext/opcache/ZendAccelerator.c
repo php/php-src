@@ -1157,7 +1157,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -1215,7 +1215,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level)) {
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
 		return new_persistent_script;
 	}
 
@@ -2348,6 +2348,7 @@ static inline int accel_find_sapi(void)
 		"apache2filter",
 		"apache2handler",
 		"litespeed",
+		"uwsgi",
 		NULL
 	};
 	const char **sapi_name;

@@ -1439,7 +1439,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!isupper(*c)) {
+		if (islower(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1508,7 +1508,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!islower(*c)) {
+		if (isupper(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 

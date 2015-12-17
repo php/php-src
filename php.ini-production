@@ -956,10 +956,6 @@ cli_server.color = On
 ; Default is 0, which does not produce any errors.
 ;intl.error_level = E_WARNING
 
-[sqlite]
-; http://php.net/sqlite.assoc-case
-;sqlite.assoc_case = 0
-
 [sqlite3]
 ;sqlite3.extension_dir =
 
@@ -1515,6 +1511,10 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; Production Value: 1
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
+
+; Only write session data when session data is changed. Enabled by default.
+; http://php.net/session.lazy-write
+;session.lazy_write = On
 
 [Assertion]
 ; Switch whether to compile assertions at all (to have no overhead at run-time)

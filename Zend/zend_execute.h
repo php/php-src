@@ -145,7 +145,7 @@ struct _zend_vm_stack {
 #define ZEND_VM_STACK_HEADER_SLOTS \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(struct _zend_vm_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
-#define ZEND_VM_STACK_ELEMETS(stack) \
+#define ZEND_VM_STACK_ELEMENTS(stack) \
 	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOTS)
 
 /*

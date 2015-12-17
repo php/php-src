@@ -191,6 +191,7 @@ typedef struct _zend_accel_directives {
 	zend_long           log_verbosity_level;
 
 	zend_long           optimization_level;
+	zend_long           opt_debug_level;
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;

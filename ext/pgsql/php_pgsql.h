@@ -210,7 +210,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_ASYNC             (1<<10)    /* Do async query */
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
 #define PGSQL_DML_ESCAPE            (1<<12)    /* No convert, but escape only */
-
+#define PGSQL_FETCH_NUM             (1<<13)    /* Fetch result with numeric index */
 
 /* exported functions */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended);
@@ -219,7 +219,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *val
 PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_ulong opt , zend_string **sql);
 PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_ulong opt, zend_string **sql);
 PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_ulong opt, zend_string **sql );
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array);
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, zend_bool numeric_index);
 
 /* internal functions */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);

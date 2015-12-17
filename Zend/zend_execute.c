@@ -150,7 +150,7 @@ static const zend_internal_function zend_pass_function = {
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
 
-	page->top = ZEND_VM_STACK_ELEMETS(page);
+	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
 	page->prev = prev;
 	return page;
@@ -1980,6 +1980,12 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 		} else if (EXPECTED(zobj->properties != NULL)) {
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+					GC_REFCOUNT(zobj->properties)--;
+				}
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
 			retval = zend_hash_find(zobj->properties, Z_STR_P(prop_ptr));
 			if (EXPECTED(retval)) {
 				ZVAL_INDIRECT(result, retval);
@@ -2413,7 +2419,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	EG(vm_stack)->prev->top = (zval*)call;
 
 	/* delete previous stack segment if it becames empty */
-	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMETS(EG(vm_stack)->prev))) {
+	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMENTS(EG(vm_stack)->prev))) {
 		zend_vm_stack r = EG(vm_stack)->prev;
 
 		EG(vm_stack)->prev = r->prev;
