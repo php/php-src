@@ -3835,8 +3835,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_CONST == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -12171,8 +12172,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_TMP_VAR == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -15620,8 +15622,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_VAR == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
@@ -29925,8 +29928,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			Z_ADDREF_P(array_ref);
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 		} else {
-			array_ptr = EX_VAR(opline->result.var);
-			ZVAL_COPY_VALUE(array_ptr, array_ref);
+			array_ref = EX_VAR(opline->result.var);
+			ZVAL_NEW_REF(array_ref, array_ptr);
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (IS_CV == IS_CONST) {
 			zval_copy_ctor_func(array_ptr);
