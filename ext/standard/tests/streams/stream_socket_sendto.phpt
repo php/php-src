@@ -27,6 +27,5 @@ unset($sock);
 --EXPECT--
 Notice: fwrite(): send of %d bytes failed with errno=%d Broken pipe in %s on line %d
 
-Warning: stream_socket_sendto(): Broken pipe
 in %s on line %d
 int(%i)
