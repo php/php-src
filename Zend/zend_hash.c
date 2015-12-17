@@ -31,6 +31,8 @@
 # define HT_ASSERT(c)
 #endif
 
+#define HT_POISONED_PTR ((HashTable *) (intptr_t) -1)
+
 #if ZEND_DEBUG
 /*
 #define HASH_MASK_CONSISTENCY	0xc0
@@ -371,7 +373,8 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTab
 	if (iter->pos == HT_INVALID_IDX) {
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
-		if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 			iter->ht->u.v.nIteratorsCount--;
 		}
 		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
@@ -389,7 +392,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	ZEND_ASSERT(idx != (uint32_t)-1);
 
-	if (EXPECTED(iter->ht) && EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
+	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
+			&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
 		iter->ht->u.v.nIteratorsCount--;
 	}
 	iter->ht = NULL;
@@ -406,20 +410,13 @@ static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTabl
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
-	uint32_t idx;
 
 	while (iter != end) {
 		if (iter->ht == ht) {
-			iter->ht = NULL;
+			iter->ht = HT_POISONED_PTR;
 		}
 		iter++;
 	}
-
-	idx = EG(ht_iterators_used);
-	while (idx > 0 && EG(ht_iterators)[idx - 1].ht == NULL) {
-		idx--;
-	}
-	EG(ht_iterators_used) = idx;
 }
 
 static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
