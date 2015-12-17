@@ -21,9 +21,10 @@ if (is_resource($sock)) {
 }
 ?>
 --CLEAN--
+unset($serverUri);
 fclose($sock);
+unset($sock);
 --EXPECT--
 Notice: fwrite(): send of %d bytes failed with errno=%d Broken pipe in %s on line %d
-
 Warning: stream_socket_sendto(): Broken pipe
 int(%i)
