@@ -501,7 +501,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			const zend_op *old_opline = EX(opline);
 			zend_throw_exception_internal(NULL);
-			if (RETURN_VALUE_USED(old_opline)) {
+			if (old_opline->opcode != ZEND_HANDLE_EXCEPTION && RETURN_VALUE_USED(old_opline)) {
 				zval_ptr_dtor(EX_VAR(old_opline->result.var));
 			}
 			HANDLE_EXCEPTION_LEAVE();
