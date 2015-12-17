@@ -42,7 +42,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
-	zend_bool collect_constants = (op_array == &ctx->script->main_op_array);
+	/* bug #71127*
+	zend_bool collect_constants = (op_array == &ctx->script->main_op_array); */
+	zend_bool collect_constants = 0;
 
 	while (opline < end) {
 		switch (opline->opcode) {
