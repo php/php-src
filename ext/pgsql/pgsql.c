@@ -281,7 +281,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(0, numeric_index)
+	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all_columns, 0, 0, 1)
@@ -588,6 +588,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_select, 0, 0, 3)
 	ZEND_ARG_INFO(0, table)
 	ZEND_ARG_INFO(0, ids)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 /* }}} */
 
@@ -1204,7 +1205,6 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_DML_EXEC", PGSQL_DML_EXEC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_ASYNC", PGSQL_DML_ASYNC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_FETCH_NUM", PGSQL_FETCH_NUM, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -2904,17 +2904,22 @@ PHP_FUNCTION(pg_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_all(resource result [, bool numeric_index])
+/* {{{ proto array pg_fetch_all(resource result [, int result_type])
    Fetch all rows into array */
 PHP_FUNCTION(pg_fetch_all)
 {
 	zval *result;
-	zend_bool numeric_index = 0;
+	long result_type = PGSQL_ASSOC;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &result, &numeric_index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &result, &result_type) == FAILURE) {
 		return;
+	}
+
+	if (!(result_type & PGSQL_BOTH)) {
+		php_error_docref(NULL, E_WARNING, "Invalid result type");
+		RETURN_FALSE;
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2923,7 +2928,7 @@ PHP_FUNCTION(pg_fetch_all)
 
 	pgsql_result = pg_result->result;
 	array_init(return_value);
-	if (php_pgsql_result2array(pgsql_result, return_value, numeric_index) == FAILURE) {
+	if (php_pgsql_result2array(pgsql_result, return_value, result_type) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -7037,7 +7042,7 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, zend_bool numeric_index)
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long result_type)
 {
 	zval row;
 	char *field_name;
@@ -7049,39 +7054,31 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, z
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
 		return FAILURE;
 	}
-	if (numeric_index) {
-		for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
-			array_init(&row);
-			for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
-				if (PQgetisnull(pg_result, pg_row, i)) {
+	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
+		array_init(&row);
+		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
+			field_name = PQfname(pg_result, i);
+			if (PQgetisnull(pg_result, pg_row, i)) {
+				if (result_type & PGSQL_ASSOC) {
+					add_assoc_null(&row, field_name);
+				}
+				if (result_type & PGSQL_NUM) {
 					add_next_index_null(&row);
-				} else {
-					char *element = PQgetvalue(pg_result, pg_row, i);
-					if (element) {
-						const size_t element_len = strlen(element);
+				}
+			} else {
+				char *element = PQgetvalue(pg_result, pg_row, i);
+				if (element) {
+					const size_t element_len = strlen(element);
+					if (result_type & PGSQL_ASSOC) {
+						add_assoc_stringl(&row, field_name, element, element_len);
+					}
+					if (result_type & PGSQL_NUM) {
 						add_next_index_stringl(&row, element, element_len);
 					}
 				}
 			}
-			add_index_zval(ret_array, pg_row, &row);
 		}
-	} else {
-		for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
-			array_init(&row);
-			for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
-				field_name = PQfname(pg_result, i);
-				if (PQgetisnull(pg_result, pg_row, i)) {
-					add_assoc_null(&row, field_name);
-				} else {
-					char *element = PQgetvalue(pg_result, pg_row, i);
-					if (element) {
-						const size_t element_len = strlen(element);
-						add_assoc_stringl(&row, field_name, element, element_len);
-					}
-				}
-			}
-			add_index_zval(ret_array, pg_row, &row);
-		}
+		add_index_zval(ret_array, pg_row, &row);
 	}
 	return SUCCESS;
 }
@@ -7089,7 +7086,7 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, z
 
 /* {{{ php_pgsql_select
  */
-PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, zend_string **sql)
+ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -7127,7 +7124,7 @@ PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids
 
 	pg_result = PQexec(pg_link, ZSTR_VAL(querystr.s));
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
-		ret = php_pgsql_result2array(pg_result, ret_array, (opt & PGSQL_FETCH_NUM));
+		ret = php_pgsql_result2array(pg_result, ret_array, result_type);
 	} else {
 		php_error_docref(NULL, E_NOTICE, "Failed to execute '%s'", ZSTR_VAL(querystr.s));
 	}
@@ -7145,7 +7142,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto mixed pg_select(resource db, string table, array ids[, int options])
+/* {{{ proto mixed pg_select(resource db, string table, array ids[, int options [, int result_type])
    Select records that has ids (id=>value) */
 PHP_FUNCTION(pg_select)
 {
@@ -7153,16 +7150,21 @@ PHP_FUNCTION(pg_select)
 	char *table;
 	size_t table_len;
 	zend_ulong option = PGSQL_DML_EXEC;
+	long result_type = PGSQL_ASSOC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rsa|l",
-							  &pgsql_link, &table, &table_len, &ids, &option) == FAILURE) {
+							  &pgsql_link, &table, &table_len, &ids, &option, &result_type) == FAILURE) {
 		return;
 	}
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");
+		RETURN_FALSE;
+	}
+	if (!(result_type & PGSQL_BOTH)) {
+		php_error_docref(NULL, E_WARNING, "Invalid result type");
 		RETURN_FALSE;
 	}
 
@@ -7174,7 +7176,7 @@ PHP_FUNCTION(pg_select)
 		php_error_docref(NULL, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
 	array_init(return_value);
-	if (php_pgsql_select(pg_link, table, ids, return_value, option, &sql) == FAILURE) {
+	if (php_pgsql_select(pg_link, table, ids, return_value, option, result_type, &sql) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
