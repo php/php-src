@@ -34,6 +34,7 @@ var_dump(fwrite($fd, str_repeat('0', 70)));
 ?>
 --CLEAN--
 <?php
+fclose($fd);
 unset($fd);
 ?>
 --EXPECTF--
