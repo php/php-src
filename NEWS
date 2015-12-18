@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #60052 (Integer returned as a 64bit integer on X64_86). (Mariuz)
 
 - Pgsql:
-  . Implemented FR #31021 (pg_result_notice() is needed to get all notice
+  . Implemented FR #31021 (pg_last_notice() is needed to get all notice
     messages). (Yasuo)
   . Implemented FR #48532 (Allow pg_fetch_all() to index numerically). (Yasuo)
 
