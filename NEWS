@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #71154 (Incorrect HT iterator invalidation causes iterator reuse).
     (Nikita)
   . Fixed bug #52355 (Negating zero does not produce negative zero). (Andrea)
+  . Fixed bug #66179 (var_export() exports float as integer). (Andrea)
 
 . CURL:
   . Fixed bug #71144 (Sementation fault when using cURL with ZTS).
