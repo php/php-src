@@ -3216,8 +3216,7 @@ static void zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		case ZEND_CLONE:
-			/* FIXME: For some reason "clone" return reference */
-			UPDATE_SSA_TYPE(MAY_BE_DEF|MAY_BE_REF|MAY_BE_OBJECT, ssa_ops[i].result_def);
+			UPDATE_SSA_TYPE(MAY_BE_DEF|MAY_BE_OBJECT, ssa_ops[i].result_def);
 			if ((t1 & MAY_BE_OBJECT) && ssa_ops[i].op1_use >= 0 && ssa_var_info[ssa_ops[i].op1_use].ce) {
 				UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_ops[i].op1_use].ce, ssa_var_info[ssa_ops[i].op1_use].is_instanceof, ssa_ops[i].result_def);
 			} else {
