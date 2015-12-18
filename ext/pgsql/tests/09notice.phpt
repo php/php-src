@@ -26,7 +26,7 @@ var_dump($res);
 
 // Get empty notice
 var_dump(pg_last_notice($db));
-var_dump(pg_last_notice($db, TRUE));
+var_dump(pg_last_notice($db, PGSQL_NOTICE_ALL));
 
 pg_query($db, "BEGIN;");
 pg_query($db, "BEGIN;");
@@ -35,7 +35,15 @@ pg_query($db, "BEGIN;");
 
 // Get notices
 var_dump(pg_last_notice($db));
-var_dump(pg_last_notice($db, TRUE));
+var_dump(pg_last_notice($db, PGSQL_NOTICE_ALL));
+
+// Clear and get notices
+var_dump(pg_last_notice($db, PGSQL_NOTICE_CLEAR));
+var_dump(pg_last_notice($db, PGSQL_NOTICE_LAST));
+var_dump(pg_last_notice($db, PGSQL_NOTICE_ALL));
+
+// Invalid option
+var_dump(pg_last_notice($db, 99));
 ?>
 --EXPECTF--
 resource(%d) of type (pgsql result)
@@ -57,3 +65,10 @@ array(3) {
   [2]=>
   string(52) "WARNING:  there is already a transaction in progress"
 }
+bool(true)
+string(0) ""
+array(0) {
+}
+
+Warning: pg_last_notice(): Invalid option specified (99) in %s/09notice.php on line %d
+bool(false)

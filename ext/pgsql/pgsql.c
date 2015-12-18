@@ -56,9 +56,13 @@
 #define InvalidOid ((Oid) 0)
 #endif
 
-#define PGSQL_ASSOC		1<<0
-#define PGSQL_NUM		1<<1
-#define PGSQL_BOTH		(PGSQL_ASSOC|PGSQL_NUM)
+#define PGSQL_ASSOC           1<<0
+#define PGSQL_NUM             1<<1
+#define PGSQL_BOTH            (PGSQL_ASSOC|PGSQL_NUM)
+
+#define PGSQL_NOTICE_LAST     1  /* Get the last notice */
+#define PGSQL_NOTICE_ALL      2  /* Get all notices */
+#define PGSQL_NOTICE_CLEAR    3  /* Remove notices */
 
 #define PGSQL_STATUS_LONG     1
 #define PGSQL_STATUS_STRING   2
@@ -208,7 +212,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_notice, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, all_notices)
+	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PQFTABLE
@@ -1120,6 +1124,10 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+	/* For pg_last_notice() */
+	REGISTER_LONG_CONSTANT("PGSQL_NOTICE_LAST", PGSQL_NOTICE_LAST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_NOTICE_ALL", PGSQL_NOTICE_ALL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_NOTICE_CLEAR", PGSQL_NOTICE_CLEAR, CONST_CS | CONST_PERSISTENT);
 	/* For pg_connection_status() */
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
@@ -2304,16 +2312,16 @@ PHP_FUNCTION(pg_affected_rows)
 /* }}} */
 #endif
 
-/* {{{ proto mixed pg_last_notice(resource connection [, bool all_notices])
+/* {{{ proto mixed pg_last_notice(resource connection [, long option])
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice)
 {
 	zval *pgsql_link = NULL;
 	zval *notice, *notices;
 	PGconn *pg_link;
-	zend_bool all_notices = 0;
+	long option = PGSQL_NOTICE_LAST;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &pgsql_link, &all_notices) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_link, &option) == FAILURE) {
 		return;
 	}
 
@@ -2322,26 +2330,37 @@ PHP_FUNCTION(pg_last_notice)
 		RETURN_FALSE;
 	}
 
-	/* PHP 7.0 and earlier returns FALSE for empty notice.
-	   PHP 7.1> returns empty array or string */
 	notices = zend_hash_index_find(&PGG(notices), (zend_ulong)Z_RES_HANDLE_P(pgsql_link));
-	if (all_notices) {
-		if (notices) {
-			RETURN_ZVAL(notices, 1, 0);
-		} else {
-			array_init(return_value);
-		}
-	} else {
-		if (notices) {
-			zend_hash_internal_pointer_end(Z_ARRVAL_P(notices));
-			if ((notice = zend_hash_get_current_data(Z_ARRVAL_P(notices))) == NULL) {
+	switch (option) {
+		case PGSQL_NOTICE_LAST:
+			if (notices) {
+				zend_hash_internal_pointer_end(Z_ARRVAL_P(notices));
+				if ((notice = zend_hash_get_current_data(Z_ARRVAL_P(notices))) == NULL) {
+					RETURN_EMPTY_STRING();
+				}
+				RETURN_ZVAL(notice, 1, 0);
+			} else {
 				RETURN_EMPTY_STRING();
 			}
-			RETURN_ZVAL(notice, 1, 0);
-		} else {
-			RETURN_EMPTY_STRING();
-		}
+			break;
+		case PGSQL_NOTICE_ALL:
+			if (notices) {
+				RETURN_ZVAL(notices, 1, 0);
+			} else {
+				array_init(return_value);
+				return;
+			}
+			break;
+		case PGSQL_NOTICE_CLEAR:
+			if (notices) {
+				zend_hash_clean(&PGG(notices));
+			}
+			RETURN_TRUE;
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Invalid option specified (%d)", option);
 	}
+	RETURN_FALSE;
 }
 /* }}} */
 

@@ -46,9 +46,12 @@ PHP 7.1 UPGRADE NOTES
   current environment variables will be returned as an associative array
   when omitted.
 - long2ip() accepts integer as parameter now
-- pg_last_notice() accepts optional 2nd bool parameter to get all notices and
-  returns empty string or array on successful calls. It returned FALSE for
-  empty notice previously.
+- pg_last_notice() accepts optional long parameter to specify operation.
+  PGSQL_NOTICE_LAST - Get last notice (Default)
+  PGSQL_NOTICE_ALL - Get all stored notices
+  PGSQL_NOTICE_CLEAR - Remove all stored notices
+  It returns empty string or array on successful PGSQL_NOTICE_LAST/ALL calls.
+  It returned FALSE for empty notice previously.
 - pg_fetch_all() accepts optional 2nd bool parameter to get numerically indexed
   rows.
 - pg_select() accepts PGSQL_FETCH_NUM option to get numerically indexed rows.
@@ -72,6 +75,11 @@ PHP 7.1 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Pgsql:
+  PGSQL_NOTICE_LAST
+  PGSQL_NOTICE_ALL
+  PGSQL_NOTICE_CLEAR
 
 ========================================
 11. Changes to INI File Handling
